@@ -56,12 +56,251 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
 
 **Comparison Table**
 
-<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/FeatureTable.PNG" width="700">
+<table align="" style="border: 0px solid #000000;" class="mceEditable" data-mce-contenteditable="true" border="0" cellpadding="3" cellspacing="0" height="100%" width="100%">
+ <tbody>
+ <tr>
+ <td style="background-color: #cccccc;">
+ <strong>Feature</strong>
+ </td>
+ <td style="border: 0px solid transparent; background-color: #cccccc;">
+ <b>DIY-Thermocam V2</b>
+ </td>
+ <td style="background-color: #cccccc;">
+ <strong>FLIR E6</strong>
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Thermal resolution
+ </td>
+ <td>
+ 160 x 120
+ </td>
+ <td>
+ 160 x 120
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Thermal sensitivity <span style="color: #ff0000;"><strong>*</strong></span>
+ </td>
+ <td>
+ &lt; 0.05° C (50 mK)
+ </td>
+ <td>
+ &lt; 0.06° C (60 mK)
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Thermal temp. range
+ </td>
+ <td>
+ -40° C to 200° C
+ </td>
+ <td>
+ <span style="line-height: 26.6667px;">-20° C to 250° C</span>
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Field-of-view (FOV)
+ </td>
+ <td>
+ 56 deg HFOV, 71 deg diagonal 
+ </td>
+ <td>
+ <span><span style="line-height: 26.6667px;">45 deg × 34 deg</span></span>
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Display
+ </td>
+ <td>
+ 3.2" 320x240 , touch input
+ </td>
+ <td>
+ 3.0" 320x240, no touch input
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Spot sensor temp. range
+ </td>
+ <td>
+ -70° C to 380° C
+ </td>
+ <td>
+ -20° C to 250° C
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Spot sensor temp. accuracy <strong><span style="color: #ff0000;">*</span></strong>
+ </td>
+ <td>
+ 0.5° C over wide range
+ </td>
+ <td>
+ ±2 ° C or ±2%
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Temp. measurement mode
+ </td>
+ <td>
+ every position, multiple positions
+ </td>
+ <td>
+ spot (center) mode
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Image modes
+ </td>
+ <td>
+ IR image, visual image, combined
+ </td>
+ <td>
+ IR image, visual image. MSX
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Color schemes
+ </td>
+ <td>
+ 18 different color schemes
+ </td>
+ <td>
+ rainbow, iron, grayscale
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Storage mode
+ </td>
+ <td>
+ picture and video
+ </td>
+ <td>
+ picture only
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Storage capacity
+ </td>
+ <td>
+ 8 GB internal storage
+ </td>
+ <td>
+ 500 sets of images
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ File format
+ </td>
+ <td>
+ standard BMP and raw data
+ </td>
+ <td>
+ standard JPEG and raw data
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Operation time
+ </td>
+ <td>
+ about 4-6 hours
+ </td>
+ <td>
+ about 4 hours
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+
+ <tr>
+ <td>
+ Weight
+ </td>
+ <td>
+ 255g
+ </td>
+ <td>
+ 575g
+ </td>
+ <td>
+ 
+ </td>
+ </tr>
+ </tbody>
+</table>
 
 ----------
 
 **Device Screenshots**
-
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Screenshots.PNG" width="700">
-
-
