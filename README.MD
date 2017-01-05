@@ -20,7 +20,7 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
 
 **Features:**
 
-<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Features.PNG">
+<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Features.PNG" width="694">
 
 ----------
 
