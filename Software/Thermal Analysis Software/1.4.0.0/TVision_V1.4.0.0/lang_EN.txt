@@ -1,0 +1,621 @@
+[Textinfo]
+0#temperature
+1#measuring\ points
+2#Drag&Drop\ fail
+3#Error\ while\ read\ last\ settings\.
+4#Focus
+5#Temp
+6#Mouse
+7#Function\ confirm
+8#Should\ all\ measurements\ really\ be\ removed\?
+9#Programmfehler
+10#is\ unknown
+11#stored
+12#Image\ files
+13#all\ files
+14#Resolution\ not\ recognised
+15#Radiometric
+16#old\ Radiometric\ Imagefile
+17#old\ dataset\ recognised\.\.\.
+18#none\ dataset\ found\ in
+19#Radiometric\ load\ canceled
+20#Error\ at
+21#Error\ at\ Datensatz_Zusatzinfos\(\)
+22#Preview\.\.\.
+23#Save\ as
+24#Yes:\ save\ at\ this\ path
+25#No:\ save\ as\ new\ file
+26#Radiometric\ save
+27#Thermal\ Image
+28#Image\ is\ in\ clipboard
+29#only
+30#Thermal
+31#Visual
+32#Thermal\ video\ dataset
+33#M8\ JPG\ could\ not\ load\.\.\.
+34#Open_M8_JPG_File\ Fail
+35#Open\ Special\ File\ Fail
+36#Planck\ Overflow\.\.\.
+37#not\ found
+38#Telnet\ connecton\ error
+39#not\ enough\ data\ in\ \*\.seq\ file\.
+40#no\ camera
+41#no\ camera\ found
+42#Start
+43#Stop
+44#Restart
+45#Restart\ FAIL!
+46#Offline
+47#Start\ Streaming
+48#Stop\ Streaming
+49#Seek\ Thermal\ camera\ not\ found
+50#to\ occur\ in\ image\(%\)
+51#Resolution
+52#Filesize
+53#get\ new\ Image
+54#Overwrite\ Image\ \(
+55#Thermal\ Sequence\ Dataset
+56#DIY-Thermocam\ Drive\ not\ found
+57#File\ already\ exist:
+58#Overwrite\?
+59#Write\ Cal\ Data\ to\ Camera\?
+60#Starting\ calibration\.\.\.
+61#Get\ values\ for\ Low\ Temp\.\.\.
+62#Get\ values\ for\ Hi\ Temp\.\.\.
+63#Done\.
+64#greater\ than&less\ than&equal\ \(rounded\ to\ 1\ digit\)&between&not\ between
+65#Active&monitored\ meas:&condition:&Actions:&Disable\ \(Aktive->Off\)&Timeout\ until\ next\ trigger\ in\ Seconds&File\ open\ /\ start\ Application&only\ once\ \(disable\ after\ trigger\)&Save\ Image\ \(radiometric\)&Subfolder:&SerialPort->Send\ Text:&SerialPort->Send\ Bytes:&SerialPort->Send\ Value\ as\ Text&Settings\ save/load&Setup\ load&Setup\ save
+66#<no\ subfolder>
+67#Es\ sind\ >\ 50\ Zeichen\ eingegeben,\r\n\ gespeichert\ wird\ nur\ bis\ 50\.
+
+[Controls]
+frmCalibration#Calibration
+TP_Cal_2Point#2\ Point\ Cal\.
+btn_cal2P_showCalBox#Show\ Cal\ box
+label_cal2P_CalSaveNote#Note\ for\ Cal\ file:
+btn_cal2P_OpenFolder#Open\ folder
+btn_cal2P_CalLoad#Load
+btn_cal2P_CalSave#Save
+label_cal_caldateiSave#Save\ Cal\ file
+label_cal_RawValRefTemp#Raw\ Value\ \ \ \ \ \ Ref\ Temp
+Btn_Cal2P_StartCalSequence#Start\ Calibration
+label_cal_2PunktKal#2\ Point\ Calibration
+Btn_Cal2P_DoCal#Calculate
+label_cal_slope#Cal\ Slope:
+label_cal_offset#Cal\ Offset:
+label_cal_manuell#Manual
+label_cal_caldateiLoad#Load\ Cal\ file
+TP_Cal_2PointDIYLepton#2\ Point\ Cal\ for\ DIY-Thermocam
+label_CalDiy_Monitor#Main\ IR\ Monitor
+chk_CalDiy_MonitorEnable#Monitor
+btn_calDiy_BeschreibungLoad#Open
+label_CalDiy_ResSlopeOffset#Cal\ Slope:\r\nCal\ Offset:
+label_CalDiy_resultsTitel#Calibration\ Results
+label_CalDiy_ResVorherNachher#before:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ after:
+label_CalDiy_SpotTitel#Spot\ Sensor
+label_CalDiy_RawTitel#Sensor\ Raw\ Avr
+btn_calDiy_AbortCal#Cancel
+btn_calDiy_StartCal#Start\ Calibration
+TP_Cal_2Map#Map\ Cal
+rad_map_UseTexpert#Thermal\ Expert\ Q1
+rad_map_UseSeek#Seek\ Thermal
+btn_calseek_DisableProcessing#Disable\ processing
+btn_calSeek_GenerateMaps#Generate\ Maps
+btn_calSeek_GetHiMap#Get\ Hi\ Map
+btn_calSeek_GetLowMap#Get\ Low\ Map
+label_calSeek_manuell#Manual
+frmPlot#Plot
+frmBildbearbeitung#Image\ processing
+btn_try_PNG#Try\ PNG
+btn_filter_RawRepMedian#Rep\.\ Median
+chk_view_medianRep#Rep\.\ Median
+TP_Still#Still
+btn_filter_TempOffset#Temperature\ offset
+btn_saveChanges#Save\ changes
+btn_filter_RawSharpReset#Reset
+label_IProcessing#Once\ a\ processed\ image\ is\ saved,\ these\ changes\ can't\ be\ revoked\.\(raw\ data\ will\ be\ overwritten\)
+btn_filter_Convolution#Convolution\ 3x3
+btn_filter_RawSharpPos#Sharpen
+btn_filter_RawMedian#Median
+btn_filter_GaussBlur#Gauss\ Blur
+TP_Live#Live
+chk_view_Convolution#Convolution\ 3x3
+chk_view_RefFrame#Active
+btn_view_GetRefFrame#Get\ Reference
+chk_view_GausBlur#Gauss\ Blur
+btn_view_SaveRefFrame#Save
+btn_view_LoadRefFrame#Load
+chk_view_Averrage#Averrage
+labeldev_refFrame#Ref\.\ image
+chk_view_Rawsharp#Raw\ data\ sharpen
+chk_view_median#Median
+chk_view_TempOff#Temperature\ offset
+label_vision_interpol#Interpolation:
+label_IP_Kernel#Convolution\ Kernel
+frmFunctions#Functions
+chk_view_VisBlendRotation#Rotation:
+label_VR_treshold#Visual\ Relief\ Factor:
+chk_view_VisReliefSingleDiff#Single\ Difference
+chk_view_VisRelief#Visual\ Relief\ Overlay
+chk_view_VisBlendingUseKeys#Use\ Keyboard
+chk_view_VisBlendingEnabled#Active
+label_view_Interpolation#Interpolation:\r\n\r\nColorscale:
+chk_BigColorScala#14Bit\ ColorScale
+chk_praegen#Emboss
+chk_sharpen#Sharpen
+l_darstellung2#Illustration
+chk_kanten#Corners
+chk_messobjekte#show\ meas\ objects\ extra
+label_view_VisBlending#Visual\ Blending
+label_QShot_AddImage#Additional\ to\ ThermoVision\ Image:
+chk_QShot_SaveVis#Save:\ Vis\ \(\*\.bmp\)
+chk_QShot_SaveTif#Save:\ IR\ 16bit\ \(\*\.tif\)
+label_QShot_Trigger#Trigger\ Key:
+chk_Qshot_Set#Set
+btn_QShot_OpenFolder#Open\ folder\r\n
+label_QShot_filename#Filename:
+chk_QShot_Aktiv#Active
+l_IProcessing2#Quick\ Shot
+label_QShot_folder#Folder:
+l_Isotherm2#Isotherm
+chk_isoterm1#Iso\ 1
+chk_isoterm2#Iso\ 2
+chk_isoterm_gray#grayscale\ instead\ of\ Isotherm\ color
+chk_zoom_sharpen#Sharpen
+chk_zoom_PosFixed#Position\ fixed
+chk_zoom_UseColorScale#Use\ color\ palette
+label_zoom_2#source\ pixel\ size:
+l_ZoomBox2#IR\ Zoom\ box
+label_zoom_3#Position:
+l_IrOverlay2#IR\ Overlay
+btn_exp_16Tif_SaveToFile#Image\ to\ file
+chk_exp_16Tif_autoscale#Autoscale
+txt_exp_16Tif_Filename#Image\ name
+label_img_16bitFileName#file\ name:
+labelfunc_16bitTif#16\ bit\ TIF\ Image
+label_img_normal#Normal\ Image
+btn_picsave_OpenFolder#Open\ Folder\r\n
+btn_picsave_ToClipboard#Image\ in\ clipboard
+txt_picsave_filename#Image
+l_SaveBild2#Export:\ Images
+label_img_FileName#Filename:
+chk_picsave_scala#Color\ Scale
+chk_picsave_objekte#Meas\ Objects
+label_img_Inter#Interpolation:
+btn_picsave_speichern#Image\ to\ File
+label_img_FileFormat#Fileformat:
+TP_TS_Bild#Frame
+label_Sequ_neu#Sequence\ file\ will\ be\ new\ created\.\ The\ filemode\ prevent\ frame\ navigation\.\ Close\ and\ open\ the\ file\ to\ get\ Navigation\ access\.
+chk_IRVideo_Play#Play
+label_seq_fps#FPS:
+label_seq_pos#calculated\ frame\ pos:
+chk_video_Autorange#Autorange
+CHK_IRVideo_Replay#Replay
+btn_video_Goto#Goto\ Frame:
+btn_IRvidPrevFrame#<<\ prev
+btn_IRvidNextFrame#next\ >>
+label_sec_einzelbild#Single\ Frame
+chk_IRVideo_REC#REC
+TP_TS_Vorschau#Preview
+btn_video_RepPreview#replace\ Preview
+TP_TS_Seq#\*\.SEQ
+group_seq_flir#Flir\ \*\.SEQ\ File
+chk_video_SeqFrameoffset#Frameoffset:
+label_seq_FlirRes#Max:\r\nMin:\r\nResolution:
+chk_video_RefreshPreviewOnClose#if\ changed\ Refresh\ Preview\ on\ closing\ file\.
+btn_IRVideo_Close#Close
+l_saveVideo2#Thermal\ Sequence
+btn_IRVideo_OpenClose#Open
+label_seq_posReal#Frame\ pos:
+btn_IRVideo_StartClose#New
+group_dec_M8#\.JPG\ Grabber\ \(Mobir\ M8\)
+label_dec_solltempM8#desired\ val:
+chk_filepic_Setup#Settings\ >>>
+l_IrDecoder2#IR-Image\ Decoder
+label_dec_solltemp#desired\ values:
+btn_flir_RecalcTemperatures#recalculate\ Image
+label_FLIR_humidity#Humidity\ \(%\)
+label_FLIR_AtmTemp#Air\ Temperature\ \(°C\)
+label_FLIR_Distance#Distance\ \(Meter\)
+chk_flirIR_HalfSize#Half\ Size
+chk_flirIR_useFileSettings#Settings\ from\ File
+label_FLIR_ReflTemp#Refl\.\ Apparent\ Temp\ \(°C\)
+label_FLIR_Emiss#Emissivity
+l_FlirIR2#Flir\ IR\ Image\ Grabber
+chk_plot_MilliSeconds#Write\ Milliseconds
+btn_F_GraphsaveMulti#all\ side\ by\ side
+rad_plot_time#Interval\ \(Sec\):
+btn_F_Graphsave#every\ Curve\ separate
+label_plot_exportTXT#Export\ as\ \*\.txt\ File
+btn_F_graphClear#delete\ all\ Points
+btn_F_graphstop#Stop
+l_Plotter2#Time\ Plotter
+btn_F_graphstart#Start
+label_plot_pointstyle#Pointstyle:
+label_plot_Datenerfass#Data\ acquisition
+rad_plot_CameraFrame#if\ Frame\ from\ Camera
+chk_mov_drawMeas#Only\ MainIR:\ show\ Meas.
+chk_mov_MaxPerformance#no\ preview\ while\ record\ \(max\ Performance\)\.
+rad_mov_fromVisual#image\ from\ Visual
+rad_mov_fromMainIR#image\ from\ MainIR
+btn_mov_openfolder#Open\ Folder\r\n
+label_mov_erklarerung#The\ Interpolation\ can't\ be\ changed\ while\ the\ Video\ file\ is\ open,\ because\ the\ Size\ must\ be\ the\ same\.
+label_movie_FPS#FPS\ \(play\ speed\ of\ File\):
+chk_mov_rec#REC
+btn_mov_grabFrame#Grab\ single\ frame
+label_movie_MMSSBilder#MM:SS\ \(Images\):
+btn_mov_store#Save\ and\ close
+btn_mov_create#Create
+l_VideoNormal2#Movie
+label_fmov_Name#Name:
+label_fmov_Codec#Codec:
+frmFuncDevices#Devices
+l_visionsetup2#Vision\ Setup
+chk_view_SmoothAutoRange#smooth\ Autorange\ \|\ Steps:
+chk_view_AutorageGrenze#Auto\ min\ range
+btn_SP_ClearLog#Clear\ Log
+btn_SP_OpenPort#Open\ Port
+TP_SP_Text#Text
+labelrecivet#Receive\ as\ Text:
+CHK_RS232_Sonderzeichen#print\ special\ chars
+label_sendt#Send:
+TP_SP_Bytes#Bytes
+labelreciveB#Receive\ as\ Bytes:
+labelsendb#Send:
+TP_SP_Pins#Pins
+labelSP_Tab3Info#if\ this\ Tab\ is\ active,\ received\ data\ will\ go\ to\ other\ functions\ and\ not\ appear\ in\ terminal\.
+labelSP2#2x\ Output:
+label_DSR#DSR
+label_CD#CD
+label_CTS#CTS
+btn_rs232_RTS#RTS
+btn_rs232_DTR#DTR
+labelsp1#3x\ Input:
+l_SerialPort2#Serial\ Terminal
+TP_FLIR_A#A
+txt_flir_send#nuc
+TP_FLIR_B#B
+groupBox6#Grab\ min\ and\ max\ Temp
+rad_flir_frommBox#from\ fullscreen\ mBox:
+rad_flir_fromScale#from\ Scale\ \(imprecise\)
+groupBox7#Grab\ IR\ Image\ from\ sequence
+rad_flir_TakeLast#take\ last\ image
+rad_flir_TakeFirst#take\ first\ image
+TP_FLIR_C#C
+btn_hid_verbinden#Connection
+Txt_usb_send#6\ 1
+labeldev12#recive\ Bytes:
+labeldev11#Send\ Bytes:
+btn_flir_InitgrabIR#Init\ Grab
+btn_flir_grabIR#Grab\ IR
+l_DevFlirEx2#Device:\ FLIR\ Ex
+btn_FLIR_ConnTelnet#Telnet
+labeldev8#Camera\ needs\ RNDIS\ Mode\.
+chk_SHFRA#SlopeHandleForRawAquisition
+btn_seek_initRaw#Raw
+btn_seek_ProcTExt#Extern
+btn_seek_ProcTInt#Intern
+btn_seek_ProcIExt#Extern
+btn_seek_ProcIInt#Intern
+btn_seek_initHiFPS#FastRaw
+label_seek_prozessierung#Processing
+label_seek_process#Image:\r\nTemp:
+btn_seek_initNormal#Normal
+TP_Seek1_int#Intern
+label_seek_NoShutterInNormalMode#No\ Shutter\ funtions\r\n\ in\ Normal\ Mode
+label_seek_slopeoffset#Slope:\r\nOffset:
+btn_seek_BigNUC#Big\ NUC
+label_Seek_Proc_intern#If\ no\ external\ Processing\ is\ enabled\ then\ internal\ is\ used\.
+btn_seek_NUC#NUC
+btn_seek_ShutterOpen#Shutter\ Open
+btn_seek_ShutterClose#Shutter\ Close
+chk_seek_shutterinfo#Quick\ Info\ at\ Shutter
+TP_Seek1_ext#Extern
+btn_seek_DoMapCal#Create\ new\ GO-Maps
+btn_seek_FrameOffsetCal#Frame\ as\ Offset\r\n\(NUC\ without\ Shutter\)
+btn_Seek_LoadMapFile#Load
+chk_seek_ExternProcessing#Use\ extern\ processing
+chk_Seek_UseFCalValues#Use\ 2Point\ Cal\ for\ Temperature
+label_devSeek_DevTempFrameCnt#Device\ Temp:\r\nFrame\ Count:
+label_Seek_RawData#Rawdata
+chk_seek_showRawValues#Raw\ Data\ in\ Meastable
+label_devSeek_FWandSerial#Device\ FW:\r\nSerial:
+chk_seek_VisFromWebcam#Visual\ Image\ from\ WebcamA
+btn_seek_ShowDPM#Show\ DeathPixelMap
+btn_GetProcByteStreaming#Stream
+btn_SeekThermal_Connect#Connect
+l_SeekThermal2#Device:\ Seek\ Thermal
+chk_seek_InitHiFPS#Init\ Hi\ FPS
+chk_seek_Autorange#Autorange
+label_Weba_HideDriverFunc#Start\ Camera\ first\ to\ get\ the\ Driver\ Functions\.\.\.
+btn_WebcamA_PropertyWin#Show\ Driver\ Window
+chk_WebcamA_Autoselect#Autoselect:
+btn_WebcamA_Start#Start
+chk_WebCamA_FPS#Frames/Sec\ \(FPS\):
+chk_WebCamA_Resolution#Resolution:
+btn_WebCamA_RefreshSources#Refresh
+label_webA_quellen#Video\ sources:
+l_WebcamA2#Device:\ Webcam\ A
+labeldev1#Resolution:
+label_Webb_HideDriverFunc#Start\ Camera\ first\ to\ get\ the\ Driver\ Functions\.\.\.
+btn_WebcamB_PropertyWin#Show\ Driver\ Window
+labeldev3#Resolution:
+chk_WebcamB_Autoselect#Autoselect:
+btn_WebcamB_Start#Start
+chk_WebCamB_FPS#Bilder/Sec\ \(FPS\):
+chk_WebCamB_Resolution#Resolution:
+btn_WebCamB_RefreshSources#Refresh
+label_webB_quellen#Video\ sources:
+l_WebcamB2#Device:\ Webcam\ B
+chk_DIYLep_SettingsFromCamera#use\ Settings\ from\ Camera
+btn_DIYLepton_SingleShot#Snapshot\ \(IR\+Hi\ Res\ Vis\)
+btn_DIYLepton_CalFileToCam#CalFile\ ->\ Camera
+btn_DIYLepton_CalCamToFile#Camera\ ->\ CalFile
+btn_DIYLepton_doNew2PCal#New\ 2\ Point\ Calibration
+btn_DIYLepton_WriteCalToCam#write\ Caldata\ in\ Camera
+btn_DIY_LoadCalFile#Load
+chk_DIY_UseCalFile#use\ Cal\ file:
+btn_DIYLepton_DoNuc#NUC
+btn_DIYLepton_ManNuc#Manual
+btn_DIYLepton_AutoNuc#Auto
+label_DIY_Shuttercontrol#Shutter\ Control
+btn_DIYLepton_Laser#LASER\ On/Off
+label_DIYLep_SpotSensor#Spot\ Sensor
+chk_DIYLep_Autoscale#Autoscale
+labeldiy1#Streaming:
+chk_DIYLepton_Autoselect#Select,\ if\ exist:
+btn_DIYLepton_GetSize#get\ Size
+btn_DIYLepton#Connect
+label_DIY_Cal#Calibration
+l_Enable#OFF
+l_Dev_DiyThermocam#Device:\ DIY\ Thermocam
+rad_optris_Exptif#16bit\ \.tif
+rad_optris_ExpJpg#8bit\ \.jpg
+label_dev_optrisexport#Export:
+btn_optris_FolderCSV#Process\ Folder\ csv\ ->\ jpg
+labeloptr1#Level:\r\nSpan:
+label_optrisInfos#infos\.\.\.
+l_Optris2#Device:\ Optris
+radioButton1optris#Fixed:
+rad_optris_Dynamic#Dynamic:
+chk_TExpert_OnlyTempFrame#read\ only\ TempMap
+chk_TExpert_VisualFromWebA#Visal\ Image\ from\ WebcamA
+chk_TExpert_DiscardOvertemp#Ignore\ Temp\ >\ 1000°C
+TP_Texp_Intern#Intern
+btn_TEStreamingDLL#Stream
+label_TE_InternProcInfo#If\ no\ external\ Processing\ is\ enabled\ then\ internal\ is\ used\.
+btn_TExpert_ConnectDll#Connect
+btn_TENucDLL#doNUC
+chk_TExpert_UseUmgebungsTempCal#Ambient\ Cal
+TP_Texp_Extern#Extern
+btn_Texp_ShowDPM#Show\ DPM
+label_TE_OffsetSlope#Slope:\r\nOffset:
+chk_Texp_ExternProcessing#Use\ extern\ processing
+btn_Texp_DoMapCal#Create\ new\ GO-Maps
+btn_TE_FrameOffsetCal#Frame\ as\ Offset\r\n\(NUC\ without\ Shutter\)
+txt_TE_Values#MaxVal:\r\nMinVal:\r\nRange:
+btn_Texp_LoadMapFile#Load
+btn_TExpert_Connect#Connect
+btn_TEStreaming#Stream
+chk_TExpert_SwitchSide#patch\ borders
+chk_TE_Autorange#Autorange
+l_DevTExpert2#Device:\ i3\ T-Expert
+chk_dhide_TExpert#Device:\ i3\ Thermal\ Expert
+btn_dhide_allOFF#all\ OFF
+btn_dhide_allON#all\ ON
+chk_dhide_Optris#Device:\ Optris
+chk_dhide_DIYLep#Device:\ DIY-Thermocam
+chk_dhide_WebB#Device:\ Webcam\ B
+chk_dhide_WebA#Device:\ Webcam\ A
+chk_dhide_SeekThermal#Device:\ Seek\ Thermal
+chk_dhide_FlirEx#Device:\ Flir\ Ex
+chk_dhide_serialTerminal#Serial\ Terminal
+l_dhide2#Hide\ Devices
+frmMeasGrid#MeasGrid
+chk_NoteEnable#Show\ Note
+label_note_head#Comment\ /\ Note
+frmMeasTable#MeasTable
+frmLines#Lines
+frmHistogram#Histogram
+btn_histo_statistic#Statistic
+group_HistoSetup#Histogramm\ Setup
+chk_histo_fill#Fill\ Line
+label_histo3#Line:
+label_histo2#Step\ size:
+label_histo1#Area:
+label_histo6#Holes\ between\ the\ Points\ \(Zero\ Values\):
+label_histo_statistics#Statistic
+label_histo5#Meas\ point\ Min/Max:
+label_histo4#Different\ values\ count\ \(Non\ Zero\ Values\):
+btn_histo_setup#Setup\.\.\.
+btn_histo_Refresh#Refresh
+frmVisual#Visual
+chk_mon_ColDown2#below\ 2:
+chk_mon_ColDown1#below\ 1:
+chk_mon_ColUp2#above\ 2:
+chk_mon_ColUp1#above\ 1:
+label_mon_setup#Monitor\ Setup
+label_mon_standardCol#Standard\ color:
+chk_mon_setup#Setup
+label_overlay2#Offset\ W/H:
+label_overlay1#Offset\ X/Y:
+chk_visualRelief#VR
+chk_vis_showPositions#Positions
+frmMainIR#MainIR
+group_ExternalPalette#Load\ external\ color\ Palette
+btn_extPal_Close#Choose\ and\ Close
+btn_extPal_Extract#Extract
+label_mainIr_exfileResult#Result\ ->
+label_mainIr_exfileSource#<-\ Source
+label_mainIr_exfileLeft#Left\ offset:
+label_mainIr_exfileoTop#Top\ offset:
+btn_extPal_load#Load
+label_mainIr_exfilepal#Filename:
+group_IRGrabber#IR\ Image\ Grabber
+group_dec_minmax#Bild\ Min/Max
+label_IrGrab_maxsize#Max:\ 800x600
+label_IRGrab_offsetRange#Offset\ range:
+label_IRGrab_ImgH#Img\ H:
+label_dec_span#Span:
+label_IRGrab_Offset#Offset:
+label_IRGrab_imgW#Img\ W:
+group_dec_pixel#Pixelvalue\ created\ by\.\.\.
+chk_filepic_Bit15Korr#if\ >32767\r\nthen\ -\ 32767\r\nelse\ \+\ 32767
+label_irGrab_Indexrise#Index\ increment:
+group_dec_fileformat#Fileformat
+label_IRGrab_dummyrow#Dummy\ rows:\r\n\(will\ be\ skipped\)
+btn_filepic_ZeileDown#Row\ -\ -
+btn_filepic_ZeileUp#Row\ \+\ \+
+label_IRGrab_colafter#New\ Row\ after:
+label_IRGrab_newlineafter#New\ Row\ after:
+label_IRGrab_startoffset#Start\ offset\ \(byte\):
+label_vorschau#Preview\.\.\.
+frmImageBrowser#ImageBrowser
+btn_ImgBrow_DeleteFiles#Delete\ marked
+btn_ImgBrow_ReadFiles#read\ all\ Images\ from\ Folder
+btn_GrabVisual#get\ Image\ as\ Visual
+
+[conmenu]
+tbtn_filepic_offset_GrenzeUp#set\ as\ upper\ edge
+tbtn_filepic_offset_GrenzeDown#set\ as\ lower\ edge
+tbtn_filepic_offset_GrenzeFull#set\ from\ -65535\ to\ 65535\ \(full\ range\)
+tbtn_mess_AlleAbschalten#disable\ all\ measurements
+tbtn_mess_collapse#collapse\ all
+tbtn_mess_expande#expand\ all
+tbtn_mess_FastRefresh#Fast\ Refresh
+tbtn_PicBox_DelMeas#disable\ this\ measurement
+tbtn_PicBox_ClearAllPoints#disable\ all\ measurements
+toolStripMenuItem2#set\ new\.\.\.
+toolStripMenuItem2.tbtn_set_area1#Area
+toolStripMenuItem2.tbtn_set_line1#Linie
+toolStripMenuItem2.tbtn_set_Diffline1#2\ Point\ Delta\ Linie
+tbtn_FarbscalaCollection#Color\ Scale\.\.\.
+tbtn_FarbscalaCollection.tbtn_Scala_0#Gray
+tbtn_FarbscalaCollection.tbtn_Scala_1#Sinus
+tbtn_FarbscalaCollection.tbtn_Scala_2#Ironbow
+tbtn_FarbscalaCollection.tbtn_Scala_3#Hot\ \(Fire\)
+tbtn_FarbscalaCollection.tbtn_Scala_4#Cold\ \(Ice\)
+tbtn_FarbscalaCollection.tbtn_Scala_5#Rainbow
+tbtn_FarbscalaCollection.tbtn_Scala_6#Rainbow\ 2
+tbtn_FarbscalaCollection.tbtn_Scala_7#Contrast
+tbtn_FarbscalaCollection.tbtn_Scala_8#Split
+tbtn_FarbscalaCollection.tbtn_Scala_9#GrayIronbow
+tbtn_FarbscalaCollection.tbtn_Scala_10#GrayRainbow
+tbtn_FarbscalaCollection.tbtn_Scala_11#Arctic
+tbtn_FarbscalaCollection.tbtn_Scala_12#SegmentIronbow
+tbtn_FarbscalaCollection.tbtn_Scala_13#SegmentRainbow
+tbtn_FarbscalaCollection.tbtn_Scala_14#Medical
+tbtn_FarbscalaCollection.tbtn_Scala_15#Extern
+tbtn_FarbscalaCollection.tbtn_Scala_SetupExternPal#Setup\ Extern\ Palette
+toolStripMenuItem3#settings\.\.\.
+toolStripMenuItem3.tbtn_spiegeln_both#rotate\ 180°
+toolStripMenuItem3.Tbtn_spiegeln_WO#west/east\ \(Horizontal\)
+toolStripMenuItem3.tbtn_spiegeln_NS#north/south\ \(Vertical\)
+toolStripMenuItem3.tbtn_main_VisBlending#Visual\ Blending
+toolStripMenuItem3.tbtn_main_messobjekte#meas\.\ objects
+toolStripMenuItem3.tbtn_main_StretchImage#Stretch\ Image
+toolStripMenuItem3.tbtn_main_CamControls#Camera\ Mode
+toolStripMenuItem3.tbtn_main_ZoomboxEnable#Zoombox\ On/Off
+toolStripMenuItem3.tbtn_main_ZoomboxFixed#Zoombox\ fixed
+tbtn_Scale_Autoscale#Autoscale
+ConMenu_Scale_Isotherm_Move#shift\ Isotherm\ values
+toolStripMenuItem5#Set\ Isotherm
+toolStripMenuItem5.ConMenu_Scale_Isotherm_Set1#Set\ Isotherm\ 1\ Max
+toolStripMenuItem5.ConMenu_Scale_Isotherm_Set2#Set\ Isotherm\ 1\ Min
+toolStripMenuItem5.ConMenu_Scale_Isotherm_Set3#Set\ Isotherm\ 2\ Max
+toolStripMenuItem5.ConMenu_Scale_Isotherm_Set4#Set\ Isotherm\ 2\ Min
+tbtn_cam_olay_OnOff#Overlay\ OFF
+tbtn_cam_olay_FullIR#Only\ IR\ Image
+tbtn_cam_olay_20#Overlay\ 20\ %
+tbtn_cam_olay_40#Overlay\ 40\ %
+tbtn_cam_olay_60#Overlay\ 60\ %
+tbtn_cam_olay_80#Overlay\ 80\ %
+tbtn_cam_olay_FullVis#Only\ VIS\ Image
+tbtn_cam_olay_Relief#Vis-Relief\ OFF
+tbtn_vis_Refresh#Refresh
+tbtn_vis_ShowMeas#Show\ Measurements
+tbtn_vis_Save#save\ overlay\ image
+tbtn_vis_OpenFolder#open\ folder
+tbtn_vis_exportVisSource#save\ Vis\ image
+tbtn_vis_loadVisSource#load\ Vis\ image
+tbtn_vis_Standardoffset#standard\ offset
+tbtn_vis_RotFlipbase#Rotate\ and\ Flip
+tbtn_vis_RotFlipbase.tbtn_vis_RotFlip1#Rotation\ 180°
+tbtn_vis_RotFlipbase.tbtn_vis_RotFlip2#Rotation\ \+\ 90°
+tbtn_vis_RotFlipbase.tbtn_vis_RotFlip3#Rotation\ -\ 90°
+tbtn_vis_RotFlipbase.tbtn_vis_RotFlip4#West/East\ \(Horizontal\)
+tbtn_vis_RotFlipbase.tbtn_vis_RotFlip5#North/South\ \(Vertical\)
+tbtn_vis_remove#remove\ Vis\ image
+tbtn_zed_reset#Reset\ Scale
+tbtn_zed_Rainbow#L1\ rainbow
+tbtn_zed_saveImage#save\ graph\ image
+tbtn_zed_saveImage.tbtn_zed_saveGraph1#Resolution:\ 400x200
+tbtn_zed_saveImage.tbtn_zed_saveGraph2#Resolution:\ 600x240
+tbtn_zed_saveImage.tbtn_zed_saveGraph3#Resolution:\ 800x300
+tbtn_zed_saveImage.tbtn_zed_saveGraph4#Resolution:\ 1280x480
+toolStripMenuItem4#save\ image\ analysis
+toolStripMenuItem4.tbtn_zed_Auswertung_1#Resolution:\ 640x480
+toolStripMenuItem4.tbtn_zed_Auswertung_2#Resolution:\ 1280x960
+tchk_ZedShowLegend#Show\ Keys
+
+[combo]
+cb_cal_ValueEntry#manual\ value\ entry#DIY-Thermocam\ Spot-Sensor#
+CB_IP_ConvSetups#Setups\.\.\.#Normal#Median#Sharpen#Corner#Relief#
+cb_farbpalette#Gray#Sinus#Ironbow#Hot\ \(Fire\)#Cold\ \(Ice\)#Rainbow#Rainbow\ 2#Contrast#Split#GrayIronbow#GrayRainbow#Arctis#SegIronbow#SegRainbow#Medical#Extern#
+cb_filepic_Setup#Choose\ your\ type\ \ of\ Camera:#SDS\ HotfindL\ \(384x288\ \*\.SAT\)#Guide\ M2\ \(120x120\ \*\.IRI\)#Guide\ M3\ \(120x160\ \*\.IRI\)#Guide\ M4\ \(120x160\ \*\.IRI\ \+\ Vis\)#Trotec\ EC060\ \(160x120\ \*\.SAT\)#Trotec\ IC080\ \(160x120\ \*\.SAT\)#PCE\ TC3\ \(160x120\ \*\.IRI\)#
+CB_F_GraphTimebase#time\ since\ Graph\ start#System\ time#
+CB_RS232_baud#SetExtern#921600#230400#115200#57600#38400#19200#9600#4800#2400#
+cb_seek_Direction#0°\ Landscape#180°\ Landscape#90°\ Portrait#270°\ Portrait#
+CB_DIYLepton_Streaming#OFF#ThermalFrame#SpotSensor#Frame\+Spot#Visual#Visual\+Thermal#SingleShot#
+CB_DIYLepton_direction#0°\ Landscape#180°\ Landscape#90°\ Portrait#270°\ Portrait#
+CB_DIYLepton_Size#80x60#160x120#
+cb_Texpert_Direction#0°\ Landscape#180°\ Landscape#90°\ Portrait#270°\ Portrait#
+CB_Histo_Typ#everything#only\ area#
+CB_Histo_RangeSize#Range:\ 1°#Range:\ 0\.1°#
+cb_mon_Measurements#
+cb_mon_SelectedValue#Max\ Temperature\ \(Red\)#Min\ Temperature\ \(Blue\)#Active\ Meas\.\ \(Setup\.\.\.\)#
+cb_vis_Blending#100%#80%#60%#40%#20%#0%#
+CB_TopR_Mode#IR-Zoom\ Box#Value\ Monitor#Only\ visual\ Image#Thermal\ Blending#Visual\ Isotherm\ below#Visual\ Isotherm\ above#
+cb_filepic_DrehenSpiegeln#no\ rotation#Mirror\ horizontal#Mirror\ vertical#rotate\ 180°#rotate\ 90°\ clockwise#rotate\ 90°\ contraclockwise#
+cb_filepic_Resolution#Format\ =\ Resolution#Format\ =\ double\ Resolution#
+CB_ImgBrow_SuchOrt#ThermoVision\ Images#DIY-Thermocam\ Images\ from\ Folder:#DIY-Thermocam\ Images\ from\ the\ Camera#Thermal\ Expert\ Images\ from\ Folder:#
+CB_ImgBrow_VisionSubfolders#ThermoVision\ Images#DIY-Thermocam\ Images\ from\ Folder:#DIY-Thermocam\ Images\ from\ the\ Camera#Thermal\ Expert\ Images\ from\ Folder:#
+
+[menu]
+toolStripMenuItem1#File
+toolStripMenuItem1.tbtn_main_resetBild#Reset\ Image
+toolStripMenuItem1.tbtn_dat_Load#Load\ Image
+toolStripMenuItem1.tbtn_main_OpenFlir#Load\ FLIR\ Image
+toolStripMenuItem1.tbtn_main_OpenIrDec#Load\ Image\ in\ IR\ Decoder
+toolStripMenuItem1.tbtn_close#Close
+tbtn_Windows#Window
+tbtn_Windows.tbtn_MainIR#MainIR
+tbtn_Windows.tbtn_fVisual#Visual
+tbtn_Windows.tbtn_fImgBrow#Image\ Browser
+tbtn_Windows.tbtn_Plot#Plot
+tbtn_Windows.tbtn_lines#Lines
+tbtn_Windows.tbtn_Mgrid#Meas\ Grid
+tbtn_Windows.tbtn_mtable#Meas\ Table
+tbtn_Windows.tbtn_histo#Histogram
+tbtn_Windows.tbtn_Cal#Calibration
+tbtn_Windows.tbtn_IProc#Image\ processing
+tbtn_Windows.tbtn_Report#Report
+tbtn_Windows.tbtn_ffunc#Functions
+tbtn_Windows.tbtn_fdevice#Device
+tbtn_Windows.tbtn_webA#WebcamA
+tbtn_Windows.tbtn_webB#WebcamB
+tbtn_Windows.tbtn_About#About\ ThermoVision_JoeC
+tbtn_Windows.tbtn_Default#Window\ settings\ to\ standard
+tbtn_main_optionen#Options
+tbtn_main_optionen.tbtn_main_TempTypFromFile#Get\ Unit\ from\ File
+tbtn_main_optionen.tbtn_main_thermovisionLabel#ThermoVision\ Image
+tbtn_main_optionen.tbtn_main_TVExist#if\ Image\ name\ already\ exist
+tbtn_main_optionen.tbtn_main_TVExist.tbtn_main_IfTvExist1#append\ sequential\ number
+tbtn_main_optionen.tbtn_main_TVExist.tbtn_main_IfTvExist2#Overwrite
+tbtn_main_optionen.tbtn_main_TVExist.tbtn_main_IfTvExist3#Ask\ while\ Save\ Image
+tbtn_main_optionen.tbtn_main_SettingsFromImage#Use\ Settings\ from\ File
+tbtn_main_optionen.tbtn_main_StoreFixed500#Save\ in\ old\ Format\ \(fixed\ 500\)
+
+[manuell]
+tbtn_main_FullScreen#Fullscreen
+tbtn_main_CameraMode#Camera
