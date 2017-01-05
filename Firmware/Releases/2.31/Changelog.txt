@@ -1,0 +1,185 @@
+*** Changelog DIY-Thermocam Firmware ***
+
+2.31 (11.12.2016)
+-Extended serial protocol
+-Bugfixes and improvements
+
+2.30 (29.11.2016)
+-Added support for the DIY-Thermocam V2
+-Improved video capture speed
+-Extended serial protocol
+-Load menu is now divided into load images / videos
+-Bugfixes and improvements
+
+2.20 (29.10.2016)
+-Improved Lepton3 SPI protocol
+
+2.19 (24.10.2016)
+-Fixed artifact bug when saving visual image
+-Added play/pause function to load video
+-Small changes and bugfixes
+
+2.18 (04.10.2016)
+-Fixed a bug with display rotation not applied
+-Other small bugfixes
+
+2.17 (26.09.2016)
+-Added increase / decrease to align combined menu
+-Fixed an issue with wrong colors/lines on startup
+-Small changes
+
+2.16 (25.09.2016)
+-Small bugfixes and changes
+
+2.15 (16.09.2016)
+-Small bugfixes and changes
+-Replaced USB file transfer icon
+
+2.14 (14.09.2016)
+-Fixed wrong pixels in combined mode
+-Load menu touch improvements
+-Added preview image for video capture
+-Small UI improvements
+
+2.13 (13.09.2016)
+-Improved align combined menu, now moves visual image
+-Option to change alpha transparency in combined mode
+
+2.12 (11.09.2016)
+-Added save visual image function for the thermal live viewer
+-Small USB serial protocol changes
+
+2.11 (09.09.2016)
+-Button to refresh screen in align combined menu
+-Faster access in change mode, temperature points & hot/cold mode
+
+2.10 (08.09.2016)
+-Improved align combined menu
+-Store three differemt presets for combined alignment
+-Store three different presets for temperature limits
+-Improved video capture speed
+-Improved video conversion speed
+-Get hottest/coldest position over USB serial
+-Replaced three icons
+-Improved colors and menus
+-Spot sensor got a faster reaction time
+-Some bugfixes
+
+2.01 (01.09.2016)
+-Replaced two icons
+-Improved hot/cold menu and added to main menu (thermal only)
+-Added switch for manual/auto/locked by long touch press
+-Fixed a bug with hottest/coldest point display
+
+2.00 (31.08.2016)
+-New unified main menu with graphical icons
+-New adjust combined menu
+-Visual / combined images can be displayed
+-New screen timeout menu
+-Show minimum and maximum temperature on screen
+-Ability to change text color
+-Some bugfixes
+
+1.25 (15.08.2016)
+-New boot screen
+-Various bugfixes
+
+1.24 (27.07.2016)
+-Improved first start setup
+-Extended USB protocol
+
+1.23 (09.07.2016)
+-Changed and extended USB protocol
+-Improved compensation algorithm
+-Some bugfixes
+
+1.22 (04.07.2016)
+-Removed flickering effect in live mode
+-Simplified communication protocol and added new functions
+-Calibration slope is now stored in EEPROM
+-Fixed a bug with the load image menu
+
+1.21 (02.07.2016)
+-Improved filtering speed and added choice between two filter types (Box & Gaussian)
+-Ability to transmit the visual image over serial
+-Improved calibration algorithm with compensation by spot temperature
+-Fixed a bug, where the ranges and temperatures points are not calculated correctly
+-Some bugfixes
+
+1.20 (25.06.2016)
+-Fixed a bug where the spot temp was calculated too high
+-Added more protocols to the serial connection
+
+1.19 (14.06.2016)
+-Added time-sync for thermal viewer
+-Code optimizations
+-Fixed some bugs
+
+1.18 (02.06.2016)
+-Added Combined mode and Visual mode
+-Fixed a bug with self-diagnostic display checks
+-Improved calibration algorithm
+
+1.17 (16.04.2016)
+-Added self-diagnostic HW checks
+-Small bugfixes
+
+1.16 (08.04.2016)
+-Added adjust camera menu
+
+1.15 (31.03.2016)
+-Option to rotate the display
+-Improved thermal viewer capabilities
+-Various bugfixes
+
+1.14 (30.03.2016)
+-Improved thermal viewer capabilities
+-Better support for Lepton3
+
+1.13 (18.03.2016)
+-Improved fault detection on first startup
+-Small bugfixes
+
+1.12 (10.03.2016)
+-Improved Hottest & Coldest mode
+
+1.11 (08.03.2016)
+-Small changes & bugfixes
+
+1.10 (03.03.2016)
+-Added 13 new color schemes
+-Added set points option
+-Improved auto-calibration (added warmup time)
+-Added limits locked function (touch screen long)
+-Added display options to live menu
+-Improved video & interval capture
+-Various bugfixes
+
+1.06 (22.02.2016)
+-Improved calibration algorithm
+-Some bugfixes
+
+1.05 (31.01.2016)
+-Improved touch screen usability
+-Various bugfixes
+
+1.04 (18.01.2016)
+-Important bugfix for Batch #1 units that fixes Calibration and Mass Storage Mode
+
+1.03 (17.01.2016)
+-Full support for the Lepton3 sensor
+-Added a bug with fahrenheit temp. format in calibration mode
+-Improved battery level display
+-Some bugfixes
+
+1.02 (30.12.2015)
+-Added quick calibration on startup
+-Some bugfixes
+
+1.01 (24.12.2015)
+-Improved touch screen responsibility
+-Implemented hardware checks
+-Various bugfixes
+
+1.00 (19.12.2015):
+-Initial release
