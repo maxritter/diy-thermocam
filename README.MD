@@ -117,19 +117,20 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Printed Circuit Board<br />
-		Custom PCB for the DIY-Thermocam
-		</td>
-		<td><a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
+		Against a small donation, you will receive the PCB by post</td>
+		<td>
+		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20PCB&amp;amount=20%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
+		Donate</a><br />
 		Or use the gerber files</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Enclosure.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Enclosure<br />
-		2D laser-cut enclosure made out of 3mm black acryl, one side mate</td>
+		Against a small donation, you will receive the enclosure by post</td>
 		<td>
-		<a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
-		Ponoko.com</a><br />
+		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20Enclosure&amp;amount=30%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
+		Donate</a><br />
 		Or use the design files</td>
 	</tr>
 	<tr>
