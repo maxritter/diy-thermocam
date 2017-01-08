@@ -117,16 +117,18 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Printed Circuit Board<br />
-		Custom PCB for the DIY-Thermocam
+		Against a small donation, I will send you the PCB.<br />
+		Please leave your address in the comment field.
 		</td>
-		<td><a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
+		<td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FTMWNMXZW3RD6">Buy from me</a><br />
 		Or use the gerber files</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Enclosure.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Enclosure<br />
-		2D laser-cut enclosure made out of 3mm black acryl, one side mate</td>
+		2D laser-cut enclosure made out of 3mm black acryl. <br />
+		Ponoko will make it for you.</td>
 		<td>
 		<a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
 		Ponoko.com</a><br />
@@ -663,11 +665,15 @@ When you **turn the device on** afterwards, you should see the **first start scr
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalImg.PNG" width="700">
 
+More thermal images in full resolution can be found in the images / thermal folder.
+
 ----------
 
 **Thermal Image Comparison**
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalComp.jpg" width="700">
+
+This is a comparison between the DIY-Thermocam, the Seek XR and a FLIR E8 thermal imager.
 
 ----------
 
