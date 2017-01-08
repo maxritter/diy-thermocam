@@ -8,7 +8,7 @@ http://www.diy-thermocam.net
 https://github.com/maxritter/DIY-Thermocam
 
 
-<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Firmware/Source/diagram.png" width="500">
+<img src="https://github.com/maxritter/DIY-Thermocam/blob/master/diagram.png" width="500">
 
 
 Download and install the following programs:

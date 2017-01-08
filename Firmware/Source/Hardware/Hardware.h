@@ -548,11 +548,11 @@ void initRTC() {
 	//Get the time from the Teensy
 	setSyncProvider(getTeensy3Time);
 
-	//Check if year is lower than 2016
-	if ((year() < 2016) && (EEPROM.read(eeprom_firstStart) == eeprom_setValue)) {
+	//Check if year is lower than 2017
+	if ((year() < 2017) && (EEPROM.read(eeprom_firstStart) == eeprom_setValue)) {
 		showFullMessage((char*) "Empty coin cell battery!");
 		delay(1000);
-		setTime(0, 0, 0, 1, 1, 2016);
+		setTime(0, 0, 0, 1, 1, 2017);
 		Teensy3Clock.set(now());
 	}
 }

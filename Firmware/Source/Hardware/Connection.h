@@ -277,7 +277,7 @@ void setTime() {
 	String dateIn = Serial.readString();
 
 	//Check if valid
-	if (getInt(dateIn.substring(0, 4) >= 2016)) {
+	if (getInt(dateIn.substring(0, 4) >= 2017)) {
 		//Set the clock
 		setTime(getInt(dateIn.substring(11, 13)), getInt(dateIn.substring(14, 16)), getInt(dateIn.substring(17, 19)),
 			getInt(dateIn.substring(8, 10)), getInt(dateIn.substring(5, 7)), getInt(dateIn.substring(0, 4)));

@@ -105,7 +105,7 @@ void timeDateScreen() {
 
 	//Reset values
 	setTime(12, 30, 30, 15, 6, 2017);
-	
+
 	//Adjust time
 	timeMenu(true);
 	timeMenuHandler(true);
@@ -239,7 +239,7 @@ void firstStartComplete() {
 	text[5] = "Afterwards, you will be redirected";
 	text[6] = "to the align combined menu.";
 	infoScreen(text, false);
-	
+
 	//Wait for hard-reset
 	while (true);
 }
@@ -251,15 +251,20 @@ boolean checkLiveModeHelper() {
 
 /* Help screen for the first start of live mode */
 void liveModeHelper() {
-	//Hint screen for the combined image setting
-	camera_setDisplayRes();
-	combinedAlignmentScreen();
-	camera_setSaveRes();
-
-	//Do the first time calibration
-	calibrationHelperScreen();
-
 	String text[7];
+	
+	//Do the combined alignment if cam connected
+	if (checkDiagnostic(diag_camera))
+	{
+		camera_setDisplayRes();
+		combinedAlignmentScreen();
+		camera_setSaveRes();
+	}
+
+	//Do the first time calibration if spot sensor working
+	if (checkDiagnostic(diag_spot))
+		calibrationHelperScreen();
+
 	//Hint screen for the live mode #1 
 	text[0] = "First time helper";
 	text[1] = "To enter the live mode menu,";
@@ -269,6 +274,8 @@ void liveModeHelper() {
 	text[5] = "top of the device short takes";
 	text[6] = "an image, long records a video.";
 	infoScreen(text);
+
+	//Hint screen for the live mode #2
 	text[1] = "The device needs one minute to";
 	text[2] = "warmup the sensor, more functions";
 	text[3] = "will be activated afterwards. You";
@@ -276,8 +283,10 @@ void liveModeHelper() {
 	text[5] = "ferent temperature limits by pres-";
 	text[6] = "sing the screen long in live mode.";
 	infoScreen(text);
+
+	//Show waiting message
 	showFullMessage((char*)"Please wait..");
-	
+
 	//Set EEPROM marker to complete
 	EEPROM.write(eeprom_liveHelper, eeprom_setValue);
 }
@@ -288,17 +297,18 @@ void stdEEPROMSet() {
 	//Show message
 	showFullMessage((char*) "Flashing spot EEPROM settings..");
 
-	//Set spot maximum temp to 380°C
-	mlx90614_setMax();
-
-	//Set spot minimum temp to -70°
-	mlx90614_setMin();
-
-	//Set spot filter settings
-	mlx90614_setFilter();
-
-	//Set spot emissivity to 0.9
-	mlx90614_setEmissivity();
+	//Only if spot sensor is connected
+	if(checkDiagnostic(diag_spot))
+	{
+		//Set spot maximum temp to 380°C
+		mlx90614_setMax();
+		//Set spot minimum temp to -70°
+		mlx90614_setMin();
+		//Set spot filter settings
+		mlx90614_setFilter();
+		//Set spot emissivity to 0.9
+		mlx90614_setEmissivity();
+	}
 
 	//Set device EEPROM settings
 	EEPROM.write(eeprom_rotationEnabled, false);
@@ -321,7 +331,7 @@ void stdEEPROMSet() {
 	EEPROM.write(eeprom_filterType, filterType_gaussian);
 
 	//For DIY-Thermocam V2, set HQ res to true
-	if(teensyVersion == teensyVersion_new)
+	if (teensyVersion == teensyVersion_new)
 		EEPROM.write(eeprom_hqRes, true);
 
 	//Set disable shutter to false

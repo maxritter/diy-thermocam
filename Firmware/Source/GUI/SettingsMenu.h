@@ -682,7 +682,7 @@ void yearMenu(bool firstStart) {
 			int pressedButton = buttons_checkButtons(true);
 			//Minus
 			if (pressedButton == 0) {
-				if (year() > 2016) {
+				if (year() > 2017) {
 					setTime(hour(), minute(), second(), day(), month(),
 						year() - 1);
 					drawCenterElement(year());
