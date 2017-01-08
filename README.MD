@@ -1,5 +1,6 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
 <br>
+<br>
 
 The **DIY-Thermocam** is a **do-it-yourself** infrared camera, based on the popular **FLIR Lepton** long-wave-infrared array sensor.  The **material price** of all components is at about **400€**, which makes the device the **cheapest standalone solution** for thermal imaging.
 
@@ -17,7 +18,7 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
 
 **Make your own**
 
-You can **make** your **own** DIY-Thermocam V2 at home in about **3 hours**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **simple**: No SMD components, only big through-hole parts and modules.  The enclosure can be assembled easily only with bolts & nuts, no glue required.
+You can **make** your **own** DIY-Thermocam at home in about **3 hours**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **simple**: No SMD components, only big through-hole parts and modules.  The enclosure can be assembled easily only with bolts & nuts, no glue required.
 
 The following list provides an **overview** about the **required parts**. They can also be found at **other distributors**. You also need some **small wires** and **shrink tubes** to connect the buttons and switches to the PCB. 
 
@@ -458,7 +459,7 @@ When you **turn the device on** afterwards, you should see the **first start scr
                 <strong>Feature</strong>
             </td>
             <td style="border: 0px solid transparent; background-color: #cccccc;">
-                <b>DIY-Thermocam V2</b>
+                <b>DIY-Thermocam</b>
             </td>
             <td style="background-color: #cccccc;">
                 <strong>FLIR E6</strong>
