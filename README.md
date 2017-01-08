@@ -1,1 +1,0 @@
-# DIY-Thermocam
