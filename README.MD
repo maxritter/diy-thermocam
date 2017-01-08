@@ -20,7 +20,7 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
 
 You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required.
 
-The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepton3** (160 x 120) LWIR sensor. The **hardware revision** is **detected automatically** by the firmware on startup. The **Lepton2** can be bought as a **standalone sensor** on Digikey, whereas the **Lepton3** has to be unassembled from a second generation **FLIR One** smartphone addon.
+The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepton3** (160 x 120) LWIR sensor. The **hardware revision** is **detected automatically** by the firmware on startup. 
 
 The following list provides an **overview** about the **required parts**. They can also be found at **other distributors**. You also need some **small wires** and **shrink tubes** to connect the buttons and switches to the PCB. 
 
@@ -35,12 +35,12 @@ The following list provides an **overview** about the **required parts**. They c
 	<tr>
 		<td style="width: 111px">
 		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
-		<td style="width: 235px">FLIR Lepton2 / Lepton3 with Shutter<br />
-		Long-wave-infrared array sensorr<br />
+		<td style="width: 235px">FLIR Lepton3 with Shutter<br />
+		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
-		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">Digikey.com</a>&nbsp;(Lepton2)<br />
-		Or&nbsp;<a href="http://hardtechlife.com/teardown-flir-one-for-android/">unassemble</a>&nbsp;from a&nbsp;<a href="https://www.amazon.com/FLIR-ONE-Thermal-Imager-iOS/dp/B00VILVV62/ref=sr_1_1?s=industrial&amp;ie=UTF8&amp;qid=1483642601&amp;sr=1-1&amp;keywords=FLIR+One">FLIR One V2</a>&nbsp;for Android/IOS (Lepton3)<br />
+		<a href="http://www.ebay.de/itm/262798711991?ssPageName=STRK:MESELX:IT&amp;_trksid=p3984.m1558.l2649">
+		Ebay.com</a><br />
 		</td>
 	</tr>
 	<tr>
@@ -117,18 +117,16 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Printed Circuit Board<br />
-		Against a small donation, I will send you the PCB.<br />
-		Please leave your address in the comment field.
+		Custom PCB for the DIY-Thermocam
 		</td>
-		<td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FTMWNMXZW3RD6">Buy from me</a><br />
+		<td><a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
 		Or use the gerber files</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Enclosure.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Enclosure<br />
-		2D laser-cut enclosure made out of 3mm black acryl. <br />
-		Ponoko will make it for you.</td>
+		2D laser-cut enclosure made out of 3mm black acryl, one side mate</td>
 		<td>
 		<a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
 		Ponoko.com</a><br />
@@ -138,7 +136,7 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">SanDisk 8GB microSD card<br />
-		Can be any size, but needs to be Class4 SD&nbsp;</td>
+		Can be any size, but needs to be Class4 microSD&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/SanDisk-Micro-SD-HC-8GB-8G-Class-4-C4-Flash-Memory-Card-New-Lifetime-Warranty-/111115566897?hash=item19df00ff31:g:tGIAAMXQjUNR3PAs">
 		Ebay.com</a></td>
@@ -332,14 +330,15 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Screw M2.5 x 6 Black (8 pcs)&nbsp;</td>
-		<td><a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a></td>
+		<td>&nbsp;<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Bolt M2.5 x 12 (4 pcs)&nbsp;</td>
 		<td>
-		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">Details</a></td>
+		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">
+		Details</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
