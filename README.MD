@@ -378,7 +378,7 @@ The following list provides an **overview** about the **required parts**. They c
 		&nbsp;</td>
 		<td style="width: 235px">Washer M2 (3 pcs)&nbsp;</td>
 		<td>
-		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png">
+		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png" >
 		Details</a></td>
 	</tr>
 </table>
@@ -386,31 +386,41 @@ The following list provides an **overview** about the **required parts**. They c
 
 The single components are **soldered** to the **PCB** as following:
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Back.png" width="700">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Back.png" width="500">
 
 The two **M2 x 3.5** distance spacers are put on the **left side** of the visual camera, so that the parallaxe the FLIR Lepton is minimized. The other two **M2 x 3.0** spacers are put under the **left side** of the **camera**, the remaining four are placed between the **Lepton module** and the PCB.
 
 **Cut** the small trace between **VUSB** and **VIN** on the Teensy with a sharp knife:
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/TeensyCut.png">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/TeensyCut.png" width="300">
 
 If you want to understand the **connections** on the PCB, check out the **schematic** and the **pinmap** inside the documents foder.
 
 The **top side** with the buttons and switches connected looks like this:
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Top.png" width="700">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Top.png" width="500">
 
-And here are images from **all four sides**:
+And here are images from **all four sides** of the naked device:
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side1.png" width="700">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side1.png" width="500">
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side2.png" width="700">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side2.png" width="500">
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side3.png" width="700">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side3.png" width="500">
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side4.png" width="700">
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side4.png" width="500">
 
-In a last step, the naked device needs to be put into the **enclosure**. Use the bolts, nuts and distance bolts to assemble everything.
+In a last step, the naked device needs to be put into the **enclosure**. Use the bolts, nuts and distance bolts to assemble everything:
+
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceFront.jpg" width="500">
+
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceOpen.jpg" width="500">
+
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBack.jpg" width="500">
+
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceTop.jpg" width="500">
+
+<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
 
 Now **flash** the latest version of the **firmware** to the device. Check out the **firmware update guide** in the document folder for more information.
 
