@@ -14,6 +14,8 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
+A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is now available, giving an **overview** about the whole **project** and its **capabilities**.
+<br/>
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a>
 
 ----------
