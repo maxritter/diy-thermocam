@@ -127,7 +127,8 @@ The following list provides an **overview** about the **required parts**. They c
 		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20PCB&amp;amount=20%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
 		Donate</a><br />
 		<a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
-		Or use the <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB>gerber files</a></td>
+		Or use the 
+		<a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB">gerber files</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -139,7 +140,8 @@ The following list provides an **overview** about the **required parts**. They c
 		Donate</a><br />
 		<a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
 		Ponoko.com</a><br />
-		Or use the <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure>design files</a></td>
+		Or use the 
+		<a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure">design files</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -391,6 +393,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Details</a></td>
 	</tr>
 </table>
+
 
 <br>
 
