@@ -79,7 +79,8 @@ The following list provides an **overview** about the **required parts**. They c
 		Cortex M4 Microcontroller&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
-		Digikey.com</a>&nbsp;</td>
+		Digikey.com</a>&nbsp;<br />
+		<a href="http://www.exp-tech.de/teensy-3-6">Exp-Tech.de</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -113,7 +114,9 @@ The following list provides an **overview** about the **required parts**. They c
 		5V voltage booster&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
-		Ebay.com</a>&nbsp;</td>
+		Ebay.com</a><br />
+		<a href="http://www.exp-tech.de/pololu-5v-step-up-spannungsregler-u3v12f5">
+		Exp-Tech.de</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -123,7 +126,8 @@ The following list provides an **overview** about the **required parts**. They c
 		<td>
 		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20PCB&amp;amount=20%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
 		Donate</a><br />
-		Or use the gerber files</td>
+		<a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
+		Or use the <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB>gerber files</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -133,7 +137,9 @@ The following list provides an **overview** about the **required parts**. They c
 		<td>
 		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20Enclosure&amp;amount=30%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
 		Donate</a><br />
-		Or use the design files</td>
+		<a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
+		Ponoko.com</a><br />
+		Or use the <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure>design files</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -333,7 +339,8 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Screw M2.5 x 6 Black (8 pcs)&nbsp;</td>
-		<td>&nbsp;<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a></td>
+		<td>
+		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -384,6 +391,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Details</a></td>
 	</tr>
 </table>
+
 <br>
 
 The single components are **soldered** to the **PCB** as following:
@@ -396,7 +404,7 @@ The two **M2 x 3.5** distance spacers are put on the **left side** of the visual
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/TeensyCut.png" width="300">
 
-If you want to understand the **connections** on the PCB, check out the **schematic** and the **pinmap** inside the documents foder.
+If you want to understand the **connections** on the PCB, check out the **[schematic](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Schematic_2.3.pdf)** and the **[pinmap](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Pinmap_2.1.pdf)**.
 
 The **top side** with the buttons and switches connected looks like this:
 
@@ -424,9 +432,11 @@ In a last step, the naked device needs to be put into the **enclosure**. Use the
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
 
-Now **flash** the latest version of the **firmware** to the device. Check out the **firmware update guide** in the document folder for more information.
+Now **flash** the latest version of the **firmware** to the device. Check out the **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_04.pdf)** for more information.
 
 When you **turn the device on** afterwards, you should see the **first start screen**. If any of the components or connections do not work, a **diagnostic screen** is shown.
+
+In order to understand to various device functionalities, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The structure of the raw data files is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the open USB serial protocol **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_14.pdf)**.
 
 ----------
 
@@ -667,9 +677,11 @@ When you **turn the device on** afterwards, you should see the **first start scr
 
 ----------
 
-**Device GUI**
+**Device Firmware**
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Screenshots.PNG" width="700">
+
+The **latest releases** of device firmware can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Releases)**. For the firmware **SDK**, check out **[this instruction](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Source)**.
 
 ----------
 
@@ -677,7 +689,7 @@ When you **turn the device on** afterwards, you should see the **first start scr
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalImg.PNG" width="700">
 
-More thermal images in full resolution can be found in the images / thermal folder.
+More thermal images in **full resolution** can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Images/Thermal)**.
 
 ----------
 
@@ -685,7 +697,7 @@ More thermal images in full resolution can be found in the images / thermal fold
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalComp.jpg" width="700">
 
-This is a comparison between the DIY-Thermocam, the Seek XR and a FLIR E8 thermal imager.
+This is a **comparison** between the **DIY-Thermocam**, the **Seek XR** and a **FLIR E8** thermal imager.
 
 ----------
 
@@ -693,15 +705,15 @@ This is a comparison between the DIY-Thermocam, the Seek XR and a FLIR E8 therma
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Live Viewer and Updater.PNG" width="500">
 
-The standalone PC **thermal live viewer** software allows you to **capture** HQ **thermal** and **visual images**, as well as **videos** right on the **computer**.  Various **settings** can be **changed** over the UI, including a calibration and two **different transfer modes**. The software is written in **Python**, so it can be modified to your own needs and executed on **any OS**. New **firmware updates** can be flashed to the device easily with the **firmware updater** application.
+The standalone PC **[thermal live viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Live%20Viewer)** software allows you to **capture** HQ **thermal** and **visual images**, as well as **videos** right on the **computer**.  Various **settings** can be **changed** over the UI, including a calibration and two **different transfer modes**. The software is written in **Python**, so it can be modified to your own needs and executed on **any OS**. New **firmware updates** can be flashed to the device easily with the **[firmware updater](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater)** application.
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermoVision.png" width="700">
 
-There is a powerful **thermal analysis software** for the PC, called **ThermoVision**. The **image browser** can show all thermal & visual images on the internal storage, when the device is connected over USB. They can then be loaded with one click. The software allows you to **analyze** and **edit** the **thermal raw data files** right from the device, create **combined images** and **stream & record live images** (thermal & visual) from the Thermocam. You can even set **temperature thresholds**, which trigger a specific action like opening a file, saving an image or sending a command to the serial port.
+There is a powerful **[thermal analysis software](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)** for the PC, called **ThermoVision**. The **image browser** can show all thermal & visual images on the internal storage, when the device is connected over USB. They can then be loaded with one click. The software allows you to **analyze** and **edit** the **thermal raw data files** right from the device, create **combined images** and **stream & record live images** (thermal & visual) from the Thermocam. You can even set **temperature thresholds**, which trigger a specific action like opening a file, saving an image or sending a command to the serial port.
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/DataViewer.png" width="600">
 
-The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **thermal data viewer**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The l**ive-tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **video converter** to avi videos.
+The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **[thermal data viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The **live tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **[video converter](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)** to avi videos.
 
 ----------
  
