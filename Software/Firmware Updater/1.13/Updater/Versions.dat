@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<versions>
+  <firmware version="2.31">
+    <size>620325</size>
+	<builddate>11.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.31">
+    <size>581212</size>
+	<builddate>11.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.32">
+    <size>623340</size>
+	<builddate>15.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.32">
+    <size>584109</size>
+	<builddate>15.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.33">
+    <size>634664</size>
+	<builddate>18.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.33">
+    <size>593872</size>
+	<builddate>18.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.34">
+    <size>752266</size>
+	<builddate>20.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.34">
+    <size>616964</size>
+	<builddate>20.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.35">
+    <size>763773</size>
+	<builddate>25.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.35">
+    <size>620506</size>
+	<builddate>25.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.36">
+    <size>763953</size>
+	<builddate>09.01.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.36">
+    <size>620660</size>
+	<builddate>09.01.2017</builddate>
+    <target>V1</target>
+  </firmware>
+</versions>
