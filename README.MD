@@ -2,7 +2,7 @@
 <br>
 <br>
 
-The **DIY-Thermocam** is a **do-it-yourself** infrared camera, based on the popular **FLIR Lepton** long-wave-infrared array sensor.  The **material price** of all components is at about **400€**, which makes the device the **cheapest standalone solution** for thermal imaging on the market.
+The **DIY-Thermocam** is a **do-it-yourself** infrared camera, based on the popular **FLIR Lepton** long-wave-infrared array sensor.  The **material price** of all components is at about **400â‚¬**, which makes the device the **cheapest standalone solution** for thermal imaging on the market.
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Thermocam.jpg" width="500">
 
@@ -437,7 +437,7 @@ In a last step, the naked device needs to be put into the **enclosure**. Use the
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
 
-Now **flash** the latest version of the **firmware** to the device. Check out the **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_04.pdf)** for more information.
+Now **flash** the latest version of the **firmware** to the device. Check out the **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_05.pdf)** for more information.
 
 When you **turn the device on** afterwards, you should see the **first start screen**. If any of the components or connections do not work, a **diagnostic screen** is shown.
 
@@ -456,7 +456,7 @@ In order to understand to various device functionalities, have a look at the **[
  - **2 MP visual camera** to capture optical images, that can be used in a
    combined image
  - **MLX90614 single point**-infrared sensor for high-precision spot
-   temperatures (10° FOV)
+   temperatures (10Â° FOV)
  - **HDMI** or **analog video** output  capabilities (640x480 pixel) over
    external video output module (instructions coming soon)
  - **3 operating modes**: thermal only, thermal + visual, video recording
@@ -515,10 +515,10 @@ In order to understand to various device functionalities, have a look at the **[
                 Thermal sensitivity <span style="color: #ff0000;"><strong>*</strong></span>
             </td>
             <td>
-                &lt; 0.05° C (50 mK)
+                &lt; 0.05Â° C (50 mK)
             </td>
             <td>
-                &lt; 0.06° C (60 mK)
+                &lt; 0.06Â° C (60 mK)
             </td>
         </tr>
 
@@ -527,10 +527,10 @@ In order to understand to various device functionalities, have a look at the **[
                 Thermal temp. range
             </td>
             <td>
-                -40° C to 200° C
+                -40Â° C to 200Â° C
             </td>
             <td>
-                <span style="line-height: 26.6667px;">-20° C to 250° C</span>
+                <span style="line-height: 26.6667px;">-20Â° C to 250Â° C</span>
             </td>
         </tr>
 
@@ -542,7 +542,7 @@ In order to understand to various device functionalities, have a look at the **[
                 56 deg HFOV, 71 deg diagonal 
             </td>
             <td>
-                <span><span style="line-height: 26.6667px;">45 deg × 34 deg</span></span>
+                <span><span style="line-height: 26.6667px;">45 deg Ã— 34 deg</span></span>
             </td>
         </tr>
 
@@ -563,10 +563,10 @@ In order to understand to various device functionalities, have a look at the **[
                 Spot sensor temp. range
             </td>
             <td>
-                -70° C to 380° C
+                -70Â° C to 380Â° C
             </td>
             <td>
-                -20° C to 250° C
+                -20Â° C to 250Â° C
             </td>
         </tr>
 
@@ -575,10 +575,10 @@ In order to understand to various device functionalities, have a look at the **[
                 Spot sensor temp. accuracy <strong><span style="color: #ff0000;">*</span></strong>
             </td>
             <td>
-                0.5° C over wide range
+                0.5Â° C over wide range
             </td>
             <td>
-                ±2 ° C or ±2%
+                Â±2 Â° C or Â±2%
             </td>
         </tr>
 
