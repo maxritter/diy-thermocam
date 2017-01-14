@@ -28,14 +28,9 @@ The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepto
 
 The following list provides an **overview** about the **required parts**. **Most** of the **parts** can be ordered on **Digikey.com** with free worldwide shipping, the rest can be found on **Ebay.com** or received **from me** against a **small donation**. You also need some **small wires** and **shrink tubes** to connect the buttons and switches to the PCB. 
 
-<br>
+**Main parts:**
+
 <table style="width: 57%">
-	<tr>
-		<td class="auto-style1" style="width: 111px">&nbsp;</td>
-		<td class="auto-style1" style="width: 235px"><strong>Part &amp; 
-		Functionality</strong></td>
-		<td class="auto-style1"><strong>Sources</strong></td>
-	</tr>
 	<tr>
 		<td style="width: 111px">
 		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
@@ -310,8 +305,7 @@ The following list provides an **overview** about the **required parts**. **Most
 </table>
 
 **Other parts:**
-
-The other parts can be received against a small **[donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RUBQUZ2ZCMRVW)** by post.
+The other parts can be received against a small **[donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RUBQUZ2ZCMRVW)** by post or buy them on **your own** using the **detail information**.
 
 <table style="width: 57%">
 	<tr>
@@ -410,7 +404,6 @@ The other parts can be received against a small **[donation](https://www.paypal.
 		Details</a></td>
 	</tr>
 </table>
-<br>
 
 The single components are **soldered** to the **PCB** as following:
 
