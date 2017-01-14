@@ -26,7 +26,7 @@ You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, 
 
 The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepton3** (160 x 120) LWIR sensor. The **hardware revision** is **detected automatically** by the firmware on startup. 
 
-The following list provides an **overview** about the **required parts**. They can also be found at **other distributors**. You also need some **small wires** and **shrink tubes** to connect the buttons and switches to the PCB. 
+The following list provides an **overview** about the **required parts**. **Most** of the **parts** can be ordered on **Digikey.com** with free worldwide shipping, the rest can be found on **Ebay.com** or received **from me** against a **small donation**. You also need some **small wires** and **shrink tubes** to connect the buttons and switches to the PCB. 
 
 <br>
 <table style="width: 57%">
@@ -34,18 +34,21 @@ The following list provides an **overview** about the **required parts**. They c
 		<td class="auto-style1" style="width: 111px">&nbsp;</td>
 		<td class="auto-style1" style="width: 235px"><strong>Part &amp; 
 		Functionality</strong></td>
-		<td class="auto-style1"><strong>Source</strong></td>
+		<td class="auto-style1"><strong>Sources</strong></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
-		<td style="width: 235px">FLIR Lepton3 with Shutter<br />
+		<td style="width: 235px">FLIR Lepton with Shutter<br />
 		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
 		<a href="http://www.ebay.de/itm/262798711991?ssPageName=STRK:MESELX:IT&amp;_trksid=p3984.m1558.l2649">
-		Ebay.com</a><br />
-		</td>
+		<strong>Ebay.com</strong></a> (Lepton3)<br />
+		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
+		Digikey.com</a> (Lepton2)<br />
+		Or <a href="http://hardtechlife.com/teardown-flir-one-for-android/">
+		extract</a> the Lepton3 from a FLIR One V2</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -54,7 +57,9 @@ The following list provides an **overview** about the **required parts**. They c
 		Interface the Lepton over SPI / I2C&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/FLIR-Lepton-Breakout-Board-/262796780921?ssPageName=ADME:L:LCA:US:1123">
-		Ebay.com</a></td>
+		<strong>Ebay.com</strong></a><br />
+		<a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
+		Digikey.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -63,7 +68,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Spot sensor for absolute temperature measurement&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -71,8 +76,8 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 235px">Arducam V2 Mini 2MP<br />
 		Visual camera module&nbsp;</td>
 		<td>
-		<a href="http://www.ebay.com/itm/Arducam-2MP-V2-Mini-Camera-Shield-ESP8266-Esp-12F-Nano-Evaluation-Kits-/182229665456?hash=item2a6dbc06b0:g:gUYAAOSwqfNXnrKR">
-		Ebay.com</a></td>
+		<a href="http://www.ebay.com/itm/Arducam-2MP-V2-Mini-Camera-Shield-with-ESP8266-Nano-Esp-12F-Evaluation-Kits-/291833972833?hash=item43f2a90861:g:gUYAAOSwqfNXnrKR">
+		<strong>Ebay.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -81,7 +86,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Cortex M4 Microcontroller&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
-		Digikey.com</a>&nbsp;<br />
+		<strong>Digikey.com</strong></a>&nbsp;<br />
 		<a href="http://www.exp-tech.de/teensy-3-6">Exp-Tech.de</a></td>
 	</tr>
 	<tr>
@@ -91,14 +96,14 @@ The following list provides an **overview** about the **required parts**. They c
 		ILI9341 display controller with ADS7843 resistive touch screen</td>
 		<td>
 		<a href="http://www.ebay.com/itm/262796764156?ssPageName=STRK:MESELX:IT&amp;_trksid=p3984.m1558.l2649">
-		Ebay.com</a></td>
+		<strong>Ebay.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">2500 mAh Lithium Ion Battery&nbsp;<br />
 		3.7V Lipo with JST Connector; Max. Dimens.: 5mm(h)x55mm(w)x75mm(l)</td>
-		<td><a href="http://www.ebay.de/itm/-/262794191580">Ebay.com</a></td>
+		<td><a href="http://www.ebay.de/itm/-/262794191580"><strong>Ebay.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -107,7 +112,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Including charging LED&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/Dual-TP4057-Lithium-Battery-1A-LED-Charging-Board-Li-ion-Battery-Charger-Mudule-/400614252936?hash=item5d46786188:g:WTEAAOSwal5YJTmW">
-		Ebay.com</a></td>
+		<strong>Ebay.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -116,7 +121,7 @@ The following list provides an **overview** about the **required parts**. They c
 		5V voltage booster&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
-		Ebay.com</a><br />
+		<strong>Ebay.com</strong></a><br />
 		<a href="http://www.exp-tech.de/pololu-5v-step-up-spannungsregler-u3v12f5">
 		Exp-Tech.de</a></td>
 	</tr>
@@ -126,8 +131,8 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 235px">Printed Circuit Board<br />
 		Against a small donation, you will receive the PCB by post</td>
 		<td>
-		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20PCB&amp;amount=20%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
-		Donate</a><br />
+		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=PNHHMMA7L4HM6">
+		<strong>Donate</strong></a><br />
 		<a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
 		Or use the 
 		<a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB">gerber files</a></td>
@@ -138,8 +143,8 @@ The following list provides an **overview** about the **required parts**. They c
 		<td style="width: 235px">Enclosure<br />
 		Against a small donation, you will receive the enclosure by post</td>
 		<td>
-		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=mail%40maxritter%2enet&amp;lc=DE&amp;item_name=DIY%2dThermocam%20Enclosure&amp;amount=30%2e00&amp;currency_code=EUR&amp;no_note=0&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest">
-		Donate</a><br />
+		<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=5DYRNFHGNMXG2">
+		<strong>Donate</strong></a><br />
 		<a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
 		Ponoko.com</a><br />
 		Or use the 
@@ -152,7 +157,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Can be any size, but needs to be Class4 microSD&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/SanDisk-Micro-SD-HC-8GB-8G-Class-4-C4-Flash-Memory-Card-New-Lifetime-Warranty-/111115566897?hash=item19df00ff31:g:tGIAAMXQjUNR3PAs">
-		Ebay.com</a></td>
+		<strong>Ebay.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -161,7 +166,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Power switch</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/e-switch/R6ABLKBLKFF/EG1526-ND/301973">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -170,7 +175,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Push button</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/rafi-usa/1.10107.0110104/1715-1019-ND/6227436">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -179,7 +184,7 @@ The following list provides an **overview** about the **required parts**. They c
 		USB power switch</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/e-switch/EG1201A/EG1902-ND/101723">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -188,7 +193,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Connect the lipo to the PCB&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -197,7 +202,7 @@ The following list provides an **overview** about the **required parts**. They c
 		SD slot for the SD card on the PCB</td>
 		<td>
 		<a href="http://www.digikey.com/products/en?keywords=%09732-3818-1-ND">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -206,7 +211,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Short microSD to SD adapter for the internal storage card&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/seeed-technology-co-ltd/328030004/328030004-ND/5487856">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -215,7 +220,7 @@ The following list provides an **overview** about the **required parts**. They c
 		40-pin 2.54mm female header&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -224,7 +229,7 @@ The following list provides an **overview** about the **required parts**. They c
 		8-pin 2.54mm female header&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/PPPC081LGBN-RC/S5483-ND/775941">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -233,7 +238,7 @@ The following list provides an **overview** about the **required parts**. They c
 		40-pin 2.54mm male header&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/4-103741-0/A26509-40-ND/297917">
-		Digikey.com</a> (2pcs)</td>
+		<strong>Digikey.com</strong></a> (2pcs)</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -242,7 +247,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Holder for the coin cell battery&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/products/en?keywords=Keystone%203001">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -251,7 +256,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Battery for the real-time-clock</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -260,7 +265,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Multi-purpose resistor&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNMF14FTC4K70/S4.7KCACT-ND/2617510">
-		Digikey.com</a> (4pcs)</td>
+		<strong>Digikey.com</strong></a> (4pcs)</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -269,7 +274,7 @@ The following list provides an **overview** about the **required parts**. They c
 		Multi-purpose resistor</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
-		Digikey.com</a> (2pcs)&nbsp;</td>
+		<strong>Digikey.com</strong></a> (2pcs)&nbsp;</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -278,34 +283,44 @@ The following list provides an **overview** about the **required parts**. They c
 		Double-sided adhesive tape for the lipo protection on the PCB&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/3m-tc/12X12-6-9495LE/3M9744-ND/2649289">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a><br />
+		Or use any thick tape</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CableRight.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Angled microUSB cable<br />
-		For connection of the Thermocam to the PC&nbsp;</td>
+		For connection of the Thermocam to the PC&nbsp;and 
+		charging of the device</td>
 		<td>
 		<a href="http://www.ebay.com/itm/Down-Angled-Micro-USB-5-Pin-Male-to-USB-A-Male-Data-Charge-Cable-for-Cell-Phone-/291869468911?hash=item43f4c6a8ef:g:9RgAAOSwxg5X0ovy">
-		Ebay.com</a></td>
+		<strong>Ebay.com</strong></a><br />
+		Or use any USB cable</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Tripod.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">Mini tripod<br />
+		<td style="width: 235px">Mini tripod (optional)<br />
 		Used as a stand for the device&nbsp;</td>
 		<td>
 		<a href="http://www.ebay.com/itm/New-Mini-Flexible-Pocket-Size-Metal-Tripod-for-Digital-Camera-Sony-Canon-Nikon-/121351046836?hash=item1c411606b4:g:gCIAAOSwP~tW3qCx">
-		Ebay.com</a></td>
+		<strong>Ebay.com</strong></a><br />
+		Or use any tripod</td>
 	</tr>
+</table>
+
+**Other parts:**
+
+The other parts can be received against a small **[donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RUBQUZ2ZCMRVW)** by post.
+
+<table style="width: 57%">
 	<tr>
 		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/TripodSocket.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">Tripod socket&nbsp;<br />
-		Attached on the bottom of the enclosure</td>
+		&nbsp;</td>
+		<td style="width: 235px">Tripod socket&nbsp;</td>
 		<td>
-		<a href="https://www.amazon.com/The-Hillman-Group-2511-13-Pack/dp/B00HYLZ33W/">
-		Amazon.com</a></td>
+		<a href="http://wedo.hillmangroup.com/item/steel-nuts/tee-nuts-zinc-2/2511-l">
+		Details</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -395,8 +410,6 @@ The following list provides an **overview** about the **required parts**. They c
 		Details</a></td>
 	</tr>
 </table>
-
-
 <br>
 
 The single components are **soldered** to the **PCB** as following:
@@ -724,3 +737,4 @@ The second possibility to **view** and **edit the raw data** files right on the 
  
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
+**Last updated**: 14.01.2017
