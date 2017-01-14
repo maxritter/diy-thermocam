@@ -15,7 +15,7 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is now available, giving an **overview** about the whole **project** and its **capabilities**.
-<br/>
+
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a>
 
 ----------
@@ -305,6 +305,7 @@ The following list provides an **overview** about the **required parts**. **Most
 </table>
 
 **Other parts:**
+
 The other parts can be received against a small **[donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RUBQUZ2ZCMRVW)** by post or buy them on **your own** using the **detail information**.
 
 <table style="width: 57%">
