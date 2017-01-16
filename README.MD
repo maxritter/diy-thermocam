@@ -38,12 +38,10 @@ The following list provides an **overview** about the **required parts**. **Most
 		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
-		<a href="http://www.ebay.de/itm/262798711991?ssPageName=STRK:MESELX:IT&amp;_trksid=p3984.m1558.l2649">
-		<strong>Ebay.com</strong></a> (Lepton3)<br />
 		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		Digikey.com</a> (Lepton2)<br />
-		Or <a href="http://hardtechlife.com/teardown-flir-one-for-android/">
-		extract</a> the Lepton3 from a FLIR One V2</td>
+		<strong>Digikey.com</strong></a> (Lepton2)<br />
+		<a href="http://hardtechlife.com/teardown-flir-one-for-android/">
+		Extract</a> the Lepton3 from a FLIR One V2</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -62,8 +60,10 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">MLX90614-BCF<br />
 		Spot sensor for absolute temperature measurement&nbsp;</td>
 		<td>
+		<strong>
 		<a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
-		<strong>Digikey.com</strong></a></td>
+		Digikey.com</a></strong><br />
+		<a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -71,8 +71,11 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">Arducam V2 Mini 2MP<br />
 		Visual camera module&nbsp;</td>
 		<td>
+		<strong>
 		<a href="http://www.ebay.com/itm/Arducam-2MP-V2-Mini-Camera-Shield-with-ESP8266-Nano-Esp-12F-Evaluation-Kits-/291833972833?hash=item43f2a90861:g:gUYAAOSwqfNXnrKR">
-		<strong>Ebay.com</strong></a></td>
+		Ebay.com</a></strong><br />
+		<a href="http://www.uctronics.com/arducam-2mp-v2-mini-camera-shield-with-esp8266-nano-esp-12f-evaluation-kits.html">
+		Uctronics.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -80,9 +83,12 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">Teensy 3.6<br />
 		Cortex M4 Microcontroller&nbsp;</td>
 		<td>
+		<strong>
 		<a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
-		<strong>Digikey.com</strong></a>&nbsp;<br />
-		<a href="http://www.exp-tech.de/teensy-3-6">Exp-Tech.de</a></td>
+		Digikey.com</a></strong><br />
+		<a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
+		<a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
+		Flikto.de</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -90,24 +96,33 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">3.2" TT LCD Display Module<br />
 		ILI9341 display controller with ADS7843 resistive touch screen</td>
 		<td>
+		<strong>
 		<a href="http://www.ebay.com/itm/262796764156?ssPageName=STRK:MESELX:IT&amp;_trksid=p3984.m1558.l2649">
-		<strong>Ebay.com</strong></a></td>
+		Ebay.com</a></strong><br />
+		<a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
+		BuyDisplay.com</a> (5V, Pin header 4-wire SPI, resistive touch, no font 
+		chip)</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">2500 mAh Lithium Ion Battery&nbsp;<br />
 		3.7V Lipo with JST Connector; Max. Dimens.: 5mm(h)x55mm(w)x75mm(l)</td>
-		<td><a href="http://www.ebay.de/itm/-/262794191580"><strong>Ebay.com</strong></a></td>
+		<td><strong><a href="http://www.ebay.de/itm/-/262794191580">Ebay.com</a></strong><br />
+		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
+		Mikroe.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Charging.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">TP4056 Charging Module<br />
+		<td style="width: 235px">TP4057 Charging Module<br />
 		Including charging LED&nbsp;</td>
 		<td>
+		<strong>
 		<a href="http://www.ebay.com/itm/Dual-TP4057-Lithium-Battery-1A-LED-Charging-Board-Li-ion-Battery-Charger-Mudule-/400614252936?hash=item5d46786188:g:WTEAAOSwal5YJTmW">
-		<strong>Ebay.com</strong></a></td>
+		Ebay.com</a></strong><br />
+		<a href="https://www.amazon.com/Solu-Lithium-Battery-Charging-Reverse/dp/B00YZV7RTW">
+		Amazon.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -115,10 +130,12 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">Pololu U3V12F5<br />
 		5V voltage booster&nbsp;</td>
 		<td>
+		<strong>
 		<a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
-		<strong>Ebay.com</strong></a><br />
-		<a href="http://www.exp-tech.de/pololu-5v-step-up-spannungsregler-u3v12f5">
-		Exp-Tech.de</a></td>
+		Ebay.com</a></strong><br />
+		<a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
+		<a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
+		Flikto.de</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -151,8 +168,11 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">SanDisk 8GB microSD card<br />
 		Can be any size, but needs to be Class4 microSD&nbsp;</td>
 		<td>
+		<strong>
 		<a href="http://www.ebay.com/itm/SanDisk-Micro-SD-HC-8GB-8G-Class-4-C4-Flash-Memory-Card-New-Lifetime-Warranty-/111115566897?hash=item19df00ff31:g:tGIAAMXQjUNR3PAs">
-		<strong>Ebay.com</strong></a></td>
+		Ebay.com</a></strong><br />
+		<a href="http://www.digikey.com/product-detail/en/panasonic-electronic-components/RP-SMLF08DA1/P17033-ND/5119440">
+		Digikey.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -303,6 +323,7 @@ The following list provides an **overview** about the **required parts**. **Most
 		Or use any tripod</td>
 	</tr>
 </table>
+
 
 **Other parts:**
 
@@ -731,4 +752,4 @@ The second possibility to **view** and **edit the raw data** files right on the 
  
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 14.01.2017
+**Last updated**: 16.01.2017
