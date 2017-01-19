@@ -40,8 +40,11 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
 		<strong>Digikey.com</strong></a> (Lepton2)<br />
+		<a href="https://store.groupgets.com/#!/50°-Shuttered-FLIR-Lepton-Thermal-Imager/p/52199502/category=0">
+		GroupGets.com</a> (Lepton2)<br />
 		<a href="http://hardtechlife.com/teardown-flir-one-for-android/">
-		Extract</a> the Lepton3 from a FLIR One V2</td>
+		Extract</a> the Lepton3 from a 
+		<a href="https://www.amazon.co.uk/d/Shops/FLIR-Thermal-Imaging-Camera-Devices/B0123QLZJ8/ref=sr_1_1?ie=UTF8&amp;qid=1484821714&amp;sr=8-1&amp;keywords=FLIR+One">FLIR One V2</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -49,10 +52,10 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 235px">FLIR Lepton Breakout Board<br />
 		Interface the Lepton over SPI / I2C&nbsp;</td>
 		<td>
-		<a href="http://www.ebay.com/itm/FLIR-Lepton-Breakout-Board-/262796780921?ssPageName=ADME:L:LCA:US:1123">
-		<strong>Ebay.com</strong></a><br />
 		<a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
-		Digikey.com</a></td>
+		<strong>Digikey.com</strong></a><br />
+		<a href="https://store.groupgets.com/#!/FLIR-Lepton-Breakout-Board/p/52239830/category=0">
+		GroupGets.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -106,9 +109,12 @@ The following list provides an **overview** about the **required parts**. **Most
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">2500 mAh Lithium Ion Battery&nbsp;<br />
-		3.7V Lipo with JST Connector; Max. Dimens.: 5mm(h)x55mm(w)x75mm(l)</td>
-		<td><strong><a href="http://www.ebay.de/itm/-/262794191580">Ebay.com</a></strong><br />
+		<td style="width: 235px">3.7V Lithium Polymer Battery&nbsp;<br />
+		With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)</td>
+		<td>
+		<a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
+		<strong>Aliexpress.com</strong></a><br />
+		<a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
 		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
 		Mikroe.com</a></td>
 	</tr>
@@ -253,7 +259,7 @@ The following list provides an **overview** about the **required parts**. **Most
 		40-pin 2.54mm male header&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/4-103741-0/A26509-40-ND/297917">
-		<strong>Digikey.com</strong></a> (2pcs)</td>
+		<strong>Digikey.com</strong></a> (2 pcs)</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -280,7 +286,7 @@ The following list provides an **overview** about the **required parts**. **Most
 		Multi-purpose resistor&nbsp;</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNMF14FTC4K70/S4.7KCACT-ND/2617510">
-		<strong>Digikey.com</strong></a> (4pcs)</td>
+		<strong>Digikey.com</strong></a> (4 pcs)</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -289,7 +295,7 @@ The following list provides an **overview** about the **required parts**. **Most
 		Multi-purpose resistor</td>
 		<td>
 		<a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
-		<strong>Digikey.com</strong></a> (2pcs)&nbsp;</td>
+		<strong>Digikey.com</strong></a> (2 pcs)&nbsp;</td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -752,4 +758,4 @@ The second possibility to **view** and **edit the raw data** files right on the 
  
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 16.01.2017
+**Last updated**: 19.01.2017
