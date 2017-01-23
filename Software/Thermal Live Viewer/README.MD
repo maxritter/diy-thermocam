@@ -14,3 +14,19 @@ Looking at the entry with “tty.usbmodem...”, change the line
 ser = serial.Serial("COM10", 115200)
 to this:
 ser = serial.Serial("/dev/tty.usbmodem1894391", 115200)
+
+The number suffixing the path seems to change with each camera.
+
+For the video recording functionality you need ffmpeg. It is included for the combiled Windows versions, otherwise you need to download the ffmpeg package from here: https://ffmpeg.org/download.html.
+
+Change the line:
+
+ffmpegCmd = 'ffmpeg -framerate %d -i %s/%%06d.jpg -codec copy %s' % \
+            (round(frames), videoFolder, videoFolder + ".avi")
+
+to this to get it to work under Linux / Mac OSX:
+
+ffmpeg_loc = os.getcwd() + "/"
+ffmpeg_loc = ffmpeg_loc.replace(' ', '\\ ')
+ffmpegCmd = ffmpeg_loc + 'ffmpeg -framerate %d -i %s/%%06d.jpg -codec copy %s' % \
+            (round(frames), videoFolder, videoFolder + ".avi”)
