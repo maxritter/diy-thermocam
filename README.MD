@@ -97,11 +97,10 @@ The following list provides an **overview** about the **required parts**. **Most
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Display.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">3.2" TT LCD Display Module<br />
-		ILI9341 display controller with ADS7843 resistive touch screen</td>
+		Configuration: 5V, Pin header 4-wire SPI, resistive touch, no font chip</td>
 		<td>
 		<a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
-		<strong>BuyDisplay.com</strong></a> (5V, Pin header 4-wire SPI, resistive touch, no font 
-		chip)</td>
+		<strong>BuyDisplay.com</strong></a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -326,7 +325,6 @@ The following list provides an **overview** about the **required parts**. **Most
 		Or use any tripod</td>
 	</tr>
 </table>
-
 
 
 **Other parts:**
