@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C5F80730-F44F-4478-BDAE-6634EFC2CA88}</ProjectGuid>
+    <RootNamespace>$safeprojectname$</RootNamespace>
+    <ProjectName>DIY-Thermocam</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>
+    </PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>
+    </PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\libraries;$(ProjectDir)libraries;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\avr;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\util;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\utils;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\avr;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include;$(ProjectDir)..\DIY-Thermocam;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>arduino.h;DIY-Thermocam.ino;__vm\.DIY-Thermocam.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <PreprocessorDefinitions>__HARDWARE_MK66fx1m0__;__HARDWARE_MK66FX1M0__;_VMDEBUG=1;__MK66FX1M0__;TEENSYDUINO=134;ARDUINO=10801;F_CPU=240000000;USB_SERIAL;LAYOUT_US_ENGLISH;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\teensy\avr\libraries;C:\Dev\VisualMicro\DIY-Thermocam\libraries;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\avr;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\util;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\utils;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3\avr;C:\Program Files (x86)\Arduino\hardware\teensy/../tools/arm/bin/..\arm-none-eabi\include;C:\Dev\VisualMicro\DIY-Thermocam;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>arduino.h;DIY-Thermocam.ino;__vm\.DIY-Thermocam.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>__HARDWARE_MK66fx1m0__;__HARDWARE_MK66FX1M0__;__MK66FX1M0__;TEENSYDUINO=134;ARDUINO=10801;F_CPU=240000000;USB_SERIAL;LAYOUT_US_ENGLISH;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="VisualMicro" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DIY-Thermocam.ino">
+      <FileType>CppCode</FileType>
+    </None>
+    <None Include="LICENSE" />
+    <None Include="README.MD" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="General\ColorSchemes.h" />
+    <ClInclude Include="General\GlobalDefines.h" />
+    <ClInclude Include="General\GlobalMethods.h" />
+    <ClInclude Include="General\GlobalVariables.h" />
+    <ClInclude Include="GUI\Bitmaps.h" />
+    <ClInclude Include="GUI\Buttons.h" />
+    <ClInclude Include="GUI\FirstStart.h" />
+    <ClInclude Include="GUI\GUI.h" />
+    <ClInclude Include="GUI\LiveMode.h" />
+    <ClInclude Include="GUI\LoadMenu.h" />
+    <ClInclude Include="GUI\MainMenu.h" />
+    <ClInclude Include="GUI\SettingsMenu.h" />
+    <ClInclude Include="GUI\VideoMenu.h" />
+    <ClInclude Include="Hardware\Battery.h" />
+    <ClInclude Include="Hardware\Camera\Camera.h" />
+    <ClInclude Include="Hardware\Camera\OV2640.h" />
+    <ClInclude Include="Hardware\Camera\OV2640Regs.h" />
+    <ClInclude Include="Hardware\Camera\tjpgd.h" />
+    <ClInclude Include="Hardware\Camera\VC0706.h" />
+    <ClInclude Include="Hardware\Connection.h" />
+    <ClInclude Include="Hardware\Display\Display.h" />
+    <ClInclude Include="Hardware\Display\DisplayDefines.h" />
+    <ClInclude Include="Hardware\Hardware.h" />
+    <ClInclude Include="Hardware\Lepton.h" />
+    <ClInclude Include="Hardware\MassStorage.h" />
+    <ClInclude Include="Hardware\MLX90614.h" />
+    <ClInclude Include="Hardware\SD.h" />
+    <ClInclude Include="Hardware\Touchscreen\FT6206_Touchscreen.h" />
+    <ClInclude Include="Hardware\Touchscreen\Point.h" />
+    <ClInclude Include="Hardware\Touchscreen\Touchscreen.h" />
+    <ClInclude Include="Hardware\Touchscreen\XPT2046_Touchscreen.h" />
+    <ClInclude Include="Libraries\ADC\ADC.h" />
+    <ClInclude Include="Libraries\ADC\ADC_Module.h" />
+    <ClInclude Include="Libraries\Bounce\Bounce.h" />
+    <ClInclude Include="Libraries\EEPROM\EEPROM.h" />
+    <ClInclude Include="Libraries\I2C\i2c_t3.h" />
+    <ClInclude Include="Libraries\Metro\Metro.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\ArduinoFiles.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\ArduinoStream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\bufstream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatApiConstants.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatFile.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatFileSystem.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatLib.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatLibConfig.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatStructs.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FatVolume.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\FmtNumber.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\fstream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\ios.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\iostream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\istream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\ostream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\StdioStream.h" />
+    <ClInclude Include="Libraries\SdFat\FatLib\SysCall.h" />
+    <ClInclude Include="Libraries\SdFat\FreeStack.h" />
+    <ClInclude Include="Libraries\SdFat\MinimumSerial.h" />
+    <ClInclude Include="Libraries\SdFat\SdFat.h" />
+    <ClInclude Include="Libraries\SdFat\SdFatConfig.h" />
+    <ClInclude Include="Libraries\SdFat\SdFatUtil.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\AvrDevelopersGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\BobuinoGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\GpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\LeonardoGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\MegaGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\SleepingBeautyGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\Standard1284GpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\Teensy2GpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\Teensy2ppGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\UnoGpioPinMap.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\DigitalPin.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\SdInfo.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\SdSpi.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\SdSpiCard.h" />
+    <ClInclude Include="Libraries\SdFat\SdSpiCard\SoftSPI.h" />
+    <ClInclude Include="Libraries\SdFat\SystemInclude.h" />
+    <ClInclude Include="Libraries\SPI\SPI.h" />
+    <ClInclude Include="Libraries\Time\Time.h" />
+    <ClInclude Include="Libraries\Time\TimeLib.h" />
+    <ClInclude Include="Thermal\Calibration.h" />
+    <ClInclude Include="Thermal\Create.h" />
+    <ClInclude Include="Thermal\Load.h" />
+    <ClInclude Include="Thermal\Save.h" />
+    <ClInclude Include="Thermal\Thermal.h" />
+    <ClInclude Include="__vm\.DIY-Thermocam.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Hardware\Camera\tjpgd.c" />
+    <ClCompile Include="Hardware\Display\Fonts.c" />
+    <ClCompile Include="Hardware\Touchscreen\FT6206_Touchscreen.cpp" />
+    <ClCompile Include="Hardware\Touchscreen\XPT2046_Touchscreen.cpp" />
+    <ClCompile Include="Libraries\ADC\ADC.cpp" />
+    <ClCompile Include="Libraries\ADC\ADC_Module.cpp" />
+    <ClCompile Include="Libraries\Bounce\Bounce.cpp" />
+    <ClCompile Include="Libraries\EEPROM\EEPROM.cpp" />
+    <ClCompile Include="Libraries\I2C\i2c_t3.cpp" />
+    <ClCompile Include="Libraries\Metro\Metro.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\FatFile.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\FatFileLFN.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\FatFilePrint.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\FatFileSFN.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\FatVolume.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\FmtNumber.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\fstream.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\istream.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\ostream.cpp" />
+    <ClCompile Include="Libraries\SdFat\FatLib\StdioStream.cpp" />
+    <ClCompile Include="Libraries\SdFat\MinimumSerial.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdFat.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdFatUtil.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiCard.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiESP8266.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiParticle.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiSAM3X.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiSTM32F1.cpp" />
+    <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiTeensy3.cpp" />
+    <ClCompile Include="Libraries\SPI\SPI.cpp" />
+    <ClCompile Include="Libraries\Time\DateStrings.cpp" />
+    <ClCompile Include="Libraries\Time\Time.cpp" />
+  </ItemGroup>
+  <PropertyGroup>
+    <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties arduino.upload.maximum_size="1048576" arduino.upload.speed="" visualmicro.package.name="teensy" arduino.board.property_bag="name=Teensy 3.6&#xD;&#xA;upload.maximum_size=1048576&#xD;&#xA;upload.maximum_data_size=262144&#xD;&#xA;upload.tool=teensyloader&#xD;&#xA;upload.protocol=halfkay&#xD;&#xA;build.board=TEENSY36&#xD;&#xA;build.core=teensy3&#xD;&#xA;build.mcu=mk66fx1m0&#xD;&#xA;build.warn_data_percentage=99&#xD;&#xA;build.toolchain=arm/bin/&#xD;&#xA;build.command.gcc=arm-none-eabi-gcc&#xD;&#xA;build.command.g++=arm-none-eabi-g++&#xD;&#xA;build.command.ar=arm-none-eabi-gcc-ar&#xD;&#xA;build.command.objcopy=arm-none-eabi-objcopy&#xD;&#xA;build.command.objdump=arm-none-eabi-objdump&#xD;&#xA;build.command.size=arm-none-eabi-size&#xD;&#xA;build.flags.common=-g -Wall -ffunction-sections -fdata-sections -nostdlib&#xD;&#xA;build.flags.dep=-MMD&#xD;&#xA;build.flags.optimize=-Os&#xD;&#xA;build.flags.cpu=-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant&#xD;&#xA;build.flags.defs=-D__MK66FX1M0__ -DTEENSYDUINO=134&#xD;&#xA;build.flags.cpp=-fno-exceptions -felide-constructors -std=gnu++0x -fno-rtti&#xD;&#xA;build.flags.c=&#xD;&#xA;build.flags.S=-x assembler-with-cpp&#xD;&#xA;build.flags.ld=-Wl,--gc-sections,--relax,--defsym=__rtc_localtime={extra.time.local} &quot;-T{build.core.path}/mk66fx1m0.ld&quot;&#xD;&#xA;build.flags.libs=-larm_cortexM4lf_math -lm&#xD;&#xA;serial.restart_cmd=false&#xD;&#xA;menu.usb.serial=Serial&#xD;&#xA;menu.usb.serial.build.usbtype=USB_SERIAL&#xD;&#xA;menu.usb.keyboard=Keyboard&#xD;&#xA;menu.usb.keyboard.build.usbtype=USB_KEYBOARDONLY&#xD;&#xA;menu.usb.keyboard.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.touch=Keyboard + Touch Screen&#xD;&#xA;menu.usb.touch.build.usbtype=USB_TOUCHSCREEN&#xD;&#xA;menu.usb.touch.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.hidtouch=Keyboard + Mouse + Touch Screen&#xD;&#xA;menu.usb.hidtouch.build.usbtype=USB_HID_TOUCHSCREEN&#xD;&#xA;menu.usb.hidtouch.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.hid=Keyboard + Mouse + Joystick&#xD;&#xA;menu.usb.hid.build.usbtype=USB_HID&#xD;&#xA;menu.usb.hid.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.serialhid=Serial + Keyboard + Mouse + Joystick&#xD;&#xA;menu.usb.serialhid.build.usbtype=USB_SERIAL_HID&#xD;&#xA;menu.usb.midi=MIDI&#xD;&#xA;menu.usb.midi.build.usbtype=USB_MIDI&#xD;&#xA;menu.usb.midi.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.serialmidi=Serial + MIDI&#xD;&#xA;menu.usb.serialmidi.build.usbtype=USB_MIDI_SERIAL&#xD;&#xA;menu.usb.audio=Audio&#xD;&#xA;menu.usb.audio.build.usbtype=USB_AUDIO&#xD;&#xA;menu.usb.audio.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.serialmidiaudio=Serial + MIDI + Audio&#xD;&#xA;menu.usb.serialmidiaudio.build.usbtype=USB_MIDI_AUDIO_SERIAL&#xD;&#xA;menu.usb.rawhid=Raw HID&#xD;&#xA;menu.usb.rawhid.build.usbtype=USB_RAWHID&#xD;&#xA;menu.usb.rawhid.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.flightsim=Flight Sim Controls&#xD;&#xA;menu.usb.flightsim.build.usbtype=USB_FLIGHTSIM&#xD;&#xA;menu.usb.flightsim.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.flightsimjoystick=Flight Sim Controls + Joystick&#xD;&#xA;menu.usb.flightsimjoystick.build.usbtype=USB_FLIGHTSIM_JOYSTICK&#xD;&#xA;menu.usb.flightsimjoystick.fake_serial=teensy_gateway&#xD;&#xA;menu.usb.everything=All of the Above&#xD;&#xA;menu.usb.everything.build.usbtype=USB_EVERYTHING&#xD;&#xA;menu.usb.disable=No USB&#xD;&#xA;menu.usb.disable.build.usbtype=USB_DISABLED&#xD;&#xA;menu.speed.180=180 MHz&#xD;&#xA;menu.speed.168=168 MHz&#xD;&#xA;menu.speed.144=144 MHz&#xD;&#xA;menu.speed.120=120 MHz&#xD;&#xA;menu.speed.96=96 MHz&#xD;&#xA;menu.speed.72=72 MHz&#xD;&#xA;menu.speed.48=48 MHz&#xD;&#xA;menu.speed.24=24 MHz&#xD;&#xA;menu.speed.16=16 MHz (No USB)&#xD;&#xA;menu.speed.8=8 MHz (No USB)&#xD;&#xA;menu.speed.4=4 MHz (No USB)&#xD;&#xA;menu.speed.2=2 MHz (No USB)&#xD;&#xA;menu.speed.192=192 MHz (overclock)&#xD;&#xA;menu.speed.216=216 MHz (overclock)&#xD;&#xA;menu.speed.240=240 MHz (overclock)&#xD;&#xA;menu.speed.240.build.fcpu=240000000&#xD;&#xA;menu.speed.216.build.fcpu=216000000&#xD;&#xA;menu.speed.192.build.fcpu=192000000&#xD;&#xA;menu.speed.180.build.fcpu=180000000&#xD;&#xA;menu.speed.168.build.fcpu=168000000&#xD;&#xA;menu.speed.144.build.fcpu=144000000&#xD;&#xA;menu.speed.120.build.fcpu=120000000&#xD;&#xA;menu.speed.96.build.fcpu=96000000&#xD;&#xA;menu.speed.72.build.fcpu=72000000&#xD;&#xA;menu.speed.48.build.fcpu=48000000&#xD;&#xA;menu.speed.24.build.fcpu=24000000&#xD;&#xA;menu.speed.16.build.fcpu=16000000&#xD;&#xA;menu.speed.8.build.fcpu=8000000&#xD;&#xA;menu.speed.4.build.fcpu=4000000&#xD;&#xA;menu.speed.2.build.fcpu=2000000&#xD;&#xA;menu.opt.o2lto=Faster with LTO&#xD;&#xA;menu.opt.o2lto.build.flags.optimize=-O2 -flto -fno-fat-lto-objects&#xD;&#xA;menu.opt.o2lto.build.flags.ldspecs=-fuse-linker-plugin&#xD;&#xA;menu.opt.o2std=Faster&#xD;&#xA;menu.opt.o2std.build.flags.optimize=-O2&#xD;&#xA;menu.opt.o2std.build.flags.ldspecs=&#xD;&#xA;menu.opt.o1lto=Fast with LTO&#xD;&#xA;menu.opt.o1lto.build.flags.optimize=-O1 -flto -fno-fat-lto-objects&#xD;&#xA;menu.opt.o1lto.build.flags.ldspecs=-fuse-linker-plugin&#xD;&#xA;menu.opt.o1std=Fast&#xD;&#xA;menu.opt.o1std.build.flags.optimize=-O1&#xD;&#xA;menu.opt.o1std.build.flags.ldspecs=&#xD;&#xA;menu.opt.o3lto=Fastest with LTO&#xD;&#xA;menu.opt.o3lto.build.flags.optimize=-O3 -flto -fno-fat-lto-objects&#xD;&#xA;menu.opt.o3lto.build.flags.ldspecs=-fuse-linker-plugin&#xD;&#xA;menu.opt.o3std=Fastest&#xD;&#xA;menu.opt.o3std.build.flags.optimize=-O3&#xD;&#xA;menu.opt.o3std.build.flags.ldspecs=&#xD;&#xA;menu.opt.oglto=Debug with LTO&#xD;&#xA;menu.opt.oglto.build.flags.optimize=-Og -flto -fno-fat-lto-objects&#xD;&#xA;menu.opt.oglto.build.flags.ldspecs=-fuse-linker-plugin&#xD;&#xA;menu.opt.ogstd=Debug&#xD;&#xA;menu.opt.ogstd.build.flags.optimize=-Og&#xD;&#xA;menu.opt.ogstd.build.flags.ldspecs=&#xD;&#xA;menu.opt.oslto=Smallest Code with LTO&#xD;&#xA;menu.opt.oslto.build.flags.optimize=-Os -flto -fno-fat-lto-objects --specs=nano.specs&#xD;&#xA;menu.opt.oslto.build.flags.ldspecs=-fuse-linker-plugin&#xD;&#xA;menu.opt.osstd=Smallest Code&#xD;&#xA;menu.opt.osstd.build.flags.optimize=-Os --specs=nano.specs&#xD;&#xA;menu.opt.osstd.build.flags.ldspecs=&#xD;&#xA;menu.keys.en-us=US English&#xD;&#xA;menu.keys.en-us.build.keylayout=US_ENGLISH&#xD;&#xA;menu.keys.fr-ca=Canadian French&#xD;&#xA;menu.keys.fr-ca.build.keylayout=CANADIAN_FRENCH&#xD;&#xA;menu.keys.xx-ca=Canadian Multilingual&#xD;&#xA;menu.keys.xx-ca.build.keylayout=CANADIAN_MULTILINGUAL&#xD;&#xA;menu.keys.cz-cz=Czech&#xD;&#xA;menu.keys.cz-cz.build.keylayout=CZECH&#xD;&#xA;menu.keys.da-da=Danish&#xD;&#xA;menu.keys.da-da.build.keylayout=DANISH&#xD;&#xA;menu.keys.fi-fi=Finnish&#xD;&#xA;menu.keys.fi-fi.build.keylayout=FINNISH&#xD;&#xA;menu.keys.fr-fr=French&#xD;&#xA;menu.keys.fr-fr.build.keylayout=FRENCH&#xD;&#xA;menu.keys.fr-be=French Belgian&#xD;&#xA;menu.keys.fr-be.build.keylayout=FRENCH_BELGIAN&#xD;&#xA;menu.keys.fr-ch=French Swiss&#xD;&#xA;menu.keys.fr-ch.build.keylayout=FRENCH_SWISS&#xD;&#xA;menu.keys.de-de=German&#xD;&#xA;menu.keys.de-de.build.keylayout=GERMAN&#xD;&#xA;menu.keys.de-dm=German (Mac)&#xD;&#xA;menu.keys.de-dm.build.keylayout=GERMAN_MAC&#xD;&#xA;menu.keys.de-ch=German Swiss&#xD;&#xA;menu.keys.de-ch.build.keylayout=GERMAN_SWISS&#xD;&#xA;menu.keys.is-is=Icelandic&#xD;&#xA;menu.keys.is-is.build.keylayout=ICELANDIC&#xD;&#xA;menu.keys.en-ie=Irish&#xD;&#xA;menu.keys.en-ie.build.keylayout=IRISH&#xD;&#xA;menu.keys.it-it=Italian&#xD;&#xA;menu.keys.it-it.build.keylayout=ITALIAN&#xD;&#xA;menu.keys.no-no=Norwegian&#xD;&#xA;menu.keys.no-no.build.keylayout=NORWEGIAN&#xD;&#xA;menu.keys.pt-pt=Portuguese&#xD;&#xA;menu.keys.pt-pt.build.keylayout=PORTUGUESE&#xD;&#xA;menu.keys.pt-br=Portuguese Brazilian&#xD;&#xA;menu.keys.pt-br.build.keylayout=PORTUGUESE_BRAZILIAN&#xD;&#xA;menu.keys.rs-rs=Serbian (Latin Only)&#xD;&#xA;menu.keys.rs-rs.build.keylayout=SERBIAN_LATIN_ONLY&#xD;&#xA;menu.keys.es-es=Spanish&#xD;&#xA;menu.keys.es-es.build.keylayout=SPANISH&#xD;&#xA;menu.keys.es-mx=Spanish Latin America&#xD;&#xA;menu.keys.es-mx.build.keylayout=SPANISH_LATIN_AMERICA&#xD;&#xA;menu.keys.sv-se=Swedish&#xD;&#xA;menu.keys.sv-se.build.keylayout=SWEDISH&#xD;&#xA;menu.keys.tr-tr=Turkish (partial)&#xD;&#xA;menu.keys.tr-tr.build.keylayout=TURKISH&#xD;&#xA;menu.keys.en-gb=United Kingdom&#xD;&#xA;menu.keys.en-gb.build.keylayout=UNITED_KINGDOM&#xD;&#xA;menu.keys.usint=US International&#xD;&#xA;menu.keys.usint.build.keylayout=US_INTERNATIONAL&#xD;&#xA;runtime.ide.path=C:\Program Files (x86)\Arduino&#xD;&#xA;runtime.os=windows&#xD;&#xA;build.system.path=C:\Program Files (x86)\Arduino\hardware\teensy\avr\system&#xD;&#xA;runtime.ide.version=10801&#xD;&#xA;target_package=teensy&#xD;&#xA;target_platform=teensy3&#xD;&#xA;runtime.hardware.path=C:\Program Files (x86)\Arduino\hardware\teensy&#xD;&#xA;originalid=teensy36&#xD;&#xA;build.flags.ldspecs=--specs=nano.specs&#xD;&#xA;intellisense.include.paths.more={build.core.vmresolved}\utils;{build.core.vmresolved}\avr;{compiler.path}{build.toolchain}..\arm-none-eabi\include;&#xD;&#xA;version=1.6.7&#xD;&#xA;rewriting=disabled&#xD;&#xA;compiler.path={runtime.hardware.path}/../tools/&#xD;&#xA;compiler.objcopy.eep.flags=-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0&#xD;&#xA;compiler.elf2hex.flags=-O ihex -R .eeprom&#xD;&#xA;recipe.preproc.includes=&quot;{compiler.path}{build.toolchain}{build.command.g++}&quot; -M -MG -MP -x c++ -w {build.flags.cpp} {build.flags.cpu} {build.flags.defs} -DARDUINO={runtime.ide.version} -DF_CPU={build.fcpu} -D{build.usbtype} -DLAYOUT_{build.keylayout} {includes} &quot;{source_file}&quot;&#xD;&#xA;recipe.preproc.macros=&quot;{compiler.path}{build.toolchain}{build.command.g++}&quot; -E -CC -x c++ -w {compiler.cpp.flags} {build.flags.common} {build.flags.cpp} {build.flags.cpu} {build.flags.defs} -DARDUINO={runtime.ide.version} -DF_CPU={build.fcpu} -D{build.usbtype} -DLAYOUT_{build.keylayout} {includes} &quot;{source_file}&quot; -o &quot;{preprocessed_file_path}&quot;&#xD;&#xA;recipe.cpp.o.pattern=&quot;{compiler.path}{build.toolchain}{build.command.g++}&quot; -c {build.flags.optimize} {build.flags.common} {build.flags.dep} {build.flags.cpp} {build.flags.cpu} {build.flags.defs} -DARDUINO={runtime.ide.version} -DF_CPU={build.fcpu} -D{build.usbtype} -DLAYOUT_{build.keylayout} {includes} &quot;{source_file}&quot; -o &quot;{object_file}&quot;&#xD;&#xA;recipe.c.o.pattern=&quot;{compiler.path}{build.toolchain}{build.command.gcc}&quot; -c {build.flags.optimize} {build.flags.common} {build.flags.dep} {build.flags.c} {build.flags.cpu} {build.flags.defs} -DARDUINO={runtime.ide.version} -DF_CPU={build.fcpu} -D{build.usbtype} -DLAYOUT_{build.keylayout} {includes} &quot;{source_file}&quot; -o &quot;{object_file}&quot;&#xD;&#xA;recipe.S.o.pattern=&quot;{compiler.path}{build.toolchain}{build.command.gcc}&quot; -c {build.flags.optimize} {build.flags.common} {build.flags.dep} {build.flags.S} {build.flags.cpu} {build.flags.defs} -DARDUINO={runtime.ide.version} -DF_CPU={build.fcpu} -D{build.usbtype} -DLAYOUT_{build.keylayout} {includes} &quot;{source_file}&quot; -o &quot;{object_file}&quot;&#xD;&#xA;recipe.ar.pattern=&quot;{compiler.path}{build.toolchain}{build.command.ar}&quot; rcs &quot;{build.path}/{archive_file}&quot; &quot;{object_file}&quot;&#xD;&#xA;recipe.c.combine.pattern=&quot;{compiler.path}{build.toolchain}{build.command.gcc}&quot; {build.flags.optimize} {build.flags.ld} {build.flags.ldspecs} {build.flags.cpu} -o &quot;{build.path}/{build.project_name}.elf&quot; {object_files} &quot;{build.path}/{archive_file}&quot; &quot;-L{build.path}&quot; {build.flags.libs}&#xD;&#xA;recipe.elfpatch.pattern=&quot;{compiler.path}/hardware/tools/{build.elfpatch}&quot; -mmcu={build.mcu} &quot;{build.path}/{build.project_name}.elf&quot; &quot;{sketch_path}/disk&quot;&#xD;&#xA;recipe.objcopy.eep.pattern=&quot;{compiler.path}{build.toolchain}{build.command.objcopy}&quot; {compiler.objcopy.eep.flags} &quot;{build.path}/{build.project_name}.elf&quot; &quot;{build.path}/{build.project_name}.eep&quot;&#xD;&#xA;recipe.objcopy.hex.pattern=&quot;{compiler.path}{build.toolchain}{build.command.objcopy}&quot; {compiler.elf2hex.flags} &quot;{build.path}/{build.project_name}.elf&quot; &quot;{build.path}/{build.project_name}.hex&quot;&#xD;&#xA;recipe.hooks.postbuild.1.pattern=&quot;{compiler.path}/teensy_post_compile&quot; &quot;-file={build.project_name}&quot; &quot;-path={build.path}&quot; &quot;-tools={compiler.path}&quot; &quot;-board={build.board}&quot;&#xD;&#xA;recipe.size.pattern=&quot;{compiler.path}{build.toolchain}{build.command.size}&quot; -A &quot;{build.path}/{build.project_name}.elf&quot;&#xD;&#xA;recipe.size.regex=^(?:\.text|\.data|\.bootloader)\s+([0-9]+).*&#xD;&#xA;recipe.size.regex.data=^(?:\.usbdescriptortable|\.dmabuffers|\.usbbuffers|\.data|\.bss|\.noinit)\s+([0-9]+).*&#xD;&#xA;recipe.size.regex.eeprom=^(?:\.eeprom)\s+([0-9]+).*&#xD;&#xA;tools.teensyloader.cmd.path={runtime.hardware.path}/../tools&#xD;&#xA;tools.teensyloader.upload.params.quiet=&#xD;&#xA;tools.teensyloader.upload.params.verbose=-verbose&#xD;&#xA;tools.teensyloader.upload.pattern=&quot;{cmd.path}/teensy_post_compile&quot; -test &quot;-file={build.project_name}&quot; &quot;-path={build.path}&quot; &quot;-tools={cmd.path}&quot; &quot;-board={build.board}&quot; -reboot&#xD;&#xA;recipe.output.tmp_file={build.project_name}.hex&#xD;&#xA;recipe.output.save_file={build.project_name}.{build.board}.hex&#xD;&#xA;recipe.output.tmp_file2={build.project_name}.elf&#xD;&#xA;recipe.output.save_file2={build.project_name}.elf&#xD;&#xA;vm.platform.root.path=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\Extensions\fr10eqs1.2gn\Micro Platforms\arduino16x&#xD;&#xA;runtime.tools.arduinoOTA.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.arduinoOTA-1.0.0.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avrdude.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avrdude-6.3.0-arduino8.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avr-gcc.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avr-gcc-4.9.2-atmel3.5.3-arduino2.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.vm.boardinfo.id=teensy36&#xD;&#xA;runtime.vm.boardinfo.name=teensy36&#xD;&#xA;runtime.vm.boardinfo.desc=Teensy 3.6&#xD;&#xA;runtime.vm.boardinfo.src_location=C:\Program Files (x86)\Arduino\hardware\teensy\avr&#xD;&#xA;ide.hint=For all platforms that use Board Manager&#xD;&#xA;ide.location.key=Arduino16x&#xD;&#xA;ide.location.ide.winreg=Arduino 1.6.x Application&#xD;&#xA;ide.location.sketchbook.winreg=Arduino 1.6.x Sketchbook&#xD;&#xA;ide.location.sketchbook.preferences=sketchbook.path&#xD;&#xA;ide.default.revision_name=1.8.0&#xD;&#xA;ide.default.version=10800&#xD;&#xA;ide.default.package=arduino&#xD;&#xA;ide.default.platform=avr&#xD;&#xA;ide.multiplatform=true&#xD;&#xA;ide.includes=arduino.h&#xD;&#xA;ide.exe_name=arduino&#xD;&#xA;ide.platformswithoutpackage=false&#xD;&#xA;ide.includes.fallback=wprogram.h&#xD;&#xA;ide.extension=ino&#xD;&#xA;ide.extension.fallback=pde&#xD;&#xA;ide.versionGTEQ=160&#xD;&#xA;ide.exe=arduino.exe&#xD;&#xA;ide.hosts=atmel&#xD;&#xA;ide.url=http://arduino.cc/en/Main/Software&#xD;&#xA;ide.help.reference.path=reference&#xD;&#xA;ide.help.reference.path2=reference\www.arduino.cc\en\Reference&#xD;&#xA;ide.help.reference.serial=reference\www.arduino.cc\en\Serial&#xD;&#xA;vm.debug=true&#xD;&#xA;software=ARDUINO&#xD;&#xA;ssh.user.name=root&#xD;&#xA;ssh.user.default.password=arduino&#xD;&#xA;ssh.host.wwwfiles.path=/www/sd&#xD;&#xA;build.working_directory={runtime.ide.path}&#xD;&#xA;ide.location.preferences.portable={runtime.ide.path}\portable&#xD;&#xA;ide.location.preferences=%VM_APPDATA_LOCAL%\arduino15\preferences.txt&#xD;&#xA;ide.location.preferences_fallback=%VM_APPDATA_ROAMING%\arduino15\preferences.txt&#xD;&#xA;ide.location.contributions=%VM_APPDATA_LOCAL%\arduino15&#xD;&#xA;ide.location.contributions_fallback=%VM_APPDATA_ROAMING%\arduino15&#xD;&#xA;ide.contributions.boards.allow=true&#xD;&#xA;ide.contributions.boards.ignore_unless_rewrite_found=true&#xD;&#xA;ide.contributions.libraries.allow=true&#xD;&#xA;ide.contributions.boards.support.urls.wiki=https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls&#xD;&#xA;ide.create_platforms_from_boardsTXT.teensy=build.core&#xD;&#xA;ide.appid=arduino16x&#xD;&#xA;location.sketchbook=C:\Dev\VisualMicro\DIY-Thermocam&#xD;&#xA;build.core.path=C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy3&#xD;&#xA;vm.core.include=arduino.h&#xD;&#xA;vm.boardsource.path=C:\Program Files (x86)\Arduino\hardware\teensy\avr&#xD;&#xA;runtime.platform.path=C:\Program Files (x86)\Arduino\hardware\teensy\avr&#xD;&#xA;vm.platformname.name=teensy3&#xD;&#xA;build.arch=TEENSY3&#xD;&#xA;" visualmicro.application.name="arduino16x" arduino.build.mcu="mk66fx1m0" custom_teensy36_opt="o3std" custom_teensy31_opt="o2std" custom_teensy31_usb="serial" arduino.build.auto_discover_includes="0" arduino.upload.protocol="halfkay" custom_teensy31_speed="144" arduino.build.f_cpu="" custom_teensy36_speed="240" custom_teensy36_keys="en-us" custom_teensy31_keys="en-us" arduino.board.desc="Teensy 3.6" arduino.board.name="teensy36" arduino.upload.port="COM10" visualmicro.platform.name="teensy3" arduino.build.core="teensy3" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
