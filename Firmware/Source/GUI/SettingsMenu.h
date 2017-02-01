@@ -907,8 +907,8 @@ void visualImageMenu(bool firstStart = false) {
 					buttons_setInactive(1);
 				}
 			}
-			//Save JPEG
-			else if (pressedButton == 1) {
+			//Save JPEG, only when visual camera works
+			else if ((pressedButton == 1) && (checkDiagnostic(diag_camera))) {
 				if (!visualEnabled) {
 					visualEnabled = true;
 					buttons_setActive(1);

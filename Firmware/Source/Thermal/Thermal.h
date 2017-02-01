@@ -91,14 +91,16 @@ void buttonIRQ() {
 void longTouchHandler() {
 	//When in auto mode, toggle between locked & unlocked
 	if (autoMode) {
-		//Unlock limits
+		//Unlock limits and enable auto FFC
 		if (limitsLocked) {
 			showTransMessage((char*) "Limits unlocked");
 			limitsLocked = false;
+			lepton_ffcMode(true);
 		}
 
-		//Lock limits
+		//Lock limits and disable auto FFC
 		else {
+			lepton_ffcMode(false);
 			showTransMessage((char*) "Limits locked");
 			limitsLocked = true;
 		}

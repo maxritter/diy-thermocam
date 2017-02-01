@@ -452,11 +452,17 @@ bool hotColdMenu() {
 		return false;
 	}
 
+	//Trigger FFC when in auto mode
+	if (leptonShutter == leptonShutter_auto)
+		lepton_ffc(true);
+
 redraw:
 	//Background
 	mainMenuBackground();
+
 	//Title
 	mainMenuTitle((char*) "Hot / Cold");
+
 	//Draw the selection menu
 	buttons_deleteAllButtons();
 	buttons_setTextFont(smallFont);
@@ -465,6 +471,7 @@ redraw:
 	buttons_addButton(215, 45, 90, 122, (char*) "Disabled");
 	buttons_addButton(15, 188, 120, 40, (char*) "Back");
 	buttons_drawButtons();
+
 	//Save the current position inside the menu
 	while (true) {
 		//Touch screen pressed
@@ -472,43 +479,68 @@ redraw:
 			int pressedButton = buttons_checkButtons(true);
 			//Hot
 			if (pressedButton == 0) {
+				//Set marker to hot
 				hotColdMode = hotColdMode_hot;
+
 				//Choose the color
 				if (hotColdColorMenu())
 					//Set the limit
 					hotColdChooser();
+
 				//Go back
-				else
+				else {
+					hotColdMode = hotColdMode_disabled;
 					goto redraw;
-				//Write to EEPROM
-				EEPROM.write(eeprom_hotColdMode, hotColdMode);
-				return true;
+				}
+
+				//Leave loop
+				break;
 			}
 			//Cold
 			if (pressedButton == 1) {
+				//Set marker to cold
 				hotColdMode = hotColdMode_cold;
+				
 				//Choose the color
 				if (hotColdColorMenu())
 					//Set the limit
 					hotColdChooser();
+
 				//Go back
-				else
+				else {
+					hotColdMode = hotColdMode_disabled;
 					goto redraw;
-				//Write to EEPROM
-				EEPROM.write(eeprom_hotColdMode, hotColdMode);
-				return true;
+				}
+
+				//Leave loop
+				break;
 			}
 			//Disabled
 			if (pressedButton == 2) {
+				//Set marker to disabled
 				hotColdMode = hotColdMode_disabled;
-				EEPROM.write(eeprom_hotColdMode, hotColdMode);
-				return true;
+
+				//Leave loop
+				break;
 			}
-			//Back
+			//Back to main menu
 			if (pressedButton == 3)
 				return false;
 		}
 	}
+
+	//Write to EEPROM
+	EEPROM.write(eeprom_hotColdMode, hotColdMode);
+
+	//Disable auto FFC for isotherm mode
+	if (hotColdMode != hotColdMode_disabled)
+		lepton_ffcMode(false);
+	//Enable it when isotherm disabled
+	else
+		lepton_ffcMode(true);
+
+	//Go back
+	return true;
 }
 
 /* Switch the current preset menu item */
@@ -806,7 +838,7 @@ void tempLimitsPresetsString(int pos) {
 /* Menu to save the temperature limits to a preset */
 bool tempLimitsPresets() {
 	//Save the current position inside the menu
-	byte tempLimitsMenuPos = EEPROM.read(eeprom_minMaxPreset);
+	byte tempLimitsMenuPos = 0;
 	//Background
 	mainMenuBackground();
 	//Title
@@ -886,6 +918,7 @@ bool tempLimits() {
 	//Title & Background
 	mainMenuBackground();
 	mainMenuTitle((char*)"Temp. Limits");
+
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
@@ -893,6 +926,7 @@ bool tempLimits() {
 	buttons_addButton(165, 47, 140, 120, (char*) "Manual");
 	buttons_addButton(15, 188, 140, 40, (char*) "Back");
 	buttons_drawButtons();
+
 	//Touch handler
 	while (true) {
 		//If touch pressed
@@ -903,13 +937,28 @@ bool tempLimits() {
 				//Enable auto mode again and disable limits locked
 				autoMode = true;
 				limitsLocked = false;
+
+				//Enable auto FFC
+				lepton_ffcMode(true);
+
+				//Go back
 				return true;
 			}
 			//MANUAL
 			if (pressedButton == 1) {
+				//Trigger FFC and switch to manual when in auto mode
+				if (leptonShutter == leptonShutter_auto) {
+					//Trigger FFC
+					lepton_ffc(true);
+
+					//Disable auto FFC
+					lepton_ffcMode(false);
+				}
+					
 				//Disable auto mode and limits locked
 				autoMode = false;
 				limitsLocked = false;
+
 				//Let the user choose the new limits
 				return tempLimitsPresets();
 			}

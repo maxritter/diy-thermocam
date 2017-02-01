@@ -99,9 +99,14 @@ void compensateCalib() {
 /* Checks if the calibration warmup is done */
 void checkWarmup() {
 	//Activate the calibration after a warmup time of 30s
-	if (((calStatus == cal_warmup) && (millis() - calTimer > 30000)))
+	if (((calStatus == cal_warmup) && (millis() - calTimer > 30000))) {
 		//Set calibration status to standard
 		calStatus = cal_standard;
+
+		//Disable auto FFC when isotherm mode
+		if (hotColdMode != hotColdMode_disabled)
+			lepton_ffcMode(false);
+	}
 }
 
 /* Help function for least suqare fit */
@@ -165,9 +170,11 @@ void calibrationProcess(bool serial, bool firstStart) {
 		//Reset counter to zero
 		int counter = 0;
 
-		//Perform FFC if shutter is attached
-		if (leptonShutter != leptonShutter_none)
+		//Perform FFC and set shutter mode to manual afterwards
+		if (leptonShutter != leptonShutter_none) {
 			lepton_ffc();
+			lepton_ffcMode(false);
+		}
 
 		//Get 100 different calibration samples
 		while (counter < 100) {
@@ -241,10 +248,15 @@ void calibrationProcess(bool serial, bool firstStart) {
 		//When in serial mode, store and send ACK
 		if (serial)
 		{
+			//Set shutter mode back to auto
+			lepton_ffcMode(true);
+
 			//Save calibration to EEPROM
 			storeCalibration();
+
 			//Send ACK
 			Serial.write(CMD_SET_CALIBRATION);
+
 			//Leave 
 			return;
 		}
@@ -271,6 +283,9 @@ void calibrationProcess(bool serial, bool firstStart) {
 	sprintf(result, "Slope: %1.4f, offset: %.1f", calSlope, calOffset);
 	showFullMessage(result);
 	delay(2000);
+	
+	//Set shutter mode back to auto
+	lepton_ffcMode(true);
 
 	//Save calibration to EEPROM
 	storeCalibration();

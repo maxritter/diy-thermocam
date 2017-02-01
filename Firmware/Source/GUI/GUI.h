@@ -52,7 +52,7 @@ void showFullMessage(char* message, bool small) {
 	//Fill screen complete
 	if (!small)
 		display_fillScr(200, 200, 200);
-	
+
 	//Make a round corner around it
 	else {
 		display_setColor(200, 200, 200);
@@ -125,10 +125,11 @@ void showDiagnostic() {
 	display_setBackColor(200, 200, 200);
 	display_setColor(VGA_BLUE);
 	display_print((char*) "Self-diagnostic", CENTER, 10);
-	//Display hint
+
+	//Change text color and font
 	display_setFont(smallFont);
-	display_print((char*) "Fix the issues to use the device", CENTER, 220);
 	display_setColor(VGA_BLACK);
+
 	//Display hardware module names
 	display_print((char*) "Spot sensor  ", 50, 50);
 	display_print((char*) "Display      ", 50, 70);
@@ -138,54 +139,60 @@ void showDiagnostic() {
 	display_print((char*) "Battery gauge", 50, 150);
 	display_print((char*) "Lepton config", 50, 170);
 	display_print((char*) "Lepton data  ", 50, 190);
+
 	//Check spot sensor
 	if (checkDiagnostic(diag_spot))
 		display_print((char*) "OK    ", 220, 50);
-	else {
+	else
 		display_print((char*) "Failed", 220, 50);
-		//We disable the spot sensor, so the user can go on
-		spotEnabled = false;
-	}
+
 	//Check display
 	if (checkDiagnostic(diag_display))
 		display_print((char*) "OK    ", 220, 70);
 	else
 		display_print((char*) "Failed", 220, 70);
+
 	//Check visual camera
 	if (checkDiagnostic(diag_camera))
 		display_print((char*) "OK    ", 220, 90);
-	else {
+	else
 		display_print((char*) "Failed", 220, 90);
-		//We switch to thermal mode
-		displayMode = displayMode_thermal;
-		//And disable the visual image save
-		visualEnabled = false;
-	}
+
 	//Check touch screen
 	if (checkDiagnostic(diag_touch))
 		display_print((char*) "OK    ", 220, 110);
 	else
 		display_print((char*) "Failed", 220, 110);
+
 	//Check sd card
 	if (checkDiagnostic(diag_sd))
 		display_print((char*) "OK    ", 220, 130);
 	else
 		display_print((char*) "Failed", 220, 130);
+
 	//Check battery gauge
 	if (checkDiagnostic(diag_bat))
 		display_print((char*) "OK    ", 220, 150);
 	else
 		display_print((char*) "Failed", 220, 150);
+
 	//Check lepton config
 	if (checkDiagnostic(diag_lep_conf))
 		display_print((char*) "OK    ", 220, 170);
 	else
 		display_print((char*) "Failed", 220, 170);
+
 	//Check lepton data
 	if (checkDiagnostic(diag_lep_data))
 		display_print((char*) "OK    ", 220, 190);
 	else
 		display_print((char*) "Failed", 220, 190);
+
+	//Wait some time
+	delay(1500);
+
+	//Show hint
+	display_print((char*) "Trying to start..", CENTER, 220);
 }
 
 /* Draw the Boot screen */

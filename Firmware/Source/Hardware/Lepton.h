@@ -273,8 +273,12 @@ int lepton_readReg(byte reg) {
 /* Set the shutter operation to manual/auto */
 void lepton_ffcMode(bool automatic)
 {
-	//If there is no shutter, do not do anything
-	if (leptonShutter == leptonShutter_none)
+	//If there is no shutter, return
+	if(leptonShutter == leptonShutter_none)
+		return;
+
+	//When enabling auto FFC, check for some factors
+	if ((automatic) && ((hotColdMode != hotColdMode_disabled) || (autoMode == false) || (limitsLocked == true)))
 		return;
 
 	//Contains the standard values for the FFC mode
@@ -321,12 +325,14 @@ void lepton_version() {
 	Wire.write(0x48);
 	Wire.write(0x1C);
 	byte error = Wire.endTransmission();
+
 	//Lepton I2C error, set diagnostic
 	if (error != 0) {
 		setDiagnostic(diag_lep_conf);
 		leptonVersion = leptonVersion_2_noShutter;
 		return;
 	}
+
 	//Transfer the new package
 	Wire.beginTransmission(0x2A);
 	while (lepton_readReg(0x2) & 0x01);
@@ -334,18 +340,25 @@ void lepton_version() {
 	char leptonhw[33];
 	Wire.readBytes(leptonhw, 32);
 	Wire.endTransmission();
+
 	//Detected Lepton2 Shuttered
 	if (strstr(leptonhw, "05-060") != NULL) {
 		leptonVersion = leptonVersion_2_shutter;
+		leptonShutter = leptonShutter_auto;
 	}
+
 	//Detected Lepton3 Shuttered
 	else if (strstr(leptonhw, "05-070") != NULL) {
 		leptonVersion = leptonVersion_3_shutter;
+		leptonShutter = leptonShutter_auto;
 	}
+
 	//Detected Lepton2 No-Shutter
 	else {
 		leptonVersion = leptonVersion_2_noShutter;
+		leptonShutter = leptonShutter_none;
 	}
+
 	//Write to EEPROM
 	EEPROM.write(eeprom_leptonVersion, leptonVersion);
 }
@@ -375,6 +388,7 @@ void lepton_init() {
 	//Repeat as long as the frame is not valid, equals sync
 	while (((leptonFrame[0] & 0x0F) == 0x0F) && ((millis() - calTimer) < 1000));
 	lepton_end();
+
 	//If sync not received after a second, set diagnostic
 	if ((leptonFrame[0] & 0x0F) == 0x0F)
 		setDiagnostic(diag_lep_data);

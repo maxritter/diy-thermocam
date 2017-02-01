@@ -8,15 +8,15 @@ http://www.diy-thermocam.net
 https://github.com/maxritter/DIY-Thermocam
 
 
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Diagram.png" width="500">
+<img src="https://github.com/maxritter/DIY-Thermocam/blob/master/diagram.png" width="500">
 
 
 Download and install the following programs:
 
-1. Arduino 1.6.13:                      https://www.arduino.cc/en/Main/Software
-2. Teensyduino 1.34:                    https://www.pjrc.com/teensy/td_download.html
-3. Visual Studio 2015 Community Edition: https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx
-4. Visual Micro:                         http://www.visualmicro.com/page/Arduino-Visual-Studio-Downloads.aspx
+1. Arduino 1.8.1:                      https://www.arduino.cc/en/Main/Software
+2. Teensyduino 1.36:                   https://www.pjrc.com/teensy/td_download.html
+3. Visual Studio 2015/2017 Community:  https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx
+4. Visual Micro:                       http://www.visualmicro.com/page/Arduino-Visual-Studio-Downloads.aspx
 
 Now Start Visual Studio.
 

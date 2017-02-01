@@ -1205,8 +1205,4 @@ void serialConnect() {
 	//Turn laser off if enabled
 	if (laserEnabled)
 		toggleLaser();
-
-	//Switch back to auto shutter if manual used
-	if (leptonShutter == leptonShutter_manual)
-		lepton_ffcMode(true);
 }

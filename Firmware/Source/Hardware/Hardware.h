@@ -332,12 +332,16 @@ void checkDiagnostic() {
 		diagnostic = diag_ok;
 	}
 
-	//If the diagnostic is not okay
-	if (diagnostic != diag_ok) {
-		//Show it on the screen
+	//If the diagnostic is not okay show info
+	if (diagnostic != diag_ok) 
 		showDiagnostic();
-		//Try to continue after two seconds
-		delay(2000);
+
+	//If there is a problem with the visual camera, switch to thermal
+	if (!checkDiagnostic(diag_camera)) {
+		//We switch to thermal mode
+		displayMode = displayMode_thermal;
+		//And disable the visual image save
+		visualEnabled = false;
 	}
 }
 
@@ -575,12 +579,14 @@ bool checkScreenLight() {
 /* Disable automatic FFC when saved in EEPROM */
 void checkNoFFC()
 {
-	//Set value found, set FFC to manual
-	if (EEPROM.read(eeprom_noShutter) == eeprom_setValue)
+	//Set value found
+	if (EEPROM.read(eeprom_noShutter) == eeprom_setValue){
+		//Disable auto FFC mode
 		lepton_ffcMode(false);
 
-	//Set lepton shutter to none
-	leptonShutter = leptonShutter_none;
+		//Set lepton shutter to none
+		leptonShutter = leptonShutter_none;
+	}
 }
 
 /* Switches the laser on or off*/
