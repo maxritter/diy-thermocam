@@ -38,12 +38,10 @@ The following list provides an **overview** about the **required parts**. **Most
 		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
-		<strong>
-		<a href="http://www.ebay.de/itm/FLIR-Lepton3-160x120-LWIR-thermal-imaging-sensor-shuttered-/262830980775?hash=item3d31f27ea7:g:3awAAOSwo4pYcokJ">
-		Ebay.com</a> </strong>(Lepton3)<strong><br />
-		</strong>
 		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		Digikey.com</a> (Lepton2)<br />
+		<strong>Digikey.com</strong></a> (Lepton2)<br />
+		<a href="https://store.groupgets.com/#!/50°-Shuttered-FLIR-Lepton-Thermal-Imager/p/52199502/category=0">
+		GroupGets.com</a> (Lepton2)<br />
 		<a href="http://hardtechlife.com/teardown-flir-one-for-android/">
 		Extract</a> the Lepton3 from a 
 		<a href="https://www.amazon.co.uk/d/Shops/FLIR-Thermal-Imaging-Camera-Devices/B0123QLZJ8/ref=sr_1_1?ie=UTF8&amp;qid=1484821714&amp;sr=8-1&amp;keywords=FLIR+One">FLIR One V2</a></td>
@@ -442,7 +440,7 @@ The **finished device** looks like this:
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
 
-In order to understand to various device functionalities, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The structure of the raw data files is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the open USB serial protocol **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_14.pdf)**.
+In order to understand to various device functionalities, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The structure of the raw data files is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the open USB serial protocol **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
 
 ----------
 

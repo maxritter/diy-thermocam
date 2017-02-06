@@ -58,6 +58,7 @@
 #define CMD_FRAME_RAW          150
 #define CMD_FRAME_COLOR        151
 #define CMD_FRAME_DISPLAY      152
+#define CMD_FRAME_SAVE         153
 
 //Types of raw frame responses
 #define FRAME_CAPTURE_THERMAL  180
@@ -784,6 +785,50 @@ void sendFrame(bool color) {
 		sendCmd = FRAME_NORMAL;
 }
 
+/* Saves a frame to the internal sd card*/
+void saveFrame() {
+	//ThermocamV4 or DIY-Thermocam V2 - check SD card
+	if (!checkSDCard() || (getSDSpace() < 1000)) {
+		Serial.write(CMD_INVALID);
+		return;
+	}
+
+	//Build save filename from the current time & date
+	createSDName(saveFilename);
+
+	//Capture visual image if enabled
+	if (visualEnabled && (checkDiagnostic(diag_camera)))
+	{
+		//Capture visual frame
+		camera_capture();
+		//Short delay
+		delay(100);
+		//Save visual image in full-res
+		camera_get(camera_save);
+	}
+
+	//Enable image save marker
+	imgSave = imgSave_create;
+
+	//Create image and save raw file
+	createThermalImg();
+
+	//Save Bitmap image if activated
+	if (convertEnabled) {
+		displayInfos();
+		saveBuffer(saveFilename);
+	}
+		
+	//Refresh free space
+	refreshFreeSpace();
+
+	//Disable image save marker
+	imgSave = imgSave_disabled;
+
+	//Send ACK
+	Serial.write(CMD_FRAME_SAVE);
+}
+
 /* Sends the display content as frame */
 void sendDisplayFrame() {
 	//Send type of frame response
@@ -973,6 +1018,10 @@ bool serialHandler() {
 		//Send display frame
 	case CMD_FRAME_DISPLAY:
 		sendDisplayFrame();
+		break;
+		//Save display frame
+	case CMD_FRAME_SAVE:
+		saveFrame();
 		break;
 		//End connection
 	case CMD_END:
