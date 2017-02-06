@@ -22,7 +22,7 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 **Make your own**
 
-You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required.
+You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_01.pdf)** will lead you through the process, step-by-step.
 
 The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepton3** (160 x 120) LWIR sensor. The **hardware revision** is **detected automatically** by the firmware on startup. 
 
@@ -428,34 +428,7 @@ The other parts can be received against a small **[donation](https://www.paypal.
 		Details</a></td>
 	</tr>
 </table>
-
-The single components are **soldered** to the **PCB** as following:
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Back.png" width="500">
-
-The two **M2 x 3.5** distance spacers are put on the **left side** of the visual camera, so that the parallaxe the FLIR Lepton is minimized. The other two **M2 x 3.0** spacers are put under the **left side** of the **camera**, the remaining four are placed between the **Lepton module** and the PCB.
-
-**Cut** the small trace between **VUSB** and **VIN** on the Teensy with a sharp knife:
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/TeensyCut.png" width="300">
-
-If you want to understand the **connections** on the PCB, check out the **[schematic](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Schematic_2.3.pdf)** and the **[pinmap](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Pinmap_2.1.pdf)**.
-
-The **top side** with the buttons and switches connected looks like this:
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Top.png" width="500">
-
-And here are images from **all four sides** of the naked device:
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side1.png" width="500">
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side2.png" width="500">
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side3.png" width="500">
-
-<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Side4.png" width="500">
-
-In a last step, the naked device needs to be put into the **enclosure**. Use the bolts, nuts and distance bolts to assemble everything:
+The **finished device** looks like this:
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceFront.jpg" width="500">
 
@@ -466,10 +439,6 @@ In a last step, the naked device needs to be put into the **enclosure**. Use the
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceTop.jpg" width="500">
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
-
-Now **flash** the latest version of the **firmware** to the device. Check out the **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_05.pdf)** for more information.
-
-When you **turn the device on** afterwards, you should see the **first start screen**. If any of the components or connections do not work, a **diagnostic screen** is shown.
 
 In order to understand to various device functionalities, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The structure of the raw data files is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the open USB serial protocol **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_14.pdf)**.
 
@@ -488,7 +457,7 @@ In order to understand to various device functionalities, have a look at the **[
  - **MLX90614 single point**-infrared sensor for high-precision spot
    temperatures (10° FOV)
  - **HDMI** or **analog video** output  capabilities (640x480 pixel) over
-   external video output module (instructions coming soon)
+   external video output module
  - **3 operating modes**: thermal only, thermal + visual, video recording
  - **18 different color schemes** including rainbow, ironblack, grayscale,
    hot & cold
@@ -542,8 +511,7 @@ In order to understand to various device functionalities, have a look at the **[
 
         <tr>
             <td>
-                Thermal sensitivity <span style="color: #ff0000;"><strong>*</strong></span>
-            </td>
+                Thermal sensitivity</td>
             <td>
                 &lt; 0.05° C (50 mK)
             </td>
@@ -602,8 +570,7 @@ In order to understand to various device functionalities, have a look at the **[
 
         <tr>
             <td>
-                Spot sensor temp. accuracy <strong><span style="color: #ff0000;">*</span></strong>
-            </td>
+                Spot sensor temp. accuracy</td>
             <td>
                 0.5° C over wide range
             </td>
@@ -707,6 +674,15 @@ In order to understand to various device functionalities, have a look at the **[
                 575g
             </td>
         </tr>
+
+        <tr>
+            <td>
+                Price</td>
+            <td class="auto-style1">
+                <strong>400€</strong></td>
+            <td class="auto-style2">
+                <strong>2000€</strong></td>
+        </tr>
     </tbody>
 </table>
 
@@ -751,7 +727,70 @@ There is a powerful **[thermal analysis software](https://github.com/maxritter/D
 The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **[thermal data viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The **live tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **[video converter](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)** to avi videos.
 
 ----------
- 
+
+**Video Output Module**
+
+<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/VideoOutput.jpg" width="300">
+
+If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** the **video signal** to a **TV** screen, consider adding the **external video out module** to your device. 
+
+It just needs to be plugged into the **microUSB cable** of the Thermocam and is also supplied with **power** by the **internal battery**. 
+
+It is capable of providing a **HDMI signal** or **analog video output** (**PAL & NTSC**) with a resolution of **640x480** pixel. 
+
+You need the **following parts**: 
+
+<table style="width: 65%">
+	<tr>
+		<td style="width: 235px">Raspberry Pi Zero</td>
+		<td>
+		<a href="https://thepihut.com/products/raspberry-pi-zero?variant=14062715972">
+		ThePiHut.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 235px">Sandisk 8GB microSD</td>
+		<td>
+		<a href="http://www.ebay.com/itm/SANDISK-8GB-MOBILE-ULTRA-MicroSD-Class-10-UHS-48MB-S-SDHC-TF-FLASH-">
+		Ebay.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 235px">microUSB cable</td>
+		<td>
+		<a href="http://www.ebay.com/itm/NEW-ORIGINAL-SAMSUNG-MICRO-USB-CHARGING-CABLE-FOR-OEM-GALAXY-S3-S4-S6-NOTE-4-/262426066726?var=561224615039&amp;hash=item3d19cfff26:g:UOEAAOSwSclXLl3j">
+		Ebay.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 235px">Enclosure</td>
+		<td>
+		<a href="https://www.amazon.com/SB-High-Quality-Raspberry-Zero/dp/B01CQ3UCXS/ref=sr_1_2?ie=UTF8&amp;qid=1483872527&amp;sr=8-2&amp;keywords=SB+High+Quality+Raspberry+Pi">
+		Amazon.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 235px">USB-OTG cable</td>
+		<td>
+		<a href="http://www.ebay.com/itm/Micro-USB-Male-to-USB-2-0-Female-Host-OTG-Adapter-Cable-for-Nexus-7-/231386794712?hash=item35dfba4ad8:g:61IAAOSwA3dYcJFT">
+		Ebay.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 235px">Mini HDMI adapter</td>
+		<td>
+		<a href="http://www.ebay.com/itm/HDMI-MALE-MINI-TO-HDMI-FEMALE-MONITOR-ADAPTER-CONNECTOR-LAPTOP-CONVERTER-VIDEO-/252130803657?hash=item3ab42abfc9:g:ibwAAOSw5VFWICCJ">
+		Ebay.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 235px">2-pin female header</td>
+		<td>
+		<a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/PPTC021LGBN-RC/S5438-ND/775896">
+		Digikey.com</a></td>
+	</tr>
+	</table>
+
+Download and flash the **[complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM)** to the SD card, it runs a **python script** that you can modify to your own needs.
+
+Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
+
+---------- 
+
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 30.01.2017
+**Last updated**: 06.02.2017
