@@ -38,10 +38,12 @@ The following list provides an **overview** about the **required parts**. **Most
 		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
+		<strong>
+		<a href="http://www.ebay.de/itm/FLIR-Lepton3-160x120-LWIR-thermal-imaging-sensor-shuttered-/262830980775?hash=item3d31f27ea7:g:3awAAOSwo4pYcokJ">
+		Ebay.com</a> </strong>(Lepton3)<strong><br />
+		</strong>
 		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		<strong>Digikey.com</strong></a> (Lepton2)<br />
-		<a href="https://store.groupgets.com/#!/50°-Shuttered-FLIR-Lepton-Thermal-Imager/p/52199502/category=0">
-		GroupGets.com</a> (Lepton2)<br />
+		Digikey.com</a> (Lepton2)<br />
 		<a href="http://hardtechlife.com/teardown-flir-one-for-android/">
 		Extract</a> the Lepton3 from a 
 		<a href="https://www.amazon.co.uk/d/Shops/FLIR-Thermal-Imaging-Camera-Devices/B0123QLZJ8/ref=sr_1_1?ie=UTF8&amp;qid=1484821714&amp;sr=8-1&amp;keywords=FLIR+One">FLIR One V2</a></td>
