@@ -22,7 +22,7 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 **Make your own**
 
-You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_01.pdf)** will lead you through the process, step-by-step.
+You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_02.pdf)** will lead you through the process, step-by-step.
 
 The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepton3** (160 x 120) LWIR sensor. The **hardware revision** is **detected automatically** by the firmware on startup. 
 
