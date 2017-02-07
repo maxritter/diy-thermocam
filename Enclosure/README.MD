@@ -1,4 +1,4 @@
-The design has been designed with Google Sketchup for a material thickness of 3mm. The standard enclosure is cut out of black acryl plastic (one side frosted) by a laser cutting service.
+The enclosure has been designed with Google Sketchup for a material thickness of 3mm. The standard enclosure is cut out of black acryl plastic (one side frosted) by a laser cutting service.
 
 You can order the 2D laser cut side plates from Ponoko USA: http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930.
 
