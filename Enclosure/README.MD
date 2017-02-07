@@ -1,7 +1,10 @@
-The design is created with Google Sketchup.
+The design has been designed with Google Sketchup for a material thickness of 3mm. The standard enclosure is cut out of black acryl plastic (one side frosted) by a laser cutting service.
 
-You can order the 2D laser cut side plates from Ponoko: http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930
+You can order the 2D laser cut side plates from Ponoko USA: http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930.
 
-Or get it from me against a small donation.
+Formulor.de also offers a laser cutting service for that material in Germany.
+Seeedstudio.com has a low-cost laser cutting service in China, but their material thickness varies, so be careful.
 
-You could also use a 3D printer to make your custom version of the enclosure, together with the 3D design files.
+You can also get the enclosure from me against a small donation, have a look at the part list for the link.
+
+Or use a 3D printer to make your custom version of the enclosure, together with the 3D design files.
