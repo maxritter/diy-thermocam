@@ -22,7 +22,7 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 **HOW TO MAKE IT**
 
-You can **make** your **own** DIY-Thermocam at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_02.pdf)** will lead you through the process, step-by-step.
+You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_02.pdf)** will lead you through the process, step-by-step.
 
 On the **part side**, you need the **components** from the **support package** and the **missing parts** from the **other parts list** below.
 
@@ -35,7 +35,7 @@ In order to understand to various device functionalities, have a look at the **[
 
 **SUPPORT PACKAGE**
 
-The **support package** contains **most of the components** required to **build** the **DIY-Thermocam V2**. You can **acquire** it by **following the link** below, **leave your address** in the comment field. **International shipping** is **included** in the donation. Of course, you can also use the **provided links** to buy all the components separately **on your own**.
+The **support package** contains **most of the components** required to **build** the **DIY-Thermocam V2**. You can **acquire** it by **following the link** below, **leaving your address** in the comment field. **International shipping** is **included** in the donation. **Alternatively**, you can also use the **provided links** on the right side to buy all the components separately **on your own**.
 
 [**-> Get the support package <-**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8MTC38TANMB24)
 
@@ -84,17 +84,6 @@ The **support package** contains **most of the components** required to **build*
 		<a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
 		<a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
 		Flikto.de</a></td>
-	</tr>
-	<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">SanDisk 8GB microSD card<br />
-		Can be any size, but needs to be Class4 microSD&nbsp;</td>
-		<td>
-		<a href="http://www.ebay.com/itm/SanDisk-Micro-SD-HC-8GB-8G-Class-4-C4-Flash-Memory-Card-New-Lifetime-Warranty-/111115566897?hash=item19df00ff31:g:tGIAAMXQjUNR3PAs">
-		Ebay.com</a><br />
-		<a href="http://www.digikey.com/product-detail/en/panasonic-electronic-components/RP-SMLF08DA1/P17033-ND/5119440">
-		Digikey.com</a></td>
 	</tr>
 	<tr>
 		<td style="width: 111px">
@@ -342,11 +331,12 @@ The **support package** contains **most of the components** required to **build*
 </table>
 
 
+
 ----------
 
 **OTHER PARTS**
 
-The following list contains **parts that are not included** in the **support package**. You need to **buy** them over the **provided links**.
+The following list contains **parts that are not included** in the **support package**. You need to **buy** them over one of the **provided links** on the right side.
 
 <table style="width: 57%">
 <tr>
@@ -431,6 +421,17 @@ The following list contains **parts that are not included** in the **support pac
 		<a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
 		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
 		Mikroe.com</a></td>
+	</tr>
+	<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">SanDisk 8GB microSD card<br />
+		Can be any size, but needs to be Class4 microSD&nbsp;</td>
+		<td>
+		<a href="http://www.ebay.com/itm/SanDisk-Micro-SD-HC-8GB-8G-Class-4-C4-Flash-Memory-Card-New-Lifetime-Warranty-/111115566897?hash=item19df00ff31:g:tGIAAMXQjUNR3PAs">
+		Ebay.com</a><br />
+		<a href="http://www.digikey.com/product-detail/en/panasonic-electronic-components/RP-SMLF08DA1/P17033-ND/5119440">
+		Digikey.com</a></td>
 	</tr>
 </table>
 
