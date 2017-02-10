@@ -330,29 +330,31 @@ The **support package** contains **most of the components** required to **build*
 	</tr>
 </table>
 
-
-
 ----------
 
 **OTHER PARTS**
 
-The following list contains **parts that are not included** in the **support package**. You need to **buy** them over one of the **provided links** on the right side.
+The following list contains **parts that are not included** in the **support package**. You need to **buy** them over one of the **provided links** on the right side. **Digikey.com** provides **free international shipment** for all orders **over 100€**, so I recommend buying the Lepton Module, Spot Sensor, Teensy and SD card from them **to reach that value**. I also recommend [**extracting**](http://hardtechlife.com/teardown-flir-one-for-android/) the FLIR Lepton3 sensor from a **FLIR One**. The **Lepton2** also works, but currently its **not possible** to buy it from **outside the US** due to new regulations.
 
 <table style="width: 57%">
 <tr>
 		<td style="width: 111px">
 		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
-		<td style="width: 235px">FLIR Lepton with Shutter<br />
+		<td style="width: 235px">FLIR Lepton2/Lepton3 shuttered<br />
 		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
-		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		<strong>Digikey.com</strong></a> (Lepton2)<br />
+		FLIR One -
+		<a href="https://www.amazon.co.uk/gp/offer-listing/B01478QCHU/ref=sr_1_1_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-1&amp;keywords=FLIR+One&amp;condition=used">
+		<strong>Android</strong></a> 
+		or
+		<a href="https://www.amazon.co.uk/gp/offer-listing/B0123QLZJ8/ref=sr_1_3_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-3&amp;keywords=FLIR+One&amp;condition=used">
+		<strong>iOS</strong></a> (<strong>Lepton3</strong>)<br />
+		Alternative 1: 		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
+		Digikey.com</a> (<strong>Lepton2</strong>) - US ONLY<br />
+		Alternative 2:
 		<a href="https://store.groupgets.com/#!/50°-Shuttered-FLIR-Lepton-Thermal-Imager/p/52199502/category=0">
-		GroupGets.com</a> (Lepton2)<br />
-		<a href="http://hardtechlife.com/teardown-flir-one-for-android/">
-		Extract</a> the Lepton3 from a 
-		<a href="https://www.amazon.co.uk/d/Shops/FLIR-Thermal-Imaging-Camera-Devices/B0123QLZJ8/ref=sr_1_1?ie=UTF8&amp;qid=1484821714&amp;sr=8-1&amp;keywords=FLIR+One">FLIR One V2</a></td>
+		GroupGets.com</a> (<strong>Lepton2</strong>)</td>
 	</tr>
 <tr>
 		<td style="width: 111px">
@@ -362,6 +364,7 @@ The following list contains **parts that are not included** in the **support pac
 		<td>
 		<a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
 		<strong>Digikey.com</strong></a><br />
+		Alternative 1:
 		<a href="https://store.groupgets.com/#!/FLIR-Lepton-Breakout-Board/p/52239830/category=0">
 		GroupGets.com</a></td>
 	</tr>
@@ -374,6 +377,7 @@ The following list contains **parts that are not included** in the **support pac
 		<strong>
 		<a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
 		Digikey.com</a></strong><br />
+		Alternative 1:
 		<a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
 	</tr>
 <tr>
@@ -385,9 +389,23 @@ The following list contains **parts that are not included** in the **support pac
 		<strong>
 		<a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
 		Digikey.com</a></strong><br />
+		Alternative 1:
 		<a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
+		Alternative 2:
 		<a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
 		Flikto.de</a></td>
+	</tr>
+	<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">SanDisk 8GB microSD card<br />
+		Can be any size, but needs to be Class4 microSD&nbsp;</td>
+		<td>
+		<strong><a href="http://www.digikey.com/products/en?keywords=P17033-ND">
+		Digikey.com</a></strong><br />
+		Alternative 1:
+		<a href="https://www.amazon.com/SanDisk-microSD-High-Capacity-microSDHC/dp/B00488G6P8/ref=sr_1_2?ie=UTF8&amp;qid=1486731377&amp;sr=8-2&amp;keywords=8GB+microSD">
+		Amazon.com</a></td>
 	</tr>
 <tr>
 		<td style="width: 111px">
@@ -398,6 +416,7 @@ The following list contains **parts that are not included** in the **support pac
 		<strong>
 		<a href="http://www.ebay.com/itm/Arducam-2MP-V2-Mini-Camera-Shield-with-ESP8266-Nano-Esp-12F-Evaluation-Kits-/291833972833?hash=item43f2a90861:g:gUYAAOSwqfNXnrKR">
 		Ebay.com</a></strong><br />
+		Alternative 1:
 		<a href="http://www.uctronics.com/arducam-2mp-v2-mini-camera-shield-with-esp8266-nano-esp-12f-evaluation-kits.html">
 		Uctronics.com</a></td>
 	</tr>
@@ -418,20 +437,11 @@ The following list contains **parts that are not included** in the **support pac
 		<td>
 		<a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
 		<strong>Aliexpress.com</strong></a><br />
+		Alternative 1:
 		<a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
+		Alternative 2:
 		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
 		Mikroe.com</a></td>
-	</tr>
-	<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">SanDisk 8GB microSD card<br />
-		Can be any size, but needs to be Class4 microSD&nbsp;</td>
-		<td>
-		<a href="http://www.ebay.com/itm/SanDisk-Micro-SD-HC-8GB-8G-Class-4-C4-Flash-Memory-Card-New-Lifetime-Warranty-/111115566897?hash=item19df00ff31:g:tGIAAMXQjUNR3PAs">
-		Ebay.com</a><br />
-		<a href="http://www.digikey.com/product-detail/en/panasonic-electronic-components/RP-SMLF08DA1/P17033-ND/5119440">
-		Digikey.com</a></td>
 	</tr>
 </table>
 
