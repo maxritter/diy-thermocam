@@ -66,4 +66,37 @@
 	<builddate>09.01.2017</builddate>
     <target>V1</target>
   </firmware>
+  
+  <firmware version="2.37">
+    <size>757608</size>
+	<builddate>01.02.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.37">
+    <size>621077</size>
+	<builddate>01.02.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.38">
+    <size>760848</size>
+	<builddate>06.02.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.38">
+    <size>621539</size>
+	<builddate>06.02.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.39">
+    <size>762272</size>
+	<builddate>21.02.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.39">
+    <size>622739</size>
+	<builddate>21.02.2017</builddate>
+    <target>V1</target>
+  </firmware>
 </versions>

@@ -29,11 +29,17 @@ float fahrenheitToCelcius(float Tf) {
 
 /* Function to calculate temperature out of Lepton value */
 float calFunction(uint16_t rawValue) {
+	//For radiometric Lepton, set offset to fixed value
+	if (leptonVersion == leptonVersion_2_5_shutter)
+		calOffset = -273.15;
+
 	//Calculate offset out of ambient temp
-	if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
-		calOffset = mlx90614_amb - (calSlope * 8192) + calComp;
+	else if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
+		calOffset = ambTemp - (calSlope * 8192) + calComp;
+
 	//Calculate the temperature in Celcius out of the coefficients
 	float temp = (calSlope * rawValue) + calOffset;
+
 	//Convert to Fahrenheit if needed
 	if (tempFormat == tempFormat_fahrenheit)
 		temp = celciusToFahrenheit(temp);
@@ -45,9 +51,16 @@ uint16_t tempToRaw(float temp) {
 	//Convert to Celcius if needed
 	if (tempFormat == tempFormat_fahrenheit)
 		temp = fahrenheitToCelcius(temp);
-	//Calculate offset out of ambient temp
+
+	//For radiometric Lepton, set offset to fixed value
+	if (leptonVersion == leptonVersion_2_5_shutter)
+		calOffset = -273.15;
+
+	//Otherwise calculate offset out of ambient temp
 	if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
-		calOffset = mlx90614_amb - (calSlope * 8192) + calComp;
+		calOffset = ambTemp - (calSlope * 8192) + calComp;
+
+	//Calcualte the raw value
 	uint16_t rawValue = (temp - calOffset) / calSlope;
 	return rawValue;
 }
@@ -69,31 +82,29 @@ uint16_t calcAverage() {
 	return avg;
 }
 
-/* Compensate the calibration with object temp */
+/* Compensate the calibration with MLX90614 values */
 void compensateCalib() {
 	//Refresh MLX90614 ambient temp
-	mlx90614_getAmb();
-	///Refresh object temperature
-	mlx90614_getTemp();
-	//Convert to Fahrenheit if needed
-	if (tempFormat == tempFormat_fahrenheit)
-		mlx90614_temp = celciusToFahrenheit(mlx90614_temp);
+	ambTemp = mlx90614_getAmb();
 
 	//Apply compensation if auto mode enabled, no limited locked and standard calib
 	if ((autoMode) && (!limitsLocked) && (calStatus != cal_warmup)) {
 		//Calculate min & max
 		int16_t min = round(calFunction(minValue));
 		int16_t max = round(calFunction(maxValue));
+
 		//If spot temp is lower than current minimum by one degree, lower minimum
-		if (mlx90614_temp < (min - 1))
-			calComp = mlx90614_temp - min;
+		if (spotTemp < (min - 1))
+			calComp = spotTemp - min;
+
 		//If spot temp is higher than current maximum by one degree, raise maximum
-		else if (mlx90614_temp > (max + 1))
-			calComp = mlx90614_temp - max;
+		else if (spotTemp > (max + 1))
+			calComp = spotTemp - max;
 	}
+
 	//Calculate offset out of ambient temp
 	if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
-		calOffset = mlx90614_amb - (calSlope * 8192) + calComp;
+		calOffset = ambTemp - (calSlope * 8192) + calComp;
 }
 
 /* Checks if the calibration warmup is done */
@@ -150,6 +161,12 @@ int linreg(int n, const uint16_t x[], const float y[], float* m, float* b, float
 
 /* Run the calibration process */
 void calibrationProcess(bool serial, bool firstStart) {
+	//When in serial mode and using radiometric Lepton, return invalid command
+	if (serial && (leptonVersion == leptonVersion_2_5_shutter)) {
+		Serial.write(CMD_INVALID);
+		return;
+	}
+
 	//Variables
 	float calMLX90614[100];
 	uint16_t calLepton[100];
@@ -157,7 +174,8 @@ void calibrationProcess(bool serial, bool firstStart) {
 	char result[30];
 	uint16_t average;
 	uint16_t average_old = 0;
-	float mlx90614_old = 0;
+	float temp;
+	float temp_old = 0;
 	maxValue = 0;
 	minValue = 65535;
 
@@ -194,11 +212,14 @@ void calibrationProcess(bool serial, bool firstStart) {
 			//Store old average
 			average_old = average;
 
+			//Measure new value from MLX90614
+			temp = mlx90614_getTemp();
+
 			//If the temperature changes too much, do not take that measurement
-			if (abs(mlx90614_getTemp() - mlx90614_old) < 10) {
+			if (abs(temp - temp_old) < 10) {
 				//Store values
 				calLepton[counter] = average;
-				calMLX90614[counter] = mlx90614_temp;
+				calMLX90614[counter] = temp;
 
 				//Find minimum and maximum value
 				if (average > maxValue)
@@ -222,7 +243,7 @@ void calibrationProcess(bool serial, bool firstStart) {
 			}
 
 			//Store old spot temperature
-			mlx90614_old = mlx90614_temp;
+			temp_old = temp;
 
 			//Wait at least 111ms between two measurements (9Hz)
 			while ((millis() - timeElapsed) < 111);
@@ -305,6 +326,13 @@ bool calibration() {
 	//Still in warmup
 	if (calStatus == cal_warmup) {
 		showFullMessage((char*) "Please wait for sensor warmup!", true);
+		delay(1000);
+		return false;
+	}
+
+	//Radiometric Lepton, no calibration needed
+	if (leptonVersion == leptonVersion_2_5_shutter) {
+		showFullMessage((char*) "Not required for radiometric Lepton!", true);
 		delay(1000);
 		return false;
 	}

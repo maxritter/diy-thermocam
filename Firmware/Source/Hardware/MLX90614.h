@@ -40,10 +40,6 @@ const unsigned char mlx90614_crcTable[] = { 0x00, 0x07, 0x0E, 0x09, 0x1C, 0x1B, 
 0x7F, 0x6A, 0x6D, 0x64, 0x63, 0x3E, 0x39, 0x30, 0x37, 0x22, 0x25, 0x2C, 0x2B, 0x06, 0x01, 0x08, 0x0F, 0x1A, 0x1D, 0x14, 0x13, 0xAE, 0xA9,
 0xA0, 0xA7, 0xB2, 0xB5, 0xBC, 0xBB, 0x96, 0x91, 0x98, 0x9F, 0x8A, 0x8D, 0x84, 0x83, 0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5, 0xCC, 0xCB, 0xE6,
 0xE1, 0xE8, 0xEF, 0xFA, 0xFD, 0xF4, 0xF3 };
-//Stores the object temp
-float mlx90614_temp = 0;
-//Stores the ambient temp
-float mlx90614_amb = 0;
 
 /* Methods */
 
@@ -112,7 +108,7 @@ uint16_t mlx90614_receive(byte address, byte* error = NULL) {
 	byte MSB = Wire.read();
 	Wire.read();
 	//Check if the transmission worked
-	if(error != NULL)
+	if (error != NULL)
 		*error = Wire.endTransmission();
 	else
 		Wire.endTransmission();
@@ -122,24 +118,26 @@ uint16_t mlx90614_receive(byte address, byte* error = NULL) {
 }
 
 /* Measures the ambient or object temperature */
-void mlx90614_measure(boolean TaTo, boolean* check) {
+float mlx90614_measure(boolean TaTo, boolean* check) {
+	//Get the raw value from the sensor
 	uint16_t rawData = mlx90614_getRawData(TaTo, check);
+
+	//Convert to Kelvin
 	float tempData = (rawData * 0.02) - 0.01;
+
+	//Convert to Celsius
 	tempData -= 273.15;
-	//TaTo is one, measure ambient
-	if (TaTo) {
-		if ((tempData < -40) || (tempData > 125))
-			*check = 0;
-		else
-			mlx90614_amb = tempData;
-	}
-	//TaTo is zero, measure object
-	else {
-		if ((tempData < -70) || (tempData > 380))
-			*check = 0;
-		else
-			mlx90614_temp = tempData;
-	}
+
+	//TaTo is one, check for ambient borders
+	if ((TaTo) && ((tempData < -40) || (tempData > 125)))
+		*check = false;
+
+	//TaTo is zero, check for object borders
+	else if ((tempData < -70) || (tempData > 380))
+		*check = false;
+
+	//Return temperature in Celsius
+	return tempData;
 }
 
 /* Set the maximum temp to 380°C */
@@ -276,43 +274,59 @@ boolean mlx90614_checkFilter() {
 
 /* Read and return the ambient temperature */
 float mlx90614_getAmb() {
+	float ambTemp;
 	boolean check = 1;
 	byte count = 0;
+
+	//Repeat until valid value
 	do {
-		mlx90614_measure(1, &check);
+		ambTemp = mlx90614_measure(1, &check);
 		//If we cannot connect,continue
 		if (count == 100)
 			return 0;
 		count++;
 		delay(10);
 	} while (check == 0);
-	return mlx90614_amb;
+
+	//Return ambient temperature
+	return ambTemp;
 }
 
 /* Read and return the object temperature */
 float mlx90614_getTemp() {
+	float objTemp;
 	boolean check = 1;
 	byte count = 0;
+
+	//Repeat until valid value
 	do {
-		mlx90614_measure(0, &check);
+		objTemp = mlx90614_measure(0, &check);
 		//If we cannot connect, continue
 		if (count == 100)
 			return 0;
 		count++;
 		delay(10);
 	} while (check == 0);
-	return mlx90614_temp;
+
+	//Return object temperature
+	return objTemp;
 }
 
 /* Initializes the sensor */
 void mlx90614_init() {
 	byte error;
 
+	//For radiometric Lepton, do not init the MLX90614
+	if (leptonVersion == leptonVersion_2_5_shutter) {
+		mlx90614Version = mlx90614Version_new;
+		return;
+	}
+
 	//Get filter settings
 	uint16_t filter = mlx90614_receive(mlx90614_Filter, &error);
 
 	//If I2C connection is not working, set diagnostic
-	if(error != 0)
+	if (error != 0)
 	{
 		setDiagnostic(diag_spot);
 		return;

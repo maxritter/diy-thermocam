@@ -185,7 +185,7 @@ bool calibrationChooser() {
 			//DELETE
 			if (pressedButton == 1) {
 				calSlope = cal_stdSlope;
-				calOffset = mlx90614_amb - (calSlope * 8192) + calComp;
+				calOffset = ambTemp - (calSlope * 8192) + calComp;
 				calStatus = cal_standard;
 				storeCalibration();
 				return true;

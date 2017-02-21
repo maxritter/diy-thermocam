@@ -31,7 +31,7 @@ void lepton_begin() {
 		startAltClockline();
 
 	//For Teensy  3.1 / 3.2 and Lepton3 use this one
-	if ((teensyVersion == teensyVersion_old) && (leptonVersion == leptonVersion_3_shutter))
+	if ((teensyVersion == teensyVersion_old) && (leptonVersion == leptonVersion_3_0_shutter))
 		SPI.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE0));
 
 	//Otherwise use 20 Mhz maximum and SPI mode 1
@@ -76,8 +76,8 @@ bool savePackage(byte line, byte segment = 0) {
 			return 0;
 		}
 
-		//Lepton2
-		if (leptonVersion != leptonVersion_3_shutter) {
+		//Lepton2.x
+		if (leptonVersion != leptonVersion_3_0_shutter) {
 			//Rotated or old hardware version
 			if (((mlx90614Version == mlx90614Version_old) && (!rotationEnabled)) ||
 				((mlx90614Version == mlx90614Version_new) && (rotationEnabled))) {
@@ -152,7 +152,7 @@ LeptonReadError lepton_getPackage(byte line, byte seg) {
 		return ROW_ERROR;
 
 	//For the Lepton3, check if the segment number matches
-	if ((line == 20) && (leptonVersion == leptonVersion_3_shutter)) {
+	if ((line == 20) && (leptonVersion == leptonVersion_3_0_shutter)) {
 		byte segment = (leptonFrame[0] >> 4);
 		if (segment == 0)
 			return SEGMENT_INVALID;
@@ -170,7 +170,7 @@ void lepton_getRawValues()
 	byte line, error, segmentNumbers;
 
 	//Determine number of segments
-	if (leptonVersion == leptonVersion_3_shutter)
+	if (leptonVersion == leptonVersion_3_0_shutter)
 		segmentNumbers = 4;
 	else
 		segmentNumbers = 1;
@@ -240,8 +240,19 @@ bool lepton_ffc(bool message = false) {
 	Wire.beginTransmission(0x2A);
 	Wire.write(0x00);
 	Wire.write(0x04);
-	Wire.write(0x02);
-	Wire.write(0x42);
+
+	//For radiometric Lepton, send RAD FFC command
+	if (leptonVersion == leptonVersion_2_5_shutter) {
+		Wire.write(0x4E);
+		Wire.write(0x2E);
+	}
+	//For all others, send normal FFC command
+	else {
+		Wire.write(0x02);
+		Wire.write(0x42);
+	}
+
+	//Get error byte
 	byte error = Wire.endTransmission();
 
 	//Wait some time when in main menu
@@ -268,6 +279,40 @@ int lepton_readReg(byte reg) {
 	reading = reading << 8;
 	reading |= Wire.read();
 	return reading;
+}
+
+ /* Get the spotmeter value on a radiometric lepton */
+float lepton_spotTemp() {
+	//Get RAD spotmeter value
+	Wire.beginTransmission(0x2A);
+	Wire.write(0x00);
+	Wire.write(0x04);
+	Wire.write(0x4E);
+	Wire.write(0xD0);
+	byte error = Wire.endTransmission();
+
+	//Lepton I2C error, set diagnostic
+	if (error != 0) {
+		setDiagnostic(diag_spot);
+		return 0;
+	}
+
+	//Transfer the new package
+	Wire.beginTransmission(0x2A);
+	while (lepton_readReg(0x2) & 0x01);
+	Wire.requestFrom(0x2A, lepton_readReg(0x6));
+	byte response[8];
+	Wire.readBytes(response, 8);
+	Wire.endTransmission();
+
+	//Calculate spot temperature in Kelvin
+	float spotTemp = (response[0] * 256.0) + response[1];
+	//Multiply by correction factor
+	spotTemp *= 0.01;
+	//Convert to celsius
+	spotTemp -= 273.15;
+
+	return spotTemp;
 }
 
 /* Set the shutter operation to manual/auto */
@@ -329,7 +374,7 @@ void lepton_version() {
 	//Lepton I2C error, set diagnostic
 	if (error != 0) {
 		setDiagnostic(diag_lep_conf);
-		leptonVersion = leptonVersion_2_noShutter;
+		leptonVersion = leptonVersion_2_0_noShutter;
 		return;
 	}
 
@@ -343,19 +388,25 @@ void lepton_version() {
 
 	//Detected Lepton2 Shuttered
 	if (strstr(leptonhw, "05-060") != NULL) {
-		leptonVersion = leptonVersion_2_shutter;
+		leptonVersion = leptonVersion_2_0_shutter;
 		leptonShutter = leptonShutter_auto;
 	}
 
 	//Detected Lepton3 Shuttered
-	else if (strstr(leptonhw, "05-070") != NULL) {
-		leptonVersion = leptonVersion_3_shutter;
+	else if (strstr(leptonhw, "05-070620") != NULL) {
+		leptonVersion = leptonVersion_3_0_shutter;
 		leptonShutter = leptonShutter_auto;
+	}
+
+	//Detected Lepton2.5 Shuttered (Radiometric)
+	else if (strstr(leptonhw, "05-070360") != NULL) {
+		leptonVersion = leptonVersion_2_5_shutter;
+		leptonShutter = leptonShutter_autoRAD;
 	}
 
 	//Detected Lepton2 No-Shutter
 	else {
-		leptonVersion = leptonVersion_2_noShutter;
+		leptonVersion = leptonVersion_2_0_noShutter;
 		leptonShutter = leptonShutter_none;
 	}
 
@@ -368,13 +419,20 @@ void lepton_init() {
 	//Check the Lepton HW Revision
 	lepton_version();
 
-	//Set the calibration timer
-	calTimer = millis();
-	//Set calibration status to warmup if not coming from mass storage
-	calStatus = cal_warmup;
-	//Set the compensation value to zero
-	calComp = 0;
+	//For radiometric Lepton, set calibration to done
+	if (leptonVersion == leptonVersion_2_5_shutter)
+		calStatus = cal_standard;
 
+	//Otherwise init warmup timer
+	else {
+		//Set the calibration timer
+		calTimer = millis();
+		//Set calibration status to warmup if not coming from mass storage
+		calStatus = cal_warmup;
+		//Set the compensation value to zero
+		calComp = 0;
+	}
+	
 	//Activate auto mode
 	autoMode = true;
 	//Deactivate limits Locked

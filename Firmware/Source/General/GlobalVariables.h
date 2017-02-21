@@ -121,6 +121,10 @@ long calTimer;
 uint16_t maxValue;
 uint16_t minValue;
 
+//Spot & ambient temperature
+float spotTemp;
+float ambTemp;
+
 //Position of min and maxtemp
 uint16_t minTempPos;
 uint16_t minTempVal;

@@ -303,7 +303,7 @@ void loadRawData(char* filename, char* dirname) {
 				smallBuffer[(line * 2 * 160) + 160 + (column * 2) + 1] = result;
 			}
 		}
-		leptonVersion = leptonVersion_2_shutter;
+		leptonVersion = leptonVersion_2_0_shutter;
 	}
 
 	//For the Lepton3 sensor, read 19200 raw values
@@ -313,7 +313,7 @@ void loadRawData(char* filename, char* dirname) {
 			lsb = sdFile.read();
 			smallBuffer[i] = (((msb) << 8) + lsb);
 		}
-		leptonVersion = leptonVersion_3_shutter;
+		leptonVersion = leptonVersion_3_0_shutter;
 	}
 	//Invalid data
 	else {
@@ -337,7 +337,7 @@ void loadRawData(char* filename, char* dirname) {
 	uint8_t farray[4];
 	for (int i = 0; i < 4; i++)
 		farray[i] = sdFile.read();
-	mlx90614_temp = bytesToFloat(farray);
+	spotTemp = bytesToFloat(farray);
 
 	//Read color scheme
 	colorScheme = sdFile.read();

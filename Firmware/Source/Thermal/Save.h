@@ -353,7 +353,7 @@ void saveRawData(bool isImage, char* name, uint16_t framesCaptured) {
 	}
 
 	//For the Lepton2 sensor, write 4800 raw values
-	if (leptonVersion != leptonVersion_3_shutter) {
+	if (leptonVersion != leptonVersion_3_0_shutter) {
 		for (int line = 0; line < 60; line++) {
 			for (int column = 0; column < 80; column++) {
 				result = smallBuffer[(line * 2 * 160) + (column * 2)];
@@ -379,7 +379,7 @@ void saveRawData(bool isImage, char* name, uint16_t framesCaptured) {
 
 	//Write the object temp 
 	uint8_t farray[4];
-	floatToBytes(farray, mlx90614_temp);
+	floatToBytes(farray, spotTemp);
 	for (int i = 0; i < 4; i++)
 		sdFile.write(farray[i]);
 

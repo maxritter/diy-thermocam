@@ -22,11 +22,13 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 **HOW TO MAKE IT**
 
-You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_03.pdf)** will lead you through the process, step-by-step.
+You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_04.pdf)** will lead you through the process, step-by-step.
 
 On the **part side**, you need the **components** from the **support package** and the **missing parts** from the **other parts list** below.
 
-The DIY-Thermocam works with the **FLIR Lepton2** (80 x 60) and the **FLIR Lepton3** (160 x 120) LWIR sensor. The **hardware revision** is **detected automatically** by the firmware on startup. 
+The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** (**Lepton2.5** only at the moment). The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
+
+The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** only at the moment), the **spot sensor** is **not required**.
 
 The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_06.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
 
@@ -334,13 +336,15 @@ The **support package** contains **most of the components** required to **build*
 
 **OTHER PARTS**
 
-The following list contains **parts that are not included** in the **support package**. You need to **buy** them over one of the **provided links** on the right side. **Digikey.com** provides **free international shipment** for all orders **over 100€**, so I recommend buying the Lepton Module, Spot Sensor, Teensy and SD card from them **to reach that value**. I also recommend [**extracting**](http://hardtechlife.com/teardown-flir-one-for-android/) the FLIR Lepton3 sensor from a **FLIR One**. The **Lepton2** also works, but currently its **not possible** to buy it from **outside the US** due to new regulations.
+The following list contains **parts that are not included** in the **support package**. You need to **buy** them over one of the **provided links** on the right side. **Digikey.com** provides **free international shipment** for all orders **over 100€**, so I recommend buying the Lepton module, spot sensor (not for Lepton2.5), Teensy and SD card from them **to reach that value**. 
+
+I also recommend [**extracting**](http://hardtechlife.com/teardown-flir-one-for-android/) the FLIR Lepton3 sensor from a **FLIR One**. The **Lepton2.x** also works, but currently its **not possible** to buy it from **outside the US** at the moment, due to new regulations.
 
 <table style="width: 57%">
 <tr>
 		<td style="width: 111px">
 		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
-		<td style="width: 235px">FLIR Lepton2/Lepton3 shuttered<br />
+		<td style="width: 235px">FLIR Lepton2.x/Lepton3.x shuttered<br />
 		Long-wave-infrared array sensor<br />
 		</td>
 		<td>
@@ -349,12 +353,13 @@ The following list contains **parts that are not included** in the **support pac
 		<strong>Android</strong></a> 
 		or
 		<a href="https://www.amazon.co.uk/gp/offer-listing/B0123QLZJ8/ref=sr_1_3_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-3&amp;keywords=FLIR+One&amp;condition=used">
-		<strong>iOS</strong></a> (<strong>Lepton3</strong>)<br />
-		Alternative 1: 		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		Digikey.com</a> (<strong>Lepton2</strong>) - US ONLY<br />
+		<strong>iOS</strong></a> (<strong>Lepton3.0</strong>)<br />
+		Alternative 1:
+		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
+		Digikey.com</a> (<strong>Lepton2.0</strong>) - US ONLY<br />
 		Alternative 2:
-		<a href="https://store.groupgets.com/#!/50°-Shuttered-FLIR-Lepton-Thermal-Imager/p/52199502/category=0">
-		GroupGets.com</a> (<strong>Lepton2</strong>)</td>
+		<a href="http://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
+		Digikey.com</a> (<strong>Lepton2.5</strong>) - US ONLY</td>
 	</tr>
 <tr>
 		<td style="width: 111px">
@@ -372,7 +377,8 @@ The following list contains **parts that are not included** in the **support pac
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">MLX90614-BCF<br />
-		Spot sensor for absolute temperature measurement&nbsp;</td>
+		Spot sensor for absolute temperature measurement, NOT required for 
+		Lepton2.5</td>
 		<td>
 		<strong>
 		<a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
@@ -810,4 +816,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 10.02.2017
+**Last updated**: 21.02.2017

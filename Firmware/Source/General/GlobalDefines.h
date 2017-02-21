@@ -43,13 +43,14 @@
 #define teensyVersion_new    1 //Teensy 3.6
 
 //MLX90614 sensor version
-#define mlx90614Version_old 0 //MLX90614-BCI
-#define mlx90614Version_new 1 //MLX90614-DCI, MLX90614-BCF, MLX90614-DCH
+#define mlx90614Version_old  0 //MLX90614-BCI
+#define mlx90614Version_new  1 //MLX90614-DCI, MLX90614-BCF, MLX90614-DCH
 
 //FLIR Lepton sensor version
-#define leptonVersion_2_shutter   0 //FLIR Lepton2 Shuttered
-#define leptonVersion_3_shutter   1 //FLIR Lepton3 Shuttered
-#define leptonVersion_2_noShutter 2 //FLIR Lepton2 Non-Shuttered
+#define leptonVersion_2_0_shutter   0 //FLIR Lepton2 Shuttered
+#define leptonVersion_3_0_shutter   1 //FLIR Lepton3 Shuttered
+#define leptonVersion_2_0_noShutter 2 //FLIR Lepton2 Non-Shuttered
+#define leptonVersion_2_5_shutter   3 //FLIR Lepton 2.5 Shuttered
 
 //Temperature format
 #define tempFormat_celcius    0
@@ -67,9 +68,10 @@
 #define minMaxPoints_both     3
 
 //Shutter mode
-#define leptonShutter_manual 0
-#define leptonShutter_auto   1
-#define leptonShutter_none   2
+#define leptonShutter_manual  0
+#define leptonShutter_auto    1
+#define leptonShutter_none    2
+#define leptonShutter_autoRAD 3
 
 //Text color
 #define textColor_white 0

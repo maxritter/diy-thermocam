@@ -97,3 +97,5 @@ boolean checkSDCard();
 void bootFFC();
 void camera_capture(void);
 boolean checkFirstStart();
+float celciusToFahrenheit(float Tc);
+void getSpotTemp();

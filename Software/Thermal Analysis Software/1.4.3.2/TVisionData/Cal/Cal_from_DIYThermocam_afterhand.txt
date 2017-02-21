@@ -1,0 +1,7 @@
+CalSlope:	0	
+CalOffset:	0	
+RawLowValue:	0	
+RawHiValue:	0	
+TempLowValue:	0	
+TempHiValue:	0	
+Note:	11:31:16	

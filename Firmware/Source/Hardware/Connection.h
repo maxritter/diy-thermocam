@@ -106,8 +106,8 @@ void sendRawLimits() {
 void sendRawData(bool color = false) {
 	uint16_t result;
 
-	//For the Lepton2 sensor, write 4800 raw values
-	if ((leptonVersion != leptonVersion_3_shutter) && (!color)) {
+	//For the Lepton2.x sensor, write 4800 raw values
+	if ((leptonVersion != leptonVersion_3_0_shutter) && (!color)) {
 		for (int line = 0; line < 60; line++) {
 			for (int column = 0; column < 80; column++) {
 				result = smallBuffer[(line * 2 * 160) + (column * 2)];
@@ -152,7 +152,10 @@ void sendFramebuffer()
 /* Sends the configuration data */
 void sendConfigData() {
 	//Lepton version
-	Serial.write(leptonVersion);
+	if (leptonVersion == leptonVersion_2_5_shutter)
+		Serial.write(leptonVersion_2_0_shutter);
+	else
+		Serial.write(leptonVersion);
 	//Rotation
 	Serial.write(rotationEnabled);
 	//Send color scheme
@@ -181,7 +184,7 @@ void sendCalStatus() {
 	if (calStatus == cal_warmup)
 		Serial.write((byte)abs(30 - ((millis() - calTimer) / 1000)));
 	else
-			Serial.write(0);
+		Serial.write(0);
 }
 
 /* Sends the visual image in low or high quality */
@@ -234,6 +237,7 @@ void sendVisualImg()
 /* Sends the calibration data */
 void sendCalibrationData() {
 	uint8_t farray[4];
+
 	//Send the calibration offset first
 	floatToBytes(farray, (float)calOffset);
 	for (int i = 0; i < 4; i++)
@@ -246,8 +250,13 @@ void sendCalibrationData() {
 
 /* Sends the spot temp*/
 void sendSpotTemp() {
+	//Array to store the byte-converted float value
 	uint8_t farray[4];
-	floatToBytes(farray, mlx90614_temp);
+
+	//Convert float to bytes
+	floatToBytes(farray, spotTemp);
+
+	//Send the four bytes out
 	for (int i = 0; i < 4; i++)
 		Serial.write(farray[i]);
 }
@@ -294,8 +303,8 @@ void setTime() {
 void setCalOffset() {
 	uint8_t farray[4];
 
-	//If not enough data available, leave
-	if (Serial.available() < 4)
+	//If not enough data available or RAD, leave
+	if ((Serial.available() < 4) || (leptonVersion == leptonVersion_2_5_shutter))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -317,8 +326,8 @@ void setCalOffset() {
 void setCalSlope() {
 	uint8_t farray[4];
 
-	//If not enough data available, leave
-	if (Serial.available() < 4)
+	//If not enough data available or RAD, leave
+	if ((Serial.available() < 4) || (leptonVersion == leptonVersion_2_5_shutter))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -818,7 +827,7 @@ void saveFrame() {
 		displayInfos();
 		saveBuffer(saveFilename);
 	}
-		
+
 	//Refresh free space
 	refreshFreeSpace();
 
@@ -1168,8 +1177,11 @@ void serialOutput() {
 		if (checkDiagnostic(diag_lep_data))
 			lepton_getRawValues();
 
-		//Compensate calibration with object temp
-		if (checkDiagnostic(diag_spot))
+		//Get the spot temperature
+		getSpotTemp();
+
+		//Compensate calibration with MLX90614 for non-radiometric Lepton
+		if (leptonVersion != leptonVersion_2_5_shutter)
 			compensateCalib();
 
 		//Refresh the temp points

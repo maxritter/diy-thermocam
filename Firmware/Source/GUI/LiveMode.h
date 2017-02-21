@@ -176,6 +176,8 @@ void displayFreeSpace() {
 
 /* Show the current spot temperature on screen*/
 void showSpot() {
+	char buffer[10];
+
 	//Draw the spot circle
 	display_drawCircle(160, 120, 12);
 
@@ -185,9 +187,10 @@ void showSpot() {
 	display_drawLine(160, 96, 160, 108);
 	display_drawLine(160, 132, 160, 144);
 
-	//Convert to float with a special method
-	char buffer[10];
-	floatToChar(buffer, mlx90614_temp);
+	//Convert spot temperature to char array
+	floatToChar(buffer, spotTemp);
+	
+	//Print value on display
 	display_print(buffer, 145, 150);
 }
 

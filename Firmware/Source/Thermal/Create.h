@@ -657,8 +657,12 @@ void createThermalImg(bool small) {
 	//Receive the temperatures over SPI
 	lepton_getRawValues();
 
-	//Compensate calibration with object temp
-	compensateCalib();
+	//Get the spot temperature
+	getSpotTemp();
+
+	//Compensate calibration with MLX90614 for non-radiometric Lepton
+	if (leptonVersion != leptonVersion_2_5_shutter)
+		compensateCalib();
 
 	//Refresh the temp points if required
 	refreshTempPoints();
@@ -686,7 +690,7 @@ void createThermalImg(bool small) {
 		smallToBigBuffer();
 
 	//Convert lepton data to RGB565 colors
-	if(!videoSave)
+	if (!videoSave)
 		convertColors(small);
 }
 
@@ -698,8 +702,12 @@ void createVisCombImg() {
 	//Receive the temperatures over SPI
 	lepton_getRawValues();
 
-	//Compensate calibration with object temp
-	compensateCalib();
+	//Get the spot temperature
+	getSpotTemp();
+
+	//Compensate calibration with MLX90614 for non-radiometric Lepton
+	if (leptonVersion != leptonVersion_2_5_shutter)
+		compensateCalib();
 
 	//Refresh the temp points if required
 	refreshTempPoints();

@@ -287,7 +287,9 @@ void readEEPROM() {
 	}
 	//Calibration slope
 	read = EEPROM.read(eeprom_calSlopeSet);
-	if (read == eeprom_setValue)
+	if (leptonVersion == leptonVersion_2_5_shutter)
+		calSlope = 0.01;
+	else if (read == eeprom_setValue)
 		readCalibration();
 	else
 		calSlope = cal_stdSlope;
@@ -587,6 +589,21 @@ void checkNoFFC()
 		//Set lepton shutter to none
 		leptonShutter = leptonShutter_none;
 	}
+}
+
+//Get the spot temperature from Lepton or MLX90614
+void getSpotTemp() {
+	//Get spot value from radiometric Lepton
+	if (leptonVersion == leptonVersion_2_5_shutter)
+		spotTemp = lepton_spotTemp();
+
+	//Get temperature from MLX90614
+	else
+		spotTemp = mlx90614_getTemp();
+
+	//Convert to Fahrenheit if required
+	if (tempFormat == tempFormat_fahrenheit)
+		spotTemp = celciusToFahrenheit(spotTemp);
 }
 
 /* Switches the laser on or off*/
