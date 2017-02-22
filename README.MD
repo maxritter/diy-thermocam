@@ -39,7 +39,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/mas
 
 The **support package** contains **most of the components** required to **build** the **DIY-Thermocam V2**. You can **acquire** it by **following the link** below, **leaving your address** in the comment field. **International shipping** is **included** in the donation. **Alternatively**, you can also use the **provided links** on the right side to buy all the components separately **on your own**.
 
-[**-> Get the support package <-**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8MTC38TANMB24)
+[**-> Get the support package <-**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3SBVK9TE5KAS4)
 
 
 <table style="width: 57%">
@@ -816,4 +816,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 21.02.2017
+**Last updated**: 22.02.2017
