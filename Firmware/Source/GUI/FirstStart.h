@@ -261,8 +261,8 @@ void liveModeHelper() {
 		camera_setSaveRes();
 	}
 
-	//Do the first time calibration if spot sensor working
-	if (checkDiagnostic(diag_spot))
+	//Do the first time calibration if spot sensor working and not using Lepton2.5
+	if (checkDiagnostic(diag_spot) && (leptonVersion != leptonVersion_2_5_shutter))
 		calibrationHelperScreen();
 
 	//Hint screen for the live mode #1 
@@ -276,9 +276,16 @@ void liveModeHelper() {
 	infoScreen(text);
 
 	//Hint screen for the live mode #2
-	text[1] = "The device needs one minute to";
-	text[2] = "warmup the sensor, more functions";
-	text[3] = "will be activated afterwards. You";
+	if (leptonVersion != leptonVersion_2_5_shutter) {
+		text[1] = "The device needs 30 seconds to";
+		text[2] = "warmup the sensor, more functions";
+		text[3] = "will be activated afterwards. You";
+	}
+	else {
+		text[1] = "The device has detected that you";
+		text[2] = "are using the radiometric Lepton2.5";
+		text[3] = "sensor and adjusted to that. You";
+	}
 	text[4] = "can lock the limits or toggle dif-";
 	text[5] = "ferent temperature limits by pres-";
 	text[6] = "sing the screen long in live mode.";
@@ -294,20 +301,23 @@ void liveModeHelper() {
 
 /* Set the EEPROM values to default for the first time */
 void stdEEPROMSet() {
-	//Show message
-	showFullMessage((char*) "Flashing spot EEPROM settings..");
+	//Flash spot sensor, not for radiometric Lepton
+	if (leptonVersion != leptonVersion_2_5_shutter) {
+		//Show message
+		showFullMessage((char*) "Flashing spot EEPROM settings..");
 
-	//Only if spot sensor is connected
-	if(checkDiagnostic(diag_spot))
-	{
-		//Set spot maximum temp to 380°C
-		mlx90614_setMax();
-		//Set spot minimum temp to -70°
-		mlx90614_setMin();
-		//Set spot filter settings
-		mlx90614_setFilter();
-		//Set spot emissivity to 0.9
-		mlx90614_setEmissivity();
+		//Only if spot sensor is connected
+		if (checkDiagnostic(diag_spot))
+		{
+			//Set spot maximum temp to 380°C
+			mlx90614_setMax();
+			//Set spot minimum temp to -70°
+			mlx90614_setMin();
+			//Set spot filter settings
+			mlx90614_setFilter();
+			//Set spot emissivity to 0.9
+			mlx90614_setEmissivity();
+		}
 	}
 
 	//Set device EEPROM settings

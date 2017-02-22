@@ -1,6 +1,6 @@
 *** Changelog DIY-Thermocam Firmware ***
 
-2.39 (21.02.2017)
+2.39 (22.02.2017)
 -Added support for radiometric Lepton (Lepton2.5)
 
 2.38 (06.02.2017)

@@ -7,9 +7,6 @@ Copyright by Max Ritter
 http://www.diy-thermocam.net
 https://github.com/maxritter/DIY-Thermocam
 
-THIS GUIDE IS ONLY REQUIRED, IF YOU WANT TO MAKE CHANGES TO THE FIRMWARE ON YOUR OWN!
-If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex).
-
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Diagram.png" width="500">
 
