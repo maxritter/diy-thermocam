@@ -22,7 +22,9 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 **HOW TO MAKE IT**
 
-You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_04.pdf)** will lead you through the process, step-by-step.
+You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. 
+
+An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_04.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
 
 On the **part side**, you need the **components** from the **support package** and the **missing parts** from the **other parts list** below.
 
@@ -30,19 +32,132 @@ The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR
 
 The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** only at the moment), the **spot sensor** is **not required**.
 
-The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_06.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
+The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_06.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
+
+For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
 
 
 ----------
 
-**SUPPORT PACKAGE**
+**Required Parts**
 
-The **support package** contains **most of the components** required to **build** the **DIY-Thermocam V2**. You can **acquire** it by **following the link** below, **leaving your address** in the comment field. **International shipping** is **included** in the donation. **Alternatively**, you can also use the **provided links** on the right side to buy all the components separately **on your own**.
 
-[**-> Get the support package <-**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3SBVK9TE5KAS4)
+In order to **make your own DIY-Thermocam V2**, use the list to acquire the needed parts over one of the **provided links** on the right side. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 
+I also recommend [**extracting**](http://hardtechlife.com/teardown-flir-one-for-android/) the FLIR Lepton3 sensor from a **FLIR One**. The **Lepton2.x** also works, but currently its **not possible** to buy it from **outside the US** at the moment, due to new regulations.
+
+For time reasons, I do **not offer** complete **kits** or **pre-assembled units**. Please take your time and **order** the components **on your own**, the **result** will be **worth the efforts**!
 
 <table style="width: 57%">
+<tr>
+		<td style="width: 111px">
+		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
+		<td style="width: 235px">FLIR Lepton2.x/Lepton3.x shuttered<br />
+		Long-wave-infrared array sensor<br />
+		</td>
+		<td>
+		FLIR One -
+		<a href="https://www.amazon.co.uk/gp/offer-listing/B01478QCHU/ref=sr_1_1_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-1&amp;keywords=FLIR+One&amp;condition=used">
+		<strong>Android</strong></a> 
+		or
+		<a href="https://www.amazon.co.uk/gp/offer-listing/B0123QLZJ8/ref=sr_1_3_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-3&amp;keywords=FLIR+One&amp;condition=used">
+		<strong>iOS</strong></a> (<strong>Lepton3.0</strong>)<br />
+		Alternative 1:
+		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
+		Digikey.com</a> (<strong>Lepton2.0</strong>) - US ONLY<br />
+		Alternative 2:
+		<a href="http://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
+		Digikey.com</a> (<strong>Lepton2.5</strong>) - US ONLY</td>
+	</tr>
+<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonModule.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">FLIR Lepton Breakout Board<br />
+		Interface the Lepton over SPI / I2C&nbsp;</td>
+		<td>
+		<a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
+		<strong>Digikey.com</strong></a><br />
+		Alternative 1:
+		<a href="https://store.groupgets.com/#!/FLIR-Lepton-Breakout-Board/p/52239830/category=0">
+		GroupGets.com</a></td>
+	</tr>
+<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">MLX90614-BCF<br />
+		Spot sensor for absolute temperature measurement, NOT required for 
+		Lepton2.5</td>
+		<td>
+		<strong>
+		<a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
+		Digikey.com</a></strong><br />
+		Alternative 1:
+		<a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
+	</tr>
+<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Teensy36.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">Teensy 3.6<br />
+		Cortex M4 Microcontroller&nbsp;</td>
+		<td>
+		<strong>
+		<a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
+		Digikey.com</a></strong><br />
+		Alternative 1:
+		<a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
+		Alternative 2:
+		<a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
+		Flikto.de</a></td>
+	</tr>
+	<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">SanDisk 8GB microSD card<br />
+		Can be any size, but needs to be Class4 microSD&nbsp;</td>
+		<td>
+		<strong><a href="http://www.digikey.com/products/en?keywords=P17033-ND">
+		Digikey.com</a></strong><br />
+		Alternative 1:
+		<a href="https://www.amazon.com/SanDisk-microSD-High-Capacity-microSDHC/dp/B00488G6P8/ref=sr_1_2?ie=UTF8&amp;qid=1486731377&amp;sr=8-2&amp;keywords=8GB+microSD">
+		Amazon.com</a></td>
+	</tr>
+<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/VisualCam.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">Arducam V2 Mini 2MP<br />
+		Visual camera module&nbsp;</td>
+		<td>
+		<strong>
+		<a href="http://www.ebay.com/itm/Arducam-2MP-V2-Mini-Camera-Shield-with-ESP8266-Nano-Esp-12F-Evaluation-Kits-/291833972833?hash=item43f2a90861:g:gUYAAOSwqfNXnrKR">
+		Ebay.com</a></strong><br />
+		Alternative 1:
+		<a href="http://www.uctronics.com/arducam-2mp-v2-mini-camera-shield-with-esp8266-nano-esp-12f-evaluation-kits.html">
+		Uctronics.com</a></td>
+	</tr>
+<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Display.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">3.2" TT LCD Display Module<br />
+		Configuration: 5V, Pin header 4-wire SPI, resistive touch, no font chip</td>
+		<td>
+		<a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
+		<strong>BuyDisplay.com</strong></a></td>
+	</tr>
+<tr>
+		<td style="width: 111px">
+		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" /></td>
+		<td style="width: 235px">3.7V Lithium Polymer Battery&nbsp;<br />
+		With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)</td>
+		<td>
+		<a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
+		<strong>Aliexpress.com</strong></a><br />
+		Alternative 1:
+		<a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
+		Alternative 2:
+		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
+		Mikroe.com</a></td>
+	</tr>
+
 	<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" /></td>
@@ -332,124 +447,6 @@ The **support package** contains **most of the components** required to **build*
 	</tr>
 </table>
 
-----------
-
-**OTHER PARTS**
-
-The following list contains **parts that are not included** in the **support package**. You need to **buy** them over one of the **provided links** on the right side. **Digikey.com** provides **free international shipment** for all orders **over 100€**, so I recommend buying the Lepton module, spot sensor (not for Lepton2.5), Teensy and SD card from them **to reach that value**. 
-
-I also recommend [**extracting**](http://hardtechlife.com/teardown-flir-one-for-android/) the FLIR Lepton3 sensor from a **FLIR One**. The **Lepton2.x** also works, but currently its **not possible** to buy it from **outside the US** at the moment, due to new regulations.
-
-<table style="width: 57%">
-<tr>
-		<td style="width: 111px">
-		<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" /></td>
-		<td style="width: 235px">FLIR Lepton2.x/Lepton3.x shuttered<br />
-		Long-wave-infrared array sensor<br />
-		</td>
-		<td>
-		FLIR One -
-		<a href="https://www.amazon.co.uk/gp/offer-listing/B01478QCHU/ref=sr_1_1_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-1&amp;keywords=FLIR+One&amp;condition=used">
-		<strong>Android</strong></a> 
-		or
-		<a href="https://www.amazon.co.uk/gp/offer-listing/B0123QLZJ8/ref=sr_1_3_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-3&amp;keywords=FLIR+One&amp;condition=used">
-		<strong>iOS</strong></a> (<strong>Lepton3.0</strong>)<br />
-		Alternative 1:
-		<a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		Digikey.com</a> (<strong>Lepton2.0</strong>) - US ONLY<br />
-		Alternative 2:
-		<a href="http://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
-		Digikey.com</a> (<strong>Lepton2.5</strong>) - US ONLY</td>
-	</tr>
-<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonModule.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">FLIR Lepton Breakout Board<br />
-		Interface the Lepton over SPI / I2C&nbsp;</td>
-		<td>
-		<a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
-		<strong>Digikey.com</strong></a><br />
-		Alternative 1:
-		<a href="https://store.groupgets.com/#!/FLIR-Lepton-Breakout-Board/p/52239830/category=0">
-		GroupGets.com</a></td>
-	</tr>
-<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">MLX90614-BCF<br />
-		Spot sensor for absolute temperature measurement, NOT required for 
-		Lepton2.5</td>
-		<td>
-		<strong>
-		<a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
-		Digikey.com</a></strong><br />
-		Alternative 1:
-		<a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
-	</tr>
-<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Teensy36.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">Teensy 3.6<br />
-		Cortex M4 Microcontroller&nbsp;</td>
-		<td>
-		<strong>
-		<a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
-		Digikey.com</a></strong><br />
-		Alternative 1:
-		<a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
-		Alternative 2:
-		<a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
-		Flikto.de</a></td>
-	</tr>
-	<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">SanDisk 8GB microSD card<br />
-		Can be any size, but needs to be Class4 microSD&nbsp;</td>
-		<td>
-		<strong><a href="http://www.digikey.com/products/en?keywords=P17033-ND">
-		Digikey.com</a></strong><br />
-		Alternative 1:
-		<a href="https://www.amazon.com/SanDisk-microSD-High-Capacity-microSDHC/dp/B00488G6P8/ref=sr_1_2?ie=UTF8&amp;qid=1486731377&amp;sr=8-2&amp;keywords=8GB+microSD">
-		Amazon.com</a></td>
-	</tr>
-<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/VisualCam.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">Arducam V2 Mini 2MP<br />
-		Visual camera module&nbsp;</td>
-		<td>
-		<strong>
-		<a href="http://www.ebay.com/itm/Arducam-2MP-V2-Mini-Camera-Shield-with-ESP8266-Nano-Esp-12F-Evaluation-Kits-/291833972833?hash=item43f2a90861:g:gUYAAOSwqfNXnrKR">
-		Ebay.com</a></strong><br />
-		Alternative 1:
-		<a href="http://www.uctronics.com/arducam-2mp-v2-mini-camera-shield-with-esp8266-nano-esp-12f-evaluation-kits.html">
-		Uctronics.com</a></td>
-	</tr>
-<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Display.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">3.2" TT LCD Display Module<br />
-		Configuration: 5V, Pin header 4-wire SPI, resistive touch, no font chip</td>
-		<td>
-		<a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
-		<strong>BuyDisplay.com</strong></a></td>
-	</tr>
-<tr>
-		<td style="width: 111px">
-		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" /></td>
-		<td style="width: 235px">3.7V Lithium Polymer Battery&nbsp;<br />
-		With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)</td>
-		<td>
-		<a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
-		<strong>Aliexpress.com</strong></a><br />
-		Alternative 1:
-		<a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
-		Alternative 2:
-		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
-		Mikroe.com</a></td>
-	</tr>
-</table>
 
 ----------
 
@@ -816,4 +813,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 22.02.2017
+**Last updated**: 08.03.2017
