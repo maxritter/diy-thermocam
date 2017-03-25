@@ -7,6 +7,4 @@ You can order the 2D laser cut side plates from Ponoko USA: http://www.ponoko.co
 Formulor.de also offers a laser cutting service for that material in Germany.
 Seeedstudio.com has a low-cost laser cutting service in China, but their material thickness varies, so be careful.
 
-You can also get the enclosure from me against a small donation, have a look at the part list for the link.
-
 Or use a 3D printer to make your custom version of the enclosure, together with the 3D design files.
