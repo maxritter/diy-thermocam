@@ -157,8 +157,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
 		Mikroe.com</a></td>
 	</tr>
-
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Printed Circuit Board<br />
@@ -168,7 +167,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		Or use the 
 		<a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB">gerber files</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Enclosure.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Enclosure<br />
@@ -179,7 +178,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		Or use the 
 		<a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure">design files</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Charging.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">TP4057 Charging Module<br />
@@ -190,7 +189,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://www.amazon.com/Solu-Lithium-Battery-Charging-Reverse/dp/B00YZV7RTW">
 		Amazon.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Booster.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Pololu U3V12F5<br />
@@ -202,7 +201,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
 		Flikto.de</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PowerSwitch.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">E-Switch R6ABLKBLKFF<br />
@@ -211,7 +210,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/e-switch/R6ABLKBLKFF/EG1526-ND/301973">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PushButton.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">RAFI 1.10107.0110104<br />
@@ -220,7 +219,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/rafi-usa/1.10107.0110104/1715-1019-ND/6227436">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/USBSwitch.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">E-Switch EG1201A<br />
@@ -229,7 +228,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/e-switch/EG1201A/EG1902-ND/101723">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">JST S2B-PH-K-S<br />
@@ -238,7 +237,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDSlot.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Wurth 693063020911<br />
@@ -247,7 +246,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/products/en?keywords=%09732-3818-1-ND">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDAdapter.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">MicroSD adapter<br />
@@ -256,7 +255,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/seeed-technology-co-ltd/328030004/328030004-ND/5487856">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DisplayHeader.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Display connector<br />
@@ -265,7 +264,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonHeader.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Lepton board connector<br />
@@ -274,7 +273,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/PPPC081LGBN-RC/S5483-ND/775941">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PinHeader.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Pin header strip<br />
@@ -283,7 +282,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/4-103741-0/A26509-40-ND/297917">
 		Digikey.com</a> (2 pcs)</td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CoinHolder.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Keystone 3001<br />
@@ -292,7 +291,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/products/en?keywords=Keystone%203001">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CoinCell.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">CR1220 coin cell battery&nbsp;<br />
@@ -301,7 +300,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
 		Digikey.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Res47.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">4.7K 1/4W 1% resistor<br />
@@ -310,7 +309,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNMF14FTC4K70/S4.7KCACT-ND/2617510">
 		Digikey.com</a> (4 pcs)</td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Res10K.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">10K 1/4W 1% resistor&nbsp;<br />
@@ -319,7 +318,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
 		Digikey.com</a> (2 pcs)&nbsp;</td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoProt.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Lipo protector<br />
@@ -329,7 +328,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		Digikey.com</a><br />
 		Or use any thick tape</td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CableRight.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Angled microUSB cable<br />
@@ -340,7 +339,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		Ebay.com</a><br />
 		Or use any USB cable</td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Tripod.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Mini tripod<br />
@@ -350,7 +349,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		Ebay.com</a><br />
 		Or use any tripod</td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/TripodSocket.png" style="-webkit-user-select: none" /></td>
 		<td style="width: 235px">Tripod socket&nbsp;</td>
@@ -358,7 +357,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://www.amazon.com/The-Hillman-Group-2511-13-Pack/dp/B00HYLZ33W/">
 		Amazon.com</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Screw M2 x 10&nbsp;(6 pcs)</td>
@@ -366,7 +365,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Distance M2 x 3 (6 pcs)&nbsp;</td>
@@ -374,7 +373,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x3.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Distance M2 x 3.5 (2 pcs)&nbsp;</td>
@@ -382,7 +381,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x35.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Screw M2 x 8 (5 pcs)&nbsp;</td>
@@ -390,14 +389,14 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM2x8.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Screw M2.5 x 6 Black (8 pcs)&nbsp;</td>
 		<td>
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Bolt M2.5 x 12 (4 pcs)&nbsp;</td>
@@ -405,7 +404,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Bolt M2.5 x 11 (4 pcs)&nbsp;</td>
@@ -413,7 +412,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x11.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Bolt M2.5 x 5 (4 pcs)&nbsp;</td>
@@ -421,7 +420,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x5.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Nut M2 (5 pcs)&nbsp;</td>
@@ -429,7 +428,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Nut M2 Plastic (6 pcs)&nbsp;</td>
@@ -437,7 +436,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
 		<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">
 		Details</a></td>
 	</tr>
-	<tr>
+<tr>
 		<td style="width: 111px">
 		&nbsp;</td>
 		<td style="width: 235px">Washer M2 (3 pcs)&nbsp;</td>
