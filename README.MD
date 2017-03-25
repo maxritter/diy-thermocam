@@ -913,4 +913,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 08.03.2017
+**Last updated**: 25.03.2017
