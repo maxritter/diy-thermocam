@@ -44,31 +44,32 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 In order to **make your own DIY-Thermocam V2**, use the list to acquire the needed parts over one of the **provided links** on the right side. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 
-I also recommend [**extracting**](http://hardtechlife.com/teardown-flir-one-for-android/) the FLIR Lepton3 sensor from a **FLIR One**. The **Lepton2.x** also works, but currently its **not possible** to buy it from **outside the US** at the moment, due to new regulations.
-
-For time reasons, I do **not offer** complete **kits** or **pre-assembled units**. Please take your time and **order** the components **on your own**, the **result** will be **worth the efforts**!
+I do **not offer** complete **kits** or **pre-assembled units**. Please take your time and **order** the components **on your own**, the **result** will be **worth the efforts**!
 
 <table style="width: 100%">
    <tr>
       <td style="width: 111px">
          <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" />
       </td>
-      <td style="width: 235px">FLIR Lepton2.x/Lepton3.x shuttered<br />
+      <td style="width: 235px">FLIR Lepton (Shuttered)<br />
          Long-wave-infrared array sensor<br />
       </td>
       <td>
-         FLIR One -
-         <a href="https://www.amazon.co.uk/gp/offer-listing/B01478QCHU/ref=sr_1_1_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-1&amp;keywords=FLIR+One&amp;condition=used">
-         <strong>Android</strong></a> 
-         or
-         <a href="https://www.amazon.co.uk/gp/offer-listing/B0123QLZJ8/ref=sr_1_3_olp?ie=UTF8&amp;qid=1486731192&amp;sr=8-3&amp;keywords=FLIR+One&amp;condition=used">
-         <strong>iOS</strong></a> (<strong>Lepton3.0</strong>)<br />
-         Alternative 1:
-         <a href="http://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-         Digikey.com</a> (<strong>Lepton2.0</strong>) - US ONLY<br />
-         Alternative 2:
-         <a href="http://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
-         Digikey.com</a> (<strong>Lepton2.5</strong>) - US ONLY
+         Lepton3.0:
+		 <a href="https://www.avnet.com/shop/us/p/sensors-and-transducers/optical-sensors/image-sensors/flir-systems-flr--1/500-0726-01-3074457345632113613/">
+		 <strong>Avnet.com</strong></a> or
+		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
+		 Digikey.com</a><br />
+		 Lepton2.5:
+		 <a href="https://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
+		 <strong>Digikey.com</strong></a> or
+		 <a href="https://store.groupgets.com/products/radiometric-flir-lepton-2-5">
+		 GroupGets.com</a><br />
+		 Lepton2.0:
+		 <a href="https://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
+		 <strong>Digikey.com</strong></a> or
+		 <a href="https://store.groupgets.com/products/50-shuttered-flir-lepton-thermal-imager">
+		 GroupGets.com </a>
       </td>
    </tr>
    <tr>
@@ -84,7 +85,10 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
          Alternative 1:
          <a href="https://store.groupgets.com/#!/FLIR-Lepton-Breakout-Board/p/52239830/category=0">
          GroupGets.com</a>
-      </td>
+      <br />
+		 Alternative 2:
+		 <a href="http://www.futureelectronics.com/en/Technologies/Product.aspx?ProductID=250058700FLY5058792&amp;IM=0">
+		 FutureElectronics.com</a></td>
    </tr>
    <tr>
       <td style="width: 111px">
@@ -100,7 +104,8 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
          Digikey.com</a></strong><br />
          Alternative 1:
          <a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a>
-      </td>
+         <br />
+		 Alternative 2: FutureElectronics.com</td>
    </tr>
    <tr>
       <td style="width: 111px">
@@ -187,7 +192,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       <td style="width: 235px">Printed Circuit Board<br />
          89.4mm (w) x 68.4mm (h), 1.6mm thickness, 2 layers</td>
       <td>
-         <a href="https://oshpark.com/shared_projects/ddHY98QR">OSHPark.com</a><br />
+         <a href="https://oshpark.com/shared_projects/ddHY98QR"><strong>OSHPark.com</strong></a><br />
 		 <a href="http://www.smart-prototyping.com/PCB-Prototyping.html">
 		 Smart-Prototyping.com</a><br />
          Or use the 
@@ -202,7 +207,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
          2D laser-cut from 3mm black acryl plastic (one side frosted)</td>
       <td>
          <a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
-         Ponoko.com</a><br />
+         <strong>Ponoko.com</strong></a><br />
 		 <a href="http://www.formulor.de/">Formulor.de</a><br />
          Or use the 
          <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure">design files</a>
@@ -217,7 +222,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.ebay.com/itm/Dual-TP4057-Lithium-Battery-1A-LED-Charging-Board-Li-ion-Battery-Charger-Mudule-/400614252936?hash=item5d46786188:g:WTEAAOSwal5YJTmW">
-         Ebay.com</a><br />
+         <strong>Ebay.com</strong></a><br />
          <a href="https://www.amazon.com/Solu-Lithium-Battery-Charging-Reverse/dp/B00YZV7RTW">
          Amazon.com</a>
       </td>
@@ -231,7 +236,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
-         Ebay.com</a><br />
+         <strong>Ebay.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
          <a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
          Flikto.de</a>
@@ -246,7 +251,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/e-switch/R6ABLKBLKFF/EG1526-ND/301973">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -258,7 +263,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/rafi-usa/1.10107.0110104/1715-1019-ND/6227436">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -270,7 +275,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/e-switch/EG1201A/EG1902-ND/101723">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -282,7 +287,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -294,7 +299,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/products/en?keywords=%09732-3818-1-ND">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -306,7 +311,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/seeed-technology-co-ltd/328030004/328030004-ND/5487856">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -318,7 +323,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -330,7 +335,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/PPPC081LGBN-RC/S5483-ND/775941">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -342,7 +347,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/4-103741-0/A26509-40-ND/297917">
-         Digikey.com</a> (2 pcs)
+         <strong>Digikey.com</strong></a> (2 pcs)
       </td>
    </tr>
    <tr>
@@ -354,7 +359,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/products/en?keywords=Keystone%203001">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -366,7 +371,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
-         Digikey.com</a>
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -378,7 +383,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNMF14FTC4K70/S4.7KCACT-ND/2617510">
-         Digikey.com</a> (4 pcs)
+         <strong>Digikey.com</strong></a> (4 pcs)
       </td>
    </tr>
    <tr>
@@ -390,7 +395,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
-         Digikey.com</a> (2 pcs)&nbsp;
+         <strong>Digikey.com</strong></a> (2 pcs)&nbsp;
       </td>
    </tr>
    <tr>
@@ -402,7 +407,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/3m-tc/12X12-6-9495LE/3M9744-ND/2649289">
-         Digikey.com</a><br />
+         <strong>Digikey.com</strong></a><br />
          Or use any thick tape
       </td>
    </tr>
@@ -416,7 +421,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.ebay.com/itm/Down-Angled-Micro-USB-5-Pin-Male-to-USB-A-Male-Data-Charge-Cable-for-Cell-Phone-/291869468911?hash=item43f4c6a8ef:g:9RgAAOSwxg5X0ovy">
-         Ebay.com</a><br />
+         <strong>Ebay.com</strong></a><br />
          Or use any USB cable
       </td>
    </tr>
@@ -429,7 +434,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
       <td>
          <a href="http://www.ebay.com/itm/New-Mini-Flexible-Pocket-Size-Metal-Tripod-for-Digital-Camera-Sony-Canon-Nikon-/121351046836?hash=item1c411606b4:g:gCIAAOSwP~tW3qCx">
-         Ebay.com</a><br />
+         <strong>Ebay.com</strong></a><br />
          Or use any tripod
       </td>
    </tr>
@@ -440,7 +445,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       <td style="width: 235px">Tripod socket&nbsp;</td>
       <td>
          <a href="https://www.amazon.com/The-Hillman-Group-2511-13-Pack/dp/B00HYLZ33W/">
-         Amazon.com</a>
+         <strong>Amazon.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -553,6 +558,7 @@ For time reasons, I do **not offer** complete **kits** or **pre-assembled units*
       </td>
    </tr>
 </table>
+
 
 ----------
 
@@ -913,4 +919,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 25.03.2017
+**Last updated**: 12.04.2017
