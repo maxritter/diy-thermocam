@@ -47,7 +47,7 @@ In order to **make your own DIY-Thermocam V2**, use the list to acquire the need
 I do **not offer** complete **kits** or **pre-assembled units**. Please take your time and **order** the components **on your own**, the **result** will be **worth the efforts**!
 
 <table style="width: 100%">
-   <tr>
+  <tr>
       <td style="width: 111px">
          <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" />
       </td>
@@ -61,22 +61,22 @@ I do **not offer** complete **kits** or **pre-assembled units**. Please take you
 		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
 		 Digikey.com</a><br />
 		 Lepton2.5:
+		 <a href="http://www.ebay.com/itm/FLIR-Lepton2-5-Radiometric-80x60-LWIR-Sensor-/262928735698?hash=item3d37c61dd2:g:XR8AAOSwuLZY6OsV">
+		 <strong>Ebay.com</strong></a> or
 		 <a href="https://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
-		 <strong>Digikey.com</strong></a> or
-		 <a href="https://store.groupgets.com/products/radiometric-flir-lepton-2-5">
-		 GroupGets.com</a><br />
+		 Digikey.com</a><br />
 		 Lepton2.0:
+		 <a href="http://www.ebay.com/itm/FLIR-Lepton2-80x60-LWIR-Sensor-/262928739894?hash=item3d37c62e36:g:T6YAAOSwpP9Y6OwZ">
+		 <strong>Ebay.com</strong></a> or
 		 <a href="https://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		 <strong>Digikey.com</strong></a> or
-		 <a href="https://store.groupgets.com/products/50-shuttered-flir-lepton-thermal-imager">
-		 GroupGets.com </a>
-      </td>
+		 Digikey.com</td>
    </tr>
+
    <tr>
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonModule.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">FLIR Lepton Breakout Board<br />
+      <td style="width: 235px">FLIR Lepton Breakout Boardbr />
          Interface the Lepton over SPI / I2C&nbsp;
       </td>
       <td>
@@ -558,7 +558,6 @@ I do **not offer** complete **kits** or **pre-assembled units**. Please take you
       </td>
    </tr>
 </table>
-
 
 ----------
 
