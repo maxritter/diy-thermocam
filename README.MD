@@ -2,7 +2,7 @@
 <br>
 <br>
 
-The **DIY-Thermocam** is a **do-it-yourself** infrared camera, based on the popular **FLIR Lepton** long-wave-infrared array sensor.  The **material price** of all components is at about **400€**, which makes the device one of the **cheapest standalone solution** for thermal imaging on the market.
+The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on the popular **FLIR Lepton** long-wave-infrared array sensor. 
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Thermocam.jpg" width="500">
 
@@ -14,9 +14,12 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
-A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is now available, giving an **overview** about the whole **project** and its **capabilities**.
+[**GroupGets**](https://groupgets.com/campaigns/305-diy-thermocam) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
 
-<a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a>
+A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
+
+<a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
+<a href="https://groupgets.com/campaigns/305-diy-thermocam"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
 
 ----------
 
@@ -25,8 +28,6 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. 
 
 An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_04.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
-
-On the **part side**, you need the **components** from the **support package** and the **missing parts** from the **other parts list** below.
 
 The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** (**Lepton2.5** only at the moment). The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
 
@@ -39,15 +40,18 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 ----------
 
-**Required Parts**
+**REQUIRED PARTS**
 
 
-In order to **make your own DIY-Thermocam V2**, use the list to acquire the needed parts over one of the **provided links** on the right side. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
+In order to **make your own DIY-Thermocam V2**, you have **two options**: 
 
-I do **not offer** complete **kits** or **pre-assembled units**. Please take your time and **order** the components **on your own**, the **result** will be **worth the efforts**!
+- Buy the **[self-assembly kit](https://groupgets.com/campaigns/305-diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
+- Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
+
+I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
 
 <table style="width: 100%">
-   <tr>
+    <tr>
       <td style="width: 111px">
          <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" />
       </td>
@@ -61,16 +65,17 @@ I do **not offer** complete **kits** or **pre-assembled units**. Please take you
 		 <a href="https://www.avnet.com/shop/us/p/sensors-and-transducers/optical-sensors/image-sensors/flir-systems-flr--1/500-0726-01-3074457345632113613/">
 		 Avnet.com</a><br />
 		 Lepton2.5:
-		 <a href="http://www.ebay.com/itm/FLIR-Lepton2-5-Radiometric-80x60-LWIR-Sensor-/262928735698?hash=item3d37c61dd2:g:XR8AAOSwuLZY6OsV">
-		 <strong>Ebay.com</strong></a> or
 		 <a href="https://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
-		 Digikey.com</a><br />
+		 <strong>Digikey.com</strong></a> or
+		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/radiometric-flir-lepton-2-5">
+		 GroupGets.com</a><br />
 		 Lepton2.0:
-		 <a href="http://www.ebay.com/itm/FLIR-Lepton2-80x60-LWIR-Sensor-/262928739894?hash=item3d37c62e36:g:T6YAAOSwpP9Y6OwZ">
-		 <strong>Ebay.com</strong></a> or
 		 <a href="https://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		 Digikey.com</td>
+		 <strong>Digikey.com</strong></a> or
+		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/50-shuttered-flir-lepton-thermal-imager">
+		 GroupGets.com</a></td>
    </tr>
+
    <tr>
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonModule.png" style="-webkit-user-select: none" />
@@ -905,4 +910,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 15.04.2017
+**Last updated**: 17.04.2017
