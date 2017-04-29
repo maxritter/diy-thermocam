@@ -1,25 +1,24 @@
-
-*** DIY-Thermocam Firmware Development ***
+# DIY-Thermocam Firmware Development #
 
 GNU General Public License v3.0
 Copyright by Max Ritter
 
-http://www.diy-thermocam.net
-https://github.com/maxritter/DIY-Thermocam
-
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Diagram.png" width="500">
 
-THIS GUIDE IS ONLY REQUIRED, IF YOU WANT TO MAKE CHANGES TO THE FIRMWARE ON YOUR OWN!
-If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex).
+**THIS GUIDE IS ONLY REQUIRED, IF YOU WANT TO MAKE CHANGES TO THE FIRMWARE ON YOUR OWN!**
+
+If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex) from **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Releases)**.
 
 
 Download and install the following programs:
 
-1. Arduino 1.8.1:                      https://www.arduino.cc/en/Main/Software
+1. Arduino 1.8.2:                      https://www.arduino.cc/en/Main/Software
 2. Teensyduino 1.36:                   https://www.pjrc.com/teensy/td_download.html
 3. Visual Studio 2015/2017 Community:  https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx
 4. Visual Micro:                       http://www.visualmicro.com/page/Arduino-Visual-Studio-Downloads.aspx
+
+If you are using the DIY-Thermocam V1 with the Teensy 3.2, you need to unlock the overclock option first. Go to the Teensy avr folder (f.ex. "C:\Program Files (x86)\Arduino\hardware\teensy\avr\"), open the file "boards.txt" and remove the hash (#) symbol in front of this line: "teensy31.menu.speed.144=144 MHz (overclock)", then save the file.
 
 Now Start Visual Studio.
 
@@ -47,8 +46,8 @@ If there is no Comport, upload a blank sketch with the USB Type "Serial" to the 
 
 Open the project with Open -> Arduino Project and select the "DIY-Thermocam.ino". 
 
-Compile the project with F7. The last step is to include the Mass Storage into the Hex file.
+Compile the project with F7 or upload it directly to the Thermocam with F5.
 
-Copy the output hex "DIY-Thermocam.ino.hex" from Visual studio into the folder "MSD" and start the file "Unify.bat". A new file called "Firmware.hex" will be created.
+If you are using the DIY-Thermocam V1 with the Teensy 3.2, you also need to include the mass storage part into your hex file. Copy the output hex "DIY-Thermocam.ino.hex" from Visual studio into the folder "MSD" and start the file "Unify.bat". A new file called "Firmware.hex" will be created.
 
 Upload this file to your DIY-Thermocam with the teensy.exe uploader together with the teensy_reboot.exe from the "MSD" folder.
