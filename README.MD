@@ -14,12 +14,12 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
-[**GroupGets**](https://groupgets.com/campaigns/313-diy-thermocam-round-2) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
+[**GroupGets**](https://groupgets.com/campaigns/305-diy-thermocam) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
 
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
 
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
-<a href="https://groupgets.com/campaigns/313-diy-thermocam-round-2"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
+<a href="https://groupgets.com/campaigns/305-diy-thermocam"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
 
 ----------
 
@@ -45,7 +45,7 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 In order to **make your own DIY-Thermocam V2**, you have **two options**: 
 
-- Buy the **[self-assembly kit](https://groupgets.com/campaigns/313-diy-thermocam-round-2)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
+- Buy the **[self-assembly kit](https://groupgets.com/campaigns/305-diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
 - Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 
 I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
@@ -62,8 +62,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Lepton3.0:
 		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
 		 <strong>Digikey.com</strong></a> or
-		 <a href="https://www.avnet.com/shop/us/p/sensors-and-transducers/optical-sensors/image-sensors/flir-systems-flr--1/500-0726-01-3074457345632113613/">
-		 Avnet.com</a><br />
+		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/l3">
+		 GroupGets.com</a><br />
 		 Lepton2.5:
 		 <a href="https://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
 		 <strong>Digikey.com</strong></a> or
@@ -75,7 +75,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/50-shuttered-flir-lepton-thermal-imager">
 		 GroupGets.com</a></td>
    </tr>
-
    <tr>
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonModule.png" style="-webkit-user-select: none" />
@@ -86,12 +85,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
       <td>
          <a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
          <strong>Digikey.com</strong></a><br />
-         <a href="https://store.groupgets.com/#!/FLIR-Lepton-Breakout-Board/p/52239830/category=0">
-         GroupGets.com</a>
-      <br />
-		 <a href="http://www.futureelectronics.com/en/Technologies/Product.aspx?ProductID=250058700FLY5058792&amp;IM=0">
-		 FutureElectronics.com</a></td>
+         <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/flir-lepton-breakout-board">GroupGets.com</a></td>
    </tr>
+
    <tr>
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" />
@@ -910,4 +906,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 04.05.2017
+**Last updated**: 08.05.2017
