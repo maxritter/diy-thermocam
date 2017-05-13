@@ -47,6 +47,7 @@ In order to **make your own DIY-Thermocam V2**, you have **two options**:
 
 - Buy the **[self-assembly kit](https://groupgets.com/campaigns/313-diy-thermocam-round-2)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
 - Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
+- You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
 
 I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
 
@@ -87,7 +88,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <strong>Digikey.com</strong></a><br />
          <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/flir-lepton-breakout-board">GroupGets.com</a></td>
    </tr>
-
    <tr>
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" />
@@ -97,8 +97,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Lepton2.5)</td>
       <td>
          <strong>
-         <a href="http://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-TU/MLX90614ESF-BCF-000-TU-ND/3641020">
-         Digikey.com</a></strong><br />
+         <a href="https://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-SP/MLX90614ESF-BCF-000-SP-ND/5414794">Digikey.com</a></strong><br />
          <a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
    </tr>
    <tr>
@@ -125,10 +124,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Can be any size, but needs to be Class4 microSD&nbsp;
       </td>
       <td>
-         <strong><a href="http://www.digikey.com/products/en?keywords=P17033-ND">
-         Digikey.com</a></strong><br />
-         <a href="https://www.amazon.com/SanDisk-microSD-High-Capacity-microSDHC/dp/B00488G6P8/ref=sr_1_2?ie=UTF8&amp;qid=1486731377&amp;sr=8-2&amp;keywords=8GB+microSD">
-         Amazon.com</a>
+         <a href="http://www.ebay.com/itm/SanDisk-32GB-16GB-8GB-Micro-SD-SD-HC-TF-Memory-Card-Retail-Package-Class-4-C4-/152291118415?var=&amp;hash=item2375420d4f:m:mhCKhMZoMK-EaKQbv04Y5Ag">
+		 <strong>Ebay.com</strong></a><br />
+         <a href="https://www.amazon.com/SanDisk-microSD-High-Capacity-microSDHC/dp/B00488G6P8/ref=sr_1_7?ie=UTF8&amp;qid=1494677828&amp;sr=8-7&amp;keywords=Sandisk+8GB">Amazon.com</a>
       </td>
    </tr>
    <tr>
@@ -394,8 +392,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Double-sided adhesive tape for the lipo protection on the PCB&nbsp;
       </td>
       <td>
-         <a href="http://www.digikey.com/product-detail/en/3m-tc/12X12-6-9495LE/3M9744-ND/2649289">
-         <strong>Digikey.com</strong></a><br />
+         <a href="http://www.ebay.com/itm/3M-300LSE-Double-Sided-Super-Sticky-Heavy-Duty-Adhesive-Tape-/152506570643?var=&amp;hash=item2382199793:m:mbfszab003v24D4gcJ724Eg">
+		 <strong>Ebay.com</strong></a><br />
          Or use any thick tape
       </td>
    </tr>
@@ -906,4 +904,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 08.05.2017
+**Last updated**: 13.05.2017
