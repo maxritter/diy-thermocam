@@ -30,13 +30,7 @@ void lepton_begin() {
 	if (mlx90614Version == mlx90614Version_new)
 		startAltClockline();
 
-	//For Teensy  3.1 / 3.2 and Lepton3 use this one
-	if ((teensyVersion == teensyVersion_old) && (leptonVersion == leptonVersion_3_0_shutter))
-		SPI.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE0));
-
-	//Otherwise use 20 Mhz maximum and SPI mode 1
-	else
-		SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE1));
+	SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE1));
 
 	//Start transfer  - CS LOW
 	digitalWrite(pin_lepton_cs, LOW);
@@ -217,7 +211,7 @@ void lepton_getRawValues()
 
 				//Stabilize framerate
 				uint32_t time = micros();
-				while ((micros() - time) < 800)
+				while ((micros() - time) < 400)
 					__asm__ volatile ("nop");
 
 				//Restart at line 0

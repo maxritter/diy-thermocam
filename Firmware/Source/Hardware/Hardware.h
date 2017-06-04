@@ -131,7 +131,7 @@ void readAdjustCombined() {
 
 /* Clears the whole EEPROM */
 void clearEEPROM() {
-	for (unsigned int i = 0; i < EEPROM.length(); i++)
+	for (unsigned int i = 100; i < 250; i++)
 		EEPROM.write(i, 0);
 }
 
@@ -691,6 +691,8 @@ void initHardware()
 	lepton_init();
 	//Init spot sensor
 	mlx90614_init();
+	//Wait two more seconds for FFC to complete
+	bootFFC();
 	//Init SD card
 	initSD();
 	//Disable I2C timeout
@@ -699,8 +701,6 @@ void initHardware()
 	initScreenOffTimer();
 	//Init the buffer(s)
 	initBuffer();
-	//Wait two more seconds for FFC to complete
-	bootFFC();
 	//Check battery for the first time
 	checkBattery(true);
 	//Init the realtime clock
