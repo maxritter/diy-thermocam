@@ -1,6 +1,14 @@
 /*
     ------------------------------------------------------------------------------------------------------
-    i2c_t3 - I2C library for Teensy 3.0/3.1/LC
+    i2c_t3 - I2C library for Teensy 3.x & LC
+
+    - (v9.2) Modified 29Dec16 by Brian (nox771 at gmail.com)
+        - improved resetBus() function to reset C1 state (thanks hw999)
+
+    - (v9.1) Modified 16Oct16 by Brian (nox771 at gmail.com)
+        - applied two fixes due to bug reports:
+            - removed I2C_F_DIV120 setting (120 divide-ratio) for I2C clock
+            - disabled I2C_AUTO_RETRY by default (setting remains but must be manually enabled)
 
     - (v9) Modified 01Jul16 by Brian (nox771 at gmail.com)
         - Added support for Teensy 3.5/3.6:
@@ -898,11 +906,18 @@ void i2c_t3::resetBus_(struct i2cStruct* i2c, uint8_t bus)
             delayMicroseconds(5);
         }
 
-        // reset status
-        i2c->currentStatus = I2C_WAITING; // reset status
-
         // reconfigure pins for I2C
         pinConfigure_(i2c, bus, i2c->currentPins, i2c->currentPullup, 0);
+
+        // reset config and status
+        if(*(i2c->S) & 0x7F) // reset config if any residual status bits are set
+        {
+            *(i2c->C1) = 0x00; // disable I2C, intr disabled
+            delayMicroseconds(5);
+            *(i2c->C1) = I2C_C1_IICEN; // enable I2C, intr disabled, Rx mode
+            delayMicroseconds(5);
+        }
+        i2c->currentStatus = I2C_WAITING;
     }
 }
 

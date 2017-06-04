@@ -1,6 +1,14 @@
 /*
     ------------------------------------------------------------------------------------------------------
-    i2c_t3 - I2C library for Teensy 3.0/3.1/LC
+    i2c_t3 - I2C library for Teensy 3.x & LC
+
+    - (v9.2) Modified 29Dec16 by Brian (nox771 at gmail.com)
+        - improved resetBus() function to reset C1 state (thanks hw999)
+
+    - (v9.1) Modified 16Oct16 by Brian (nox771 at gmail.com)
+        - applied two fixes due to bug reports:
+            - removed I2C_F_DIV120 setting (120 divide-ratio) for I2C clock
+            - disabled I2C_AUTO_RETRY by default (setting remains but must be manually enabled)
 
     - (v9) Modified 01Jul16 by Brian (nox771 at gmail.com)
         - Added support for Teensy 3.5/3.6:
@@ -137,7 +145,6 @@
 #ifndef I2C_F_DIV52
     #define I2C_F_DIV52  ((uint8_t)0x43)
     #define I2C_F_DIV60  ((uint8_t)0x45)
-    #define I2C_F_DIV120 ((uint8_t)0x85)
     #define I2C_F_DIV136 ((uint8_t)0x4F)
     #define I2C_F_DIV176 ((uint8_t)0x55)
     #define I2C_F_DIV352 ((uint8_t)0x95)
@@ -197,7 +204,7 @@
 //
 // Note: this is incompatible with multi-master buses, only use in single-master configurations
 //
-#define I2C_AUTO_RETRY
+//#define I2C_AUTO_RETRY
 
 // ======================================================================================================
 // == End User Define Section ===========================================================================
@@ -357,7 +364,7 @@ enum i2c_dma_state {I2C_DMA_OFF,
 //
 const int32_t i2c_div_num[] =
     {20,22,24,26,28,30,32,34,36,40,44,48,52,56,60,64,68,72,
-     80,88,96,104,112,120,128,136,144,160,176,192,224,240,256,288,
+     80,88,96,104,112,128,136,144,160,176,192,224,240,256,288,
      320,352,384,448,480,512,576,640,768,896,960,1024,1152,
      1280,1536,1920,1792,2048,2304,2560,3072,3840};
 
@@ -367,15 +374,15 @@ const uint8_t i2c_div_ratio[] =
      I2C_F_DIV36,I2C_F_DIV40,I2C_F_DIV44,I2C_F_DIV48,
      I2C_F_DIV52,I2C_F_DIV56,I2C_F_DIV60,I2C_F_DIV64,
      I2C_F_DIV68,I2C_F_DIV72,I2C_F_DIV80,I2C_F_DIV88,
-     I2C_F_DIV96,I2C_F_DIV104,I2C_F_DIV112,I2C_F_DIV120,
-     I2C_F_DIV128,I2C_F_DIV136,I2C_F_DIV144,I2C_F_DIV160,
-     I2C_F_DIV176,I2C_F_DIV192,I2C_F_DIV224,I2C_F_DIV240,
-     I2C_F_DIV256,I2C_F_DIV288,I2C_F_DIV320,I2C_F_DIV352,
-     I2C_F_DIV384,I2C_F_DIV448,I2C_F_DIV480,I2C_F_DIV512,
-     I2C_F_DIV576,I2C_F_DIV640,I2C_F_DIV768,I2C_F_DIV896,
-     I2C_F_DIV960,I2C_F_DIV1024,I2C_F_DIV1152,I2C_F_DIV1280,
-     I2C_F_DIV1536,I2C_F_DIV1920,I2C_F_DIV1792,I2C_F_DIV2048,
-     I2C_F_DIV2304,I2C_F_DIV2560,I2C_F_DIV3072,I2C_F_DIV3840};
+     I2C_F_DIV96,I2C_F_DIV104,I2C_F_DIV112,I2C_F_DIV128,
+     I2C_F_DIV136,I2C_F_DIV144,I2C_F_DIV160,I2C_F_DIV176,
+     I2C_F_DIV192,I2C_F_DIV224,I2C_F_DIV240,I2C_F_DIV256,
+     I2C_F_DIV288,I2C_F_DIV320,I2C_F_DIV352,I2C_F_DIV384,
+     I2C_F_DIV448,I2C_F_DIV480,I2C_F_DIV512,I2C_F_DIV576,
+     I2C_F_DIV640,I2C_F_DIV768,I2C_F_DIV896,I2C_F_DIV960,
+     I2C_F_DIV1024,I2C_F_DIV1152,I2C_F_DIV1280,I2C_F_DIV1536,
+     I2C_F_DIV1920,I2C_F_DIV1792,I2C_F_DIV2048,I2C_F_DIV2304,
+     I2C_F_DIV2560,I2C_F_DIV3072,I2C_F_DIV3840};
 
 
 // ------------------------------------------------------------------------------------------------------
