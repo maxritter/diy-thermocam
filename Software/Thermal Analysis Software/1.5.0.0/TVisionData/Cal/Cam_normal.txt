@@ -1,0 +1,3 @@
+CalSlope:	0.0402	
+CalOffset:	-296.86	
+Note:		
