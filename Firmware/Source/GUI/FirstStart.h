@@ -321,7 +321,8 @@ void stdEEPROMSet() {
 	}
 
 	//Set device EEPROM settings
-	EEPROM.write(eeprom_rotationEnabled, false);
+	EEPROM.write(eeprom_rotationVert, false);
+	EEPROM.write(eeprom_rotationHorizont, false);
 	EEPROM.write(eeprom_spotEnabled, false);
 	EEPROM.write(eeprom_colorbarEnabled, true);
 	EEPROM.write(eeprom_batteryEnabled, true);

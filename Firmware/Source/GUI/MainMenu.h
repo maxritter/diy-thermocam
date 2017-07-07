@@ -934,9 +934,15 @@ bool tempLimits() {
 			int pressedButton = buttons_checkButtons(true);
 			//AUTO
 			if (pressedButton == 0) {
+				//Show message
+				showFullMessage((char*)"Please wait..", true);
+
 				//Enable auto mode again and disable limits locked
 				autoMode = true;
 				limitsLocked = false;
+
+				//Set temperature presets to temporary, so it does not load
+				EEPROM.write(eeprom_minMaxPreset, minMax_temporary);
 
 				//Enable auto FFC
 				lepton_ffcMode(true);

@@ -228,26 +228,6 @@ void bootScreen() {
 	display_print((char*)Version, CENTER, 220);
 }
 
-/* Show the shutter info on the boot screen */
-void bootFFC()
-{
-	//Skip if returnning from mass storage mode or doing a firmware update
-	if ((EEPROM.read(eeprom_massStorage) == eeprom_setValue) ||
-		(EEPROM.read(eeprom_fwVersion) != fwVersion))
-		return;
-
-	//Showing the info on the screen
-	display_setFont(bigFont);
-	display_print((char*) "Performing FFC", CENTER, 194);
-	display_setFont(smallFont);
-
-	//Wait some time for FFC to complete
-	delay(2000);
-
-	//If no automatic FFC desired, disable it forever
-	checkNoFFC();
-}
-
 /* More includes */
 #include "MainMenu.h"
 #include "LoadMenu.h"

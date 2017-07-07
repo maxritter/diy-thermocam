@@ -117,6 +117,26 @@ void checkWarmup() {
 		//Disable auto FFC when isotherm mode
 		if (hotColdMode != hotColdMode_disabled)
 			lepton_ffcMode(false);
+
+		//Read temperature limits
+		readTempLimits();
+
+		//If we loaded one
+		if(!autoMode)
+		{
+			//Trigger FFC and switch to manual when in auto mode
+			if (leptonShutter == leptonShutter_auto) {
+				//Trigger FFC
+				lepton_ffc();
+				delay(2000);
+
+				//Disable auto FFC
+				lepton_ffcMode(false);
+			}
+
+			//Disable auto mode and limits locked
+			limitsLocked = false;
+		}
 	}
 }
 
@@ -304,7 +324,7 @@ void calibrationProcess(bool serial, bool firstStart) {
 	sprintf(result, "Slope: %1.4f, offset: %.1f", calSlope, calOffset);
 	showFullMessage(result);
 	delay(2000);
-	
+
 	//Set shutter mode back to auto
 	lepton_ffcMode(true);
 

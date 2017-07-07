@@ -431,7 +431,7 @@ repeat:
 		}
 
 		//If rotation enabled and saving / sending, include EXIF header
-		if ((counter == 20) && (!stream) && (rotationEnabled))
+		if ((counter == 20) && (!stream) && (rotationVert))
 		{
 			for (uint8_t i = 0; i < 100; i++)
 			{

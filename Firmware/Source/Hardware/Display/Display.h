@@ -274,12 +274,12 @@ void display_init()
 	if (check != 0xE0)
 		setDiagnostic(diag_display);
 
-	//Read rotation enabled from EEPROM
-	byte read = EEPROM.read(eeprom_rotationEnabled);
+	//Read 180° rotation
+	byte read = EEPROM.read(eeprom_rotationVert);
 	if ((read == 0) || (read == 1))
-		rotationEnabled = read;
+		rotationVert = read;
 	else
-		rotationEnabled = 0;
+		rotationVert = 0;
 }
 
 /* Set the xy coordinates */

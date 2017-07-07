@@ -57,8 +57,9 @@ bool visualEnabled;
 bool autoMode;
 //Lock current limits
 bool limitsLocked;
-//Display rotation
-bool rotationEnabled;
+//Vertical display rotation
+bool rotationVert;
+bool rotationHorizont;
 
 //Display options
 bool batteryEnabled;

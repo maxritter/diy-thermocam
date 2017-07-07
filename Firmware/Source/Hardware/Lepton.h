@@ -30,7 +30,13 @@ void lepton_begin() {
 	if (mlx90614Version == mlx90614Version_new)
 		startAltClockline();
 
-	SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE1));
+	//For Teensy  3.1 / 3.2 and Lepton3 use this one
+	if ((teensyVersion == teensyVersion_old) && (leptonVersion == leptonVersion_3_0_shutter))
+		SPI.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE0));
+
+	//Otherwise use 20 Mhz maximum and SPI mode 1
+	else
+		SPI.beginTransaction(SPISettings(20000000, MSBFIRST, SPI_MODE1));
 
 	//Start transfer  - CS LOW
 	digitalWrite(pin_lepton_cs, LOW);
@@ -61,9 +67,17 @@ void lepton_reset()
 bool savePackage(byte line, byte segment = 0) {
 	//Go through the video pixels for one video line
 	for (int column = 0; column < 80; column++) {
+		//Apply horizontal mirroring
+		if (rotationHorizont)
+			column = 79 - column;
+
 		//Make a 16-bit rawvalue from the lepton frame
 		uint16_t result = (uint16_t)(leptonFrame[2 * column + 4] << 8
 			| leptonFrame[2 * column + 5]);
+
+		//Discard horizontal mirroring
+		if (rotationHorizont)
+			column = 79 - column;
 
 		//Invalid value, return
 		if (result == 0) {
@@ -73,8 +87,8 @@ bool savePackage(byte line, byte segment = 0) {
 		//Lepton2.x
 		if (leptonVersion != leptonVersion_3_0_shutter) {
 			//Rotated or old hardware version
-			if (((mlx90614Version == mlx90614Version_old) && (!rotationEnabled)) ||
-				((mlx90614Version == mlx90614Version_new) && (rotationEnabled))) {
+			if (((mlx90614Version == mlx90614Version_old) && (!rotationVert)) ||
+				((mlx90614Version == mlx90614Version_new) && (rotationVert))) {
 				smallBuffer[(line * 2 * 160) + (column * 2)] = result;
 				smallBuffer[(line * 2 * 160) + (column * 2) + 1] = result;
 				smallBuffer[(line * 2 * 160) + 160 + (column * 2)] = result;
@@ -92,19 +106,31 @@ bool savePackage(byte line, byte segment = 0) {
 		//Lepton3
 		else {
 			//Non-rotated
-			if (!rotationEnabled) {
+			if (!rotationVert) {
 				switch (segment) {
 				case 1:
-					smallBuffer[19199 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
+					if (rotationHorizont)
+						smallBuffer[19199 - (((line / 2) * 160) + ((1 - (line % 2)) * 80) + (column))] = result;
+					else
+						smallBuffer[19199 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
 					break;
 				case 2:
-					smallBuffer[14399 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
+					if (rotationHorizont)
+						smallBuffer[14399 - (((line / 2) * 160) + ((1 - (line % 2)) * 80) + (column))] = result;
+					else
+						smallBuffer[14399 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
 					break;
 				case 3:
-					smallBuffer[9599 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
+					if (rotationHorizont)
+						smallBuffer[9599 - (((line / 2) * 160) + ((1 - (line % 2)) * 80) + (column))] = result;
+					else
+						smallBuffer[9599 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
 					break;
 				case 4:
-					smallBuffer[4799 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
+					if (rotationHorizont)
+						smallBuffer[4799 - (((line / 2) * 160) + ((1 - (line % 2)) * 80) + (column))] = result;
+					else
+						smallBuffer[4799 - (((line / 2) * 160) + ((line % 2) * 80) + (column))] = result;
 					break;
 				}
 			}
@@ -126,6 +152,7 @@ bool savePackage(byte line, byte segment = 0) {
 				}
 			}
 		}
+
 	}
 
 	//Everything worked
@@ -211,7 +238,7 @@ void lepton_getRawValues()
 
 				//Stabilize framerate
 				uint32_t time = micros();
-				while ((micros() - time) < 400)
+				while ((micros() - time) < 800)
 					__asm__ volatile ("nop");
 
 				//Restart at line 0
@@ -275,7 +302,7 @@ int lepton_readReg(byte reg) {
 	return reading;
 }
 
- /* Get the spotmeter value on a radiometric lepton */
+/* Get the spotmeter value on a radiometric lepton */
 float lepton_spotTemp() {
 	//Get RAD spotmeter value
 	Wire.beginTransmission(0x2A);
@@ -313,7 +340,7 @@ float lepton_spotTemp() {
 void lepton_ffcMode(bool automatic)
 {
 	//If there is no shutter, return
-	if(leptonShutter == leptonShutter_none)
+	if (leptonShutter == leptonShutter_none)
 		return;
 
 	//When enabling auto FFC, check for some factors
@@ -321,7 +348,7 @@ void lepton_ffcMode(bool automatic)
 		return;
 
 	//Contains the standard values for the FFC mode
-	byte package[] = { automatic, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 
+	byte package[] = { automatic, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 224, 147, 4, 0, 0, 0, 0, 0, 44, 1, 52, 0 };
 
 	//Data length
@@ -336,10 +363,10 @@ void lepton_ffcMode(bool automatic)
 	Wire.beginTransmission(0x2A);
 	Wire.write(0x00);
 	Wire.write(0x08);
-	for(byte i=0;i<sizeof(package);i++)
+	for (byte i = 0; i < sizeof(package); i++)
 		Wire.write(package[i]);
 	Wire.endTransmission();
-	
+
 	//SYS module with FFC Mode Set
 	Wire.beginTransmission(0x2A);
 	Wire.write(0x00);
@@ -426,7 +453,7 @@ void lepton_init() {
 		//Set the compensation value to zero
 		calComp = 0;
 	}
-	
+
 	//Activate auto mode
 	autoMode = true;
 	//Deactivate limits Locked

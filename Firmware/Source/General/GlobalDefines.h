@@ -110,7 +110,7 @@
 #define eeprom_dateEnabled      109
 #define eeprom_teensyVersion    110
 #define eeprom_storageEnabled   111
-#define eeprom_rotationEnabled  112
+#define eeprom_rotationVert     112
 #define eeprom_displayMode      113
 #define eeprom_textColor        114
 #define eeprom_filterType       115
@@ -166,6 +166,7 @@
 #define eeprom_hqRes            168
 #define eeprom_noShutter        169
 #define eeprom_batComp			170
+#define eeprom_rotationHorizont 171
 #define eeprom_fwVersion        250
 #define eeprom_setValue         200
 

@@ -274,6 +274,12 @@ void readEEPROM() {
 		textColor = read;
 	else
 		textColor = textColor_white;
+	//Horizontal mirroring
+	read = EEPROM.read(eeprom_rotationHorizont);
+	if ((read == false) || (read == true))
+		rotationHorizont = read;
+	else
+		rotationHorizont = false;
 	//Hot / cold mode
 	read = EEPROM.read(eeprom_hotColdMode);
 	if ((read >= hotColdMode_disabled) && (read <= hotColdMode_hot))
@@ -480,7 +486,7 @@ void detectTeensyVersion()
 
 /* Sets the display rotation depending on the setting */
 void setDisplayRotation() {
-	if (rotationEnabled) {
+	if (rotationVert) {
 		display_setRotation(135);
 		touch_setRotation(true);
 	}
@@ -506,6 +512,7 @@ void readTempLimits() {
 		max = ((EEPROM.read(eeprom_maxValue1High) << 8) + EEPROM.read(eeprom_maxValue1Low));
 		minValue = tempToRaw(min);
 		maxValue = tempToRaw(max);
+		autoMode = false;
 	}
 	//Min / max preset 2
 	else if ((minMaxPreset == minMax_preset2) && (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)) {
@@ -513,7 +520,7 @@ void readTempLimits() {
 		max = ((EEPROM.read(eeprom_maxValue2High) << 8) + EEPROM.read(eeprom_maxValue2Low));
 		minValue = tempToRaw(min);
 		maxValue = tempToRaw(max);
-
+		autoMode = false;
 	}
 	//Min / max preset 3
 	else if ((minMaxPreset == minMax_preset3) && (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)) {
@@ -521,6 +528,7 @@ void readTempLimits() {
 		max = ((EEPROM.read(eeprom_maxValue3High) << 8) + EEPROM.read(eeprom_maxValue3Low));
 		minValue = tempToRaw(min);
 		maxValue = tempToRaw(max);
+		autoMode = false;
 	}
 }
 
@@ -691,8 +699,6 @@ void initHardware()
 	lepton_init();
 	//Init spot sensor
 	mlx90614_init();
-	//Wait two more seconds for FFC to complete
-	bootFFC();
 	//Init SD card
 	initSD();
 	//Disable I2C timeout
@@ -705,4 +711,6 @@ void initHardware()
 	checkBattery(true);
 	//Init the realtime clock
 	initRTC();
+	//If no automatic FFC desired, disable it forever
+	checkNoFFC();
 }

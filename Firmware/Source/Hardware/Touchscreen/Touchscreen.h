@@ -66,7 +66,7 @@ void touch_init() {
 
 		//Comparison value depending on rotation
 		uint16_t xval, yval;
-		if (rotationEnabled) {
+		if (rotationVert) {
 			xval = 320;
 			yval = 240;
 		}

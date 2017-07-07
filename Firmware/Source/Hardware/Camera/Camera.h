@@ -186,7 +186,7 @@ unsigned int camera_decompOutNormal(JDEC * jd, void * bitmap, JRECT * rect)
 						bmp[count] = 1;
 
 					//Write to image buffer, rotated
-					if (rotationEnabled)
+					if (rotationVert)
 						bigBuffer[76799 - imagepos] = bmp[count];
 					//Write to image buffer, normal
 					else
@@ -243,7 +243,7 @@ unsigned int camera_decompOutCombined(JDEC * jd, void * bitmap, JRECT * rect) {
 						blueV = (pixel & 0x1F) << 3;
 
 						//Get the thermal image color, rotated
-						if (rotationEnabled)
+						if (rotationVert)
 							pixel = smallBuffer[19199 - imagepos];
 						//Get the thermal image color, normal
 						else
@@ -269,7 +269,7 @@ unsigned int camera_decompOutCombined(JDEC * jd, void * bitmap, JRECT * rect) {
 						pixel = bmp[count++];
 
 					//Write to image buffer, rotated
-					if (rotationEnabled)
+					if (rotationVert)
 						smallBuffer[19199 - imagepos] = pixel;
 					//Write to image buffer, normal
 					else
@@ -326,7 +326,7 @@ void camera_get(byte mode, char* dirname = NULL)
 	else
 	{
 		//If rotated and not streaming, add EXIF header
-		if ((rotationEnabled) && (mode != camera_stream))
+		if ((rotationVert) && (mode != camera_stream))
 			camera_jpegData = (uint8_t*)malloc(jpegLen + 100);
 		//Otherwise allocate byte for JPEG data only
 		else

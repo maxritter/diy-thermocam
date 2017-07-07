@@ -785,7 +785,7 @@ void dateMenuHandler(bool firstStart = false) {
 			}
 			//Back
 			else if (pressedButton == 3) {
-				if(!firstStart)
+				if (!firstStart)
 					otherMenu();
 				break;
 			}
@@ -827,7 +827,7 @@ void timeMenuHandler(bool firstStart = false) {
 			}
 			//Back
 			else if (pressedButton == 3) {
-				if(!firstStart)
+				if (!firstStart)
 					otherMenu();
 				break;
 			}
@@ -1131,41 +1131,57 @@ void tempFormatMenu(bool firstStart = false) {
 void rotateDisplayMenu(bool firstStart = false) {
 	drawTitle((char*) "Disp. rotation", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char*) "Enabled");
-	buttons_addButton(170, 60, 130, 70, (char*) "Disabled");
-	buttons_addButton(20, 150, 280, 70, (char*) "Save");
+	buttons_addButton(20, 60, 130, 70, (char*) "Rotation");
+	buttons_addButton(170, 60, 130, 70, (char*) "Hor. Flip");
+	buttons_addButton(20, 150, 130, 70, (char*) "Disabled");
+	buttons_addButton(170, 150, 130, 70, (char*) "Save");
 	if (firstStart)
-		buttons_relabelButton(2, (char*) "Set", false);
+		buttons_relabelButton(3, (char*) "Set", false);
 	buttons_drawButtons();
-	if (rotationEnabled)
+	if (rotationVert)
 		buttons_setActive(0);
-	else
+	else if (rotationHorizont)
 		buttons_setActive(1);
+	else
+		buttons_setActive(2);
 	//Touch handler
 	while (true) {
 		//touch pressed
 		if (touch_touched() == true) {
 			int pressedButton = buttons_checkButtons();
-			//Enabled
+			//Rotate 180°
 			if (pressedButton == 0) {
-				if (!rotationEnabled) {
-					rotationEnabled = true;
+				if (!rotationVert) {
+					rotationVert = true;
+					rotationHorizont = false;
 					buttons_setActive(0);
 					buttons_setInactive(1);
+					buttons_setInactive(2);
 				}
 			}
-			//Disabled
+			//Mirror horizontally
 			else if (pressedButton == 1) {
-				if (rotationEnabled) {
-					rotationEnabled = false;
+				if (!rotationHorizont) {
+					rotationHorizont = true;
+					rotationVert = false;
 					buttons_setActive(1);
 					buttons_setInactive(0);
+					buttons_setInactive(2);
 				}
 			}
-			//Save
+			//Disable
 			else if (pressedButton == 2) {
+				rotationVert = false;
+				rotationHorizont = false;
+				buttons_setActive(2);
+				buttons_setInactive(0);
+				buttons_setInactive(1);
+			}
+			//Save
+			else if (pressedButton == 3) {
 				//Write new settings to EEPROM
-				EEPROM.write(eeprom_rotationEnabled, rotationEnabled);
+				EEPROM.write(eeprom_rotationVert, rotationVert);
+				EEPROM.write(eeprom_rotationHorizont, rotationHorizont);
 				if (firstStart)
 					return;
 				//Set the rotation

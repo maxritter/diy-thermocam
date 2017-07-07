@@ -157,7 +157,7 @@ void sendConfigData() {
 	else
 		Serial.write(leptonVersion);
 	//Rotation
-	Serial.write(rotationEnabled);
+	Serial.write(rotationVert);
 	//Send color scheme
 	Serial.write(colorScheme);
 	//Send the temperature format
@@ -690,11 +690,11 @@ void setRotation()
 	if ((read >= 0) && (read <= 1))
 	{
 		//Set rotation to input
-		rotationEnabled = read;
+		rotationVert = read;
 		//Apply to display
 		setDisplayRotation();
 		//Save to EEPROM
-		EEPROM.write(eeprom_rotationEnabled, rotationEnabled);
+		EEPROM.write(eeprom_rotationVert, rotationVert);
 	}
 	//Send invalid
 	else

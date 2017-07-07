@@ -213,7 +213,7 @@ void vc0706_transfer(uint8_t* jpegData, uint16_t jpegLen, byte mode, char* dirna
 	if (mode == camera_serial)
 	{
 		//When rotation is enabled or using the ThermocamV4, send EXIF
-		if ((rotationEnabled && (mlx90614Version == mlx90614Version_new)) || (mlx90614Version == mlx90614Version_old))
+		if ((rotationVert && (mlx90614Version == mlx90614Version_new)) || (mlx90614Version == mlx90614Version_old))
 		{
 			Serial.write(((jpegLen + 100) & 0xFF00) >> 8);
 			Serial.write((jpegLen + 100) & 0x00FF);
@@ -260,7 +260,7 @@ void vc0706_transfer(uint8_t* jpegData, uint16_t jpegLen, byte mode, char* dirna
 		if (mode == camera_serial)
 		{
 			//Rotation on DIY-Thermocam V1 or V2
-			if ((counter == 0) && rotationEnabled && (mlx90614Version == mlx90614Version_new))
+			if ((counter == 0) && rotationVert && (mlx90614Version == mlx90614Version_new))
 			{
 				Serial.write(buffer, 40);
 				Serial.write(exifHeader_rotated, 100);
@@ -284,7 +284,7 @@ void vc0706_transfer(uint8_t* jpegData, uint16_t jpegLen, byte mode, char* dirna
 		if (mode == camera_save)
 		{
 			//Rotation on DIY-Thermocam V1 or V2
-			if ((counter == 0) && rotationEnabled && (mlx90614Version == mlx90614Version_new))
+			if ((counter == 0) && rotationVert && (mlx90614Version == mlx90614Version_new))
 			{
 				sdFile.write(buffer, 40);
 				sdFile.write(exifHeader_rotated, 100);
