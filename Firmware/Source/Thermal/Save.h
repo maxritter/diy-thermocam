@@ -161,7 +161,7 @@ void imgSaveStart() {
 	//Check if there is at least 1MB of space left
 	if (getSDSpace() < 1000) {
 		//Show message
-		showFullMessage((char*) "The SD card is full!");
+		showFullMessage((char*) "The SD card is full");
 		delay(1000);
 
 		//Disable and return
@@ -327,7 +327,7 @@ void processVideoFrames(int framesCaptured, char* dirname) {
 	}
 
 	//All images converted!
-	showFullMessage((char*) "Video converted!");
+	showFullMessage((char*) "Video converted");
 	delay(1000);
 }
 

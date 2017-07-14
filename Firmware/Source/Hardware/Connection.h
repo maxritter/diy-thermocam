@@ -1224,7 +1224,7 @@ void serialInit()
 /* Tries to establish a connection to a thermal viewer or video output module*/
 void serialConnect() {
 	//Show message
-	showFullMessage((char*)"Serial connection detected!");
+	showFullMessage((char*)"Serial connection detected");
 	display_print((char*) "Touch screen long to return", CENTER, 170);
 	delay(1000);
 

@@ -366,7 +366,7 @@ void tempPointFunction(bool remove) {
 		}
 		//No points available to remove
 		if (!removed) {
-			showFullMessage((char*) "No points available!", true);
+			showFullMessage((char*) "No points available", true);
 			delay(1000);
 			return;
 		}
@@ -385,7 +385,7 @@ void tempPointFunction(bool remove) {
 		}
 		//Maximum number of points added
 		if (i == 96) {
-			showFullMessage((char*) "Remove a point first!", true);
+			showFullMessage((char*) "Remove a point first", true);
 			delay(1000);
 			return;
 		}
@@ -455,10 +455,10 @@ redraw:
 		drawMainMenuBorder();
 		//Show removed message
 		if (removed)
-			showFullMessage((char*) "Point removed!", true);
+			showFullMessage((char*) "Point removed", true);
 		//Invalid position, redraw
 		else {
-			showFullMessage((char*) "Invalid position!", true);
+			showFullMessage((char*) "Invalid position", true);
 			delay(1000);
 			goto redraw;
 		}
@@ -473,7 +473,7 @@ redraw:
 		//Show border
 		drawMainMenuBorder();
 		//Show message
-		showFullMessage((char*) "Point added!", true);
+		showFullMessage((char*) "Point added", true);
 	}
 
 	//Wait some time

@@ -44,7 +44,10 @@ void touchIRQ() {
 
 		//Short press - show menu
 		if (endTime < 1000)
-			showMenu = showMenu_desired;
+		{
+			if (showMenu == showMenu_disabled)
+				showMenu = showMenu_desired;
+		}
 		//Long press not in visual - lock or release limits
 		else if (displayMode != displayMode_visual)
 			longTouch = true;
@@ -111,32 +114,84 @@ void longTouchHandler() {
 		//Read preset from EEPROM
 		byte minMaxPreset = EEPROM.read(eeprom_minMaxPreset);
 
-		//When in temporary limits, go to preset 1
+		//When in temporary limits
 		if (minMaxPreset == minMax_temporary) {
-			showTransMessage((char*) "Switch to Preset 1");
-			EEPROM.write(eeprom_minMaxPreset, minMax_preset1);
+			if (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 1");
+				minMaxPreset = minMax_preset1;
+			}
+			else if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 2");
+				minMaxPreset = minMax_preset2;
+			}
+			else if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 3");
+				minMaxPreset = minMax_preset3;
+			}
+			else
+				showTransMessage((char*) "No other Preset");
 		}
 
-		//When in preset 1, go to preset 2
-		if (minMaxPreset == minMax_preset1) {
-			showTransMessage((char*) "Switch to Preset 2");
-			EEPROM.write(eeprom_minMaxPreset, minMax_preset2);
+		//When in preset 1
+		else if (minMaxPreset == minMax_preset1) {
+			if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 2");
+				minMaxPreset = minMax_preset2;
+			}
+			else if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 3");
+				minMaxPreset = minMax_preset3;
+			}
+			else
+				showTransMessage((char*) "No other Preset");
 		}
 
-		//When in preset 2, go to preset 3
-		if (minMaxPreset == minMax_preset2) {
-			showTransMessage((char*) "Switch to Preset 3");
-			EEPROM.write(eeprom_minMaxPreset, minMax_preset3);
+		//When in preset 2
+		else if (minMaxPreset == minMax_preset2) {
+			if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 3");
+				minMaxPreset = minMax_preset3;
+			}
+			else if (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 1");
+				minMaxPreset = minMax_preset1;
+			}
+			else
+				showTransMessage((char*) "No other Preset");
 		}
 
-		//When in preset 3, go back to preset 1
-		if (minMaxPreset == minMax_preset3) {
-			showTransMessage((char*) "Switch to Preset 1");
-			EEPROM.write(eeprom_minMaxPreset, minMax_preset1);
+		//When in preset 3
+		else if (minMaxPreset == minMax_preset3) {
+			if (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 1");
+				minMaxPreset = minMax_preset1;
+			}
+			else if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
+			{
+				showTransMessage((char*) "Switch to Preset 2");
+				minMaxPreset = minMax_preset2;
+			}
+			else
+				showTransMessage((char*) "No other Preset");
 		}
 
-		//Load the new limits
-		readTempLimits();
+		//When not using temporary preset
+		if (minMaxPreset != minMax_temporary)
+		{
+			//Save new preset to EEPROM
+			EEPROM.write(eeprom_minMaxPreset, minMaxPreset);
+
+			//Load the new limits
+			readTempLimits();
+		}
 	}
 
 	//Disable lock limits menu

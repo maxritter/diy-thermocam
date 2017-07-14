@@ -716,7 +716,7 @@ void batteryGauge()
 	display_setBackColor(200, 200, 200);
 	display_print((char*)"Do you want to calibrate the", CENTER, 75);
 	display_print((char*)"battery gauge? Fully charge the", CENTER, 95);
-	display_print((char*)"battery first (LED green/blue)!", CENTER, 115);
+	display_print((char*)"battery first (LED green/blue).", CENTER, 115);
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
@@ -735,7 +735,7 @@ void batteryGauge()
 				checkBattery(false, true);
 
 				//Show Message
-				showFullMessage((char*) "Battery gauge calibrated!", true);
+				showFullMessage((char*) "Battery gauge calibrated", true);
 				delay(1000);
 
 				//Return
@@ -992,7 +992,7 @@ void formatStorage() {
 		(teensyVersion == teensyVersion_new)) {
 		showFullMessage((char*) "Checking SD card..", true);
 		if (!checkSDCard()) {
-			showFullMessage((char*) "Insert SD card!", true);
+			showFullMessage((char*) "Insert SD card", true);
 			delay(1000);
 			storageMenu();
 			return;
@@ -1023,7 +1023,7 @@ void formatStorage() {
 				showFullMessage((char*) "Format storage..", true);
 				formatCard();
 				refreshFreeSpace();
-				showFullMessage((char*) "Formatting finished!", true);
+				showFullMessage((char*) "Formatting finished", true);
 				delay(1000);
 				break;
 			}

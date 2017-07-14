@@ -215,7 +215,7 @@ void firstFormat() {
 
 		//Check for SD card
 		if (!checkSDCard()) {
-			showFullMessage((char*) "Please insert SD card!");
+			showFullMessage((char*) "Please insert SD card");
 			//Wait until card is inserted
 			while (!checkSDCard())
 				delay(1000);

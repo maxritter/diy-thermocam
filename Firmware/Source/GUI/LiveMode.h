@@ -27,7 +27,7 @@ void displayBatteryStatus() {
 
 	//USB Power only
 	if (batPercentage == -1)
-		display_print((char*) "USB Power", 240, 0);
+		display_print((char*) "USB Power", 225, 0);
 
 	//Low Battery
 	else if (batPercentage == 0)
@@ -110,13 +110,56 @@ void displayWarmup() {
 		display_print(buffer, 65, 200);
 }
 
+/* Display the current temperature mode on top*/
+void displayTempMode()
+{
+	char buffer[10];
+
+	//Warmup
+	if (calStatus == cal_warmup)
+		sprintf(buffer, " WARMUP");
+	//Limits locked
+	else if (limitsLocked)
+		sprintf(buffer, " LOCKED");
+	//Auto mode
+	else if (autoMode)
+		sprintf(buffer, "  AUTO");
+	//Temperature presets
+	else
+	{
+		//Check which preset is active
+		byte minMaxPreset;
+		byte read = EEPROM.read(eeprom_minMaxPreset);
+		if ((read >= minMax_preset1) && (read <= minMax_preset3))
+			minMaxPreset = read;
+		else
+			minMaxPreset = minMax_temporary;
+		//Choose corresponding text
+		if ((minMaxPreset == minMax_preset1) && (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue))
+			sprintf(buffer, "PRESET 1");
+		else if ((minMaxPreset == minMax_preset2) && (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue))
+			sprintf(buffer, "PRESET 2");
+		else if ((minMaxPreset == minMax_preset3) && (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue))
+			sprintf(buffer, "PRESET 3");
+		else
+			sprintf(buffer, " MANUAL");
+	}
+
+	//Low resolution display
+	if ((teensyVersion == teensyVersion_old) || (!hqRes))
+		display_print(buffer, 120, 0);
+	//HQ resolution display
+	else
+		display_print(buffer, 140, 0);
+}
+
 /* Display the minimum and maximum point on the screen */
 void displayMinMaxPoint(bool min)
 {
 	int16_t xpos, ypos;
 
 	//Calculate x and y position
-	if(min)
+	if (min)
 		calculatePointPos(&xpos, &ypos, minTempPos);
 	else
 		calculatePointPos(&xpos, &ypos, maxTempPos);
@@ -140,12 +183,12 @@ void displayMinMaxPoint(bool min)
 			ypos = 229;
 
 		//Show min or max value as absolute temperature
-		if(min)
+		if (min)
 			display_printNumF(calFunction(minTempVal), 2, xpos, ypos);
 		else
 			display_printNumF(calFunction(maxTempVal), 2, xpos, ypos);
 	}
-	
+
 	//Warmup, show C / H
 	else
 	{
@@ -189,7 +232,7 @@ void showSpot() {
 
 	//Convert spot temperature to char array
 	floatToChar(buffer, spotTemp);
-	
+
 	//Print value on display
 	display_print(buffer, 145, 150);
 }
@@ -231,6 +274,8 @@ void displayInfos() {
 		//Display warmup if required
 		if (calStatus == cal_warmup)
 			displayWarmup();
+		//Display temperature mode
+		displayTempMode();
 	}
 
 	//Show the minimum / maximum points

@@ -109,7 +109,7 @@ void deleteVideo(char* dirname) {
 				sd.rmdir(dirname);
 				//End SD
 				endAltClockline();
-				showFullMessage((char*) "Video deleted!");
+				showFullMessage((char*) "Video deleted");
 				delay(1000);
 				return;
 			}
@@ -163,7 +163,7 @@ void deleteImage(char* filename) {
 				if (sd.exists(filename))
 					sd.remove(filename);
 				endAltClockline();
-				showFullMessage((char*) "Image deleted!");
+				showFullMessage((char*) "Image deleted");
 				delay(1000);
 				return;
 			}
@@ -216,7 +216,7 @@ void convertImage(char* filename) {
 
 	//Check if image is a bitmap
 	if (filename[15] == 'B') {
-		showFullMessage((char*) "Image is already converted!");
+		showFullMessage((char*) "Image is already converted");
 		delay(500);
 		return;
 	}
@@ -229,7 +229,7 @@ void convertImage(char* filename) {
 
 	//If image is already converted, return
 	if (exists) {
-		showFullMessage((char*) "Image is already converted!");
+		showFullMessage((char*) "Image is already converted");
 		delay(500);
 		strcpy(&filename[14], ".DAT");
 		return;
@@ -248,7 +248,7 @@ void convertImage(char* filename) {
 	saveBuffer(filename);
 
 	//Show finish message
-	showFullMessage((char*) "Image converted!");
+	showFullMessage((char*) "Image converted");
 	delay(1000);
 	strcpy(&filename[14], ".DAT");
 }
@@ -274,7 +274,7 @@ void convertVideo(char* dirname) {
 
 	//If video is already converted, return
 	if (exists) {
-		showFullMessage((char*) "Video is already converted!");
+		showFullMessage((char*) "Video is already converted");
 		delay(500);
 		return;
 	}
@@ -312,7 +312,7 @@ void openImage(char* filename, int imgCount) {
 
 	//Unsupported file type
 	else {
-		showFullMessage((char*) "Unsupported file type!");
+		showFullMessage((char*) "Unsupported file type");
 		delay(1000);
 		return;
 	}

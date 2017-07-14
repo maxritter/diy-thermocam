@@ -91,7 +91,7 @@ void checkBattery(bool start = false, bool calibrate = false) {
 
 	//Show warning on startup if the battery is low
 	if ((batPercentage <= 20) && (batPercentage != -1) && (start)) {
-		showFullMessage((char*) "Battery almost empty, charge!");
+		showFullMessage((char*) "Battery almost empty, charge");
 		delay(1000);
 	}
 }

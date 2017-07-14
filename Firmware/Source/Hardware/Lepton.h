@@ -255,7 +255,16 @@ void lepton_getRawValues()
 bool lepton_ffc(bool message = false) {
 	//Show a message for main menu
 	if (message)
+	{
+		//When in manual temperature mode, a FFC is not possible
+		if (!autoMode)
+		{
+			showFullMessage((char*) "No FFC in manual mode", true);
+			delay(1000);
+			return false;
+		}
 		showFullMessage((char*) "Performing FFC..", true);
+	}
 
 	//Send FFC run command
 	Wire.beginTransmission(0x2A);

@@ -57,7 +57,7 @@ uint16_t tempToRaw(float temp) {
 		calOffset = -273.15;
 
 	//Otherwise calculate offset out of ambient temp
-	if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
+	else if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
 		calOffset = ambTemp - (calSlope * 8192) + calComp;
 
 	//Calcualte the raw value
@@ -87,8 +87,8 @@ void compensateCalib() {
 	//Refresh MLX90614 ambient temp
 	ambTemp = mlx90614_getAmb();
 
-	//Apply compensation if auto mode enabled, no limited locked and standard calib
-	if ((autoMode) && (!limitsLocked) && (calStatus != cal_warmup)) {
+	//Calculate compensation if auto mode enabled, no limits locked and no radiometric lepton used
+	if ((autoMode) && (!limitsLocked) && (leptonVersion != leptonVersion_2_5_shutter) && (calStatus != cal_manual)) {
 		//Calculate min & max
 		int16_t min = round(calFunction(minValue));
 		int16_t max = round(calFunction(maxValue));
@@ -100,11 +100,10 @@ void compensateCalib() {
 		//If spot temp is higher than current maximum by one degree, raise maximum
 		else if (spotTemp > (max + 1))
 			calComp = spotTemp - max;
-	}
 
-	//Calculate offset out of ambient temp
-	if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
+		//Calculate offset out of ambient temp
 		calOffset = ambTemp - (calSlope * 8192) + calComp;
+	}
 }
 
 /* Checks if the calibration warmup is done */
@@ -122,17 +121,11 @@ void checkWarmup() {
 		readTempLimits();
 
 		//If we loaded one
-		if(!autoMode)
+		if (!autoMode)
 		{
-			//Trigger FFC and switch to manual when in auto mode
-			if (leptonShutter == leptonShutter_auto) {
-				//Trigger FFC
-				lepton_ffc();
-				delay(2000);
-
-				//Disable auto FFC
+			//Switch to manual FFC mode
+			if (leptonShutter == leptonShutter_auto)
 				lepton_ffcMode(false);
-			}
 
 			//Disable auto mode and limits locked
 			limitsLocked = false;
@@ -307,7 +300,7 @@ void calibrationProcess(bool serial, bool firstStart) {
 
 			//When in first start mode
 			if (firstStart) {
-				showFullMessage((char*) "Bad calibration, try again!", true);
+				showFullMessage((char*) "Bad calibration, try again", true);
 				delay(1000);
 			}
 
@@ -333,7 +326,7 @@ void calibrationProcess(bool serial, bool firstStart) {
 
 	//Show message if not in first start menu
 	if (firstStart == false) {
-		showFullMessage((char*) "Calibration written to EEPROM!", true);
+		showFullMessage((char*) "Calibration written to EEPROM", true);
 		delay(1000);
 	}
 
@@ -345,14 +338,14 @@ void calibrationProcess(bool serial, bool firstStart) {
 bool calibration() {
 	//Still in warmup
 	if (calStatus == cal_warmup) {
-		showFullMessage((char*) "Please wait for sensor warmup!", true);
+		showFullMessage((char*) "Please wait for sensor warmup", true);
 		delay(1000);
 		return false;
 	}
 
 	//Radiometric Lepton, no calibration needed
 	if (leptonVersion == leptonVersion_2_5_shutter) {
-		showFullMessage((char*) "Not required for radiometric Lepton!", true);
+		showFullMessage((char*) "Not required for radiometric Lepton", true);
 		delay(1000);
 		return false;
 	}

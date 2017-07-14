@@ -107,7 +107,7 @@ bool calibrationRepeat() {
 	display_setBackColor(200, 200, 200);
 	display_print((char*)"Try again?", CENTER, 66);
 	display_setFont(smallFont);
-	display_print((char*)"Use different calibration objects!", CENTER, 201);
+	display_print((char*)"Use different calibration objects", CENTER, 201);
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
@@ -201,7 +201,7 @@ bool calibrationChooser() {
 bool tempPointsMenu() {
 	//Still in warmup, do not add points
 	if (calStatus == cal_warmup) {
-		showFullMessage((char*) "Please wait for sensor warmup!", true);
+		showFullMessage((char*) "Please wait for sensor warmup", true);
 		delay(1000);
 		return false;
 	}
@@ -236,7 +236,7 @@ redraw:
 			//Clear
 			if (pressedButton == 2) {
 				clearTempPoints();
-				showFullMessage((char*)"All points cleared!", true);
+				showFullMessage((char*)"All points cleared", true);
 				delay(1000);
 				goto redraw;
 			}
@@ -447,14 +447,10 @@ void hotColdChooser() {
 bool hotColdMenu() {
 	//Still in warmup, do not add points
 	if (calStatus == cal_warmup) {
-		showFullMessage((char*) "Please wait for sensor warmup!", true);
+		showFullMessage((char*) "Please wait for sensor warmup", true);
 		delay(1000);
 		return false;
 	}
-
-	//Trigger FFC when in auto mode
-	if (leptonShutter == leptonShutter_auto)
-		lepton_ffc(true);
 
 redraw:
 	//Background
@@ -583,6 +579,7 @@ bool tempLimitsPresetSaveMenu() {
 			//SELECT
 			if (pressedButton == 3) {
 				int16_t min, max;
+				uint8_t farray[4];
 				switch (menuPos) {
 					//Temporary
 				case 0:
@@ -596,6 +593,9 @@ bool tempLimitsPresetSaveMenu() {
 					EEPROM.write(eeprom_minValue1Low, min & 0x00FF);
 					EEPROM.write(eeprom_maxValue1High, (max & 0xFF00) >> 8);
 					EEPROM.write(eeprom_maxValue1Low, max & 0x00FF);
+					floatToBytes(farray, (float)calComp);
+					for (int i = 0; i < 4; i++)
+						EEPROM.write(eeprom_minMax1Comp + i, (farray[i]));
 					EEPROM.write(eeprom_minMax1Set, eeprom_setValue);
 					EEPROM.write(eeprom_minMaxPreset, minMax_preset1);
 					break;
@@ -607,6 +607,9 @@ bool tempLimitsPresetSaveMenu() {
 					EEPROM.write(eeprom_minValue2Low, min & 0x00FF);
 					EEPROM.write(eeprom_maxValue2High, (max & 0xFF00) >> 8);
 					EEPROM.write(eeprom_maxValue2Low, max & 0x00FF);
+					floatToBytes(farray, (float)calComp);
+					for (int i = 0; i < 4; i++)
+						EEPROM.write(eeprom_minMax2Comp + i, (farray[i]));
 					EEPROM.write(eeprom_minMax2Set, eeprom_setValue);
 					EEPROM.write(eeprom_minMaxPreset, minMax_preset2);
 					break;
@@ -618,6 +621,9 @@ bool tempLimitsPresetSaveMenu() {
 					EEPROM.write(eeprom_minValue3Low, min & 0x00FF);
 					EEPROM.write(eeprom_maxValue3High, (max & 0xFF00) >> 8);
 					EEPROM.write(eeprom_maxValue3Low, max & 0x00FF);
+					floatToBytes(farray, (float)calComp);
+					for (int i = 0; i < 4; i++)
+						EEPROM.write(eeprom_minMax3Comp + i, (farray[i]));
 					EEPROM.write(eeprom_minMax3Set, eeprom_setValue);
 					EEPROM.write(eeprom_minMaxPreset, minMax_preset3);
 					break;
@@ -861,15 +867,36 @@ bool tempLimitsPresets() {
 					return true;
 					//Load Preset 1
 				case 1:
-					EEPROM.write(eeprom_minMaxPreset, minMax_preset1);
+					if(EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
+						EEPROM.write(eeprom_minMaxPreset, minMax_preset1);
+					else
+					{
+						showFullMessage((char*) "Preset 1 not saved", true);
+						delay(1000);
+						return false;
+					}
 					break;
 					//Load Preset 2
 				case 2:
-					EEPROM.write(eeprom_minMaxPreset, minMax_preset2);
+					if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
+						EEPROM.write(eeprom_minMaxPreset, minMax_preset2);
+					else
+					{
+						showFullMessage((char*) "Preset 2 not saved", true);
+						delay(1000);
+						return false;
+					}
 					break;
 					//Load Preset 3
 				case 3:
-					EEPROM.write(eeprom_minMaxPreset, minMax_preset3);
+					if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
+						EEPROM.write(eeprom_minMaxPreset, minMax_preset3);
+					else
+					{
+						showFullMessage((char*) "Preset 3 not saved", true);
+						delay(1000);
+						return false;
+					}
 					break;
 				}
 				//Read temperature limits from EEPROM
@@ -910,7 +937,7 @@ bool tempLimits() {
 
 	//Still in warmup, do not let the user do this
 	if (calStatus == cal_warmup) {
-		showFullMessage((char*) "Please wait for sensor warmup!", true);
+		showFullMessage((char*) "Please wait for sensor warmup", true);
 		delay(1000);
 		return false;
 	}
@@ -952,14 +979,9 @@ bool tempLimits() {
 			}
 			//MANUAL
 			if (pressedButton == 1) {
-				//Trigger FFC and switch to manual when in auto mode
-				if (leptonShutter == leptonShutter_auto) {
-					//Trigger FFC
-					lepton_ffc(true);
-
-					//Disable auto FFC
+				//Switch to manual FFC mode
+				if (leptonShutter == leptonShutter_auto)
 					lepton_ffcMode(false);
-				}
 					
 				//Disable auto mode and limits locked
 				autoMode = false;
@@ -1258,7 +1280,7 @@ bool modeMenu() {
 				//If the visual camera is not working
 				if (!checkDiagnostic(diag_camera))
 				{
-					showFullMessage((char*)"Cam not connected!", true);
+					showFullMessage((char*)"Cam not connected", true);
 					delay(1000);
 					return false;
 				}

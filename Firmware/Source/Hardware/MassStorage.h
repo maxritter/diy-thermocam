@@ -98,7 +98,7 @@ void massStorage() {
 	if (!massStoragePrompt())
 		return;
 	//Show message
-	showFullMessage((char*) "Disconnect USB cable to return!");
+	showFullMessage((char*) "Disconnect USB cable to return");
 	//Set marker
 	EEPROM.write(eeprom_massStorage, eeprom_setValue);
 	//Wait some time

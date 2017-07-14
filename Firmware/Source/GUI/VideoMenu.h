@@ -189,7 +189,7 @@ void videoCaptureInterval(int16_t* remainingTime, int* framesCaptured, char* dir
 
 	//Show saving message
 	if ((*remainingTime <= 0) || (*framesCaptured == 0))
-		sprintf(buffer, "Saving now!");
+		sprintf(buffer, "Saving now..");
 	//Show waiting time
 	else
 		sprintf(buffer, "Saving in %ds", *remainingTime);
@@ -330,7 +330,7 @@ void videoCapture() {
 
 	//Show finished message
 	else {
-		showFullMessage((char*) "Video capture finished!");
+		showFullMessage((char*) "Video capture finished");
 		delay(1000);
 	}
 
@@ -347,7 +347,7 @@ void videoMode() {
 	//Show message that video is only possible in thermal mode
 	if (displayMode != displayMode_thermal) {
 		//Show message
-		showFullMessage((char*) "Works only in thermal mode!");
+		showFullMessage((char*) "Works only in thermal mode");
 		delay(1000);
 
 		//Disable mode and return
@@ -370,7 +370,7 @@ void videoMode() {
 	//Check if there is at least 1MB of space left
 	if (getSDSpace() < 1000) {
 		//Show message
-		showFullMessage((char*) "The SD card is full!");
+		showFullMessage((char*) "The SD card is full");
 		delay(1000);
 
 		//Disable mode and return

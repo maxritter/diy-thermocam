@@ -317,7 +317,7 @@ void loadRawData(char* filename, char* dirname) {
 	}
 	//Invalid data
 	else {
-		showFullMessage((char*) "Invalid file size!");
+		showFullMessage((char*) "Invalid file size");
 		delay(1000);
 		sdFile.close();
 		endAltClockline();
@@ -382,14 +382,14 @@ bool yearChoose(char* filename) {
 		//Check if the yearStorage is at least 2016
 		if (yearCheck < 0) {
 			//if it is not, return to main menu with error message
-			showFullMessage((char*) "The year must be >= 2016!");
+			showFullMessage((char*) "The year must be >= 2016");
 			delay(1000);
 			return true;
 			//Check if yearStorage is smaller than 2064 - unlikely the Thermocam is still in use then !
 		}
 		else if (yearCheck > 49) {
 			//if it is not, return to main menu with error message
-			showFullMessage((char*) "The year must be < 2064!");
+			showFullMessage((char*) "The year must be < 2064");
 			delay(1000);
 			return true;
 			//Add yearStorage to the array if passes the checks
@@ -814,7 +814,7 @@ void searchFiles() {
 					//End SD Transmission
 					endAltClockline();
 					//Display an error message
-					showFullMessage((char*) "Maximum number of files exceeded!");
+					showFullMessage((char*) "Maximum number of files exceeded");
 					delay(1000);
 					//And return to the main menu
 					mainMenu();
@@ -975,9 +975,9 @@ bool loadDelete(char* filename, int* pos) {
 	//If there are no files left, return
 	if (imgCount == 0) {
 		if (loadMode == loadMode_image)
-			showFullMessage((char*) "No images found!");
+			showFullMessage((char*) "No images found");
 		else
-			showFullMessage((char*) "No videos found!");
+			showFullMessage((char*) "No videos found");
 		delay(1000);
 		return false;
 	}
@@ -994,9 +994,9 @@ void loadFind(char* filename, int* pos) {
 	//If there is only one image
 	if (imgCount == 1) {
 		if (loadMode == loadMode_image)
-			showFullMessage((char*) "Only one image available!");
+			showFullMessage((char*) "Only one image available");
 		else
-			showFullMessage((char*) "Only one video available!");
+			showFullMessage((char*) "Only one video available");
 		delay(1000);
 		return;
 	}
@@ -1095,7 +1095,7 @@ void loadFiles() {
 		(teensyVersion == teensyVersion_new)) {
 		showFullMessage((char*) "Checking SD card..", true);
 		if (!checkSDCard()) {
-			showFullMessage((char*) "Insert SD card!", true);
+			showFullMessage((char*) "Insert SD card", true);
 			delay(1000);
 			mainMenu();
 			return;
@@ -1158,9 +1158,9 @@ redraw:
 	if (imgCount == 0) {
 		//Show message
 		if (loadMode == loadMode_image)
-			showFullMessage((char*) "No images found!", true);
+			showFullMessage((char*) "No images found", true);
 		else
-			showFullMessage((char*) "No videos found!", true);
+			showFullMessage((char*) "No videos found", true);
 		delay(1000);
 		//Deallocate space
 		loadDeAlloc();

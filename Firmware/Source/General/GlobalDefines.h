@@ -167,6 +167,9 @@
 #define eeprom_noShutter        169
 #define eeprom_batComp			170
 #define eeprom_rotationHorizont 171
+#define eeprom_minMax1Comp      172 //4 Byte (172-175)
+#define eeprom_minMax2Comp      176 //4 Byte (176-179)
+#define eeprom_minMax3Comp      180 //4 Byte (180-183)
 #define eeprom_fwVersion        250
 #define eeprom_setValue         200
 

@@ -359,7 +359,7 @@ void mlx90614_init() {
 		}
 		//Show message, if one of the settings had to be re-written
 		if (!checkDiagnostic(diag_spot)) {
-			showFullMessage((char*)"Spot EEPROM updated, restart device!");
+			showFullMessage((char*)"Spot EEPROM updated, restart device");
 			while (1);
 		}
 	}

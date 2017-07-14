@@ -151,7 +151,7 @@ void checkFWUpgrade() {
 			//Clear EEPROM
 			clearEEPROM();
 			//Show message and wait
-			showFullMessage((char*)"FW update completed, pls restart!");
+			showFullMessage((char*)"FW update completed, pls restart");
 			while (true);
 		}
 		//Upgrade
@@ -167,8 +167,18 @@ void checkFWUpgrade() {
 				EEPROM.write(eeprom_adjComb2Set, 0);
 				EEPROM.write(eeprom_adjComb3Set, 0);
 			}
+
+			//Clear temperature presets when coming from a FW smaller than 2.42
+			if(eepromVersion < 242)
+			{
+				EEPROM.write(eeprom_minMax1Set, 0);
+				EEPROM.write(eeprom_minMax2Set, 0);
+				EEPROM.write(eeprom_minMax3Set, 0);
+				EEPROM.write(eeprom_minMaxPreset, 0);
+			}
+
 			//Show upgrade completed message
-			showFullMessage((char*)"Update completed, restart device!");
+			showFullMessage((char*)"Update completed, restart device");
 			//Set EEPROM firmware version to current one
 			EEPROM.write(eeprom_fwVersion, fwVersion);
 			//Wait for hard-reset
@@ -176,7 +186,7 @@ void checkFWUpgrade() {
 		}
 
 		//Show downgrade completed message
-		showFullMessage((char*)"Downgrade completed, restart device!");
+		showFullMessage((char*)"Downgrade completed, restart device");
 		//Set EEPROM firmware version to current one
 		EEPROM.write(eeprom_fwVersion, fwVersion);
 		//Wait for hard-reset
@@ -499,6 +509,7 @@ void setDisplayRotation() {
 /* Reads the temperature limits from EEPROM */
 void readTempLimits() {
 	int16_t min, max;
+	uint8_t farray[4];
 	//Min / max selection
 	byte minMaxPreset;
 	byte read = EEPROM.read(eeprom_minMaxPreset);
@@ -510,6 +521,9 @@ void readTempLimits() {
 	if ((minMaxPreset == minMax_preset1) && (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)) {
 		min = ((EEPROM.read(eeprom_minValue1High) << 8) + EEPROM.read(eeprom_minValue1Low));
 		max = ((EEPROM.read(eeprom_maxValue1High) << 8) + EEPROM.read(eeprom_maxValue1Low));
+		for (int i = 0; i < 4; i++)
+			farray[i] = EEPROM.read(eeprom_minMax1Comp + i);
+		calComp = bytesToFloat(farray);
 		minValue = tempToRaw(min);
 		maxValue = tempToRaw(max);
 		autoMode = false;
@@ -518,6 +532,9 @@ void readTempLimits() {
 	else if ((minMaxPreset == minMax_preset2) && (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)) {
 		min = ((EEPROM.read(eeprom_minValue2High) << 8) + EEPROM.read(eeprom_minValue2Low));
 		max = ((EEPROM.read(eeprom_maxValue2High) << 8) + EEPROM.read(eeprom_maxValue2Low));
+		for (int i = 0; i < 4; i++)
+			farray[i] = EEPROM.read(eeprom_minMax2Comp + i);
+		calComp = bytesToFloat(farray);
 		minValue = tempToRaw(min);
 		maxValue = tempToRaw(max);
 		autoMode = false;
@@ -526,6 +543,9 @@ void readTempLimits() {
 	else if ((minMaxPreset == minMax_preset3) && (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)) {
 		min = ((EEPROM.read(eeprom_minValue3High) << 8) + EEPROM.read(eeprom_minValue3Low));
 		max = ((EEPROM.read(eeprom_maxValue3High) << 8) + EEPROM.read(eeprom_maxValue3Low));
+		for (int i = 0; i < 4; i++)
+			farray[i] = EEPROM.read(eeprom_minMax3Comp + i);
+		calComp = bytesToFloat(farray);
 		minValue = tempToRaw(min);
 		maxValue = tempToRaw(max);
 		autoMode = false;
@@ -564,7 +584,7 @@ void initRTC() {
 
 	//Check if year is lower than 2017
 	if ((year() < 2017) && (EEPROM.read(eeprom_firstStart) == eeprom_setValue)) {
-		showFullMessage((char*) "Empty coin cell battery!");
+		showFullMessage((char*) "Empty coin cell battery");
 		delay(1000);
 		setTime(0, 0, 0, 1, 1, 2017);
 		Teensy3Clock.set(now());
@@ -625,7 +645,7 @@ void toggleLaser(bool message) {
 		digitalWrite(pin_laser, LOW);
 		laserEnabled = false;
 		if (message) {
-			showFullMessage((char*) "Laser is now off!", true);
+			showFullMessage((char*) "Laser is now off", true);
 			delay(1000);
 		}
 	}
@@ -634,7 +654,7 @@ void toggleLaser(bool message) {
 		digitalWrite(pin_laser, HIGH);
 		laserEnabled = true;
 		if (message) {
-			showFullMessage((char*) "Laser is now on!", true);
+			showFullMessage((char*) "Laser is now on", true);
 			delay(1000);
 		}
 	}
@@ -642,7 +662,7 @@ void toggleLaser(bool message) {
 
 /* Toggle the display*/
 void toggleDisplay() {
-	showFullMessage((char*) "Screen goes off, touch to continue!", true);
+	showFullMessage((char*) "Screen goes off, touch to continue", true);
 	delay(1000);
 	disableScreenLight();
 	//Wait for touch press
