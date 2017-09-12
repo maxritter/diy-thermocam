@@ -14,12 +14,12 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
-[**GroupGets**](https://groupgets.com/campaigns/338-diy-thermocam-round-6) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
+[**GroupGets**](https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
 
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
 
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
-<a href="https://groupgets.com/campaigns/338-diy-thermocam-round-6"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
+<a href="https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
 
 ----------
 
@@ -27,7 +27,7 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. 
 
-An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_04.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
+An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_05.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
 
 The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** (**Lepton2.5** only at the moment). The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
 
@@ -45,7 +45,7 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 In order to **make your own DIY-Thermocam V2**, you have **two options**: 
 
-- Buy the **[self-assembly kit](https://groupgets.com/campaigns/338-diy-thermocam-round-6)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
+- Buy the **[self-assembly kit](https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order. In case there is **no activate campaign** at the moment, **[contact GroupGets](https://groupgets.freshdesk.com/support/tickets/new)** for a new one.
 - Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 - You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
 
@@ -896,4 +896,4 @@ Check out the [**video output module manual**](https://github.com/maxritter/DIY-
 
 **Contact me** by **[mail](mailto:mail@maxritter.net)** if you have any **questions** / **feedback** / **improvements**
 
-**Last updated**: 26.07.2017
+**Last updated**: 12.09.2017
