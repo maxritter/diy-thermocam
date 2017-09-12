@@ -1,9 +1,7 @@
-The standalone firmware updater only runs on Windows XP or greater.
+**Firmware Updater**
 
-You can also use the Teensy Loader, in case the firmware updater does not work for you. 
+The **standalone firmware updater** only runs on **Windows** XP or greater, get the latest version from [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/1.13/Updater). Then follow the [firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_06.pdf).
 
-In the unlikely case that the update failed and the device does not start any more, load the firmware file again and start the flash procedure, the status should display “Waiting for device...”. Then short the pins P & G on the Teensy for one second  (https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/TeensyProgram.png) on the V1 or the PROGRAM jumper on the V2, while the device is turned on an connected to the computer. Afterwards, the flash starts.
+You can also use the **Teensy Loader**, which works for Windows,** Linux and Mac**. For Windows, it is available [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/Teensy%20Loader), for Linux and Mac download "Teensyduino" from [here](https://www.pjrc.com/teensy/td_download.htm). Load the hex file with "teensy.exe", then launch "teensy_reboot.exe" while the Thermocam is connected to the PC and turned on. The flash procedure should start. 
 
-For more information, check out the firmware update guide inside the document folder.
-
-If you want to flash the hex files on Linux or Mac OSX, use the Teensyduino uploader from https://www.pjrc.com/teensy/td_download.html.
+In the unlikely case that the update failed and the device **does not start any more**, load the firmware file again and start the flash procedure, the status should display “Waiting for device...”. Then [short the pins P & G on the Teensy for one second](https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/TeensyProgram.png) with a screwdriver, while the device is turned on and connected to the PC. Afterwards, the flash should start.
