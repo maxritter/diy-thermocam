@@ -1027,8 +1027,6 @@ void loadAlloc() {
 
 /* Change settings for load menu */
 void loadSettings() {
-	//Set calibration status to manual
-	calStatus = cal_manual;
 	//Do not show additional information that are not required
 	batteryEnabled = false;
 	dateEnabled = false;

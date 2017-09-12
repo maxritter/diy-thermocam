@@ -33,9 +33,14 @@ float calFunction(uint16_t rawValue) {
 	if (leptonVersion == leptonVersion_2_5_shutter)
 		calOffset = -273.15;
 
-	//Calculate offset out of ambient temp
-	else if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
+	//For non-radiometric Lepton
+	else {
+		//Refresh MLX90614 ambient temp
+		ambTemp = mlx90614_getAmb();
+
+		//Calculate offset out of ambient temp and compensation factor
 		calOffset = ambTemp - (calSlope * 8192) + calComp;
+	}
 
 	//Calculate the temperature in Celcius out of the coefficients
 	float temp = (calSlope * rawValue) + calOffset;
@@ -56,9 +61,14 @@ uint16_t tempToRaw(float temp) {
 	if (leptonVersion == leptonVersion_2_5_shutter)
 		calOffset = -273.15;
 
-	//Otherwise calculate offset out of ambient temp
-	else if ((calStatus != cal_manual) && (autoMode) && (!limitsLocked))
+	//For non-radiometric Lepton
+	else {
+		//Refresh MLX90614 ambient temp
+		ambTemp = mlx90614_getAmb();
+
+		//Calculate offset out of ambient temp and compensation factor
 		calOffset = ambTemp - (calSlope * 8192) + calComp;
+	}
 
 	//Calcualte the raw value
 	uint16_t rawValue = (temp - calOffset) / calSlope;
@@ -84,11 +94,8 @@ uint16_t calcAverage() {
 
 /* Compensate the calibration with MLX90614 values */
 void compensateCalib() {
-	//Refresh MLX90614 ambient temp
-	ambTemp = mlx90614_getAmb();
-
-	//Calculate compensation if auto mode enabled, no limits locked and no radiometric lepton used
-	if ((autoMode) && (!limitsLocked) && (leptonVersion != leptonVersion_2_5_shutter) && (calStatus != cal_manual)) {
+	//Calculate compensation if auto mode enabled and no limits locked
+	if ((autoMode) && (!limitsLocked)) {
 		//Calculate min & max
 		int16_t min = round(calFunction(minValue));
 		int16_t max = round(calFunction(maxValue));
@@ -100,9 +107,6 @@ void compensateCalib() {
 		//If spot temp is higher than current maximum by one degree, raise maximum
 		else if (spotTemp > (max + 1))
 			calComp = spotTemp - max;
-
-		//Calculate offset out of ambient temp
-		calOffset = ambTemp - (calSlope * 8192) + calComp;
 	}
 }
 
@@ -127,7 +131,7 @@ void checkWarmup() {
 			if (leptonShutter == leptonShutter_auto)
 				lepton_ffcMode(false);
 
-			//Disable auto mode and limits locked
+			//Disable limits locked
 			limitsLocked = false;
 		}
 	}
@@ -273,11 +277,11 @@ void calibrationProcess(bool serial, bool firstStart) {
 		//Calculate the calibration formula with least square fit
 		linreg(100, calLepton, calMLX90614, &calSlope, &calOffset, &calCorrelation);
 
-		//Set calibration to manual
-		calStatus = cal_manual;
+		//Refresh MLX90614 ambient temp
+		ambTemp = mlx90614_getAmb();
 
-		//Set compensation to zero
-		calComp = 0;
+		//Calculate compensation
+		calComp = calOffset - ambTemp + (calSlope * 8192);
 
 		//When in serial mode, store and send ACK
 		if (serial)
@@ -350,11 +354,7 @@ bool calibration() {
 		return false;
 	}
 
-	//If there is a calibration
-	else if (calStatus == cal_manual)
-		return calibrationChooser();
-
-	//If there is none, do a new one
+	//Do a new one
 	calibrationProcess();
 
 	return true;

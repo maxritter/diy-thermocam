@@ -168,8 +168,8 @@ void checkFWUpgrade() {
 				EEPROM.write(eeprom_adjComb3Set, 0);
 			}
 
-			//Clear temperature presets when coming from a FW smaller than 2.42
-			if(eepromVersion < 242)
+			//Clear temperature presets when coming from a FW smaller than 2.43
+			if(eepromVersion < 243)
 			{
 				EEPROM.write(eeprom_minMax1Set, 0);
 				EEPROM.write(eeprom_minMax2Set, 0);
@@ -371,8 +371,6 @@ void storeCalibration() {
 	for (int i = 0; i < 4; i++)
 		EEPROM.write(eeprom_calSlopeBase + i, (farray[i]));
 	EEPROM.write(eeprom_calSlopeSet, eeprom_setValue);
-	//Set calibration to manual
-	calStatus = cal_manual;
 }
 
 /* A method to check if the touch screen is pressed */
@@ -508,8 +506,10 @@ void setDisplayRotation() {
 
 /* Reads the temperature limits from EEPROM */
 void readTempLimits() {
-	int16_t min, max;
-	uint8_t farray[4];
+	//Some variables to get started
+	byte minValueHigh, minValueLow, maxValueHigh, maxValueLow, minMaxComp;
+	bool found = false;
+
 	//Min / max selection
 	byte minMaxPreset;
 	byte read = EEPROM.read(eeprom_minMaxPreset);
@@ -517,37 +517,44 @@ void readTempLimits() {
 		minMaxPreset = read;
 	else
 		minMaxPreset = minMax_temporary;
+
+
 	//Min / max preset 1
 	if ((minMaxPreset == minMax_preset1) && (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)) {
-		min = ((EEPROM.read(eeprom_minValue1High) << 8) + EEPROM.read(eeprom_minValue1Low));
-		max = ((EEPROM.read(eeprom_maxValue1High) << 8) + EEPROM.read(eeprom_maxValue1Low));
-		for (int i = 0; i < 4; i++)
-			farray[i] = EEPROM.read(eeprom_minMax1Comp + i);
-		calComp = bytesToFloat(farray);
-		minValue = tempToRaw(min);
-		maxValue = tempToRaw(max);
-		autoMode = false;
+		minValueHigh = eeprom_minValue1High;
+		minValueLow = eeprom_minValue1Low;
+		maxValueHigh = eeprom_maxValue1High;
+		maxValueLow = eeprom_maxValue1Low;
+		minMaxComp = eeprom_minMax1Comp;
+		found = true;
 	}
 	//Min / max preset 2
 	else if ((minMaxPreset == minMax_preset2) && (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)) {
-		min = ((EEPROM.read(eeprom_minValue2High) << 8) + EEPROM.read(eeprom_minValue2Low));
-		max = ((EEPROM.read(eeprom_maxValue2High) << 8) + EEPROM.read(eeprom_maxValue2Low));
-		for (int i = 0; i < 4; i++)
-			farray[i] = EEPROM.read(eeprom_minMax2Comp + i);
-		calComp = bytesToFloat(farray);
-		minValue = tempToRaw(min);
-		maxValue = tempToRaw(max);
-		autoMode = false;
+		minValueHigh = eeprom_minValue2High;
+		minValueLow = eeprom_minValue2Low;
+		maxValueHigh = eeprom_maxValue2High;
+		maxValueLow = eeprom_maxValue2Low;
+		minMaxComp = eeprom_minMax2Comp;
+		found = true;
 	}
 	//Min / max preset 3
 	else if ((minMaxPreset == minMax_preset3) && (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)) {
-		min = ((EEPROM.read(eeprom_minValue3High) << 8) + EEPROM.read(eeprom_minValue3Low));
-		max = ((EEPROM.read(eeprom_maxValue3High) << 8) + EEPROM.read(eeprom_maxValue3Low));
+		minValueHigh = eeprom_minValue3High;
+		minValueLow = eeprom_minValue3Low;
+		maxValueHigh = eeprom_maxValue3High;
+		maxValueLow = eeprom_maxValue3Low;
+		minMaxComp = eeprom_minMax3Comp;
+		found = true;
+	}
+
+	//Apply settings
+	if (found) {
+		minValue = ((EEPROM.read(minValueHigh) << 8) + EEPROM.read(minValueLow));
+		maxValue = ((EEPROM.read(maxValueHigh) << 8) + EEPROM.read(maxValueLow));
+		uint8_t farray[4];
 		for (int i = 0; i < 4; i++)
-			farray[i] = EEPROM.read(eeprom_minMax3Comp + i);
+			farray[i] = EEPROM.read(minMaxComp + i);
 		calComp = bytesToFloat(farray);
-		minValue = tempToRaw(min);
-		maxValue = tempToRaw(max);
 		autoMode = false;
 	}
 }

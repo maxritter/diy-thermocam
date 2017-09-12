@@ -219,7 +219,6 @@
 //Calibration
 #define cal_warmup   0
 #define cal_standard 1
-#define cal_manual   2
 #define cal_stdSlope 0.0300f //Standard slope value
 
 //Image save marker

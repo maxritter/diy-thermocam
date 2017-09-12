@@ -160,43 +160,6 @@ void calibrationScreen(bool firstStart) {
 	}
 }
 
-/* Calibration Chooser */
-bool calibrationChooser() {
-	//Title & Background
-	mainMenuBackground();
-	mainMenuTitle((char*)"Calibration");
-	//Draw the buttons
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 47, 140, 120, (char*) "New");
-	buttons_addButton(165, 47, 140, 120, (char*) "Delete");
-	buttons_addButton(15, 188, 140, 40, (char*) "Back");
-	buttons_drawButtons();
-	//Touch handler
-	while (true) {
-		//If touch pressed
-		if (touch_touched() == true) {
-			int pressedButton = buttons_checkButtons(true);
-			//NEW
-			if (pressedButton == 0) {
-				calibrationProcess();
-				return true;
-			}
-			//DELETE
-			if (pressedButton == 1) {
-				calSlope = cal_stdSlope;
-				calOffset = ambTemp - (calSlope * 8192) + calComp;
-				calStatus = cal_standard;
-				storeCalibration();
-				return true;
-			}
-			//BACK
-			if (pressedButton == 2)
-				return false;
-		}
-	}
-}
-
 /* Menu to add or remove temperature points to the thermal image */
 bool tempPointsMenu() {
 	//Still in warmup, do not add points
@@ -578,7 +541,6 @@ bool tempLimitsPresetSaveMenu() {
 			int pressedButton = buttons_checkButtons(true);
 			//SELECT
 			if (pressedButton == 3) {
-				int16_t min, max;
 				uint8_t farray[4];
 				switch (menuPos) {
 					//Temporary
@@ -587,12 +549,10 @@ bool tempLimitsPresetSaveMenu() {
 					break;
 					//Preset 1
 				case 1:
-					min = (int16_t)round(calFunction(minValue));
-					max = (int16_t)round(calFunction(maxValue));
-					EEPROM.write(eeprom_minValue1High, (min & 0xFF00) >> 8);
-					EEPROM.write(eeprom_minValue1Low, min & 0x00FF);
-					EEPROM.write(eeprom_maxValue1High, (max & 0xFF00) >> 8);
-					EEPROM.write(eeprom_maxValue1Low, max & 0x00FF);
+					EEPROM.write(eeprom_minValue1High, (minValue & 0xFF00) >> 8);
+					EEPROM.write(eeprom_minValue1Low, minValue & 0x00FF);
+					EEPROM.write(eeprom_maxValue1High, (maxValue & 0xFF00) >> 8);
+					EEPROM.write(eeprom_maxValue1Low, maxValue & 0x00FF);
 					floatToBytes(farray, (float)calComp);
 					for (int i = 0; i < 4; i++)
 						EEPROM.write(eeprom_minMax1Comp + i, (farray[i]));
@@ -601,12 +561,10 @@ bool tempLimitsPresetSaveMenu() {
 					break;
 					//Preset 2
 				case 2:
-					min = (int16_t)round(calFunction(minValue));
-					max = (int16_t)round(calFunction(maxValue));
-					EEPROM.write(eeprom_minValue2High, (min & 0xFF00) >> 8);
-					EEPROM.write(eeprom_minValue2Low, min & 0x00FF);
-					EEPROM.write(eeprom_maxValue2High, (max & 0xFF00) >> 8);
-					EEPROM.write(eeprom_maxValue2Low, max & 0x00FF);
+					EEPROM.write(eeprom_minValue2High, (minValue & 0xFF00) >> 8);
+					EEPROM.write(eeprom_minValue2Low, minValue & 0x00FF);
+					EEPROM.write(eeprom_maxValue2High, (maxValue & 0xFF00) >> 8);
+					EEPROM.write(eeprom_maxValue2Low, maxValue & 0x00FF);
 					floatToBytes(farray, (float)calComp);
 					for (int i = 0; i < 4; i++)
 						EEPROM.write(eeprom_minMax2Comp + i, (farray[i]));
@@ -615,12 +573,10 @@ bool tempLimitsPresetSaveMenu() {
 					break;
 					//Preset 3
 				case 3:
-					min = (int16_t)round(calFunction(minValue));
-					max = (int16_t)round(calFunction(maxValue));
-					EEPROM.write(eeprom_minValue3High, (min & 0xFF00) >> 8);
-					EEPROM.write(eeprom_minValue3Low, min & 0x00FF);
-					EEPROM.write(eeprom_maxValue3High, (max & 0xFF00) >> 8);
-					EEPROM.write(eeprom_maxValue3Low, max & 0x00FF);
+					EEPROM.write(eeprom_minValue3High, (minValue & 0xFF00) >> 8);
+					EEPROM.write(eeprom_minValue3Low, minValue & 0x00FF);
+					EEPROM.write(eeprom_maxValue3High, (maxValue & 0xFF00) >> 8);
+					EEPROM.write(eeprom_maxValue3Low, maxValue & 0x00FF);
 					floatToBytes(farray, (float)calComp);
 					for (int i = 0; i < 4; i++)
 						EEPROM.write(eeprom_minMax3Comp + i, (farray[i]));

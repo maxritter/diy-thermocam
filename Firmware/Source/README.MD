@@ -13,8 +13,8 @@ If you just want to flash the newest version of the firmware to your device, fol
 
 Download and install the following programs:
 
-1. Arduino 1.8.2:                      https://www.arduino.cc/en/Main/Software
-2. Teensyduino 1.36:                   https://www.pjrc.com/teensy/td_download.html
+1. Arduino 1.8.4+:                      https://www.arduino.cc/en/Main/Software
+2. Teensyduino 1.39+:                   https://www.pjrc.com/teensy/td_download.html
 3. Visual Studio 2015/2017 Community:  https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx
 4. Visual Micro:                       http://www.visualmicro.com/page/Arduino-Visual-Studio-Downloads.aspx
 

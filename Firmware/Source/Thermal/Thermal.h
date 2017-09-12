@@ -571,7 +571,7 @@ void liveMode() {
 			videoMode();
 
 		//Long touch handler
-		if (longTouch)
+		if ((longTouch) && (calStatus == cal_standard))
 			longTouchHandler();
 	}
 }

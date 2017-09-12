@@ -459,9 +459,10 @@ void lepton_init() {
 		calTimer = millis();
 		//Set calibration status to warmup if not coming from mass storage
 		calStatus = cal_warmup;
-		//Set the compensation value to zero
-		calComp = 0;
 	}
+
+	//Set the compensation value to zero
+	calComp = 0;
 
 	//Activate auto mode
 	autoMode = true;
