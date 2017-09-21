@@ -366,7 +366,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Battery for the real-time-clock
       </td>
       <td>
-         <a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
+         <a href="https://www.digikey.com/product-detail/en/fdk-america-inc-a-member-of-fujitsu-group/CR1220/SY033-ND/1202933">
          <strong>Digikey.com</strong></a>
       </td>
    </tr>
