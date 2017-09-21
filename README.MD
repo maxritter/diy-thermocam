@@ -63,7 +63,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Lepton3.0:
 		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
 		 <strong>Digikey.com</strong></a>, <a href="http://www.0gravity.ch/online//product_info.php?cPath=211&products_id=1835">
-		 <strong>0gravity.ch</strong></a> or
+		 0gravity.ch</a> or
 		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/l3">
 		 GroupGets.com</a><br />
 		 Lepton2.5:
