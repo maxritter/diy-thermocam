@@ -113,8 +113,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
          Digikey.com</a></strong><br />
          <a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
-         <a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
-         Flikto.de</a><br />
          <a href="http://www.exp-tech.de/teensy-3-6">EXP-Tech.de</a><br />
          <a href="http://www.watterott.com/de/Teensy-v36-USB-Board-ARM-Cortex-M4">watterott</a>
       </td>
@@ -233,8 +231,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
          <strong>Ebay.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
-         <a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
-         Flikto.de</a><br /> 
          <a href="http://www.robotshop.com/en/5v-step-up-voltage-regulator-u3v12f5.html">robotshop.com</a>
       </td>
    </tr>
