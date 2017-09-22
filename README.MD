@@ -368,7 +368,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="https://www.digikey.com/product-detail/en/fdk-america-inc-a-member-of-fujitsu-group/CR1220/SY033-ND/1202933">
          <strong>Digikey.com</strong></a><br />
          <a href="https://www.reichelt.de/Knopfzellen-Lithium/CR-1220-REN/3/index.html?ACTION=3&LA=446&ARTICLE=105202&GROUPID=4241&artnr=CR+1220+REN&SEARCH=CR1220">Reichelt.de</a>
-         
       </td>
    </tr>
    <tr>
