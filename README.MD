@@ -175,9 +175,10 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Aliexpress.com</a><br />
          <a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
          <a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
-         Mikroe.com</a>
-         <a href="https://eckstein-shop.de/PKCELL-LiPo-Akku-Lithium-Ion-Polymer-Batterie-37V-2500mAh-JST-PH-Connector">Eckstein-shop.de</a>
-         
+         Mikroe.com</a><br />
+         <a href="https://eckstein-shop.de/PKCELL-LiPo-Akku-Lithium-Ion-Polymer-Batterie-37V-2500mAh-JST-PH-Connector">Eckstein-shop.de</a><br />
+         <a href="https://www.buerklin.com/de//p/74s4080">
+         Buerklin.com</a>
       </td>
    </tr>
    <tr>
