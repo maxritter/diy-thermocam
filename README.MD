@@ -176,6 +176,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
          <a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
          Mikroe.com</a>
+         <a href="https://eckstein-shop.de/PKCELL-LiPo-Akku-Lithium-Ion-Polymer-Batterie-37V-2500mAh-JST-PH-Connector">Eckstein-shop.de</a>
+         
       </td>
    </tr>
    <tr>
@@ -231,7 +233,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
          <strong>Ebay.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
-         <a href="http://www.robotshop.com/en/5v-step-up-voltage-regulator-u3v12f5.html">robotshop.com</a>
+         <a href="http://www.robotshop.com/en/5v-step-up-voltage-regulator-u3v12f5.html">robotshop.com</a><br />
+         <a href="https://eckstein-shop.de/Pololu-5V-Step-Up-Spannungsregler-U3V12F5">Eckstein-shop.de</a>
       </td>
    </tr>
    <tr>
@@ -363,7 +366,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
       </td>
       <td>
          <a href="https://www.digikey.com/product-detail/en/fdk-america-inc-a-member-of-fujitsu-group/CR1220/SY033-ND/1202933">
-         <strong>Digikey.com</strong></a>
+         <strong>Digikey.com</strong></a><br />
+         <a href="https://www.reichelt.de/Knopfzellen-Lithium/CR-1220-REN/3/index.html?ACTION=3&LA=446&ARTICLE=105202&GROUPID=4241&artnr=CR+1220+REN&SEARCH=CR1220">Reichelt.de</a>
+         
       </td>
    </tr>
    <tr>
