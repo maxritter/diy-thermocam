@@ -415,16 +415,16 @@ void lepton_version() {
 	char leptonhw[33];
 	Wire.readBytes(leptonhw, 32);
 	Wire.endTransmission();
-
-	//Detected Lepton2 Shuttered
-	if (strstr(leptonhw, "05-060") != NULL) {
-		leptonVersion = leptonVersion_2_0_shutter;
-		leptonShutter = leptonShutter_auto;
+	
+	//Detected Lepton2 Non-Shuttered
+	if (strstr(leptonhw, "05-060340") != NULL) {
+		leptonVersion = leptonVersion_2_0_noShutter;
+		leptonShutter = leptonShutter_none;
 	}
 
-	//Detected Lepton3 Shuttered
-	else if (strstr(leptonhw, "05-070620") != NULL) {
-		leptonVersion = leptonVersion_3_0_shutter;
+	//Detected Lepton2 Shuttered
+	else if (strstr(leptonhw, "05-060950") != NULL) {
+		leptonVersion = leptonVersion_2_0_shutter;
 		leptonShutter = leptonShutter_auto;
 	}
 
@@ -434,7 +434,13 @@ void lepton_version() {
 		leptonShutter = leptonShutter_autoRAD;
 	}
 
-	//Detected Lepton2 No-Shutter
+	//Detected Lepton3 Shuttered
+	else if (strstr(leptonhw, "05-070620") != NULL) {
+		leptonVersion = leptonVersion_3_0_shutter;
+		leptonShutter = leptonShutter_auto;
+	}
+
+	//Detected unknown Lepton2 No-Shutter
 	else {
 		leptonVersion = leptonVersion_2_0_noShutter;
 		leptonShutter = leptonShutter_none;
