@@ -155,9 +155,7 @@ In order to **make your own DIY-Thermocam V2**, you have can use the **part list
       <td>
          <a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
          <strong>Aliexpress.com</strong></a><br />
-         <a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a><br />
-         <a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
-         Mikroe.com</a>
+         <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN">Ebay.com</a><br />
       </td>
    </tr>
    <tr>
