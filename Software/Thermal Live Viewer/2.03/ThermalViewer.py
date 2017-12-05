@@ -132,6 +132,7 @@ buttonCalibration = None
 allButtons = None
 
 # Global Variables
+device = "COM10"
 screen = None
 ser = None
 calTimer = None
@@ -2090,19 +2091,19 @@ def sendStart():
 
 # Connect to the device
 def connect():
-    global ser, hardwareVersion
+    global ser, hardwareVersion, device
 
     # Display waiting message
-    displayText("Waiting for device on COM10..", False)
+    displayText("Waiting for device on " + device + " ...", False)
 
-    # Check if device is connected to COM10
+    # Check if device is connected
     while True:
         # Check if the user wants to exit
         checkExit()
 
         # Try to open the ports
         try:
-            ser = serial.Serial("COM10", 115200)
+            ser = serial.Serial(device, 115200)
         # Did not work, try again in 1s
         except serial.serialutil.SerialException:
             time.sleep(1)
@@ -2312,6 +2313,8 @@ def loop():
 
 # Call of functions
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        device = sys.argv[1]
     setup()
     while True:
         loop()
