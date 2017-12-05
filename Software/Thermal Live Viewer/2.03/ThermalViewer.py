@@ -893,6 +893,10 @@ def convertLeptonData():
 
 # Display some text on the screen
 def displayText(msg, wait):
+    if screen == None:
+        print msg
+        return
+
     # Fill background
     background = pygame.Surface((640, 480))
     background.fill((250, 250, 250))
@@ -1080,6 +1084,10 @@ def endConnection():
 
 # Check if the user wants to exit
 def checkExit():
+    # Just return if GUI stuff hasn't been setup yet
+    if screen == None:
+        return
+
     # User wants to exit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
