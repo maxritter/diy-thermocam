@@ -2311,6 +2311,7 @@ def loop():
 
 
 # Call of functions
-setup()
-while True:
-    loop()
+if __name__ == "__main__":
+    setup()
+    while True:
+        loop()
