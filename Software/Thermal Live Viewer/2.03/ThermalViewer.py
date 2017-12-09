@@ -143,6 +143,35 @@ videoFolder = None
 videoCounter = 0
 videoStart = None
 
+def sendCommandWithFloat(cmd, data):
+    # Send new value to the device
+    try:
+        # Send command and new value
+        sendArray = (chr(cmd) + struct.pack('<f', data))
+        ser.write(sendArray)
+        # Get ACK
+        inData = map(ord, ser.read(1))
+
+    # Error
+    except serial.serialutil.SerialException:
+        return False
+
+    # Timeout
+    if not inData:
+        return False
+
+    # Check for ACK
+    if inData[0] != cmd:
+        print inData
+        return False
+
+    return True
+
+def setCalibrationSlope(slope):
+    return sendCommandWithFloat(cmd_set_calslope, slope)
+
+def setCalibrationOffset(offset):
+    return sendCommandWithFloat(cmd_set_caloffset, offset)
 
 # Set the color scheme
 def setColorScheme(updateValue):
@@ -698,8 +727,6 @@ def runShutter():
 
 # Run the calibration
 def runCalibration():
-    global calOffset, calSlope
-
     # Show message
     displayText("Start Calibration..", False)
 
@@ -744,6 +771,10 @@ def runCalibration():
 
     # Show finish message
     displayText("Calibration completed!", True)
+    return getCalibration()
+
+def getCalibration():
+    global calOffset, calSlope
 
     # Get the new offset and slope
     try:
