@@ -122,7 +122,7 @@ In order to **make your own DIY-Thermocam V2**, you have can use the **part list
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Arducam.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Arducam V2 Mini 2MP<br />
+      <td style="width: 235px">Arducam V1 Mini 2MP<br />
          Visual camera module&nbsp;
       </td>
       <td>
