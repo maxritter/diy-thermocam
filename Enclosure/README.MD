@@ -1,10 +1,21 @@
-The enclosure has been designed with Google Sketchup for a material thickness of 3mm. The standard enclosure is cut out of black acryl plastic (one side frosted) by a laser cutting service.
+There are **4 versions** of the enclosure:
 
-If you use the Lepton2.5 without the external spot sensor, utilize the "radiometric" variants of the main enclosure and the bottom part (has no hole for the spot sensor).
+**ArducamV1_NonRadiometric**: Made for the Arducam V1 Mini 2MP camera and the Lepton2.0 / Lepton3.0 non-radiometric sensor
 
-You can order the 2D laser cut side plates from Ponoko USA: http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930.
+**ArducamV1_Radiometric**: Made for the Arducam V1 Mini 2MP camera and the Lepton2.5 radiometric sensor
 
-Formulor.de also offers a laser cutting service for that material in Germany.
-Seeedstudio.com has a low-cost laser cutting service in China, but their material thickness varies, so be careful.
+**ArducamV2_NonRadiometric**: Made for the Arducam V2 Mini 2MP camera and the Lepton2.0 / Lepton3.0 non-radiometric sensor
 
-Or use a 3D printer to make your custom version of the enclosure, together with the 3D design files.
+**ArducamV2_Radiometric**: Made for the Arducam V2 Mini 2MP camera and the Lepton2.5 radiometric sensor
+
+The **Arudam V1** camera is used in all devices build starting 2018, as the **Arducam V2** part has become deprecated. You can distinguish between those two by having a look at the lense. The V1 has a big lense on top of it, the V2 only a very flat one.
+
+The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
+
+The enclosure has been designed with Google Sketchup for a material thickness of **3mm**. The standard enclosure is cut out of **black acryl plastic** by a laser cutting service. 
+
+Popular services are **ponoko.com** located in the USA and GB, **formulor.de** from Germany and **seedstudio.com** from China. The price for one case should be around 10€. You can also use a 3D printer to print out the case on your own, but in that case you have to adapt the 3D files for **3D printing**, as they were designed for laser cutting.
+
+You can download the free version of **Google Sketchup** here: [https://goo.gl/GSqC8C](https://goo.gl/GSqC8C)
+**Inkscape** for editing the 2D SVG files can be loaded here: [https://goo.gl/w8YHZN](https://goo.gl/w8YHZN)
+Use this plugin for Sketchup, to **convert the 3D model to 2D**: [https://github.com/JoakimSoderberg/sketchup-svg-outline-plugin](https://github.com/JoakimSoderberg/sketchup-svg-outline-plugin)
