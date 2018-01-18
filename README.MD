@@ -14,7 +14,14 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
+[**GroupGets**](https://groupgets.com/campaigns/384-diy-thermocam-kit-round-11) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
+
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
+
+**Update:** haraldg has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
+
+<a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
+<a href="https://groupgets.com/campaigns/384-diy-thermocam-kit-round-11"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
 
 ----------
 
@@ -38,7 +45,13 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 **REQUIRED PARTS**
 
 
-In order to **make your own DIY-Thermocam V2**, you have can use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
+In order to **make your own DIY-Thermocam V2**, you have **two options**: 
+
+- Buy the **[self-assembly kit](https://groupgets.com/campaigns/384-diy-thermocam-kit-round-11)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
+- Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
+- You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
+
+I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
 
 <table style="width: 100%">
    <tr>
