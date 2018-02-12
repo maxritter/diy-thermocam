@@ -64,7 +64,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
       <td>
          Lepton3.0:
 		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
-		 <strong>Digikey.com</strong></a> or
+		 <strong>Digikey.com</strong></a>, <a href="http://www.0gravity.ch/online//product_info.php?cPath=211&products_id=1835">
+		 0gravity.ch</a> or
 		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/l3">
 		 GroupGets.com</a><br />
 		 Lepton2.5:
@@ -99,7 +100,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Lepton2.5)</td>
       <td>
          <strong>
-         <a href="https://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-SP/MLX90614ESF-BCF-000-SP-ND/5414794">Digikey.com</a></strong><br />
+         <a href="https://www.digikey.com/products/en?keywords=MLX90614ESF-BCF-000-TU-ND">Digikey.com</a></strong><br />
          <a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
    </tr>
    <tr>
@@ -114,8 +115,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
          Digikey.com</a></strong><br />
          <a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
-         <a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
-         Flikto.de</a>
+         <a href="http://www.exp-tech.de/teensy-3-6">EXP-Tech.de</a><br />
+         <a href="http://www.watterott.com/de/Teensy-v36-USB-Board-ARM-Cortex-M4">watterott</a>
       </td>
    </tr>
    <tr>
@@ -142,6 +143,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <strong>
          <a href="https://www.ebay.com/itm/Arducam-Mini-module-Camera-Shield-w-2-MP-OV2640-for-Arduino-UNO-Mega2560-board-/281639729684">
          Ebay.com</a></strong><br />
+         <a href="http://www.robotshop.com/eu/en/arducam-2mp-v2-mini-camera-shield-esp8266-nano-module.html">
+         robotshop.com</a><br />
          <a href="http://www.watterott.com/de/2MP-Mini-Kamera-Board-OV2640">
          Watterott.com</a>
       </td>
@@ -166,9 +169,18 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
       </td>
       <td>
+       <strong>
          <a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
          <strong>Aliexpress.com</strong></a><br />
-         <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN">Ebay.com</a><br />
+         <a href="https://www.buerklin.com/de//p/74s4080">
+         Buerklin.com</a><br />
+         <a href="https://www.digikey.com/product-detail/en/sparkfun-electronics/PRT-13855/1568-1686-ND/7559594">
+         Digikey.com</a></strong><br />
+        <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN">Ebay.com</a><br />
+        <a href="https://eckstein-shop.de/PKCELL-LiPo-Akku-Lithium-Ion-Polymer-Batterie-37V-2500mAh-JST-PH-Connector">Eckstein-shop.de</a><br />
+         <a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
+         Mikroe.com</a><br />
+         <a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a>
       </td>
    </tr>
    <tr>
@@ -224,8 +236,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
          <strong>Ebay.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
-         <a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
-         Flikto.de</a>
+         <a href="http://www.robotshop.com/en/5v-step-up-voltage-regulator-u3v12f5.html">robotshop.com</a><br />
+         <a href="https://eckstein-shop.de/Pololu-5V-Step-Up-Spannungsregler-U3V12F5">Eckstein-shop.de</a>
       </td>
    </tr>
    <tr>
@@ -356,8 +368,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Battery for the real-time-clock
       </td>
       <td>
-         <a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
-         <strong>Digikey.com</strong></a>
+         <a href="https://www.digikey.com/product-detail/en/fdk-america-inc-a-member-of-fujitsu-group/CR1220/SY033-ND/1202933">
+         <strong>Digikey.com</strong></a><br />
+         <a href="https://www.reichelt.de/Knopfzellen-Lithium/CR-1220-REN/3/index.html?ACTION=3&LA=446&ARTICLE=105202&GROUPID=4241&artnr=CR+1220+REN&SEARCH=CR1220">Reichelt.de</a>
       </td>
    </tr>
    <tr>
