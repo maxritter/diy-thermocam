@@ -78,13 +78,10 @@ uint16_t tempToRaw(float temp) {
 /* Calculates the average of the 196 (14x14) pixels in the middle */
 uint16_t calcAverage() {
 	int sum = 0;
+	uint16_t val;
 	for (byte vert = 52; vert < 66; vert++) {
 		for (byte horiz = 72; horiz < 86; horiz++) {
-			uint16_t val = smallBuffer[(vert * 160) + horiz];
-			//If one of the values contains hotter or colder values than the lepton can handle
-			if ((val == 16383) || (val == 0))
-				//Do not use that calibration set!
-				return 0;
+			val = smallBuffer[(vert * 160) + horiz];
 			sum += val;
 		}
 	}
@@ -205,12 +202,6 @@ void calibrationProcess(bool serial, bool firstStart) {
 		//Reset counter to zero
 		int counter = 0;
 
-		//Perform FFC and set shutter mode to manual afterwards
-		if (leptonShutter != leptonShutter_none) {
-			lepton_ffc();
-			lepton_ffcMode(false);
-		}
-
 		//Get 100 different calibration samples
 		while (counter < 100) {
 			//Store time elapsed
@@ -321,9 +312,6 @@ void calibrationProcess(bool serial, bool firstStart) {
 	sprintf(result, "Slope: %1.4f, offset: %.1f", calSlope, calOffset);
 	showFullMessage(result);
 	delay(2000);
-
-	//Set shutter mode back to auto
-	lepton_ffcMode(true);
 
 	//Save calibration to EEPROM
 	storeCalibration();

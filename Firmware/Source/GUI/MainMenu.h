@@ -107,6 +107,8 @@ bool calibrationRepeat() {
 	display_setBackColor(200, 200, 200);
 	display_print((char*)"Try again?", CENTER, 66);
 	display_setFont(smallFont);
+	display_setBackColor(120, 120, 120);
+	display_setColor(VGA_WHITE);
 	display_print((char*)"Use different calibration objects", CENTER, 201);
 	//Draw the buttons
 	buttons_deleteAllButtons();
