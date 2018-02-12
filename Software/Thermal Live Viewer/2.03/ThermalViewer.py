@@ -132,6 +132,7 @@ buttonCalibration = None
 allButtons = None
 
 # Global Variables
+device = "COM10"
 screen = None
 ser = None
 calTimer = None
@@ -142,6 +143,35 @@ videoFolder = None
 videoCounter = 0
 videoStart = None
 
+def sendCommandWithFloat(cmd, data):
+    # Send new value to the device
+    try:
+        # Send command and new value
+        sendArray = (chr(cmd) + struct.pack('<f', data))
+        ser.write(sendArray)
+        # Get ACK
+        inData = map(ord, ser.read(1))
+
+    # Error
+    except serial.serialutil.SerialException:
+        return False
+
+    # Timeout
+    if not inData:
+        return False
+
+    # Check for ACK
+    if inData[0] != cmd:
+        print inData
+        return False
+
+    return True
+
+def setCalibrationSlope(slope):
+    return sendCommandWithFloat(cmd_set_calslope, slope)
+
+def setCalibrationOffset(offset):
+    return sendCommandWithFloat(cmd_set_caloffset, offset)
 
 # Set the color scheme
 def setColorScheme(updateValue):
@@ -697,8 +727,6 @@ def runShutter():
 
 # Run the calibration
 def runCalibration():
-    global calOffset, calSlope
-
     # Show message
     displayText("Start Calibration..", False)
 
@@ -743,6 +771,10 @@ def runCalibration():
 
     # Show finish message
     displayText("Calibration completed!", True)
+    return getCalibration()
+
+def getCalibration():
+    global calOffset, calSlope
 
     # Get the new offset and slope
     try:
@@ -892,6 +924,10 @@ def convertLeptonData():
 
 # Display some text on the screen
 def displayText(msg, wait):
+    if screen == None:
+        print msg
+        return
+
     # Fill background
     background = pygame.Surface((640, 480))
     background.fill((250, 250, 250))
@@ -1079,6 +1115,10 @@ def endConnection():
 
 # Check if the user wants to exit
 def checkExit():
+    # Just return if GUI stuff hasn't been setup yet
+    if screen == None:
+        return
+
     # User wants to exit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -2090,19 +2130,19 @@ def sendStart():
 
 # Connect to the device
 def connect():
-    global ser, hardwareVersion
+    global ser, hardwareVersion, device
 
     # Display waiting message
-    displayText("Waiting for device on COM10..", False)
+    displayText("Waiting for device on " + device + " ...", False)
 
-    # Check if device is connected to COM10
+    # Check if device is connected
     while True:
         # Check if the user wants to exit
         checkExit()
 
         # Try to open the ports
         try:
-            ser = serial.Serial("COM10", 115200)
+            ser = serial.Serial(device, 115200)
         # Did not work, try again in 1s
         except serial.serialutil.SerialException:
             time.sleep(1)
@@ -2311,6 +2351,9 @@ def loop():
 
 
 # Call of functions
-setup()
-while True:
-    loop()
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        device = sys.argv[1]
+    setup()
+    while True:
+        loop()

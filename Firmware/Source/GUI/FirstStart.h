@@ -183,6 +183,9 @@ void combinedAlignmentScreen() {
 	colorMap = colorMap_rainbow;
 	colorElements = 256;
 
+	//Disable showmenu
+	showMenu = showMenu_disabled;
+
 	//Adjust combined menu
 	adjustCombinedNewMenu(true);
 }

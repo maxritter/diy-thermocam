@@ -524,6 +524,9 @@ void liveModeInit() {
 	//Attach the Touch interrupt
 	attachInterrupt(pin_touch_irq, touchIRQ, FALLING);
 
+	//Disable showmenu
+	showMenu = showMenu_disabled;
+
 	//Clear temperature points array
 	clearTempPoints();
 }
@@ -542,7 +545,7 @@ void liveMode() {
 		screenOffCheck();
 
 		//If touch IRQ has been triggered, open menu
-		if (showMenu)
+		if (showMenu == showMenu_desired)
 			mainMenu();
 
 		//Start the image save procedure
