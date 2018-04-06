@@ -2,6 +2,10 @@
 <br>
 <br>
 
+**Update 07.04.2018**: **Firmware** version **2.45** now supports the new **radiometric Lepton3.5** sensor!
+
+----------
+
 The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on the popular **FLIR Lepton** long-wave-infrared array sensor. 
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Thermocam.jpg" width="500">
@@ -21,7 +25,7 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 **Update:** haraldg has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
 
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
-<a href="https://groupgets.com/campaigns/384-diy-thermocam-kit-round-11"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
+<a href="https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
 
 ----------
 
@@ -33,7 +37,7 @@ An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw
 
 The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** (**Lepton2.5** only at the moment). The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
 
-The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** only at the moment), the **spot sensor** is **not required**.
+The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** or **Lepton3.5**), the **spot sensor** is **not required**.
 
 The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/FirmwareUpdate_06.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
 
@@ -47,7 +51,7 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 In order to **make your own DIY-Thermocam V2**, you have **two options**: 
 
-- Buy the **[self-assembly kit](https://groupgets.com/campaigns/384-diy-thermocam-kit-round-11)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.0** or **Lepton2.5** sensor to your order.
+- Buy the **[self-assembly kit](https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order.
 - Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 - You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
 
@@ -62,10 +66,14 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Long-wave-infrared array sensor<br />
       </td>
       <td>
+	     Lepton3.5:
+		 <a href="https://www.digikey.com/product-detail/en/flir/500-0771-01/500-0771-01-ND/7606616">
+		 <strong>Digikey.com</strong></a> or
+		 <a href="https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5">
+		 GroupGets.com</a><br />
          Lepton3.0:
 		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
-		 <strong>Digikey.com</strong></a>, <a href="http://www.0gravity.ch/online//product_info.php?cPath=211&products_id=1835">
-		 0gravity.ch</a> or
+		 <strong>Digikey.com</strong></a> or
 		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/l3">
 		 GroupGets.com</a><br />
 		 Lepton2.5:
@@ -100,7 +108,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Lepton2.5)</td>
       <td>
          <strong>
-         <a href="https://www.digikey.com/products/en?keywords=MLX90614ESF-BCF-000-TU-ND">Digikey.com</a></strong><br />
+         <a href="https://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-SP/MLX90614ESF-BCF-000-SP-ND/5414794">Digikey.com</a></strong><br />
          <a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
    </tr>
    <tr>
@@ -115,8 +123,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
          Digikey.com</a></strong><br />
          <a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
-         <a href="http://www.exp-tech.de/teensy-3-6">EXP-Tech.de</a><br />
-         <a href="http://www.watterott.com/de/Teensy-v36-USB-Board-ARM-Cortex-M4">watterott</a>
+         <a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
+         Flikto.de</a>
       </td>
    </tr>
    <tr>
@@ -143,8 +151,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <strong>
          <a href="https://www.ebay.com/itm/Arducam-Mini-module-Camera-Shield-w-2-MP-OV2640-for-Arduino-UNO-Mega2560-board-/281639729684">
          Ebay.com</a></strong><br />
-         <a href="http://www.robotshop.com/eu/en/arducam-2mp-v2-mini-camera-shield-esp8266-nano-module.html">
-         robotshop.com</a><br />
          <a href="http://www.watterott.com/de/2MP-Mini-Kamera-Board-OV2640">
          Watterott.com</a>
       </td>
@@ -169,18 +175,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
       </td>
       <td>
-       <strong>
          <a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
          <strong>Aliexpress.com</strong></a><br />
-         <a href="https://www.buerklin.com/de//p/74s4080">
-         Buerklin.com</a><br />
-         <a href="https://www.digikey.com/product-detail/en/sparkfun-electronics/PRT-13855/1568-1686-ND/7559594">
-         Digikey.com</a></strong><br />
-        <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN">Ebay.com</a><br />
-        <a href="https://eckstein-shop.de/PKCELL-LiPo-Akku-Lithium-Ion-Polymer-Batterie-37V-2500mAh-JST-PH-Connector">Eckstein-shop.de</a><br />
-         <a href="https://shop.mikroe.com/accessories/batteries/li-polymer-battery-37v-2000mah">
-         Mikroe.com</a><br />
-         <a href="https://www.sparkfun.com/products/8483">Sparkfun.com</a>
+         <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN">Ebay.com</a><br />
       </td>
    </tr>
    <tr>
@@ -236,8 +233,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
          <strong>Ebay.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
-         <a href="http://www.robotshop.com/en/5v-step-up-voltage-regulator-u3v12f5.html">robotshop.com</a><br />
-         <a href="https://eckstein-shop.de/Pololu-5V-Step-Up-Spannungsregler-U3V12F5">Eckstein-shop.de</a>
+         <a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
+         Flikto.de</a>
       </td>
    </tr>
    <tr>
@@ -368,9 +365,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Battery for the real-time-clock
       </td>
       <td>
-         <a href="https://www.digikey.com/product-detail/en/fdk-america-inc-a-member-of-fujitsu-group/CR1220/SY033-ND/1202933">
-         <strong>Digikey.com</strong></a><br />
-         <a href="https://www.reichelt.de/Knopfzellen-Lithium/CR-1220-REN/3/index.html?ACTION=3&LA=446&ARTICLE=105202&GROUPID=4241&artnr=CR+1220+REN&SEARCH=CR1220">Reichelt.de</a>
+         <a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
+         <strong>Digikey.com</strong></a>
       </td>
    </tr>
    <tr>
@@ -570,11 +566,11 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 
  - Fast **ARM Cortex M4** processor (**240MHz**), based on the popular, **Arduino**
    compatible **Teensy 3.6**
- - **160 x 120** pixel **FLIR Lepton3** long-wave infrared array sensor for live
+ - **160x120 (Lepton3)** or **80x60 (Lepton2)** long-wave infrared array sensor for live
    thermographic images
  - Frame rate of up to **9 FPS** (US export compliance) over the serial
    connection, 5 FPS on the device itself
- - **2 MP visual camera** to capture optical images, that can be used in a
+ - **2MP visual camera** to capture optical images, that can be used in a
    combined image
  - **MLX90614 single point**-infrared sensor for high-precision spot
    temperatures (10° FOV)
@@ -588,7 +584,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
    on the device
  - **Save** real-time **videos** and interval images with different time-lapse
    settings
- - **8GB internal storage**, accessible as an exchangeable SD / microSD
+ - **Up to 8GB internal storage**, accessible as an exchangeable SD / microSD
    slot
  - **2500 mAh lithium polymer battery** for long operation time (4-6 hours)
  - **Open-source firmware** written in **Arduino compatible C/C++** code
