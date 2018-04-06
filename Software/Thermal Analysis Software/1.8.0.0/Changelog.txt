@@ -1,0 +1,116 @@
+Thermal Analysis Software
+Changelog
+
+1.8.0.0
+-A few minor bugs have been fixed
+-Change from .NET 3.5 to .NET 4.0 (Win XP compatible)
+
+1.7.0.0
+-New window: PictureProcessing
+-Graph Histogram
+-Improved Reports
+-Interpolation and color scale are now set in the bar at the bottom. 
+-Median implementation
+-New color palette "RedGrayBlue"
+-Option: "Disable IR aspect ratio" in Visual 
+-About window now has a list view, instead of single-clicks from before.
+-The delta line and the measuring line can now also run backwards
+-Mbox now has eight degrees of change 
+-IR Zoombox is now no longer with Visual but with functions with in it
+
+1.6.0.0
+-Thermal report, that can create IR and visual images with color scale
+-Improved image browser
+-Various bugfixes
+
+1.5.0.0
+-90 ° rotation in the IR image 
+-New icon since the old virus has led to virus detection 
+-Bugfixes
+
+1.4.4.2
+-DIY instructions for Cal now in the subfolder
+-Visual effects are now available with Visual-> Effects (Sub-Panel)
+-RTF Reports
+-In addition to Visual Relief (formerly only VR) , VisualGray is now available
+-Visual isotherm starts with a transparency
+-Spot has a 3x3 option
+-Spot has a ShowRaw option
+-Plot Multi (previously "all curves together" Save) can be loaded
+-Plot Marker 
+
+1.4.3.2
+-Settings are now no longer a separate window but dock as a document with.
+-Plot statistics: As with histograms, the statistics must be activated to make them visible. 
+
+1.4.2.1
+-Image processings like Median or Gausian are no longer moving all temperatures
+-With File -> "Close without Settings to save" is also done exactly
+-Many changes to line graph (graph of a measurement line)
+-New window: Settings
+
+1.4.0.0
+-Visual Relief: It is an alternative to IR blending and is similar (not the same) to the FLIR MSX display format
+-Movie Function: Image Capture MainIR or Visual 
+-Movie function: No preview during recording 
+-Visual blending in the MainIR window 
+-New measurement: 2 point difference 
+-Image rotation in degrees 
+-Image rotation and image reflection 
+-Various format adjustments for the DIY Thermocam (V1 / V2)
+-Strength adjustment of Gaus-Blur filter adjusted 
+
+1.3.0.18
+-Fixed live mode for Lepton2 sensor
+-Added use settings from camera checkbox
+
+1.3.0.8
+-Improved visual overlay
+-Added support for EXIF rotation detection
+
+1.3.0.2
+-Visual overlay improved a lot, now has also Isotherm blending modes
+-Measured value monitor 
+-Histogram statistics 
+-In the box, the Min / Max tips fit better to the measuring point
+-Load Tempswitch Setup now opens an OpenFileDialog 
+-ImageBrowser now only creates the preview images, which can be displayed directly, others are only loaded when scrolling down. 
+-At isotherm the font color of the limit fields was adjusted, lower limit is blue, upper limit is red
+-External assemblies are now in the subfolder "external"
+
+1.2.0.0
+-New Option for thermal imaging Expert: Temperature Discard> 1000 ° C 
+-Compensates for an error that can occur when saving images of the Android APP.
+-New function: "Save Changes" (in image processing, is) characterized the current record is stored in the file that has previously been loaded.
+-When Auto Select a * .CSV is not special uses for Optris for Thermal Expert.
+-Imaging FLIR images improved. 
+-Images are copied locally and from there processed (hence FileDrop network paths possible). The registration process has been revised.
+-The program shall designate points, as decimal, even if in the control panel which has been set to another.
+-New Palette: Medical
+-Decimal separator to "." set, even if '' is in the system settings
+
+1.1.2.2
+-Fixed Error loading extra images. 
+-There was an error in referencing, so images were indeed appear and could be used for overlay and so on, but if you wanted to save them, they were not stored. 
+-built Quickshot function. 
+-In this case, a key is defined that automatically by pressing a key stores an image. On request, with extra visual or 16bit TIF image. The images are stored in a separate folder and a "Overview.txt" lists all files with the sample timing (time the button is pressed), and min / max values ??on.
+-Deletefunktion for ImageBrowser. 
+-Mouse left-> Open picture 
+-Mouse right -> Select Image 
+-A button at the bottom right then deletes all highlighted when clicked. When delete entire possible records are deleted. If an image is deleted from the DIY Thermocam or Thermal Expert camera, are the extra put-visual images and thumbnails with deleted.
+-Seek customized kernel, Solte now unterstüzen a higher range 
+improved image capture for thermal Expert (from the * .CSV)
+
+1.1.0.0
+-In the DIY Thermocam can now be made a Snapshot  (it is an IR image captured and then a Visual full frame 640x480, but the camera FW 2:15 is required)
+-Zoom box can be activated in the mouse menu from the main screen (and Ctrl + Z)
+-The image filter Gausian Blur and Convolution 3x3 were installed
+-Image Filter Rep. Median was removed (to be repaired)
+-new window: image processing, is now the editing features for pictures together (previously in the tab: functions-> Appearance) and live streams (previously in the tab: Device> Vision)
+-double-click on the status bar, the Standard restore (For particularly long messages, it can happen, which is adjusted by a newline size)
+-Seek Thermal: in extremely hot temperatures (> 350 ° C) off earlier to individual pixels, these are now being replaced with an automatic value. 
+-Image Browser: revised imaging (locks now after read the files no longer)
+-Image Browser: can now search a folder by Thermal Expert images (looks only for * .csv, but provides images found are with)
+-Images of the thermal imager Thermal Expert Q1 (* .csv file) can be imported (Low Res Temp and Hi Res Map in memory errors and lack of hi-res map only the low res image is captured)
+-Revised: Zoom Box
+-New: Temperature Switch

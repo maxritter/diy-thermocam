@@ -1,0 +1,1 @@
+start ThermoVision_JoeC.exe -SEEK
