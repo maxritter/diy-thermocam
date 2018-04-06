@@ -255,17 +255,10 @@ boolean checkLiveModeHelper() {
 /* Help screen for the first start of live mode */
 void liveModeHelper() {
 	String text[7];
-	
-	//Do the combined alignment if cam connected
-	if (checkDiagnostic(diag_camera))
-	{
-		camera_setDisplayRes();
-		combinedAlignmentScreen();
-		camera_setSaveRes();
-	}
 
-	//Do the first time calibration if spot sensor working and not using Lepton2.5
-	if (checkDiagnostic(diag_spot) && (leptonVersion != leptonVersion_2_5_shutter))
+	//Do the first time calibration if spot sensor working and not using radiometric Lepton
+	if (checkDiagnostic(diag_spot) && (leptonVersion != leptonVersion_2_5_shutter) 
+		&& (leptonVersion != leptonVersion_3_5_shutter))
 		calibrationHelperScreen();
 
 	//Hint screen for the live mode #1 
@@ -279,7 +272,7 @@ void liveModeHelper() {
 	infoScreen(text);
 
 	//Hint screen for the live mode #2
-	if (leptonVersion != leptonVersion_2_5_shutter) {
+	if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter)) {
 		text[1] = "The device needs 30 seconds to";
 		text[2] = "warmup the sensor, more functions";
 		text[3] = "will be activated afterwards. You";
@@ -305,7 +298,7 @@ void liveModeHelper() {
 /* Set the EEPROM values to default for the first time */
 void stdEEPROMSet() {
 	//Flash spot sensor, not for radiometric Lepton
-	if (leptonVersion != leptonVersion_2_5_shutter) {
+	if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter)) {
 		//Show message
 		showFullMessage((char*) "Flashing spot EEPROM settings..");
 

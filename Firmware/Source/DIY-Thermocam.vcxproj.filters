@@ -290,9 +290,6 @@
     <ClInclude Include="Libraries\SdFat\SdSpiCard\boards\UnoGpioPinMap.h">
       <Filter>Libraries\SD\SdSpiCard\boards</Filter>
     </ClInclude>
-    <ClInclude Include="Libraries\SPI\SPI.h">
-      <Filter>Libraries\SPI</Filter>
-    </ClInclude>
     <ClInclude Include="Libraries\Time\Time.h">
       <Filter>Libraries\Time</Filter>
     </ClInclude>
@@ -318,6 +315,10 @@
       <Filter>Libraries\Timer</Filter>
     </ClInclude>
     <ClInclude Include="__vm\.DIY-Thermocam.vsarduino.h" />
+    <ClInclude Include="__vm\.Source.vsarduino.h" />
+    <ClInclude Include="Libraries\SPI\SPI.h">
+      <Filter>Libraries\SPI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Hardware\Camera\tjpgd.c">
@@ -389,9 +390,6 @@
     <ClCompile Include="Libraries\SdFat\SdSpiCard\SdSpiTeensy3.cpp">
       <Filter>Libraries\SD\SdSpiCard</Filter>
     </ClCompile>
-    <ClCompile Include="Libraries\SPI\SPI.cpp">
-      <Filter>Libraries\SPI</Filter>
-    </ClCompile>
     <ClCompile Include="Libraries\Time\DateStrings.cpp">
       <Filter>Libraries\Time</Filter>
     </ClCompile>
@@ -415,6 +413,9 @@
     </ClCompile>
     <ClCompile Include="Libraries\Metro\Metro.cpp">
       <Filter>Libraries\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="Libraries\SPI\SPI.cpp">
+      <Filter>Libraries\SPI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

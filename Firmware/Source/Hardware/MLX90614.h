@@ -317,7 +317,7 @@ void mlx90614_init() {
 	byte error;
 
 	//For radiometric Lepton, do not init the MLX90614
-	if (leptonVersion == leptonVersion_2_5_shutter) {
+	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter)) {
 		mlx90614Version = mlx90614Version_new;
 		return;
 	}

@@ -226,6 +226,9 @@ void bootScreen() {
 
 	//Display version
 	display_print((char*)Version, CENTER, 220);
+
+	//Wait some time
+	delay(2000);
 }
 
 /* More includes */

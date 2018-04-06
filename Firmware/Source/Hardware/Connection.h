@@ -107,7 +107,7 @@ void sendRawData(bool color = false) {
 	uint16_t result;
 
 	//For the Lepton2.x sensor, write 4800 raw values
-	if ((leptonVersion != leptonVersion_3_0_shutter) && (!color)) {
+	if ((leptonVersion != leptonVersion_3_0_shutter) && (leptonVersion != leptonVersion_3_5_shutter) && (!color)) {
 		for (int line = 0; line < 60; line++) {
 			for (int column = 0; column < 80; column++) {
 				result = smallBuffer[(line * 2 * 160) + (column * 2)];
@@ -154,6 +154,8 @@ void sendConfigData() {
 	//Lepton version
 	if (leptonVersion == leptonVersion_2_5_shutter)
 		Serial.write(leptonVersion_2_0_shutter);
+	else if (leptonVersion == leptonVersion_3_5_shutter)
+		Serial.write(leptonVersion_3_0_shutter);
 	else
 		Serial.write(leptonVersion);
 	//Rotation
@@ -304,7 +306,7 @@ void setCalOffset() {
 	uint8_t farray[4];
 
 	//If not enough data available or RAD, leave
-	if ((Serial.available() < 4) || (leptonVersion == leptonVersion_2_5_shutter))
+	if ((Serial.available() < 4) || (leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -327,7 +329,7 @@ void setCalSlope() {
 	uint8_t farray[4];
 
 	//If not enough data available or RAD, leave
-	if ((Serial.available() < 4) || (leptonVersion == leptonVersion_2_5_shutter))
+	if ((Serial.available() < 4) || (leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -1181,7 +1183,7 @@ void serialOutput() {
 		getSpotTemp();
 
 		//Compensate calibration with MLX90614 for non-radiometric Lepton
-		if (leptonVersion != leptonVersion_2_5_shutter)
+		if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter))
 			compensateCalib();
 
 		//Refresh the temp points

@@ -303,7 +303,7 @@ void readEEPROM() {
 	}
 	//Calibration slope
 	read = EEPROM.read(eeprom_calSlopeSet);
-	if (leptonVersion == leptonVersion_2_5_shutter)
+	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
 		calSlope = 0.01;
 	else if (read == eeprom_setValue)
 		readCalibration();
@@ -629,7 +629,7 @@ void checkNoFFC()
 //Get the spot temperature from Lepton or MLX90614
 void getSpotTemp() {
 	//Get spot value from radiometric Lepton
-	if (leptonVersion == leptonVersion_2_5_shutter)
+	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
 		spotTemp = lepton_spotTemp();
 
 	//Get temperature from MLX90614

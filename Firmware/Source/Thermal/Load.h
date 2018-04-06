@@ -303,7 +303,6 @@ void loadRawData(char* filename, char* dirname) {
 				smallBuffer[(line * 2 * 160) + 160 + (column * 2) + 1] = result;
 			}
 		}
-		leptonVersion = leptonVersion_2_0_shutter;
 	}
 
 	//For the Lepton3 sensor, read 19200 raw values
@@ -313,7 +312,6 @@ void loadRawData(char* filename, char* dirname) {
 			lsb = sdFile.read();
 			smallBuffer[i] = (((msb) << 8) + lsb);
 		}
-		leptonVersion = leptonVersion_3_0_shutter;
 	}
 	//Invalid data
 	else {
@@ -358,6 +356,34 @@ void loadRawData(char* filename, char* dirname) {
 	for (int i = 0; i < 4; i++)
 		farray[i] = sdFile.read();
 	calSlope = bytesToFloat(farray);
+
+	//Lepton2.x
+	if ((fileSize == lepton2_small) || (fileSize == lepton2_big)) {
+		//Radiometric Lepton2.5
+		if ((calOffset == -273.15) && (calSlope == 0.01))
+		{
+			leptonVersion = leptonVersion_2_5_shutter;
+		}
+		//Non-radiometric Lepton2.0
+		else
+		{
+			leptonVersion = leptonVersion_2_0_shutter;
+		}
+	}
+
+	//Lepton3.x
+	if ((fileSize == lepton3_small) || (fileSize == lepton3_big)) {
+		//Radiometric Lepton3.5
+		if ((calOffset == -273.15) && (calSlope == 0.01))
+		{
+			leptonVersion = leptonVersion_3_5_shutter;
+		}
+		//Non-radiometric Lepton3.5
+		else
+		{
+			leptonVersion = leptonVersion_3_0_shutter;
+		}
+	}
 
 	//Clear temperature points array
 	clearTempPoints();

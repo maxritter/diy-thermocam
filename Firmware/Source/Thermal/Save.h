@@ -353,7 +353,7 @@ void saveRawData(bool isImage, char* name, uint16_t framesCaptured) {
 	}
 
 	//For the Lepton2 sensor, write 4800 raw values
-	if (leptonVersion != leptonVersion_3_0_shutter) {
+	if ((leptonVersion != leptonVersion_3_0_shutter) && (leptonVersion != leptonVersion_3_5_shutter)) {
 		for (int line = 0; line < 60; line++) {
 			for (int column = 0; column < 80; column++) {
 				result = smallBuffer[(line * 2 * 160) + (column * 2)];

@@ -30,7 +30,7 @@ float fahrenheitToCelcius(float Tf) {
 /* Function to calculate temperature out of Lepton value */
 float calFunction(uint16_t rawValue) {
 	//For radiometric Lepton, set offset to fixed value
-	if (leptonVersion == leptonVersion_2_5_shutter)
+	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
 		calOffset = -273.15;
 
 	//For non-radiometric Lepton
@@ -58,7 +58,7 @@ uint16_t tempToRaw(float temp) {
 		temp = fahrenheitToCelcius(temp);
 
 	//For radiometric Lepton, set offset to fixed value
-	if (leptonVersion == leptonVersion_2_5_shutter)
+	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
 		calOffset = -273.15;
 
 	//For non-radiometric Lepton
@@ -176,7 +176,7 @@ int linreg(int n, const uint16_t x[], const float y[], float* m, float* b, float
 /* Run the calibration process */
 void calibrationProcess(bool serial, bool firstStart) {
 	//When in serial mode and using radiometric Lepton, return invalid command
-	if (serial && (leptonVersion == leptonVersion_2_5_shutter)) {
+	if (serial && ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))) {
 		Serial.write(CMD_INVALID);
 		return;
 	}
@@ -336,7 +336,7 @@ bool calibration() {
 	}
 
 	//Radiometric Lepton, no calibration needed
-	if (leptonVersion == leptonVersion_2_5_shutter) {
+	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter)) {
 		showFullMessage((char*) "Not required for radiometric Lepton", true);
 		delay(1000);
 		return false;

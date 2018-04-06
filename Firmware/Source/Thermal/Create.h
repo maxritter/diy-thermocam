@@ -661,7 +661,7 @@ void createThermalImg(bool small) {
 	getSpotTemp();
 
 	//Compensate calibration with MLX90614 for non-radiometric Lepton
-	if (leptonVersion != leptonVersion_2_5_shutter)
+	if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter))
 		compensateCalib();
 
 	//Refresh the temp points if required
@@ -706,7 +706,7 @@ void createVisCombImg() {
 	getSpotTemp();
 
 	//Compensate calibration with MLX90614 for non-radiometric Lepton
-	if (leptonVersion != leptonVersion_2_5_shutter)
+	if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter))
 		compensateCalib();
 
 	//Refresh the temp points if required

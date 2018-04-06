@@ -21,7 +21,7 @@ XPT2046_Touchscreen resTouch;
 //Capacitive Touch Controller
 FT6206_Touchscreen capTouch;
 //Choose the right touch screen
-bool touch_capacitive;
+volatile bool touch_capacitive;
 
 /* Returns the coordinates of the touched point */
 TS_Point touch_getPoint() {
@@ -83,7 +83,7 @@ void touch_init() {
 }
 
 /* Returns if the screen is currently touched */
-bool touch_touched() {
+volatile bool touch_touched() {
 	bool touch;
 	//Check for touch, capacitive or resistive
 	if (touch_capacitive)
