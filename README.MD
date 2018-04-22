@@ -2,7 +2,7 @@
 <br>
 <br>
 
-**Update 07.04.2018**: **Firmware** version **2.45** now supports the new **radiometric Lepton3.5** sensor!
+**Update 22.04.2018**: **GroupGets** launched a **[new campaign](https://groupgets.com/campaigns/420-diy-thermocam-kit-round-13)** to order the **DIY-Thermocam V2 kit**!
 
 ----------
 
