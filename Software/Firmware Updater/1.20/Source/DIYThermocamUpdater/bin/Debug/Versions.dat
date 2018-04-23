@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+
+<versions>
+  <firmware version="2.31">
+    <size>620325</size>
+	<builddate>11.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.31">
+    <size>581212</size>
+	<builddate>11.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.32">
+    <size>623340</size>
+	<builddate>15.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.32">
+    <size>584109</size>
+	<builddate>15.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.33">
+    <size>634664</size>
+	<builddate>18.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.33">
+    <size>593872</size>
+	<builddate>18.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.34">
+    <size>752266</size>
+	<builddate>20.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.34">
+    <size>616964</size>
+	<builddate>20.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.35">
+    <size>763773</size>
+	<builddate>25.12.2016</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.35">
+    <size>620506</size>
+	<builddate>25.12.2016</builddate>
+    <target>V1</target>
+  </firmware>
+
+  <firmware version="2.36">
+    <size>763953</size>
+	<builddate>09.01.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.36">
+    <size>620660</size>
+	<builddate>09.01.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.37">
+    <size>757608</size>
+	<builddate>01.02.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.37">
+    <size>621077</size>
+	<builddate>01.02.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.38">
+    <size>760848</size>
+	<builddate>06.02.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.38">
+    <size>621539</size>
+	<builddate>06.02.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.39">
+    <size>762918</size>
+	<builddate>22.02.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.39">
+    <size>623156</size>
+	<builddate>22.02.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.40">
+    <size>737498</size>
+	<builddate>04.06.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.40">
+    <size>613207</size>
+	<builddate>04.06.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.41">
+    <size>789386</size>
+	<builddate>07.07.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.41">
+    <size>616457</size>
+	<builddate>07.07.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.42">
+    <size>793481</size>
+	<builddate>14.07.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.42">
+    <size>618565</size>
+	<builddate>14.07.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+    <firmware version="2.43">
+    <size>792581</size>
+	<builddate>12.09.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.43">
+    <size>617641</size>
+	<builddate>12.09.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.44">
+    <size>791546</size>
+	<builddate>15.10.2017</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.44">
+    <size>617535</size>
+	<builddate>15.10.2017</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.45">
+    <size>737723</size>
+	<builddate>06.04.2018</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.45">
+    <size>615562</size>
+	<builddate>06.04.2018</builddate>
+    <target>V1</target>
+  </firmware>
+  
+  <firmware version="2.46">
+    <size>686025</size>
+	<builddate>17.04.2018</builddate>
+    <target>V2</target>
+  </firmware>
+  <firmware version="2.46">
+    <size>585880</size>
+	<builddate>17.04.2018</builddate>
+    <target>V1</target>
+  </firmware>
+</versions>

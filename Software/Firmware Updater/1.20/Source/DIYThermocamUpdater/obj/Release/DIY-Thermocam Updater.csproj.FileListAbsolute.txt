@@ -1,0 +1,18 @@
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\bin\Release\DIY-Thermocam Updater.exe.config
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\bin\Release\DIY-Thermocam Updater.exe
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\bin\Release\DIY-Thermocam Updater.pdb
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Release\DIYThermocamUpdater.UpdaterForm.resources
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Release\DIYThermocamUpdater.Properties.Resources.resources
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.csproj.GenerateResource.Cache
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.exe
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.pdb
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.csprojResolveAssemblyReference.cache
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\bin\Release\DIY-Thermocam Updater.exe.config
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.exe
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.pdb
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\bin\Release\DIY-Thermocam Updater.exe
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\bin\Release\DIY-Thermocam Updater.pdb
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.csprojResolveAssemblyReference.cache
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\obj\Release\DIYThermocamUpdater.UpdaterForm.resources
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\obj\Release\DIYThermocamUpdater.Properties.Resources.resources
+C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\Source\DIYThermocamUpdater\obj\Release\DIY-Thermocam Updater.csproj.GenerateResource.Cache

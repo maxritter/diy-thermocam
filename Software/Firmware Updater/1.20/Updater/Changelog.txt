@@ -1,0 +1,39 @@
+*** DIY-Thermocam Firmware Updater Changelog ***
+
+1.20
+-Removed serial connection requirement
+-Improved stability
+
+1.13
+-Code structure changes
+-The versions file is now stored in XML format
+
+1.12
+-Ability to recover the device after a failed update
+
+1.11
+-Possibility to update without connection
+
+1.10
+-Added hardware detection
+-Added battery status check
+
+1.05
+-Ability to flash unknown firmware files
+-Bugfixes
+
+1.04
+-Improved uploading speed
+-Bugfixes
+
+1.03
+-Fixed DPI specific text issues
+
+1.02
+-Fixed firmware version update server
+
+1.01
+-Added auto-reboot by software
+
+1.00 
+-Initial release
