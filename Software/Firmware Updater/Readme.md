@@ -1,6 +1,6 @@
 **Firmware Updater**
 
-The **standalone firmware updater** only runs on **Windows** XP or greater, get the latest version from [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/1.13/Updater). Then follow the [firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_06.pdf).
+The **standalone firmware updater** only runs on **Windows** XP or greater, get the latest version from [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/1.13/Updater). Then follow the [firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_07.pdf).
 
 You can also use the **Teensy Loader**, which works for Windows,** Linux and Mac**. For Windows, it is available [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/Teensy%20Loader), for Linux and Mac download "Teensyduino" from [here](https://www.pjrc.com/teensy/td_download.htm). Load the hex file with "teensy.exe", then launch "teensy_reboot.exe" while the Thermocam is connected to the PC and turned on. The flash procedure should start. In case there is an error **"File too big"**, upload "FileTooBig.hex" to the Teensy first and then the newest version of the firmware in the next step.
 
