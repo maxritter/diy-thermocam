@@ -1,10 +1,14 @@
 There are **4 versions** of the enclosure. The **Arudam V1** camera is used in **all devices build from 2018**, as the **Arducam V2** part has become **deprecated**. You can distinguish between those two by having a look at the lense. The V1 has a big lense on top of it, the V2 only a very flat one.
 
 <img src="https://images-na.ssl-images-amazon.com/images/I/61QiB6hqMZL._SX466_.jpg" width="300" />
-( **ArducamV1** )
+(ArducamV1)
 
 <img src="http://www.arducam.com/wp-content/uploads/2016/08/ArduCAM-2MP-V2-2-1.jpg" width="300" />
-( **ArducamV2** )
+(ArducamV2)
+
+The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
+
+----------
 
 You can find those four versions in the corresponding folders:
 
@@ -16,7 +20,7 @@ You can find those four versions in the corresponding folders:
 
 **ArducamV2_Radiometric**: Made for the Arducam V2 Mini 2MP camera and the Lepton2.5 radiometric sensor
 
-The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
+----------
 
 The enclosure has been designed with Google Sketchup for a material thickness of **3mm**. The standard enclosure is cut out of **black acryl plastic** by a laser cutting service. 
 
