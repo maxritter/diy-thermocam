@@ -2,7 +2,7 @@
 <br>
 <br>
 
-**Update 22.04.2018**: **GroupGets** launched a **[new campaign](https://groupgets.com/campaigns/420-diy-thermocam-kit-round-13)** to order the **DIY-Thermocam V2 kit**!
+**Update 08.09.2018:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
 
 ----------
 
@@ -51,7 +51,7 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 In order to **make your own DIY-Thermocam V2**, you have **two options**: 
 
-- Buy the **[self-assembly kit](https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order.
+- Buy the **[self-assembly kit](https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order. If they currently **do not have an active campaign**, **[write them an email](mailto:ron@groupgets.com )** and ask for one ;) 
 - Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 - You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
 
@@ -95,7 +95,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Interface the Lepton over SPI / I2C&nbsp;
       </td>
       <td>
-         <a href="http://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-sensors/795?k=FLIR%20Lepton">
+         <a href="https://www.digikey.com/product-detail/en/flir/250-0587-00/250-0587-00-ND/5266963">
          <strong>Digikey.com</strong></a><br />
          <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/flir-lepton-breakout-board">GroupGets.com</a></td>
    </tr>
@@ -104,8 +104,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" />
       </td>
       <td style="width: 235px">MLX90614-BCF<br />
-         Spot sensor for absolute temperature measurement (not required for 
-         Lepton2.5)</td>
+         Spot sensor for absolute temperature measurement - <strong>not required for 
+         Lepton2.5 / Lepton3.5</strong></td>
       <td>
          <strong>
          <a href="https://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-SP/MLX90614ESF-BCF-000-SP-ND/5414794">Digikey.com</a></strong><br />
@@ -160,7 +160,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Display.png" style="-webkit-user-select: none" />
       </td>
       <td style="width: 235px">3.2" TT LCD Display Module<br />
-         Configuration: 5V, Pin header 4-wire SPI, resistive touch, no font chip
+         Configuration: Interface: Pin Header Connection-4-wire-SPI, Power Supply: 5V, Touch Panel: 3.2" Resistive, Font Chip: None 
       </td>
       <td>
          <a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
@@ -175,9 +175,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
       </td>
       <td>
-         <a href="https://www.aliexpress.com/item/Free-shipping-1pcs-lot-655560-3-7-V-lithium-polymer-battery-3000-mah-DIY-mobile-emergency/32788025260.html?spm=2114.01010208.3.60.bQsjkq&amp;ws_ab_test=searchweb0_0,searchweb201602_2_10065_10068_10000009_10000032_10084_10000025_10083_10080_10000029_10082_10081_10000028_10110_10111_10112_10060_10113_10114_10062_10115_10056_503_10055_10054_10059_10000044_10099_501_10078_10079_10000022_10000012_429_10103_10073_10000015_10102_10101_10096_10000035_10000018_10000019_10052_10053_10050_10107_10051_10106,searchweb201603_10,afswitch_5,single_sort_1_default&amp;btsid=895a580d-2b5e-4679-97c6-2793638cf17a">
-         <strong>Aliexpress.com</strong></a><br />
-         <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN">Ebay.com</a><br />
+         <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN"><strong>Ebay.com</strong></a><br />
       </td>
    </tr>
    <tr>
@@ -216,7 +214,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Including charging LED&nbsp;
       </td>
       <td>
-         <a href="http://www.ebay.com/itm/Dual-TP4057-Lithium-Battery-1A-LED-Charging-Board-Li-ion-Battery-Charger-Mudule-/400614252936?hash=item5d46786188:g:WTEAAOSwal5YJTmW">
+         <a href="https://www.ebay.com/itm/TP4057-5V-1A-LED-Charger-Charging-Module-For-3-7V-Li-ion-Lithium-18650-Battery/122754421232?hash=item1c94bbd1f0:g:EssAAOSws8VZ3ZSX">
          <strong>Ebay.com</strong></a><br />
          <a href="https://www.amazon.com/Solu-Lithium-Battery-Charging-Reverse/dp/B00YZV7RTW">
          Amazon.com</a>
@@ -230,11 +228,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          5V voltage booster&nbsp;
       </td>
       <td>
-         <a href="http://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator-U3V12F5-/201448950785?hash=item2ee74b0c01:g:mwwAAOSw-0xYa86A">
+         <a href="https://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator/302861045898?epid=1769652012&hash=item4683ecd08a:g:LzAAAOSwfBFbiEdB">
          <strong>Ebay.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
-         <a href="https://www.flikto.de/products/pololu-5v-step-up-voltage-regulator-u3v12f5">
-         Flikto.de</a>
       </td>
    </tr>
    <tr>
@@ -401,7 +397,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Double-sided adhesive tape for the lipo protection on the PCB&nbsp;
       </td>
       <td>
-         <a href="http://www.ebay.com/itm/3M-300LSE-Double-Sided-Super-Sticky-Heavy-Duty-Adhesive-Tape-/152506570643?var=&amp;hash=item2382199793:m:mbfszab003v24D4gcJ724Eg">
+         <a href="https://www.ebay.com/itm/200mmX100mm-3M-9495LE-300LSE-Double-Sided-Transparent-Clear-Adhesive-Tape/281869275116?hash=item41a0b7cfec%3Am%3AmR2yJrCTWwgBQsqxZ6HHr2A&var=580847054098">
 		 <strong>Ebay.com</strong></a><br />
          Or use any thick tape
       </td>
@@ -428,7 +424,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Used as a stand for the device&nbsp;
       </td>
       <td>
-         <a href="http://www.ebay.com/itm/New-Mini-Flexible-Pocket-Size-Metal-Tripod-for-Digital-Camera-Sony-Canon-Nikon-/121351046836?hash=item1c411606b4:g:gCIAAOSwP~tW3qCx">
+         <a href="https://www.ebay.com/itm/Universal-Mini-Flexible-Portable-Tripod-Stand-for-Digital-Camera-HD-Nikon-Canon/381340421241?epid=14009503154&hash=item58c9a90c79:g:zbQAAOSwpmNbKRpD">
          <strong>Ebay.com</strong></a><br />
          Or use any tripod
       </td>
@@ -640,7 +636,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Thermal temp. range
       </td>
       <td>
-         -40° C to 200° C
+         -10° C - +140° C or -10° C - +450° C (Lepton3.5)
       </td>
       <td>
          <span style="line-height: 26.6667px;">-20° C to 250° C</span>
@@ -673,7 +669,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Spot sensor temp. range
       </td>
       <td>
-         -70° C to 380° C
+         -70° C to 380° C (Lepton2.0/3.0 only)
       </td>
       <td>
          -20° C to 250° C
@@ -783,7 +779,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Price
       </td>
       <td class="auto-style1">
-         <strong>400€</strong>
+         <strong>~500€</strong>
       </td>
       <td class="auto-style2">
          <strong>2000€</strong>
@@ -856,14 +852,14 @@ You need the **following parts**:
    <tr>
       <td style="width: 235px">Sandisk 8GB microSD</td>
       <td>
-         <a href="http://www.ebay.com/itm/SANDISK-8GB-MOBILE-ULTRA-MicroSD-Class-10-UHS-48MB-S-SDHC-TF-FLASH-">
+         <a href="https://www.ebay.com/itm/SanDisk-32GB-16GB-8GB-Micro-SD-SD-HC-TF-Memory-Card-Retail-Package-Class-4-C4/152291118415?epid=1200079740&hash=item2375420d4f%3Am%3AmUGMwSe_qfLwgGGYCXauK4Q&var=451490926483">
          Ebay.com</a>
       </td>
    </tr>
    <tr>
       <td style="width: 235px">microUSB cable</td>
       <td>
-         <a href="http://www.ebay.com/itm/NEW-ORIGINAL-SAMSUNG-MICRO-USB-CHARGING-CABLE-FOR-OEM-GALAXY-S3-S4-S6-NOTE-4-/262426066726?var=561224615039&amp;hash=item3d19cfff26:g:UOEAAOSwSclXLl3j">
+         <a href="https://www.ebay.com/itm/Rapid-Charge-Micro-USB-Cable-Fast-Charging-For-Tablet-Android-Smartphone/263383418541?hash=item3d52e006ad%3Am%3AmZBxWznWnpAS_LiXK2TcO-Q&var=562394099416">
          Ebay.com</a>
       </td>
    </tr>
