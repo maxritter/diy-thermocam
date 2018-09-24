@@ -228,8 +228,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          5V voltage booster&nbsp;
       </td>
       <td>
-         <a href="https://www.ebay.com/itm/5V-Step-Up-Voltage-Regulator/302861045898?epid=1769652012&hash=item4683ecd08a:g:LzAAAOSwfBFbiEdB">
-         <strong>Ebay.com</strong></a><br />
+         <a href="https://www.amazon.com/gp/product/B016YHHIIY/ref=od_aui_detailpages00?ie=UTF8&psc=1">
+         <strong>Amazon.com</strong></a><br />
          <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
       </td>
    </tr>

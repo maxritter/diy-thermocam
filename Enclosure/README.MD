@@ -8,6 +8,8 @@ There are **4 versions** of the enclosure. The **Arudam V1** camera is used in *
 
 The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
 
+For most users starting the project now, the **ArducamV1_Radiometric** version will be the preferred one, in case they use the **Lepton3.5** as sensor. For this version, there exists also a folder "3D print", which, contains the **single sides for 3D printing** instead of laser cutting.
+
 ----------
 
 You can find those four versions in the corresponding folders:
