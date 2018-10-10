@@ -2,6 +2,8 @@
 <br>
 <br>
 
+**Update 10.10.2018:** **GroupGets** launched another round of the **DIY-Thermocam Kit** campaign, **[check it out](https://groupgets.com/campaigns/468-diy-thermocam-kit-round-15)**!
+
 **Update 08.09.2018:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
 
 ----------
@@ -51,7 +53,7 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 In order to **make your own DIY-Thermocam V2**, you have **two options**: 
 
-- Buy the **[self-assembly kit](https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order. If they currently **do not have an active campaign**, **[write them an email](mailto:ron@groupgets.com )** and ask for one ;) 
+- Buy the **[self-assembly kit](https://groupgets.com/campaigns/468-diy-thermocam-kit-round-15)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order. If they currently **do not have an active campaign**, **[write them an email](mailto:ron@groupgets.com )** and ask for one ;) 
 - Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 - You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
 
