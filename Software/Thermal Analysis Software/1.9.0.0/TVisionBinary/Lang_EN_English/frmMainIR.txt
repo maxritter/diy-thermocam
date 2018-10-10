@@ -1,0 +1,101 @@
+﻿# this file contains data for [frmMainIR], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+group_IRGrabber	IR\ Image\ Grabber
+group_dec_minmax	image\ Min/Max
+label_IrGrab_maxsize	Max:\ 800x600
+label_IRGrab_offsetRange	Offset\ range:
+label_IRGrab_ImgH	Img\ H:
+label_dec_span	Span:
+label_IRGrab_Offset	Offset:
+label_IRGrab_imgW	Img\ W:
+group_dec_pixel	Pixelvalue\ created\ by\.\.\.
+chk_filepic_Bit15Korr	if\ >32767\r\nthen\ -\ 32767\r\nelse\ \+\ 32767
+label_irGrab_Indexrise	Index\ increment:
+group_dec_fileformat	Fileformat
+label_IRGrab_dummyrow	Dummy\ rows:\r\n\(will\ be\ skipped\)
+btn_filepic_ZeileDown	Row\ -\ -
+btn_filepic_ZeileUp	Row\ \+\ \+
+label_IRGrab_colafter	New\ Column\ after:
+label_IRGrab_newlineafter	New\ Row\ after:
+label_IRGrab_startoffset	Start\ offset\ \(byte\):
+label_vorschau	Preview\.\.\.
+group_ExternalPalette	Load\ external\ color\ Palette
+btn_extPal_Close	Choose\ and\ Close
+btn_extPal_Extract	Extract
+label_mainIr_exfileResult	Result\ ->
+label_mainIr_exfileSource	<-\ Source
+label_mainIr_exfileLeft	Left\ offset:
+label_mainIr_exfileoTop	Top\ offset:
+btn_extPal_load	Load
+label_mainIr_exfilepal	Filename:
+
+[conmenu]
+tbtn_filepic_offset_GrenzeUp	set\ as\ upper\ edge
+tbtn_filepic_offset_GrenzeDown	set\ as\ lower\ edge
+tbtn_filepic_offset_GrenzeFull	set\ from\ -65535\ to\ 65535\ \(full\ range\)
+tbtn_cam_MeasAllOff	no\ measurement
+tbtn_cam_MeasCenterSpot	center\ spot
+tbtn_cam_MeasMinMaxBox	min\ max\ box
+tbtn_PicBox_DelMeas	disable\ this\ measurement
+tbtn_PicBox_ClearAllPoints	disable\ all\ measurements
+toolStripMenuItem2	set\ new\.\.\.
+toolStripMenuItem2.tbtn_set_area1	Area
+toolStripMenuItem2.tbtn_set_line1	Linie
+toolStripMenuItem2.tbtn_set_Diffline1	2\ Point\ Delta\ Linie
+tbtn_FarbscalaCollection	Color\ Scale\.\.\.
+tbtn_FarbscalaCollection.tbtn_Scala_0	Gray
+tbtn_FarbscalaCollection.tbtn_Scala_1	Sinus
+tbtn_FarbscalaCollection.tbtn_Scala_2	Ironbow
+tbtn_FarbscalaCollection.tbtn_Scala_3	Hot\ \(Fire\)
+tbtn_FarbscalaCollection.tbtn_Scala_4	Cold\ \(Ice\)
+tbtn_FarbscalaCollection.tbtn_Scala_5	Rainbow
+tbtn_FarbscalaCollection.tbtn_Scala_6	Rainbow\ 2
+tbtn_FarbscalaCollection.tbtn_Scala_7	Contrast
+tbtn_FarbscalaCollection.tbtn_Scala_8	Split
+tbtn_FarbscalaCollection.tbtn_Scala_9	GrayIronbow
+tbtn_FarbscalaCollection.tbtn_Scala_10	GrayRainbow
+tbtn_FarbscalaCollection.tbtn_Scala_11	Arctic
+tbtn_FarbscalaCollection.tbtn_Scala_12	SegmentIronbow
+tbtn_FarbscalaCollection.tbtn_Scala_13	SegmentRainbow
+tbtn_FarbscalaCollection.tbtn_Scala_14	Medical
+tbtn_FarbscalaCollection.tbtn_Scala_15	Red-Gray-Blue
+tbtn_FarbscalaCollection.tbtn_Scala_97	Extern\ \(Slot1\.ppg\)
+tbtn_FarbscalaCollection.tbtn_Scala_98	Extern\ \(Slot2\.ppg\)
+tbtn_FarbscalaCollection.tbtn_Scala_99	Extern\ \(Image\)
+tbtn_FarbscalaCollection.tbtn_Scala_SetupExternPal	Setup\ extern\ Palette
+toolStripMenuItem3	settings\.\.\.
+toolStripMenuItem3.tbtn_spiegeln_both	Rotate\ 180°
+toolStripMenuItem3.tbtn_rotate_Pos90	Rotate\ \+\ 90°
+toolStripMenuItem3.tbtn_rotate_Neg90	Rotate\ -\ 90°
+toolStripMenuItem3.Tbtn_spiegeln_WO	west/east\ \(Horizontal\)
+toolStripMenuItem3.tbtn_spiegeln_NS	north/south\ \(Vertical\)
+toolStripMenuItem3.tbtn_Rotate_AlsoVisual	make\ changes\ for\ Visual\ too
+toolStripMenuItem3.tbtn_main_VisBlending	Visual\ Blending
+toolStripMenuItem3.tbtn_main_messobjekte	meas\.\ objects
+toolStripMenuItem3.tbtn_main_StretchImage	Stretch\ Image
+toolStripMenuItem3.tbtn_main_CamControls	Camera\ Mode
+toolStripMenuItem3.tbtn_main_ZoomboxEnable	Zoombox\ On/Off
+toolStripMenuItem3.tbtn_main_ZoomboxFixed	Zoombox\ fixed
+tbtn_PicBox_GenerateReport	Generate\ Report
+tbtn_Scale_Autoscale	Autoscale
+ConMenu_Scale_Isotherm_Move	shift\ Isotherm\ values
+tbtn_Scale_SetIsotherm	Set\ Isotherm
+tbtn_Scale_SetIsotherm.ConMenu_Scale_Isotherm_Set1	Set\ Isotherm\ 1\ Max
+tbtn_Scale_SetIsotherm.ConMenu_Scale_Isotherm_Set2	Set\ Isotherm\ 1\ Min
+tbtn_Scale_SetIsotherm.ConMenu_Scale_Isotherm_Set3	Set\ Isotherm\ 2\ Max
+tbtn_Scale_SetIsotherm.ConMenu_Scale_Isotherm_Set4	Set\ Isotherm\ 2\ Min
+tbtn_cam_olay_OnOff	Overlay\ OFF
+tbtn_cam_olay_FullIR	Only\ IR\ Image
+tbtn_cam_olay_20	Overlay\ 20\ %
+tbtn_cam_olay_40	Overlay\ 40\ %
+tbtn_cam_olay_60	Overlay\ 60\ %
+tbtn_cam_olay_80	Overlay\ 80\ %
+tbtn_cam_olay_FullVis	Only\ VIS\ Image
+tbtn_cam_olay_Relief	Vis-Relief\ OFF
+
+[combo]
+cb_filepic_DrehenSpiegeln	no\ rotation#mirror\ horizontal#mirror\ vertical#rotate\ 180°#rotate\ 90°\ clockwise#rotate\ 90°\ contraclockwise#
+cb_filepic_bytetyp	byte\[x\+1]<<8\ \|\ byte\[x]#byte\[x]<<8\ \|\ byte\[x\+1]#bxte\[x]#
+cb_filepic_Resolution	format\ =\ resolution#format\ =\ double\ resolution#

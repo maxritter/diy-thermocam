@@ -1,0 +1,24 @@
+# this file contains data for [frmLines], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+
+[conmenu]
+tbtn_zed_reset	Reset\ Scale
+tbtn_zed_Autoscale	Autoscale
+tbtn_zed_restoreScale	Restore\ Scale
+tbtn_zed_Rainbow	L1\ Farbscala
+tbtn_zed_ShowPointValues	Zeige\ Messpunkte
+tbtn_zed_saveImage	Graph\ Bild\ speichern
+tbtn_zed_saveImage.tbtn_zed_saveGraph1	Auflösung:\ 400x200
+tbtn_zed_saveImage.tbtn_zed_saveGraph2	Auflösung:\ 600x240
+tbtn_zed_saveImage.tbtn_zed_saveGraph3	Auflösung:\ 800x300
+tbtn_zed_saveImage.tbtn_zed_saveGraph4	Auflösung:\ 1280x480
+tbtn_zed_Bildauswertung	Bildauswertung\ speichern
+tbtn_zed_Bildauswertung.tbtn_zed_Auswertung_1	Auflösung:\ 640x480
+tbtn_zed_Bildauswertung.tbtn_zed_Auswertung_2	Auflösung:\ 1280x960
+tchk_ZedShowLegend	Legende\ anzeigen
+tchk_line_SaveToBitmap	Export:\ Graph\ to\ PNG
+
+[combo]
+

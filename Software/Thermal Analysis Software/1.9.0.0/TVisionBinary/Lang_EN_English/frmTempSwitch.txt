@@ -1,0 +1,32 @@
+﻿# this file contains data for [frmTempSwitch], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+txt_Filename	TempSwitch
+btn_loadSetup	Setup\ load
+btn_SaveSetup	Setup\ save
+chk_act_SerialSendMeasAsText	SerialPort->Send\ Value\ as\ Text
+txt_act_serialBytes	100\ 50
+chk_act_SerialSendBytes	SerialPort->Send\ Bytes:
+txt_act_serialTxt	Alarm\.\.\.
+chk_act_SerialSendText	SerialPort->Send\ Text:
+txt_radioSubfolder	TempSwitchfolder
+chk_act_SaveRadioUseSubfolder	Subfolder:
+chk_act_Timeout	Timeout\ until\ next\ trigger\ in\ Seconds
+chk_act_SaveRadio	Save\ Image\ \(radiometric\)
+label_Act_SetProcessPath	\.\.\.
+txt_processPath	C:\\Windows\\Media\\chord\.wav
+chk_act_StartProcess_autoDisable	only\ once\ \(disable\ after\ trigger\)
+chk_act_StartProcess	File\ open\ /\ start\ Application
+chk_act_Abschalten	Disable\ \(Aktive->Off\)
+label_TS_Aktionen	actions:
+label_TS_Bedingung	condition:
+label_TS_bewachteMessung	monitored\ meas:
+chk_Aktiv	Active
+label_TS_SetupSaveLoad	Settings\ save/load
+
+[conmenu]
+
+[combo]
+cb_Bedingung	greater\ than#less\ than#equal\ \(rounded\ to\ 1\ digit\)#between#not\ between#
+

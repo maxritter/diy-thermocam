@@ -1,0 +1,14 @@
+# 
+# 
+Port:COM10
+Baud:38400
+AutoSelectPort:COM10
+UseAutoSelect:T1
+UseSendBytes:T
+UseSendTxt:T
+SendBytes:0 127 128 255
+SendTxt:Txt
+Interval:2
+CbSensorType:0
+CbStartbytes:1
+CbEndBytes:0

@@ -1,0 +1,26 @@
+﻿# this file contains data for [frmPictureProcessing], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+btn_OK	OK
+chk_proc_ColBalB	Farb\ balance\ B
+chk_proc_ColBalG	Farb\ balance\ G
+chk_proc_ColBalR	Farb\ balance\ R
+chk_proc_Crop	Zuschneiden
+btn_RunProcessing	Run\.\.\.
+rad_RotFlip0	Keine\ Rotation\\Spiegelung
+chk_proc_Resize	Grösse\ ändern
+chk_proc_GrayScale	in\ Graustufen
+chk_proc_Contrast	Kontrast
+chk_proc_Brightness	Helligkeit
+chk_resizeRatioFixed	Fix\ Ratio
+btn_settings_load	Lade\ Einstellungen
+btn_settings_Save	Speichere\ Einstellungen
+btn_ZoomReset	Zoom\ 1
+
+[conmenu]
+
+[combo]
+
+[UserControls]
+

@@ -1,0 +1,163 @@
+﻿# this file contains data for [MainForm], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+frmSettings	Settings
+frmFunctions	Functions
+frmFuncDevices	Devices
+frmMainIR	MainIR
+frmMeasGrid	Meas\ grid
+frmMeasTable	Meas\ table
+frmVisual	Visual
+frmWebcam	WebcamA
+frmWebcam	WebcamB
+frmImageBrowser	ImageBrowser
+frmHistogram	Histogram
+frmCalibration	Calibration
+frmLines	Lines
+frmPlot	Plotter
+frmBildbearbeitung	Imageprocessing
+frmReport	Report
+frmCameraCommanderFLIR	Camera\ Commander:\ FLIR
+btn_screenshot	Screen
+btn_view_x4	x4
+btn_view_x2	x2
+btn_view_x1	OFF
+
+[conmenu]
+
+[combo]
+cb_farbpalette	Gray#Sinus#Ironbow#Hot\ \(Fire\)#Cold\ \(Ice\)#Rainbow#Rainbow\ 2#Contrast#Split#GrayIronbow#GrayRainbow#Arctis#SegIronbow#SegRainbow#Medical#Red-Gray-Blue#Extern\ \(Slot1\.ppg\)#Extern\ \(Slot2\.ppg\)#Extern#
+
+[UserControls]
+
+[Textinfo]
+0	temperature
+1	measuring\ points
+2	not\ found
+3	Error\ while\ read\ last\ settings\.
+4	seconds
+5	Temp
+6	Mouse
+7	Function\ confirm
+8	Should\ all\ measurements\ really\ be\ removed\?
+9	fusion\ window
+10	is\ unknown
+11	stored
+12	Image\ files
+13	all\ files
+14	Resolution\ not\ recognised
+15	Radiometric
+16	Open
+17	Video\ file\ could\ not\ been\ created\.\ Select\ a\ video\ codec\ first\.
+18	none\ dataset\ found\ in
+19	Radiometric\ load\ canceled
+20	Remove
+21	Receive
+22	Preview\.\.\.
+23	Save\ as
+24	Yes:\ save\ at\ this\ path
+25	No:\ save\ as\ new\ file
+26	Radiometric\ save
+27	Thermal\ Image
+28	Image\ is\ in\ clipboard
+29	only
+30	Thermal
+31	Visual
+32	Isotherm
+33	M8\ JPG\ could\ not\ load\.\.\.
+34	Open_M8_JPG_File\ Fail
+35	Download
+36	transfer\.\.\.
+37	not\ found
+38	Telnet\ connecton\ error
+39	not\ enough\ data\ in\ \*\.seq\ file\.
+40	no\ camera
+41	no\ camera\ found
+42	Start
+43	Stop
+44	Restart
+45	Restart\ FAIL!
+46	Offline
+47	Start\ Streaming
+48	Stop\ Streaming
+49	Index~Date~Time~Size~FileName~Info
+50	to\ occur\ in\ image\(%\)
+51	Resolution
+52	Filesize
+53	get\ new\ Image
+54	Overwrite\ Image\ \(
+55	Thermal\ Sequence\ Dataset
+56	Cancel
+57	File\ already\ exist:
+58	Overwrite\?
+59	Write\ Cal\ Data\ to\ Camera\?
+60	Starting\ calibration\.\.\.
+61	Get\ values\ for\ Low\ Temp\.\.\.
+62	Get\ values\ for\ Hi\ Temp\.\.\.
+63	Done
+64	greater\ than#less\ than#equal\ \(rounded\ to\ 1\ digit\)#between#not\ between
+65	Active#monitored\ meas:#condition:#Actions:#Disable\ \(Aktive->Off\)#Timeout\ until\ next\ trigger\ in\ Seconds#File\ open\ /\ start\ Application#only\ once\ \(disable\ after\ trigger\)#Save\ Image\ \(radiometric\)#Subfolder:#SerialPort->Send\ Text:#SerialPort->Send\ Bytes:#SerialPort->Send\ Value\ as\ Text#Settings\ save/load#Setup\ load#Setup\ save
+66	<no\ subfolder>
+67	More\ than\ 50\ Chars\ are\ given\.\r\n\ but\ stored\ are\ just\ up\ to\ 50\ chars\.
+68	Search\ in\ Drives
+69	Grab\ all\ Measurement\ Data
+70	Add\ to\ Report\?\r\n\r\nYes\ =\ add\ Content\r\nNo\ =\ replace\ existing\r\nCancel\ =\ do\ nothing
+71	Error\ on\ delete
+72	Measure
+73	Clear\ Tree
+74	Delete\ all\.\.\.\ really\ do\ that\?
+75	Start\ the\ selected\ file\ to\ try\ it\ works\?
+76	To\ Login:\ Password\ is\ in\ Clipboard,\ Username:\ flir
+77	Too\ much\ resisted\ Telnet\ Users\.\ Restart\ your\ Camera\.\.\.
+78	Timeout
+79	Wait\ for\ response
+80	Wait\.\.\.
+
+[menu]
+tbtn_Datei	File
+tbtn_Datei.tbtn_main_resetBild	Reset\ Image
+tbtn_Datei.tbtn_dat_Load	Load\ Image
+tbtn_Datei.tbtn_main_OpenFlir	Load\ FLIR\ Image
+tbtn_Datei.tbtn_main_OpenIrDec	Load\ Image\ in\ IR\ Decoder
+tbtn_Datei.tbtn_close	Close
+tbtn_Datei.tbtn_closeNoStoreSettings	Close\ without\ store\ settings
+tbtn_Windows	Window
+tbtn_Windows.tbtn_MainIR	MainIR
+tbtn_Windows.tbtn_fVisual	Visual
+tbtn_Windows.tbtn_fImgBrow	Image\ Browser
+tbtn_Windows.tbtn_Plot	Plot
+tbtn_Windows.tbtn_lines	Lines
+tbtn_Windows.tbtn_Mgrid	Meas\ Grid
+tbtn_Windows.tbtn_mtable	Meas\ Table
+tbtn_Windows.tbtn_histo	Histogram
+tbtn_Windows.tbtn_Cal	Calibration
+tbtn_Windows.tbtn_IProc	Image\ processing
+tbtn_Windows.tbtn_Report	Report
+tbtn_Windows.tbtn_CCFlir	CameraCommander:\ FLIR
+tbtn_Windows.tbtn_ffunc	Functions
+tbtn_Windows.tbtn_fdevice	Device
+tbtn_Windows.tbtn_webA	WebcamA
+tbtn_Windows.tbtn_webB	WebcamB
+tbtn_Windows.tbtn_About	About\ ThermoVision_JoeC
+tbtn_Windows.tbtn_Default	Window\ settings\ to\ standard
+tbtn_Main_Settings	Settings
+
+[toolstrip]
+[TS] toolStrip_Main ###########################
+tbtn_main_OpenFile	OpenFile
+tbtn_main_quicsave	Quicksave:
+ttxt_main_RadioName	Imagename
+label_main_new	New:
+tbtn_main_MinMax	MinMax
+tbtn_main_Spot	Spot
+tbtn_main_DiffLine	2 Point Delta Line
+tbtn_main_Line	Line
+tbtn_main_Box	Box
+tbtn_main_Tempswitch	Temp Switch
+toolStripLabel2	Panels:
+tbtn_main_HideAll	MainIR Full
+tbtn_main_RestoreLast	Restore last
+label_main_modus	Mode:
+tbtn_main_FullScreen	Fullscreen
+tbtn_main_CameraMode	Camera

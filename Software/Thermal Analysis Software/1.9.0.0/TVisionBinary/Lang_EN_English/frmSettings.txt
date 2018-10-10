@@ -1,0 +1,30 @@
+﻿# this file contains data for [frmSettings], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+txtLangInfo	Controls\ in\ english,\ not\ sure\ about\ UK\ or\ US,\ just\ english.
+btn_set_OK	OK
+TP_Set_APP	APP
+groupSelectLanguage	Select\ Language
+btnLangOk	OK
+group_SettingsFile	Settings\ file\ \(Settings\.dat\)
+btn_OpenSettingsFile	Open\ settings\ file
+chk_saveOnClose	Save\ settings\ on\ close\ application
+chk_BigColorScala	14Bit\ ColorScale
+label1	MeasBox:\ active\ border\ with\ to\ change\ size
+chk_Set_ClearMeasOnLoad	remove\ all\ measurements\ while\ load\ an\ image\ or\ change\ resolution\.
+group_Set_Format	Temperature\ format
+chk_Set_FormatFromFile	overwrite\ settings\ while\ load\ an\ image
+rad_set_FromatF	F\ Farenheit
+rad_set_FromatK	K\ Kelvin
+rad_set_FromatC	C\ Celsius
+group_Set_TVImage	Thermovision\ \*\.jpg\ Format
+L_Set_Desc_ImageExist	if\ Filename\ already\ exist:
+chk_Set_ReadSettingsFromRadio	Get\ Settings\ from\ Image\r\n\(if\ disabled,\ only\ frame\ will\ be\ aquired,\ no\ change\ in\ scale,\ Measurements\ and\ so\ on\.\.\.\)
+TP_Set_Fonts	Fonts
+
+[conmenu]
+
+[combo]
+CB_Set_IfRadioExist	Append\ sequential\ number#Overwrite#Ask\ each\ Time#
+

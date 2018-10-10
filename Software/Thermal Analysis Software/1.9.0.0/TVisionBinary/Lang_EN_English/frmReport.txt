@@ -1,0 +1,26 @@
+﻿# this file contains data for [frmReport], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+btn_Report_Speichern	store
+chk_report_showSource	Quellcode\ anzeigen
+btn_report_AutoFill	Autofill\ \#Tags
+btn_report_SetRTF	Set\ RTF
+btn_report_GetRTF	Get\ RTF
+btn_report_Mark_0	B
+btn_report_Mark_2	K
+btn_report_Mark_1	U
+
+[conmenu]
+ttxt_report_Markiert	Marked\ Text
+tbtn_report_SetForecol	change\ foreground\ color
+tbtn_report_SetBackcol	change\ background\ color
+tbtn_report_SetPagecol	change\ Page\ background
+tbtn_report_PastePicture	Paste:\ Image
+tbtn_report_PasteMeasTable	Paste:\ Meastable
+tbtn_report_PasteTags	Paste:\ Tags
+tbtn_Report_Vorlagen	Load\ Template
+tbtn_Report_VorlagenSafe	Safe\ Template
+
+[combo]
+

@@ -1,0 +1,13 @@
+﻿# this file contains data for [frmWebcam], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+btn_folder	folder
+btn_Save	store
+txt_Bildname	Name
+btn_GrabVisual	catch\ image\ as\ visual\ frame
+
+[conmenu]
+
+[combo]
+

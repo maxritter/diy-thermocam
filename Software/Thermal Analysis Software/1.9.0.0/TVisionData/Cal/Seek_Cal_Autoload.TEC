@@ -1,0 +1,38 @@
+# Save Datetime: 01.07.2017 01:17:27
+# Camera: ThermalExpert Q1
+# block 1 | global constants ?
+AtmA1: 0.006569
+AtmA2: 0.01262
+AtmB1: -0.002276
+AtmB2: -0.00667
+AtmX: 1.9
+PlanckF: 2.5
+# block 2 | camera constants
+PlanckR1: 11650
+PlanckR2: 0.1043691
+PlanckB: 1065
+PlanckO: -2750
+# block 3 | camera parameter
+Emissivity: 0.95
+RefectedTemp_K: 298.15
+Distance_Meter: 0
+AirTemp_K: 293.15
+Humidity: 0.5
+chk_PlanCal_WDC_Active: True
+txt_PlanCal_WDC_Filename: Seek_WarmupDriftCorrection.wdc
+num_WDC_Smoothing: 16
+# Calibration Values
+6741:16#4263:
+6840:21#4263:
+7276:32#4262:
+7731:43#4262:
+7966:48#4262:
+8240:54#4262:
+8874:66#4261:
+9443:78#4260:
+9747:81#4260:
+10162:88#4259:
+10541:95#4259:
+10859:101#4259:
+12256:121#4259:
+12495:124#4258:

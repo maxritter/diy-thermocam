@@ -1,0 +1,19 @@
+# this file is for a setup of the visual processing window
+chk_proc_Brightness=False
+num_helligkeit=1.5
+chk_proc_Contrast=False
+num_contrast=1.5
+chk_proc_GrayScale=False
+chk_proc_Resize=False
+num_crop_top=100
+num_crop_right=100
+num_crop_bottom=100
+num_crop_left=100
+MirrorRotationState=0
+chk_proc_ColBalR=False
+num_proc_ColBalR=1.5
+chk_proc_ColBalG=True
+num_proc_ColBalG=1.5
+chk_proc_ColBalB=False
+num_proc_ColBalB=1.2
+

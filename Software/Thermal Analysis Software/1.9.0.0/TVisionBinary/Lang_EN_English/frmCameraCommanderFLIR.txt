@@ -1,0 +1,478 @@
+﻿# this file contains data for [frmCameraCommanderFLIR], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+TP_flir_control	Control\ 
+group_HID_LED	LED\ color\ table
+btn_HID_LEDSingleSetup	Write\ Setup
+group_ExHID_Dev	Dev
+label_HID_key11	\?
+label_HID_key10	Menu
+label_HID_key7	C
+label_HID_key9	D
+label_HID_key8	R
+label_HID_key6	L
+label_HID_key5	U
+label_HID_key1	store
+label_HID_key4	Play
+label_HID_key0	front
+btn_HID_OverrideFocSetPos	Override\ FocPos
+lab_HID_HomingVal	\.
+label73	Lichtschranke\r\n\(Home\ Position\)
+lab_Afoc_State	Autofocus\ State:
+group_DownloadPictures	Download\ images\ from\ Camera
+btn_pic_DownOpenFolder	Open\ folder
+chk_pic_DownOverrideIfExist	Override\ if\ exist
+txt_pic_DownFolder	C:\\Temp\\_Flir_Bilder
+btn_pic_Download	Download\ all\ and\ delete\ them\ from\ Camera
+TP_view1	View\ 1
+groupBox43	IR\ Window\ \(Picture\ In\ Picture\)
+btn_f_SetPipFullscreen	IR\ full\ Screen
+chk_f_SetPipWindow	Set\ IR\ Window
+groupBox19	Palette
+groupBox3	Isotherm
+chk_iso_SendToCam	Send\ changes\ to\ Camera\ immediately
+radio_iso_Mode3	between\ A\ and\ B
+radio_iso_Mode2	above\ value\ A
+radio_iso_Mode1	below\ value\ A
+label27	View:
+btn_iso_SetAll	Send\ all
+btn_F_022_isoOff	OFF
+label11	Color:
+label21	Value\ B:
+label12	Value\ A:
+TP_view2	View\ 2
+groupBox50	RNDIS\ Screen
+chk_VideoRNDIS	RNDIS\ grab\ Screen
+groupBox28	Level\ and\ Span
+btn_F_011_ModeMan	Manuell
+btn_F_010_ModeAuto	Auto
+btn_F_025_BackL_100	100
+btn_F_030_BackL_5	5
+btn_F_024_BackL_50	50
+btn_F_023_BackL_0	OFF
+label31	Backlight:
+groupBox18	Freeze
+btn_F_001_FreezeOff	OFF
+btn_F_000_FreezeOn	ON
+label42	MSX\ offset:\r\n\(focus\ position\)
+TP_setMeas	Measurement
+group_diff	Difference\ \(Value\ A\ -\ Value\ B\)
+btn_F_setDiff	Set
+label18	Ref:
+btn_F_021_diffOff	OFF
+radio_diff_NurAktive	only\ active
+radio_diff_all	all\ Measurements
+label20	B:
+label19	A:
+label55	Messfequenz\ \(max\.\ 10\.6\)
+group_SetMeas	Set\ Measure\ by\ Mouseclick
+chk_F_SetMeasVerify	Check\ Settings\ \(takes\ time,\ is\ safer\)
+chk_F_SetRemoveAll	turn\ all\ off
+chk_F_SetSpot5	Spot\ 5
+chk_F_SetSpot4	Spot\ 4
+chk_F_SetSpot3	Spot\ 3
+chk_F_SetSpot2	Spot\ 2
+chk_F_SetBox4	Box\ 4
+chk_F_SetBox3	Box\ 3
+chk_F_SetBox2	Box\ 2
+chk_F_SetBox1	Box\ 1
+chk_F_SetSpot1	Spot\ 1
+chk_F_008_AdvMeasMenu	advancedMeasureMenu
+btn_F_012_ReadSpot	Read\ Spot1
+btn_F_009_ReadBatt	Read\ Batt
+TP_Setup1	Setup\ 1
+groupBox32	Filter:\ Row\ /\ Colum
+label47	Row:\r\nThres\r\nThresPix\r\n\r\nColum:\r\nThres\r\nThresPix
+chk_F_004_row	Enable\ Row
+chk_F_005_column	Enable\ Colum
+groupBox31	Filter:\ apr3x3
+label46	Killnumber:\r\nlamda:\r\nthresholdInit:\r\nthresholdMax:
+chk_F_003_apr3x3Enable	Enable
+groupBox34	Filter:\ temporal
+label49	Level\ \(0-16\):\ Thres\ \(0-24\):
+chk_F_007_Temporal	Enable
+groupBox33	Noise\ Gen
+label48	Level\ \(0-255\):
+chk_F_006_Noisegen	Enable
+groupBox30	Filter:\ bilateral
+label44	Sigma\ \(0-500\):
+chk_F_002_BilatEnable	Enable
+TP_Setup2	Setup\ 2
+groupBox40	\.image\.fusion
+label54	xpanVal\r\nypanVal\r\nzoomFactor
+groupBox38	\.\.\.histRect
+btn_F_013_HistoRectSet	Set
+label53	set_x1\r\nset_x2\r\nset_y1\r\nset_y2
+groupBox37	contadj\.colDistr
+label52	filterParam\r\nlinearPercent\r\nplateauPercent
+groupBox36	contadj
+label51	brightness\r\ncontrast\r\nfrequency
+groupBox35	contadj\.autoAdj
+label50	TSpanMin\r\nTSpanMinAuto\r\nfilterParam
+TP_Setup3	Setup\ 3
+groupBox60	Inter\ Scale
+btn_F_028_InterScaleOff	Off
+btn_F_027_InterScaleOn	On
+groupBox24	Special
+chk_F_010_RemDeathPixel	remove\ death\ Pixel
+groupBox2	Parameter
+label3	emissivity:\r\nRel\ humidity:\r\nReflect\.\ Temp:
+groupBox1	USB\ Modus
+groupBox41	Nuc
+btn_F_017_NucCommit	Trigger
+label56	FramesLog2:
+chk_F_012_AutoNuc	Enable\ Auto\ NUC
+chk_F_009_NucShutter	Shutter
+TP_IRVideo	IR-Video
+groupBox15	Download\ \(USB:\ RNDIS\)
+btn_ftp_SequenzOpenFolder	open\ folder
+btn_ftp_SequenzDownload	Download
+btn_ftp_SequenzGetFileSize	Get\ Filesize
+txt_ftp_SequenzDownloadFile	default\.seq
+txt_ftp_SequenzDownloadPath	C:\\Temp\\_Flir_Sequenz
+groupBox42	Thermal\ Record
+btn_flir_DownloadSeq	Download
+btn_flir_GrabSeq	Record
+btn_f_IRVid_SetSettings	set\ Settings
+btn_f_IRVid_GetSettings	get\ Settings
+label57	Count\ \(Frames\):\r\nFrequency:
+txt_f_rtrecordFilename	\\Temp\\default\.seq
+btn_F_020_IRVid_Store	Store
+btn_F_019_IRVid_Stop	Stop
+btn_F_018_IRVid_Start	Start
+chk_F_011_RTAction	on:\ Record\r\noff:\ Playback
+label58	Filename:
+TP_Pictures	Pictures
+groupBox45	Interval\ \(time\ lapse\)
+txt_raff_set	0:00:10
+tbtn_raff_stop	Stop
+label28	Store\ next\ image\ in:
+btn_raff_start	Start
+label32	H:MM:SS
+groupBox44	Picture\ folder\ from\ the\ camera\ \(USB:\ RNDIS\)
+btn_pic_SetActiveFolder	All\ new\ images\ to\ this\ folder\ in\ Camera
+btn_pic_ListFiles	List\ all\ images\ from\ Camera
+btn_pic_NewFolder	New:
+btn_pic_DeleteFolder	delete\ selected
+btn_pic_GetFolders	List\ folders
+btn_F_026_ResetPicCount	Picture\ counter\ to\ 0\ \(next\ image:\ FLIR0001\)
+TP_Movie	Movie
+groupBox54	Interval\ \(time\ lapse\)
+txt_mov_raffTime	0:00:05
+btn_mov_raffStop	Stop
+btn_mov_raffStart	Start
+label40	H:MM:SS
+btn_mov_openfolder	open\r\nfolder
+btn_mov_store	save\ and\ close
+groupBox53	Recording
+chk_mov_rec	REC
+btn_mov_grabFrame	Grab\ single\ frame
+label36	MM:SS\ \(frames\):
+groupBox52	video\ path\ and\ file\ name
+txt_mov_path	C:\\\\Temp\\\\_Flir_Movies
+txt_mov_filename	video\\\.avi
+btn_mov_create	create
+groupBox51	Videocodec
+TP_ImgProc	Imageprocessing
+groupBox58	Color\ difference
+radio_IP_ColDiff_Typ2	gradations\ \(Base:\ Black\)
+radio_IP_ColDiff_Typ1	Solid\ \(Base:\ Gray\)
+btn_IP_SetColDiff	Set
+chk_IP_ColDiff	ON
+groupBox59	Ref\.
+chk_IP_GrabRefpic	G\ E\ T
+groupBox57	averaging
+chk_IP_Avr	ON
+groupBox56	sharpen
+radio_IP_Sharp3	high
+radio_IP_Sharp2	middle
+radio_IP_Sharp1	low
+chk_IP_Sharpen	ON
+groupBox55	difference/subtraction
+radio_IP_Diff2	Subst\.
+radio_IP_Diff1	Diff
+chk_IP_Substract	ON
+groupBox10	Buttons
+chk_F_UseTastaturForControl	Use\ keyboard\ to\ control
+label1	Q\ \ \ \ \ R\r\n\ \ \ \ W\r\nA\ \ E\ D\r\n\ \ \ \ S\r\n\ \ \ \ \ \ \ \ \ \ \ F
+btn_flir_bt8	Save
+label45	!MSD:
+btn_flir_bt5	Menu
+btn_flir_bt4	R
+btn_flir_bt3	L
+btn_flir_bt2	down
+btn_flir_bt1	up
+btn_flir_bt6	Back
+btn_flir_bt0	Play
+btn_F_002_Nuc	NUC\ \(shutter\)
+label_F_StatusVideo	line\ 0\r\nline\ 1
+btn_F_CamFind	Search\.\.\.
+btn_F_CamDevice	Start
+groupBox20	Digital\ Zoom
+btn_F_006_Zoom8	x8
+btn_F_016_ChanVisual	Visual
+btn_F_005_Zoom4	x4
+btn_F_004_Zoom2	x2
+btn_F_015_ChanFusion	MSX
+btn_F_014_ChanIR	IR
+btn_F_003_Zoom1	x1
+group_Screenshot	Screenshot\ \(Video\)
+btn_F_Scrennshot	Save
+btn_F_ScrennshotFolder	open\ folder
+txt_F_screenpath	C:\\\\Temp\\\\_Flir_Screenshots
+groupBox21	Power\ Control
+btn_F_029_Shutdown	Shutdown
+btn_F_008_Restart	Restart
+btn_F_007_Standby	Standby
+TP_flir_Control2	Measurement
+TP_M_Meas	Measurement
+groupBox22	Measurement
+chk_meas_test	Test
+chk_f_Grap_B4_Avr	Box\ 4\ Avr
+chk_f_Grap_B4_Min	Box\ 4\ Min
+chk_f_Grap_B4_Max	Box\ 4\ Max
+chk_f_Grap_B3_Avr	Box\ 3\ Avr
+chk_f_Grap_B3_Min	Box\ 3\ Min
+chk_f_Grap_B3_Max	Box\ 3\ Max
+btn_F_GrabMeas	Grab\ all\ Measurement\ Data
+chk_f_Grap_B2_Avr	Box\ 2\ Avr
+chk_f_Grap_B2_Min	Box\ 2\ Min
+chk_f_Grap_B2_Max	Box\ 2\ Max
+chk_f_Grap_B1_Avr	Box\ 1\ Avr
+chk_f_Grap_B1_Min	Box\ 1\ Min
+chk_f_Grap_B1_Max	Box\ 1\ Max
+chk_f_Grap_S5	Spot\ 5
+chk_f_Grap_S4	Spot\ 4
+chk_f_Grap_S1	Spot\ 1
+chk_f_Grap_D1	Diff\ 1
+chk_f_Grap_S3	Spot\ 3
+chk_f_Grap_S2	Spot\ 2
+groupBox8	Settings
+label_F_punkte	0
+label_F_ItemColor	Mouseclick:\ Set\ Color
+chk_F_CurveTitelVisible	Visible
+txt_F_curvetitel	Spot\ 1
+label26	Titel:
+radio_F_Spot	Spot\ \(Point\)
+chk_F_CurveVisible	Visible
+label29	Curve:
+radio_F_mbox	MBox\ \(Area\)
+radio_F_diff	Diff
+TP_M_Graph	Graph
+groupBox23	show\ camera\ display
+rad_Graph_showVideo	show
+rad_Graph_showNoVideo	dont\ show
+btn_F_Graphsave	Save\ all\ measurment\ data\ to\ text\ file
+btn_F_graphstop	Stop
+btn_F_graphstart	Start
+btn_F_graphClear	delete\ all\ Points
+label30	Timeout\ \(Sec\):
+TP_M_AuswertungA	Analysis\ A
+groupBox46	action\ after\ trigger
+txt_M_ARunPath2	C:\\\\Windows\\\\Media\\\\chord\\\.wav
+chk_M_ARun2	run\ single:
+btn_M_ASelectRunFile2	\.\.\.
+radio_M_ATurnoffMeas	Measurement\ \+\ Analysis
+radio_M_ATurnoffAuswert	Analysis\ A
+chk_M_ATurnOff	turn\ off:
+txt_M_ARunPath	C:\\\\Windows\\\\Media\\\\chord\\\.wav
+chk_M_AMakePicture	Camera\ takes\ picture
+chk_M_ARun	run\ always:
+btn_M_ASelectRunFile	\.\.\.
+groupBox27	monitored\ measurement
+groupBox26	condition\ to\ perform
+label34	threshold\ 1:
+radio_M_Aover	above
+radio_M_Abetween	betweeen
+radio_M_Agleich	equal
+radio_M_Aunder	below
+label35	threshold\ 2:
+chk_M_AActive	Active\ A
+TP_M_AuswertungB	Analysis\ B
+groupBox47	action\ after\ trigger
+txt_M_BRunPath2	C:\\\\Windows\\\\Media\\\\chord\\\.wav
+chk_M_BRun2	run\ single:
+btn_M_BSelectRunFile	\.\.\.
+chk_M_BMakePicture	Camera\ takes\ picture
+btn_M_BSelectRunFile2	\.\.\.
+txt_M_BRunPath	C:\\\\Windows\\\\Media\\\\chord\\\.wav
+radio_M_BTurnoffMeas	Measurement\ \+\ Analysis
+radio_M_BTurnoffAuswert	Analysis\ B
+chk_M_BTurnOff	turn\ off:
+chk_M_BRun	run\ always:
+chk_M_BActive	Active\ B
+groupBox49	condition\ to\ perform
+label39	threshold\ 2:
+label33	threshold\ 1:
+radio_M_Bover	above
+radio_M_Bbetween	betweeen
+radio_M_Bgleich	equal
+radio_M_Bunder	below
+groupBox48	monitored\ measurement
+TP_flir_Terminal	Terminal
+tabPage2	Send\ /\ Control
+BTN_RS232_GetHelp	Get\ Help
+chk_rs232_ByteWinddowAsHelp	Byte\ Window\ as\ Help
+groupBox17	Timeouts
+label13	Telnet:\r\nUART:
+chk_rs232_FlirResponseOutput	Print\ Flirresponse
+BTN_RS232_Oenlast	Open\ last:
+btn_rs232_refresh	Refresh\ Ports
+BTN_RS232_Clear	Clear
+label10	Textbox:
+TXT_Send_B	0\ 127\ 128\ 129\ 255
+BTN_RS232_Save	Save
+TXT_Send_S_2	\.services\.net\.interface\.RNDISFN1
+TXT_Send_S_1	\.image\.sysimg\.measureFuncs\.spot\.5\.active\ true
+TXT_Send_S_0	usbfn\ RNDIS
+BTN_RS232_Open	Open
+label4	Text:
+label9	Bytes:
+label2	Rset:
+label7	Rls:
+tabPage3	Setup
+chk_rs232_KommaToPoint	Komma\ to\ Point\ \(camera\ only\ accept\ \.\ as\ decimal\ separator\)
+CHK_RS232_NotOnTop	Print\ not\ ever\ on\ TOP
+label_DSR	DSR
+CHK_RS232_Sonderzeichen	show\ special\ chars
+btn_rs232_DTR	DTR
+CHK_RS232_ToBytes_time	write\ time\ in\ byte\ window
+btn_rs232_RTS	RTS
+CHK_RS232_UseStartByte	Startbyte:
+label_CTS	CTS
+label_CD	CD
+CHK_RS232_ToBytes	convert\ text\ in\ bytes\ and\ display
+CHK_RS232_SendChar13	CR\ \(char\ 13\)\ at\ end
+label8	Normal\ \(and\ actual\ marked\):
+label6	Color\ received:
+CHK_txt_WriteTime	log\ time
+label5	Color\ send:
+tabPage1	I2C\ EEPROM
+label64	all\ data\ are\ HEX\ \(FF\ ->\ 255\)
+label63	Textbox:\ 00\ EF\ 00\ 03\.\.\.\ Data<SPACE>Data\.\.\.
+label62	Send:\ i2c\ w\ \+\ Textbox
+btn_rs232_i2cReadout	i2c\ readout
+btn_rs232_i2cWrite	i2c\ write
+btn_rs232_i2cOverride	Overwrite
+label61	overwrite\ whole\ EEPROM\ data:
+label60	Write\ \(Adress<SPACE>Data\):
+label59	EEPROM\ read\ all:
+TP_flir_Ftp	FTP-Tree
+txt_ftp_treeSaveFile	TreeFTP\.txt
+tbtn_ftp_treeSave	Save\ Tree
+tbtn_ftp_treeLoad	Load\ Tree
+label14	Download
+btn_ftp_Openfolder	Open\ Folder
+btn_ftp_FullDump	Full\ Dump
+txt_ftp_CameraName	CameraName
+txt_ftp_path	/
+btn_ftp_Auslesen	Readout
+TP_flir_Tree	Res-Tree
+group_Tree_set	change\ choosed\ setting\ \(ENTER->Send\)
+btn_tree_setListrefresh	get\ all\ settings
+label43	Liste:
+label41	direct:
+label38	double\ /\ int:
+label37	boolean:
+btn_tree_setfalse	false
+btn_tree_setTrue	true
+groupBox16	Response\ from\ Camera
+btn_tree_getFullResponse	Read\ with\ extra\ Info
+txt_tree_filename	TreeData\.txt
+txt_tree_set	true
+txt_tree_grabnode	\.
+btn_tree_set	Set
+btn_tree_load	Load\ Tree
+btn_tree_save	Save\ Tree
+btn_tree_GrabNode	Readout
+TP_flir_web	Web
+btn_web_webcam	Webcam\ Init
+btn_web_pixkill	Pixel\ Replacement
+btn_web_ServiceStart	Service\ Startseite
+tbtn_web_webcam	Direct\ Webcam
+btn_web_startseite	Startseite
+txt_web_pw	3vlig
+txt_web_user	flir
+group_web_webcam	Direct\ Webcam
+TP_flir_Hid	HID
+groupBox7	Recive\ HID
+groupBox5	Verbindungs\ Log
+groupBox6	Send\ HID\ \(DEC:\ 0\ -\ 255\ oder\ HEX:\ 0x00\ -\ 0xff\)
+txt_usb_send	1\ 1
+groupBox9	µC\ Serial
+btn_hid_uart1Rx_del	DEL
+chk_FLIR_auswerten	evaluate
+txt_hid_uart1Tx	rset\ \.image\.flow\.digitalFilter\.noiseGen\.enabled\ false
+groupBox4	HID
+chk_HID_ShowTab	Show\ Tab
+TP_Setup	Setup
+group_ReadCamFuncs	read\ camera\ functions
+chk_tree_oldE45Mode	Old:\ Thermacam\ E45\ Mode
+groupBox11	camera\ resolution
+btn_Cam_ReadAllFunctions	list\ of\ camera\ functions
+group_IP	IP\ Adresse
+btn_ip_SendBrodcast	Network\ Brodcast
+label65	Used\ Conn\.:
+label66	Parallel\ Connections:
+btn_ip_Getinfos	Network\ infos
+btn_ip_PingScan	IP\ Ping\ Scan
+label67	IP\ from:
+label68	IP\ to:
+label69	Last\ Recive:
+label70	Last\ Send:
+group_telnetIP	Timeout\ in\ mS
+btn_FLIR_ConnTelnet	Telnet
+label_F_Status	Status\.\.\.
+btn_use_Uart	UART
+btn_abbruch	cancel
+btn_usb_finddevice	HID
+
+[conmenu]
+tbtn_ftp_download	Download
+tbtn_ftp_Upload	Upload\ File
+tbtn_ftp_ReadFullTree	Show\ complete\ camera\ tree
+tbtn_ftp_Delete	Delete\ File
+tbtn_ReadSpot	read\ spot
+tbtn_ReadSpot.tbtn_f_RefSpot1	Spot\ 1
+tbtn_ReadSpot.tbtn_f_RefSpot2	Spot\ 2
+tbtn_ReadSpot.tbtn_f_RefSpot3	Spot\ 3
+tbtn_ReadSpot.tbtn_f_RefSpot4	Spot\ 4
+tbtn_ReadSpot.tbtn_f_RefSpot5	Spot\ 5
+tbtn_ReadMbox	read\ area
+tbtn_ReadMbox.tbtn_F_RefBox1	mbox\ 1
+tbtn_ReadMbox.tbtn_F_RefBox2	mbox\ 2
+tbtn_ReadMbox.tbtn_F_RefBox3	mbox\ 3
+tbtn_ReadMbox.tbtn_F_RefBox4	mbox\ 4
+tbtn_f_RefDiff1	read\ Diff\ 1
+refreshTabelle	refresh\ table
+tbtn_KillMeasurement	remove\ Measurement
+tbtn_KillMeasurement.btn_F_Kill_P1	Kill\ Point\ 1
+tbtn_KillMeasurement.btn_F_Kill_P2	Kill\ Point\ 2
+tbtn_KillMeasurement.btn_F_Kill_P3	Kill\ Point\ 3
+tbtn_KillMeasurement.btn_F_Kill_P4	Kill\ Point\ 4
+tbtn_KillMeasurement.btn_F_Kill_P5	Kill\ Point\ 5
+tbtn_KillMeasurement.btn_F_Kill_B1	Kill\ Box\ 1
+tbtn_KillMeasurement.btn_F_Kill_B2	Kill\ Box\ 2
+tbtn_KillMeasurement.btn_F_Kill_B3	Kill\ Box\ 3
+tbtn_KillMeasurement.btn_F_Kill_B4	Kill\ Box\ 4
+tbtn_f_GrabAllMeasData	read\ all\ measurement\ data
+tbtn_F_removeAll	disable\ all
+tbtn_pic_DownSelected	download\ selected
+tbtn_pic_DownAll	download\ all
+tbtn_pic_DelSelected	delete\ selected\ from\ camera
+tbtn_pic_DelAll	delete\ all\ from\ camera
+btn_GrabNodesLevel1	acquire\ Level\ 1\ subnodes
+btn_GrabNodesAllLevel	acquire\ all\ subnodes
+tbtn_RemoveSubnode	remove\ subnodes
+tbtn_RemoveALLSubnodes	remove\ all
+
+[combo]
+cb_iso_filterTyp	transparent#solid#linked#
+cb_iso_filtercolor	gray#red#green#blue#yellow#cyan#magenta#
+CB_diff_2	spot\ 1#spot\ 2#spot\ 3#spot\ 4#spot\ 5#mbox\ 1\ min#mbox\ 1\ max#mbox\ 1\ avg#mbox\ 2\ min#mbox\ 2\ max#mbox\ 2\ avg#mbox\ 3\ min#mbox\ 3\ max#mbox\ 3\ avg#mbox\ 4\ min#mbox\ 4\ max#mbox\ 4\ avg#reftemp\ 1#
+CB_diff_1	spot\ 1#spot\ 2#spot\ 3#spot\ 4#spot\ 5#mbox\ 1\ min#mbox\ 1\ max#mbox\ 1\ avg#mbox\ 2\ min#mbox\ 2\ max#mbox\ 2\ avg#mbox\ 3\ min#mbox\ 3\ max#mbox\ 3\ avg#mbox\ 4\ min#mbox\ 4\ max#mbox\ 4\ avg#reftemp\ 1#
+cb_F_mboxItems	AVR#MAX#MIN#
+CB_F_GraphTimebase	time\ since\ start\ of\ measurement#System\ time#
+CB_F_GraphSymboltype	None#Diamond#Circle#Plus#Square#Triangle#XCross#
+

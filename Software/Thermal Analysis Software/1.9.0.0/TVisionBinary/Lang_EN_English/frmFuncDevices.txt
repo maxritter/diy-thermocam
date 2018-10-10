@@ -1,0 +1,344 @@
+﻿# this file contains data for [frmFuncDevices], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+l_visionsetup2	Vision\ Setup
+chk_view_SmoothAutoRange	smooth\ Autorange\ \|\ Steps:
+chk_view_AutorageGrenze	Auto\ min\ range
+btn_SP_ClearLog	Clear\ Log
+btn_SP_OpenPort	Open\ Port
+TP_SP_Text	Text
+labelrecivet	Receive\ as\ Text:
+txt_SP_SendT	Test\ Text
+CHK_RS232_Sonderzeichen	print\ special\ chars
+label_sendt	Send:
+TP_SP_Bytes	Bytes
+labelreciveB	Receive\ as\ Bytes:
+txt_SP_SendB	0\ 127\ 128\ 129\ 255
+labelsendb	Send:
+TP_SP_Pins	Pins
+labelSP_Tab3Info	if\ this\ Tab\ is\ active,\ received\ data\ will\ go\ to\ other\ functions\ and\ not\ appear\ in\ terminal\.
+labelSP2	2x\ Output:
+label_DSR	DSR
+label_CD	CD
+label_CTS	CTS
+btn_rs232_RTS	RTS
+btn_rs232_DTR	DTR
+labelsp1	3x\ Input:
+l_SerialPort2	Serial\ Terminal
+label_Weba_HideDriverFunc	Start\ Camera\ first\ to\ get\ the\ Driver\ Functions\.\.\.
+btn_WebcamA_PropertyWin	Show\ Driver\ Window
+chk_WebcamA_Autoselect	Autoselect:
+label_WebCamA_Active	Webcam\ Off
+btn_WebcamA_Start	Start
+chk_WebCamA_FPS	Bilder/Sec\ \(FPS\):
+chk_WebCamA_Resolution	Resolution:
+btn_WebCamA_RefreshSources	Refresh
+label_webA_quellen	video\ sources:
+l_WebcamA2	Device:\ Webcam\ A
+labeldev1	resolutions:
+label_Webb_HideDriverFunc	Start\ Camera\ first\ to\ get\ the\ Driver\ Functions\.\.\.
+btn_WebcamB_PropertyWin	Show\ Driver\ Window
+labeldev3	resolutions:
+chk_WebcamB_Autoselect	Autoselect:
+label_WebCamB_Active	Webcam\ Off
+btn_WebcamB_Start	Start
+chk_WebCamB_FPS	Bilder/Sec\ \(FPS\):
+chk_WebCamB_Resolution	Resolution:
+btn_WebCamB_RefreshSources	Refresh
+label_webB_quellen	video\ sources:
+l_WebcamB2	Device:\ Webcam\ B
+rad_optris_Exptif	16bit\ \.tif
+rad_optris_ExpJpg	8bit\ \.jpg
+label_dev_optrisexport	Export:
+btn_optris_FolderCSV	Process\ Folder\ csv\ ->\ jpg
+labeloptr1	Level:\r\nSpan:
+label_optrisInfos	infos\.\.\.
+l_Optris2	Device:\ Optris
+radioButton1optris	Fixed:
+rad_optris_Dynamic	Dynamic:
+label_ArgusInfos	infos\.\.\.
+l_Argus2	Device:\ Argus
+btn_CEM_showCalWindow	show\ P-Cal\ Window
+label_CEM_humidity	Humidity\ \(%\)
+label_CEM_AtmTemp	Air\ Temperature\ \(°C\)
+label_CEM_Distance	Distance\ \(Meter\)
+label_CEM_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+label_CEM_info	CEM\ DT-9885\ only
+label_CEM_Emiss	Emissivity
+label_CEMInfos	infos\.\.\.
+l_CEM2	Device:\ CEM
+chk_dhide_TCamDll2	Device:\ TCamDll\ 2
+chk_dhide_TCamDll1	Device:\ TCamDll\ 1
+chk_dhide_Testo	Device:\ Testo
+chk_dhide_FlirOne	Device:\ Flir\ One
+chk_dhide_CEM	Device:\ CEM
+chk_dhide_SerSens2	Device:\ Serial\ Sensor\ 2
+chk_dhide_SerSens1	Device:\ Serial\ Sensor\ 1
+chk_dhide_Argus	Device:\ Argus
+chk_dhide_TExpert	Device:\ i3\ Termal\ Expert
+chk_dhide_Optris	Device:\ Optris
+chk_dhide_DIYLep	Device:\ DIY-Thermocam
+chk_dhide_WebB	Device:\ Webcam\ B
+chk_dhide_WebA	Device:\ Webcam\ A
+chk_dhide_SeekThermal	Device:\ Seek\ Thermal
+chk_dhide_FlirEx	Device:\ Flir\ Ex
+chk_dhide_serialTerminal	Serial\ Terminal
+l_dhide2	Hide\ Devices
+btn_dhide_allON	all\ ON
+btn_dhide_allOFF	all\ OFF
+
+[conmenu]
+
+[combo]
+
+[UserControls]
+[UC] uC_Dev_DIYThermocam1 ###########################
+chk_DIYLep_SettingsFromCamera	use\ Settings\ from\ Camera
+btn_DIYLepton_SingleShot	Snapshot\ \(IR\+Hi\ Res\ Vis\)
+btn_DIYLepton_CalFileToCam	CalFile\ ->\ Camera
+btn_DIYLepton_CalCamToFile	Camera\ ->\ CalFile
+btn_DIYLepton_doNew2PCal	New\ 2\ Point\ Calibration
+btn_DIYLepton_WriteCalToCam	write\ Caldata\ in\ Camera
+btn_DIY_LoadCalFile	Load
+chk_DIY_UseCalFile	use\ Cal\ file:
+btn_DIYLepton_DoNuc	NUC
+btn_DIYLepton_ManNuc	Manual
+btn_DIYLepton_AutoNuc	Auto
+label_DIY_Shuttercontrol	Shutter\ Control
+btn_DIYLepton_Laser	LASER\ On/Off
+label_DIYLep_SpotSensor	Spot\ Sensor
+chk_DIYLep_Autoscale	Autoscale
+labeldiy1	Streaming:
+chk_DIYLepton_Autoselect	Select,\ if\ exist:
+btn_DIYLepton_GetSize	get\ Size
+btn_DIYLepton	Connect
+label_DIY_Cal	Calibration
+l_Dev_DiyThermocam	Device:\ DIY\ Thermocam
+CB_DIYLepton_Streaming	OFF#ThermalFrame#SpotSensor#Frame\+Spot#Visual#Visual\+Thermal#SingleShot#
+CB_DIYLepton_Size	80x60#160x120#
+[UC] uC_Dev_FlirOne1 ###########################
+chk_FlirOne_Autorange	Autorange
+label19	Connected\ clients:
+btn_SetPort	SET
+label18	PC\ IP
+lblStatus	PORT\ NOT\ OPEN
+label12	Tcp\ Port
+label4	Sensor
+label8	Frame\ Droped\ /\ ImageTyp\r\n
+btn_FlirOne_showCalWindow	show\ P-Cal\ Window
+label_FlirOne_humidity	Humidity\ \(%\)
+label_FlirOne_AtmTemp	Air\ Temperature\ \(°C\)
+l_FlirOne	Device:\ Flir\ One
+label_FlirOne_Distance	Distance\ \(Meter\)
+label_FlirOne_Emiss	Emissivity
+label_FlirOne_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+[UC] uC_Dev_SeekThermal1 ###########################
+TP_Seek1_int	Intern
+label_seek_NoShutterInNormalMode	No\ Shutter\ funtions\r\n\ in\ Normal\ Mode
+label_seek_slopeoffset	Slope:\r\nOffset:
+btn_seek_BigNUC	Big\ NUC
+label_Seek_Proc_intern	If\ no\ external\ Processing\ is\ enabled\ then\ internal\ is\ used\.
+btn_seek_NUC	NUC
+btn_seek_ShutterOpen	Shutter\ Open
+btn_seek_ShutterClose	Shutter\ Close
+chk_seek_shutterinfo	Quick\ Info\ at\ Shutter
+TP_Seek1_ext1	Ext\ 1
+btn_seek_DoMapCal	Create\ new\ GO-Maps
+btn_seek_FrameOffsetCal	Frame\ as\ Offset\r\n\(NUC\ without\ Shutter\)
+btn_Seek_LoadMapFile	Load
+chk_seek_ExternProcessing	Use\ extern\ processing
+chk_Seek_UseFCalValues	Use\ 2Point\ Cal\ for\ Temperature
+TP_Seek1_ext2	Ext\ 2
+chk_seek_UsePlanckCal	Use\ Planck\ Calibration
+btn_seek_showCalWindow	Show\ Cal\ window
+label_seek_humidity	Humidity\ \(%\)
+label_seek_AtmTemp	Air\ Temperature\ \(°C\)
+label_seek_Distance	Distance\ \(Meter\)
+label_seek_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+label_seek_Emiss	Emissivity
+TP_Seek1_img	Img
+btn_seekImg_Reload	R
+btn_seekImg_Open	Open
+labelseekImg1	Level\ /\ Span:
+rad_seekImg_fixed	Fixed:
+rad_seekImg_dynamic	Dynamic:
+label1	to\ read\ in\ \r\nReveal\ \*\.tiff\ frames
+label_devSeek_DevTempFrameCnt	Device\ Temp:\r\nFrame\ Count:
+label_Seek_RawData	Rawdata
+chk_seek_showRawValues	Raw\ Data\ in\ Meastable
+label_devSeek_FWandSerial	Device\ FW:\r\nSerial:
+chk_seek_VisFromWebcam	Visual\ Image\ from\ WebcamA
+btn_seek_ShowDPM	Show\ DeathPixelMap
+btn_seek_initRaw	Raw
+btn_seek_ProcTExt	Extern
+btn_seek_ProcTInt	Intern
+btn_seek_ProcIExt	Extern
+btn_seek_ProcIInt	Intern
+btn_seek_initHiFPS	FastRaw
+label_seek_prozessierung	Processing
+label_seek_process	Image:\r\nTemp:
+btn_seek_initNormal	Normal
+btn_GetProcByteStreaming	Stream
+btn_SeekThermal_Connect	Connect
+chk_seek_InitHiFPS	Init\ Hi\ FPS
+chk_seek_Autorange	Autorange
+l_Dev_SeekThermal	Device:\ SeekThermal
+[UC] uC_Dev_SerialSensor1 ###########################
+btn_SerSens_LoadSetup	Load
+label1	Interval:
+btn_SerSens_SaveSetup	Save
+label_SerSens_CommandFormat	CMD:\ <Txt/Bytes>\ <13>
+txt_SerSens_SendBytes	48\ 49\ 50
+txt_SerSens_SendTxt	T
+chk_SerSens_SendTxt	Send\ Text:
+btn_SerSens_Setup	Setup
+label_SerSens_Name	Name:
+txt_SerSens_Name	SerSens
+chk_SerSens_Autoselect	Select\ if\ Exist:
+btn_SerSens_Connect	Connect
+l_SerialSensor	Device:\ SerialSensor\ 2
+chk_SerSens_SendBytes	Send\ Bytes:
+cb_SerSens_SensorType	Direct#Owon\ B35\ Bluetooth#
+[UC] uC_Dev_SerialSensor2 ###########################
+btn_SerSens_LoadSetup	Load
+label1	Interval:
+btn_SerSens_SaveSetup	Save
+label_SerSens_CommandFormat	CMD:\ <Txt/Bytes>\ <13>
+txt_SerSens_SendBytes	48\ 49\ 50
+txt_SerSens_SendTxt	T
+chk_SerSens_SendTxt	Send\ Text:
+btn_SerSens_Setup	Setup
+label_SerSens_Name	Name:
+txt_SerSens_Name	SerSens
+chk_SerSens_Autoselect	Select\ if\ Exist:
+btn_SerSens_Connect	Connect
+l_SerialSensor	Device:\ SerialSensor\ 2
+chk_SerSens_SendBytes	Send\ Bytes:
+cb_SerSens_SensorType	Direct#Owon\ B35\ Bluetooth#
+[UC] uC_Dev_TCamDll1 ###########################
+TP_DLL3	DLL
+txt_dll_CamConnStr	deviceConnectionString
+rad_dll_ModeRaw	Raw\ Mode
+rad_dll_ModeTemp	Temp\ Mode
+label_dll_Log	Log:
+label_dll_Name	Dll\ name\ /\ CamConnStr:
+chk_TCam_VisualFromWebA	Visual\ from\ Webcam\ A
+TP_DLL4	Cmd
+btn_dll_Query	Query
+btn_dll_send	Send
+txt_dll_send	NUC
+TP_DLL1	Map
+btn_dll_NUC	NUC
+chk_TE_RawToMeas	Raw->\ Meas
+btn_dll_ShowDPM	Show\ DPM
+chk_dll_RawMapCal	Use\ Raw\ Map\ Cal
+btn_dll_DoMapCal	New\ GO-Map
+txt_dll_RawValues	MaxVal:\r\nMinVal:\r\nRange:
+btn_dll_LoadMapFile	Load
+TP_DLL2	Temp
+btn_TEIR_showCalWindow	Show\ Cal\ Window
+label_TEIR_humidity	Humidity\ \(%\)
+label_TEIR_AtmTemp	Air\ Temperature\ \(°C\)
+label_TEIR_Distance	Distance\ \(Meter\)
+label_TEIR_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+label_TEIR_Emiss	Emissivity
+rad_TE_CalTyp_Planck	Use\ Planck\ Cal
+rad_TE_CalTyp_2P	Use\ 2\ Point\ Cal
+label_TE_OffsetSlope	Slope:\r\nOffset:
+chk_TE_Autorange	Autorange
+l_TCam	Device:\ TCamDll2
+btn_TCam_Connect	Connect
+btn_TCamStreaming	Stream
+[UC] uC_Dev_TCamDll2 ###########################
+TP_DLL3	DLL
+txt_dll_CamConnStr	deviceConnectionString
+rad_dll_ModeRaw	Raw\ Mode
+rad_dll_ModeTemp	Temp\ Mode
+label_dll_Log	Log:
+label_dll_Name	Dll\ name\ /\ CamConnStr:
+chk_TCam_VisualFromWebA	Visual\ from\ Webcam\ A
+TP_DLL4	Cmd
+btn_dll_Query	Query
+btn_dll_send	Send
+txt_dll_send	NUC
+TP_DLL1	Map
+btn_dll_NUC	NUC
+chk_TE_RawToMeas	Raw->\ Meas
+btn_dll_ShowDPM	Show\ DPM
+chk_dll_RawMapCal	Use\ Raw\ Map\ Cal
+btn_dll_DoMapCal	New\ GO-Map
+txt_dll_RawValues	MaxVal:\r\nMinVal:\r\nRange:
+btn_dll_LoadMapFile	Load
+TP_DLL2	Temp
+btn_TEIR_showCalWindow	Show\ Cal\ Window
+label_TEIR_humidity	Humidity\ \(%\)
+label_TEIR_AtmTemp	Air\ Temperature\ \(°C\)
+label_TEIR_Distance	Distance\ \(Meter\)
+label_TEIR_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+label_TEIR_Emiss	Emissivity
+rad_TE_CalTyp_Planck	Use\ Planck\ Cal
+rad_TE_CalTyp_2P	Use\ 2\ Point\ Cal
+label_TE_OffsetSlope	Slope:\r\nOffset:
+chk_TE_Autorange	Autorange
+l_TCam	Device:\ TCamDll2
+btn_TCam_Connect	Connect
+btn_TCamStreaming	Stream
+[UC] uC_Dev_Testo1 ###########################
+l_Testo	Device:\ Testo
+[UC] uC_Dev_TExpert1 ###########################
+chk_TExpert_OnlyTempFrame	read\ only\ TempMap
+btn_TE_NUC	NUC
+TP_Texp_Intern	i3\ Driver
+btn_TEStreamingDLL	Stream
+label_TE_InternProcInfo	Connecting\ need\ 7\ Sec\.\ around
+btn_TExpert_ConnectDll	Connect
+chk_TExpert_UseUmgebungsTempCal	Ambient\ Cal
+TP_Texp_Ext1	Ext\ 1
+chk_TE_RawToMeas	Raw->\ Meas
+btn_Texp_ShowThermalExtra	Extra\ Bytes
+btn_Texp_ShowDPM	Show\ DPM
+chk_Texp_ExternProcessing	Use\ extern\ processing
+btn_Texp_DoMapCal	Create\ new\ GO-Maps
+txt_TE_Values	MaxVal:\r\nMinVal:\r\nRange:
+btn_Texp_LoadMapFile	Load
+btn_TExpert_Connect	Connect
+btn_TEStreaming	Stream
+TP_Texp_Ext2	Ext\ 2
+btn_TEIR_showCalWindow	Show\ Cal\ Window
+label_TEIR_humidity	Humidity\ \(%\)
+label_TEIR_AtmTemp	Air\ Temperature\ \(°C\)
+label_TEIR_Distance	Distance\ \(Meter\)
+label_TEIR_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+label_TEIR_Emiss	Emissivity
+rad_TE_CalTyp_Planck	Use\ Planck\ Cal
+rad_TE_CalTyp_2P	Use\ 2\ Point\ Cal
+label_TE_OffsetSlope	Slope:\r\nOffset:
+chk_TE_Autorange	Autorange
+l_TExpert	Device:\ i3\ T-Expert
+chk_TExpert_ReplacePixelSouthEast	Replace\ first\ and\ last\ Pixel
+chk_TExpert_VisualFromWebA	Visal\ Image\ from\ WebcamA
+chk_TExpert_DiscardOvertemp	Ignore\ Temp\ >\ 1000°C
+chk_TExpert_SwitchSide	patch\ borders
+[UC] uC_Dev_Flir1 ###########################
+TP_FLIR_Cal	Cal
+label_Flir_ReflTemp	Refl\.\ Apparent\ Temp\ \(°C\)
+label_Flir_Emiss	Emissivity
+btn_Flir_showCalWindow	Show\ Cal\ Window
+label_Flir_Distance	Distance\ \(Meter\)
+label_Flir_humidity	Humidity\ \(%\)
+label_Flir_AtmTemp	Air\ Temperature\ \(°C\)
+TP_FLIR_Frame	Frame
+btn_flir_InitgrabIR	Init\ Grab
+btn_flir_grabIR	Grab\ IR
+btn_FLIR_ConnTelnet	Telnet
+labeldev8	Camera\ needs\ RNDIS\ Mode\.
+TP_FLIR_jpg	JPG
+btn_flir_RecalcTemperatures	calculate\ new
+chk_flirIR_HalfSize	Half\ Size
+chk_flirIR_useFileSettings	use\ settings\ from\ image
+label_flir_ExifDatenVomBild	Exif\ daten\ from\ image
+btn_Flir_CameraComanderShow	show\ CameraCommander\ Flir
+chk_Flir_Autorange	Autorange
+l_Flir	Device:\ Flir
+

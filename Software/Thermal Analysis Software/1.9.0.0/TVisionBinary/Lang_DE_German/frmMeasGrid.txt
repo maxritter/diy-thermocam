@@ -1,0 +1,15 @@
+# this file contains data for [frmMeasGrid], all lines with a # at start will be ignored
+# no Errors
+##############################################################################
+[Controls]
+chk_NoteEnable	Notiz\ anzeigen
+label_note_head	Kommentar\ /\ Notiz
+
+[conmenu]
+tbtn_mess_AlleAbschalten	Alle\ Messungen\ abschalten
+tbtn_mess_collapse	Alle\ einklappen
+tbtn_mess_expande	Alle\ ausklappen
+tbtn_mess_FastRefresh	Fast\ Refresh
+
+[combo]
+
