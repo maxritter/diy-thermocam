@@ -1,6 +1,6 @@
 There are **two versions** of the enclosure. The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
 
-For most users starting the project now, the **ArducamV1_Radiometric** version will be the preferred one, in case they use the **Lepton3.5** as sensor. For this version, there exists also a folder "3D print", which, contains the **single sides for 3D printing** instead of laser cutting.
+For most users starting the project now, the **Radiometric** version will be the preferred one, in case they use the **Lepton3.5** as sensor. For this version, there exists also a folder "3D print", which, contains the **single sides for 3D printing** instead of laser cutting.
 
 ----------
 
@@ -14,5 +14,5 @@ You can download the free version of **Google Sketchup** here: [https://goo.gl/G
 **Inkscape** for editing the 2D SVG files can be loaded here: [https://goo.gl/w8YHZN](https://goo.gl/w8YHZN)
 Use this plugin for Sketchup, to **convert the 3D model to 2D**: [https://github.com/JoakimSoderberg/sketchup-svg-outline-plugin](https://github.com/JoakimSoderberg/sketchup-svg-outline-plugin)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTU0NTQyOTUyMV19
+eyJoaXN0b3J5IjpbLTEwNjU4OTQ3MjZdfQ==
 -->
