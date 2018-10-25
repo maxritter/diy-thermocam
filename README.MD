@@ -2,15 +2,18 @@
 <br>
 <br>
 
-**Update 10.10.2018:** **GroupGets** launched another round of the **DIY-Thermocam Kit** campaign, **[check it out](https://groupgets.com/campaigns/468-diy-thermocam-kit-round-15)**!
+**Update #2:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
 
-**Update 08.09.2018:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
+**Update #1:** **haraldg** has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
 
 ----------
 
+
 The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on the popular **FLIR Lepton** long-wave-infrared array sensor. 
 
+
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Thermocam.jpg" width="500">
+
 
 The aim of this project is to give **private persons**, **educational institutes** and **companies** access to a **portable**,  **affordable** and **customizable** thermal imaging plattform.
  
@@ -20,44 +23,47 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
-[**GroupGets**](https://groupgets.com/campaigns/384-diy-thermocam-kit-round-11) does now offer a **complete self-assembly kit**, so you **don't have to worry** about buying **all the parts on your own**. 
-
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
 
-**Update:** haraldg has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
-
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
-<a href="https://groupgets.com/manufacturers/diycam-thermocam/products/diy-thermocam"><img src="https://github.com/maxritter/DIY-Thermocam/blob/master/Images/Website/GroupGetsLogo.jpg?raw=true"></a>
 
 ----------
 
+
 **HOW TO MAKE IT**
+
 
 You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. 
 
+
 An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_05.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
+
 
 The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** (**Lepton2.5** only at the moment). The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
 
+
 The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** or **Lepton3.5**), the **spot sensor** is **not required**.
 
+
 The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_07.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
+
 
 For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
 
 
+
+
 ----------
+
 
 **REQUIRED PARTS**
 
+In order to **make your own DIY-Thermocam V2**,   please use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 
-In order to **make your own DIY-Thermocam V2**, you have **two options**: 
-
-- Buy the **[self-assembly kit](https://groupgets.com/campaigns/468-diy-thermocam-kit-round-15)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order. If they currently **do not have an active campaign**, **[write them an email](mailto:ron@groupgets.com )** and ask for one ;) 
-- Use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
-- You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
+You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you.  If you do not have a  VAT and still want to buy the components from Ettinger, write a mail to [sales@ettinger.de](mailto:sales@ettinger.de) and ask for a quote.
 
 I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
+
 
 <table style="width: 100%">
    <tr>
@@ -544,23 +550,33 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
    </tr>
 </table>
 
+
 ----------
+
 
 **DEVICE IMAGES**
 
+
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceFront.jpg" width="500">
+
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceOpen.jpg" width="500">
 
+
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBack.jpg" width="500">
+
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceTop.jpg" width="500">
 
+
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
+
 
 ----------
 
+
 **FEATURES**
+
 
  - Fast **ARM Cortex M4** processor (**240MHz**), based on the popular, **Arduino**
    compatible **Teensy 3.6**
@@ -595,9 +611,12 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
  - Use simple **commands** to receive all thermal & configuration data over
    the **USB serial port** with high speed
 
+
 ----------
 
+
 **FEATURE TABLE**
+
 
 <table style="width: 100%">
    <tr>
@@ -789,59 +808,87 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
    </tr>
 </table>
 
+
 ----------
+
 
 **DEVICE FIRMWARE**
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Screenshots.PNG" width="700">
+
 
 The **latest releases** of device firmware can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Releases)**. For the firmware **SDK**, check out **[this instruction](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Source)**.
 
+
 ----------
+
 
 **THERMAL IMAGES**
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalImg.PNG" width="700">
+
 
 More thermal images in **full resolution** can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Images/Thermal)**.
 
+
 ----------
+
 
 **THERMAL IMAGE COMPARISON**
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalComp.jpg" width="700">
+
 
 This is a **comparison** between the **DIY-Thermocam**, the **Seek XR** and a **FLIR E8** thermal imager.
 
+
 ----------
+
 
 **SOFTWARE**
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Live Viewer and Updater.PNG" width="500">
+
 
 The standalone PC **[thermal live viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Live%20Viewer)** software allows you to **capture** HQ **thermal** and **visual images**, as well as **videos** right on the **computer**.  Various **settings** can be **changed** over the UI, including a calibration and two **different transfer modes**. The software is written in **Python**, so it can be modified to your own needs and executed on **any OS**. New **firmware updates** can be flashed to the device easily with the **[firmware updater](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater)** application.
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermoVision.png" width="700">
+
 
 There is a powerful **[thermal analysis software](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)** for the PC, called **ThermoVision**. The **image browser** can show all thermal & visual images on the internal storage, when the device is connected over USB. They can then be loaded with one click. The software allows you to **analyze** and **edit** the **thermal raw data files** right from the device, create **combined images** and **stream & record live images** (thermal & visual) from the Thermocam. You can even set **temperature thresholds**, which trigger a specific action like opening a file, saving an image or sending a command to the serial port.
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/DataViewer.png" width="600">
+
 
 The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **[thermal data viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The **live tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **[video converter](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)** to avi videos.
 
+
 ----------
+
 
 **VIDEO OUTPUT MODULE**
 
+
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/VideoOutput.jpg" width="300">
+
 
 If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** the **video signal** to a **TV** screen, consider adding the **external video out module** to your device. 
 
+
 It just needs to be plugged into the **microUSB cable** of the Thermocam and is also supplied with **power** by the **internal battery**. 
+
 
 It is capable of providing a **HDMI signal** or **analog video output** (**PAL & NTSC**) with a resolution of **640x480** pixel. 
 
+
 You need the **following parts**: 
+
 
 <table style="width: 100%">
    <tr>
@@ -895,6 +942,11 @@ You need the **following parts**:
    </tr>
 </table>
 
+
 Download and flash the **[complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM)** to the SD card, it runs a **python script** that you can modify to your own needs.
 
+
 Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbNjA2ODgzMDk4XX0=
+-->
