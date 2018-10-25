@@ -1,31 +1,8 @@
-There are **4two versions** of the enclosure. The **Arudam V1** camera is used in **all devices build from 2018**, as the **Arducam V2** part has become **deprecated**. You can distinguish between those two by having a look at the lense. The V1 has a big lense on top of it, the V2 only a very flat one.
-
-<img src="https://images-na.ssl-images-amazon.com/images/I/61QiB6hqMZL._SX466_.jpg" width="300" />
-(ArducamV1)
-
-<img src="http://www.arducam.com/wp-content/uploads/2016/08/ArduCAM-2MP-V2-2-1.jpg" width="300" />
-(ArducamV2)
-
-The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
-
+There are **two versions** of the enclosure. The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
 
 For most users starting the project now, the **ArducamV1_Radiometric** version will be the preferred one, in case they use the **Lepton3.5** as sensor. For this version, there exists also a folder "3D print", which, contains the **single sides for 3D printing** instead of laser cutting.
 
-
 ----------
-
-You can find those four versions in the corresponding folders:
-
-**ArducamV1_NonRadiometric**: Made for the Arducam V1 Mini 2MP camera and the Lepton2.0 / Lepton3.0 non-radiometric sensor
-
-**ArducamV1_Radiometric**: Made for the Arducam V1 Mini 2MP camera and the Lepton2.5 radiometric sensor
-
-**ArducamV2_NonRadiometric**: Made for the Arducam V2 Mini 2MP camera and the Lepton2.0 / Lepton3.0 non-radiometric sensor
-
-**ArducamV2_Radiometric**: Made for the Arducam V2 Mini 2MP camera and the Lepton2.5 radiometric sensor
-
-----------
-
 
 The enclosure has been designed with Google Sketchup for a material thickness of **3mm**. The standard enclosure is cut out of **black acryl plastic** by a laser cutting service. 
 
@@ -37,5 +14,5 @@ You can download the free version of **Google Sketchup** here: [https://goo.gl/G
 **Inkscape** for editing the 2D SVG files can be loaded here: [https://goo.gl/w8YHZN](https://goo.gl/w8YHZN)
 Use this plugin for Sketchup, to **convert the 3D model to 2D**: [https://github.com/JoakimSoderberg/sketchup-svg-outline-plugin](https://github.com/JoakimSoderberg/sketchup-svg-outline-plugin)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTM2MzI0MzQyNV19
+eyJoaXN0b3J5IjpbMTU0NTQyOTUyMV19
 -->
