@@ -2,8 +2,9 @@
 <br>
 <br>
 
-**Update 08.09.2018:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
+**Update #2:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
 
+**Update #1:** **haraldg** has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
 
 ----------
 
@@ -21,10 +22,8 @@ There are **various applications** like finding **heat leaks** in the insulation
 Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to take **advantage** of the **versatile possibilities** of thermal imaging and to **save money** at one go.
  
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
+
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
-
-
-**Update:** haraldg has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
 
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
 
@@ -949,5 +948,5 @@ Download and flash the **[complete image](https://drive.google.com/open?id=0B5k5
 
 Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzY0NjA2OTUxXX0=
+eyJoaXN0b3J5IjpbNjA2ODgzMDk4XX0=
 -->
