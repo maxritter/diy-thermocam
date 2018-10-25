@@ -70,16 +70,9 @@ For going deeper, the **structure of the raw data files** is explained **[here](
 
 **REQUIRED PARTS**
 
+In order to **make your own DIY-Thermocam V2**,   please use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
 
-
-In order to **make your own DIY-Thermocam V2**, you have **two options**: 
-
-- Buy the **[self-assembly kit](https://groupgets.com/campaigns/468-diy-thermocam-kit-round-15)** from **GroupGets**. It includes **all required parts** except for the **Lepton sensor** and **module**. After you click on **"Join this buy"**, you can add the **Lepton module** and the **Lepton3.5**, **Lepton3.0** or **Lepton2.5** sensor to your order. If they currently **do not have an active campaign**, **[write them an email](mailto:ron@groupgets.com )** and ask for one ;) 
-- Uplease use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
-- 
-
-You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you. 
-If you do not have a  
+You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you.  If you do not have a  VAT and still want to buy the components from Ettinger, write a mail to [sales@ettinger.de](mailto:sales@ettinger.de) and ask for a quote.
 
 I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
 
@@ -967,5 +960,5 @@ Download and flash the **[complete image](https://drive.google.com/open?id=0B5k5
 
 Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE2OTA2MzgzMzhdfQ==
+eyJoaXN0b3J5IjpbLTEzMDk2NDIwOTNdfQ==
 -->
