@@ -16,11 +16,11 @@ The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on
 
 
 The aim of this project is to give **private persons**, **educational institutes** and **companies** access to a **portable**,  **affordable** and **customizable** thermal imaging plattform.
- 
+
 There are **various applications** like finding **heat leaks** in the insulation of buildings, the analysis of **electrical** or **mechanical components**, the **detection** of **persons** / animals or even mounting it on a **drone**, together with the additional **video out module**.
- 
+
 Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to take **advantage** of the **versatile possibilities** of thermal imaging and to **save money** at one go.
- 
+
 **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
 A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
@@ -49,7 +49,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 
 
 For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
-
 
 
 
@@ -180,7 +179,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" />
       </td>
       <td style="width: 235px">3.7V Lithium Polymer Battery&nbsp;<br />
-         With JST-PH connector, max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
+         Max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
       </td>
       <td>
          <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN"><strong>Ebay.com</strong></a><br />
@@ -277,12 +276,24 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <strong>Digikey.com</strong></a>
       </td>
    </tr>
+    <tr>
+      <td style="width: 111px">
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon2.png" style="-webkit-user-select: none" />
+      </td>
+      <td style="width: 235px">JST S2B-PH-K-S<br />
+         Lipo Connector&nbsp;
+      </td>
+      <td>
+         <a href="https://www.digikey.com/product-detail/en/jst-sales-america-inc/PHR-2/455-1165-ND/608607#images-1">
+         <strong>Digikey.com</strong></a>
+      </td>
+   </tr>
    <tr>
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon.png" style="-webkit-user-select: none" />
       </td>
       <td style="width: 235px">JST S2B-PH-K-S<br />
-         Connect the lipo to the PCB&nbsp;
+         PCB Lipo Connector&nbsp;
       </td>
       <td>
          <a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
@@ -571,7 +582,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
 
-
 ----------
 
 
@@ -610,7 +620,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
    ThermoVision by Joe-C
  - Use simple **commands** to receive all thermal & configuration data over
    the **USB serial port** with high speed
-
 
 ----------
 
@@ -820,7 +829,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 
 The **latest releases** of device firmware can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Releases)**. For the firmware **SDK**, check out **[this instruction](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Source)**.
 
-
 ----------
 
 
@@ -832,7 +840,6 @@ The **latest releases** of device firmware can be found **[here](https://github.
 
 More thermal images in **full resolution** can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Images/Thermal)**.
 
-
 ----------
 
 
@@ -843,7 +850,6 @@ More thermal images in **full resolution** can be found **[here](https://github.
 
 
 This is a **comparison** between the **DIY-Thermocam**, the **Seek XR** and a **FLIR E8** thermal imager.
-
 
 ----------
 
@@ -867,7 +873,6 @@ There is a powerful **[thermal analysis software](https://github.com/maxritter/D
 
 
 The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **[thermal data viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The **live tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **[video converter](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)** to avi videos.
-
 
 ----------
 
