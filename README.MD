@@ -63,7 +63,6 @@ You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https:
 
 I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
 
-
 <table style="width: 100%">
    <tr>
       <td style="width: 111px">
@@ -278,9 +277,9 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
    </tr>
     <tr>
       <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon2.png" style="-webkit-user-select: none" />
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon2.jpg" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">JST S2B-PH-K-S<br />
+      <td style="width: 235px">JST PHR-2<br />
          Lipo Connector&nbsp;
       </td>
       <td>
@@ -560,6 +559,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 		 Ettinger.de</strong></a> (3 pcs)</td>
    </tr>
 </table>
+
 
 
 ----------
