@@ -319,7 +319,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Short microSD to SD adapter for the internal storage card&nbsp;
       </td>
       <td>
-         <a href="http://www.digikey.com/product-detail/en/seeed-technology-co-ltd/328030004/328030004-ND/5487856">
+         <a href="https://www.digikey.com/product-detail/en/adafruit-industries-llc/1763/1528-2011-ND/6827144">
          <strong>Digikey.com</strong></a>
       </td>
    </tr>
