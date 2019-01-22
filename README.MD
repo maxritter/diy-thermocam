@@ -403,7 +403,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Multi-purpose resistor
       </td>
       <td>
-         <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
+         <a href="https://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNF14FTD10K0/RNF14FTD10K0CT-ND/1975090">
          <strong>Digikey.com</strong></a> (2 pcs)&nbsp;
       </td>
    </tr>
