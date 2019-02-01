@@ -1,8 +1,18 @@
 There are **two versions** of the enclosure. The difference between the **radiometric** and **non-radiometric** versions is, that the non-radiometric setup also needs an external spot sensor. For the radiometric version, this cutout in the enclosure has been removed.
 
-For most users starting the project now, the **Radiometric** version will be the preferred one, in case they use the **Lepton3.5** as sensor. For this version, there exists also a folder "3D print", which, contains the **single sides for 3D printing** instead of laser cutting.
+For most users starting the project now, the **radiometric** version will be the preferred one, in case they use the **Lepton2.5** or **Lepton3.5** as sensor. For this version, there exists also a folder "3D print", which, contains the **single sides for 3D printing** instead of laser cutting.
+
+The non-radiometric version is suitable for the **Lepton2.0** as well as the **Lepton3.0**. It has an additional hole for the MLX90614 spot sensor.
 
 ----------
+
+**Patrik Thürlemann** from the Kantonsschule Trogen has created a nice 3D enclosure for the radiometric version of the device:
+
+![](https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/3dprint_1.JPG) ![](https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/3dprint_2.JPG)
+
+You can find it in the folder "**3D_Print_Radiometric**". It includes STEP and STL files.
+
+------
 
 The enclosure has been designed with Google Sketchup for a material thickness of **3mm**. The standard enclosure is cut out of **black acryl plastic** by a laser cutting service. 
 
