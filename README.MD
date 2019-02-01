@@ -1,6 +1,7 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
-<br>
-<br>
+
+
+**Update #3:** **Patrik Thürlemann** has created a nice **3D printed enclosure** for the radiometric version of the device, check it out **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3D_Print_Radiometric)**.
 
 **Update #2:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
 
@@ -559,7 +560,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 		 Ettinger.de</strong></a> (3 pcs)</td>
    </tr>
 </table>
-
 
 
 ----------
