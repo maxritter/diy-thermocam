@@ -3,7 +3,7 @@
 
 **Update #3:** **Patrik Thürlemann** has created a nice **3D printed enclosure** for the radiometric version of the device, check it out **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3D_Print_Radiometric)**.
 
-**Update #2:** **Firmware 2.47** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
+**Update #2:** **[Firmware 2.47](https://github.com/maxritter/diythermocam_firmware/releases)** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
 
 **Update #1:** **haraldg** has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
 
@@ -11,7 +11,6 @@
 
 
 The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on the popular **FLIR Lepton** long-wave-infrared array sensor. 
-
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Thermocam.jpg" width="500">
 
@@ -46,7 +45,7 @@ The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR
 The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** or **Lepton3.5**), the **spot sensor** is **not required**.
 
 
-The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_07.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
+The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_08.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
 
 
 For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
