@@ -1,11 +1,10 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
 
 
-**Update #3:** **Patrik Thürlemann** has created a nice **3D printed enclosure** for the radiometric version of the device, check it out **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3D_Print_Radiometric)**.
 
-**Update #2:** **[Firmware 2.47](https://github.com/maxritter/diythermocam_firmware/releases)** now supports the **low gain mode** for the **Lepton3.5**, so it can measure temperatures up to **+450°C**!
+**Update #2:** **[Firmware 2.48](https://github.com/maxritter/diythermocam_firmware/releases/tag/2.48)** is now out and supports the updated **ArduCAM-M-2MP Plus** camera
 
-**Update #1:** **haraldg** has written a nice set of tools for **post-processing** the thermal raw data files. Check it out **[here](https://github.com/haraldg/thermocam-tools)**. He also published a short article about **manual calibration** [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/ManualCalibration_01.pdf).
+**Update #1:** **Patrik Thürlemann** has created a nice **3D printed enclosure** for the radiometric version of the device, check it out **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3D_Print_Radiometric)**.
 
 ----------
 
@@ -150,7 +149,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
       <td style="width: 111px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Arducam.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Arducam V1 Mini 2MP<br />
+      <td style="width: 235px">ArduCAM-M-2MP Plus<br />
          Visual camera module&nbsp;
       </td>
       <td>
@@ -559,6 +558,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 		 Ettinger.de</strong></a> (3 pcs)</td>
    </tr>
 </table>
+
 
 
 ----------
