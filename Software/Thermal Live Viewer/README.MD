@@ -1,4 +1,4 @@
-Compiled versions of the thermal live viewer for Windows can be [downloaded here](http://diy-thermocam.bplaced.net/ThermalViewer/).
+Compiled versions of the thermal live viewer for Windows can be [downloaded here](https://www.dropbox.com/s/otar27qetzpolfv/ThermalLiveViewer_2.03.zip?dl=1).
 
 If the comport is not COM10 on Windows, you need to [change it](http://plugable.com/2011/07/04/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7/).
 
