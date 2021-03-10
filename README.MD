@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
 
-
+**Update 2021-03-10:** I am currently working on the **DIY-Thermocam V3**, as some of the parts of the V2 became obsolete in the meantime. It will feature the brand new Teensy 4.1 microcontroller, so expect a much improved performance. Current time estimation until launch will be 3-4 weeks from now on. I will also offer a **Thermocam V3 Care Package** on this website, making it much easier to source the parts (of course you can still buy all parts on your own if you want with an updated partlist). The care package will be available against a small Paypal contribution towards costs with worldwide shipping, only excluding the more expensive parts that are easy to order (Lepton + Breakout, Teensy, Display, Lipo, microSD, Arducam). Stay tuned! 
 
 **Update #2:** **[Firmware 2.48](https://github.com/maxritter/diythermocam_firmware/releases/tag/2.48)** is now out and supports the updated **ArduCAM-M-2MP Plus** camera
 
