@@ -1,10 +1,15 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
 
-**Update 2021-03-10:** I am currently working on the **DIY-Thermocam V3**, as some of the parts of the V2 became obsolete in the meantime. It will feature the brand new Teensy 4.1 microcontroller, so expect a much improved performance. Current time estimation until launch will be 3-4 weeks from now on. I will also offer a **Thermocam V3 Care Package** on this website, making it much easier to source the parts (of course you can still buy all parts on your own if you want with an updated partlist). The care package will be available against a small Paypal contribution towards costs with worldwide shipping, only excluding the more expensive parts that are easy to order (Lepton + Breakout, Teensy, Display, Lipo, microSD, Arducam). Stay tuned! 
+> **Update 2021-03-10:** 
+>
+> I am currently working on the **DIY-Thermocam V3**, as some of the parts of the V2 (Lepton Breakout Board, Camera module) have become obsolete in the meantime. It will feature the brand new **Teensy 4.1** microcontroller, so expect a much improved performance. Current **time estimation** until launch will be **3-4 weeks** from now on. 
+>
+> I will also offer a **DIY-Thermocam V3 KIT** on this website, making it much easier to source the parts (of course you can still buy all parts on your own if you want with an updated partlist). The kit / part package will be available against a Paypal contribution towards costs with **worldwide shipping**, only excluding the more expensive parts that are easy to order (Lepton + Breakout, Teensy, Display, Lipo, microSD, Arducam). 
+>
+> If you are interested in the **KIT**, please write me a short message **[here](https://www.maxritter.net/contact)**, so I can put you on the **waiting list** and better estimate the demand.
 
-**Update #2:** **[Firmware 2.48](https://github.com/maxritter/diythermocam_firmware/releases/tag/2.48)** is now out and supports the updated **ArduCAM-M-2MP Plus** camera
 
-**Update #1:** **Patrik Thürlemann** has created a nice **3D printed enclosure** for the radiometric version of the device, check it out **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3D_Print_Radiometric)**.
+
 
 ----------
 
@@ -38,10 +43,10 @@ You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tool
 An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_05.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
 
 
-The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** (**Lepton2.5** only at the moment). The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
+The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** **Lepton2.5**  and **Lepton3.5**. The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
 
 
-The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. An **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** or **Lepton3.5**), the **spot sensor** is **not required**.
+The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. In this case, an **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** or **Lepton3.5**), the **spot sensor** is **not required**.
 
 
 The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_08.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
@@ -949,8 +954,4 @@ You need the **following parts**:
 
 Download and flash the **[complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM)** to the SD card, it runs a **python script** that you can modify to your own needs.
 
-
 Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbNjA2ODgzMDk4XX0=
--->
