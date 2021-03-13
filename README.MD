@@ -1,19 +1,10 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
 
-> **Update 2021-03-10:** 
+> **Update 2021-03-13:** 
 >
-> I am currently working on the **DIY-Thermocam V3**, as some of the parts of the V2 (Lepton Breakout Board, Camera module) have become obsolete in the meantime. It will feature the brand new **Teensy 4.1** microcontroller, so expect a much improved performance. Current **time estimation** until launch will be **3-4 weeks** from now on. 
+> I am currently working on the **DIY-Thermocam V3**. It will feature the brand new **Teensy 4.1** Cortex M7 based microcontroller, so expect an **increased performance**. Current **time estimation** until launch will be **3-4 weeks** from now on. You can already **pre-order the V3 KIT** and order the **remaining components on your own**, check the **updated partlist** below. An **upgrade KIT from V2 to V3** will follow at a later point in time.
 >
-> I will also offer a **DIY-Thermocam V3 KIT** on this website, making it much easier to source the parts (of course you can still buy all parts on your own if you want with the updated partlist). The kit / part package will be available against a Paypal contribution with **worldwide shipping**, only excluding the more expensive parts that are easy to order (Lepton + Breakout, Teensy, Display, Lipo, microSD, Arducam). 
->
-> It will be possible to **upgrade from V2 to V3** with the **KIT** by **reusing the existing components** and ordering a Teensy 4.1, only the Arducam needs to be unsoldered from the old PCB or replaced with a new one (Display, Lipo and Lepton + Breakout can be simply removed).
->
-> If you are interested in the **V3 KIT** write me a short message **[here](https://www.maxritter.net/contact)**, so I can put you on the **waiting list** and better estimate the order demand.
 
-
-
-
-----------
 
 
 The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on the popular **FLIR Lepton** long-wave-infrared array sensor. 
@@ -21,7 +12,7 @@ The **DIY-Thermocam** is a **low-cost, do-it-yourself** thermal imager, based on
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Thermocam.jpg" width="500">
 
 
-The aim of this project is to give **private persons**, **educational institutes** and **companies** access to a **portable**,  **affordable** and **customizable** thermal imaging plattform.
+The aim of this project is to give **private persons**, **educational institutes** and **companies** access to a **portable**,  **affordable** and **customizable** thermal imaging platform.
 
 There are **various applications** like finding **heat leaks** in the insulation of buildings, the analysis of **electrical** or **mechanical components**, the **detection** of **persons** / animals or even mounting it on a **drone**, together with the additional **video out module**.
 
@@ -33,545 +24,397 @@ A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Doc
 
 <a href="https://www.facebook.com/diythermocam/"><img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/FacebookButton.jpg"></a> 
 
-----------
 
 
-**HOW TO MAKE IT**
+# Building Instructions
 
 
-You can **make** your **own DIY-Thermocam V2** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled easily only with **bolts & nuts**, no glue required. 
+You can **make** your **own DIY-Thermocam V3** at home **easily**.  For the tools, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled with only **bolts & nuts**, no glue is required. **V3** works with the **radiometric versions of the FLIR Lepton**, which are **Lepton2.5** and **Lepton3.5**.
 
 
-An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_05.pdf)** will lead you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
+An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_05.pdf)** (will soon be updated for V3) leads you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**.
 
+The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_08.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
 
-The DIY-Thermocam works with the **FLIR Lepton2.x** (**80 x 60**) and the **FLIR Lepton3.x** (**160 x 120**) LWIR sensor, including the **radiometric versions** **Lepton2.5**  and **Lepton3.5**. The **hardware revision** is **detected automatically** by the firmware **on startup** and you can **change** the sensor just with your **fingers**. 
-
-
-The **Lepton2.0** and **Lepton3.0** sensors do **not** have in an **internal calibration**. In this case, an **external spot sensor**, the **MLX90614** is used to generate a **transfer function** for raw values to absolute temperatures conversion. When using a **radiometric Lepton** (**Lepton2.5** or **Lepton3.5**), the **spot sensor** is **not required**.
-
-
-The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_08.pdf)** helps you to update your device to the **newest firmware**. In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. 
-
-
-For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
+In order to **build your own DIY-Thermocam V3**, use the **part list below** to acquire all the components from three sources that **deliver worldwide**: [Digikey.com](https://www.digikey.com/), [Robotshop.com](https://www.robotshop.com/) and [BuyDisplay.com](http://buydisplay.com/). You can get the **remaining parts** against a **small contribution** to this project in the form of a **KIT**.
 
 
 
-----------
-
-
-**REQUIRED PARTS**
-
-In order to **make your own DIY-Thermocam V2**,   please use the **part list below** to acquire all the components **on your own**. **Digikey.com** offers **free international shipment** for all orders **over 100€**, so I recommend buying most of the components from them. 
-
-You can find all of the **screws, bolts, nuts & washers** at **[Ettinger](https://www.ettinger.de/en)** and maybe also at a **local construction market** near you.  If you do not have a  VAT and still want to buy the components from Ettinger, write a mail to [sales@ettinger.de](mailto:sales@ettinger.de) and ask for a quote.
-
-I do **not** offer **pre-assembled** devices and am also **not responsible** for the **quality** and **completeness** of the kit from **GroupGets**.
+## Digikey.com
 
 <table style="width: 100%">
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Lepton.png" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; user-select: none;" />
       </td>
-      <td style="width: 235px">FLIR Lepton (Shuttered)<br />
-         Long-wave-infrared array sensor<br />
+      <td >
+	  <a href="https://www.digikey.com/product-detail/en/flir/500-0771-01/500-0771-01-ND/7606616">
+	  <strong>FLIR Lepton 3.5</strong></a> (195,00€)<br />
+         160x120 Radiometric LWIR sensor<br />
       </td>
-      <td>
-	     Lepton3.5:
-		 <a href="https://www.digikey.com/product-detail/en/flir/500-0771-01/500-0771-01-ND/7606616">
-		 <strong>Digikey.com</strong></a> or
-		 <a href="https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5">
-		 GroupGets.com</a><br />
-         Lepton3.0:
-		 <a href="https://www.digikey.com/products/en?keywords=500-0726-01">
-		 <strong>Digikey.com</strong></a> or
-		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/l3">
-		 GroupGets.com</a><br />
-		 Lepton2.5:
-		 <a href="https://www.digikey.com/product-detail/en/flir/500-0763-01/500-0763-01-ND/6250105">
-		 <strong>Digikey.com</strong></a> or
-		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/radiometric-flir-lepton-2-5">
-		 GroupGets.com</a><br />
-		 Lepton2.0:
-		 <a href="https://www.digikey.com/product-detail/en/flir/500-0659-01/500-0659-01-ND/5215153">
-		 <strong>Digikey.com</strong></a> or
-		 <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/50-shuttered-flir-lepton-thermal-imager">
-		 GroupGets.com</a></td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonModule.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">FLIR Lepton Breakout Board
+      <td >
+	  <a href="https://www.digikey.com/en/products/detail/flir-lepton/250-0577-00/10385179?s=N4IgTCBcDaIGYBsCWAnABAgpgBwC4HsA7NAIxUwEMBrfAV1xAF0BfIA">
+	  <strong>Lepton Breakout Board V2</strong> </a>(58,90€)<br />
          Interface the Lepton over SPI / I2C&nbsp;
       </td>
-      <td>
-         <a href="https://www.digikey.com/product-detail/en/flir/250-0587-00/250-0587-00-ND/5266963">
-         <strong>Digikey.com</strong></a><br />
-         <a href="https://store.groupgets.com/collections/flir-lepton-accessories/products/flir-lepton-breakout-board">GroupGets.com</a></td>
    </tr>
    <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SpotSensor.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">MLX90614-BCF<br />
-         Spot sensor for absolute temperature measurement - <strong>not required for 
-         Lepton2.5 / Lepton3.5</strong></td>
-      <td>
-         <strong>
-         <a href="https://www.digikey.com/product-detail/en/melexis-technologies-nv/MLX90614ESF-BCF-000-SP/MLX90614ESF-BCF-000-SP-ND/5414794">Digikey.com</a></strong><br />
-         <a href="http://as-electronic.net/MLX90614ESF-BCF-000">As-electronic.net</a></td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Teensy36.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Teensy 3.6<br />
-         Cortex M4 Microcontroller&nbsp;
-      </td>
-      <td>
-         <strong>
-         <a href="http://www.digikey.com/product-detail/en/sparkfun-electronics/DEV-14057/1568-1442-ND/6235190">
-         Digikey.com</a></strong><br />
-         <a href="https://www.pjrc.com/store/teensy36.html">PJRC.com</a><br />
-         <a href="https://www.flikto.de/products/teensy-3-6-v3-6-usb-mikrocontroller">
-         Flikto.de</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">SanDisk 8GB microSD card<br />
-         Can be any size, but needs to be Class4 microSD&nbsp;
-      </td>
-      <td>
-         <a href="http://www.ebay.com/itm/SanDisk-32GB-16GB-8GB-Micro-SD-SD-HC-TF-Memory-Card-Retail-Package-Class-4-C4-/152291118415?var=&amp;hash=item2375420d4f:m:mhCKhMZoMK-EaKQbv04Y5Ag">
-		 <strong>Ebay.com</strong></a><br />
-         <a href="https://www.amazon.com/SanDisk-microSD-High-Capacity-microSDHC/dp/B00488G6P8/ref=sr_1_7?ie=UTF8&amp;qid=1494677828&amp;sr=8-7&amp;keywords=Sandisk+8GB">Amazon.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Arducam.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">ArduCAM-M-2MP Plus<br />
-         Visual camera module&nbsp;
-      </td>
-      <td>
-         <strong>
-         <a href="https://www.ebay.com/itm/Arducam-Mini-module-Camera-Shield-w-2-MP-OV2640-for-Arduino-UNO-Mega2560-board-/281639729684">
-         Ebay.com</a></strong><br />
-         <a href="http://www.watterott.com/de/2MP-Mini-Kamera-Board-OV2640">
-         Watterott.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Display.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">3.2" TT LCD Display Module<br />
-         Configuration: Interface: Pin Header Connection-4-wire-SPI, Power Supply: 5V, Touch Panel: 3.2" Resistive, Font Chip: None 
-      </td>
-      <td>
-         <a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
-         <strong>BuyDisplay.com</strong></a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">3.7V Lithium Polymer Battery&nbsp;<br />
-         Max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
-      </td>
-      <td>
-         <a href="https://www.ebay.com/itm/3-7V-2000mAh-Rechargeable-Battery-Li-Po-Polymer-For-Tablet-PC-DVD-GPS-PAD-505060/121965187238?epid=760566634&hash=item1c65b110a6:g:MQAAAOSwXetZUxxN"><strong>Ebay.com</strong></a><br />
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Printed Circuit Board<br />
-         89.4mm (w) x 68.4mm (h), 1.6mm thickness, 2 layers</td>
-      <td>
-         <a href="https://oshpark.com/shared_projects/ddHY98QR"><strong>OSHPark.com</strong></a><br />
-		 <a href="http://www.smart-prototyping.com/PCB-Prototyping.html">
-		 Smart-Prototyping.com</a><br />
-         Or use the 
-         <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB">gerber files</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Enclosure.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Enclosure<br />
-         2D laser-cut from 3mm black acryl plastic (one side frosted)</td>
-      <td>
-         <a href="http://www.ponoko.com/design-your-own/products/diy-thermocam-v2-enclosure-13930">
-         <strong>Ponoko.com</strong></a><br />
-		 <a href="http://www.formulor.de/">Formulor.de</a><br />
-         Or use the 
-         <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure">design files</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Charging.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">TP4057 Charging Module<br />
-         Including charging LED&nbsp;
-      </td>
-      <td>
-         <a href="https://www.ebay.com/itm/TP4057-5V-1A-LED-Charger-Charging-Module-For-3-7V-Li-ion-Lithium-18650-Battery/122754421232?hash=item1c94bbd1f0:g:EssAAOSws8VZ3ZSX">
-         <strong>Ebay.com</strong></a><br />
-         <a href="https://www.amazon.com/Solu-Lithium-Battery-Charging-Reverse/dp/B00YZV7RTW">
-         Amazon.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Booster.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Pololu U3V12F5<br />
-         5V voltage booster&nbsp;
-      </td>
-      <td>
-         <a href="https://www.amazon.com/gp/product/B016YHHIIY/ref=od_aui_detailpages00?ie=UTF8&psc=1">
-         <strong>Amazon.com</strong></a><br />
-         <a href="https://www.pololu.com/product/2115">Pololu.com</a><br />
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PowerSwitch.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">E-Switch R6ABLKBLKFF<br />
+      <td >
+	  <a href="http://www.digikey.com/product-detail/en/e-switch/R6ABLKBLKFF/EG1526-ND/301973">
+	  <strong>E-Switch R6ABLKBLKFF</strong></a> (1,41€)<br />
          Power switch
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/e-switch/R6ABLKBLKFF/EG1526-ND/301973">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PushButton.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">RAFI 1.10107.0110104<br />
+      <td >
+	  <a href="http://www.digikey.com/product-detail/en/rafi-usa/1.10107.0110104/1715-1019-ND/6227436">
+	  <strong>RAFI 1.10107.0110104</strong></a> (6,54€)<br />
          Push button
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/rafi-usa/1.10107.0110104/1715-1019-ND/6227436">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/USBSwitch.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">E-Switch EG1201A<br />
+      <td >
+	  <a href="http://www.digikey.com/product-detail/en/e-switch/EG1201A/EG1902-ND/101723">
+	  <strong>E-Switch EG1201A</strong></a> (0,64€)<br />
          USB power switch
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/e-switch/EG1201A/EG1902-ND/101723">
-         <strong>Digikey.com</strong></a>
-      </td>
-   </tr>
-    <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon2.jpg" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">JST PHR-2<br />
-         Lipo Connector&nbsp;
-      </td>
-      <td>
-         <a href="https://www.digikey.com/product-detail/en/jst-sales-america-inc/PHR-2/455-1165-ND/608607#images-1">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">JST S2B-PH-K-S<br />
+      <td >
+	  <a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
+	  <strong>JST S2B-PH-K-S</strong></a> (0,16€)<br />
          PCB Lipo Connector&nbsp;
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDSlot.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Wurth 693063020911<br />
+      <td >
+	  <a href="http://www.digikey.com/products/en?keywords=%09732-3818-1-ND">
+	  <strong>Wurth 693063020911</strong></a> (2,08€)<br />
          SD slot for the SD card on the PCB
       </td>
-      <td>
-         <a href="http://www.digikey.com/products/en?keywords=%09732-3818-1-ND">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDAdapter.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">MicroSD adapter<br />
+      <td >
+	  <a href="https://www.digikey.com/en/products/detail/adafruit-industries-llc/1763/6827144">
+	  <strong>MicroSD adapter</strong></a> (5,84€)<br />
          Short microSD to SD adapter for the internal storage card&nbsp;
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/seeed-technology-co-ltd/328030004/328030004-ND/5487856">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DisplayHeader.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Display connector<br />
+      <td >
+	  <a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093">
+	  <strong>Display connector</strong></a> (1,90€)<br />
          40-pin 2.54mm female header&nbsp;
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LeptonHeader.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Lepton board connector<br />
-         8-pin 2.54mm female header&nbsp;
-      </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/PPPC081LGBN-RC/S5483-ND/775941">
-         <strong>Digikey.com</strong></a>
+      <td >
+	  <a href="https://www.digikey.com/en/products/detail/sullins-connector-solutions/PPPC102LJBN-RC/776021">
+	  <strong>Lepton board connector</strong></a> (1,22€)<br />
+         20-pin 2.54mm female header&nbsp;
       </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PinHeader.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Pin header strip<br />
+      <td ><strong>2 x </strong>
+	  <a href="https://www.digikey.com/en/products/detail/4-103741-0/A26509-40-ND/297917">
+	  <strong>Pin header strip</strong></a> (3,70€)<br />
          40-pin 2.54mm male header&nbsp;
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/4-103741-0/A26509-40-ND/297917">
-         <strong>Digikey.com</strong></a> (2 pcs)
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CoinHolder.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">Keystone 3001<br />
+      <td >
+	  <a href="https://www.digikey.com/en/products/detail/keystone-electronics/3001/227442?s=N4IgTCBcDaINIFMCeBnALgewHYIAQGYAGQgRhAF0BfIA">
+	  <strong>Keystone 3001</strong></a> (0,45€)<br />
          Holder for the coin cell battery&nbsp;
       </td>
-      <td>
-         <a href="http://www.digikey.com/products/en?keywords=Keystone%203001">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CoinCell.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">CR1220 coin cell battery&nbsp;<br />
+      <td >
+	  <a href="https://www.digikey.com/en/products/detail/panasonic-bsg/CR1220/269740">
+	  <strong>CR1220 coin cell battery</strong></a> (0,70€)<br />
          Battery for the real-time-clock
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/energizer-battery-company/CR1220VP/N033-ND/704851">
-         <strong>Digikey.com</strong></a>
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Res47.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">4.7K 1/4W 1% resistor<br />
+      <td ><strong>4 x </strong>
+	  <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNMF14FTC4K70/S4.7KCACT-ND/2617510">
+	  <strong>4.7K 1/4W 1% resistor</strong></a> (0,32€)<br />
          Multi-purpose resistor&nbsp;
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/RNMF14FTC4K70/S4.7KCACT-ND/2617510">
-         <strong>Digikey.com</strong></a> (4 pcs)
-      </td>
    </tr>
    <tr>
-      <td style="width: 111px">
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Res10K.png" style="-webkit-user-select: none" />
       </td>
-      <td style="width: 235px">10K 1/4W 1% resistor&nbsp;<br />
+      <td >&nbsp;<strong>2 x </strong>
+	  <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
+	  <strong>10K 1/4W 1% resistor</strong></a> (0,16€)<br />
          Multi-purpose resistor
       </td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/stackpole-electronics-inc/CF14JT10K0/CF14JT10K0CT-ND/1830374">
-         <strong>Digikey.com</strong></a> (2 pcs)&nbsp;
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoProt.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Lipo protector<br />
-         Double-sided adhesive tape for the lipo protection on the PCB&nbsp;
-      </td>
-      <td>
-         <a href="https://www.ebay.com/itm/200mmX100mm-3M-9495LE-300LSE-Double-Sided-Transparent-Clear-Adhesive-Tape/281869275116?hash=item41a0b7cfec%3Am%3AmR2yJrCTWwgBQsqxZ6HHr2A&var=580847054098">
-		 <strong>Ebay.com</strong></a><br />
-         Or use any thick tape
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CableRight.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Angled microUSB cable<br />
-         For connection of the Thermocam to the PC&nbsp;and 
-         charging of the device
-      </td>
-      <td>
-         <a href="http://www.ebay.com/itm/Down-Angled-Micro-USB-5-Pin-Male-to-USB-A-Male-Data-Charge-Cable-for-Cell-Phone-/291869468911?hash=item43f4c6a8ef:g:9RgAAOSwxg5X0ovy">
-         <strong>Ebay.com</strong></a><br />
-         Or use any USB cable
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Tripod.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Mini tripod<br />
-         Used as a stand for the device&nbsp;
-      </td>
-      <td>
-         <a href="https://www.ebay.com/itm/Universal-Mini-Flexible-Portable-Tripod-Stand-for-Digital-Camera-HD-Nikon-Canon/381340421241?epid=14009503154&hash=item58c9a90c79:g:zbQAAOSwpmNbKRpD">
-         <strong>Ebay.com</strong></a><br />
-         Or use any tripod
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/TripodSocket.png" style="-webkit-user-select: none" />
-      </td>
-      <td style="width: 235px">Tripod socket&nbsp;</td>
-      <td>
-         <a href="https://www.amazon.com/The-Hillman-Group-2511-13-Pack/dp/B00HYLZ33W/">
-         <strong>Amazon.com</strong></a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x10.png" width="100" /></td>
-      <td style="width: 235px">Screw M2x10 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>)</td>
-      <td>
-         &nbsp;<a href="https://www.ettinger.de/en/product/0114142"><strong>Ettinger.de</strong></a> 
-		 (6 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.png" width="100" /></td>
-      <td style="width: 235px">Spacer M2x3 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x3.png">Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0581030"><strong>
-		 Ettinger.de</strong></a> (6 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.5.png" width="100" /></td>
-      <td style="width: 235px">Spacer M2x3.5 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x35.png">Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0581035"><strong>
-		 Ettinger.de</strong></a> (2 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x8.png" width="100" /></td>
-      <td style="width: 235px">Screw M2x8 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM2x8.png">Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0112138"><strong>
-		 Ettinger.de</strong></a> (5 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x6.png" width="100" /></td>
-      <td style="width: 235px">Screw M2.5x6 Black (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>
-      )</td>
-      <td>
-         <a href="http://www.ebay.com/itm/M2-5-Black-10-9-Grade-Alloy-Steel-Hex-Socket-BUTTON-HEAD-Screws-/282445943742?var=581589331786&amp;hash=item41c31713be:m:m1ckYrXP_7-t3VDbQpbZHZA">
-		 <strong>Ebay.com</strong></a> (8 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x12.png" width="100" /></td>
-      <td style="width: 235px">Standoff M2.5x12 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">Details</a>)</td>
-      <td>
-         &nbsp;<a href="https://www.ettinger.de/en/product/0502123"><strong>Ettinger.de</strong></a> 
-		 (4 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px; height: 23px;">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x11.png" width="100" /></td>
-      <td style="width: 235px; height: 23px;">Standoff M2.5x11 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x11.png">Details</a>)</td>
-      <td style="height: 23px">
-         <a href="https://www.ettinger.de/en/product/0512113"><strong>
-		 Ettinger.de</strong></a> (4 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x5.png" width="100" /></td>
-      <td style="width: 235px">Standoff M2.5x5 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x5.png">Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0512053"><strong>
-		 Ettinger.de</strong></a> (4 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2N_2.png" width="100" /></td>
-      <td style="width: 235px">Nut M2 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0210011"><strong>
-		 Ettinger.de</strong></a> (5 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <a href="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2N_1.png">
-		 <img class="auto-style1" height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/NutM2.png" width="100" /></a></td>
-      <td style="width: 235px">Nut M2 Plastic (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0205016"><strong>
-		 Ettinger.de</strong></a> (6 pcs)</td>
-   </tr>
-   <tr>
-      <td style="width: 111px">
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2W.png" width="100" /></td>
-      <td style="width: 235px">Washer M2 (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png" >Details</a>)</td>
-      <td>
-         <a href="https://www.ettinger.de/en/product/0301013"><strong>
-		 Ettinger.de</strong></a> (3 pcs)</td>
    </tr>
 </table>
 
 
 
-----------
+## Robotshop.com
+
+<table style="width: 100%">
+   <tr>
+      <td style="width: 110px"  >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Teensy36.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.robotshop.com/en/teensy-41-usb-microcontroller-development-board-no-pins.html">
+	  <strong>Teensy 4.1</strong></a> (27,07€)<br />
+         Cortex M7 Microcontroller&nbsp;
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 110px"  >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.robotshop.com/en/8-gb-microsd-card.html"><strong>SanDisk 8GB microSD card</strong></a> 
+	  (8,38€)<br />
+         Can be any size, but needs to be Class4 microSD&nbsp;
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 110px"  >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Arducam.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.robotshop.com/en/arducam-mini-camera-module-w--2mp-plus-ov2640-arduino.html">
+	  <strong>ArduCAM-M-2MP Plus</strong></a> (26,22€)<br />
+         Visual camera module&nbsp;
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 110px"  >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.robotshop.com/de/en/lipo-battery-cell---37v-1200mah.html">
+	  <strong>3.7V LiPo Battery</strong></a>&nbsp;(10,03€)<br />
+         Max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 110px"  >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Booster.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.robotshop.com/en/5v-step-up-voltage-regulator-u3v12f5.html">
+	  <strong>Pololu U3V12F5</strong></a> (3,30€)<br />
+         5V voltage booster&nbsp;
+      </td>
+   </tr>
+   </table>
 
 
-**DEVICE IMAGES**
+
+## BuyDisplay.com
+
+<table style="width: 100%">
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Display.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display">
+	  <strong>3.2" TFT LCD Display Module</strong></a> (16,29€)<br />
+         Configuration: Interface: Pin Header Connection-4-wire-SPI, Power Supply: 5V, Touch Panel: 3.2" Resistive, Font Chip: None 
+      </td>
+   </tr>
+</table>
+
+
+
+## DIY-Thermocam V3 KIT
+
+**[Pre-Order Now](https://www.paypal.com/donate?hosted_button_id=3RX2CSZKJ89PY)** over a **Paypal Donation**. **Worldwide shipping with tracking** via Deutsche Post is included, just leave your **shipping address** during the payment process. The **estimated shipment date** is **<u>mid of April</u>**. The KIT assumes **all components above are self-bought** and only works with the **radiometric version** of the FLIR Lepton (**Lepton2.5 or Lepton3.5**). **[Get in touch with me](https://www.maxritter.net/contact/)** if you have **any questions or special requirements**.
+
+<table style="width: 100%">
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" />
+      </td>
+      <td ><a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB">
+	  <strong>Printed Circuit Board V3</strong></a><br />
+         89.4mm (w) x 68.4mm (h), 1.6mm thickness, 2 layers</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Enclosure.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure">
+	  <strong>Enclosure V3</strong></a><br />
+         2D laser-cut from 3mm black acryl plastic (one side frosted)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Charging.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.aliexpress.com/item/32574075391.html?spm=a2g0o.productlist.0.0.5b652414nd5xU9&amp;algo_pvid=7ece75ac-c310-470f-b3a5-3bc255840530&amp;algo_expid=7ece75ac-c310-470f-b3a5-3bc255840530-2&amp;btsid=0b0a119a16156638169154117e24e0&amp;ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_">
+	  <strong>LiPo Charging Module</strong></a> (TP4057)<br />
+         Including charging LED&nbsp;
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoProt.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.amazon.com/Scotch-Indoor-Mounting-pounds-squares/dp/B000KKPHZ8/ref=sr_1_2?dchild=1&amp;keywords=3m+mounting+square&amp;qid=1615663896&amp;sr=8-2">
+	  <strong>Lipo protector</strong></a><br />
+         Double-sided adhesive tape for the lipo protection on the PCB&nbsp;
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CableRight.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.amazon.com/TRIPP-6-Feet-Universal-Reversible-UR050-006-DNB/dp/B00KKSPCIC/ref=sr_1_8?crid=M57WB3DGWUMY&amp;dchild=1&amp;keywords=down+angle+micro+usb+cable&amp;qid=1615663958&amp;sprefix=down+angle+micro+%2Caps%2C295&amp;sr=8-8">
+	  <strong>Down angle microUSB cable</strong></a><br />
+         For connection of the Thermocam to the PC&nbsp;and 
+         charging of the device
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Tripod.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.amazon.com/ProChosen-Compact-Flexible-Tabletop-projector/dp/B016ZMRCE8/ref=sr_1_29?dchild=1&amp;keywords=tripod+mini&amp;qid=1615664010&amp;sr=8-29">
+	  <strong>Mini tripod</strong></a><br />
+         Used as a stand for the device&nbsp;
+      </td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/TripodSocket.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.amazon.com/The-Hillman-Group-2511-13-Pack/dp/B00HYLZ33W/">
+	  <strong>Tripod socket&nbsp;</strong></a></td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x10.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0114142"><strong>Screw M2x10</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0581030"><strong>Spacer M2x3</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x3.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.5.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0581035"><strong>Spacer M2x3.5</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x35.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x8.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0112138"><strong>Screw M2x8</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM2x8.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x6.png" width="100" /></td>
+      <td >
+	  <a href="https://www.ebay.com/itm/50x-M2-5-X-6-5mm-M2-5x6-5L-Black-Zinc-Machine-Screws-HP-Pavilion-Presario-Screw-/300718205954"><strong>Screw M2.5x6 Black</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>
+      )</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x12.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0502123"><strong>Standoff M2.5x12</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x11.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0512113"><strong>Standoff M2.5x11</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x11.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x5.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0512053"><strong>Standoff M2.5x5</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x5.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2N_2.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0210011"><strong>Nut M2</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+		 <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/NutM2.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0205016"><strong>Nut M2 Plastic</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
+   </tr>
+   <tr>
+      <td style="width: 113px" >
+         &nbsp;
+         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2W.png" width="100" /></td>
+      <td ><a href="https://www.ettinger.de/en/product/0301013"><strong>Washer M2</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png" >Details</a>)</td>
+   </tr>
+</table>
+
+
+
+# Device Images
 
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceFront.jpg" width="500">
@@ -579,59 +422,34 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceOpen.jpg" width="500">
 
-
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBack.jpg" width="500">
 
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceTop.jpg" width="500">
 
-
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceBottom.jpg" width="500">
 
-----------
 
 
-**FEATURES**
+# Features
 
 
- - Fast **ARM Cortex M4** processor (**240MHz**), based on the popular, **Arduino**
-   compatible **Teensy 3.6**
- - **160x120 (Lepton3)** or **80x60 (Lepton2)** long-wave infrared array sensor for live
-   thermographic images
- - Frame rate of up to **9 FPS** (US export compliance) over the serial
-   connection, 5 FPS on the device itself
- - **2MP visual camera** to capture optical images, that can be used in a
-   combined image
- - **MLX90614 single point**-infrared sensor for high-precision spot
-   temperatures (10° FOV)
- - **HDMI** or **analog video** output  capabilities (640x480 pixel) over
-   external video output module
+ - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular, **Arduino** compatible **Teensy 4.1**
+ - Frame rate of up to **9 FPS** (US export compliance)
+ - **2MP visual camera** to capture optical images, that can be used in a combined image
+ - **HDMI** or **analog video** output  capabilities (640x480 pixel) over external video output module
  - **3 operating modes**: thermal only, thermal + visual, video recording
- - **18 different color schemes** including rainbow, ironblack, grayscale,
-   hot & cold
+ - **18 different color schemes** including rainbow, ironblack, grayscale, hot & cold
  - 3.2 inch **LCD touch display** with bright colors,  wide angle and resistive touch
- - **Save thermal** and **visual images** with a resolution of 640x480 pixels
-   on the device
- - **Save** real-time **videos** and interval images with different time-lapse
-   settings
- - **Up to 8GB internal storage**, accessible as an exchangeable SD / microSD
-   slot
- - **2500 mAh lithium polymer battery** for long operation time (4-6 hours)
+ - **Save thermal** and **visual images** with a resolution of 640x480 pixels on the device
+ - **Save** real-time **videos** and interval images with different time-lapse settings
+ - **Up to 8GB internal storage**, accessible as an exchangeable SD / microSD slot
+ - **1200 mAh lithium polymer battery** for long operation time (2-3 hours)
  - **Open-source firmware** written in **Arduino compatible C/C++** code
- - Regular **firmware updates** with new features, flashable over a
-   standalone firmware updater
- - **Standalone thermal viewer application** to save high-quality thermal
-   images & videos  on the computer
- - Fully **compatible** to the comprehensive **thermal analysis software**
-   ThermoVision by Joe-C
- - Use simple **commands** to receive all thermal & configuration data over
-   the **USB serial port** with high speed
-
-----------
-
-
-**FEATURE TABLE**
-
+ - Regular **firmware updates** with new features, flashable over a standalone firmware updater
+ - **Standalone thermal viewer application** to save high-quality thermal images & videos  on the computer
+ - Fully **compatible** to the comprehensive **thermal analysis software** ThermoVision by Joe-C
+ - Use simple **commands** to receive all thermal & configuration data over the **USB serial port** with high speed
 
 <table style="width: 100%">
    <tr>
@@ -639,7 +457,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          <strong>Feature</strong>
       </td>
       <td style="border: 0px solid transparent; background-color: #cccccc;">
-         <b>DIY-Thermocam</b>
+         <b>DIY-Thermocam V3</b>
       </td>
       <td style="background-color: #cccccc;">
          <strong>FLIR E6</strong>
@@ -650,10 +468,10 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Thermal resolution
       </td>
       <td>
-         80 x 60 or 160 x 120
+         80x60 (Lepton2.5) or 160x120 (Lepton3.5)
       </td>
       <td>
-         160 x 120
+         160x120
       </td>
    </tr>
    <tr>
@@ -790,17 +608,6 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
    </tr>
    <tr>
       <td>
-         Operation time
-      </td>
-      <td>
-         about 4-6 hours
-      </td>
-      <td>
-         about 4 hours
-      </td>
-   </tr>
-   <tr>
-      <td>
          Weight
       </td>
       <td>
@@ -815,7 +622,7 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
          Price
       </td>
       <td class="auto-style1">
-         <strong>~500€</strong>
+         <strong>~450€</strong>
       </td>
       <td class="auto-style2">
          <strong>2000€</strong>
@@ -824,10 +631,8 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 </table>
 
 
-----------
 
-
-**DEVICE FIRMWARE**
+# Device UI
 
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Screenshots.PNG" width="700">
@@ -835,21 +640,18 @@ I do **not** offer **pre-assembled** devices and am also **not responsible** for
 
 The **latest releases** of device firmware can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Releases)**. For the firmware **SDK**, check out **[this instruction](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware/Source)**.
 
-----------
 
 
-**THERMAL IMAGES**
-
+# Sample Thermal Images
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalImg.PNG" width="700">
 
 
 More thermal images in **full resolution** can be found **[here](https://github.com/maxritter/DIY-Thermocam/tree/master/Images/Thermal)**.
 
-----------
 
 
-**THERMAL IMAGE COMPARISON**
+# Thermal Image Comparison
 
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermalComp.jpg" width="700">
@@ -857,10 +659,9 @@ More thermal images in **full resolution** can be found **[here](https://github.
 
 This is a **comparison** between the **DIY-Thermocam**, the **Seek XR** and a **FLIR E8** thermal imager.
 
-----------
 
 
-**SOFTWARE**
+# Desktop Software
 
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Live Viewer and Updater.PNG" width="500">
@@ -880,10 +681,9 @@ There is a powerful **[thermal analysis software](https://github.com/maxritter/D
 
 The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **[thermal data viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The **live tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **[video converter](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)** to avi videos.
 
-----------
 
 
-**VIDEO OUTPUT MODULE**
+# Optional Video Output Module
 
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/VideoOutput.jpg" width="300">
@@ -952,8 +752,6 @@ You need the **following parts**:
       </td>
    </tr>
 </table>
-
-
 Download and flash the **[complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM)** to the SD card, it runs a **python script** that you can modify to your own needs.
 
 Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
