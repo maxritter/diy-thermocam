@@ -215,7 +215,7 @@ In order to **build your own DIY-Thermocam V3**, use the **part list below** to 
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Storage.png" style="-webkit-user-select: none" />
       </td>
       <td >
-	  <a href="https://www.robotshop.com/en/8-gb-microsd-card.html"><strong>SanDisk 8GB microSD card</strong></a> 
+	  <a href="https://www.robotshop.com/en/8-gb-microsd-card.html"><strong>8GB MicroSD Card</strong></a> 
 	  (8,38€)<br />
          Can be any size, but needs to be Class4 microSD&nbsp;
       </td>
@@ -226,7 +226,7 @@ In order to **build your own DIY-Thermocam V3**, use the **part list below** to 
       </td>
       <td >
 	  <a href="https://www.robotshop.com/en/arducam-mini-camera-module-w--2mp-plus-ov2640-arduino.html">
-	  <strong>ArduCAM-M-2MP Plus</strong></a> (26,22€)<br />
+	  <strong>ArduCAM Mini 2MP Plus</strong></a> (26,22€)<br />
          Visual camera module&nbsp;
       </td>
    </tr>
@@ -251,6 +251,7 @@ In order to **build your own DIY-Thermocam V3**, use the **part list below** to 
       </td>
    </tr>
    </table>
+
 
 
 
@@ -700,58 +701,37 @@ It is capable of providing a **HDMI signal** or **analog video output** (**PAL &
 
 You need the **following parts**: 
 
-
 <table style="width: 100%">
    <tr>
       <td style="width: 235px">Raspberry Pi Zero</td>
       <td>
-         <a href="https://thepihut.com/products/raspberry-pi-zero?variant=14062715972">
-         ThePiHut.com</a>
+         <a href="https://www.amazon.com/Raspberry-Pi-Zero-Wireless-model/dp/B06XFZC3BX/ref=pd_bxgy_img_2/146-4503882-0203551?_encoding=UTF8&pd_rd_i=B06XFZC3BX&pd_rd_r=0a4fab3e-5968-464b-8942-6541b51bf8d5&pd_rd_w=Iff39&pd_rd_wg=nmmi4&pf_rd_p=f325d01c-4658-4593-be83-3e12ca663f0e&pf_rd_r=Q8NDGJ2Y8R2DYRNF52V4&psc=1&refRID=Q8NDGJ2Y8R2DYRNF52V4">
+         Amazon.com</a>
       </td>
    </tr>
    <tr>
       <td style="width: 235px">Sandisk 8GB microSD</td>
       <td>
-         <a href="https://www.ebay.com/itm/SanDisk-32GB-16GB-8GB-Micro-SD-SD-HC-TF-Memory-Card-Retail-Package-Class-4-C4/152291118415?epid=1200079740&hash=item2375420d4f%3Am%3AmUGMwSe_qfLwgGGYCXauK4Q&var=451490926483">
-         Ebay.com</a>
+         <a href="https://www.amazon.com/SanDisk%C2%AE-microSDHCTM-8GB-Memory-Card/dp/B0012Y2LLE/ref=sr_1_3?dchild=1&keywords=8gb+microsd&qid=1615665584&sr=8-3">
+         Amazon.com</a>
       </td>
    </tr>
    <tr>
       <td style="width: 235px">microUSB cable</td>
       <td>
-         <a href="https://www.ebay.com/itm/Rapid-Charge-Micro-USB-Cable-Fast-Charging-For-Tablet-Android-Smartphone/263383418541?hash=item3d52e006ad%3Am%3AmZBxWznWnpAS_LiXK2TcO-Q&var=562394099416">
-         Ebay.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 235px">Enclosure</td>
-      <td>
-         <a href="https://www.amazon.com/SB-High-Quality-Raspberry-Zero/dp/B01CQ3UCXS/ref=sr_1_2?ie=UTF8&amp;qid=1483872527&amp;sr=8-2&amp;keywords=SB+High+Quality+Raspberry+Pi">
+         <a href="https://www.amazon.com/Amazon-Micro-USB-designed-tablets-readers/dp/B0741WGQ36/ref=sr_1_1_sspa?dchild=1&keywords=micro+USB+cable&qid=1615665609&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExN09ZVE5DQVo2Wjc5JmVuY3J5cHRlZElkPUEwNDEyMTc1MUxSVkc1MUhaWUkxRyZlbmNyeXB0ZWRBZElkPUEwNDcyNTc0MUhQNExSQjdMMkNVUSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU=">
          Amazon.com</a>
       </td>
    </tr>
    <tr>
-      <td style="width: 235px">USB-OTG cable</td>
+      <td style="width: 235px">Enclosure + OTG cable + HDMI adapter + Heatsink</td>
       <td>
-         <a href="http://www.ebay.com/itm/Micro-USB-Male-to-USB-2-0-Female-Host-OTG-Adapter-Cable-for-Nexus-7-/231386794712?hash=item35dfba4ad8:g:61IAAOSwA3dYcJFT">
-         Ebay.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 235px">Mini HDMI adapter</td>
-      <td>
-         <a href="http://www.ebay.com/itm/HDMI-MALE-MINI-TO-HDMI-FEMALE-MONITOR-ADAPTER-CONNECTOR-LAPTOP-CONVERTER-VIDEO-/252130803657?hash=item3ab42abfc9:g:ibwAAOSw5VFWICCJ">
-         Ebay.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 235px">2-pin female header</td>
-      <td>
-         <a href="http://www.digikey.com/product-detail/en/sullins-connector-solutions/PPTC021LGBN-RC/S5438-ND/775896">
-         Digikey.com</a>
+         <a href="https://www.amazon.com/Raspberry-Zero-Adapter-Compatible-Black/dp/B074G13HX7/ref=sr_1_6?dchild=1&keywords=unistorm+raspberry+pi+zero&qid=1615665535&sr=8-6">
+         Amazon.com</a>
       </td>
    </tr>
 </table>
-Download and flash the **[complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM)** to the SD card, it runs a **python script** that you can modify to your own needs.
 
-Check out the [**video output module manual**](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) how to **assemble** and **use** the module.
+Download and flash the [complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM) to the SD card, it runs a **python script** that you can modify to your own needs.
+
+Check out the [video output module manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) on how to **assemble** and **use** the module.
