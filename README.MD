@@ -62,9 +62,8 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Charging.png" style="-webkit-user-select: none" />
       </td>
       <td >
-	  <a href="https://www.aliexpress.com/item/32574075391.html?spm=a2g0o.productlist.0.0.5b652414nd5xU9&amp;algo_pvid=7ece75ac-c310-470f-b3a5-3bc255840530&amp;algo_expid=7ece75ac-c310-470f-b3a5-3bc255840530-2&amp;btsid=0b0a119a16156638169154117e24e0&amp;ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_">
-	  <strong>LiPo Charging Module</strong></a> (TP4057)<br />
-         Including charging LED&nbsp;
+	  <strong>Lipo Charging Module</strong><br />
+         TP4057 including charging LED&nbsp;
       </td>
    </tr>
    <tr>
@@ -72,8 +71,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoProt.png" style="-webkit-user-select: none" />
       </td>
       <td >
-	  <a href="https://www.amazon.com/Scotch-Indoor-Mounting-pounds-squares/dp/B000KKPHZ8/ref=sr_1_2?dchild=1&amp;keywords=3m+mounting+square&amp;qid=1615663896&amp;sr=8-2">
-	  <strong>Lipo protector</strong></a><br />
+	  <strong>Lipo protector</strong><br />
          Double-sided adhesive tape for the lipo protection on the PCB&nbsp;
       </td>
    </tr>
@@ -82,8 +80,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Tripod.png" style="-webkit-user-select: none" />
       </td>
       <td >
-	  <a href="https://www.amazon.com/ProChosen-Compact-Flexible-Tabletop-projector/dp/B016ZMRCE8/ref=sr_1_29?dchild=1&amp;keywords=tripod+mini&amp;qid=1615664010&amp;sr=8-29">
-	  <strong>Mini tripod</strong></a><br />
+	  <strong>Mini tripod</strong><br />
          Used as a stand for the device&nbsp;
       </td>
    </tr>
@@ -91,77 +88,78 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
       <td style="width: 113px" >
          &nbsp;<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/TripodSocket.png" style="-webkit-user-select: none" />
       </td>
-      <td >
-	  <a href="https://www.amazon.com/The-Hillman-Group-2511-13-Pack/dp/B00HYLZ33W/">
-	  <strong>Tripod socket&nbsp;</strong></a></td>
+     <td >
+	  <strong>Tripod Socket</strong><br />
+         The Hillman Group 2511 1/4-20 x 5/16 x 3/4 Inch Brad Hole Tee Nut&nbsp;
+      </td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x10.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0114142"><strong>Screw M2x10</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>)</td>
+      <td ><strong>Screw M2x10</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0581030"><strong>Spacer M2x3</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x3.png">Details</a>)</td>
+      <td ><strong>Spacer M2x3</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x3.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.5.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0581035"><strong>Spacer M2x3.5</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x35.png">Details</a>)</td>
+      <td ><strong>Spacer M2x3.5</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x35.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x8.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0112138"><strong>Screw M2x8</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM2x8.png">Details</a>)</td>
+      <td ><strong>Screw M2x8</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM2x8.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x6.png" width="100" /></td>
       <td >
-	  <a href="https://www.ebay.com/itm/50x-M2-5-X-6-5mm-M2-5x6-5L-Black-Zinc-Machine-Screws-HP-Pavilion-Presario-Screw-/300718205954"><strong>Screw M2.5x6 Black</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>
+	  <strong>Screw M2.5x6 Black</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>
       )</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x12.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0502123"><strong>Standoff M2.5x12</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">Details</a>)</td>
+      <td ><strong>Standoff M2.5x12</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x11.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0512113"><strong>Standoff M2.5x11</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x11.png">Details</a>)</td>
+      <td ><strong>Standoff M2.5x11</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x11.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x5.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0512053"><strong>Standoff M2.5x5</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x5.png">Details</a>)</td>
+      <td ><strong>Standoff M2.5x5</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x5.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2N_2.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0210011"><strong>Nut M2</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
+      <td ><strong>Nut M2</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
 		 <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/NutM2.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0205016"><strong>Nut M2 Plastic</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
+      <td ><strong>Nut M2 Plastic</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2W.png" width="100" /></td>
-      <td ><a href="https://www.ettinger.de/en/product/0301013"><strong>Washer M2</strong></a> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png" >Details</a>)</td>
+      <td ><strong>Washer M2</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png" >Details</a>)</td>
    </tr>
 </table>
 
