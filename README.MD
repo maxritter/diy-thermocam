@@ -282,7 +282,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
    </tr>
   <tr>
       <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/TeensyHeader.png" style="-webkit-user-select: none" />
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/TeensyFemale.png" style="-webkit-user-select: none" />
       </td>
       <td ><a href="https://www.digikey.com/en/products/detail/adafruit-industries-llc/598/8299908?s=N4IgTCBcDaIIIBMCGAzATgVwJYBcAEArAJwAcIAugL5A">
 	  <strong>Teensy Female Header</strong></a> (2,43€)<br />
@@ -644,7 +644,6 @@ If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** t
 
 
 # Device UI
-
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Screenshots.PNG" width="700">
 
