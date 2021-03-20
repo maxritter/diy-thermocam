@@ -79,17 +79,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
    </tr>
    <tr>
       <td style="width: 113px" >
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CableRight.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="https://www.amazon.com/TRIPP-6-Feet-Universal-Reversible-UR050-006-DNB/dp/B00KKSPCIC/ref=sr_1_8?crid=M57WB3DGWUMY&amp;dchild=1&amp;keywords=down+angle+micro+usb+cable&amp;qid=1615663958&amp;sprefix=down+angle+micro+%2Caps%2C295&amp;sr=8-8">
-	  <strong>Down angle microUSB cable</strong></a><br />
-         For connection of the Thermocam to the PC&nbsp;and 
-         charging of the device
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 113px" >
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Tripod.png" style="-webkit-user-select: none" />
       </td>
       <td >
@@ -206,9 +195,9 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PowerSwitch.png" style="-webkit-user-select: none" />
       </td>
       <td >
-	  <a href="http://www.digikey.com/product-detail/en/e-switch/R6ABLKBLKFF/EG1526-ND/301973">
-	  <strong>E-Switch R6ABLKBLKFF</strong></a> (1,41€)<br />
-         Power switch
+	  <a href="https://www.digikey.com/en/products/detail/nkk-switches/CWT12AAS1/671497">
+	  <strong>NKK Switches CWT12AAS1</strong></a> (1,41€)<br />
+         SWITCH ROCKER SPDT 6A 125V
       </td>
    </tr>
    <tr>
@@ -219,16 +208,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 	  <a href="http://www.digikey.com/product-detail/en/rafi-usa/1.10107.0110104/1715-1019-ND/6227436">
 	  <strong>RAFI 1.10107.0110104</strong></a> (6,54€)<br />
          Push button
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/USBSwitch.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="http://www.digikey.com/product-detail/en/e-switch/EG1201A/EG1902-ND/101723">
-	  <strong>E-Switch EG1201A</strong></a> (0,64€)<br />
-         USB power switch
       </td>
    </tr>
    <tr>
@@ -283,12 +262,31 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
    </tr>
    <tr>
       <td style="width: 112px">
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CameraHeader.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.digikey.com/en/products/detail/sullins-connector-solutions/PPPC081LGBN-RC/775941">
+	  <strong>Arducam connector</strong></a> (0,63€)<br />
+         8-pin 2.54mm female header &nbsp;
+      </td>
+   </tr> 
+   <tr>
+      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PinHeader.png" style="-webkit-user-select: none" />
       </td>
       <td ><strong>2 x </strong>
 	  <a href="https://www.digikey.com/en/products/detail/4-103741-0/A26509-40-ND/297917">
 	  <strong>Pin header strip</strong></a> (3,70€)<br />
          40-pin 2.54mm male header&nbsp;
+      </td>
+   </tr>
+  <tr>
+      <td style="width: 112px">
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/TeensyHeader.png" style="-webkit-user-select: none" />
+      </td>
+      <td ><a href="https://www.digikey.com/en/products/detail/adafruit-industries-llc/598/8299908?s=N4IgTCBcDaIIIBMCGAzATgVwJYBcAEArAJwAcIAugL5A">
+	  <strong>Teensy Female Header</strong></a> (2,43€)<br />
+         36-pin 0.1" Female header - pack of 5&nbsp;
       </td>
    </tr>
    <tr>
@@ -330,8 +328,9 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 	  <strong>10K 1/4W 1% resistor</strong></a> (0,16€)<br />
          Multi-purpose resistor
       </td>
-   </tr>
+   </tr>	
 </table>
+
 
 
 
@@ -388,7 +387,18 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
          5V voltage booster&nbsp;
       </td>
    </tr>
+   <tr>
+      <td style="width: 110px"  >
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/USBCable.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <a href="https://www.robotshop.com/en/120cm-a-micro-b-usb-cable.html">
+	  <strong>Micro USB Cable</strong></a> (2,43€)<br />
+         120cm A to Micro B USB Cable&nbsp;
+      </td>
+   </tr>
    </table>
+
 
 
 ## BuyDisplay.com
