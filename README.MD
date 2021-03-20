@@ -337,7 +337,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 <table style="width: 100%">
    <tr>
       <td style="width: 110px"  >
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Teensy36.png" style="-webkit-user-select: none" />
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Teensy41.png" style="-webkit-user-select: none" />
       </td>
       <td >
 	  <a href="https://www.robotshop.com/en/teensy-41-usb-microcontroller-development-board-no-pins.html">
