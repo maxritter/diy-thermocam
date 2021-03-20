@@ -407,6 +407,13 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 </table>
 
 
+# Video Output Module
+
+If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** the **video signal** to a **TV** screen, consider adding the **external video out module** to your device. **I am currently redesigning** this module for the **V3**, in order to give it a **HW upgrade for 2021** and **improve the performance**. The video output module will be connected to the **DIY-Thermocam V3** via USB and supports **Micro HDMI 2.0a** as well as **TV CVBS Output (PAL / NTSC)**.
+
+[**Get in touch with me**](https://www.maxritter.net/contact) if you are interested in this application for your DIY-Thermocam, so I can give you an **update about the current timeline**.
+
+
 
 # Device Images
 
@@ -674,57 +681,3 @@ There is a powerful **[thermal analysis software](https://github.com/maxritter/D
 
 
 The second possibility to **view** and **edit the raw data** files right on the **PC**, is the **[thermal data viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)**. It allows various functions to alter the thermal range, **add measurement points** as well as various filters. The program is also capable of **converting whole folders** of raw data frames into images (JPG, BMP or PNG) or avi videos. The **live tab** allows you to stream live images from the device and the calibration tab offers functions to edit the **raw-to-absolution temperature conversion**. You can also convert videos or interval pictures with the **[video converter](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)** to avi videos.
-
-
-
-# Optional Video Output Module
-
-
-<img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/VideoOutput.jpg" width="300">
-
-
-If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** the **video signal** to a **TV** screen, consider adding the **external video out module** to your device. 
-
-
-It just needs to be plugged into the **microUSB cable** of the Thermocam and is also supplied with **power** by the **internal battery**. 
-
-
-It is capable of providing a **HDMI signal** or **analog video output** (**PAL & NTSC**) with a resolution of **640x480** pixel. 
-
-
-You need the **following parts**: 
-
-<table style="width: 100%">
-   <tr>
-      <td style="width: 235px">Raspberry Pi Zero</td>
-      <td>
-         <a href="https://www.amazon.com/Raspberry-Pi-Zero-Wireless-model/dp/B06XFZC3BX/ref=pd_bxgy_img_2/146-4503882-0203551?_encoding=UTF8&pd_rd_i=B06XFZC3BX&pd_rd_r=0a4fab3e-5968-464b-8942-6541b51bf8d5&pd_rd_w=Iff39&pd_rd_wg=nmmi4&pf_rd_p=f325d01c-4658-4593-be83-3e12ca663f0e&pf_rd_r=Q8NDGJ2Y8R2DYRNF52V4&psc=1&refRID=Q8NDGJ2Y8R2DYRNF52V4">
-         Amazon.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 235px">Sandisk 8GB microSD</td>
-      <td>
-         <a href="https://www.amazon.com/SanDisk%C2%AE-microSDHCTM-8GB-Memory-Card/dp/B0012Y2LLE/ref=sr_1_3?dchild=1&keywords=8gb+microsd&qid=1615665584&sr=8-3">
-         Amazon.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 235px">microUSB cable</td>
-      <td>
-         <a href="https://www.amazon.com/Amazon-Micro-USB-designed-tablets-readers/dp/B0741WGQ36/ref=sr_1_1_sspa?dchild=1&keywords=micro+USB+cable&qid=1615665609&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExN09ZVE5DQVo2Wjc5JmVuY3J5cHRlZElkPUEwNDEyMTc1MUxSVkc1MUhaWUkxRyZlbmNyeXB0ZWRBZElkPUEwNDcyNTc0MUhQNExSQjdMMkNVUSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU=">
-         Amazon.com</a>
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 235px">Enclosure + OTG cable + HDMI adapter + Heatsink</td>
-      <td>
-         <a href="https://www.amazon.com/Raspberry-Zero-Adapter-Compatible-Black/dp/B074G13HX7/ref=sr_1_6?dchild=1&keywords=unistorm+raspberry+pi+zero&qid=1615665535&sr=8-6">
-         Amazon.com</a>
-      </td>
-   </tr>
-</table>
-
-Download and flash the [complete image](https://drive.google.com/open?id=0B5k537ZMNlFANUdpaTRFb2pqcXM) to the SD card, it runs a **python script** that you can modify to your own needs.
-
-Check out the [video output module manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/VideoModule_01.pdf) on how to **assemble** and **use** the module.
