@@ -94,6 +94,15 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
       </td>
    </tr>
    <tr>
+      <td style="width: 112px">
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDSlot.png" style="-webkit-user-select: none" />
+      </td>
+      <td >
+	  <strong>PCB SD Card Slot</strong><br />
+         Wurth 693063020911
+      </td>
+   </tr>
+   <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x10.png" width="100" /></td>
@@ -165,6 +174,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 
 
 
+
 ## Digikey.com
 
 <table style="width: 100%">
@@ -216,16 +226,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 	  <a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
 	  <strong>JST S2B-PH-K-S</strong></a> (0,16€)<br />
          PCB Lipo Connector&nbsp;
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDSlot.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="http://www.digikey.com/products/en?keywords=%09732-3818-1-ND">
-	  <strong>Wurth 693063020911</strong></a> (2,08€)<br />
-         SD slot for the SD card on the PCB
       </td>
    </tr>
    <tr>
@@ -331,7 +331,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 
 
 
-
 ## Robotshop.com
 
 <table style="width: 100%">
@@ -371,8 +370,8 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
       </td>
       <td >
 	  <a href="https://www.robotshop.com/de/en/lipo-battery-cell---37v-1200mah.html">
-	  <strong>3.7V LiPo Battery</strong></a>&nbsp;(10,03€)<br />
-         Max. dimens.: 60mm (w) x 55mm (l) x 6.5mm (h)
+	  <strong>3.7V Lipo Battery</strong></a>&nbsp;(10,03€)<br />
+         Or any other Lipo with 3.7V and max. dimens.: 65mm (w) x 55mm (l) x 6.5mm (h). An old mobile phone battery (f. ex. Samsung EB-BG355BBE GH43-04302A) can work, too
       </td>
    </tr>
    <tr>
@@ -396,6 +395,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
       </td>
    </tr>
    </table>
+
 
 
 
