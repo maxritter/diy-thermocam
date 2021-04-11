@@ -1,0 +1,35 @@
+---
+label: Page
+hide_body: false
+fields:
+- type: text
+  name: title
+  label: Title
+  description: The title of the page
+  config:
+    required: true
+- type: text
+  name: subtitle
+  label: Subtitle
+  description: The text shown just below the page title
+- type: file
+  name: image
+  label: Background Image
+  description: The image shown in the background of the page header
+- type: field_group
+  name: seo
+  label: Seo
+  fields:
+  - type: include
+    name: include_stackbit_page_meta
+    label: Page meta data
+    template: stackbit_page_meta
+- type: text
+  name: template
+  label: Template
+  hidden: true
+  default: page
+  config:
+    required: true
+pages:
+- src/pages/style-guide.md

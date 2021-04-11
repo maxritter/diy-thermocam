@@ -1,0 +1,47 @@
+---
+label: Header Configuration
+hide_body: true
+display_field: title
+fields:
+- type: text
+  name: title
+  label: Header Title
+  description: The title displayed in the header if no logo image added
+- type: file
+  name: logo_img
+  label: Logo
+  description: The logo image displayed in the header
+- type: text
+  name: logo_img_alt
+  label: Logo Alt Text
+  description: The alt text of the logo image
+- type: text
+  name: url
+  label: Header Title (Logo) URL
+  description: >-
+    The URL of the header title (logo). Useful if you want the header title
+    (logo) link to another URL, rather than the home page.
+- type: boolean
+  name: has_nav
+  label: Enable Navigation Menu
+  description: Display the navigation menu bar in the header
+  default: true
+- type: field_group_list
+  name: nav_links
+  label: Navigation Links
+  description: List of navigation links
+  fields:
+  - type: include
+    name: include_action_menu
+    label: Parent Action
+    template: action_menu
+  config:
+    labelField: label
+- type: text
+  name: type
+  label: Object Type
+  description: The type of the object
+  hidden: true
+  default: header
+  config:
+    required: true

@@ -1,0 +1,37 @@
+---
+label: Documentation Overview Section
+hide_body: true
+display_field: title
+fields:
+- type: text
+  name: title
+  label: Title
+  description: The title of the section.
+- type: text
+  name: section_id
+  label: Section ID
+  description: 'A unique identifier of the section, must not contain whitespace'
+- type: text
+  name: subtitle
+  label: Subtitle
+  description: The subtitle of the section
+- type: select
+  name: col_number
+  label: Columns
+  description: The number of documentation sections in a row
+  default: three
+  config:
+    required: true
+    source:
+      type: custom
+    options:
+    - two
+    - three
+- type: text
+  name: type
+  label: Object Type
+  description: The type of the object
+  hidden: true
+  default: section_docs
+  config:
+    required: true

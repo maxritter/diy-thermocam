@@ -1,0 +1,55 @@
+---
+label: Documentation Pages
+hide_body: false
+fields:
+- type: text
+  name: title
+  label: Title
+  description: >-
+    The title of the page, used both as a page title and as a navigation menu
+    title
+  config:
+    required: true
+- type: number
+  name: weight
+  label: Weight
+  description: >-
+    The navigation order of the documentation page. This value is ignored for
+    parent section pages.
+- type: text
+  name: excerpt
+  label: Excerpt
+  description: >-
+    Short description of the documentation section. Displayed in documentation
+    overview section.
+- type: field_group
+  name: seo
+  label: Seo
+  fields:
+  - type: include
+    name: include_stackbit_page_meta
+    label: Page meta data
+    template: stackbit_page_meta
+- type: text
+  name: template
+  label: Template
+  hidden: true
+  default: docs
+  config:
+    required: true
+pages:
+- src/pages/docs/about/features.md
+- src/pages/docs/about/index.md
+- src/pages/docs/about/overview.md
+- src/pages/docs/community/index.md
+- src/pages/docs/faq/index.md
+- src/pages/docs/getting-started/index.md
+- src/pages/docs/getting-started/installation.md
+- src/pages/docs/getting-started/quick-start.md
+- src/pages/docs/index.md
+- src/pages/docs/manage-content/index.md
+- src/pages/docs/tools/index.md
+- src/pages/docs/tools/plug-ins.md
+- src/pages/docs/tools/starter-theme.md
+- src/pages/docs/ui-components/index.md
+- src/pages/docs/ui-components/typography.md

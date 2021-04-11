@@ -1,0 +1,40 @@
+# License Agreement
+##### Version 1.02 (02/14/2019)
+
+This Single Project License Agreement (**“Agreement”**) is between you and Stackbit Inc., a Delaware corporation (“Stackbit”) and governs Your right to use the website project including website theme and other media content (the "Project") obtained from or generated using our services available at www.stackbit.com (the "Services"). By clicking on the “Create Account” button (or any similar button) that is presented to you at the time of sign-up or by using the Site to generate a Project, you indicate that you agree to the terms and conditions of this Agreement. If You are accepting this Agreement on behalf of Your employer or other organization, You are agreeing to these terms for the entity and You represent and warrant that You have authority to bind such entity (party bound to this Agreement is referred to as “You”). 
+
+1. **Definitions**. The capitalized terms shall have the meaning given in the relevant paragraph where such term is defined. In addition, the following terms shall have the meaning set forth below.
+
+   **“Client"** means the person or entity whose website you are designing if you are a web developer, web designer, agency or a marketing agent.
+   
+   **“Theme”** means the website theme made available on the Site and generated using the Services, in HTML/JS/CSS electronic source code format together with any related developer documentation.
+   
+   **“Project”** means any work that includes a Theme or that is derived from or is a ‘derivative work’ of a Theme, as such terms are used under the United States Copyright Act of 1976, as amended.
+
+2.	**License**. Subject to the terms and conditions of this Agreement, Stackbit hereby grants you a perpetual, non-exclusive, non-transferable, non-sublicensable limited license to use, modify, and display the Theme only as incorporated in a single Project as set forth in Section 3 below. All rights not granted herein are expressly reserved by Stackbit.
+
+3.	**Permitted Use**
+
+        You may use the Theme as it is incorporated into a single Project, either your own Project or the Project of your Client, and You may make modifications to the Theme necessary to fit the requirements of the Project provided that the Project and the use of the Project by You or the Client remains subject to this Agreement. You will own the Project you create, but Stackbit retains all right, title and interest in and to the Theme and other media content that are incorporated in your Project. You must retain and include all copyright notices and the terms of this License without modification in the files of the Project. You and Client must use the Project in compliance with all applicable federal, state and local laws, rules and regulations.
+
+4.	**Prohibited Uses**
+
+        You may not, and shall not permit anyone else to, use the Project or do anything with the Project that is not expressly permitted by this Agreement, including, but not limited to, the following strictly prohibited uses:
+
+        1. resell, sublicense or other transfer the Project or the Theme or other components thereof or your rights to use the Theme as set forth herein or otherwise make available or allows a person to access or reproduce the Theme as an electronic file, except in connection with the single Project and subject to Section 3 above;
+    
+        2. Use, reproduce or display the Theme or Project in any manner that competitive with the Services or our business (e.g. inclusion as part of an online website builder service, or distribution outside the Services such as on a Theme/themes marketplace or a "freebies" website);
+    
+        3. Use, reproduce or display of the Theme in a fashion that we consider as, or under applicable law is considered, pornographic, obscene, immoral, infringing, defamatory or libelous; and
+    
+        4. Use or display of the Theme in an electronic format that enables it to be downloaded or distributed in any file sharing arrangement.
+
+5.	**Ownership**. Stackbit shall retain and own all right, title and interest, including but not limited to copyright, patent, trade secret and all other intellectual property rights, in and to the Themes. You shall own all right, title and interest, including but not limited to copyright, patent, trade secret and all other intellectual property rights, in and to the Project, subject to Stackbit’s ownership of the Theme and the terms of this license agreement.
+
+6.	**Term and Termination**.  This Agreement shall commence on the deployment of a Project through Stackbit’s Services to a repository (such as for example to Github) and continue indefinitely until it is terminated in accordance with Section 6. Stackbit may terminate this Agreement if You breach the Agreement and such breach remains uncured for 15 days following Your receipt of written notice from Stackbit. You may terminate this Agreement for convenience and without cause at any time immediately upon written notice to Stackbit. Upon termination of this Agreement for any reason, You and your Client shall a) cease all use of the Theme and the Project b) destroy or delete all copies and archives of the Theme, Projects, and accompanying materials, and c) if requested, confirm to Stackbit in writing that you have complied with these requirements. Any provisions of this Agreement which expressly or by implication are intended to survive its termination will survive and continue to bind the parties.
+
+7.	**Warranty and Disclaimer**. THE SERVICES, SITE, THEME, PROJECT AND ALL CONTENT AVAILABLE THROUGH THE SITE ARE OFFERED “AS IS” AND WITHOUT WARRANTY, AND STACKBIT MAKES NO REPRESENTATION OR WARRANTY OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, AND SPECIFICALLY DISCLAIMS ALL WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE.
+
+8.	**Limitation of Liability**.  Stackbit’s aggregate liability for all claims, losses, liabilities or damages in connection with this Services, Theme, Project or this Agreement or its subject matter, whether as a result of breach of contract, tort (including negligence) or otherwise, regardless of the theory of liability asserted, is limited to no more than the total amount of fees paid to Stackbit under this Agreement, or $100, whichever is greater.  In addition, Stackbit will not be liable in any event for lost profits, consequential, indirect, punitive, exemplary or special damages.  
+
+9.	**General**. This Agreement shall be governed by the law of the State of California, without reference to conflict of laws principles. The United Nations Convention on contracts for the International Sales of Goods shall not apply. This Agreement, together with the Stackbit Terms of Service at www.stackbit.com/tos/ represents the entire agreement between the parties with regard to the subject matter thereof and supersedes any prior understandings, proposals or agreements concerning the same subject matter. If any provision of this Agreement is found to be unenforceable or invalid, the remainder of such provision shall be enforced to the maximum extent permitted by law. No amendment or modification of this Agreement shall be valid or binding unless in a writing signed by representatives of both parties. You may not assign this Agreement without Stackbit’s prior written consent. Any attempted assignment in violation of this shall be null and void. This Agreement shall be binding upon and inure to the benefit of the parties hereto and their respective permitted successors and assigns. Any notice required or permitted to be given by either party under this Agreement shall be in writing and may be sent via an active Services account dashboard or shall be personally delivered or sent by commercial courier service, or by first class mail (certified or registered if available), or by telecopy confirmed by first class mail (registered or certified if available), to the other party at its address set forth below, or such new address as may from time-to-time be supplied hereunder by the parties hereto.

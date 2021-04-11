@@ -1,0 +1,39 @@
+---
+label: Advanced Page
+hide_body: true
+fields:
+- type: text
+  name: title
+  label: Title
+  description: The title of the page.
+  config:
+    required: true
+- type: blocks
+  name: sections
+  label: Sections
+  description: Page sections
+  template_types:
+  - section_content
+  - section_cta
+  - section_docs
+  - section_grid
+  - section_hero
+- type: field_group
+  name: seo
+  label: Seo
+  fields:
+  - type: include
+    name: include_stackbit_page_meta
+    label: Page meta data
+    template: stackbit_page_meta
+- type: text
+  name: template
+  label: Template
+  hidden: true
+  default: advanced
+  config:
+    required: true
+pages:
+- src/pages/index.md
+- src/pages/overview.md
+- src/pages/showcase.md

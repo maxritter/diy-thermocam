@@ -1,0 +1,55 @@
+---
+label: Post
+hide_body: false
+fields:
+- type: text
+  name: title
+  label: Title
+  description: The title of the post
+  config:
+    required: true
+- type: text
+  name: subtitle
+  label: Subtitle
+  description: The text shown just below the post title
+- type: datetime
+  name: date
+  label: Date
+  config:
+    required: true
+- type: file
+  name: thumb_image
+  label: Image (blog feed)
+  description: The image shown in the blog feed
+- type: text
+  name: thumb_image_alt
+  label: Image alt text (blog feed)
+  description: The alt text of the blog feed image
+- type: file
+  name: image
+  label: Background Image (single post)
+  description: The image shown in the background of the single post header
+- type: text
+  name: excerpt
+  label: Excerpt
+  description: The excerpt of the post displayed in the blog feed
+- type: field_group
+  name: seo
+  label: Seo
+  fields:
+  - type: include
+    name: include_stackbit_page_meta
+    label: Page meta data
+    template: stackbit_page_meta
+- type: text
+  name: template
+  label: Template
+  hidden: true
+  default: post
+  config:
+    required: true
+pages:
+- src/pages/blog/community.md
+- src/pages/blog/conf.md
+- src/pages/blog/function-of-design.md
+- src/pages/blog/libris-theme.md

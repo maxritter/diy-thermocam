@@ -1,0 +1,54 @@
+// Fonts
+$font-primary:   "Lato", Helvetica, Arial, sans-serif !default;
+$font-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace !default;
+
+// Colors
+$color-primary:   #00c6ff !default;
+$color-secondary: #0072ff !default;
+
+$gray-100:        #f8f8fa !default;
+$gray-200:        #ecedf2 !default;
+$gray-300:        #dde0e7 !default;
+$gray-400:        #9aa4b9 !default;
+$gray-500:        #67758d !default;
+$gray-600:        #424b5f !default;
+$gray-700:        #283040 !default;
+
+$red:             #fc381d !default;
+$red-pale:        #ffe9e6 !default;
+$yellow:          #fcb41d !default;
+$yellow-pale:     #fff7e6 !default;
+
+// Border radius
+$border-radius: 5px;
+$border-radius-sm: 3px;
+
+// Box shadow
+$box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08);
+
+// Container max width
+$container:    1200px !default;
+$container-sm: 680px !default;
+$container-md: 800px !default;
+
+// Container padding
+$container-padding: 3vw !default;
+
+// Grid gap
+$grid-gap: 1.875em !default;
+
+// Alternative theme palettes
+$theme-palettes: (
+  green: (
+    primary:   #20c86e,
+    secondary: #1ba65b
+  ),
+  navy: (
+    primary:   #004e92,
+    secondary: #000428
+  ),
+  violet: (
+    primary:   #8e2de2,
+    secondary: #4a00e0
+  )
+);

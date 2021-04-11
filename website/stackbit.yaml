@@ -1,0 +1,573 @@
+stackbitVersion: ~0.3.0
+ssgName: gatsby
+ssgVersion: 2.3.30
+buildCommand: npm run build
+publishDir: public
+staticDir: static
+uploadDir: images
+dataDir: src/data
+pagesDir: src/pages
+pageLayoutKey: template
+logicFields:
+  - doc_sections.root_docs_path
+  - doc_sections.sections
+  - docs.weight
+models:
+  config:
+    type: config
+    label: Site Configuration
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: Site title
+        required: true
+      - type: string
+        name: domain
+        label: Domain
+        description: >-
+          The domain of your site, including the protocol, e.g.
+          https://mysite.com/
+      - type: image
+        name: favicon
+        label: Favicon
+        description: A square icon that represents your website
+      - type: enum
+        name: palette
+        label: Color Palette
+        description: The color palette of the site
+        options:
+          - blue
+          - green
+          - navy
+          - violet
+        default: blue
+        required: true
+      - type: model
+        name: header
+        label: Header Configuration
+        models:
+          - header
+      - type: model
+        name: footer
+        label: Footer Configuration
+        models:
+          - footer
+  header:
+    type: object
+    label: Header Configuration
+    labelField: title
+    fields:
+      - type: string
+        name: title
+        label: Header Title
+        description: The title displayed in the header if no logo image added
+      - type: image
+        name: logo_img
+        label: Logo
+        description: The logo image displayed in the header
+      - type: string
+        name: logo_img_alt
+        label: Logo Alt Text
+        description: The alt text of the logo image
+      - type: string
+        name: url
+        label: Header Title (Logo) URL
+        description: >-
+          The URL of the header title (logo). Useful if you want the header
+          title (logo) link to another URL, rather than the home page.
+      - type: boolean
+        name: has_nav
+        label: Enable Navigation Menu
+        description: Display the navigation menu bar in the header
+        default: true
+      - type: list
+        name: nav_links
+        label: Navigation Links
+        description: List of navigation links
+        items:
+          type: model
+          models:
+            - action_menu
+  footer:
+    type: object
+    label: Footer Configuration
+    labelField: content
+    fields:
+      - type: string
+        name: content
+        label: Footer Content
+        description: The copyright text displayed in the footer
+      - type: list
+        name: links
+        label: Links
+        description: List of links in the footer
+        items:
+          type: model
+          models:
+            - action
+      - type: boolean
+        name: has_social
+        label: Enable Social Links
+        description: Display social links in the footer
+        default: true
+      - type: list
+        name: social_links
+        label: Social Links
+        description: List of social links in the footer
+        items:
+          type: model
+          models:
+            - action
+  doc_sections:
+    type: data
+    file: doc_sections.yml
+    label: Documentation Sections
+    fields:
+      - type: string
+        name: root_docs_path
+        label: Root Documentation URL Path
+        description: >-
+          The URL path under which the documentation pages will be generated.
+          For example, value "/" will place all documentation pages at the site
+          root, while value "/docs" will place all documentation pages under the
+          "/docs" path.
+        default: /docs
+        required: true
+      - type: list
+        name: sections
+        label: Sections
+        description: >-
+          The main sections of the documentation. Every item must be the URL
+          slug representing the section.
+        items:
+          type: string
+  docs:
+    type: page
+    urlPath: '/docs/{slug}'
+    label: Documentation Pages
+    layout: docs
+    folder: docs
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: >-
+          The title of the page, used both as a page title and as a navigation
+          menu title
+        required: true
+      - type: number
+        name: weight
+        label: Weight
+        description: >-
+          The navigation order of the documentation page. This value is ignored
+          for parent section pages.
+      - type: string
+        name: excerpt
+        label: Excerpt
+        description: >-
+          Short description of the documentation section. Displayed in
+          documentation overview section.
+      - type: model
+        name: seo
+        models:
+          - stackbit_page_meta
+  advanced:
+    type: page
+    label: Advanced Page
+    layout: advanced
+    hideContent: true
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the page.
+        required: true
+      - type: list
+        name: sections
+        label: Sections
+        description: Page sections
+        items:
+          type: model
+          models:
+            - section_content
+            - section_cta
+            - section_docs
+            - section_grid
+            - section_hero
+      - type: model
+        name: seo
+        models:
+          - stackbit_page_meta
+  blog:
+    type: page
+    urlPath: /blog
+    label: Blog
+    layout: blog
+    file: blog/index.md
+    hideContent: true
+    singleInstance: true
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the page
+        required: true
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The text shown just below the page title
+      - type: image
+        name: image
+        label: Background Image
+        description: The image shown in the background of the page header
+      - type: boolean
+        name: has_more_link
+        label: Show read more link
+        description: Display the read more link in the post feed
+        default: true
+      - type: string
+        name: more_link_text
+        label: Read more link label
+      - type: model
+        name: seo
+        models:
+          - stackbit_page_meta
+  page:
+    type: page
+    label: Page
+    layout: page
+    exclude: blog/**
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the page
+        required: true
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The text shown just below the page title
+      - type: image
+        name: image
+        label: Background Image
+        description: The image shown in the background of the page header
+      - type: model
+        name: seo
+        models:
+          - stackbit_page_meta
+  post:
+    type: page
+    urlPath: '/blog/{slug}'
+    label: Post
+    layout: post
+    folder: blog
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the post
+        required: true
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The text shown just below the post title
+      - type: date
+        name: date
+        label: Date
+        required: true
+      - type: image
+        name: thumb_image
+        label: Image (blog feed)
+        description: The image shown in the blog feed
+      - type: string
+        name: thumb_image_alt
+        label: Image alt text (blog feed)
+        description: The alt text of the blog feed image
+      - type: image
+        name: image
+        label: Background Image (single post)
+        description: The image shown in the background of the single post header
+      - type: string
+        name: excerpt
+        label: Excerpt
+        description: The excerpt of the post displayed in the blog feed
+      - type: model
+        name: seo
+        models:
+          - stackbit_page_meta
+  section:
+    type: object
+    label: Section
+    labelField: title
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the section.
+      - type: string
+        name: section_id
+        label: Section ID
+        description: 'A unique identifier of the section, must not contain whitespace'
+  section_content:
+    type: object
+    label: Content Section
+    extends:
+      - section
+    fields:
+      - type: image
+        name: image
+        label: Image
+        description: The image of the section
+      - type: string
+        name: image_alt
+        label: Image Alt Text
+        description: The alt text of the section image
+      - type: enum
+        name: image_position
+        label: Image Position
+        description: The position of the secton image
+        options:
+          - left
+          - right
+        default: left
+      - type: markdown
+        name: content
+        label: Content
+        description: The text content of the section
+      - type: list
+        name: actions
+        label: Action Buttons
+        items:
+          type: model
+          models:
+            - action
+  section_cta:
+    type: object
+    label: CTA Section
+    extends:
+      - section
+    fields:
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The subtitle of the section
+      - type: list
+        name: actions
+        label: Action Buttons
+        items:
+          type: model
+          models:
+            - action
+  section_docs:
+    type: object
+    label: Documentation Overview Section
+    extends:
+      - section
+    fields:
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The subtitle of the section
+      - type: enum
+        name: col_number
+        label: Columns
+        description: The number of documentation sections in a row
+        options:
+          - two
+          - three
+        default: three
+        required: true
+  section_grid:
+    type: object
+    label: Grid Section
+    extends:
+      - section
+    fields:
+      - type: string
+        name: subtitle
+        label: Subtitle
+        description: The subtitle of the section
+      - type: enum
+        name: col_number
+        label: Columns
+        description: The number of grid items in a row
+        options:
+          - two
+          - three
+        default: three
+        required: true
+      - type: list
+        name: grid_items
+        label: Grid Items
+        items:
+          type: model
+          models:
+            - grid_item
+  section_hero:
+    type: object
+    label: Hero Section
+    extends:
+      - section
+    fields:
+      - type: image
+        name: image
+        label: Image
+        description: The image shown in the background of the section
+      - type: markdown
+        name: content
+        label: Content
+        description: The text content of the section
+      - type: list
+        name: actions
+        label: Action Buttons
+        items:
+          type: model
+          models:
+            - action
+  grid_item:
+    type: object
+    label: Grid Item
+    labelField: title
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The title of the item
+      - type: string
+        name: title_url
+        label: Title URL
+        description: The URL of the item title
+      - type: image
+        name: image
+        label: Image
+        description: The image of the item
+      - type: string
+        name: image_alt
+        label: Image Alt Text
+        description: The alt text of the item image
+      - type: markdown
+        name: content
+        label: Content
+        description: The text content of the item
+      - type: list
+        name: actions
+        label: Action Buttons
+        items:
+          type: model
+          models:
+            - action
+  action:
+    type: object
+    label: Action
+    labelField: label
+    fields:
+      - type: string
+        name: label
+        label: Label
+        required: true
+      - type: string
+        name: url
+        label: URL
+        required: true
+        default: '#'
+      - type: enum
+        name: style
+        label: Style
+        options:
+          - link
+          - primary
+          - secondary
+          - icon
+        default: link
+        required: true
+      - type: enum
+        name: icon_class
+        label: Icon
+        options:
+          - dev
+          - facebook
+          - github
+          - instagram
+          - linkedin
+          - pinterest
+          - reddit
+          - twitter
+          - vimeo
+          - youtube
+      - type: boolean
+        name: new_window
+        label: Open in new tab/window
+        default: false
+      - type: boolean
+        name: no_follow
+        label: No follow
+        default: false
+        description: Add rel="nofollow" attribute to the link
+  action_menu:
+    type: object
+    label: Parent Action
+    extends:
+      - action
+    fields:
+      - type: boolean
+        name: has_subnav
+        label: Has Sub-Navigation
+        default: false
+      - type: list
+        name: subnav_links
+        label: Sub-Navigation Links
+        items:
+          type: model
+          models:
+            - action
+  stackbit_page_meta:
+    type: object
+    label: Page meta data
+    fields:
+      - type: string
+        name: title
+        label: Title
+        description: The page title that goes into the <title> tag
+        default: ''
+      - type: string
+        name: description
+        label: Description
+        description: The page description that goes into the <meta name="description"> tag
+        default: ''
+      - type: list
+        name: robots
+        label: Robots
+        description: The items that go into the <meta name="robots"> tag
+        items:
+          type: enum
+          options:
+            - all
+            - index
+            - follow
+            - noindex
+            - nofollow
+            - noimageindex
+            - notranslate
+            - none
+      - type: list
+        name: extra
+        label: Extra
+        description: >-
+          Additional definition for specific meta tags such as open-graph,
+          twitter, etc.
+        items:
+          type: object
+          labelField: name
+          fields:
+            - type: string
+              name: name
+              default: ''
+            - type: string
+              name: value
+              default: ''
+            - type: string
+              name: keyName
+              default: name
+            - type: boolean
+              name: relativeUrl

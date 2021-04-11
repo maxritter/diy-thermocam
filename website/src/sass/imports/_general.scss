@@ -1,0 +1,218 @@
+html {
+  font-family: $font-primary;
+  font-size: 100%;
+}
+
+body {
+  background: $gray-100;
+  color: $gray-600;
+  line-height: 1.625;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.125em;
+  -webkit-transition: color .3s ease;
+  transition: color .3s ease;
+
+  &:hover {
+    color: $gray-600;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: $gray-700;
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 1.5em 0 0.5em;
+  text-rendering: optimizeLegibility;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+h1 {
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.75em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+h4 {
+  font-size: 1.25em;
+}
+
+h5 {
+  font-size: 1.125em;
+}
+
+h6 {
+  font-size: 1em;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+mark,
+ins {
+  background: $yellow-pale;
+  color: $gray-700;
+  padding: 0.15em;
+  text-decoration: none;
+}
+
+pre {
+  background: $gray-700;
+  border-radius: $border-radius-sm;
+  color: $gray-100;
+  font-size: 0.875em;
+  line-height: 1.5;
+  margin: 2.14286em 0;
+  overflow: auto;
+  padding: 1.5em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+:not(pre) > code {
+  background: $gray-200;
+  border-radius: $border-radius-sm;
+  color: $gray-600;
+  font-size: 0.875rem;
+  padding: 0.15em;
+  white-space: normal;
+}
+
+blockquote {
+  border-left: 5px solid $color-primary;
+  font-size: 1.25em;
+  line-height: 1.4;
+  margin: 1.25em 0;
+  padding: 0 0 0 1em;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  p {
+    margin-bottom: 0.5em;
+  }
+
+  small,
+  cite {
+    color: $gray-500;
+    display: block;
+    font-size: 0.75em;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1.5;
+    margin-top: 0.5em;
+  }
+}
+
+dl {
+  margin: 0;
+}
+
+dt {
+  font-weight: bold;
+}
+
+ul,
+ol,
+dd {
+  margin: 0 0 1em;
+}
+
+ul {
+  list-style: disc;
+  padding: 0 0 0 1.125em;
+}
+
+ol {
+  list-style: decimal;
+  padding: 0 0 0 1.5em;
+}
+
+li > ul,
+li > ol {
+  margin-bottom: 0;
+}
+
+hr {
+  background-color: $gray-300;
+  border: 0;
+  height: 1px;
+  margin: 1.875em 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+embed,
+iframe,
+object,
+video {
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+  max-width: 100%;
+}
+
+@media only screen and (min-width: 641px) {
+  blockquote {
+    font-size: 1.5em;
+    line-height: 1.3;
+  }
+
+  h1 {
+    font-size: 2.5em;
+  }
+
+  h2 {
+    font-size: 2.125em;
+  }
+
+  h3 {
+    font-size: 1.875em;
+  }
+
+  h4 {
+    font-size: 1.5em;
+  }
+
+  h5 {
+    font-size: 1.25em;
+  }
+
+  h6 {
+    font-size: 1.125em;
+  }
+}

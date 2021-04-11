@@ -1,0 +1,63 @@
+---
+label: Action
+hide_body: true
+display_field: label
+fields:
+- type: text
+  name: label
+  label: Label
+  config:
+    required: true
+- type: text
+  name: url
+  label: URL
+  default: '#'
+  config:
+    required: true
+- type: select
+  name: style
+  label: Style
+  default: link
+  config:
+    required: true
+    source:
+      type: custom
+    options:
+    - link
+    - primary
+    - secondary
+    - icon
+- type: select
+  name: icon_class
+  label: Icon
+  config:
+    source:
+      type: custom
+    options:
+    - dev
+    - facebook
+    - github
+    - instagram
+    - linkedin
+    - pinterest
+    - reddit
+    - twitter
+    - vimeo
+    - youtube
+- type: boolean
+  name: new_window
+  label: Open in new tab/window
+  default: false
+- type: boolean
+  name: no_follow
+  label: No follow
+  description: Add rel="nofollow" attribute to the link
+  default: false
+- type: text
+  name: type
+  label: Object Type
+  description: The type of the object
+  hidden: true
+  default: action
+  config:
+    required: true

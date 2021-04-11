@@ -1,0 +1,186 @@
+// Text for screen readers
+.screen-reader-text {
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: polygon(0px 0px, 0px 0px, 0px 0px, 0px 0px);
+  height: 1px;
+  overflow: hidden;
+  position: absolute !important;
+  width: 1px;
+  word-wrap: normal !important;
+}
+
+// Heading decorations
+.line-left {
+  position: relative;
+
+  &:after {
+    background: $color-primary;
+    display: block;
+    content: "";
+    height: 100%;
+    left: -1px;
+    position: absolute;
+    top: 0;
+    width: 5px;
+  }
+}
+
+// Responsive video wrappers
+.js-reframe {
+  margin: 1.875em 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+// Notifications, allerts
+.note,
+.important {
+  border-radius: $border-radius;
+  color: $gray-700;
+  margin: 1.875em 0;
+  padding: 1em 1.125em;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.note {
+  background: $yellow-pale;
+  border-left: 5px solid $yellow;
+}
+
+.important {
+  background: $red-pale;
+  border-left: 5px solid $red;
+}
+
+// Background gradients
+.has-gradient {
+  background: $color-primary;
+  background: -webkit-gradient(linear, left top, right top, from($color-secondary), to($color-primary));
+  background: linear-gradient(to right,$color-secondary, $color-primary);
+  color: #fff;
+  position: relative;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: inherit !important;
+  }
+
+  a {
+    &:not(.button) {
+      color: inherit !important;
+
+      &:hover {
+        opacity: .8;
+      }
+    }
+  }
+
+  .button {
+    &:not(.button-secondary) {
+      background-color: #fff;
+      color: $color-primary;
+
+      &:hover,
+      &:focus,
+      &:active {
+        opacity: .85;
+      }
+    }
+  }
+
+  .button-secondary {
+    color: #fff !important;
+  }
+
+  .inner-sm {
+    position: relative;
+  }
+}
+
+// Background image
+.bg-img {
+  -webkit-animation: fadeIn20 .75s ease-in-out;
+  animation: fadeIn20 .75s ease-in-out;
+  background-position: center;
+  background-size: cover;
+  bottom: 0;
+  left: 0;
+  opacity: 0.2;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+// Grid
+.grid {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-left: -$grid-gap / 2;
+  margin-right: -$grid-gap / 2;
+}
+
+.grid-item {
+  box-sizing: border-box;
+  padding-left: $grid-gap / 2;
+  padding-right: $grid-gap / 2;
+  position: relative;
+  width: 100%;
+}
+
+.grid-center {
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.grid-swap {
+  -ms-flex-direction: row-reverse;
+  flex-direction: row-reverse;
+}
+
+.grid-middle {
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+@media only screen and (min-width: 641px) {
+  .grid-col-2 {
+    .grid-item {
+      -ms-flex: 0 0 50%;
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+}
+
+@media only screen and (min-width: 761px) {
+  .grid-col-3 {
+    .grid-item {
+      -ms-flex: 0 0 33.333%;
+      flex: 0 0 33.333%;
+      max-width: 33.333%;
+    }
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .grid {
+    margin-left: -$container-padding / 2;
+    margin-right: -$container-padding / 2;
+  }
+
+  .grid-item {
+    padding-left: $container-padding / 2;
+    padding-right: $container-padding / 2;
+  }
+}

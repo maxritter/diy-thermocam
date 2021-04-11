@@ -1,0 +1,113 @@
+{
+    "title": "Stackbit Libris Theme",
+    "palette": "blue",
+    "header": {
+        "type": "header",
+        "template": "header",
+        "title": "Libris",
+        "logo_img": "images/logo.svg",
+        "logo_img_alt": "Libris logo",
+        "has_nav": true,
+        "nav_links": [
+            {
+                "type": "action_menu",
+                "template": "action_menu",
+                "label": "Home",
+                "url": "/",
+                "style": "link",
+                "has_subnav": false
+            },
+            {
+                "type": "action_menu",
+                "template": "action_menu",
+                "label": "Docs",
+                "url": "/docs",
+                "style": "link",
+                "has_subnav": false
+            },
+            {
+                "type": "action_menu",
+                "template": "action_menu",
+                "label": "Blog",
+                "url": "/blog",
+                "style": "link",
+                "has_subnav": false
+            },
+            {
+                "type": "action_menu",
+                "template": "action_menu",
+                "label": "Sample Pages",
+                "url": "#",
+                "style": "link",
+                "has_subnav": true,
+                "subnav_links": [
+                    {
+                        "type": "action",
+                        "template": "action",
+                        "label": "Overview",
+                        "url": "/overview",
+                        "style": "link"
+                    },
+                    {
+                        "type": "action",
+                        "template": "action",
+                        "label": "Showcase",
+                        "url": "/showcase",
+                        "style": "link"
+                    }
+                ]
+            },
+            {
+                "type": "action_menu",
+                "template": "action_menu",
+                "label": "Style Guide",
+                "url": "/style-guide",
+                "style": "link",
+                "has_subnav": false
+            },
+            {
+                "type": "action_menu",
+                "template": "action_menu",
+                "label": "GitHub",
+                "url": "https://github.com/",
+                "style": "primary",
+                "has_subnav": false
+            }
+        ]
+    },
+    "footer": {
+        "type": "footer",
+        "template": "footer",
+        "content": "&copy; Stackbit. All rights reserved. This Jamstack site was created with <a href=\"https://www.stackbit.com/?utm_source=deployed-footer\" target=\"_blank\" rel=\"noopener\">Stackbit</a>. Create yours <a href=\"https://app.stackbit.com/create?theme=libris&utm_source=deployed-footer\" target=\"_blank\" rel=\"noopener\">now</a>",
+        "has_social": true,
+        "social_links": [
+            {
+                "type": "action",
+                "template": "action",
+                "label": "Twitter",
+                "url": "https://twitter.com/",
+                "style": "icon",
+                "icon_class": "twitter",
+                "new_window": true
+            },
+            {
+                "type": "action",
+                "template": "action",
+                "label": "LinkedIn",
+                "url": "https://www.linkedin.com/",
+                "style": "icon",
+                "icon_class": "linkedin",
+                "new_window": true
+            },
+            {
+                "type": "action",
+                "template": "action",
+                "label": "GitHub",
+                "url": "https://github.com/",
+                "style": "icon",
+                "icon_class": "github",
+                "new_window": true
+            }
+        ]
+    }
+}
