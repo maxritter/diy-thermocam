@@ -10,7 +10,7 @@ fields:
 - type: text
   name: section_id
   label: Section ID
-  description: 'A unique identifier of the section, must not contain whitespace'
+  description: A unique identifier of the section, must not contain whitespace
 - type: file
   name: image
   label: Image

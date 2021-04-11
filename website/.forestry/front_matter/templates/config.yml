@@ -11,7 +11,7 @@ fields:
 - type: text
   name: domain
   label: Domain
-  description: 'The domain of your site, including the protocol, e.g. https://mysite.com/'
+  description: The domain of your site, including the protocol, e.g. https://mysite.com/
 - type: file
   name: favicon
   label: Favicon

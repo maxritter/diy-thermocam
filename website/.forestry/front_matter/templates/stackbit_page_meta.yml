@@ -32,8 +32,7 @@ fields:
 - type: field_group_list
   name: extra
   label: Extra
-  description: >-
-    Additional definition for specific meta tags such as open-graph, twitter,
+  description: Additional definition for specific meta tags such as open-graph, twitter,
     etc.
   fields:
   - type: text

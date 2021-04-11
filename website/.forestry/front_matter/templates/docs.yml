@@ -5,22 +5,19 @@ fields:
 - type: text
   name: title
   label: Title
-  description: >-
-    The title of the page, used both as a page title and as a navigation menu
-    title
+  description: The title of the page, used both as a page title and as a navigation
+    menu title
   config:
     required: true
 - type: number
   name: weight
   label: Weight
-  description: >-
-    The navigation order of the documentation page. This value is ignored for
-    parent section pages.
+  description: The navigation order of the documentation page. This value is ignored
+    for parent section pages.
 - type: text
   name: excerpt
   label: Excerpt
-  description: >-
-    Short description of the documentation section. Displayed in documentation
+  description: Short description of the documentation section. Displayed in documentation
     overview section.
 - type: field_group
   name: seo

@@ -18,8 +18,7 @@ fields:
 - type: text
   name: url
   label: Header Title (Logo) URL
-  description: >-
-    The URL of the header title (logo). Useful if you want the header title
+  description: The URL of the header title (logo). Useful if you want the header title
     (logo) link to another URL, rather than the home page.
 - type: boolean
   name: has_nav

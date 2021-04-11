@@ -5,19 +5,16 @@ fields:
 - type: text
   name: root_docs_path
   label: Root Documentation URL Path
-  description: >-
-    The URL path under which the documentation pages will be generated. For
-    example, value "/" will place all documentation pages at the site root,
-    while value "/docs" will place all documentation pages under the "/docs"
-    path.
-  default: /docs
+  description: The URL path under which the documentation pages will be generated.
+    For example, value "/" will place all documentation pages at the site root, while
+    value "/docs" will place all documentation pages under the "/docs" path.
+  default: "/docs"
   config:
     required: true
 - type: list
   name: sections
   label: Sections
-  description: >-
-    The main sections of the documentation. Every item must be the URL slug
-    representing the section.
+  description: The main sections of the documentation. Every item must be the URL
+    slug representing the section.
 pages:
 - src/data/doc_sections.yml

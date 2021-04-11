@@ -11,7 +11,7 @@ fields:
 - type: text
   name: url
   label: URL
-  default: '#'
+  default: "#"
   config:
     required: true
 - type: select
