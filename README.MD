@@ -353,14 +353,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 </table>
 
 
-# Video Output Module
-
-If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** the **video signal** to a **TV** screen, consider adding the **external video out module** to your device. **I am currently redesigning** this module for the **V3**, in order to give it a **HW upgrade for 2021** and **improve the performance**. The video output module will be connected to the **DIY-Thermocam V3** via USB and supports **Micro HDMI 2.0a** as well as **TV CVBS Output (PAL / NTSC)**.
-
-[**Get in touch with me**](https://www.maxritter.net/contact) if you are interested in this application for your DIY-Thermocam, so I can give you an **update about the current timeline**.
-
-
-
 # Device Images
 
 
