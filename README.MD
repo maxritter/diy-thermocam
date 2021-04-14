@@ -1,11 +1,5 @@
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/Logo.png" width="500">
 
-> **Update 2021-03-20:** 
->
-> I am currently working on the **DIY-Thermocam V3**. It will feature the brand new **Teensy 4.1** Cortex M7 based microcontroller, so expect an **increased performance**. You can already [**pre-order the V3 KIT**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K8768C3HCK2DJ) and order the **remaining components on your own**, check the **updated partlist** below. The **estimated date of shipment** for all **pre-orders** will be **Mid of April**. An **upgrade KIT from V2 to V3** will follow at a later point in time.
->
-
-
 
 The **DIY-Thermocam V3** is a **low-cost, do-it-yourself** thermal imager, based on the popular **FLIR Lepton** long-wave-infrared array sensor. 
 
@@ -94,81 +88,65 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
       </td>
    </tr>
    <tr>
-      <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDSlot.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <strong>PCB SD Card Slot</strong><br />
-         Wurth 693063020911
-      </td>
-   </tr>
-   <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x10.png" width="100" /></td>
-      <td ><strong>Screw M2x10</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>)</td>
+      <td ><strong>4 x Screw M2x18</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.png" width="100" /></td>
-      <td ><strong>Spacer M2x3</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x3.png">Details</a>)</td>
-   </tr>
-   <tr>
-      <td style="width: 113px" >
-         &nbsp;
-         <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x3.5.png" width="100" /></td>
-      <td ><strong>Spacer M2x3.5</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2x35.png">Details</a>)</td>
+      <td ><strong>4 x Spacer M2x12</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2x8.png" width="100" /></td>
-      <td ><strong>Screw M2x8</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM2x8.png">Details</a>)</td>
+      <td ><strong>3 x Screw M2x8</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x6.png" width="100" /></td>
       <td >
-	  <strong>Screw M2.5x6 Black</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/ScrewM25x6.png">Details</a>
-      )</td>
+	  <strong>4 x Screw M2.5x6 Black</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x12.png" width="100" /></td>
-      <td ><strong>Standoff M2.5x12</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x12.png">Details</a>)</td>
+      <td ><strong>4 x Standoff M2.5x12</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x11.png" width="100" /></td>
-      <td ><strong>Standoff M2.5x11</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x11.png">Details</a>)</td>
+      <td ><strong>4 x Standoff M2.5x20</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2.5x5.png" width="100" /></td>
-      <td ><strong>Standoff M2.5x5</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DistanceM2.5x5.png">Details</a>)</td>
+      <td ><strong>4 x Standoff M2.5x5</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2N_2.png" width="100" /></td>
-      <td ><strong>Nut M2</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
+      <td ><strong>3 x Nut M2</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
 		 <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/NutM2.png" width="100" /></td>
-      <td ><strong>Nut M2 Plastic</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/NutM2.png">Details</a>)</td>
+      <td ><strong>4 x Nut M2 Plastic</strong></td>
    </tr>
    <tr>
       <td style="width: 113px" >
          &nbsp;
          <img height="100" src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/BOM/M2W.png" width="100" /></td>
-      <td ><strong>Washer M2</strong> (<a href="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/WasherM2.png" >Details</a>)</td>
+      <td ><strong>3 x Washer M2</strong></td>
    </tr>
 </table>
 
@@ -220,26 +198,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
    </tr>
    <tr>
       <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/LipoCon.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="http://www.digikey.com/product-detail/en/jst-sales-america-inc/S2B-PH-K-S(LF)(SN)/455-1719-ND/926626">
-	  <strong>JST S2B-PH-K-S</strong></a> (0,16€)<br />
-         PCB Lipo Connector&nbsp;
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/SDAdapter.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="https://www.digikey.com/en/products/detail/adafruit-industries-llc/1763/6827144">
-	  <strong>MicroSD adapter</strong></a> (5,84€)<br />
-         Short microSD to SD adapter for the internal storage card&nbsp;
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/DisplayHeader.png" style="-webkit-user-select: none" />
       </td>
       <td >
@@ -258,16 +216,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
          20-pin 2.54mm female header&nbsp;
       </td>
    </tr>
-   <tr>
-      <td style="width: 112px">
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/CameraHeader.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="https://www.digikey.com/en/products/detail/sullins-connector-solutions/PPPC081LGBN-RC/775941">
-	  <strong>Arducam connector</strong></a> (0,63€)<br />
-         8-pin 2.54mm female header &nbsp;
-      </td>
-   </tr> 
    <tr>
       <td style="width: 112px">
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PinHeader.png" style="-webkit-user-select: none" />
@@ -356,16 +304,6 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
    </tr>
    <tr>
       <td style="width: 110px"  >
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Arducam.png" style="-webkit-user-select: none" />
-      </td>
-      <td >
-	  <a href="https://www.robotshop.com/en/arducam-mini-camera-module-w--2mp-plus-ov2640-arduino.html">
-	  <strong>ArduCAM Mini 2MP Plus</strong></a> (26,22€)<br />
-         Visual camera module&nbsp;
-      </td>
-   </tr>
-   <tr>
-      <td style="width: 110px"  >
          &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/Battery.png" style="-webkit-user-select: none" />
       </td>
       <td >
@@ -445,15 +383,12 @@ If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** t
 
  - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular, **Arduino** compatible **Teensy 4.1**
  - Frame rate of up to **9 FPS** (US export compliance)
- - **2MP visual camera** to capture optical images, that can be used in a combined image
- - **HDMI** or **analog video** output  capabilities (640x480 pixel) over external video output module
- - **3 operating modes**: thermal only, thermal + visual, video recording
  - **18 different color schemes** including rainbow, ironblack, grayscale, hot & cold
  - 3.2 inch **LCD touch display** with bright colors,  wide angle and resistive touch
- - **Save thermal** and **visual images** with a resolution of 640x480 pixels on the device
+ - **Save thermal images** with a resolution of 640x480 pixels on the device
  - **Save** real-time **videos** and interval images with different time-lapse settings
  - **Up to 8GB internal storage**, accessible as an exchangeable SD / microSD slot
- - **1200 mAh lithium polymer battery** for long operation time (2-3 hours)
+ - **2000 mAh lithium polymer battery** for long operation time (4-6 hours)
  - **Open-source firmware** written in **Arduino compatible C/C++** code
  - Regular **firmware updates** with new features, flashable over a standalone firmware updater
  - **Standalone thermal viewer application** to save high-quality thermal images & videos  on the computer
@@ -565,7 +500,7 @@ If you want to mount the DIY-Thermocam on a **drone** or just wanna **output** t
          Image modes
       </td>
       <td>
-         IR image, visual image, combined
+         IR image
       </td>
       <td>
          IR image, visual image. MSX
@@ -675,13 +610,13 @@ This is a **comparison** between the **DIY-Thermocam**, the **Seek XR** and a **
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/Live Viewer and Updater.PNG" width="500">
 
 
-The standalone PC **[thermal live viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Live%20Viewer)** software allows you to **capture** HQ **thermal** and **visual images**, as well as **videos** right on the **computer**.  Various **settings** can be **changed** over the UI, including a calibration and two **different transfer modes**. The software is written in **Python**, so it can be modified to your own needs and executed on **any OS**. New **firmware updates** can be flashed to the device easily with the **[firmware updater](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater)** application.
+The standalone PC **[thermal live viewer](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Live%20Viewer)** software allows you to **capture** HQ **thermal** as well as **videos** right on the **computer**.  Various **settings** can be **changed** over the UI, including a calibration and two **different transfer modes**. The software is written in **Python**, so it can be modified to your own needs and executed on **any OS**. New **firmware updates** can be flashed to the device easily with the **[firmware updater](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater)** application.
 
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/ThermoVision.png" width="700">
 
 
-There is a powerful **[thermal analysis software](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)** for the PC, called **ThermoVision**. The **image browser** can show all thermal & visual images on the internal storage, when the device is connected over USB. They can then be loaded with one click. The software allows you to **analyze** and **edit** the **thermal raw data files** right from the device, create **combined images** and **stream & record live images** (thermal & visual) from the Thermocam. You can even set **temperature thresholds**, which trigger a specific action like opening a file, saving an image or sending a command to the serial port.
+There is a powerful **[thermal analysis software](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)** for the PC, called **ThermoVision**. The **image browser** can show all thermal images on the internal storage, when the device is connected over USB. They can then be loaded with one click. The software allows you to **analyze** and **edit** the **thermal raw data files** right from the device and **stream & record live images** from the Thermocam. You can even set **temperature thresholds**, which trigger a specific action like opening a file, saving an image or sending a command to the serial port.
 
 
 <img src="https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/DataViewer.png" width="600">
