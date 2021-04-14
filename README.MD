@@ -36,7 +36,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 <table style="width: 100%">
    <tr>
       <td style="width: 113px" >
-         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB.png" style="-webkit-user-select: none" />
+         &nbsp;<img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/BOM/PCB_new.png" style="-webkit-user-select: none" />
       </td>
       <td ><a href="https://github.com/maxritter/DIY-Thermocam/tree/master/PCB">
 	  <strong>Printed Circuit Board V3</strong></a><br />
