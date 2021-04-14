@@ -9,10 +9,10 @@ You can also use the Gerber.zip and upload it to any PCB service of your choice 
 
 ## Front
 
-![FRONT](FRONT.PNG)
+![FRONT](3.0/FRONT.PNG)
 
 ## Back
 
-![FRONT](BACK.PNG)
+![FRONT](3.0/BACK.PNG)
 
 
