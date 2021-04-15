@@ -31,7 +31,7 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 
 ## DIY-Thermocam V3 KIT
 
-[**Pre-order now!**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K8768C3HCK2DJ) Estimated shipment date is **<u>mid of April</u>**. **Worldwide shipping with tracking** is included, leave your **shipping address** during the payment. The KIT **includes the parts listed below** and assumes **components from Digikey, Robotshop and BuyDisplay are self-bought**. It works with the **radiometric version** of the FLIR Lepton (**Lepton2.5 or Lepton3.5**). **[Get in touch with me](https://www.maxritter.net/contact/)** if you have **any questions**.
+[**Pre-order now!**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K8768C3HCK2DJ) Estimated shipment date is **<u>end of April</u>**. **Worldwide shipping with tracking** is included, leave your **shipping address** during the payment. The KIT **includes the parts listed below** and assumes **components from Digikey, Robotshop and BuyDisplay are self-bought**. It works with the **radiometric version** of the FLIR Lepton (**Lepton2.5 or Lepton3.5**). **[Get in touch with me](https://www.maxritter.net/contact/)** if you have **any questions**.
 
 <table style="width: 100%">
    <tr>
