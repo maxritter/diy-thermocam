@@ -31,20 +31,11 @@ The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/ma
 
 ### Order now!
 
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="7U6HNUYY4BRZJ">
-<table>
-<tr><td><input type="hidden" name="on0" value="V3 KIT including international shipping; ships mid of May 2021">V3 KIT including international shipping; ships mid of May 2021</td></tr><tr><td><select name="os0">
-	<option value="Without Lepton3.5 and Breakout Board V2">Without Lepton3.5 and Breakout Board V2 €249,00 EUR</option>
-	<option value="With Breakout Board V2 without Lepton3.5">With Breakout Board V2 without Lepton3.5 €299,00 EUR</option>
-	<option value="With Lepton3.5 and Breakout Board V2">With Lepton3.5 and Breakout Board V2 €499,00 EUR</option>
-</select> </td></tr>
-</table>
-<input type="hidden" name="currency_code" value="EUR">
-<input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online!">
-<img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1" height="1">
-</form>
+| DIY-Thermocam V3 KIT                          | FLIR Lepton3.5                                  | Lepton Breakout Board V2                        | International Shipping                        | Price    | Order Link                                                   |
+| --------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- | --------------------------------------------- | -------- | ------------------------------------------------------------ |
+| **<span style="color:green">Included</span>** | **<span style="color:red">Not Included</span>** | **<span style="color:red">Not Included</span>** | **<span style="color:green">Included</span>** | **249€** | **[Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7U6HNUYY4BRZJ)** |
+| **<span style="color:green">Included</span>** | **<span style="color:red">Not Included</span>** | **<span style="color:green">Included</span>**   | **<span style="color:green">Included</span>** | **299€** | [**Paypal**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PWAZUKNGM52JL) |
+| **<span style="color:green">Included</span>** | **<span style="color:green">Included</span>**   | **<span style="color:green">Included</span>**   | **<span style="color:green">Included</span>** | **499€** | [**Paypal**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2H85CP6RY5VGE) |
 
 Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with tracking ID** is included, leave your **shipping address** during the payment process. There are **two versions of the KIT**: One **with the FLIR Lepton 3.5 and the Lepton Breakout Board V2**, and **another without**. **Version 3** of the DIY-Thermocam works with the **standard radiometric versions of the FLIR Lepton (Lepton2.5 & Lepton3.5)**, so you can also buy them on your own elsewhere, for example over the links below. **[Get in touch with me](https://www.maxritter.net/contact/)** if you have **any questions**. The **V3 KIT contains the following parts**:
 
@@ -306,8 +297,6 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
       <td ><strong>3x Washer M2</strong></td>
    </tr>
 </table>
-
-
 
 
 # Device Images
