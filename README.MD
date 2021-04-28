@@ -374,10 +374,10 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
          Thermal temp. range
       </td>
       <td>
-         -10° C - +140° C or -10° C - +450° C (Lepton3.5)
+         -10°C - +140°C or -10°C - +450°C
       </td>
       <td>
-         <span style="line-height: 26.6667px;">-20° C to 250° C</span>
+         <span style="line-height: 26.6667px;">-20°C to 250°C</span>
       </td>
    </tr>
    <tr>
@@ -404,28 +404,6 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
    </tr>
    <tr>
       <td>
-         Spot sensor temp. range
-      </td>
-      <td>
-         -70° C to 380° C (Lepton2.0/3.0 only)
-      </td>
-      <td>
-         -20° C to 250° C
-      </td>
-   </tr>
-   <tr>
-      <td>
-         Spot sensor temp. accuracy
-      </td>
-      <td>
-         0.5° C over wide range
-      </td>
-      <td>
-         ±2 ° C or ±2%
-      </td>
-   </tr>
-   <tr>
-      <td>
          Temp. measurement mode
       </td>
       <td>
@@ -433,17 +411,6 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
       </td>
       <td>
          spot (center) mode
-      </td>
-   </tr>
-   <tr>
-      <td>
-         Image modes
-      </td>
-      <td>
-         IR image, visual image, combined
-      </td>
-      <td>
-         IR image, visual image. MSX
       </td>
    </tr>
    <tr>
@@ -506,14 +473,13 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
          Price
       </td>
       <td class="auto-style1">
-         <strong>~450€</strong>
+         <strong>499€</strong>
       </td>
       <td class="auto-style2">
          <strong>2000€</strong>
       </td>
    </tr>
 </table>
-
 
 
 
