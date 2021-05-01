@@ -12,7 +12,7 @@ GNU General Public License v3.0, copyright by Max Ritter
 
 **THIS GUIDE IS ONLY REQUIRED, IF YOU WANT TO MAKE CHANGES TO THE FIRMWARE ON YOUR OWN!**
 
-If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex) from **[here](https://github.com/maxritter/diythermocam_firmware/releases)**.
+If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex) from **[here](https://github.com/maxritter/DIY-Thermocam/releases)**.
 
 ----------
 
