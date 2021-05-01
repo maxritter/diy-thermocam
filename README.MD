@@ -9,11 +9,9 @@ The **DIY-Thermocam V3** is a **low-cost, do-it-yourself** thermal imager, based
 
 The aim of this project is to give **private persons**, **educational institutes** and **companies** access to a **portable**,  **affordable** and **customizable** thermal imaging platform.
 
-There are **various applications** like finding **heat leaks** in the insulation of buildings, the analysis of **electrical** or **mechanical components**, the **detection** of **persons** / animals or even mounting it on a **drone**, together with the additional **video out module**.
+There are **various applications** like finding **heat leaks** in the insulation of buildings, the analysis of **electrical** or **mechanical components**, the **detection** of **persons** / animals or even mounting it on a **drone** and **recording continuous or time-lapse images**.
 
-Constructed as a **self-assembly solution**, the device allows you to take **advantage** of the **versatile possibilities** of thermal imaging and to **save money** at one go.
-
-**Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
+Constructed as a **self-assembly solution**, the device allows you to take **advantage** of the **versatile possibilities** of thermal imaging. **Everything**, from **software** to **hardware**, is completely **open-source**! This allows everyone to **modify** or **extend** the functionalities of the device to their **own needs**!
 
 The **DIY-Thermocam V3 self-assembly KIT** contains **all required components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2** (need to be bought separately from either [Digikey.com](https://www.digikey.com/) or [Groupgets.com](https://store.groupgets.com/)). Please **subscribe to the list below** to **get notified** when the **KIT goes on sale**:
 
