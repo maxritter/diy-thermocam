@@ -1,7 +1,0 @@
-CalSlope:	0.057447	
-CalOffset:	-208.428	
-RawLowValue:	3992	
-RawHiValue:	4227	
-TempLowValue:	20.9	
-TempHiValue:	34.4	
-Note:	09:14:07	

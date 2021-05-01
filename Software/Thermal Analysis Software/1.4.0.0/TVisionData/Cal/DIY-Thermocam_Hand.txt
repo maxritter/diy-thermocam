@@ -1,7 +1,0 @@
-CalSlope:	0.03976	
-CalOffset:	-288.655	
-RawLowValue:	7770	
-RawHiValue:	8019	
-TempLowValue:	20.24	
-TempHiValue:	30.18	
-Note:	20°C bis 30°C also nur 10 Range 	

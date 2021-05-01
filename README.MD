@@ -19,25 +19,39 @@ Constructed as a **self-assembly solution**, the DIY-Thermocam allows you to tak
 
 # Building Instructions
 
-You can build your **own DIY-Thermocam V3** at home **easily** in a **do-it-yourself approach**. **It's like Lego (for grown-ups)!** 
+You can build your **own DIY-Thermocam V3** at home **easily** in a **do-it-yourself approach**. An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_06.pdf)** leads you through the **process** of **constructing** the device, **step-by-step**.
 
-An **[illustrated assembly guide](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/AssemblyGuide_06.pdf)** leads you through the **process** of **constructing** the device, **step-by-step**. You should have soldered at least **one small project before**, but with that experience you **should be fine**. 
+For the **tools**, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  Check out the **[schematic](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/Schematic_3.0.pdf)** and the **[pinmap](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/Pinmap_3.0.pdf)** to see how the connections from and to the microcontroller work.
 
-For the **tools**, you only need a **simple soldering iron**, some solder tin, a nippers and a screwdriver. The **design** of the **PCB** is very **basic**: No SMD components, only big through-hole parts and modules.  The **enclosure** can be assembled with only **bolts & nuts**, no glue is required. 
+In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. The **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**.
 
-The **[firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_08.pdf)** helps you to update your device to the **newest firmware** (will be updated soon for V3). In order to understand to **various device functionalities**, have a look at the **[manual](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Manual_13.pdf)**. For going deeper, the **structure of the raw data files** is explained **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/RawData_07.pdf)**, and the **open USB serial protocol** **[here](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/SerialProtocol_15.pdf)**. A **[scientific paper](https://github.com/maxritter/DIY-Thermocam/raw/master/Documents/Scientific%20Paper.pdf)** is also available, giving an **overview** about the whole **project** and its **capabilities**.
+The **enclosure** has been **laser cutted** from 3mm acryl plastic and can be assembled with only **bolts & nuts**, no glue is required. 
 
 
+### DIY-Thermocam V3 KIT
 
-### Order now!
+The **self-assembly KIT** contains **all required components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2** (need to be bought separately from either [Digikey.com](https://www.digikey.com/) or [Groupgets.com](https://store.groupgets.com/)). Please **subscribe to the list below** to **get notified** when the **KIT goes on sale**:
 
-| DIY-Thermocam V3 KIT                          | FLIR Lepton3.5                                  | Lepton Breakout Board V2                        | International Shipping                        | Price    | Order Link                                                   |
-| --------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- | --------------------------------------------- | -------- | ------------------------------------------------------------ |
-| **<span style="color:green">Included</span>** | **<span style="color:red">Not Included</span>** | **<span style="color:red">Not Included</span>** | **<span style="color:green">Included</span>** | **239€** | **[Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7U6HNUYY4BRZJ)** |
-| **<span style="color:green">Included</span>** | **<span style="color:red">Not Included</span>** | **<span style="color:green">Included</span>**   | **<span style="color:green">Included</span>** | **299€** | [**Paypal**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PWAZUKNGM52JL) |
-| **<span style="color:green">Included</span>** | **<span style="color:green">Included</span>**   | **<span style="color:green">Included</span>**   | **<span style="color:green">Included</span>** | **499€** | [**Paypal**](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2H85CP6RY5VGE) |
+<div id="mc_embed_signup">
+<form action="https://diy-thermocam.us1.list-manage.com/subscribe/post?u=a8b544560a56792e6c65404e6&amp;id=aed219ca7d" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+    <div id="mc_embed_signup_scroll">
+	<h2>Subscribe</h2>
+<div class="mc-field-group">
+	<label for="mce-EMAIL">Email Address:
+</label>
+	<input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
+</div>
+	<div id="mce-responses" class="clear">
+		<div class="response" id="mce-error-response" style="display:none"></div>
+		<div class="response" id="mce-success-response" style="display:none"></div>
+	</div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_a8b544560a56792e6c65404e6_aed219ca7d" tabindex="-1" value=""></div>
+    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    </div>
+</form>
+</div>
 
-Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with tracking ID** is included, leave your **shipping address** during the payment process. There are **two versions of the KIT**: One **with the FLIR Lepton 3.5 and the Lepton Breakout Board V2**, and **another without**. **Version 3** of the DIY-Thermocam works with the **standard radiometric versions of the FLIR Lepton (Lepton2.5 & Lepton3.5)**, so you can also buy them on your own elsewhere, for example over the links below. **[Get in touch with me](https://www.maxritter.net/contact/)** if you have **any questions**. The **V3 KIT contains the following parts**:
+
 
 <table style="width: 100%">
    <tr>
@@ -46,7 +60,7 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
       </td>
       <td >
 	  <a href="https://www.digikey.com/product-detail/en/flir/500-0771-01/500-0771-01-ND/7606616">
-	  <strong>FLIR Lepton 3.5</strong></a> <strong>(optional, can also be bought separately)</strong><br />
+	  <strong>FLIR Lepton 3.5</strong></a> <strong>Has to be bought separately</strong><br />
          160x120 Radiometric LWIR sensor<br />
       </td>
    </tr>
@@ -56,7 +70,7 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
       </td>
       <td >
 	  <a href="https://www.digikey.com/en/products/detail/flir-lepton/250-0577-00/10385179?s=N4IgTCBcDaIGYBsCWAnABAgpgBwC4HsA7NAIxUwEMBrfAV1xAF0BfIA">
-	  <strong>Lepton Breakout Board V2</strong></a> <strong>(optional, can also be bought separately)</strong><br />
+	  <strong>Lepton Breakout Board V2</strong></a> <strong>Has to be bought separately</strong><br />
          Interface the Lepton over SPI / I2C&nbsp;
       </td>
    </tr>
@@ -299,9 +313,10 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
 </table>
 
 
+
 # Device Images
 
-**Will be updated soon for V3!**
+***Reflect V2, will be updated soon for V3!***
 
 <img src="https://raw.githubusercontent.com/maxritter/DIY-Thermocam/master/Images/Website/DeviceFront.jpg" width="500">
 
@@ -316,12 +331,11 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
 
 
 
-# Features
+# Features of V3
 
 
  - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular, **Arduino** compatible **Teensy 4.1**
  - Frame rate of up to **9 FPS** (US export compliance)
- - **HDMI** or **analog video** output  capabilities (640x480 pixel) over external video output module
  - **18 different color schemes** including rainbow, ironblack, grayscale, hot & cold
  - 3.2 inch **LCD touch display** with bright colors,  wide angle and resistive touch
  - **Save thermal images** with a resolution of 640x480 pixels on the device
@@ -329,7 +343,7 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
  - **Internal storage** over microSD card, accessible as a Mass Storage device on any PC via USB
  - **2000 mAh lithium polymer battery** for long operation time (4-6 hours)
  - **Open-source firmware** written in **Arduino compatible C/C++** code
- - Regular **firmware updates** with new features, flashable over a standalone firmware updater
+ - Regular **firmware updates** with new features, flashable over a cross-OS firmware updater
  - **Standalone thermal viewer application** to save high-quality thermal images & videos  on the computer
  - Fully **compatible** to the comprehensive **thermal analysis software** ThermoVision by Joe-C
  - Use simple **commands** to receive all thermal & configuration data over the **USB serial port** with high speed
@@ -467,19 +481,7 @@ Estimated shipment date is **<u>mid of May 2021</u>**. **Worldwide shipping with
          575g
       </td>
    </tr>
-   <tr>
-      <td>
-         Price
-      </td>
-      <td class="auto-style1">
-         <strong>499€</strong>
-      </td>
-      <td class="auto-style2">
-         <strong>2000€</strong>
-      </td>
-   </tr>
 </table>
-
 
 
 # Device UI

@@ -1,8 +1,0 @@
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\bin\Debug\DIY-Thermocam Updater.exe.config
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\bin\Debug\DIY-Thermocam Updater.exe
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\bin\Debug\DIY-Thermocam Updater.pdb
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Debug\DIYThermocamUpdater.UpdaterForm.resources
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Debug\DIYThermocamUpdater.Properties.Resources.resources
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Debug\DIY-Thermocam Updater.csproj.GenerateResource.cache
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Debug\DIY-Thermocam Updater.exe
-C:\Users\Max\Dropbox\Thermocam\DIY-Thermocam\Software\Firmware Updater\1.13\Source\DIYThermocamUpdater\obj\Debug\DIY-Thermocam Updater.pdb

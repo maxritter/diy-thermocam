@@ -1,6 +1,0 @@
-[submodule "diythermocam_firmware"]
-	path = diythermocam_firmware
-	url = https://github.com/maxritter/diythermocam_firmware
-[submodule "Firmware"]
-	path = Firmware
-	url = https://github.com/maxritter/diythermocam_firmware

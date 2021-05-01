@@ -1,7 +1,8 @@
 **Firmware Updater**
 
-The **standalone firmware updater** only runs on **Windows** XP or greater, get the latest version from [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/1.13/Updater). Then follow the [firmware update guide](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/FirmwareUpdate_07.pdf).
+To flash the newest version of the firmware to the DIY-Thermocam, use the Teensy Loader that works on Windows, Linux and Mac**. **
 
-You can also use the **Teensy Loader**, which works for Windows,** Linux and Mac**. For Windows, it is available [here](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater/Teensy%20Loader), for Linux and Mac download "Teensyduino" from [here](https://www.pjrc.com/teensy/td_download.htm). Load the hex file with "teensy.exe", then launch "teensy_reboot.exe" while the Thermocam is connected to the PC and turned on. The flash procedure should start. In case there is an error **"File too big"**, upload "FileTooBig.hex" to the Teensy first and then the newest version of the firmware in the next step.
+For Windows, it is available in this folder, for Linux and Mac download "Teensyduino" from [here](https://www.pjrc.com/teensy/td_download.htm). Load the hex file with "teensy.exe", then launch "teensy_reboot.exe" while the Thermocam is connected to the PC and turned on. The flash procedure should start. 
 
-In the unlikely case that the update failed and the device **does not start any more**, load the firmware file again and start the flash procedure, the status should display “Waiting for device...”. Then [short the pins P & G on the Teensy for one second](https://github.com/maxritter/DIY-Thermocam/raw/master/Images/Website/TeensyProgram.png) with a screwdriver, while the device is turned on and connected to the PC. Afterwards, the flash should start.
+In the unlikely case that the update failed and the device **does not start any more**, press the push button on the Teensy to put it into bootloader mode, then try to flash again.
+
