@@ -32,24 +32,8 @@ The **enclosure** has been **laser cutted** from 3mm acryl plastic and can be as
 
 The **self-assembly KIT** contains **all required components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2** (need to be bought separately from either [Digikey.com](https://www.digikey.com/) or [Groupgets.com](https://store.groupgets.com/)). Please **subscribe to the list below** to **get notified** when the **KIT goes on sale**:
 
-<div id="mc_embed_signup">
-<form action="https://diy-thermocam.us1.list-manage.com/subscribe/post?u=a8b544560a56792e6c65404e6&amp;id=aed219ca7d" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-    <div id="mc_embed_signup_scroll">
-	<h2>Subscribe</h2>
-<div class="mc-field-group">
-	<label for="mce-EMAIL">Email Address:
-</label>
-	<input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
-</div>
-	<div id="mce-responses" class="clear">
-		<div class="response" id="mce-error-response" style="display:none"></div>
-		<div class="response" id="mce-success-response" style="display:none"></div>
-	</div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_a8b544560a56792e6c65404e6_aed219ca7d" tabindex="-1" value=""></div>
-    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
-    </div>
-</form>
-</div>
+#### **[-> Subscribe Now <-](https://mailchi.mp/3e0df5458871/diy-thermocam-v3-kit)**
+
 
 
 
