@@ -5,7 +5,7 @@
     "type": "header",
     "template": "header",
     "title": "DIY-Thermocam",
-    "logo_img": "/images/logo_large.png",
+    "logo_img": "/images/icon.png",
     "logo_img_alt": "Libris logo",
     "has_nav": true,
     "nav_links": [
