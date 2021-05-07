@@ -3,7 +3,7 @@ title: Home
 sections:
   - type: section_hero
     template: section_hero
-    title: Hero Section
+    title: DIY-Thermocam
     section_id: hero
     image: images/5.jpg
     content: >-
