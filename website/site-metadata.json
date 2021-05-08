@@ -133,16 +133,6 @@
         "has_social": true,
         "social_links": [
             {
-                "type": "action",
-                "template": "action",
-                "label": "Twitter",
-                "url": "https://twitter.com/",
-                "style": "icon",
-                "icon_class": "dev",
-                "new_window": true,
-                "no_follow": false
-            },
-            {
                 "url": "https://www.youtube.com/channel/UC4XjTWGf-Umvk3ypZHzNSAw",
                 "style": "icon",
                 "icon_class": "youtube",
