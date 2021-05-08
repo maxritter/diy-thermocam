@@ -46,7 +46,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Device Features",
+                "label": "Thermal Images",
                 "url": "#",
                 "style": "link",
                 "has_subnav": false,
