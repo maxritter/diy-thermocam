@@ -3,7 +3,7 @@ title: Documentation
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
-  title: Welcome to Libris
+  title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: This is the documentation page
   extra:
     - name: 'og:type'
