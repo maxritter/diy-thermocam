@@ -82,7 +82,7 @@ sections:
     template: section_cta
     title: Build your own thermal camera now!
     section_id: cta
-    subtitle: Buy the DIY-Thermocam V3 self-assembly KIT
+    subtitle: Buy the DIY-Thermocam V3 self-assembly KIT including all components
     actions:
       - type: action
         template: action
