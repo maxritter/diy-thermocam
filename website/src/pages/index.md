@@ -13,20 +13,22 @@ sections:
         label: Get Started
         url: /docs
         style: primary
-  
   - type: section_content
     template: section_content
     title: Improved performance and simplicity
     section_id: text-img
     image: /images/open.jpg
     image_position: left
-    content: >-
-      Version 3 has been re-designed to offer 3x the performance of the predecessor, so thermal imaging is now much more fun! 
+    content: >
+      Version 3 has been redesigned to offer 3x the performance of the
+      predecessor, so thermal imaging is now much more fun! The assembly has
+      been simplified, enabling a wider audience group to build the device by
+      their own using simple tools and an illustrated assembly guide.
     actions:
       - type: action
         template: action
         label: View Live Demo
-        url: https://youtu.be/rnlmHt4fbEg
+        url: 'https://youtu.be/rnlmHt4fbEg'
         style: primary
       - type: action
         template: action
@@ -38,7 +40,10 @@ sections:
     title: Applications
     section_id: text-no-img
     content: >-
-      There are various applications like finding heat leaks in the insulation of buildings, the analysis of electrical or mechanical components, the detection of persons / animals or even mounting it on a drone and recording continuous or time-lapse images.
+      There are various applications like finding heat leaks in the insulation
+      of buildings, the analysis of electrical or mechanical components, the
+      detection of persons / animals or even mounting it on a drone and
+      recording continuous or time-lapse images.
     actions:
       - type: action
         template: action
