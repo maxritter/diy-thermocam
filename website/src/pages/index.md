@@ -15,7 +15,7 @@ sections:
         style: primary
   - type: section_content
     template: section_content
-    title: Improved performance and simplicity
+    title: The DIY-Thermocam V3 is here!
     section_id: text-img
     image: /images/open.jpg
     image_position: left
