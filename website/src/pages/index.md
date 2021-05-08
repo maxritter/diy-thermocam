@@ -57,54 +57,7 @@ sections:
         label: Check out the building instructions
         url: /docs/getting-started
         style: secondary
-  - type: section_content
-    template: section_content
-    title: Applications
-    section_id: text-no-img
-    content: >-
-      There are various applications like finding heat leaks in the insulation
-      of buildings, the analysis of electrical or mechanical components, the
-      detection of persons / animals or even mounting it on a drone and
-      recording continuous or time-lapse images.
-    actions:
-      - type: action
-        template: action
-        label: Get Started
-        url: /docs/getting-started/installation
-        style: primary
-  - type: section_grid
-    template: section_grid
-    title: Sample Layouts
-    section_id: features-two-col
-    subtitle: An optional subtitle of the section
-    col_number: two
-    grid_items:
-      - type: grid_item
-        template: grid_item
-        title: Overview
-        content: >-
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nisl
-          ligula, cursus id molestie vel, maximus aliquet risus. Vivamus in nibh
-          fringilla, fringilla tortor at, pulvinar orci.
-        actions:
-          - type: action
-            template: action
-            label: Learn More
-            url: /overview
-            style: link
-      - type: grid_item
-        template: grid_item
-        title: Showcase
-        content: >-
-          Donec lobortis velit sed suscipit lobortis. Ut non quam metus. Nullam
-          a maximus mi. Quisque justo nunc, sollicitudin euismod euismod at,
-          tincidunt ut tellus. Vivamus rhoncus mattis varius.
-        actions:
-          - type: action
-            template: action
-            label: Learn More
-            url: /showcase
-            style: link
+
   - type: section_cta
     template: section_cta
     title: Build your own thermal camera now!
