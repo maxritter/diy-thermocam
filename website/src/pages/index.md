@@ -16,7 +16,7 @@ sections:
   
   - type: section_content
     template: section_content
-    title: Meet the new version 3
+    title: V3 - More performance for better thermography
     section_id: text-img
     image: /images/open.jpg
     image_position: left
