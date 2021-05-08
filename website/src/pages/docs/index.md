@@ -1,5 +1,5 @@
 ---
-title: Welcome
+title: Documentation
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
