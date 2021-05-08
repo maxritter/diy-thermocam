@@ -20,7 +20,7 @@ sections:
       - type: grid_item
         template: grid_item
         title: Inside
-        image: /images/inside.jpg
+        image: /images/houses_2.jpg
         content: A personal theme for Unibit
       - type: grid_item
         template: grid_item
