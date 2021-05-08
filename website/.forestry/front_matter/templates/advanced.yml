@@ -35,5 +35,4 @@ fields:
 pages:
   - src/pages/index.md
   - src/pages/overview.md
-  - src/pages/showcase.md
   - src/pages/device-images.md
