@@ -46,7 +46,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Features",
+                "label": "Device Features",
                 "url": "#",
                 "style": "link",
                 "has_subnav": false,
