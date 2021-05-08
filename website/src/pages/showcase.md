@@ -38,7 +38,6 @@ sections:
       - type: grid_item
         template: grid_item
         title: Back Open
-        title_url: 'https://themes.stackbit.com/demos/ampersandexto/'
         image: /images/open.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
