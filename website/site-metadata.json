@@ -34,7 +34,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Blog",
+                "label": "Thermal Images",
                 "url": "/blog",
                 "style": "link",
                 "has_subnav": false,
