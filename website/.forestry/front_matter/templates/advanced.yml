@@ -36,3 +36,4 @@ pages:
   - src/pages/index.md
   - src/pages/overview.md
   - src/pages/device-images.md
+  - src/pages/test.md
