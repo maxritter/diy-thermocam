@@ -80,7 +80,7 @@ sections:
         image: /images/car-engine.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Wall Adaptor
         image: /images/wall-adaptor.jpg
       - type: grid_item
         template: grid_item
