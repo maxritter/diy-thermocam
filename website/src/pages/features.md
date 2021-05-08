@@ -8,6 +8,7 @@ seo:
   robots: []
   extra: []
   type: stackbit_page_meta
+  title: DIY-Thermocam | Open-source thermal imaging for everyone!
 template: page
 ---
 
