@@ -113,7 +113,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Building Instructions",
-                "url": "/style-guide",
+                "url": "/building-instructions",
                 "style": "link",
                 "has_subnav": false,
                 "icon_class": "",
