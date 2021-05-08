@@ -1,5 +1,5 @@
 ---
-title: lorem-ipsum
+title: Software
 subtitle: lorem-ipsum
 seo:
   title: ''
