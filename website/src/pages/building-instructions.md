@@ -50,3 +50,33 @@ Solder the Teensy with the female headers to the PCB. This is how it should look
 And on the back where the solder connections are:
 
 ![](/images/festive-pine.jpg)
+
+##### 7.
+
+Put male headers into the charging module and solder it right to the Teensy. This is how it should look on the front:
+
+![](/images/purple-parsley.jpg)
+
+##### 8.
+
+And on the back:
+
+![](/images/oval-kale.jpg)
+
+##### 9.
+
+Solder the 5V Booster module to the top right of the PCB. This is how it looks on the front:
+
+![](/images/pleasant-spruce.jpg)
+
+##### 10.
+
+And on the back:
+
+![](/images/perpetual-thyme.jpg)
+
+11\.
+
+Solder the 2x20 pin display header to the left of the PCB:
+
+![](/images/11.jpg)
