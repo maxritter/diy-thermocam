@@ -60,7 +60,7 @@ sections:
     template: section_content
     title: A Section With An Image
     section_id: text-img
-    image: images/jamstack.svg
+    image: /images/open.jpg
     image_position: left
     content: >-
       Nam pulvinar ante eu ultricies volutpat. Sed nulla nibh, dapibus sit amet
