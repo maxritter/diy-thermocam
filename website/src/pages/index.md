@@ -25,7 +25,7 @@ sections:
     actions:
       - type: action
         template: action
-        label: View Demo
+        label: View Live Demo
         url: /docs/getting-started
         style: primary
       - type: action
