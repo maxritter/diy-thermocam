@@ -7,12 +7,6 @@ sections:
     section_id: hero
     image: /images/5.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_long-wave-infrared array sensor.\n"
-    actions:
-      - type: action
-        template: action
-        label: Check out the Docs
-        url: /docs
-        style: primary
   - type: section_content
     template: section_content
     title: The DIY-Thermocam V3 is here!
