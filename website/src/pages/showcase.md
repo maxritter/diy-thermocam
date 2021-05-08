@@ -34,7 +34,7 @@ sections:
         template: grid_item
         title: Ampersand
         title_url: 'https://themes.stackbit.com/demos/ampersandexto/'
-        image: images/9.jpg
+        image: /images/left.jpg
         content: Medium inspired blogging theme for Unibit
 seo:
   type: stackbit_page_meta
