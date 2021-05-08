@@ -40,7 +40,7 @@ sections:
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
-        title: Right
+        title: Soldering Iron
         image: /images/soldering-iron.jpg
         content: Medium inspired blogging theme for Unibit
 seo:
