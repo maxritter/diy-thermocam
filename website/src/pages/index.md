@@ -16,7 +16,7 @@ sections:
   
   - type: section_content
     template: section_content
-    title: New! DIY-Thermocam V3
+    title: Meet the new version 3
     section_id: text-img
     image: /images/open.jpg
     image_position: left
