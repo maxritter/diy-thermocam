@@ -144,7 +144,7 @@
             },
             {
                 "url": "#",
-                "style": "link",
+                "style": "icon",
                 "icon_class": "youtube",
                 "new_window": false,
                 "no_follow": false,
