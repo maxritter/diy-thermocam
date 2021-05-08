@@ -4,7 +4,7 @@
     "header": {
         "type": "header",
         "template": "header",
-        "title": "DIY-Thermocam - An open-source, di-it-yourself thermal imager",
+        "title": "DIY-Thermocam",
         "logo_img_alt": "Libris logo",
         "has_nav": true,
         "nav_links": [
