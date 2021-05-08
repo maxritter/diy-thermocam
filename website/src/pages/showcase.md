@@ -17,7 +17,6 @@ sections:
         title: Front
         title_url: 'https://themes.stackbit.com/demos/exto/'
         image: /images/front.jpg
-        content: A portfolio theme for Unibit
       - type: grid_item
         template: grid_item
         title: Fresh
