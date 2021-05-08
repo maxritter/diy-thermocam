@@ -50,7 +50,7 @@ sections:
       - type: action
         template: action
         label: Read Building Instructions
-        url: /docs/getting-started
+        url: /building-instructions
         style: secondary
   - type: section_cta
     template: section_cta
