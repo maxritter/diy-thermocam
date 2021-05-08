@@ -109,7 +109,7 @@ sections:
       - type: grid_item
         template: grid_item
         title: Soldering Iron
-        image: /images/soldering-iron.jpg
+        image: /images/central-heating_1.jpg
       - type: grid_item
         template: grid_item
         title: Soldering Iron
