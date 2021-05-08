@@ -56,7 +56,7 @@ sections:
         image: /images/heaterbefore.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Heater after Venting
         image: /images/heaterafter.jpg
       - type: grid_item
         template: grid_item
