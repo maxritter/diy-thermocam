@@ -78,7 +78,7 @@
             },
             {
                 "label": "Desktop Software",
-                "url": "#",
+                "url": "/desktop-software",
                 "style": "link",
                 "icon_class": "dev",
                 "new_window": false,
