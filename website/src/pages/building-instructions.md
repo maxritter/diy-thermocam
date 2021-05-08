@@ -1,5 +1,5 @@
 ---
-title: Assembly Guide
+title: Building Instructions
 subtitle: >-
   This guide will guide you through all the steps to assemble your own
   DIY-Thermocam V3 from the components inside the KIT at home easily.
