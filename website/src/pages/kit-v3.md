@@ -1,6 +1,6 @@
 ---
 title: DIY-Thermocam V3 KIT
-subtitle: The style guide provides you with a blueprint of default post and page styles.
+subtitle: "The\_DIY-Thermocam V3 self-assembly KIT\_contains\_all required components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2\_(need to be bought separately from either\_Digikey.com\_or\_Groupgets.com)."
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
