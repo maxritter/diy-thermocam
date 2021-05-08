@@ -22,7 +22,7 @@ sections:
         template: grid_item
         title: Fresh
         title_url: 'https://themes.stackbit.com/demos/fresh/'
-        image: images/7.jpg
+        image: /images/back.jpg
         content: A personal theme for Unibit
       - type: grid_item
         template: grid_item
