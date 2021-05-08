@@ -4,7 +4,7 @@
     "header": {
         "type": "header",
         "template": "header",
-        "logo_img_alt": "Libris logo",
+        "logo_img_alt": "DIY-Thermocam Logo",
         "has_nav": true,
         "nav_links": [
             {
