@@ -44,7 +44,7 @@ sections:
         image: /images/milk.jpg
       - type: grid_item
         template: grid_item
-        title: Neighboorhood and Garden
+        title: Neighbourhood and Garden
         image: /images/houses_1.jpg
       - type: grid_item
         template: grid_item
