@@ -69,7 +69,7 @@ sections:
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
-  title: Stackbit Libris Theme
+  title: DIY-Thermocam
   description: The preview of the Libris theme
   extra:
     - name: 'og:type'
