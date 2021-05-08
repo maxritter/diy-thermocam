@@ -43,6 +43,41 @@ sections:
         title: Soldering Iron
         image: /images/soldering-iron.jpg
         content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
+      - type: grid_item
+        template: grid_item
+        title: Soldering Iron
+        image: /images/soldering-iron.jpg
+        content: Medium inspired blogging theme for Unibit
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
