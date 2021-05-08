@@ -8,7 +8,7 @@ sections:
     image: images/5.jpg
     content: >
       All images have been created with the Thermovision Software from raw files
-      on the SD card.
+      on the SD card of a DIY-Thermocam V3 with Lepton3.5.
   - type: section_grid
     template: section_grid
     section_id: showcase
