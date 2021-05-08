@@ -82,7 +82,7 @@ sections:
     template: section_cta
     title: Build your own thermal camera now!
     section_id: cta
-    subtitle: Buy the DIY-Thermocam V3 self-assembly KIT including all components apart from the FLIR Lepton and the Lepton Breakout Board V2
+    subtitle: Buy the DIY-Thermocam V3 self-assembly KIT including all components apart from the FLIR Lepton and the Lepton Breakout Board
     actions:
       - type: action
         template: action
