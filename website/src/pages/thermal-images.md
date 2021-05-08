@@ -92,7 +92,7 @@ sections:
         image: /images/house-front.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Internet Router
         image: /images/fritz-box.jpg
       - type: grid_item
         template: grid_item
