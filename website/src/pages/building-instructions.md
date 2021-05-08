@@ -197,3 +197,48 @@ And from the other:
 
 Carefully insert the Lepton2.5 or Lepton3.5 inside the Breakout Module. Make sure it clicks on both sides, so the Lepton is really connected properly:
 
+![](https://cdn.forestry.io/res2/q-43eUiiYhYqHr3LqgXLXzpoCtkj7iYFATsRwGJvo9Q/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDVGs1UFFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYTA0/MGYwNGE3NmMwZTAw/ZTIwNmZmZTFjNTU3/ZTI1OWRlYzk3YmZk/ZC8yOC5qcGc)
+
+##### 29.
+
+Insert the remaining two sides of the enclosure:
+
+![](/images/29.jpg)
+
+##### 30.
+
+Make sure the USB port of the Teensy is inside the cutout on the bottom of the device:
+
+![](https://preview--diythermocam-website-354b1.stackbit.dev/images/32.jpg)
+
+##### 31.
+
+Then put the backside on top and secure it with four screws. Flip the side again if the Lepton cutout does not align well, it is not centered:
+
+![](/images/30.jpg)
+
+##### 32.
+
+Turn the device around and insert the front side, secure it with four screws as well:
+
+![](/images/31.jpg)
+
+##### 33.
+
+You can attach the tripod now. This is how the final device looks on the front:
+
+![](https://cdn.forestry.io/res2/ZuJsKXFazBrN7ZucQQdvpZFRtkr7dEjN5DZ1LEGtoYg/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDVDJSVVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tMDdk/ZGM0ZjcyNDIxMjg4/M2ZkMGYxNDczMWFi/YThjNzBjZTliODVj/MS8zMy5qcGc)
+
+##### 34.
+
+And on the back:
+
+![](https://cdn.forestry.io/res2/qOLHL-VP82ezAyEGez1WxjrHJTCI-bbsfUQ7Tfh-e34/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDVUVaVVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tOWIw/Nzk4ODRlZTYxMDJl/ZTM4ZDk3NDZhNTI3/MTcyNDhiN2FjYmEz/YS8zNC5qcGc)
+
+##### 35.
+
+Finally, follow the instruction [**here**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) to flash the newest firmware to the device. You can find all firmware releases [**here**](https://github.com/maxritter/DIY-Thermocam/releases).
+
+
+
+**Congratulations, you have assembled your own thermal camera!  Please report any feedback or improvements to mail@maxritter.net.**
