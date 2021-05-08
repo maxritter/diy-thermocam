@@ -16,7 +16,6 @@ sections:
       - type: grid_item
         template: grid_item
         title: Front
-        title_url: 'https://themes.stackbit.com/demos/exto/'
         image: /images/front.jpg
       - type: grid_item
         template: grid_item
