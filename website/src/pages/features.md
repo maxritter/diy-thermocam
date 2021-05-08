@@ -1,5 +1,5 @@
 ---
-title: Features of V3
+title: Features
 subtitle: lorem-ipsum
 seo:
   title: ''
