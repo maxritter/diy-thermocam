@@ -58,7 +58,7 @@ sections:
             style: link
   - type: section_content
     template: section_content
-    title: A Section With An Image1
+    title: A Section With An Image
     section_id: text-img
     image: images/jamstack.svg
     image_position: left
