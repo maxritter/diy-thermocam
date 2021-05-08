@@ -129,7 +129,6 @@
     "footer": {
         "type": "footer",
         "template": "footer",
-        "content": "© 2021 DIY-Thermocam by ",
         "has_social": true,
         "social_links": [
             {
