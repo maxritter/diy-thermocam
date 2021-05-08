@@ -104,7 +104,7 @@ sections:
         image: /images/attic.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Row Houses
         image: /images/buildings.png
       - type: grid_item
         template: grid_item
