@@ -49,7 +49,7 @@
                 "label": "Sample Pages",
                 "url": "#",
                 "style": "link",
-                "has_subnav": false,
+                "has_subnav": true,
                 "subnav_links": [
                     {
                         "type": "action",
