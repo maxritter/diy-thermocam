@@ -36,7 +36,7 @@ seo:
 template: page
 image: images/5.jpg
 ---
-## DIY-Thermocam V3 KIT
+## Partlist
 
 The **DIY-Thermocam V3 self-assembly KIT** contains **all required components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2** (need to be bought separately from either [Digikey.com](https://www.digikey.com/) or [Groupgets.com](https://store.groupgets.com/)).
 
