@@ -21,9 +21,7 @@ sections:
     image: /images/open.jpg
     image_position: left
     content: >-
-      Nam pulvinar ante eu ultricies volutpat. Sed nulla nibh, dapibus sit amet
-      cursus quis, fringilla nec sapien. Vestibulum imperdiet nunc bibendum
-      consectetur lobortis.
+      The aim of this project is to give private persons, educational institutes and companies access to a portable, affordable and customizable thermal imaging platform.
     actions:
       - type: action
         template: action
