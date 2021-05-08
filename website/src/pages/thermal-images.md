@@ -84,7 +84,7 @@ sections:
         image: /images/wall-adaptor.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Human Face
         image: /images/human.jpg
       - type: grid_item
         template: grid_item
