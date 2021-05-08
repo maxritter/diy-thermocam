@@ -37,3 +37,4 @@ pages:
   - src/pages/overview.md
   - src/pages/device-images.md
   - src/pages/test.md
+  - src/pages/thermal-images.md
