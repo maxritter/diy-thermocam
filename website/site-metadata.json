@@ -79,7 +79,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Style Guide",
+                "label": "Building Instructions",
                 "url": "/style-guide",
                 "style": "link",
                 "has_subnav": false,
