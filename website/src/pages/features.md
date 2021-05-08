@@ -2,7 +2,6 @@
 title: Features
 subtitle: DIY-Thermocam V3
 seo:
-  title: ''
   description: ''
   robots: []
   extra: []
