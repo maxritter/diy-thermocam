@@ -39,7 +39,7 @@ sections:
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
-        title: Ampersand
+        title: Right
         image: /images/right.jpg
         content: Medium inspired blogging theme for Unibit
 seo:
