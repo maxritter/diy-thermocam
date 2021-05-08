@@ -138,7 +138,8 @@
                 "icon_class": "youtube",
                 "new_window": true,
                 "no_follow": false,
-                "type": "action"
+                "type": "action",
+                "label": "Youtube"
             },
             {
                 "type": "action",
