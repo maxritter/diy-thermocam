@@ -114,11 +114,10 @@ sections:
         template: grid_item
         title: 'Central Heating #2'
         image: /images/central-heating_2.jpg
-        
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
-  title: Showcase
+  title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: This is the showcase page
   extra:
     - name: 'og:type'
