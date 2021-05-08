@@ -86,7 +86,7 @@ sections:
     actions:
       - type: action
         template: action
-        label: Get Started
+        label: Buy now
         url: /docs/getting-started/installation
         style: primary
 seo:
