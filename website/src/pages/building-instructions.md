@@ -19,6 +19,12 @@ seo:
       value: DIY-Thermocam | Open-source thermal imaging for everyone
       keyName: property
       relativeUrl: false
+    - name: 'og:description'
+      value: >-
+        An open-source, do-it-yourself thermal imager based on the popular FLIR
+        Lepton long-wave-infrared array sensor.
+      keyName: property
+      relativeUrl: false
   type: stackbit_page_meta
 template: page
 ---
