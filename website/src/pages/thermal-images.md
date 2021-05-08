@@ -126,7 +126,7 @@ seo:
       value: website
       keyName: property
     - name: 'og:title'
-      value: Showcase
+      value: DIY-Thermocam | Open-source thermal imaging for everyone
       keyName: property
     - name: 'og:description'
       value: This is the showcase page
