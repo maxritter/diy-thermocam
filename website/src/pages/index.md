@@ -94,6 +94,7 @@ sections:
         label: Subscribe Now
         url: 'https://mailchi.mp/3e0df5458871/diy-thermocam-v3-kit'
         style: primary
+        new_window: true
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
