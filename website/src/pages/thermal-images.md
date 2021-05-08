@@ -96,7 +96,7 @@ sections:
         image: /images/fritz-box.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Coffee
         image: /images/coffee.jpg
       - type: grid_item
         template: grid_item
