@@ -39,6 +39,9 @@ sections:
     section_id: text-no-img
     content: >-
       There are various applications like finding heat leaks in the insulation of buildings, the analysis of electrical or mechanical components, the detection of persons / animals or even mounting it on a drone and recording continuous or time-lapse images.
+      There are various applications like finding heat leaks in the insulation of buildings, the analysis of electrical or mechanical components, the detection of persons / animals or even mounting it on a drone and recording continuous or time-lapse images.
+
+Constructed as a self-assembly solution, the device allows you to take advantage of the versatile possibilities of thermal imaging. Everything, from software to hardware, is completely open-source! This allows everyone to modify or extend the functionalities of the device to their own needs!
     actions:
       - type: action
         template: action
