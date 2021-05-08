@@ -19,7 +19,7 @@ sections:
     section_id: text-img
     image: /images/open.jpg
     image_position: left
-    content: >+
+    content: >
       **Version 3** has been redesigned to offer **3x the performance** of the
       predecessor, making **thermal imaging much more fun**!
 
@@ -44,9 +44,8 @@ sections:
 
       The **DIY-Thermocam V3 self-assembly KIT** contains **all required
       components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout
-      Board V2**. Please **subscribe to the list below** to **get notified**
-      when the **KIT goes on sale.**
-
+      Board V2**. Check out the **live device video** and the **assembly guide**
+      linked below to see if the project is something for you.
     actions:
       - type: action
         template: action
