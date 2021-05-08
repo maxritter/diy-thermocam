@@ -72,7 +72,7 @@ sections:
         image: /images/processor.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Three Lamps
         image: /images/lamp.jpg
       - type: grid_item
         template: grid_item
