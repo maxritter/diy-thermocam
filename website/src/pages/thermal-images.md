@@ -25,7 +25,7 @@ sections:
       - type: grid_item
         template: grid_item
         title: Back
-        image: /images/back.jpg
+        image: /images/pig.jpg
         content: A minimal blogging theme for Unibit
       - type: grid_item
         template: grid_item
