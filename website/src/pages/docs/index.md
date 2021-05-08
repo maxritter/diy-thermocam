@@ -1,5 +1,5 @@
 ---
-title: Welcome to Libris
+title: Welcome to the DIY-Thermocam documentation!
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
