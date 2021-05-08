@@ -60,7 +60,7 @@ sections:
         image: /images/heaterafter.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Washbowl
         image: /images/water-faucet.jpg
       - type: grid_item
         template: grid_item
