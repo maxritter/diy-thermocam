@@ -21,7 +21,6 @@ sections:
       - type: grid_item
         template: grid_item
         title: Inside
-        title_url: 'https://themes.stackbit.com/demos/fresh/'
         image: /images/inside.jpg
         content: A personal theme for Unibit
       - type: grid_item
