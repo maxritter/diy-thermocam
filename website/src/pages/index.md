@@ -9,7 +9,7 @@ sections:
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_long-wave-infrared array sensor.\n"
     actions:
       - label: Check out the GitHub Repo
-        url: "https://github.com/maxritter/DIY-Thermocam"
+        url: 'https://github.com/maxritter/DIY-Thermocam'
         style: primary
   - type: section_content
     template: section_content
@@ -74,7 +74,9 @@ seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
   title: DIY-Thermocam
-  description: The preview of the Libris theme
+  description: >-
+    An open-source, do-it-yourself thermal imager based on the popular FLIR
+    Lepton long-wave-infrared array sensor.
   extra:
     - name: 'og:type'
       value: website
