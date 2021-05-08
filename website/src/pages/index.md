@@ -32,7 +32,7 @@ sections:
         style: primary
       - type: action
         template: action
-        label: Get Started
+        label: Check out the building instructions
         url: /docs/getting-started
         style: secondary
   - type: section_content
