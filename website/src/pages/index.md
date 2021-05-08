@@ -1,5 +1,5 @@
 ---
-title: Home
+title: DIY-Thermocam
 sections:
   - type: section_hero
     template: section_hero
