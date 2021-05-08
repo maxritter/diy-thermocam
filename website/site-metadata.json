@@ -99,7 +99,7 @@
                 "type": "action_menu"
             },
             {
-                "label": "lorem-ipsum",
+                "label": "Partlist",
                 "url": "#",
                 "style": "link",
                 "icon_class": "dev",
