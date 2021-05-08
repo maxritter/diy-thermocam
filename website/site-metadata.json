@@ -148,7 +148,7 @@
                 "label": "LinkedIn",
                 "url": "https://www.linkedin.com/",
                 "style": "icon",
-                "icon_class": "linkedin",
+                "icon_class": "dev",
                 "new_window": true,
                 "no_follow": false
             },
