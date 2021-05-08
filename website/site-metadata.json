@@ -146,7 +146,7 @@
                 "url": "https://www.youtube.com/channel/UC4XjTWGf-Umvk3ypZHzNSAw",
                 "style": "icon",
                 "icon_class": "youtube",
-                "new_window": false,
+                "new_window": true,
                 "no_follow": false,
                 "type": "action"
             },
