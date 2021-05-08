@@ -114,10 +114,7 @@ sections:
         template: grid_item
         title: 'Central Heating #2'
         image: /images/central-heating_2.jpg
-      - type: grid_item
-        template: grid_item
-        title: Soldering Iron
-        image: /images/soldering-iron.jpg
+        
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
