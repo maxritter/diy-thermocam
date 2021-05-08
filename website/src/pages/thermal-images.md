@@ -100,7 +100,7 @@ sections:
         image: /images/coffee.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Attic
         image: /images/attic.jpg
       - type: grid_item
         template: grid_item
