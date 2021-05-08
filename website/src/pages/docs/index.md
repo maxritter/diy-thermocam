@@ -12,7 +12,7 @@ seo:
       value: website
       keyName: property
     - name: 'og:title'
-      value: Welcome to Libris
+      value: DIY-Thermocam | Open-source thermal imaging for everyone
       keyName: property
     - name: 'og:description'
       value: This is the documentation page
