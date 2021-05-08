@@ -23,7 +23,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Device Images",
-                "url": "/docs",
+                "url": "/device-images",
                 "style": "link",
                 "has_subnav": false,
                 "icon_class": "",
