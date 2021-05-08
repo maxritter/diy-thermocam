@@ -38,6 +38,8 @@ image: images/5.jpg
 ---
 ## DIY-Thermocam V3 KIT
 
+The 
+
 
 
 <table style="width: 100%">
