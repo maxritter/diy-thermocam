@@ -33,3 +33,4 @@ fields:
 pages:
   - src/pages/style-guide.md
   - src/pages/kit-v3.md
+  - src/pages/assembly-guide.md
