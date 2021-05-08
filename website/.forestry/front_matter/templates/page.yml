@@ -36,3 +36,4 @@ pages:
   - src/pages/software.md
   - src/pages/device-features.md
   - src/pages/partlist.md
+  - src/pages/building-instructions.md
