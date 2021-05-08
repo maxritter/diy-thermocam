@@ -26,7 +26,7 @@ sections:
       - type: action
         template: action
         label: View Live Demo
-        url: /docs/getting-started
+        url: https://youtu.be/rnlmHt4fbEg
         style: primary
       - type: action
         template: action
