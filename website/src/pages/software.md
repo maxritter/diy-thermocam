@@ -1,6 +1,6 @@
 ---
 title: Software
-subtitle: lorem-ipsum
+subtitle: Compatible with the DIY-Thermocam V3
 seo:
   title: ''
   description: ''
