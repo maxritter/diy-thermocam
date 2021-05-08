@@ -24,9 +24,22 @@ sections:
       predecessor, making **thermal imaging much more fun**!
 
 
-      The **assembly has been simplified**, enabling a wider audience group to
-      build the device by their own **using simple tools** and an illustrated
-      assembly guide.
+      The aim of this project is to give **private persons**, **educational
+      institutes** and **companies** access to a **portable**,  **affordable**
+      and **customizable** thermal imaging platform.
+
+
+      There are **various applications** like finding **heat leaks** in the
+      insulation of buildings, the analysis of **electrical** or **mechanical
+      components**, the **detection** of **persons** / animals or even mounting
+      it on a **drone** and **recording continuous or time-lapse images**.
+
+
+      Constructed as a **self-assembly solution**, the device allows you to take
+      **advantage** of the **versatile possibilities** of thermal imaging.
+      **Everything**, from **software** to **hardware**, is completely
+      **open-source**! This allows everyone to **modify** or **extend** the
+      functionalities of the device to their **own needs**!
     actions:
       - type: action
         template: action
