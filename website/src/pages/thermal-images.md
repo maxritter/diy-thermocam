@@ -48,7 +48,7 @@ sections:
         image: /images/houses_1.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Window Cold Airstream
         image: /images/cold-air.jpg
       - type: grid_item
         template: grid_item
