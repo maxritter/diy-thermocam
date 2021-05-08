@@ -6,7 +6,8 @@ sections:
     title: Device Images
     section_id: hero
     image: images/5.jpg
-    content: This is an optional page subtitle
+    content: |
+      DIY-Thermocam V3
   - type: section_grid
     template: section_grid
     section_id: showcase
