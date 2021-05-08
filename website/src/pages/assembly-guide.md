@@ -32,3 +32,21 @@ Cut the connection between the two pads on the top of the Teensy with a sharp kn
 Insert a microSD card into the top side of the Teensy. It will be used as an internal storage and can be accessed via a PC as mass storage over the USB connection:
 
 ![](/images/mighty-steel.jpg)
+
+##### 4.
+
+Stack four female headers on top of all the male headers from step 1. This avoids soldering the Teensy directly to the PCB and therefore simplifies any repairs or later adjustments:
+
+![](/images/square-spider.jpg)
+
+##### 5.
+
+Solder the Teensy with the female headers to the PCB. This is how it should look on the front:
+
+![](/images/groovy-lettuce.jpg)
+
+##### 6.
+
+And on the back where the solder connections are:
+
+![](/images/festive-pine.jpg)
