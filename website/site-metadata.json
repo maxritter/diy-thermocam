@@ -47,7 +47,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Thermal Images",
-                "url": "#",
+                "url": "/thermal-images",
                 "style": "link",
                 "has_subnav": false,
                 "subnav_links": [
