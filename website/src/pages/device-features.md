@@ -1,5 +1,5 @@
 ---
-title: Features
+title: Device Features
 subtitle: DIY-Thermocam V3
 seo:
   title: ''
