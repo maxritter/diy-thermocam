@@ -108,7 +108,7 @@ sections:
         image: /images/buildings.png
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: 'Central Heating #1'
         image: /images/central-heating_1.jpg
       - type: grid_item
         template: grid_item
