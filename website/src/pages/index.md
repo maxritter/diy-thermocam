@@ -21,7 +21,7 @@ sections:
     image: /images/open.jpg
     image_position: left
     content: >-
-      The aim of this project is to give private persons, educational institutes and companies access to a portable, affordable and customizable thermal imaging platform.
+      Version 3 has been re-designed to offer 3x the performance of the 
     actions:
       - type: action
         template: action
