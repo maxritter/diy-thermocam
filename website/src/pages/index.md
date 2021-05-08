@@ -16,7 +16,7 @@ sections:
   
   - type: section_content
     template: section_content
-    title: Open-Source Software & Hardware
+    title: New! Version 3.0 is out now
     section_id: text-img
     image: /images/open.jpg
     image_position: left
