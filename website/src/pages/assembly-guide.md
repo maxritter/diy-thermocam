@@ -1,5 +1,5 @@
 ---
-title: lorem-ipsum
+title: Assembly Guide
 subtitle: lorem-ipsum
 seo:
   title: ''
