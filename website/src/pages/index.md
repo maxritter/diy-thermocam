@@ -49,7 +49,7 @@ sections:
         style: primary
       - type: action
         template: action
-        label: Check out the building instructions
+        label: Read Building Instructions
         url: /docs/getting-started
         style: secondary
   - type: section_cta
