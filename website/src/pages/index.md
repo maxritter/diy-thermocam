@@ -27,7 +27,7 @@ sections:
     actions:
       - type: action
         template: action
-        label: View Live Demo
+        label: View Live Device Demo
         url: 'https://youtu.be/rnlmHt4fbEg'
         style: primary
       - type: action
