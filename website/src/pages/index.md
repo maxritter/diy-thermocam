@@ -82,7 +82,7 @@ seo:
       value: website
       keyName: property
     - name: 'og:title'
-      value: Stackbit Libris Theme
+      value: DIY-Thermocam | Open-source thermal imaging for everyone
       keyName: property
     - name: 'og:description'
       value: The preview of the Libris theme
