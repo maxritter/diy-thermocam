@@ -3,7 +3,7 @@ title: Showcase
 sections:
   - type: section_hero
     template: section_hero
-    title: Device Images
+    title: Thermal Images
     section_id: hero
     image: images/5.jpg
     content: |
