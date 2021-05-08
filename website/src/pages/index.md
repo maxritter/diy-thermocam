@@ -20,7 +20,7 @@ sections:
     image: /images/open.jpg
     image_position: left
     content: >
-      **Version 3 **has been redesigned to offer **3x the performance** of the
+      **Version 3** has been redesigned to offer **3x the performance** of the
       predecessor, making **thermal imaging much more fun**!
 
 
