@@ -40,7 +40,7 @@ sections:
       The **DIY-Thermocam V3 self-assembly KIT** contains **all required
       components apart from the FLIR Lepton 2.5/3.5 and the Lepton Breakout
       Board V2**. Check out the **live device video** and the **assembly guide**
-      linked below to see if the project is something for you.
+      linked below to get a better overview about the device functionalities.
     actions:
       - type: action
         template: action
