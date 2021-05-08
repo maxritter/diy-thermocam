@@ -52,7 +52,7 @@ sections:
         image: /images/cold-air.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Heater before Venting
         image: /images/heaterbefore.jpg
       - type: grid_item
         template: grid_item
