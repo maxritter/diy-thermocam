@@ -23,9 +23,9 @@ template: page
 
 *   Cutting pliers
 
-*   Nippers 
+*   Nippers
 
-*   Screwdriver 
+*   Screwdriver
 
 *   Multimeter
 
@@ -122,3 +122,71 @@ Solder the coin cell holder to the bottom of the PCB, next to the charging modul
 ![](/images/15.jpg)
 
 ##### 16.
+
+And on the back:
+
+![](/images/16.jpg)
+
+##### 17.
+
+Attach the left angle 2x10 pin header and stack two 10-pin female header into the bottom. Do not insert the Lepton yet, as it could be damaged by the follow steps:
+
+![](/images/17.jpg)
+
+##### 18.
+
+Put the headers into the PCB and solder them to the backside. Use the long four long spacers, screws and the plastic nuts to attach the Lepton Module to the PCB:
+
+![](/images/18.jpg)
+
+##### 19.
+
+This image shows how it looks from the side:
+
+![](/images/19.jpg)
+
+##### 20.
+
+This is how the soldered pins look from the bottom:
+
+![](/images/20.jpg)
+
+##### 21.
+
+Remove one foil from the Lipo protector and press it against the backside of the PCB:
+
+![](/images/21.jpg)
+
+##### 22.
+
+Remove the other side as well and put the Lipo on top of it. Then solder two cables to the plus (red) and minus (black) contacts of the Lipo and the other sides to the PCB position labeled "Lipo". Make sure plus is connected to plus and minus to minus:
+
+![](https://cdn.forestry.io/res2/5u0Z6uvpRjCTkH8vV_HYJQtWYnP\_-DTCwIP3NKT0P4c/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUW1STVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tOTI4/NjhhMWI2YzUwMzYx/ZDdmNzAzYmY1N2Zi/ODM1MTg0MDgzZTBh/ZC8yMi5qcGc)
+
+##### 23.
+
+Remove the protection foil from the two parts of the enclosure used in this step and put the push button and the power switch into their positions. Then connect the button with two cables to the marked position on the PCB (direction does not matter) and the middle and one outside connection of the power switch to the other connection points on the PCB:
+
+![](/images/23.jpg)
+
+##### 24.
+
+Remove the protection foil from the two parts of the enclosure used in this step and put the push button and the power switch into their positions. Then connect the button with two cables to the marked position on the PCB (direction does not matter) and the middle and one outside connection of the power switch to the other connection points on the PCB:
+
+![](/images/24.jpg)
+
+##### 25.
+
+Put the display module on top of the PCB and insert the long distance spacers into the four marked positions:
+
+![](https://cdn.forestry.io/res2/uVBc0KPOZFwNMDAIm3x3HAC3fpttQ4Dw_uiJhjqs4Ho/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUjA1TVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYTlh/MzE4NWNhM2VmZTMw/ODk3OTNkOWY3N2Ey/NjYyNzQ1NDQ3YmNh/OC8yNS5qcGc)
+
+##### 26.
+
+Use three screws, the small spacers and the nuts to connect the tripod socket to the enclosure. This is how it looks from one side:
+
+
+
+27\.
+
+And from the other:
