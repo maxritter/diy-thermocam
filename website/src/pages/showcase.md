@@ -32,7 +32,7 @@ sections:
         content: A minimal blogging theme for Unibit
       - type: grid_item
         template: grid_item
-        title: Ampersand
+        title: Left
         image: /images/left.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
