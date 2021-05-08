@@ -1,6 +1,6 @@
 ---
 title: Features
-subtitle: lorem-ipsum
+subtitle: DIY-Thermocam V3
 seo:
   title: ''
   description: ''
