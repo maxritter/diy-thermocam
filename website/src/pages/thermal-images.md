@@ -6,8 +6,9 @@ sections:
     title: Thermal Images
     section_id: hero
     image: images/5.jpg
-    content: |
-      DIY-Thermocam V3
+    content: >
+      All images have been created with the Thermovision Software from raw files
+      on the SD card.
   - type: section_grid
     template: section_grid
     section_id: showcase
