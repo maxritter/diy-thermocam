@@ -92,7 +92,7 @@ sections:
       - type: action
         template: action
         label: Subscribe Now
-        url: /docs/getting-started/installation
+        url: 'https://mailchi.mp/3e0df5458871/diy-thermocam-v3-kit'
         style: primary
 seo:
   type: stackbit_page_meta
