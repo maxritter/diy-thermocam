@@ -156,8 +156,7 @@ extern "C" {
 #define diag_touch 1
 #define diag_sd 2
 #define diag_bat 3
-#define diag_lep_conf 4
-#define diag_lep_data 5
+#define diag_lepton 4
 #define diag_ok 255
 
 //Color scheme numbers

@@ -148,11 +148,10 @@ void showDiagnostic()
 	display_setColor(VGA_BLACK);
 
 	//Display hardware module names
-	display_print((char *)"Display SPI", 50, 50);
-	display_print((char *)"Touch SPI", 50, 78);
-	display_print((char *)"Battery Gauge", 50, 106);
-	display_print((char *)"Lepton I2C", 50, 134);
-	display_print((char *)"Lepton SPI", 50, 162);
+	display_print((char *)"Display", 50, 50);
+	display_print((char *)"Touch", 50, 85);
+	display_print((char *)"Battery Gauge", 50, 120);
+	display_print((char *)"FLIR Lepton", 50, 155);
 	display_print((char *)"SD card", 50, 190);
 
 	//Check display SPI
@@ -163,27 +162,21 @@ void showDiagnostic()
 
 	//Check touch SPI
 	if (checkDiagnostic(diag_touch))
-		display_print((char *)"OK    ", 220, 78);
+		display_print((char *)"OK    ", 220, 85);
 	else
-		display_print((char *)"Failed", 220, 78);
+		display_print((char *)"Failed", 220, 85);
 
 	//Check battery gauge
 	if (checkDiagnostic(diag_bat))
-		display_print((char *)"OK    ", 220, 106);
+		display_print((char *)"OK    ", 220, 120);
 	else
-		display_print((char *)"Failed", 220, 106);
+		display_print((char *)"Failed", 220, 120);
 
-	//Check lepton I2C
-	if (checkDiagnostic(diag_lep_conf))
-		display_print((char *)"OK    ", 220, 134);
+	//Check FLIR Lepton
+	if (checkDiagnostic(diag_lepton))
+		display_print((char *)"OK    ", 220, 155);
 	else
-		display_print((char *)"Failed", 220, 134);
-
-	//Check lepton SPI
-	if (checkDiagnostic(diag_lep_data))
-		display_print((char *)"OK    ", 220, 162);
-	else
-		display_print((char *)"Failed", 220, 162);
+		display_print((char *)"Failed", 220, 155);
 
 	//Check sd card
 	if (checkDiagnostic(diag_sd))
@@ -191,11 +184,12 @@ void showDiagnostic()
 	else
 		display_print((char *)"Failed", 220, 190);
 
-	//Wait until touch
-	while (!touch_touched())
+	//Show hint
+	display_print((char *)"Touch to continue", CENTER, 220);
 
-		//Show hint
-		display_print((char *)"Touch to continue (may freeze)", CENTER, 220);
+	//Wait until touch
+	while (!touch_touched());
+	showFullMessage((char*) "Trying to continue boot, may freeze..");
 }
 
 /* Draw the Boot screen */

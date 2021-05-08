@@ -16,23 +16,12 @@
 #ifndef LEPTON_H
 #define LEPTON_H
 
-//Lepton frame error return
-enum LeptonReadError
-{
-	NONE,
-	DISCARD,
-	SEGMENT_ERROR,
-	ROW_ERROR,
-	SEGMENT_INVALID
-};
-
 /*########################## PUBLIC PROCEDURES ################################*/
 
 void lepton_begin();
 void lepton_end();
 bool lepton_ffc(bool message = false, bool switch_gain = false);
 void lepton_ffcMode(bool automatic);
-LeptonReadError lepton_getPacketSync(uint8_t line, uint8_t seg);
 bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg);
 void lepton_getFrame();
 void lepton_getFrameAsync();

@@ -1021,11 +1021,8 @@ void serialOutput()
 				break;
 
 		//Get the temps
-		if (checkDiagnostic(diag_lep_data))
-		{
-			lepton_startFrame();
-			lepton_getFrame();
-		}
+		lepton_startFrame();
+		lepton_getFrame();
 
 		//Get the spot temperature
 		getSpotTemp();

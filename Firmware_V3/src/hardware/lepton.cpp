@@ -71,7 +71,7 @@ void lepton_endFrame()
 /* Start Lepton SPI Transmission */
 void lepton_begin()
 {
-	SPI1.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE1));
+	SPI1.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE1));
 	digitalWriteFast(pin_lepton_cs, LOW);
 }
 
@@ -206,34 +206,6 @@ void lepton_getFrame()
 			timer = millis();
 		}
 	}
-}
-
-/* Get one line package from the Lepton */
-LeptonReadError lepton_getPacketSync(uint8_t line, uint8_t seg)
-{
-	//Receive one frame over SPI
-	SPI1.transfer(lepton_packet, 164);
-
-	//Repeat as long as the frame is not valid, equals sync
-	if ((lepton_packet[0] & 0x0F) == 0x0F)
-		return DISCARD;
-
-	//Check if the line number matches the expected line
-	if (lepton_packet[1] != line)
-		return ROW_ERROR;
-
-	//For the Lepton3.5, check if the segment number matches
-	if ((line == 20) && (leptonVersion == leptonVersion_3_5_shutter))
-	{
-		byte segment = (lepton_packet[0] >> 4);
-		if (segment == 0)
-			return SEGMENT_INVALID;
-		if (segment != seg)
-			return SEGMENT_ERROR;
-	}
-
-	//Everything worked
-	return NONE;
 }
 
 /* Get one line package from the Lepton */
@@ -460,8 +432,11 @@ byte lepton_i2cWriteDataRegister(byte *data, int length)
 byte lepton_i2c_execute_command(byte cmdbyte0, byte cmdbyte1)
 {
 	// Wait for execution of the command
-	while (lepton_readReg(0x2) & 0x01)
+	long timer = millis();
+	while ((lepton_readReg(0x2) & 0x01) && ((millis() - timer) < 1000))
 		;
+	if ((millis() - timer) >= 1000)
+		return 1;
 
 	Wire.beginTransmission(0x2A);
 	Wire.write(0x00);
@@ -524,10 +499,7 @@ float lepton_spotTemp()
 
 	//Lepton I2C error, set diagnostic
 	if (error != 0)
-	{
-		setDiagnostic(diag_lep_conf);
 		return 0;
-	}
 
 	//Transfer the new package
 	Wire.beginTransmission(0x2A);
@@ -606,12 +578,9 @@ bool lepton_version()
 	// 0x0800 (SDK Module ID) + 0x1C (SDK Command ID) + 0x0 (GET operation) + 0x4000 (Protection Bit) = 0x481C
 	byte error = lepton_i2c_execute_command(0x48, 0x1C);
 
-	//Lepton I2C error, set diagnostic
+	//Lepton I2C error
 	if (error != 0)
-	{
-		setDiagnostic(diag_lep_conf);
 		return false;
-	}
 
 	char leptonhw[33];
 	lepton_i2cReadDataRegister((byte *)leptonhw, 32);
@@ -836,18 +805,10 @@ bool lepton_spiCheck()
 /* Init the FLIR Lepton LWIR sensor */
 void lepton_init()
 {
-	//Check if SPI connection to Lepton works
-	if (!lepton_spiCheck())
-	{
-		setDiagnostic(diag_lep_data);
-		setDiagnostic(diag_lep_conf);
-		return;
-	}
-
 	//Check the Lepton version
 	if (!lepton_version())
 	{
-		setDiagnostic(diag_lep_conf);
+		setDiagnostic(diag_lepton);
 		return;
 	}
 
