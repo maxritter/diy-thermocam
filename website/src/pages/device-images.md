@@ -45,7 +45,7 @@ sections:
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
-  title: Showcase
+  title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: This is the showcase page
   extra:
     - name: 'og:type'
