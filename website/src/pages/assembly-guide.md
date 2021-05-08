@@ -1,8 +1,9 @@
 ---
 title: Assembly Guide
 subtitle: >-
-  To assemble your DIY-Thermocam V3, you need the following tools: A soldering
-  iron, some solder, a cutting pliers, a nippers, a screwdriver and a
+  This guide will guide you through all the steps towards your own thermal
+  imager!To assemble your DIY-Thermocam V3, you need the following tools: A
+  soldering iron, some solder, a cutting pliers, a nippers, a screwdriver and a
   multimeter.
 seo:
   title: ''
