@@ -19,7 +19,7 @@ sections:
         image: /images/pasta-squares.png
       - type: grid_item
         template: grid_item
-        title: Inside
+        title: Houses in the Neighbourhood
         image: /images/houses_2.jpg
         content: A personal theme for Unibit
       - type: grid_item
