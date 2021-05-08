@@ -185,8 +185,15 @@ Put the display module on top of the PCB and insert the long distance spacers in
 
 Use three screws, the small spacers and the nuts to connect the tripod socket to the enclosure. This is how it looks from one side:
 
+![](https://cdn.forestry.io/res2/neaq8rrFEIY7ThUVz3VLdbDfs4EKJrLYXxLf9pJXieI/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUjJSTVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYTM2/YzZlMDI1MmExYWVh/YjgzZjIyMGMyN2U5/NzBlZWZlNTNkZDU2/My8yNi5qcGc)
 
-
-27\.
+##### 27.
 
 And from the other:
+
+![](https://cdn.forestry.io/res2/e-MDPctBwbr7IWdkCP9U6oWVCVfYGMAx43u7GuQyV1M/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUnpsTVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tMzEz/YWRiYjdhNzlkMDUx/ZTAxOTkwMTYyNTIw/MDA5NzFjZThiYzEz/Yy8yNy5qcGc)
+
+##### 28.
+
+Carefully insert the Lepton2.5 or Lepton3.5 inside the Breakout Module. Make sure it clicks on both sides, so the Lepton is really connected properly:
+
