@@ -36,7 +36,7 @@ sections:
       - type: grid_item
         template: grid_item
         title: Back Open
-        image: /images/open.jpg
+        image: /images/body.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
