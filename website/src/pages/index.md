@@ -13,49 +13,7 @@ sections:
         label: Get Started
         url: /docs
         style: primary
-  - type: section_grid
-    template: section_grid
-    section_id: features
-    col_number: three
-    grid_items:
-      - type: grid_item
-        template: grid_item
-        title: Documentation
-        content: >-
-          Donec lobortis velit sed suscipit lobortis. Ut non quam metus. Nullam
-          a maximus mi. Quisque justo nunc, sollicitudin euismod euismod at,
-          tincidunt ut tellus. Vivamus rhoncus mattis varius.
-        actions:
-          - type: action
-            template: action
-            label: Get Started
-            url: /docs
-            style: link
-      - type: grid_item
-        template: grid_item
-        title: Blog
-        content: >-
-          Vestibulum a nunc ut eros condimentum posuere. Nullam dapibus quis
-          nunc non interdum. Pellentesque tortor ligula, gravida ac commodo eu.
-        actions:
-          - type: action
-            template: action
-            label: View Posts
-            url: /blog
-            style: link
-      - type: grid_item
-        template: grid_item
-        title: Style Guide
-        content: >-
-          Donec lobortis velit sed suscipit lobortis. Ut non quam metus. Nullam
-          a maximus mi. Quisque justo nunc, sollicitudin euismod euismod at,
-          tincidunt ut tellus. Vivamus rhoncus mattis varius.
-        actions:
-          - type: action
-            template: action
-            label: Learn More
-            url: /style-guide
-            style: link
+  
   - type: section_content
     template: section_content
     title: A Section With An Image
