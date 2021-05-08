@@ -89,7 +89,7 @@
             },
             {
                 "label": "Documentation",
-                "url": "#",
+                "url": "/docs",
                 "style": "link",
                 "icon_class": "dev",
                 "new_window": false,
