@@ -1,6 +1,6 @@
 ---
 title: Desktop Software
-subtitle: Compatible with the DIY-Thermocam V3
+subtitle: Extend the capabilities of your DIY-Thermocam V3
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: >-
