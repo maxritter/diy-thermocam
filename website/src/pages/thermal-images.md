@@ -76,7 +76,7 @@ sections:
         image: /images/lamp.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Car Engine
         image: /images/car-engine.jpg
       - type: grid_item
         template: grid_item
