@@ -168,7 +168,8 @@
                 "icon_class": "dev",
                 "new_window": false,
                 "no_follow": false,
-                "type": "action"
+                "type": "action",
+                "label": "Max Ritter"
             }
         ]
     },
