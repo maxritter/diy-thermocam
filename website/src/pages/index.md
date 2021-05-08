@@ -16,7 +16,7 @@ sections:
   
   - type: section_content
     template: section_content
-    title: Version 3 offers 3x performance
+    title: Improved performance and simplicity
     section_id: text-img
     image: /images/open.jpg
     image_position: left
