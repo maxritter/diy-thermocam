@@ -3,7 +3,7 @@ title: Showcase
 sections:
   - type: section_hero
     template: section_hero
-    title: Showcase
+    title: Device Images
     section_id: hero
     image: images/5.jpg
     content: This is an optional page subtitle
