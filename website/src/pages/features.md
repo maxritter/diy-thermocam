@@ -9,7 +9,20 @@ seo:
   type: stackbit_page_meta
 template: page
 ---
-## Lorem ipsum
+
+ - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular, **Arduino** compatible **Teensy 4.1**
+ - Frame rate of up to **9 FPS** (US export compliance)
+ - **18 different color schemes** including rainbow, ironblack, grayscale, hot & cold
+ - 3.2 inch **LCD touch display** with bright colors,  wide angle and resistive touch
+ - **Save thermal images** with a resolution of 640x480 pixels on the device
+ - **Save** real-time **videos** and interval images with different time-lapse settings
+ - **Internal storage** over microSD card, accessible as a Mass Storage device on any PC via USB
+ - **2000 mAh lithium polymer battery** for long operation time (4-6 hours)
+ - **Open-source firmware** written in **Arduino compatible C/C++** code
+ - Regular **firmware updates** with new features, flashable over a cross-OS firmware updater
+ - **Standalone thermal viewer application** to save high-quality thermal images & videos  on the computer
+ - Fully **compatible** to the comprehensive **thermal analysis software** ThermoVision by Joe-C
+ - Use simple **commands** to receive all thermal & configuration data over the **USB serial port** with high speed
 
 <table style="width: 100%">
    <tr>
