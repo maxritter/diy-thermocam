@@ -44,7 +44,7 @@ sections:
         image: /images/milk.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Neighboorhood and Garden
         image: /images/houses_1.jpg
       - type: grid_item
         template: grid_item
