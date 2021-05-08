@@ -15,9 +15,7 @@ template: page
 
 You need the following tools: A soldering iron, some solder, a cutting pliers, a nippers, a screwdriver and a multimeter.
 
-
-
-1\.
+##### 1.
 
 Solder two 24-pin male headers to the backside of the Teensy. Solder one 5-pin male header in the middle of those two headers and one 1-pin male header to the right side inside the VUSB pin:
 
@@ -28,3 +26,9 @@ Solder two 24-pin male headers to the backside of the Teensy. Solder one 5-pin m
 Cut the connection between the two pads on the top of the Teensy with a sharp knife. Use a multimeter to check that they are really separated:
 
 ![](/images/ultra-pine.jpg)
+
+##### 3.
+
+Insert a microSD card into the top side of the Teensy. It will be used as an internal storage and can be accessed via a PC as mass storage over the USB connection:
+
+![](/images/mighty-steel.jpg)
