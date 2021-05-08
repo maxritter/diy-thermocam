@@ -28,7 +28,7 @@ sections:
         template: grid_item
         title: Fjord
         title_url: 'https://themes.stackbit.com/demos/fjord/'
-        image: /images/open.jpg
+        image: /images/inside.jpg
         content: A minimal blogging theme for Unibit
       - type: grid_item
         template: grid_item
