@@ -40,7 +40,7 @@ sections:
         image: /images/soldering-iron.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Milk
         image: /images/milk.jpg
       - type: grid_item
         template: grid_item
