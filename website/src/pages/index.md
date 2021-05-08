@@ -20,13 +20,13 @@ sections:
     image: /images/open.jpg
     image_position: left
     content: >
-      Version 3 has been redesigned to offer 3x the performance of the
-      predecessor, making thermal imaging much more fun! 
+      **Version 3 **has been redesigned to offer **3x the performance** of the
+      predecessor, making **thermal imaging much more fun**!
 
 
-      The assembly has been simplified, enabling a wider audience group to build
-      the device by their own using simple tools and an illustrated assembly
-      guide.
+      The **assembly has been simplified**, enabling a wider audience group to
+      build the device by their own **using simple tools** and an illustrated
+      assembly guide.
     actions:
       - type: action
         template: action
