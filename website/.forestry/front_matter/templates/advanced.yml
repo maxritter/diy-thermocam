@@ -35,5 +35,4 @@ fields:
 pages:
   - src/pages/device-images.md
   - src/pages/index.md
-  - src/pages/overview.md
   - src/pages/thermal-images.md
