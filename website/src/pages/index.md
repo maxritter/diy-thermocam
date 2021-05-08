@@ -15,7 +15,7 @@ sections:
     image_position: left
     content: >
       **Version 3** has been redesigned to offer **3x the performance** of the
-      predecessor, making **thermal imaging much more fun**!
+      predecessor, making **thermal imaging much more accessible and fun**!
 
 
       The aim of this project is to give **private persons**, **educational
