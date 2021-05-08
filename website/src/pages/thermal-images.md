@@ -71,7 +71,7 @@ sections:
       - type: grid_item
         template: grid_item
         title: Soldering Iron
-        image: /images/soldering-iron.jpg
+        image: /images/water-faucet.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
