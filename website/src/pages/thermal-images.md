@@ -24,7 +24,7 @@ sections:
         content: A personal theme for Unibit
       - type: grid_item
         template: grid_item
-        title: Back
+        title: Pig behind a fence
         image: /images/pig.jpg
         content: A minimal blogging theme for Unibit
       - type: grid_item
