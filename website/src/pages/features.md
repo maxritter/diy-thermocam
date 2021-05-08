@@ -10,7 +10,7 @@ seo:
 template: page
 ---
 
- - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular, **Arduino** compatible **Teensy 4.1**
+ - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular **Teensy 4.1** microcontroller
  - Frame rate of up to **9 FPS** (US export compliance)
  - **18 different color schemes** including rainbow, ironblack, grayscale, hot & cold
  - 3.2 inch **LCD touch display** with bright colors,  wide angle and resistive touch
