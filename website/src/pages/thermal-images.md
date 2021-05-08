@@ -15,7 +15,7 @@ sections:
     grid_items:
       - type: grid_item
         template: grid_item
-        title: Front
+        title: German Ravioli
         image: /images/pasta-squares.png
       - type: grid_item
         template: grid_item
