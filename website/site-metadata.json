@@ -138,7 +138,7 @@
                 "label": "Twitter",
                 "url": "https://twitter.com/",
                 "style": "icon",
-                "icon_class": "twitter",
+                "icon_class": "dev",
                 "new_window": true,
                 "no_follow": false
             },
