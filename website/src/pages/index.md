@@ -16,7 +16,7 @@ sections:
   
   - type: section_content
     template: section_content
-    title: A Section With An Image
+    title: Open-Source Software & Hardware
     section_id: text-img
     image: /images/open.jpg
     image_position: left
