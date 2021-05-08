@@ -100,7 +100,7 @@
             },
             {
                 "label": "Partlist",
-                "url": "/kit-v3",
+                "url": "/partlist",
                 "style": "link",
                 "icon_class": "dev",
                 "new_window": false,
