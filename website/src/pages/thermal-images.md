@@ -41,7 +41,7 @@ sections:
       - type: grid_item
         template: grid_item
         title: Right
-        image: /images/right.jpg
+        image: /images/soldering-iron.jpg
         content: Medium inspired blogging theme for Unibit
 seo:
   type: stackbit_page_meta
