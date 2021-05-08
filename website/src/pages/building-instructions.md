@@ -80,3 +80,30 @@ And on the back:
 Solder the 2x20 pin display header to the left of the PCB:
 
 ![](/images/11.jpg)
+
+##### 12.
+
+Solder the charging LED to the top right of the PCB with the short leg inside the hole "G":
+
+![](/images/12.jpg)
+
+##### 13.
+
+Solder the six resistors into their respective place. This is how it looks on the front:
+
+![](/images/13.jpg)
+
+##### 14.
+
+And this how it looks on the back:
+
+![](/images/14.jpg)
+
+##### 15.
+
+Solder the coin cell holder to the bottom of the PCB, next to the charging module. Do not put in the battery yet. This is how it looks on the front:
+
+![](/images/15.jpg)
+
+##### 16.
+
