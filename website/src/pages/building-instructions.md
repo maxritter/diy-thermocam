@@ -11,11 +11,27 @@ seo:
   type: stackbit_page_meta
 template: page
 ---
-##### Prerequisites:
+### Required Time
 
-You need the following tools: A soldering iron, some solder, a cutting pliers, a nippers, a screwdriver and a multimeter.
+*   About 2-3 hours, depending on your previous experience with soldering
 
-##### 1.
+### Required Tools
+
+*   Soldering iron
+
+*   Some solder
+
+*   Cutting pliers
+
+*   Nippers 
+
+*   Screwdriver 
+
+*   Multimeter
+
+### Building Steps
+
+1\.
 
 Solder two 24-pin male headers to the backside of the Teensy. Solder one 5-pin male header in the middle of those two headers and one 1-pin male header to the right side inside the VUSB pin:
 
@@ -106,4 +122,3 @@ Solder the coin cell holder to the bottom of the PCB, next to the charging modul
 ![](/images/15.jpg)
 
 ##### 16.
-
