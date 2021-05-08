@@ -91,7 +91,7 @@ sections:
     actions:
       - type: action
         template: action
-        label: Buy Now
+        label: Subscribe Now
         url: /docs/getting-started/installation
         style: primary
 seo:
