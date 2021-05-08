@@ -14,7 +14,7 @@ sections:
     grid_items:
       - type: grid_item
         template: grid_item
-        title: Exto
+        title: Front
         title_url: 'https://themes.stackbit.com/demos/exto/'
         image: /images/front.jpg
         content: A portfolio theme for Unibit
