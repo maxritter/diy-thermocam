@@ -82,7 +82,7 @@ sections:
     template: section_cta
     title: Build your own thermal camera now!
     section_id: cta
-    subtitle: This is an optional description for the call to action block.
+    subtitle: Buy the DIY-Thermocam V3 self-assembly KIT
     actions:
       - type: action
         template: action
