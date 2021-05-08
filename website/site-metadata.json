@@ -129,7 +129,7 @@
     "footer": {
         "type": "footer",
         "template": "footer",
-        "content": "© 2021 DIY-Thermocam by Max Ritter. All rights reserved.",
+        "content": "© 2021 DIY-Thermocam by <p>Max Ritter. All rights reserved.",
         "has_social": true,
         "social_links": [
             {
