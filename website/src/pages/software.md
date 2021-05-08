@@ -1,5 +1,5 @@
 ---
-title: Software
+title: Desktop Software
 subtitle: Compatible with the DIY-Thermocam V3
 seo:
   title: ''
