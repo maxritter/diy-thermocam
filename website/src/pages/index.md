@@ -10,7 +10,7 @@ sections:
     actions:
       - type: action
         template: action
-        label: Get Started
+        label: Check out the Docs
         url: /docs
         style: primary
   - type: section_content
