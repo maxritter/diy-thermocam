@@ -30,7 +30,7 @@ sections:
         content: A minimal blogging theme for Unibit
       - type: grid_item
         template: grid_item
-        title: Left
+        title: Laptop
         image: /images/laptop.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
