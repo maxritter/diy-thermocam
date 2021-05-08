@@ -26,7 +26,8 @@ sections:
 
       The aim of this project is to give **private persons**, **educational
       institutes** and **companies** access to a **portable**,  **affordable**
-      and **customizable** thermal imaging platform.
+      and **customizable** thermal imaging platform that is based on
+      **open-source software and hardware**.
 
 
       There are **various applications** like finding **heat leaks** in the
@@ -57,7 +58,6 @@ sections:
         label: Check out the building instructions
         url: /docs/getting-started
         style: secondary
-
   - type: section_cta
     template: section_cta
     title: Build your own thermal camera now!
