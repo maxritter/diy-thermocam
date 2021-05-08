@@ -25,7 +25,7 @@ sections:
         content: A personal theme for Unibit
       - type: grid_item
         template: grid_item
-        title: Fjord
+        title: Back
         title_url: 'https://themes.stackbit.com/demos/fjord/'
         image: /images/back.jpg
         content: A minimal blogging theme for Unibit
