@@ -64,7 +64,7 @@ sections:
         image: /images/water-faucet.jpg
       - type: grid_item
         template: grid_item
-        title: Soldering Iron
+        title: Fridge
         image: /images/refrigerator.jpg
       - type: grid_item
         template: grid_item
