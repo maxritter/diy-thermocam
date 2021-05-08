@@ -21,7 +21,7 @@ sections:
     image: /images/open.jpg
     image_position: left
     content: >-
-      Version 3 has been re-designed to offer 3x the performance of the 
+      Version 3 has been re-designed to offer 3x the performance of the predecessor, so thermal imaging is now much more fun! 
     actions:
       - type: action
         template: action
