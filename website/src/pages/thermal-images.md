@@ -22,62 +22,50 @@ sections:
         template: grid_item
         title: Houses in the Neighbourhood
         image: /images/houses_2.jpg
-        content: A personal theme for Unibit
       - type: grid_item
         template: grid_item
         title: Pig behind a fence
         image: /images/pig.jpg
-        content: A minimal blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Laptop
         image: /images/laptop.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Human Body
         image: /images/body.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/soldering-iron.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/milk.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/houses_1.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/cold-air.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/heaterbefore.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/heaterafter.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/water-faucet.jpg
-        content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Soldering Iron
         image: /images/soldering-iron.jpg
-        content: Medium inspired blogging theme for Unibit
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
