@@ -88,9 +88,7 @@ And on the back where the solder connections are:
 
 If you self-cutted the female headers for the Teensy, make sure they are flat on the front and do not overcome the PCB. Otherwise the enclosure may not fit later and you may even break it. Next, put male headers into the charging module and solder it right to the Teensy. This is how it should look on the front:
 
-
-
-
+![](/images/rainy-coriander.jpg)
 
 ##### 8.
 
@@ -182,8 +180,6 @@ Remove the foild on the top side of the Lipo Protector as well and put the Batte
 
 ![](/images/fabulous-daffodil.jpg)
 
-
-
 ##### 23.
 
 Grab the second part of the enclosure which is the top that has a cutout for the push button and the small charging LED. Put the push button into it's position as marked on the image and secure it with the small plastic ring. Then connect the button with two cables to the marked position on the PCB (direction does not matter) and use two shrinking tubes to isolate the contacts on the button:
@@ -204,7 +200,7 @@ Put the display module on top of the PCB and insert the long distance spacers in
 
 ##### 26.
 
-Use three screws, the small spacers and the nuts to connect the tripod socket to the enclosure. This is how it looks from one side:
+Use the three screws, three flat washers and three metalic nuts to connect the tripod socket to the enclosure. This is how it looks from one side:
 
 ![](https://cdn.forestry.io/res2/neaq8rrFEIY7ThUVz3VLdbDfs4EKJrLYXxLf9pJXieI/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUjJSTVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYTM2/YzZlMDI1MmExYWVh/YjgzZjIyMGMyN2U5/NzBlZWZlNTNkZDU2/My8yNi5qcGc)
 
@@ -234,13 +230,13 @@ Make sure the USB port of the Teensy is inside the cutout on the bottom of the d
 
 ##### 31.
 
-Then put the backside on top and secure it with four screws. Flip the side again if the Lepton cutout does not align well, it is not centered:
+Then put the backside of the enclosure on top of the existing parts and make sure the Lepton is centered, otherwise flip the backplate around as the cutout has a slightly different distance from left to right. Finally use the four screw to secure it. Do not tighten up the screws too much, this might brake the enclosure! This is how it should look:
 
 ![](/images/30.jpg)
 
 ##### 32.
 
-Turn the device around and insert the front side, secure it with four screws as well:
+Turn the device around and insert the front side, secure it with four screws as well and do not tighten them more than required:
 
 ![](/images/31.jpg)
 
