@@ -86,9 +86,11 @@ And on the back where the solder connections are:
 
 ##### 7.
 
-Put male headers into the charging module and solder it right to the Teensy. This is how it should look on the front:
+If you self-cutted the female headers for the Teensy, make sure they are flat on the front and do not overcome the PCB. Otherwise the enclosure may not fit later and you may even break it. Next, put male headers into the charging module and solder it right to the Teensy. This is how it should look on the front:
 
-![](/images/purple-parsley.jpg)
+
+
+
 
 ##### 8.
 
@@ -158,7 +160,7 @@ Put the headers into the PCB and solder them to the backside. Use the long four 
 
 ##### 19.
 
-This image shows how it looks from the side:
+You may start with the two corners next to the microcontroller first, as they are the hardest to reach. Put the long spacer in place, push the screw through it from the bottom and secure it with the plastic nut on top. Repeat this four times and in the end tighten all nuts. This image shows how it looks from the side:
 
 ![](/images/19.jpg)
 
@@ -176,15 +178,17 @@ Remove one foil from the Lipo protector and press it against the backside of the
 
 ##### 22.
 
-Remove the other side as well and put the Lipo on top of it. Then solder two cables to the plus (red) and minus (black) contacts of the Lipo and the other sides to the PCB position labeled "Lipo". Make sure plus is connected to plus and minus to minus:
+Remove the foild on the top side of the Lipo Protector as well and put the Battery on top of it. Then solder two cables to the plus (red) and minus (black) contacts of the Battery and the other sides to the PCB position labeled "Lipo". Make sure plus is connected to plus and minus to minus. Grab the first of the six enclosure parts, which is the side where the power switch is located. There are protection foils on each of the enclosure parts, remove them first. Afterwards push the switch through the cutout in the enclosure part and solder two cables from the marked positions on the Button to the marked positions on the PCB:
 
-![](https://cdn.forestry.io/res2/5u0Z6uvpRjCTkH8vV_HYJQtWYnP\_-DTCwIP3NKT0P4c/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUW1STVFsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tOTI4/NjhhMWI2YzUwMzYx/ZDdmNzAzYmY1N2Zi/ODM1MTg0MDgzZTBh/ZC8yMi5qcGc)
+![](/images/fabulous-daffodil.jpg)
+
+
 
 ##### 23.
 
-Remove the protection foil from the two parts of the enclosure used in this step and put the push button and the power switch into their positions. Then connect the button with two cables to the marked position on the PCB (direction does not matter) and the middle and one outside connection of the power switch to the other connection points on the PCB:
+Grab the second part of the enclosure which is the top that has a cutout for the push button and the small charging LED. Put the push button into it's position as marked on the image and secure it with the small plastic ring. Then connect the button with two cables to the marked position on the PCB (direction does not matter) and use two shrinking tubes to isolate the contacts on the button:
 
-![](/images/23.jpg)
+![](/images/knowledgeable-yam.jpg)
 
 ##### 24.
 
@@ -255,7 +259,5 @@ And on the back:
 ##### 35.
 
 Finally, follow the instruction [**here**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) to flash the newest firmware to the device. You can find all firmware releases [**here**](https://github.com/maxritter/DIY-Thermocam/releases).
-
-
 
 **Congratulations, you have assembled your own thermal camera!  Please report any feedback or improvements to mail@maxritter.net.**
