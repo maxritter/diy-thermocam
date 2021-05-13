@@ -22,7 +22,7 @@ This guide should work on **all common operating systems** (**Windows, Linux & M
 2. **[Teensyduino 1.43+](https://www.pjrc.com/teensy/td_download.html)**
 3. **[Sloeber Eclipse](https://github.com/Sloeber/arduino-eclipse-plugin/releases/tag/4_2)**
 
-Then **clone this repo** to a path without empty spaces (f. ex. "C:\Sandbox\DIYThermocam_Firmware\") with `git clone https://github.com/maxritter/diythermocam_firmware.git`.
+Then **clone this repo** to a path without empty spaces (f. ex. "C:\Sandbox\DIYThermocam_Firmware\") with `git clone https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V2`.
 
 Now **start Sloeber Eclipse**.
 

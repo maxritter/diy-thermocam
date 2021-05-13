@@ -118,6 +118,6 @@ void display_writedata8_cont(uint8_t c);
 void display_writedata8_last(uint8_t c);
 void display_writeRect2BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t* pixels, const uint16_t* palette);
 void display_writeRect4BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t* pixels, const uint16_t* palette);
-void display_writeScreen(unsigned short *pcolors, boolean small);
+void display_writeScreen(unsigned short *pcolors);
 
 #endif /* DISPLAY_H */

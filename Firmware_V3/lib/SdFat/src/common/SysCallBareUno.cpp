@@ -22,53 +22,34 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "DebugMacros.h"
-#include "FsCache.h"
-//------------------------------------------------------------------------------
-uint8_t* FsCache::get(uint32_t sector, uint8_t option) {
-  if (!m_blockDev) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  if (m_sector != sector) {
-    if (!sync()) {
-      DBG_FAIL_MACRO;
-      goto fail;
-    }
-    if (!(option & CACHE_OPTION_NO_READ)) {
-      if (!m_blockDev->readSector(sector, m_buffer)) {
-        DBG_FAIL_MACRO;
-        goto fail;
-      }
-    }
-    m_status = 0;
-    m_sector = sector;
-  }
-  m_status |= option & CACHE_STATUS_MASK;
-  return m_buffer;
+#include "SysCall.h"
+#if 0  // defined(__AVR_ATmega328P__) && !ENABLE_ARDUINO_FEATURES
+#include <avr/interrupt.h>
 
- fail:
-  return nullptr;
+// ISR for timer 2 Compare A interrupt
+volatile uint16_t timer2 = 0;
+ISR(TIMER2_COMPA_vect) {
+  timer2++;
 }
-//------------------------------------------------------------------------------
-bool FsCache::sync() {
-  if (m_status & CACHE_STATUS_DIRTY) {
-    if (!m_blockDev->writeSector(m_sector, m_buffer)) {
-      DBG_FAIL_MACRO;
-      goto fail;
-    }
-    // mirror second FAT
-    if (m_status & CACHE_STATUS_MIRROR_FAT) {
-      uint32_t sector = m_sector + m_mirrorOffset;
-      if (!m_blockDev->writeSector(sector, m_buffer)) {
-        DBG_FAIL_MACRO;
-        goto fail;
-      }
-    }
-    m_status &= ~CACHE_STATUS_DIRTY;
+SdMillis_t SysCall::curTimeMS() {
+  if (TIMSK2 != (1 << OCIE2A)) {
+    // use system clock (clkI/O).
+    ASSR &= ~(1 << AS2);
+    // Clear Timer on Compare Match (CTC) mode
+    TCCR2A = (1 << WGM21);
+    // Only need 64x prescale bits in TCCR2B
+    TCCR2B = (1 << CS22);
+    // set TOP so timer period is 1 ms.
+    #if F_CPU/64000 > 250
+    #error F_CPU too large.
+    #endif  // F_CPU/64000 > 250
+    OCR2A = F_CPU/64000UL - 1;
+    // Enable interrupt.
+    TIMSK2 = (1 << OCIE2A);
   }
-  return true;
-
- fail:
-  return false;
+  cli();
+  uint16_t rtn = timer2;
+  sei();
+  return rtn;
 }
+#endif  // defined(__AVR_ATmega328P__) && !ENABLE_ARDUINO_FEATURES

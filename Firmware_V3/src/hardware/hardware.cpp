@@ -341,7 +341,7 @@ void initBuffer()
 /* Display the content of the small/big buffer on the screen */
 void displayBuffer()
 {
-	display_writeScreen(bigBuffer, 0);
+	display_writeScreen(bigBuffer);
 }
 
 /* Sets the display rotation depending on the setting */

@@ -1715,6 +1715,87 @@ void SPIClass::transfer(const void * buf, void * retbuf, size_t count)
 	}
 }
 
+void SPIClass::transfer16(const void * buf, void * retbuf, size_t count)
+{
+    if (count == 0) return;
+    uint16_t *p_write = (uint16_t*)buf;
+    uint16_t *p_read = (uint16_t*)retbuf;
+    size_t count_read = count;
+    
+    uint32_t tcr = port().TCR;
+    port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ(15);  // turn on 16 bit mode
+
+    // Lets clear the reader queue
+    port().CR = LPSPI_CR_RRF | LPSPI_CR_MEN;    // clear the queue and make sure still enabled.
+
+    while (count > 0) {
+        // Push out the next byte;
+        port().TDR = p_write? *p_write++ : _transferWriteFill;
+        count--; // how many bytes left to output.
+        // Make sure queue is not full before pushing next byte out
+        do {
+            if ((port().RSR & LPSPI_RSR_RXEMPTY) == 0)  {
+                uint16_t b = port().RDR;  // Read any pending RX bytes in
+                if (p_read) *p_read++ = b;
+                count_read--;
+            }
+        } while ((port().SR & LPSPI_SR_TDF) == 0) ;
+
+    }
+
+    // now lets wait for all of the read bytes to be returned...
+    while (count_read) {
+        if ((port().RSR & LPSPI_RSR_RXEMPTY) == 0)  {
+            uint16_t b = port().RDR;  // Read any pending RX bytes in
+            if (p_read) *p_read++ = b;
+            count_read--;
+        }
+    }
+    
+    port().TCR = tcr;    // restore back
+}
+
+void SPIClass::transfer32(const void * buf, void * retbuf, size_t count)
+{
+    if (count == 0) return;
+    uint32_t *p_write = (uint32_t*)buf;
+    uint32_t *p_read = (uint32_t*)retbuf;
+    size_t count_read = count;
+    
+    uint32_t tcr = port().TCR;
+    port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ(31);  // turn on 32 bit mode
+
+    // Lets clear the reader queue
+    port().CR = LPSPI_CR_RRF | LPSPI_CR_MEN;    // clear the queue and make sure still enabled.
+
+    while (count > 0) {
+        // Push out the next byte;
+        port().TDR = p_write? ((*p_write) << 16) | ((*p_write) >> 16) : _transferWriteFill;
+        p_write++;
+        count--; // how many bytes left to output.
+        // Make sure queue is not full before pushing next byte out
+        do {
+            if ((port().RSR & LPSPI_RSR_RXEMPTY) == 0)  {
+                uint32_t b = port().RDR;  // Read any pending RX bytes in
+                if (p_read) *p_read++ = b;
+                count_read--;
+            }
+        } while ((port().SR & LPSPI_SR_TDF) == 0) ;
+
+    }
+
+    // now lets wait for all of the read bytes to be returned...
+    while (count_read) {
+        if ((port().RSR & LPSPI_RSR_RXEMPTY) == 0)  {
+            uint32_t b = port().RDR;  // Read any pending RX bytes in
+            if (p_read) *p_read++ = b;
+            count_read--;
+        }
+    }
+    
+    port().TCR = tcr;    // restore back
+}
+
 
 void SPIClass::end() {
 	// only do something if we have begun
@@ -1826,6 +1907,9 @@ bool SPIClass::transfer(const void *buf, void *retbuf, size_t count, EventRespon
 		event_responder.triggerEvent();
 		return true;
 	}
+	// lets clear cache before we update sizes...
+	if ((uint32_t)buf >= 0x20200000u)  arm_dcache_flush((uint8_t *)buf, count);
+	if ((uint32_t)retbuf >= 0x20200000u)  arm_dcache_delete(retbuf, count);
 
 	// Now handle the cases where the count > then how many we can output in one DMA request
 	if (count > MAX_DMA_COUNT) {
@@ -1841,7 +1925,6 @@ bool SPIClass::transfer(const void *buf, void *retbuf, size_t count, EventRespon
 	if (buf) {
 		_dmaTX->sourceBuffer((uint8_t*)write_data, count);  
 		_dmaTX->TCD->SLAST = 0;	// Finish with it pointing to next location
-		if ((uint32_t)write_data >= 0x20200000u)  arm_dcache_flush(write_data, count);
 	} else {
 		_dmaTX->source((uint8_t&)_transferWriteFill);   // maybe have setable value
 		DMAChanneltransferCount(_dmaTX, count);
@@ -1851,7 +1934,6 @@ bool SPIClass::transfer(const void *buf, void *retbuf, size_t count, EventRespon
 		_dmaRX->TCD->ATTR_SRC = 0;		//Make sure set for 8 bit mode...
 		_dmaRX->destinationBuffer((uint8_t*)retbuf, count);
 		_dmaRX->TCD->DLASTSGA = 0;		// At end point after our bufffer
-		if ((uint32_t)retbuf >= 0x20200000u)  arm_dcache_delete(retbuf, count);
 	} else {
 			// Write  only mode
 		_dmaRX->TCD->ATTR_SRC = 0;		//Make sure set for 8 bit mode...

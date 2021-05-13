@@ -94,7 +94,6 @@ inline void SysCall::yield() {}
 #endif  // defined(PLATFORM_ID)
 //------------------------------------------------------------------------------
 #else  // ENABLE_ARDUINO_FEATURES
-#error Print not defined
 #include "PrintBasic.h"
 /** If not Arduino */
 typedef PrintBasic print_t;

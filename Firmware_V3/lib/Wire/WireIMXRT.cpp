@@ -8,7 +8,7 @@
 
 #define PINCONFIG (IOMUXC_PAD_ODE | IOMUXC_PAD_SRE | IOMUXC_PAD_DSE(4) | IOMUXC_PAD_SPEED(1) | IOMUXC_PAD_PKE | IOMUXC_PAD_PUE | IOMUXC_PAD_PUS(3))
 
-void TwoWire::begin(void)
+FLASHMEM void TwoWire::begin(void)
 {
 	// use 24 MHz clock
 	CCM_CSCDR2 = (CCM_CSCDR2 & ~CCM_CSCDR2_LPI2C_CLK_PODF(63)) | CCM_CSCDR2_LPI2C_CLK_SEL;
@@ -321,11 +321,16 @@ TwoWire Wire(&IMXRT_LPI2C1, TwoWire::i2c1_hardware);
 PROGMEM
 constexpr TwoWire::I2C_Hardware_t TwoWire::i2c3_hardware = {
 	CCM_CCGR2, CCM_CCGR2_LPI2C3(CCM_CCGR_ON),
+#if defined(ARDUINO_TEENSY41)
+		{{17, 1 | 0x10, &IOMUXC_LPI2C3_SDA_SELECT_INPUT, 2}, {44, 2 | 0x10, &IOMUXC_LPI2C3_SDA_SELECT_INPUT, 1}},
+		{{16, 1 | 0x10, &IOMUXC_LPI2C3_SCL_SELECT_INPUT, 2}, {45, 2 | 0x10, &IOMUXC_LPI2C3_SCL_SELECT_INPUT, 1}},
+#else  // T4 and ARDUINO_TEENSY_MICROMOD
 		{{17, 1 | 0x10, &IOMUXC_LPI2C3_SDA_SELECT_INPUT, 2}, {36, 2 | 0x10, &IOMUXC_LPI2C3_SDA_SELECT_INPUT, 1}},
 		{{16, 1 | 0x10, &IOMUXC_LPI2C3_SCL_SELECT_INPUT, 2}, {37, 2 | 0x10, &IOMUXC_LPI2C3_SCL_SELECT_INPUT, 1}},
+#endif
 	IRQ_LPI2C3
 };
-TwoWire Wire1(&IMXRT_LPI2C3, TwoWire::i2c3_hardware);
+//TwoWire Wire1(&IMXRT_LPI2C3, TwoWire::i2c3_hardware);
 
 PROGMEM
 constexpr TwoWire::I2C_Hardware_t TwoWire::i2c4_hardware = {
@@ -334,8 +339,27 @@ constexpr TwoWire::I2C_Hardware_t TwoWire::i2c4_hardware = {
 		{{24, 0 | 0x10, &IOMUXC_LPI2C4_SCL_SELECT_INPUT, 1}, {0xff, 0xff, nullptr, 0}},
 	IRQ_LPI2C4
 };
-TwoWire Wire2(&IMXRT_LPI2C4, TwoWire::i2c4_hardware);
+//TwoWire Wire2(&IMXRT_LPI2C4, TwoWire::i2c4_hardware);
 
+#if defined(ARDUINO_TEENSY_MICROMOD)
+	TwoWire Wire2(&IMXRT_LPI2C3, TwoWire::i2c3_hardware);
+	TwoWire Wire1(&IMXRT_LPI2C4, TwoWire::i2c4_hardware);
+#else
+	TwoWire Wire1(&IMXRT_LPI2C3, TwoWire::i2c3_hardware);
+	TwoWire Wire2(&IMXRT_LPI2C4, TwoWire::i2c4_hardware);
+#endif
+
+
+#if defined(ARDUINO_TEENSY_MICROMOD)
+PROGMEM
+constexpr TwoWire::I2C_Hardware_t TwoWire::i2c2_hardware = {
+	CCM_CCGR2, CCM_CCGR2_LPI2C2(CCM_CCGR_ON),
+		{{41, 2 | 0x10, &IOMUXC_LPI2C2_SDA_SELECT_INPUT, 1}, {0xff, 0xff, nullptr, 0}},
+		{{40, 2 | 0x10, &IOMUXC_LPI2C2_SCL_SELECT_INPUT, 1}, {0xff, 0xff, nullptr, 0}},
+	IRQ_LPI2C4
+};
+TwoWire Wire3(&IMXRT_LPI2C2, TwoWire::i2c2_hardware);
+#endif
 
 
 

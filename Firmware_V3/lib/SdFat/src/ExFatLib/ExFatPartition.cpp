@@ -209,7 +209,7 @@ bool ExFatPartition::fatPut(uint32_t cluster, uint32_t value) {
 }
 //------------------------------------------------------------------------------
 bool ExFatPartition::freeChain(uint32_t cluster) {
-  uint32_t next = 0;
+  uint32_t next;
   uint32_t start = cluster;
   int8_t status;
   do {

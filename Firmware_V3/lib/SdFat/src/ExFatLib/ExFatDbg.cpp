@@ -405,7 +405,7 @@ bool ExFatPartition::printDir(print_t* pr, ExFatFile* file) {
   uint16_t calcHash = 0;
   uint16_t nameHash = 0;
   uint16_t setChecksum = 0;
-  uint16_t calcChecksum = 0;
+  uint16_t calcChecksum = 0;;
   uint8_t  nameLength = 0;
   uint8_t  setCount = 0;
   uint8_t  nUnicode;

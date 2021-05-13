@@ -188,8 +188,9 @@ private:
 extern TwoWire Wire;
 extern TwoWire Wire1;
 extern TwoWire Wire2;
+#if defined(ARDUINO_TEENSY_MICROMOD)
 extern TwoWire Wire3;
-
+#endif
 
 class TWBRemulation
 {

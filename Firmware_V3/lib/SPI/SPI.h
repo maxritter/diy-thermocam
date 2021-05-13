@@ -1254,8 +1254,34 @@ public:
 		port().TCR = tcr;	// restore back
 		return port().RDR;
 	}
+    uint32_t transfer32(uint32_t data) {
+        uint32_t tcr = port().TCR;
+        port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ(31);  // turn on 32 bit mode
+        port().TDR = data;        // output 32 bit data.
+        while ((port().RSR & LPSPI_RSR_RXEMPTY)) ;    // wait while the RSR fifo is empty...
+        port().TCR = tcr;    // restore back
+        return port().RDR;
+    }
 
-	void inline transfer(void *buf, size_t count) {transfer(buf, buf, count);}
+	void inline transfer(void *buf, size_t count) {
+#if 0
+		// TODO: byte order still needs work to match SPISettings
+		if (__builtin_constant_p(count)) {
+			if (count < 1) return;
+			if (((count & 3) == 0) && (((uint32_t)buf & 3) == 0)) {
+				// size is multiple of 4 and buffer is 32 bit aligned
+				transfer32(buf, buf, count >> 2);
+				return;
+			}
+			if (((count & 1) == 0) && (((uint32_t)buf & 1) == 0)) {
+				// size is multiple of 2 and buffer is 16 bit aligned
+				transfer16(buf, buf, count >> 1);
+				return;
+			}
+		}
+#endif
+		transfer(buf, buf, count);
+	}
 	void setTransferWriteFill(uint8_t ch ) {_transferWriteFill = ch;}
 	void transfer(const void * buf, void * retbuf, size_t count);
 
@@ -1380,6 +1406,12 @@ private:
 	DMAChannel    *_dmaRX = nullptr;
 	EventResponder *_dma_event_responder = nullptr;
 #endif
+
+	// Optimized buffer transfer
+	void inline transfer16(void *buf, size_t count) {transfer16(buf, buf, count);}
+	void inline transfer32(void *buf, size_t count) {transfer32(buf, buf, count);}
+	void transfer16(const void * buf, void * retbuf, size_t count);
+	void transfer32(const void * buf, void * retbuf, size_t count);
 };
 
 

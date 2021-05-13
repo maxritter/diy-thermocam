@@ -142,7 +142,7 @@ class RingBuf : public Print {
     while (nread != count) {
         n = minSize(Size - m_head, count - nread);
         memcpyBuf(m_buf + m_head, src + nread, n);
-        m_head = advance(m_head, n);
+        m_head = advance(m_head, n);;
         nread += n;
     }
     m_count += nread;
@@ -315,9 +315,6 @@ class RingBuf : public Print {
    *
    * The number of bytes written may be less than count if
    * bytesUsed is less than count or if an error occurs.
-   *
-   * This function may be used in non-interrupt code with
-   * memcopyIn() in an ISR.
    *
    * \return Number of bytes actually written.
    */

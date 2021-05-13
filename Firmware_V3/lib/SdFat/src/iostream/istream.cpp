@@ -197,13 +197,13 @@ bool istream::getDouble(double* value) {
     if (exp & 1) {
       if (expNeg) {
         // check for underflow
-        if (v < DBL_MIN * pow10  && frac != 0) {
+        if (v < FLT_MIN * pow10  && frac != 0) {
           goto fail;
         }
         v /= pow10;
       } else {
         // check for overflow
-        if (v > DBL_MAX / pow10) {
+        if (v > FLT_MAX / pow10) {
           goto fail;
         }
         v *= pow10;

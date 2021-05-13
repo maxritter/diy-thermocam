@@ -73,17 +73,19 @@ static uint16_t lfnGetChar(DirLfn_t* ldir, uint8_t i) {
 static size_t lfnGetName(DirLfn_t* ldir, char* name, size_t n) {
   uint8_t i;
   size_t k = 13*((ldir->order & 0X1F) - 1);
+  // https://github.com/greiman/SdFat-beta/issues/67#issuecomment-774508283
   for (i = 0; i < 13; i++) {
     uint16_t c = lfnGetChar(ldir, i);
     if (c == 0 || k >= (n - 1)) {
+     //       k = n - 1;   <<-------removed
       break;
     }
     name[k++] = c >= 0X7F ? '?' : c;
   }
   // Terminate with zero byte.
-  if (k >= n) {
-    k = n - 1;
-  }
+  if (k >= n) {  // <<----------added
+    k = n - 1;   // <<--------- added
+  }             // <<---------added
   name[k] = '\0';
   return k;
 }
@@ -359,11 +361,7 @@ bool FatFile::open(FatFile* dirFile, fname_t* fname, oflag_t oflag) {
         if ((ldir->order & FAT_ORDER_LAST_LONG_ENTRY) == 0) {
           continue;
         }
-        order = ldir->order & 0X1F;
-        if (order != (freeNeed - 1)) {
-          continue;
-        }
-        lfnOrd = order;
+        lfnOrd = order = ldir->order & 0X1F;
         checksum = ldir->checksum;
       } else if (ldir->order != --order || checksum != ldir->checksum) {
         lfnOrd = 0;
@@ -648,7 +646,7 @@ bool FatFile::remove() {
 //------------------------------------------------------------------------------
 bool FatFile::lfnUniqueSfn(fname_t* fname) {
   const uint8_t FIRST_HASH_SEQ = 2;  // min value is 2
-  uint8_t pos = fname->seqPos;
+  uint8_t pos = fname->seqPos;;
   DirFat_t* dir;
   uint16_t hex;
 

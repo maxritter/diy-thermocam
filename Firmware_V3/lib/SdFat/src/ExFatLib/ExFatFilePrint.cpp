@@ -167,7 +167,7 @@ size_t ExFatFile::printName(print_t* pr) {
     for (in = 0; in < 15; in++) {
       uint16_t c = getLe16(dn->unicode + 2*in);
       if (!c) {
-        break;
+        break;;
       }
       buf[in] = c < 0X7f ? c : '?';
       n++;

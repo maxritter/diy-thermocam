@@ -300,7 +300,7 @@ bool FatPartition::fatPut(uint32_t cluster, uint32_t value) {
 //------------------------------------------------------------------------------
 // free a cluster chain
 bool FatPartition::freeChain(uint32_t cluster) {
-  uint32_t next = 0;
+  uint32_t next;
   int8_t fg;
   do {
     fg = fatGet(cluster, &next);

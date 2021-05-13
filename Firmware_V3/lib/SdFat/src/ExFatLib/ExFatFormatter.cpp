@@ -201,7 +201,7 @@ bool ExFatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
   memset(secBuf, 0, BYTES_PER_SECTOR);
   // Allocate two reserved clusters, bitmap, upcase, and root clusters.
   secBuf[0] = 0XF8;
-  for (size_t i = 1; i < 20; i++) {
+  for (size_t i = 0; i < 20; i++) {
     secBuf[i] = 0XFF;
   }
   for (uint32_t i = 0; i < ns; i++) {
