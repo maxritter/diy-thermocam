@@ -10,8 +10,6 @@ seo:
   type: stackbit_page_meta
 template: docs
 ---
-# USB Serial Protocol
-
 This guide describes how you can communicate with your DIY-Thermocam over the USB serial connection.
 
 The maximum transfer speed is 12 Mbit/s and is always active, no matter what baud rate you use to connect to the device from your PC. This allows you to receive thermal frames with high speed.  The device needs to be turned on, connected to the PC over USB and set to live mode.
@@ -22,11 +20,7 @@ All commands are transmitted as decimal bytes. In order to start the serial conn
 
 The number of bytes returned by each command is listed in the return part of each command. Whenever a command does not send data back, it will send its own command ID as acknowledge (ACK) if successful and zero (0) if not successful. In case data needs to be transmitted after the command itself, it is marked as payload in the description, followed by the number of bytes that need to be transmitted and their description.
 
-
-
 ![](/images/Serial.png)
-
-
 
 *   **100**: **CMD_START**
     *   **Description:** Set the device into serial mode and waits for the next command from the list
