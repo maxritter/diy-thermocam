@@ -25,8 +25,6 @@
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
 
-#define ILI9341_SPICLOCK 25000000
-
 #define ILI9341_TFTWIDTH 240
 #define ILI9341_TFTHEIGHT 320
 
@@ -159,7 +157,14 @@ uint32_t display_tcr_dc_not_assert;
 
 void display_begin_spi_transaction()
 {
-	SPI.beginTransaction(SPISettings(ILI9341_SPICLOCK, MSBFIRST, SPI_MODE0));
+	if(videoSave == videoSave_recording)
+	{
+		SPI.beginTransaction(SPISettings(60000000, MSBFIRST, SPI_MODE0));
+	}
+	else
+	{
+		SPI.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE0));
+	}
 	if (!display_dc_port)
 		display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
 	if (display_cs_port)

@@ -557,7 +557,7 @@ void setRotation()
 void sendHardwareVersion()
 {
 	//Send hardware version
-	Serial.write(3);
+	Serial.write(2);
 }
 
 /* Send the diagnostic information */

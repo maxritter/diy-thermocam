@@ -71,7 +71,14 @@ void lepton_endFrame()
 /* Start Lepton SPI Transmission */
 void lepton_begin()
 {
-	SPI1.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE1));
+	if(videoSave == videoSave_recording)
+	{
+		SPI1.beginTransaction(SPISettings(60000000, MSBFIRST, SPI_MODE1));
+	}
+	else
+	{
+		SPI1.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE1));
+	}
 	digitalWriteFast(pin_lepton_cs, LOW);
 }
 
