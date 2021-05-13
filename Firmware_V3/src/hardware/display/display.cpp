@@ -25,7 +25,7 @@
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
 
-#define ILI9341_SPICLOCK 30000000
+#define ILI9341_SPICLOCK 25000000
 
 #define ILI9341_TFTWIDTH 240
 #define ILI9341_TFTHEIGHT 320
@@ -36,7 +36,7 @@
 #define ILI9341_RDDST 0x09
 
 #define ILI9341_SLPIN 0x10
-#define ILI9341_SLPOUT 0x11-
+#define ILI9341_SLPOUT 0x11
 #define ILI9341_PTLON 0x12
 #define ILI9341_NORON 0x13
 
@@ -154,9 +154,6 @@ volatile uint32_t *display_dc_port;
 uint8_t display_pending_rx_count;
 uint32_t display_tcr_dc_assert;
 uint32_t display_tcr_dc_not_assert;
-int16_t display_changed_min_x, display_changed_max_x, display_changed_min_y, display_changed_max_y;
-DMAMEM uint16_t display_frame_buffer[320 * 240];
-uint16_t *display_pfbtft = display_frame_buffer;
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
@@ -411,12 +408,6 @@ byte display_InitLCD()
 
 	//Disable write to image
 	display_writeToImage = 0;
-
-	//Clear frame buffer
-	display_changed_min_x = 0x7fff;
-	display_changed_max_x = -1;
-	display_changed_min_x = 0x7fff;
-	display_changed_max_y = -1;
 
 	//Return the diagnostic info
 	return diag;
@@ -1456,63 +1447,21 @@ void display_exitSleepMode()
 	display_end_spi_transaction();
 }
 
-void display_updateScreen()
-{
+/* Write 320x240 RGB565 data to the screen */
+void display_writeScreen(unsigned short *pcolors)
+{	
+	displayUpdated = true;
 	display_begin_spi_transaction();
 	display_setAddr(0, 0, 319, 239);
 	display_writecommand_cont(ILI9341_RAMWR);
 
-	uint16_t *pfbtft_end = &display_pfbtft[(ILI9341_TFTWIDTH * ILI9341_TFTHEIGHT) - 1];
-	uint16_t *pftbft = display_pfbtft;
+	uint16_t *pfbtft_end = &pcolors[(ILI9341_TFTWIDTH * ILI9341_TFTHEIGHT) - 1];
+	uint16_t *pftbft = pcolors;
 	while (pftbft < pfbtft_end)
 	{
 		display_writedata16_cont(*pftbft++);
 	}
 	display_writedata16_last(*pftbft);
-
 	display_end_spi_transaction();
-
-	display_changed_min_x = 0x7fff;
-	display_changed_max_x = -1;
-	display_changed_min_x = 0x7fff;
-	display_changed_max_y = -1;
-}
-
-void display_updateChangedRange(int16_t x, int16_t y, int16_t w, int16_t h)
-{
-	if (x < display_changed_min_x)
-		display_changed_min_x = x;
-	if (y < display_changed_min_y)
-		display_changed_min_y = y;
-	x += w - 1;
-	y += h - 1;
-	if (x > display_changed_max_x)
-		display_changed_max_x = x;
-	if (y > display_changed_max_y)
-		display_changed_max_y = y;
-}
-
-/* Write 320x240 RGB565 data to the screen */
-void display_writeScreen(unsigned short *pcolors)
-{
-	int16_t x = 0;
-	int16_t y = 0;
-	int16_t w = 320;
-	int16_t h = 240;
-
-	//Update the range of the screen that has been changed
-	display_updateChangedRange(x, y, w, h);
-	uint16_t *pfbPixel_row = &display_pfbtft[(y * 320) + x];
-	for (; h > 0; h--)
-	{
-		uint16_t *pfbPixel = pfbPixel_row;
-		for (int i = 0; i < w; i++)
-		{
-			*pfbPixel++ = *pcolors++;
-		}
-		pfbPixel_row += 320;
-	}
-
-	//Update the display
-	display_updateScreen();
+	displayUpdated = false;
 }

@@ -149,3 +149,5 @@ volatile bool serialMode;
 volatile byte loadTouch;
 //Current buffer valid
 volatile bool leptonBufferValid;
+//Display is currently updated, do not use SPI in IRQ
+volatile bool displayUpdated;

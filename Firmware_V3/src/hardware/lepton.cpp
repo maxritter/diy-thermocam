@@ -71,7 +71,7 @@ void lepton_endFrame()
 /* Start Lepton SPI Transmission */
 void lepton_begin()
 {
-	SPI1.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE1));
+	SPI1.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE1));
 	digitalWriteFast(pin_lepton_cs, LOW);
 }
 
@@ -243,6 +243,8 @@ bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg)
 /* Get one frame of raw values from the Lepton asynchronously */
 void lepton_getFrameAsync()
 {
+	if(displayUpdated)
+		return;
 
 	uint32_t startUsec;
 	uint8_t line, prevLine;
