@@ -1,5 +1,5 @@
 ---
-title: lorem-ipsum
+title: USB Protocol
 weight: 0
 excerpt: lorem-ipsum
 seo:
