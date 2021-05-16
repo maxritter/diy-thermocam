@@ -1,8 +1,6 @@
 ---
 title: Build Your Own
-subtitle: >-
-  This guide will guide you through all the steps to assemble your own
-  DIY-Thermocam V3 from the components inside the KIT at home easily.
+subtitle: "This guide will guide you through all the steps to assemble your own DIY-Thermocam V3\_ with the KIT at home easily in 2-3 hours."
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: >-
