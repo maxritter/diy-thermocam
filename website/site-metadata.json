@@ -34,7 +34,6 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Device Features",
                 "url": "/device-features",
                 "style": "link",
                 "has_subnav": false,
