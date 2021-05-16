@@ -2,7 +2,7 @@
 title: Build Your Own
 subtitle: "This guide will lead you through all the steps to assemble your own DIY-Thermocam V3\_ with the KIT at home easily in 2-3 hours"
 seo:
-  title: DIY-Thermocam | Open-source thermal imaging for everyone!
+  title: DIY-Thermocam | Open-source thermal imaging for the rest of us
   description: >-
     The DIY-Thermocam is a do-it-yourself infrared camera, based on the popular
     FLIR Lepton long-wave infrared sensor and the Arduino compatible Teensy 4.1
