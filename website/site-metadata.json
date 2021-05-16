@@ -101,7 +101,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Building Instructions",
+                "label": "Documentation",
                 "url": "/building-instructions",
                 "style": "link",
                 "has_subnav": false,
