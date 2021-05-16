@@ -31,7 +31,6 @@ fields:
     config:
       required: true
 pages:
-  - src/pages/desktop-software.md
   - src/pages/device-features.md
   - src/pages/build-your-own.md
   - src/pages/software.md
