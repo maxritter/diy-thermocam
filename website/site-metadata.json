@@ -78,7 +78,7 @@
             },
             {
                 "label": "Device Images",
-                "url": "/desktop-software",
+                "url": "/device-images",
                 "style": "link",
                 "icon_class": "dev",
                 "new_window": false,
