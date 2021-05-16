@@ -31,15 +31,15 @@ sections:
 
       There are **various applications** like finding **heat leaks** in the
       insulation of buildings, the analysis of **electrical** or **mechanical
-      components**, the **detection** of **persons** / animals or even mounting
+      components**, the **detection** of **persons / animals** or even mounting
       it on a **drone** and **recording continuous or time-lapse images**.
 
 
       Constructed as a **self-assembly solution**, the device allows you to take
       **advantage** of the **versatile possibilities** of thermal imaging. Both
       the **software** and **hardware** are **open-source**, allowing you to
-      **modify** or **extend** the functionalities of the device to your **own
-      needs**!
+      **modify** or **extend** the **functionalities of the device** and the
+      **software ecosystem** to your **own needs**!
 
 
       The **DIY-Thermocam V3 self-assembly KIT** contains **all required
