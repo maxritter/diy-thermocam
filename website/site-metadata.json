@@ -102,7 +102,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Documentation",
-                "url": "/building-instructions",
+                "url": "/docs",
                 "style": "link",
                 "has_subnav": false,
                 "icon_class": "",
