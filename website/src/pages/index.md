@@ -63,7 +63,7 @@ sections:
     section_id: cta
     subtitle: >-
       Subscribe now to get notified first when the DIY-Thermocam V3 KIT goes on
-      sale.
+      sale!
     actions:
       - type: action
         template: action
