@@ -28,9 +28,11 @@ template: page
 ---
 # Prerequisites
 
-The KIT contains the following components:
+You need the following **components**:
 
 ![](https://cdn.forestry.io/res2/B1n3GNdrd8BwBLUxPMurAfEwZ5yy-h6TSVUsEqH7LJo/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU2xFMVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYWY0/ZmNhM2ZhNDRmYWQ5/ZDRlMDEwMjhkNTIy/MjI0YWYyZGU4ZjFm/My8xLmpwZw)
+
+The **DIY-Thermocam V3 KIT** contains:
 
 *   1 x PCB V3.0
 
@@ -104,9 +106,9 @@ The KIT contains the following components:
 
 *   2 x 10k Resistor
 
-Apart from those parts, you also need the [**Lepton Breakout Board V2**](https://store.groupgets.com/collections/frontpage/products/lepton-breakout-board-v2-0) and a [**Lepton 2.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-2-5) or [**Lepton3.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5) (recommended) that can be bought separately from GroupGets. During the following steps, each tool or part that is added to this step is display in **bold text.**
+You also need the [**Lepton Breakout Board V2**](https://store.groupgets.com/collections/frontpage/products/lepton-breakout-board-v2-0) and a [**Lepton 2.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-2-5) or [**Lepton3.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5) (recommended) that can be bought separately from GroupGets during the checkout process and are not included in the KIT.
 
-Also you need to have the following tools at home for the assembly process:
+For the **tools**, you need the following ones in order to follow the assembly process:
 
 ![](https://cdn.forestry.io/res2/MJhD9QBhahfNBqUfKOQpGtqZp5W00rnh3YyS-jsRlMY/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU2swMVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYTI2/ODRlY2ZkY2E2ZDkw/NzgyMDFkMGY4MGE3/OGY3Njc4YzM4ZjA1/YS8yLmpwZw)
 
@@ -124,9 +126,9 @@ Also you need to have the following tools at home for the assembly process:
 
 Eventually you may need a file in case there are any overhanging parts on the header strips.
 
-
-
 # Building Steps
+
+During the following steps, each tool or part that is added to this step is display in **bold text.**
 
 #### 1.
 
@@ -389,7 +391,5 @@ Grab the **Tripod** and screw it into the Tripod Socket, then put the \*\*microU
 #### 44.
 
 Finally, follow the instruction [**here**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) to flash the newest firmware to the device. You can find all firmware releases [**here**](https://github.com/maxritter/DIY-Thermocam/releases).
-
-
 
 **Congratulations, you have assembled your own thermal camera!**
