@@ -44,7 +44,7 @@ The firmware updater allows you to flash the newest version of the firmware on a
 
 ![](https://cdn.forestry.io/res2/CyukiIw18DrUH43O_urwNm-m_FV9K_ohC-sQnqBoqS4/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUjFaQ1FsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNTY4/ZDM3NzBlM2U0YzE0/OWI2YzhhZDA0NmQ1/YjczZjU2ZWEwMDE0/Ny9UaGVybW9WaXNp/b24ucG5n)
 
-ThermoVision is a powerful desktop software to view, modify and convert raw images created on the DIY-Thermocam V3. The image browser can show all images inside a folder, you can edit them in various ways and export the outputs to an image file. The is provided by a third party author, you can get more information about its capabilities on the [authors site](http://joe-c.de/pages/projekte/thermovision.php).
+ThermoVision is a powerful desktop software to view, modify and convert raw images created on the DIY-Thermocam V3. The image browser can show all images inside a folder, you can edit them in various ways and export the outputs to an image file. The is provided by a third party author, you can get more information about its capabilities on the [authors site](http://joe-c.de/pages/projekte/thermovision.php). To get started, launch the application and drag-and-drop any Thermocam Raw file into the main windows to edit it.
 
 [**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Analysis%20Software/ThermoVision.zip) (Windows only)
 
@@ -52,7 +52,7 @@ ThermoVision is a powerful desktop software to view, modify and convert raw imag
 
 ![](https://cdn.forestry.io/res2/qb-rgQx3UFXcGBqw95q60dBv6qGuCXYg9EICKgtjKXI/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUkZvNVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYWI2/ZWY5ZDVhNzg4MTFm/YjZlMzExYTc2NTRk/ZDZmOGZlMWUxNzZj/Ny9UaGVybWFsTGl2/ZVZpZXdlci5wbmc)
 
-The standalone Thermal Live Viewer application allows you to capture HQ thermal images and videos right on the computer.  Various settings can be changed over the UI.  You need to make sure that your Thermocam is listed as COM10, see [this guide how to change it](http://plugable.com/2011/07/04/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7/).
+The standalone Thermal Live Viewer application allows you to capture HQ thermal images and videos right on the computer.  Various settings can be changed over the UI. You need to make sure that your Thermocam is listed under COM10, see [this guide how to change it](http://plugable.com/2011/07/04/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7/).
 
 [**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Live%20Viewer/ThermalLiveViewer\_3.00.zip) (Windows only)
 
