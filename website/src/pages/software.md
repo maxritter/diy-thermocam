@@ -1,5 +1,5 @@
 ---
-title: Desktop Software
+title: Software Ecosystem
 subtitle: Extend the capabilities of your DIY-Thermocam V3
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for everyone!
