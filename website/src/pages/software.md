@@ -30,7 +30,6 @@ Open-source Node.js library that allows you to build your own Javascript or Type
 
 Open-source Python library that allows you to build your own Python application on top of it. **Coming soon!**
 
-
 # **Electron Cross-Platform UI Application**
 
 Open-source sample application built with the modern [Electron JS](https://www.electronjs.org/) framework that gives a blueprint / starting point how to implement cross-platform desktop or mobile applications, using the Node.JS library to connect to the device. **Coming soon!**
@@ -55,7 +54,7 @@ ThermoVision is a powerful desktop software to view, modify and convert raw imag
 
 The standalone Thermal Live Viewer application allows you to capture HQ thermal images and videos right on the computer.  Various settings can be changed over the UI.  You need to make sure that your Thermocam is listed as COM10, see [this guide how to change it](http://plugable.com/2011/07/04/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7/).
 
-\*\*\*\*[**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Live%20Viewer/ThermalLiveViewer\_3.00.zip) (Windows only)
+[**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Live%20Viewer/ThermalLiveViewer\_3.00.zip) (Windows only)
 
 # **Thermal Data Viewer**
 
