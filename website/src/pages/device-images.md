@@ -5,7 +5,7 @@ sections:
     template: section_hero
     title: Device Images
     section_id: hero
-    image: images/5.jpg
+    image: /images/background.jpg
   - type: section_grid
     template: section_grid
     section_id: showcase
