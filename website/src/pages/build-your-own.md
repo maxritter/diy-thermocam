@@ -207,7 +207,7 @@ Turn the PCB around and solder the three pins, then use the **Cutting Pliers** t
 
 #### 13.
 
-Grab the \*\*Display Connector \*\*and put it into the marked position on the backside of the PCB by making sure the little notch in the middle is directed towards the inner side of the PCB. Then carefully solder the fourty pins on the backside:
+Grab the **Display Connector** and put it into the marked position on the backside of the PCB by making sure the little notch in the middle is directed towards the inner side of the PCB. Then carefully solder the fourty pins on the backside:
 
 ![](https://cdn.forestry.io/res2/YGtGm1DB6TcBBBIfo8aIW1Kp_pqP7lo02YXGOiFopJY/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUVUxU1VWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tMzA4/OTMxNzk5MzEyZWU0/NDU5YWNmNTdiMmRm/ZWNlNTJlZTZhNjI0/MS8xNS5qcGc)
 
@@ -231,7 +231,7 @@ Grab the four **4.7K Resistors** and the two **10K Resistors** and put them into
 
 #### 17.
 
-Turn the PCB around and solder the twelve pins, then use the \*\*Cutting Pliers \*\*to remove the overlapping parts:
+Turn the PCB around and solder the twelve pins, then use the **Cutting Pliers** to remove the overlapping parts:
 
 ![](https://cdn.forestry.io/res2/E0XzLbL\_4zmZgH5jPgMwQs4MBYa2ZNZr0M53H7nEmS0/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUVRoU1VWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tMzhj/MTE5MGQxNWEzZjRi/MjM0NzQ2YWE5N2I1/MzM0OWFlYjJhZTA1/Ni8xOS5qcGc)
 
@@ -357,13 +357,13 @@ Then secure the bolts with three **Nut M2 Metal** and use a **Screwdriver** to m
 
 #### 38.
 
-Grab the front part of the **Enclosure** and use a\*\* Screwdriver\*\* to secure it with four\*\* Screw M2.5x6\*\*. Make sure the front plate is in the right position first, if not turn it upside down:
+Grab the front part of the **Enclosure** and use a **Screwdriver** to secure it with four Screw **M2.5x6**. Make sure the front plate is in the right position first, if not turn it upside down:
 
 ![](https://cdn.forestry.io/res2/-Bp2uMLaXwhPhLhd0tDoDHNV4jGXhN8savkJHYQ5\_dE/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUlhkU1VWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNTRk/MmQxZGY4ODQ4MTk5/OWFhNDhiYjczMjU3/NzQxM2IwN2NiNzZh/OS80MC5qcGc)
 
 #### 39.
 
-Use a **Tweezer** or your fingers to carefully put the\*\* Lepton2.5 \*\*or **Lepton3.5** into the socket of the Lepton Breakout Board V2. There is only one position it fits in. Make sure it snaps in and clicks on the top and bottom, otherwise there will be no connection to the Lepton possible. Next put the **Coin Cell Battery** inside the Coin Cell Holder by having the plus on the top as indicated on the holder:
+Use a **Tweezer** or your fingers to carefully put the **Lepton2.5** or **Lepton3.5** into the socket of the Lepton Breakout Board V2. There is only one position it fits in. Make sure it snaps in and clicks on the top and bottom, otherwise there will be no connection to the Lepton possible. Next put the **Coin Cell Battery** inside the Coin Cell Holder by having the plus on the top as indicated on the holder:
 
 ![](https://cdn.forestry.io/res2/zsNinK44\_XTTm8fbQQkz1cGHc_h8pQ45TObyUCYSMBc/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUlRoU1VWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tN2Rm/ZTY0MjM5NTc4N2Mw/OTA5OTAzMjI1NTA1/N2U5YjQ0YTliMTdk/NC80MS5qcGc)
 
@@ -387,7 +387,7 @@ Grab the backside of the **Enclosure** and put it on top of the four sides. Make
 
 #### 43.
 
-Grab the **Tripod** and screw it into the Tripod Socket, then put the \*\*microUSB Cable \*\*into the USB port of the Teensy 4.1 Microcontroller:
+Grab the **Tripod** and screw it into the Tripod Socket, then put the **microUSB Cable** into the USB port of the Teensy 4.1 Microcontroller:
 
 ![](https://cdn.forestry.io/res2/wm8Gedj5PRK9fhqtgxCIa2mD608oAnoixwbw-FK1R4Y/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUmxWU1VWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNjcx/YjE3MmYyODU2Zjk4/NjYyN2YwY2UzNzFm/YmI4NmVmNjhjMzcw/YS80NS5qcGc)
 
