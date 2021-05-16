@@ -1,6 +1,5 @@
 ---
 title: Device Features
-subtitle: Get an overview about the capabilities of the DIY-Thermocam V3
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: >-
