@@ -88,7 +88,7 @@
                 "type": "action_menu"
             },
             {
-                "label": "Documentation",
+                "label": "Device Features",
                 "url": "/docs",
                 "style": "link",
                 "icon_class": "dev",
