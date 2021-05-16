@@ -95,14 +95,5 @@ seo:
         https://cdn.forestry.io/res2/kehY9d3Z81zIpkkR3LMUsMsU7i4WKUbI6bEfHfrCCEs/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU1dOTlFXY3dQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tOTdl/MWEzN2RjYmE2MTQ5/MWMzNzkzMjI0NDU1/MzUxNDU4MzIwMjc0/MC9Mb2dvX0xhcmdl/LnBuZw
       keyName: property
       relativeUrl: false
-    - name: 'twitter:card'
-      value: summary_large_image
-    - name: 'twitter:title'
-      value: Stackbit Libris Theme
-    - name: 'twitter:description'
-      value: The preview of the Libris theme
-    - name: 'twitter:image'
-      value: images/4.jpg
-      relativeUrl: true
 template: advanced
 ---
