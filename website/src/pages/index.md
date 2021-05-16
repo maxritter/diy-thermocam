@@ -55,7 +55,7 @@ sections:
       - type: action
         template: action
         label: View Assembly Guide
-        url: /building-instructions
+        url: /build-your-own
         style: secondary
   - type: section_cta
     template: section_cta
