@@ -36,10 +36,10 @@ sections:
 
 
       Constructed as a **self-assembly solution**, the device allows you to take
-      **advantage** of the **versatile possibilities** of thermal imaging.
-      **Everything**, from **software** to **hardware**, is completely
-      **open-source**! This allows to **modify** or **extend** the
-      functionalities of the device to your **own needs**!
+      **advantage** of the **versatile possibilities** of thermal imaging. Both
+      the **software** and **hardware** are **open-source**, allowing you to
+      **modify** or **extend** the functionalities of the device to your **own
+      needs**!
 
 
       The **DIY-Thermocam V3 self-assembly KIT** contains **all required
