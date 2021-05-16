@@ -30,7 +30,7 @@ Open-source Node.js library that allows you to build your own Javascript or Type
 
 Open-source Python library that allows you to build your own Python application on top of it. **Coming soon!**
 
-# **Electron Cross-Platform UI Application**
+# **Electron UI Application**
 
 Open-source sample application built with the modern [Electron JS](https://www.electronjs.org/) framework that gives a blueprint / starting point how to implement cross-platform desktop or mobile applications, using the Node.JS library to connect to the device. **Coming soon!**
 
