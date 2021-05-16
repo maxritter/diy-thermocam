@@ -11,6 +11,7 @@ sections:
       - label: Buy the KIT (coming soon!)
         url: 'https://groupgets.com/'
         style: primary
+        new_window: true
   - type: section_content
     template: section_content
     title: The DIY-Thermocam V3 is here!
