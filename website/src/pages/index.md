@@ -54,7 +54,7 @@ sections:
         style: primary
       - type: action
         template: action
-        label: Check out the Assembly Guide
+        label: View Assembly Guide
         url: /building-instructions
         style: secondary
   - type: section_cta
