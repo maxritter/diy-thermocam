@@ -390,6 +390,6 @@ Grab the **Tripod** and screw it into the Tripod Socket, then put the \*\*microU
 
 #### 44.
 
-Finally, follow the instruction [**here**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) to flash the newest firmware to the device. You can find all firmware releases [**here**](https://github.com/maxritter/DIY-Thermocam/releases).
+Finally, follow the instruction [**here**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) to flash the newest firmware to the device. You can find the latest firmware release [**here**](https://github.com/maxritter/DIY-Thermocam/releases).
 
 **Congratulations, you have assembled your own thermal camera!**
