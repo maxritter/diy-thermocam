@@ -77,7 +77,7 @@
                 "no_follow": false
             },
             {
-                "label": "Desktop Software",
+                "label": "Device Images",
                 "url": "/desktop-software",
                 "style": "link",
                 "icon_class": "dev",
