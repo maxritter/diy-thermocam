@@ -4,7 +4,7 @@ subtitle: >-
   Extend the capabilities of the DIY-Thermocam V3 towards a software ecosystem,
   that offers limitless possibilities for your own applications
 seo:
-  title: DIY-Thermocam | Open-source thermal imaging for everyone!
+  title: DIY-Thermocam | Open-source thermal imaging for the rest of us
   description: >-
     An open-source, do-it-yourself thermal imager based on the popular FLIR
     Lepton long-wave-infrared array sensor.
