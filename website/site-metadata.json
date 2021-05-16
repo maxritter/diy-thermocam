@@ -23,7 +23,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Build Your Own",
-                "url": "/device-images",
+                "url": "/build-your-own",
                 "style": "link",
                 "has_subnav": false,
                 "icon_class": "",
