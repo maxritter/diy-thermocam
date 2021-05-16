@@ -59,7 +59,7 @@ sections:
         style: secondary
   - type: section_cta
     template: section_cta
-    title: Build your own thermal camera now!
+    title: Stay up-to-date on the latest news and updates
     section_id: cta
     subtitle: >-
       Subscribe now to get notified first when the DIY-Thermocam V3 KIT goes on
