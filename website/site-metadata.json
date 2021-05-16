@@ -40,7 +40,8 @@
                 "icon_class": "",
                 "new_window": false,
                 "no_follow": false,
-                "subnav_links": []
+                "subnav_links": [],
+                "label": "Software"
             },
             {
                 "type": "action_menu",
