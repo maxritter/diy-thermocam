@@ -2,7 +2,7 @@
 title: Software Ecosystem
 subtitle: >-
   Extend the capabilities of the DIY-Thermocam V3 towards a software ecosystem,
-  that offers limitless possibilities for your own applications!
+  that offers limitless possibilities for your own applications
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for everyone!
   description: >-
