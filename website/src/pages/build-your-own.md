@@ -32,7 +32,7 @@ You need the following **components**:
 
 ![](https://cdn.forestry.io/res2/B1n3GNdrd8BwBLUxPMurAfEwZ5yy-h6TSVUsEqH7LJo/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU2xFMVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYWY0/ZmNhM2ZhNDRmYWQ5/ZDRlMDEwMjhkNTIy/MjI0YWYyZGU4ZjFm/My8xLmpwZw)
 
-The **DIY-Thermocam V3 KIT** contains:
+The **DIY-Thermocam V3 KIT** contains all parts except for the FLIR Lepton Sensor and Module:
 
 *   1 x PCB V3.0
 
@@ -106,7 +106,7 @@ The **DIY-Thermocam V3 KIT** contains:
 
 *   2 x 10k Resistor
 
-You also need the [**Lepton Breakout Board V2**](https://store.groupgets.com/collections/frontpage/products/lepton-breakout-board-v2-0) and a [**Lepton 2.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-2-5) or [**Lepton3.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5) (recommended) that can be bought separately from GroupGets during the checkout process and are not included in the KIT.
+You can buy the [**Lepton Breakout Board V2**](https://store.groupgets.com/collections/frontpage/products/lepton-breakout-board-v2-0) and [**Lepton 2.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-2-5) or [**Lepton3.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5) (recommended) sensor separately from **GroupGets** during the checkout process.
 
 For the **tools**, you need the following ones in order to follow the assembly process:
 
