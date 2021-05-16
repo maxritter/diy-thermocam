@@ -34,7 +34,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "url": "/device-features",
+                "url": "/software",
                 "style": "link",
                 "has_subnav": false,
                 "icon_class": "",
