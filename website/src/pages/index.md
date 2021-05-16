@@ -53,7 +53,7 @@ sections:
         style: primary
       - type: action
         template: action
-        label: Read Building Instructions
+        label: View the Software Ecosystem
         url: /building-instructions
         style: secondary
   - type: section_cta
