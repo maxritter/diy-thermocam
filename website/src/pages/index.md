@@ -63,7 +63,7 @@ sections:
     title: Stay up-to-date on the latest news and updates
     section_id: cta
     subtitle: >-
-      Subscribe now to get notified first 
+      Subscribe now to get notified first when 
     actions:
       - type: action
         template: action
