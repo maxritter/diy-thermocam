@@ -63,7 +63,8 @@ sections:
     title: Stay up-to-date on the latest news and updates
     section_id: cta
     subtitle: >-
-      Subscribe now to get notified first when 
+      Subscribe now to get notified first when there is a new software or
+      hardware update
     actions:
       - type: action
         template: action
