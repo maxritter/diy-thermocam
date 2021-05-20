@@ -8,8 +8,8 @@ sections:
     image: /images/background.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_long-wave-infrared array sensor\n"
     actions:
-      - label: Buy the KIT (coming soon on GroupGets!)
-        url: 'https://mailchi.mp/3e0df5458871/diy-thermocam-v3-kit'
+      - label: Buy the KIT
+        url: 'https://py.pl/1aOzh9'
         style: primary
         new_window: true
   - type: section_content
