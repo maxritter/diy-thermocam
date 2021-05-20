@@ -31,11 +31,9 @@ template: page
 ---
 # Prerequisites
 
-You need the following **components** that can be acquired from our partner [**GroupGets.com**](https://groupgets.com/):
-
 ![](https://cdn.forestry.io/res2/B1n3GNdrd8BwBLUxPMurAfEwZ5yy-h6TSVUsEqH7LJo/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU2xFMVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYWY0/ZmNhM2ZhNDRmYWQ5/ZDRlMDEwMjhkNTIy/MjI0YWYyZGU4ZjFm/My8xLmpwZw)
 
-The **DIY-Thermocam V3 KIT** contains **all required parts** apart from FLIR Lepton Sensor and Module:
+The [**DIY-Thermocam V3 KIT**](https://py.pl/1aOzh9) contains **all required parts** apart from the FLIR Lepton3.5 sensor and FLIR Lepton Breakout Board V2:
 
 *   1 x PCB V3.0
 
@@ -109,7 +107,21 @@ The **DIY-Thermocam V3 KIT** contains **all required parts** apart from FLIR Lep
 
 *   2 x 10k Resistor
 
-You can buy the [**Lepton Breakout Board V2**](https://store.groupgets.com/collections/frontpage/products/lepton-breakout-board-v2-0) and [**Lepton 2.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-2-5) or [**Lepton3.5**](https://store.groupgets.com/collections/frontpage/products/flir-lepton-3-5) (recommended) sensor separately from **GroupGets** during the checkout process.
+In case you do not already own it, you can buy the [**FLIR Lepton Breakout Board V2**](https://www.flir.eu/products/lepton-breakout-board-v2.0/) separately from one of those sources:
+
+*   [Groupgets.com](https://store.groupgets.com/products/lepton-breakout-board-v2-0)
+
+*   [Digikey.com](https://www.digikey.com/en/products/detail/flir-lepton/250-0577-00/10385179)
+
+*   [Mouser.com](https://eu.mouser.com/ProductDetail/FLIR-Lepton/250-0577-00?qs=DRkmTr78QARne0IUCYtsyA%3D%3D)
+
+In case you do not already own it, you can buy the [**FLIR Lepton3.5**](https://www.flir.eu/products/lepton/?model=3.5%20Lepton) sensor separately from one of those sources:
+
+*   [Groupgets.com](https://store.groupgets.com/products/flir-lepton-3-5)
+
+*   [Digikey.com](https://www.digikey.com/en/products/detail/flir-lepton/500-0771-01/7606616)
+
+*   [Mouser.com](https://eu.mouser.com/ProductDetail/FLIR-Lepton/500-0771-01?qs=DRkmTr78QAQNv%2FBEKfCn%252BQ%3D%3D)
 
 For the **tools**, you need the following ones in order to follow the assembly process:
 
