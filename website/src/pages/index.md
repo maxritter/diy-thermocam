@@ -14,7 +14,7 @@ sections:
         new_window: true
   - type: section_content
     template: section_content
-    title: The DIY-Thermocam V3 is here!
+    title: The DIY-Thermocam V3 is here
     section_id: text-img
     image: /images/open.jpg
     image_position: left
