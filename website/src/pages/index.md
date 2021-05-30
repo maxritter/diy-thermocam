@@ -11,7 +11,6 @@ sections:
       - label: Buy the DIY-Thermocam V3
         url: 'https://py.pl/1aOzh9'
         style: primary
-        new_window: true
   - type: section_content
     template: section_content
     title: The DIY-Thermocam V3 is here
