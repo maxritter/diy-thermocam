@@ -9,7 +9,7 @@ sections:
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_long-wave-infrared array sensor.\n\nThe **self-assembly KIT** is **in-stock** now and **ships within one week**, get it here:\n"
     actions:
       - label: Buy the DIY-Thermocam V3
-        url: 'https://py.pl/1aOzh9'
+        url: 'https://ko-fi.com/s/a94d75e6b0'
         style: primary
   - type: section_content
     template: section_content
