@@ -39,6 +39,8 @@ The [**DIY-Thermocam V3 KIT**](https://ko-fi.com/s/a94d75e6b0) contains **all re
 
 *   6 x 2D Laser Cutted Enclosure Parts
 
+*   1 x Enclosure Lepton Protector
+
 *   1 x Charging Module
 
 *   1 x Charging LED
