@@ -405,6 +405,8 @@ Grab the **Tripod** and screw it into the Tripod Socket, then put the **microUSB
 
 ![](https://cdn.forestry.io/res2/wm8Gedj5PRK9fhqtgxCIa2mD608oAnoixwbw-FK1R4Y/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUmxWU1VWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNjcx/YjE3MmYyODU2Zjk4/NjYyN2YwY2UzNzFm/YmI4NmVmNjhjMzcw/YS80NS5qcGc)
 
+If you want to, you can put the **Lepton Enclosure Protector** on top of the cutout in the middle of the backside where the Lepton resides. When attached, it can be moved to the top so the Lepton is protected during transportation of the device.
+
 #### 44.
 
 Finally, follow the instruction [**here**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) to flash the newest firmware to the device. You can find the latest firmware release [**here**](https://github.com/maxritter/DIY-Thermocam/releases).
