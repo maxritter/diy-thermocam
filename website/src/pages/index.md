@@ -15,7 +15,7 @@ sections:
     template: section_content
     title: The DIY-Thermocam V3 is here
     section_id: text-img
-    image: /images/ThermocamV3_Demo.png
+    image: /images/open.jpg
     image_position: left
     content: >
       **Version 3** has been redesigned to offer **3x the performance** of the
