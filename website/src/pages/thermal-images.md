@@ -5,7 +5,7 @@ sections:
     template: section_hero
     title: Thermal Images
     section_id: hero
-    image: images/5.jpg
+    image: /images/background.jpg
     content: >
       All images have been created with the Thermovision Software from raw files
       on the SD card of a DIY-Thermocam with Lepton3.5 160x120 sensor
