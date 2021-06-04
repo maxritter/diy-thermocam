@@ -23,21 +23,25 @@ seo:
   type: stackbit_page_meta
 template: page
 ---
-# **Node.js Library**
+# ****![](https://cdn.forestry.io/res2/ir6CUhW5FbmCZ2dBqSmhgPXViJekpB9aDj5LHjcJMco/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUVZKTWVYY3dQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNGE2/NTk1MGNhZGFjMjQx/YmIyNWNiMDg2M2E3/YjNlMDJiZGI2NjI1/ZC9UaGVybW9jYW1W/M19EZW1vLnBuZw)
 
-Open-source Node.js library that allows you to build your own Javascript or Typescript application on top of it. 
+****
+
+**Node.js Library**
+
+Open-source Node.js library that allows you to build your own Javascript or Typescript application on top of it.
 
 **Coming soon!**
 
 ## **Python Library**
 
-Open-source Python library that allows you to build your own Python application on top of it. 
+Open-source Python library that allows you to build your own Python application on top of it.
 
 **Coming soon!**
 
 # **Electron UI Application**
 
-Open-source sample application built with the modern [Electron JS](https://www.electronjs.org/) framework that gives a blueprint / starting point how to implement cross-platform desktop or mobile applications, using the Node.JS library to connect to the device. 
+Open-source sample application built with the modern [Electron JS](https://www.electronjs.org/) framework that gives a blueprint / starting point how to implement cross-platform desktop or mobile applications, using the Node.JS library to connect to the device.
 
 **Coming soon!**
 
