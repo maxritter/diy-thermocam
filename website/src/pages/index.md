@@ -4,7 +4,7 @@ sections:
   - type: section_hero
     template: section_hero
     title: Open-source thermal imaging for the rest of us
-    section_id: hero
+    section_id: hero1
     image: /images/background.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_long-wave-infrared array sensor.\n\nThe **self-assembly KIT** is **in-stock** now and **ships within one week**, get it here:\n"
     actions:
@@ -13,7 +13,7 @@ sections:
         style: primary
   - type: section_hero
     template: section_hero
-    section_id: hero
+    section_id: hero2
     image: /images/background.jpg
   - type: section_content
     template: section_content
