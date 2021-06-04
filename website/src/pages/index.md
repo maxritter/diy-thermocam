@@ -11,6 +11,10 @@ sections:
       - label: Buy the DIY-Thermocam V3
         url: 'https://ko-fi.com/s/a94d75e6b0'
         style: primary
+  - type: section_hero
+    template: section_hero
+    section_id: hero
+    image: /images/background.jpg
   - type: section_content
     template: section_content
     title: The DIY-Thermocam V3 is here
