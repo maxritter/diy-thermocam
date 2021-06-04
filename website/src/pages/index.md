@@ -12,7 +12,7 @@ sections:
         url: 'https://ko-fi.com/s/a94d75e6b0'
         style: primary
   - type: section_content
-    template: section_hero
+    template: section_content
     section_id: hero2
     image: /images/ThermocamV3_Demo.png
   - type: section_content
