@@ -14,7 +14,7 @@ sections:
   - type: section_hero
     template: section_hero
     section_id: hero2
-    image: /images/background.jpg
+    image: /images/ThermocamV3_Demo.png
   - type: section_content
     template: section_content
     title: The DIY-Thermocam V3 is here
