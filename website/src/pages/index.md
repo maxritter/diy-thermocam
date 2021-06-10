@@ -8,7 +8,7 @@ sections:
     image: /images/background.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_long-wave-infrared array sensor.\n"
     actions:
-      - label: Buy V3 on GroupGets
+      - label: Buy the DIY-Thermocam V3 on GroupGets
         url: 'https://groupgets.com/campaigns/942-diy-thermocam-v3'
         style: primary
   - type: section_content
