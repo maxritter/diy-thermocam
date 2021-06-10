@@ -13,7 +13,6 @@ sections:
         style: primary
   - type: section_content
     template: section_content
-    title: The DIY-Thermocam V3 is here
     section_id: text-img
     image: /images/25a098063bca24ee49cec83f38153a99d4eeaa6c.jpg
     image_position: left
