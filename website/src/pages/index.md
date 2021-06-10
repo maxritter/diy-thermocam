@@ -34,17 +34,6 @@ sections:
       the **software** and **hardware** are **open-source**, allowing you to
       **modify** or **extend** the **functionalities of the device** and the
       **software ecosystem** to your **own needs**!
-    actions:
-      - type: action
-        template: action
-        label: View Live Device Demo
-        url: 'https://youtu.be/rnlmHt4fbEg'
-        style: primary
-      - type: action
-        template: action
-        label: View Assembly Guide
-        url: /build-your-own
-        style: secondary
   - type: section_cta
     template: section_cta
     title: Stay up-to-date on the latest news and updates
