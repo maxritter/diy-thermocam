@@ -18,10 +18,6 @@ sections:
     image: /images/25a098063bca24ee49cec83f38153a99d4eeaa6c.jpg
     image_position: left
     content: >
-      **Version 3** has been redesigned to offer **3x the performance** of the
-      predecessor, making **thermal imaging much more accessible and fun**!
-
-
       The aim of this project is to give **private persons**, **educational
       institutes** and **companies** access to a **portable**,  **affordable**
       and **customizable** thermal imaging platform that is based on
@@ -39,12 +35,6 @@ sections:
       the **software** and **hardware** are **open-source**, allowing you to
       **modify** or **extend** the **functionalities of the device** and the
       **software ecosystem** to your **own needs**!
-
-
-      The **DIY-Thermocam V3 self-assembly KIT** contains **all required
-      components** to build your own Thermocam at home. Check out the **live
-      device video** and the **assembly guide** linked below to get a better
-      **overview about the device functionalities**.
     actions:
       - type: action
         template: action
