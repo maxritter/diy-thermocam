@@ -42,7 +42,7 @@ sections:
 
 
       The **DIY-Thermocam V3 self-assembly KIT** contains **all required
-      components **to build your own Thermocam at home. Check out the **live
+      components** to build your own Thermocam at home. Check out the **live
       device video** and the **assembly guide** linked below to get a better
       **overview about the device functionalities**.
     actions:
