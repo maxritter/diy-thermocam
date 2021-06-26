@@ -98,10 +98,7 @@ seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
   title: DIY-Thermocam | Open-source thermal imaging for everyone!
-  description: >-
-    The DIY-Thermocam is a do-it-yourself infrared camera, based on the popular
-    FLIR Lepton long-wave infrared sensor and the Arduino compatible Teensy 4.1
-    microcontroller.
+  description: "The\_DIY-Thermocam V3\_is a\_low-cost, do-it-yourself\_thermal imager, based on the popular radiometric\_FLIR Lepton\_sensor and an open-source ecosystem."
   extra:
     - name: 'og:type'
       value: website
