@@ -23,30 +23,6 @@ seo:
   type: stackbit_page_meta
 template: page
 ---
-## **Node.js Library**
-
-Open-source Node.js library that allows you to build your own Javascript or Typescript application on top of it.
-
-**Coming soon!**
-
-## **Python Library**
-
-Open-source Python library that allows you to build your own Python application on top of it.
-
-**Coming soon!**
-
-# **Electron UI Application**
-
-Open-source sample application built with the modern [Electron JS](https://www.electronjs.org/) framework that gives a blueprint / starting point how to implement cross-platform desktop or mobile applications, using the Node.JS library to connect to the device.
-
-**Coming soon!**
-
-# **Firmware Updater**
-
-The firmware updater allows you to flash the newest version of the firmware on any operating system.
-
-[**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) (Windows, Linux & Mac OSX)
-
 # **ThermoVision Software**
 
 ![](https://cdn.forestry.io/res2/CyukiIw18DrUH43O_urwNm-m_FV9K_ohC-sQnqBoqS4/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUjFaQ1FsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNTY4/ZDM3NzBlM2U0YzE0/OWI2YzhhZDA0NmQ1/YjczZjU2ZWEwMDE0/Ny9UaGVybW9WaXNp/b24ucG5n)
@@ -70,6 +46,12 @@ The standalone Thermal Live Viewer application allows you to capture HQ thermal 
 The Thermal Data Viewer is next to the ThermoVision software another possibility to view, edit and convert raw data files on your PC. It allows various functions to alter the thermal range, add measurement points as well as various filters. The program is also capable of converting whole folders of raw data frames into images (JPG, BMP or PNG) or avi videos.
 
 [**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Data%20Viewer/2.3.52.365/ThermalDataViewer\_2.3.52.365.zip) (Windows only)
+
+# **Firmware Updater**
+
+The firmware updater allows you to flash the newest version of the firmware on any operating system.
+
+[**Download Latest Version**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater) (Windows, Linux & Mac OSX)
 
 # **Video Converter**
 
