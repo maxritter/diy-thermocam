@@ -17,16 +17,15 @@ sections:
     image: /images/Inner_Trans.png
     image_position: left
     content: >
-      The aim of this project is to give **private persons, educational
-      institutes and companies** access to a **portable,  affordable and
-      customizable thermal imaging platform that is based on open-source
-      software and hardware**.
+      The DIY-Thermocam V3 gives **private persons, educational institutes and
+      companies** access to a **portable,  affordable and customizable thermal
+      imaging platform **that is based on** open-source software and hardware**.
 
 
       There are various applications like **finding heat leaks** in the
       insulation of buildings, the **analysis of electrical or mechanical
-      components**, the detection of persons / animals or even **mounting it on
-      a drone** and recording **continuous or time-lapse images**.
+      components**, the **detection of persons / animals** or even **mounting it
+      on a drone** and recording **continuous or time-lapse images**.
   - type: section_content
     template: section_content
     section_id: text-img
