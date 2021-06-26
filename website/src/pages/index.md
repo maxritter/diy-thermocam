@@ -37,7 +37,7 @@ sections:
     template: section_content
     section_id: text-img
     image: /images/inside.jpg
-    image_position: left
+    image_position: right
     content: >
       The aim of this project is to give private persons, educational institutes
       and companies access to a **portable,  affordable and customizable thermal
