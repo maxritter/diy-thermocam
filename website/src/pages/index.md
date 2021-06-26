@@ -61,8 +61,8 @@ sections:
     image: /images/diligent-zucchini.png
     image_position: left
     content: >
-      The [**device
-      firmware**](https://github.com/maxritter/DIY-Thermocam/releases) provides
+      The [**Device
+      Firmware**](https://github.com/maxritter/DIY-Thermocam/releases) provides
       a lot of functionalities, that can be accessed over the **3.2" TFT LCD
       touch screen**. **Flashing the firmware** is easy and can be done without
       any programming knowledge on **any operating system** with the
