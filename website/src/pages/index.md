@@ -70,8 +70,8 @@ sections:
       updater**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater).
 
 
-      The DIY-Thermocam offers a **wide range of features**, like adding**
-      temperature points**, changing **temperature range limits**, displaying
+      The DIY-Thermocam offers a **wide range of features**, like adding
+      **temperature points**, changing **temperature range limits**, displaying
       **hot or cold temperatures** only, **saving single images or a series of
       images** (video or timelapse) to the integrated storage, changing the
       **color scheme**, etc.
@@ -80,7 +80,7 @@ sections:
       In case you want to **extend the existing featureset** with your own
       functionality, that's possible too. The [**firmware of the
       DIY-Thermocam**](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V3)
-      is completely **open-source **and is programmed in C++. Just download
+      is completely **open-source** and is programmed in C++. Just download
       **Visual Studio Code** and the **PlatformIO extension**, and you are ready
       to go!
   - type: section_cta
