@@ -34,7 +34,7 @@ sections:
       **finding heat leaks** in the insulation of buildings, the **analysis of
       electrical or mechanical components**, the **detection of persons /
       animals** or even **mounting it on a drone** and recording **continuous or
-      time-lapse images**. 
+      time-lapse images**.
   - type: section_content
     template: section_content
     section_id: text-img
