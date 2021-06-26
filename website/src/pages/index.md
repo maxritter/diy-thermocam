@@ -3,7 +3,7 @@ title: DIY-Thermocam
 sections:
   - type: section_hero
     template: section_hero
-    title: The power of thermal imaging - now accessible for everyone!
+    title: The power of thermal imaging - now affordable for everyone!
     section_id: hero
     image: /images/background.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_sensor and **open-source software**.\n"
