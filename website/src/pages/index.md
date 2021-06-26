@@ -61,10 +61,28 @@ sections:
     image: /images/diligent-zucchini.png
     image_position: left
     content: >
-      The device firmware provides a lot of functionalities, that can be
-      accessed over the 3.2" TFT LCD touch screen. Flashing the firmware is easy
-      and can be done without any programming knowledge on any operating system
-      with the standalone firmware updater.
+      The [**device
+      firmware**](https://github.com/maxritter/DIY-Thermocam/releases) provides
+      a lot of functionalities, that can be accessed over the **3.2" TFT LCD
+      touch screen**. **Flashing the firmware** is easy and can be done without
+      any programming knowledge on **any operating system** with the
+      [**standalone firmware
+      updater**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater).
+
+
+      The DIY-Thermocam offers a **wide range of features**, like adding**
+      temperature points**, changing **temperature range limits**, displaying
+      **hot or cold temperatures** only, **saving single images or a series of
+      images** (video or timelapse) to the integrated storage, changing the
+      **color scheme**, etc.
+
+
+      In case you want to **extend the existing featureset** with your own
+      functionality, that's possible too. The [**firmware of the
+      DIY-Thermocam**](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V3)
+      is completely **open-source **and is programmed in C++. Just download
+      **Visual Studio Code** and the **PlatformIO extension**, and you are ready
+      to go!
   - type: section_cta
     template: section_cta
     title: Stay up-to-date on the latest news and updates
