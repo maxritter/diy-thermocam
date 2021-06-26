@@ -59,13 +59,19 @@ sections:
       any programming knowledge on **any operating system** with the
       [**standalone firmware
       updater**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater).
+      Once the Thermocam is **connected to the PC** afterwards, it will show up
+      as a **mass storage device** and allows you to **transfer thermal images
+      from or to the device**.
 
 
       The DIY-Thermocam offers a **wide range of features**, like adding
       **temperature points**, changing **temperature range limits**, displaying
       **hot or cold temperatures** only, **saving single images or a series of
       images** (video or timelapse) to the integrated storage, changing the
-      **color scheme**, etc.
+      **color scheme**, etc. It can also **communicate to the PC** over the
+      [**USB serial
+      protocol**](https://github.com/maxritter/DIY-Thermocam/blob/master/Documents/SerialProtocol\_15.pdf),
+      in order to **stream thermal images** or **change settings remotely**.
 
 
       In case you want to **extend the existing featureset** with your own
