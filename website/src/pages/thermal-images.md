@@ -6,9 +6,8 @@ sections:
     title: Thermal Images
     section_id: hero
     image: /images/background.jpg
-    content: >
-      Images have been created with the DIY-Thermocam and the ThermoVision
-      software
+    content: |
+      Images were created with the DIY-Thermocam and ThermoVision software
   - type: section_grid
     template: section_grid
     section_id: showcase
