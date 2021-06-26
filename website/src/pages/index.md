@@ -59,9 +59,9 @@ sections:
       any programming knowledge on **any operating system** with the
       [**standalone firmware
       updater**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Firmware%20Updater).
-      Once the Thermocam is **connected to the PC** afterwards, it will show up
-      as a **mass storage device** and allows you to **transfer thermal images
-      from or to the device**.
+      Once the Thermocam is **connected to the PC**, it will show up as a **mass
+      storage device** and allows you to **transfer thermal images from or to
+      the device**.
 
 
       The DIY-Thermocam offers a **wide range of features**, like adding
