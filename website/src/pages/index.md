@@ -24,8 +24,8 @@ sections:
 
       There are various applications like **finding heat leaks** in the
       insulation of buildings, the **analysis of electrical or mechanical
-      components**, the detection of persons / animals or even mounting it on a
-      drone and recording continuous or time-lapse images.
+      components**, the detection of persons / animals or even **mounting it on
+      a drone** and recording **continuous or time-lapse images**.
 
 
       Constructed as a **self-assembly solution**, the device allows you to take
