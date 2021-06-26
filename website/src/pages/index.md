@@ -17,9 +17,10 @@ sections:
     image: /images/Inner_Trans.png
     image_position: left
     content: >
-      The DIY-Thermocam V3 gives **private persons, educational institutes and
-      companies** access to a **portable,  affordable and customizable thermal
-      imaging platform** that is based on **open-source software and hardware**.
+      The **DIY-Thermocam V3** gives **private persons, educational institutes
+      and companies** access to a **portable,  affordable and customizable
+      thermal imaging platform** that is based on **open-source software and
+      hardware**.
 
 
       There are various applications like **finding heat leaks** in the
