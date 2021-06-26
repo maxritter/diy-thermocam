@@ -14,7 +14,7 @@ sections:
   - type: section_content
     template: section_content
     section_id: text-img
-    image: /images/inside.jpg
+    image: /images/blury-table-designify.png
     image_position: left
     content: >
       The aim of this project is to give private persons, educational institutes
