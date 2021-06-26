@@ -32,22 +32,16 @@ sections:
     image: /images/ThermoVision1.png
     image_position: right
     content: >
-      The aim of this project is to give private persons, educational institutes
-      and companies access to a **portable,  affordable and customizable thermal
-      imaging platform that is based on open-source software and hardware**.
-
-
-      There are various applications like **finding heat leaks** in the
-      insulation of buildings, the **analysis of electrical or mechanical
-      components**, the detection of persons / animals or even mounting it on a
-      drone and recording continuous or time-lapse images.
-
-
-      Constructed as a **self-assembly solution**, the device allows you to take
-      advantage of the versatile possibilities of thermal imaging. Both the
-      software and hardware are open-source, allowing you to **modify or extend
-      the functionalities of the device and the software ecosystem to your own
-      needs**!
+      The device has a [**large ecosystem of
+      software**](https://www.diy-thermocam.net/software) around it, that allows
+      it to **extend the functionalities of the device** beyond the firmware
+      itself. You can use the [**ThermoVision
+      software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)
+      to edit the raw data files on your PC and save them in various file
+      formats. In addition to that, the [**Thermal Live
+      Viewer**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Live%20Viewer)
+      can stream live thermal images to your PC over the USB connection, change
+      settings on the fly and record images or videos to your PC.
   - type: section_content
     template: section_content
     section_id: text-img
