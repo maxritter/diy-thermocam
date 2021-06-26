@@ -23,7 +23,7 @@ sections:
       [**software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software)
       and
       [**hardware**](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB).
-      It is constructe as a [**self-assembly
+      It is constructed as a [**self-assembly
       solution**](https://www.diy-thermocam.net/build-your-own), that can be
       build **at home** by only using **some standard tools**. It's like **LEGO,
       but for grown-ups**!
