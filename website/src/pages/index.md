@@ -34,7 +34,7 @@ sections:
     content: >
       The device has a [**large ecosystem of
       software**](https://www.diy-thermocam.net/software) around it, that allows
-      it to **extend the functionalities of the device** beyond the firmware
+      to **extend the functionalities of the device** beyond the firmware
       itself. You can use the [**ThermoVision
       software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)
       to **edit raw data files on your PC** and **save them in various file
