@@ -37,11 +37,15 @@ sections:
       it to **extend the functionalities of the device** beyond the firmware
       itself. You can use the [**ThermoVision
       software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Analysis%20Software)
-      to edit the raw data files on your PC and save them in various file
-      formats. In addition to that, the [**Thermal Live
+      to **edit raw data files on your PC** and **save them in various file
+      formats**. In addition to that, the [**Thermal Live
       Viewer**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Live%20Viewer)
-      can stream live thermal images to your PC over the USB connection, change
-      settings on the fly and record images or videos to your PC.
+      can **stream live thermal images to your PC**, change settings on the fly
+      and **record images or videos**. The [**Thermal Data
+      Viewer**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Thermal%20Data%20Viewer)
+      provides another way of **editing raw files**, and with the [**Video
+      Converter**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software/Video%20Converter)
+      you can **convert series of captures images to movie files**.
   - type: section_content
     template: section_content
     section_id: text-img
