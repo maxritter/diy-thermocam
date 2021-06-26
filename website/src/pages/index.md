@@ -58,7 +58,7 @@ sections:
   - type: section_content
     template: section_content
     section_id: text-img
-    image: /images/caring-octopus.png
+    image: /images/Screenshots.png
     image_position: left
     content: >
       The aim of this project is to give private persons, educational institutes
