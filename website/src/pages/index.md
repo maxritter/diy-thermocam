@@ -77,9 +77,8 @@ sections:
       In case you want to **extend the existing featureset** with your own
       functionality, that's possible too. The [**firmware of the
       DIY-Thermocam**](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V3)
-      is completely **open-source** and can be programmed in C++. Just download
-      **Visual Studio Code** and the **PlatformIO extension**, and you are ready
-      to go!
+      is completely **open-source** and written in C/C++. Just download **Visual
+      Studio Code** and the **PlatformIO extension**, and you are ready to go!
   - type: section_cta
     template: section_cta
     title: Stay up-to-date on the latest news and updates
