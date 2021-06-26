@@ -19,10 +19,10 @@ sections:
     content: >
       The **DIY-Thermocam V3** gives **private persons, educational institutes
       and companies** access to a **portable,  affordable and customizable
-      thermal imaging platform** that is based on **open-source
-      **[**software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software)**
+      thermal imaging platform** that is based on open-source
+      [**software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software)
       and
-      **[**hardware**](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB).
+      [**hardware**](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB).
 
 
       There are [**various
