@@ -19,14 +19,18 @@ sections:
     content: >
       The **DIY-Thermocam V3** gives **private persons, educational institutes
       and companies** access to a **portable,  affordable and customizable
-      thermal imaging platform** that is based on **open-source software and
-      hardware**.
+      thermal imaging platform** that is based on **open-source
+      **[**software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software)**
+      and
+      **[**hardware**](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB).
 
 
-      There are various applications like **finding heat leaks** in the
-      insulation of buildings, the **analysis of electrical or mechanical
-      components**, the **detection of persons / animals** or even **mounting it
-      on a drone** and recording **continuous or time-lapse images**.
+      There are [**various
+      applications**](https://www.diy-thermocam.net/thermal-images) like
+      **finding heat leaks** in the insulation of buildings, the **analysis of
+      electrical or mechanical components**, the **detection of persons /
+      animals** or even **mounting it on a drone** and recording **continuous or
+      time-lapse images**.
   - type: section_content
     template: section_content
     section_id: text-img
