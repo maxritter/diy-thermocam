@@ -14,7 +14,7 @@ sections:
   - type: section_content
     template: section_content
     section_id: text-img
-    image: /images/25a098063bca24ee49cec83f38153a99d4eeaa6c.jpg
+    image: /images/parking-designify (1).png
     image_position: left
     content: >
       The aim of this project is to give private persons, educational institutes
