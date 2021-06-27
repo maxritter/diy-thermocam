@@ -111,7 +111,7 @@
                 "subnav_links": []
             },
             {
-                "label": "lorem-ipsum",
+                "label": "GitHub Repo",
                 "url": "#",
                 "style": "primary",
                 "icon_class": "dev",
