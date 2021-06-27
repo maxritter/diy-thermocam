@@ -13,7 +13,7 @@ excerpt: ''
 ---
 ## Schematic
 
-![](https://preview--diythermocam-website-354b1.stackbit.dev/_static/app-assets/Schematic.JPG)
+![](https://www.diy-thermocam.net/images/Schematic.JPG)
 
 ## Pinmap
 
