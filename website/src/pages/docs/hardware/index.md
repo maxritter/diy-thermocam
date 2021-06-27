@@ -40,9 +40,9 @@ excerpt: ''
 
 ## PCB
 
-The printed circuit board has been created with Autosoft Eagle: http://www.autodesk.com/education/free-software/eagle. Use this software to open the .sch (Schematic) or .brd (Board) files.
+The printed circuit board has been created with **[Autosoft Eagle](http://www.autodesk.com/education/free-software/eagle)**. Use this software to open the .sch (Schematic) or .brd (Board) files.
 
-You can also use the Gerber.zip and upload it to any PCB service of your choice to manufacture the board, for example http://www.smart-prototyping.com/PCB-Prototyping.html. Dimensions are 89.4mm (w) x 68.4mm (h), 1.6mm thickness and 2 layers.
+You can also use the Gerber.zip and upload it to any PCB service of your choice to manufacture the board, for example [PCB Protoyping](http://www.smart-prototyping.com/PCB-Prototyping.html). Dimensions are 89.4mm (w) x 68.4mm (h), 1.6mm thickness and 2 layers.
 
 [![FRONT](https://github.com/maxritter/DIY-Thermocam/raw/master/PCB/3.0/FRONT.PNG)](https://github.com/maxritter/DIY-Thermocam/blob/master/PCB/3.0/FRONT.PNG)
 
@@ -52,7 +52,7 @@ You can also use the Gerber.zip and upload it to any PCB service of your choice 
 
 ## Enclosure
 
-The enclosure has been designed with Google Sketchup in 3D and converted to 2D files to laser-cut them. The 2D SVG file can be opened with Inkscape.
+The enclosure has been designed with **[Google Sketchup](https://www.sketchup.com/plans-and-pricing/sketchup-free)** in 3D and converted to 2D files to laser-cut them. The 2D SVG file can be opened with **[Inkscape](https://inkscape.org/)**.
 
 **[Get Enclosure Revision 3.0](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3.0)**
 
