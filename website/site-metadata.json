@@ -101,7 +101,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "GitHub",
+                "label": "Documentation",
                 "url": "https://github.com/maxritter/DIY-Thermocam",
                 "style": "secondary",
                 "has_subnav": false,
