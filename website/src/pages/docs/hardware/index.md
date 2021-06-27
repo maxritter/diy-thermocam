@@ -6,7 +6,7 @@ seo:
   robots: []
   extra: []
 template: docs
-title: Manual
+title: Hardware
 weight: 
 excerpt: ''
 
