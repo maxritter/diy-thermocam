@@ -36,4 +36,3 @@ fields:
     required: true
 pages:
 - src/pages/docs/index.md
-- src/pages/docs/manual/manual.md
