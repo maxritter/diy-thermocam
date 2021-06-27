@@ -102,7 +102,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Documentation",
-                "url": "https://github.com/maxritter/DIY-Thermocam",
+                "url": "/docs",
                 "style": "secondary",
                 "has_subnav": false,
                 "icon_class": "",
