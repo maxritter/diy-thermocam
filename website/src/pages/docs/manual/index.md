@@ -11,7 +11,7 @@ weight:
 excerpt: ''
 
 ---
-This manual explains the features of the **DIY-Thermocam V3** 
+This manual explains the features of the **DIY-Thermocam V3** hardware and software:
 
 #### Charging
 
