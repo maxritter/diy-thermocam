@@ -33,6 +33,6 @@ seo:
       relativeUrl: false
 template: docs
 ---
-![](https://cdn.forestry.io/res2/tKoeR8U8L3LIcj-EkpDQzWhKkDxt7cxeDKCf2sq7jdE/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUVRsdE0wRTBQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tY2Rk/MjFiZGM0NTA0NTJl/YTZhMWE5YTliNDJj/YTFkZTQzNTAyNTMz/Yi90aGVybW9jYW0u/anBn)
+![](/\_static/app-assets/docs.jpg)
 
 Use the **links on the left** to get more information about certain aspects of the **DIY-Thermocam V3**.
