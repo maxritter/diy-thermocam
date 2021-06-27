@@ -33,4 +33,6 @@ seo:
       relativeUrl: false
 template: docs
 ---
-This documentation will be updated soon with content from the repo. Until then, please check out the Github repo for the latest documents.
+![](/\_static/app-assets/thermocam.jpg)
+
+Use the **navigation bar on the left** to get more information about certain aspects of the **DIY-Thermocam V3**.
