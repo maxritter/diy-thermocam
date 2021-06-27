@@ -112,7 +112,7 @@
             },
             {
                 "label": "GitHub Repo",
-                "url": "#",
+                "url": "https://github.com/maxritter/DIY-Thermocam",
                 "style": "primary",
                 "icon_class": "dev",
                 "new_window": false,
