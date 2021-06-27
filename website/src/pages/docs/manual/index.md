@@ -21,7 +21,7 @@ The LED on the top of the device indicates if the device is charging (red) or wh
 
 The firmware on the DIY-Thermocam can be updated over the Teensyduino loader on Windows, Linux and Mac OSX operating systems. 
 
-#### Mass STORAGE MODE (MTP)
+#### Mass Storage Mode (MTP)
 
 Connect your Thermocam to a PC in live mode via USB to enter the file transfer / mass storage mode. You can copy the raw data and BMP files as well as videos there.
 
