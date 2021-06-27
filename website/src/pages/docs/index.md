@@ -35,4 +35,4 @@ template: docs
 ---
 ![](/\_static/app-assets/docs.jpg)
 
-👈🏼 Use the **links on the left** to get more information about certain aspects of the **DIY-Thermocam**.
+👈🏼 Use the **links on the left** to get **more information** about certain aspects of the **DIY-Thermocam**.
