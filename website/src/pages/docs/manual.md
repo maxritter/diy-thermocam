@@ -1,18 +1,30 @@
 ---
-title: lorem-ipsum
-weight: 0
-excerpt: lorem-ipsum
+title: About
+excerpt: Libris is a Unibit theme created for project documentations. You can use it for your project.
 seo:
-  title: ''
-  description: ''
-  robots: []
-  extra: []
-  type: stackbit_page_meta
-template: docs
+  title: About
+  description: This is the about page
+  extra:
+    - name: og:type
+      value: website
+      keyName: property
+    - name: og:title
+      value: About
+      keyName: property
+    - name: og:description
+      value: This is the about page
+      keyName: property
+    - name: twitter:card
+      value: summary
+    - name: twitter:title
+      value: About
+    - name: twitter:description
+      value: This is the about page
+layout: docs
 ---
-## Lorem ipsum
 
-Lorem ipsum dolor sit amet, **consectetur adipiscing elit**, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut quis consequat risus. Aenean ut porta ligula. Morbi id ante eu nisi suscipit maximus. Fusce ac congue quam. Nulla id elit facilisis, consequat magna vitae, scelerisque elit. Nullam lacinia elit in arcu scelerisque, ac volutpat neque sodales.
 
-- Lorem ipsum
-- dolor sit amet
+***
+
+Here are the articles in this section:
