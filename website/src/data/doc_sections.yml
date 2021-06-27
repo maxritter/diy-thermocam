@@ -1,6 +1,7 @@
 ---
 root_docs_path: "/docs"
 sections:
+- firmware
 - serial
 - hardware
 - manual
