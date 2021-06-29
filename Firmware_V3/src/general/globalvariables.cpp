@@ -26,7 +26,7 @@
 /*############################# PUBLIC VARIABLES ##############################*/
 
 //Current firmware version
-char versionString[] = "Firmware 3.02 from 13.05.2021";
+char versionString[] = "Firmware 3.02 from 21.06.2021";
 uint16_t fwVersion = 302;
 
 //320x240 buffer

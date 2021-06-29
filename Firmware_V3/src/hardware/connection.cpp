@@ -163,39 +163,6 @@ void sendSpotTemp()
 		Serial.write(farray[i]);
 }
 
-/* Sets the time */
-void setTime()
-{
-	//Wait for time string, maximum 1 second
-	uint32_t timer = millis();
-	while (!Serial.available() && ((millis() - timer) < 1000))
-		;
-
-	//If there was no timestring
-	if (Serial.available() == 0)
-	{
-		//Send ACK and return
-		Serial.write(CMD_SET_TIME);
-		return;
-	}
-
-	//Read time
-	String dateIn = Serial.readString();
-
-	//Check if valid
-	if (getInt(dateIn.substring(0, 4) >= 2021))
-	{
-		//Set the clock
-		setTime(getInt(dateIn.substring(11, 13)), getInt(dateIn.substring(14, 16)), getInt(dateIn.substring(17, 19)),
-				getInt(dateIn.substring(8, 10)), getInt(dateIn.substring(5, 7)), getInt(dateIn.substring(0, 4)));
-		//Set the RTC
-		Teensy3Clock.set(now());
-	}
-
-	//Send ACK
-	Serial.write(CMD_SET_TIME);
-}
-
 /* Send the temperature points */
 void sendTempPoints()
 {
@@ -567,12 +534,6 @@ void sendDiagnostic()
 	Serial.write(diagnostic);
 }
 
-/* Send the HQ Resolution information */
-void sendHQResolution()
-{
-	Serial.write(1);
-}
-
 /* Set temperature points array */
 void setTempPoints()
 {
@@ -736,10 +697,6 @@ bool serialHandler()
 	case CMD_GET_CONFIGDATA:
 		sendConfigData();
 		break;
-		//Send the calibration status
-	case CMD_GET_CALSTATUS:
-		Serial.write(CMD_INVALID);
-		break;
 		//Send calibration data
 	case CMD_GET_CALIBDATA:
 		sendCalibrationData();
@@ -748,21 +705,9 @@ bool serialHandler()
 	case CMD_GET_SPOTTEMP:
 		sendSpotTemp();
 		break;
-		//Change time
-	case CMD_SET_TIME:
-		setTime();
-		break;
 		//Send temperature points
 	case CMD_GET_TEMPPOINTS:
 		sendTempPoints();
-		break;
-		//Toggle laser
-	case CMD_SET_LASER:
-		Serial.write(CMD_INVALID);
-		break;
-		//Send laser state
-	case CMD_GET_LASER:
-		Serial.write(CMD_INVALID);
 		break;
 		//Run the shutter
 	case CMD_SET_SHUTTERRUN:
@@ -778,25 +723,9 @@ bool serialHandler()
 	case CMD_SET_FILTERTYPE:
 		setFilterType();
 		break;
-		//Get the shutter mode
-	case CMD_GET_SHUTTERMODE:
-		Serial.write(CMD_INVALID);
-		break;
 		//Send battery status
 	case CMD_GET_BATTERYSTATUS:
 		sendBatteryStatus();
-		break;
-		//Set calibration offset
-	case CMD_SET_CALOFFSET:
-		Serial.write(CMD_INVALID);
-		break;
-		//Set calibration slope
-	case CMD_SET_CALSLOPE:
-		Serial.write(CMD_INVALID);
-		break;
-		//Send visual image
-	case CMD_GET_VISUALIMG:
-		Serial.write(CMD_INVALID);
 		break;
 		//Send firmware version
 	case CMD_GET_FWVERSION:
@@ -842,17 +771,9 @@ bool serialHandler()
 	case CMD_SET_ROTATION:
 		setRotation();
 		break;
-		//Run calibration
-	case CMD_SET_CALIBRATION:
-		Serial.write(CMD_INVALID);
-		break;
 		//Get diagnostic information
 	case CMD_GET_DIAGNOSTIC:
 		sendDiagnostic();
-		break;
-		//Get HQ resolution information
-	case CMD_GET_HQRESOLUTION:
-		sendHQResolution();
 		break;
 		//Send raw frame
 	case CMD_FRAME_RAW:
@@ -933,16 +854,7 @@ bool touchHandler()
 		while ((!digitalRead(pin_touch_irq)) && (endTime <= 1000))
 			endTime = millis() - startTime;
 	}
-	endTime = millis() - startTime;
 
-	//Short press - take visual image
-	if (endTime < 1000)
-	{
-		sendCmd = FRAME_CAPTURE_VISUAL;
-		return false;
-	}
-
-	//Long press
 	return true;
 }
 
@@ -961,51 +873,6 @@ void checkSerial()
 	//Another command received, discard it
 	else if ((Serial.available() > 0))
 		Serial.read();
-}
-
-/* Check for updater requests */
-void checkForUpdater()
-{
-	//We received something
-	if (Serial.available() > 0)
-	{
-		//Read command from Serial Port
-		byte recCmd = Serial.read();
-		//Decide what to do
-		switch (recCmd)
-		{
-			//Send firmware version
-		case CMD_GET_FWVERSION:
-			sendFWVersion();
-			break;
-			//Get hardware version
-		case CMD_GET_HWVERSION:
-			sendHardwareVersion();
-			break;
-			//Get diagnostic information
-		case CMD_GET_DIAGNOSTIC:
-			sendDiagnostic();
-			break;
-			//Get HQ resolution information
-		case CMD_GET_HQRESOLUTION:
-			sendHQResolution();
-			break;
-			//Send the calibration status
-		case CMD_GET_CALSTATUS:
-			Serial.write(CMD_INVALID);
-			break;
-			//Send battery status
-		case CMD_GET_BATTERYSTATUS:
-			sendBatteryStatus();
-			break;
-
-			//Start connection, send ACK
-		case CMD_START:
-			Serial.write(CMD_START);
-			break;
-		}
-		Serial.flush();
-	}
 }
 
 /* Go into video output mode and wait for connected module */

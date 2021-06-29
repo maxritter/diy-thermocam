@@ -19,60 +19,48 @@
 /*################# PUBLIC CONSTANTS, VARIABLES & DATA TYPES ##################*/
 
 //Start & Stop command
-#define CMD_START              100
-#define CMD_END	               200
-#define CMD_INVALID				 0
+#define CMD_START              0x64
+#define CMD_END	               0xC8
+#define CMD_INVALID			   0x00
 
 //Serial terminal commands
-#define CMD_GET_RAWLIMITS      110
-#define CMD_GET_RAWDATA        111
-#define CMD_GET_CONFIGDATA     112
-#define CMD_GET_CALSTATUS      113
-#define CMD_GET_CALIBDATA      114
-#define CMD_GET_SPOTTEMP       115
-#define CMD_SET_TIME           116
-#define CMD_GET_TEMPPOINTS     117
-#define CMD_SET_LASER          118
-#define CMD_GET_LASER          119
-#define CMD_SET_SHUTTERRUN     120
-#define CMD_SET_SHUTTERMODE    121
-#define CMD_SET_FILTERTYPE     122
-#define CMD_GET_SHUTTERMODE    123
-#define CMD_GET_BATTERYSTATUS  124
-#define CMD_SET_CALSLOPE       125
-#define CMD_SET_CALOFFSET      126
-#define CMD_GET_DIAGNOSTIC     127
-#define CMD_GET_VISUALIMG      128
-#define CMD_GET_FWVERSION      129
-#define CMD_SET_LIMITS         130
-#define CMD_SET_TEXTCOLOR      131
-#define CMD_SET_COLORSCHEME    132
-#define CMD_SET_TEMPFORMAT     133
-#define CMD_SET_SHOWSPOT       134
-#define CMD_SET_SHOWCOLORBAR   135
-#define CMD_SET_SHOWMINMAX     136
-#define CMD_SET_TEMPPOINTS     137
-#define CMD_GET_HWVERSION      138
-#define CMD_SET_ROTATION       139
-#define CMD_SET_CALIBRATION    140
-#define CMD_GET_HQRESOLUTION   141
+#define CMD_GET_RAWLIMITS      0x6E
+#define CMD_GET_RAWDATA        0x6F
+#define CMD_GET_CONFIGDATA     0x70
+#define CMD_GET_CALIBDATA      0x72
+#define CMD_GET_SPOTTEMP       0x73
+#define CMD_GET_TEMPPOINTS     0x75
+#define CMD_SET_SHUTTERRUN     0x78
+#define CMD_SET_SHUTTERMODE    0x79
+#define CMD_SET_FILTERTYPE     0x7A
+#define CMD_GET_BATTERYSTATUS  0x7C
+#define CMD_GET_DIAGNOSTIC     0x7F
+#define CMD_GET_FWVERSION      0x81
+#define CMD_SET_LIMITS         0x82
+#define CMD_SET_TEXTCOLOR      0x83
+#define CMD_SET_COLORSCHEME    0x84
+#define CMD_SET_TEMPFORMAT     0x85
+#define CMD_SET_SHOWSPOT       0x86
+#define CMD_SET_SHOWCOLORBAR   0x87
+#define CMD_SET_SHOWMINMAX     0x88
+#define CMD_SET_TEMPPOINTS     0x89
+#define CMD_GET_HWVERSION      0x8A
+#define CMD_SET_ROTATION       0x8B
 
 //Serial frame commands
-#define CMD_FRAME_RAW          150
-#define CMD_FRAME_COLOR        151
-#define CMD_FRAME_DISPLAY      152
-#define CMD_FRAME_SAVE         153
+#define CMD_FRAME_RAW          0x96
+#define CMD_FRAME_COLOR        0x97
+#define CMD_FRAME_DISPLAY      0x98
+#define CMD_FRAME_SAVE         0x99
 
 //Types of raw frame responses
-#define FRAME_CAPTURE_THERMAL  180
-#define FRAME_CAPTURE_VISUAL   181
-#define FRAME_CAPTURE_VIDEO    182
-#define FRAME_NORMAL           183
+#define FRAME_CAPTURE_THERMAL  0xB4
+#define FRAME_CAPTURE_VIDEO    0xB6
+#define FRAME_NORMAL           0xB7
 
 /*########################## PUBLIC PROCEDURES ################################*/
 
 void buttonHandler();
-void checkForUpdater();
 bool checkNoDisplay();
 void checkSerial();
 int getInt(String text);
@@ -86,7 +74,6 @@ void sendFramebuffer();
 void sendFrame(bool color);
 void sendFWVersion();
 void sendHardwareVersion();
-void sendHQResolution();
 void sendRawData(bool color = false);
 void sendRawLimits();
 void sendSpotTemp();

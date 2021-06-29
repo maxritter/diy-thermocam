@@ -57,9 +57,9 @@ void welcomeScreen()
 	display_printC("basic settings for your device.", CENTER, 170);
 	display_printC("-> Please touch screen <-", CENTER, 210, VGA_BLUE);
 
-	//Wait for touch press or updater request
+	//Wait for touch press
 	while (!touch_touched())
-		checkForUpdater();
+		;
 
 	//Touch release again
 	while (touch_touched())
@@ -88,9 +88,9 @@ void infoScreen(String *text, bool cont)
 		display_printC(text[5], CENTER, 155);
 		display_printC(text[6], CENTER, 180);
 		display_printC("-> Please touch screen <-", CENTER, 212, VGA_BLUE);
-		//Wait for touch press or updater request
+		//Wait for touch press
 		while (!touch_touched())
-			checkForUpdater();
+			;
 		//Touch release again
 		while (touch_touched())
 			;
@@ -211,7 +211,7 @@ void liveModeHelper()
 	//Hint screen for the live mode #1
 	text[0] = "First time helper";
 	text[1] = "To enter the menu in live mode";
-	text[2] = "touch the screen short. Pressing"; 
+	text[2] = "touch the screen short. Pressing";
 	text[3] = "the push button on top of the";
 	text[4] = "device short saves an image to";
 	text[5] = "the internal storage, pressing";
