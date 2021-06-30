@@ -14,7 +14,7 @@ title: Firmware
 
 # Development
 
-You need to setup the development IDE if you want to make your own changes to the open-source firmware of the DIY-Thermocam. 
+You need to setup the development IDE if you want to make your own changes to the open-source firmware of the DIY-Thermocam. This guide should work under all operating systems.
 
 Download and install the following programs:
 
