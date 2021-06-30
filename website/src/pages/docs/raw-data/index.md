@@ -9,11 +9,11 @@ template: docs
 title: Raw Data Structure
 excerpt: ''
 ---
-This page describes how to **interpret the raw data files (\*.DAT)**, which are **created by the device for each saved image and video / time-lapse frame on the internal storage**. 
+This page describes how to **interpret the raw data files (\*.DAT)**, which are **created by the device for each saved image and video / time-lapse frame on the internal storage**.
 
 A **sample .DAT** file can be found [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Analysis%20Software/Sample.DAT) with the corresponding thermal images linked [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Analysis%20Software/Sample.JPG).
 
-The** structure of the file** is define as following - see “method “SaveRawData” [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Firmware_V3/src/thermal/save.cpp) as reference:
+The\*\* structure of the file\*\* is define as following - see “method “SaveRawData” [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Firmware_V3/src/thermal/save.cpp) as reference:
 
 *   **Lepton raw values** - 9600 byte (Lepton2) or 38400 byte (Lepton3)
     *   4800 / 19200 raw values for the Lepton2 / Lepton3, split to two bytes, MSB first, then LSB
@@ -48,7 +48,7 @@ The** structure of the file** is define as following - see “method “SaveRawD
     *   Slope for the raw-to-abs temperature conversion
     *   Float, split to four bytes, LSB first. Reconstruction analog to the spot sensor temp
 
-The** absolute temperature** can be calculated out of each raw value by using the following formula:
+The \*\*absolute temperature\*\* can be calculated out of each raw value by using the following formula:
 `absTemp = rawValue * calibrationSlope + calibrationOffset`
 
 *   **Temperature points** - 384 byte
