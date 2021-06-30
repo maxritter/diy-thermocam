@@ -7,7 +7,7 @@ seo:
   extra: []
 template: docs
 title: USB Serial Protocol
-weight: 
+weight: 2
 excerpt: ''
 
 ---
