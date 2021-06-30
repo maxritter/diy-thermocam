@@ -48,7 +48,7 @@ The\*\* structure of the file\*\* is define as following - see “method “Save
     *   Slope for the raw-to-abs temperature conversion
     *   Float, split to four bytes, LSB first. Reconstruction analog to the spot sensor temp
 
-The \*\*absolute temperature\*\* can be calculated out of each raw value by using the following formula:
+The **absolute temperature** can be calculated out of each raw value by using the following formula:
 `absTemp = rawValue * calibrationSlope + calibrationOffset`
 
 *   **Temperature points** - 384 byte
