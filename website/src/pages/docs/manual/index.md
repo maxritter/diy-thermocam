@@ -7,7 +7,7 @@ seo:
   extra: []
 template: docs
 title: Manual
-weight: 0
+weight: 1
 excerpt: ''
 
 ---
