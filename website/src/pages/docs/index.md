@@ -47,3 +47,5 @@ excerpt: ''
 ![](https://www.diy-thermocam.net/images/docs.jpg)
 
 The **wiki subsections** provide **more information** about certain aspects of the **DIY-Thermocam V3**.
+
+This repository contains the latest firmware releases for the device, as well as related Datasheets and Documents, the Enclosure, the PCB and various Desktop Software to extend the functionalities of the Thermocam beyond the on-device capabilities. The whole firmware is open-source and can be modified by anybody using the source code provided here. All other information can be found on the website linked above.
