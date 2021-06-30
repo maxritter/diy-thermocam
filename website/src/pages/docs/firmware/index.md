@@ -16,7 +16,7 @@ title: Firmware
 
 
 
-If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex) from here.
+If you want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex) from here.
 
 This guide should work on all common operating systems (Windows, Linux & Mac OSX).
 
