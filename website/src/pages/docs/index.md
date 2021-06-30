@@ -46,4 +46,4 @@ excerpt: ''
 ---
 ![](https://www.diy-thermocam.net/images/docs.jpg)
 
-The wiki **subsections** provide **more information** about certain aspects of the **DIY-Thermocam V3**.
+The **wiki subsections** provide **more information** about certain aspects of the **DIY-Thermocam V3**.
