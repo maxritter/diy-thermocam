@@ -9,3 +9,28 @@ template: docs
 title: Firmware
 
 ---
+
+# Flashing
+
+# Development
+
+
+
+If you just want to flash the newest version of the firmware to your device, follow the Firmware Update Guide in the Document section and use one of the pre-compiled versions (*.hex) from here.
+
+This guide should work on all common operating systems (Windows, Linux & Mac OSX).
+
+Download and install the following programs:
+
+VS Code
+PlatformIO Core
+PlatformIO for VS Code
+Then clone this repo: git clone https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V3.
+
+The Teensyduino version that comes pre-installed with PlatformIO does not support Mass Storage Mode (MTP), so we need to update it. Extract the content of other/platformio_teensy4.zip to: C:\Users\<YOUR_ACCOUNT>\.platformio (filepath on Windows or Mac is different, I am using Windows) and overwrite any existing files.
+
+Now start VS Code and open the folder that you have just cloned with File -> Open Folder.
+
+PlatformIO should initialize itself automatically and you see the buttons to Build, Upload and Clean the project in the blue bar at the bottom.
+
+Before you click "Upload", make sure the Thermocam is connected to the PC via a micro USB cable and turned on. The Teensy CLI should then automatically detect it and flash the .hex file to the board. After a restart the changes should be present on the device.
