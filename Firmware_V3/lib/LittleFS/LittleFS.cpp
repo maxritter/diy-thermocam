@@ -320,7 +320,7 @@ uint32_t LittleFS::formatUnused(uint32_t blockCnt, uint32_t blockStart) {
 }
 
 FLASHMEM
-bool LittleFS::lowLevelFormat(char progressChar)
+bool LittleFS::lowLevelFormat(char progressChar, Print* pr)
 {
 	if (!configured) return false;
 	if (mounted) {
@@ -330,13 +330,13 @@ bool LittleFS::lowLevelFormat(char progressChar)
 	int ii=config.block_count/120;
 	void *buffer = malloc(config.read_size);
 	for (unsigned int block=0; block < config.block_count; block++) {
-		if (progressChar && (0 == block%ii) ) Serial.write(progressChar);
+		if (pr && progressChar && (0 == block%ii) ) pr->write(progressChar);
 		if (!blockIsBlank(&config, block, buffer)) {
 			(*config.erase)(&config, block);
 		}
 	}
 	free(buffer);
-	if (progressChar) Serial.println();
+	if (pr && progressChar) pr->println();
 	return quickFormat();
 }
 

@@ -21,12 +21,13 @@ This guide should work on **all common operating systems** (**Windows, Linux & M
 **Download** and **install** the following programs:
 
 1. [VS Code](https://code.visualstudio.com/)
-2. [PlatformIO for VS Code](https://platformio.org/install/ide?install=vscode)
+2. [PlatformIO Core](https://docs.platformio.org/en/latest//core/installation.html)
+3. [PlatformIO for VS Code](https://platformio.org/install/ide?install=vscode)
 
 Then **clone this repo**:
 `git clone https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V3`.
 
-The **Teensyduino** version that comes pre-installed with PlatformIO does not support Mass Storage Mode (MTP), so we **need to update it**. Extract the content of `other/platformio_teensy4.zip` to: `C:\Users\<YOUR_ACCOUNT>\.platformio\packages\framework-arduinoteensy` (filepath on Windows or Mac is different, I am using Windows) and overwrite any existing files.
+The **Teensyduino** version that comes pre-installed with PlatformIO does not support Mass Storage Mode (MTP), so we **need to update it**. Extract the content of `other/platformio_teensy4.zip` to: `C:\Users\<YOUR_ACCOUNT>\.platformio` (filepath on Windows or Mac is different, I am using Windows) and overwrite any existing files.
 
 Now **start VS Code** and open the folder that you have just cloned with **File -> Open Folder**. 
 

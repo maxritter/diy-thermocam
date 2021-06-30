@@ -21,7 +21,46 @@
  */
 
 #include <Arduino.h>
-#include <LittleFS_NAND.h>
+#include <LittleFS.h>
+
+// Bits in LBA for BB LUT
+#define BBLUT_STATUS_ENABLED (1 << 15)
+#define BBLUT_STATUS_INVALID (1 << 14)
+#define BBLUT_STATUS_MASK    (BBLUT_STATUS_ENABLED | BBLUT_STATUS_INVALID)
+
+//////////////////////////////////////////////////////
+// Some useful defs and macros
+#define LINEAR_TO_COLUMNECC(laddr) ((laddr) % PAGE_ECCSIZE)
+#define LINEAR_TO_COLUMN(laddr) ((laddr) % pageSize)
+#define LINEAR_TO_PAGE(laddr) ((laddr) / pageSize)
+#define LINEAR_TO_PAGEECC(laddr) ((laddr) / PAGE_ECCSIZE)
+#define LINEAR_TO_BLOCK(laddr) (LINEAR_TO_PAGE(laddr) / PAGES_PER_BLOCK)
+#define BLOCK_TO_PAGE(block) ((block) * PAGES_PER_BLOCK)
+#define BLOCK_TO_LINEAR(block) (BLOCK_TO_PAGE(block) * pageSize)
+
+//////////////////////////////////////////////////////
+//Chip ID
+#define W25N01	0xEFAA21
+#define W25N02	0xEFAA22
+#define W25M02	0xEFBB21
+
+
+//Geometry
+#define sectors_w25n0x              1024
+#define pagesPerSector_w25n0x         64
+#define pageSize              		2048
+#define sectorSize					pagesPerSector_w25n0x * pageSize
+#define totalSize_w25n0x		 	sectorSize * sectors_w25n0x
+#define pagesPerDie					65534
+
+// Device size parameters
+#define PAGE_SIZE			2048
+#define PAGES_PER_BLOCK		64
+#define BLOCKS_PER_DIE		1024
+
+#define reservedBBMBlocks	24
+
+
 
 #define SPICONFIG_NAND   SPISettings(55000000, MSBFIRST, SPI_MODE0)
 
@@ -672,11 +711,27 @@ uint8_t LittleFS_SPINAND::addBBLUT(uint32_t block_address)
 	firstOpenEntry = 20 - openEntries;	
 	Serial.printf("First Open Entry: %d\n", firstOpenEntry);
 	
+	//Write BBLUT with next sequential block
+	#ifdef LATER
+	uint8_t cmd[5];
+	
 	uint16_t pba, lba;
 	pba = block_address;
 	lba = LINEAR_TO_BLOCK((firstOpenEntry+1)*blocksize + chipsize);
 	Serial.printf("PBA: %d, LBA: %d\n", pba, lba);
 	
+	cmd[0] = 0xA1;
+	cmd[1] = pba >> 8;
+	cmd[2] = pba;
+	cmd[3] = lba >> 8;
+	cmd[4] = lba;
+	
+	//port->beginTransaction(SPICONFIG_NAND);
+	//digitalWrite(pin, LOW);
+	//port->transfer(cmd, 5);
+    //digitalWrite(pin, HIGH);
+    //port->endTransaction();
+	#endif
 	wait(progtime);
 	
   }
@@ -704,11 +759,11 @@ void LittleFS_SPINAND::deviceReset()
 
 }
 
-bool LittleFS_SPINAND::lowLevelFormat(char progressChar)
+bool LittleFS_SPINAND::lowLevelFormat(char progressChar, Print* pr)
 {
 	uint32_t eraseAddr;
 	bool val;
-	val = LittleFS::lowLevelFormat(progressChar);
+	val = LittleFS::lowLevelFormat(progressChar, pr);
 	
 	for(uint16_t blocks = 0; blocks < reservedBBMBlocks; blocks++) {
 		eraseAddr = (config.block_count + blocks) * config.block_size;
@@ -1395,7 +1450,16 @@ uint8_t LittleFS_QPINAND::addBBLUT(uint32_t block_address)
 	//lba = LINEAR_TO_BLOCK((firstOpenEntry+1)*config.block_size);
 	lba = LINEAR_TO_BLOCK((firstOpenEntry+1)*blocksize + chipsize);
 	Serial.printf("PBA: %d, LBA: %d\n", pba, lba);
+	#ifdef LATER	
+	uint8_t cmd[4];
+	cmd[0] = pba >> 8;
+	cmd[1] = pba;
+	cmd[2] = lba >> 8;
+	cmd[3] = lba;
 	
+   //FLEXSPI2_LUT44 = LUT0(CMD_SDR, PINS1, 0xA1) | LUT0(WRITE_SDR, PINS1, 1);  
+   //flexspi2_ip_write(8, 0x00800000, cmd, 4);
+	#endif	
 	wait(progtime);
   }
 	return 0;

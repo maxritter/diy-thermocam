@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// modified for SDFS by WMXZ
+// modified for SD by WMXZ
 
 #if defined(USB_MTPDISK) || defined(USB_MTPDISK_SERIAL)
 
@@ -837,6 +837,7 @@ const uint16_t supported_events[] =
                 }
               }
               break;
+            case 0x100C:  // SendObjectInfo
               p3 =  SendObjectInfo(p1, // storage
                                    p2); // parent
               CONTAINER->params[1]=p2;

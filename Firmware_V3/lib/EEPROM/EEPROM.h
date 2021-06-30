@@ -26,6 +26,10 @@
 #include <avr/eeprom.h>
 #include <avr/io.h>
 
+#if defined(__has_include) && __has_include(<type_traits>)
+#include <type_traits>
+#endif
+
 
 /***
     EERef class.
@@ -134,13 +138,19 @@ struct EEPROMClass{
 
     //Functionality to 'get' and 'put' objects to and from EEPROM.
     template< typename T > T &get( int idx, T &t ){
+        #if defined(__has_include) && __has_include(<type_traits>)
+        static_assert(std::is_trivially_copyable<T>::value,"You can not use this type with EEPROM.get" ); // the code below only makes sense if you can "memcpy" T
+        #endif
         EEPtr e = idx;
         uint8_t *ptr = (uint8_t*) &t;
         for( int count = sizeof(T) ; count ; --count, ++e )  *ptr++ = *e;
         return t;
     }
 
-    template< typename T > const T &put( int idx, const T &t ){        
+    template< typename T > const T &put( int idx, const T &t ){
+        #if defined(__has_include) && __has_include(<type_traits>)
+        static_assert(std::is_trivially_copyable<T>::value, "You can not use this type with EEPROM.get"); // the code below only makes sense if you can "memcpy" T
+        #endif
         const uint8_t *ptr = (const uint8_t*) &t;
 #ifdef __arm__
         eeprom_write_block(ptr, (void *)idx, sizeof(T));
@@ -151,6 +161,7 @@ struct EEPROMClass{
         return t;
     }
 };
+
 
 static EEPROMClass EEPROM __attribute__ ((unused));
 #endif
