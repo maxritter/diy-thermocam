@@ -45,7 +45,7 @@ weight:
 ---
 ![](https://www.diy-thermocam.net/images/docs.jpg)
 
-The **wiki subsections** provide **more information** about certain aspects of the **DIY-Thermocam V3**.
+The **Wiki Subsections** provide **more information** about certain aspects of the **DIY-Thermocam V3**.
 
 The [**GitHub repository**](https://github.com/maxritter/DIY-Thermocam) contains the [**latest firmware releases**](https://github.com/maxritter/DIY-Thermocam/releases) for the device, as well as related [**Datasheets**](https://github.com/maxritter/DIY-Thermocam/tree/master/Datasheets) and [**Documents**](https://github.com/maxritter/DIY-Thermocam/tree/master/Documents), the [**Enclosure**](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure), the [**PCB**](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB) and various [**Desktop Software**](https://github.com/maxritter/DIY-Thermocam/tree/master/Software) to **extend the functionalities of the Thermocam beyond the on-device capabilities**. 
 
