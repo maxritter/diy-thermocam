@@ -7,8 +7,6 @@ seo:
   extra: []
 template: docs
 title: Partlist
-weight: 1
-excerpt: ''
 
 ---
 
