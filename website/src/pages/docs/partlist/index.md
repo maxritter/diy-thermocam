@@ -12,36 +12,42 @@ excerpt: ''
 
 ---
 
-- 1 x [Printed Circuit Board](https://www.smart-prototyping.com/PCB-Prototyping.html) (or your own service)
-  Material: FR-4 TG130
-  Layer: 2
-  Dimension (Length): 89.40
-  Dimension (Width): 68.40
-  PCB Quantity: 100
-  Separated Different Design: 1
-  Panelized PCBs: Not Required
-  Solder Mask Color: Green
-  PCB Thickness (mm): 1.6
-  Copper Thickness: 1 oz
-  Inner Copper Thickness: No
-  Surface Finish: HASL (Hot Air Solder Leveling)
-  Min. Traces / Spacing: 6 mil
-  Min. Hole Size: 0.3 mm
-  Edge Plating: No
-  Blind Vias: No
-  Half Cut Holes: No
-  Impedance Control: No
-  Stencil Dimensions: No
-  Stencil Quantity: 1
-  Fiducial Mark: Yes
-  Polishing Technique: Polishing
-  Gerber Files (zip or rar): gerber.zip
-- 1 x [2D Laser Cutted Enclosure](https://www.ponoko.com/) (or your own service)
-  3mm Acryl GS Grey
-  Inkscape File: enclosure.zip
+
+
+- 1 x [Printed Circuit Board](https://www.smart-prototyping.com/PCB-Prototyping.html) (or your own PCB service)
+  - Material: FR-4 TG130
+  - Layer: 2
+  - Dimension (Length): 89.40
+  - Dimension (Width): 68.40
+  - PCB Quantity: 100
+  - Separated Different Design: 1
+  - Panelized PCBs: Not Required
+  - Solder Mask Color: Green
+  - PCB Thickness (mm): 1.6
+  - Copper Thickness: 1 oz
+  - Inner Copper Thickness: No
+  - Surface Finish: HASL (Hot Air Solder Leveling)
+  - Min. Traces / Spacing: 6 mil
+  - Min. Hole Size: 0.3 mm
+  - Edge Plating: No
+  - Blind Vias: No
+  - Half Cut Holes: No
+  - Impedance Control: No
+  - Stencil Dimensions: No
+  - Stencil Quantity: 1
+  - Fiducial Mark: Yes
+  - Polishing Technique: Polishing
+  - Gerber Files (zip or rar): gerber.zip
+- 1 x [2D Laser Cutted Enclosure](https://www.ponoko.com/) (or your own laser cutting service)
+  - 3mm Acryl GS Grey
+  - Inkscape File: enclosure.zip
 - 1 x [Teensy 4.1 Microcontroller](https://www.pjrc.com/store/teensy41.html)
 - 1 x [Pololu 5V Step-Up Voltage Regulator U3V12F5](https://www.pololu.com/product/2115)
-- 1 x [3.2 Inch TFT LCD Touch Display](http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display) (Pin Header Connection-4-wire-SPI, Power Supply: 5V, Touch Panel: 3.2" Resistive, Font Chip: None)
+- 1 x [3.2 Inch TFT LCD Touch Display](http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display) 
+  - Pin Header Connection-4-wire-SPI
+  - Power Supply: 5V
+  - Touch Panel: 3.2" Resistive
+  - Font Chip: None
 - 1 x [Samsung Battery EB-BG355BBE](https://www.gearbest.com/batteries/pp_1138346.html)
 - 1 x [Power Switch](https://www.digikey.com/en/products/detail/nkk-switches/CWT12AAS1/671497?s=N4IgTCBcDaIDoBcDMA2ADAWgIwHYw4wDkAREAXQF8g)
 - 1 x [Push Button](https://www.digikey.com/en/products/detail/rafi-usa/1-10107-0110104/6227436?s=N4IgTCBcDaIIwDo4AYUHYGpSgLCAugL5A)
@@ -72,5 +78,5 @@ excerpt: ''
 - 4 x [Nut M2 Plastic](https://www.ettinger.de/p/kunststoff-mutter-din-934-iso-4032/002.05.016) (German link, only for comparison)
 - 3 x [Nut M2 Zinc](https://www.ettinger.de/en/p/hexagon-nut-d934-m2/4x1-6-steel-zinc-plated/002.10.011) (German link, only for comparison)
 - 3 x [Washer M2 Steel](https://www.ettinger.de/en/p/flat-washers-for-m2-d433-2-2/4-5x0-35-steel-nickel-pl./003.01.013) (German link, only for comparison)
-- 8 x [Screw M2.5x6](https://www.ettinger.de/en/p/machine-screw-pan-head-pozidrive-d7985z-m2-5x06-steel-zinc-plated/001.18.221) (German link, only for comparison
+- 8 x [Screw M2.5x6](https://www.ettinger.de/en/p/machine-screw-pan-head-pozidrive-d7985z-m2-5x06-steel-zinc-plated/001.18.221) (German link, only for comparison)
 
