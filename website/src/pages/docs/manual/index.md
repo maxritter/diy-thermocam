@@ -7,8 +7,6 @@ seo:
   extra: []
 template: docs
 title: Manual
-weight: 1
-excerpt: ''
 
 ---
 This manual explains the features of the **DIY-Thermocam V3** hardware and software:
