@@ -14,7 +14,7 @@ title: Firmware
 
 # Development
 
-This guide should work on all common operating systems (Windows, Linux & Mac OSX).
+You need to setup the development IDE if you want to make your own changes to the open-source firmware of the DIY-Thermocam. 
 
 Download and install the following programs:
 
