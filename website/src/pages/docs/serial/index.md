@@ -12,10 +12,7 @@ excerpt: ''
 
 ---
 
-# USB Protocol
-
 #### **Version 1.0 from 30.06.21 - Requires DIY-Thermocam V3 and firmware version >= 3.0.0**
-
 
 This guide describes how you can communicate with your **DIY-Thermocam V3** over the **USB serial connection**. 
 
