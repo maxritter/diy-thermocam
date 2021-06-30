@@ -7,8 +7,7 @@ seo:
   extra: []
 template: docs
 title: Raw Data Structure
-weight: 2
-excerpt: ''
+
 ---
 This page describes how to **interpret the raw data files (\*.DAT)**, which are **created by the device for each saved image and video / time-lapse frame on the internal storage**.
 
