@@ -12,8 +12,6 @@ excerpt: ''
 
 ---
 
-# DIY-Thermocam V3 Partlist
-
 - 1 x [Printed Circuit Board](https://www.smart-prototyping.com/PCB-Prototyping.html) (or your own service)
   Material: FR-4 TG130
   Layer: 2
