@@ -13,7 +13,7 @@ This page describes how to **interpret the raw data files (\*.DAT)**, which are 
 
 A **sample .DAT** file can be found [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Analysis%20Software/Sample.DAT) with the corresponding thermal images linked [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Software/Thermal%20Analysis%20Software/Sample.JPG).
 
-The structure of the DAT file is define as following - see “method “SaveRawData” [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Firmware_V3/src/thermal/save.cpp) as reference:
+The** structure of the DAT** file is define as following - see “method “SaveRawData” [here](https://github.com/maxritter/DIY-Thermocam/blob/master/Firmware_V3/src/thermal/save.cpp) as reference:
 
 *   **Lepton raw values** - 9600 byte (Lepton2) or 38400 byte (Lepton3)
     *   4800 / 19200 raw values for the Lepton2 / Lepton3, split to two bytes, MSB first, then LSB
