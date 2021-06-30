@@ -7,7 +7,7 @@ seo:
   extra: []
 template: docs
 title: Hardware
-weight: 
+weight: 1
 excerpt: ''
 
 ---
