@@ -6,6 +6,6 @@ seo:
   robots: []
   extra: []
 template: docs
-title: Firmware Development
+title: Firmware
 
 ---
