@@ -7,8 +7,6 @@ seo:
   extra: []
 template: docs
 title: Hardware
-weight: 1
-excerpt: ''
 
 ---
 ## Schematic
