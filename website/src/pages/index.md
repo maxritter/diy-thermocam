@@ -11,7 +11,7 @@ sections:
       - label: Order the DIY-Thermocam V3 now!
         url: 'https://groupgets.com/campaigns/949-diy-thermocam-v3-round-2'
         style: primary
-      - label: Download the latest Firmware
+      - label: Download the latest firmware
         url: 'https://github.com/maxritter/DIY-Thermocam/releases'
         style: secondary
   - type: section_content
