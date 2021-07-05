@@ -12,7 +12,7 @@ sections:
         url: 'https://groupgets.com/campaigns/942-diy-thermocam-v3'
         style: primary
       - label: Download the latest Firmware
-        url: 'https://groupgets.com/campaigns/942-diy-thermocam-v3'
+        url: 'https://github.com/maxritter/DIY-Thermocam/releases'
         style: secondary
   - type: section_content
     template: section_content
