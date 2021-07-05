@@ -53,7 +53,7 @@ The [**DIY-Thermocam V3 KIT**](https://groupgets.com/campaigns/942-diy-thermocam
 
 *   1 x Red Lipo Protector
 
-*   1 x 8GB microSD Card
+*   1 x 16GB Class10 microSD Card
 
 *   4 x Screw M2x18
 
