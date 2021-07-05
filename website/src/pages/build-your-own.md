@@ -153,7 +153,7 @@ Use the **Sharp Knive** to cut the connection between the VUSB and VIN pads on t
 
 #### 4.
 
-Put the **8GB microSD Card** into its socket on the top of the Teensy 4.1 Microcontroller. This storage can be accessed as a mass storage device over the microUSB cable on a PC. You do not need to format the card beforehand, this will be done in the first time setup later:
+Put the **16GB Class10 microSD Card** into its socket on the top of the Teensy 4.1 Microcontroller. This storage can be accessed as a mass storage device over the microUSB cable on a PC. You do not need to format the card beforehand, this will be done in the first time setup later:
 
 ![](https://cdn.forestry.io/res2/-W1lZqFeXAwoOfIDQcW4LrQzM1IxkRC4YhfnKussMm0/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDVDBWUlVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tMWYz/ZjI5NmU0ZDkxZmNj/ZDdjMDAwMjk2NzBm/ZjRmYTRhZGUyZjk0/OS82LmpwZw)
 
