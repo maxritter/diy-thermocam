@@ -68,7 +68,7 @@ For most of the parts, there are also links to source included, in case you want
 - 1 x [Tripod Socket](https://www.amazon.com/gp/product/B00HYLZ33W/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1) (link contains 13 pieces, only one is needed per unit)
 - 1 x [Silver Tripod](https://www.aliexpress.com/item/4000529915425.html?spm=a2g0o.productlist.0.0.4343158a6u7Omc&algo_pvid=1ad7f185-106d-431f-baf8-a960beebdc67&algo_expid=1ad7f185-106d-431f-baf8-a960beebdc67-12&btsid=2100bdd716209794183508107eb966&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_) (link contains 100 pieces, only one is needed per unit)
 - 1 x [TP4057 Charging Module](https://www.aliexpress.com/item/32574075391.html?spm=a2g0o.productlist.0.0.559055e6J3BFFC&algo_pvid=c2ae29d7-1917-4828-81bb-df42c78722b5&algo_expid=c2ae29d7-1917-4828-81bb-df42c78722b5-0&btsid=2100bdde16156512012835815eee2f&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_)
-- 1 x [8GB microSD card](https://www.amazon.com/-/de/dp/B0012Y2LLE/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=8GB+microSD&qid=1622995725&sr=8-3) (any class works)
+- 1 x [16GB Class10 microSD card](https://www.amazon.com/-/de/dp/B0012Y2LLE/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=8GB+microSD&qid=1622995725&sr=8-3) (any class works)
 - 4 x [Screw M2x18](https://www.ettinger.de/en/p/cheese-head-slotted-d84-m2x18-steel-zinc-plated/001.14.177) (German link, only for comparison)
 - 4 x [Spacer M2x12](https://www.ettinger.de/p/isolier-distanzhuelse/besonders-fuer-m-2/005.81.120) (German link, only for comparison)
 - 3 x [Screw M2x8](https://www.ettinger.de/en/p/countersunk-head-phillips-drive-d965h-m2x08-stainless-steel/001.12.138) (German link, only for comparison)
