@@ -31,7 +31,7 @@
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
 /* Display the GUI elements for the load menu */
-void displayGUI(int imgCount, char* infoText) {
+void displayGUI(uint32_t imgCount, char* infoText) {
 	//Set text color
 	changeTextColor();
 	//set Background transparent
@@ -89,9 +89,9 @@ void deleteVideo(char* dirname) {
 				sd.chdir(dirname);
 
 				//Delete all files
-				uint16_t videoCounter = 0;
+				uint32_t videoCounter = 0;
 				bool exists;
-				char filename[] = "00000.DAT";
+				char filename[] = "000000.DAT";
 
 				//Go through the frames
 				while (1) {
@@ -106,15 +106,15 @@ void deleteVideo(char* dirname) {
 					else
 						sd.remove(filename);
 					//Remove Bitmap if there
-					strcpy(&filename[5], ".BMP");
+					strcpy(&filename[6], ".BMP");
 					if (sd.exists(filename))
 						sd.remove(filename);
 					//Remove Jpeg if there
-					strcpy(&filename[5], ".JPG");
+					strcpy(&filename[6], ".JPG");
 					if (sd.exists(filename))
 						sd.remove(filename);
 					//Reset ending
-					strcpy(&filename[5], ".DAT");
+					strcpy(&filename[6], ".DAT");
 					//Raise counter
 					videoCounter++;
 				}
@@ -265,8 +265,8 @@ void convertVideo(char* dirname) {
 	sd.chdir("/");
 	sd.chdir(dirname);
 
-	uint16_t frames = getVideoFrameNumber();
-	char filename[] = "00000.BMP";
+	uint32_t frames = getVideoFrameNumber();
+	char filename[] = "000000.BMP";
 
 	//Delete the ending for a video
 	dirname[14] = '\0';
@@ -298,7 +298,7 @@ void convertVideo(char* dirname) {
 }
 
 /* Loads an image from the SDCard and prints it on screen */
-void openImage(char* filename, int imgCount) {
+void openImage(char* filename, uint32_t imgCount) {
 	//Show message on screen
 	showFullMessage((char*) "Please wait, image is loading..");
 
@@ -352,10 +352,10 @@ void openImage(char* filename, int imgCount) {
 }
 
 /* Get the number of frames in the video */
-uint16_t getVideoFrameNumber() {
-	uint16_t videoCounter = 0;
+uint32_t getVideoFrameNumber() {
+	uint32_t videoCounter = 0;
 	bool exists;
-	char filename[] = "00000.DAT";
+	char filename[] = "000000.DAT";
 
 	//Look how many frames we have
 	while (true) {
@@ -375,12 +375,12 @@ uint16_t getVideoFrameNumber() {
 }
 
 /* Display the selected video frame */
-void displayVideoFrame(int i)
+void displayVideoFrame(uint32_t imgCount)
 {
-	char filename[] = "00000.DAT";
+	char filename[] = "000000.DAT";
 
 	//Get the frame name
-	frameFilename(filename, i);
+	frameFilename(filename, imgCount);
 
 	//Load Raw data
 	loadRawData(filename);
@@ -390,24 +390,24 @@ void displayVideoFrame(int i)
 }
 
 /* Play a video from the internal storage */
-void playVideo(char* dirname, int imgCount) {
+void playVideo(char* dirname, uint32_t imgCount) {
 	char buffer[14];
 	//Save the current frame number
-	int frameNumber = 0;
+	uint32_t frameNumber = 0;
 
 	//Switch to video folder
 	sd.chdir("/");
 	sd.chdir(dirname);
 
 	//Get the total number of frames in the dir
-	uint16_t numberOfFrames = getVideoFrameNumber();
+	uint32_t numberOfFrames = getVideoFrameNumber();
 
 	//Jump here when pausing a video
 showFrame:
 	//Display frame
 	displayVideoFrame(frameNumber);
 	//Create string
-	sprintf(buffer, "%5d / %-5d", frameNumber + 1, numberOfFrames);
+	sprintf(buffer, "%6lu / %-6lu", frameNumber + 1, numberOfFrames);
 	//Display GUI
 	displayGUI(imgCount, buffer);
 	//Display play message
@@ -464,7 +464,7 @@ showFrame:
 			//Display frame
 			displayVideoFrame(frameNumber);
 			//Create string
-			sprintf(buffer, "%5d / %-5d", frameNumber + 1, numberOfFrames);
+			sprintf(buffer, "%6lu / %-6lu", frameNumber + 1, numberOfFrames);
 			//Display GUI
 			displayGUI(imgCount, buffer);
 		}

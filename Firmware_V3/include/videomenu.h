@@ -18,8 +18,8 @@
 
 /*########################## PUBLIC PROCEDURES ################################*/
 
-void videoCaptureInterval(int16_t* remainingTime, int* framesCaptured);
-void videoCaptureNormal(int* framesCaptured);
+void videoCaptureInterval(int16_t* remainingTime, uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName);
+void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName);
 void videoCapture();
 bool videoIntervalChooser();
 bool videoIntervalHandler(byte* pos);

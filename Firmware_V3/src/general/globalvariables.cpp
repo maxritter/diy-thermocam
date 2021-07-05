@@ -26,7 +26,7 @@
 /*############################# PUBLIC VARIABLES ##############################*/
 
 //Current firmware version
-char versionString[] = "Firmware 3.02 from 21.06.2021";
+char versionString[] = "Firmware 3.02 from 05.07.2021";
 uint16_t fwVersion = 302;
 
 //320x240 buffer
@@ -150,4 +150,4 @@ volatile byte loadTouch;
 //Current buffer valid
 volatile bool leptonBufferValid;
 //Display is currently updated, do not use SPI in IRQ
-volatile bool displayUpdated;
+volatile bool disableSPIIRQ;

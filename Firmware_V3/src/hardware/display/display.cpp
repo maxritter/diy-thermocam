@@ -1455,7 +1455,7 @@ void display_exitSleepMode()
 /* Write 320x240 RGB565 data to the screen */
 void display_writeScreen(unsigned short *pcolors)
 {	
-	displayUpdated = true;
+	disableSPIIRQ = true;
 	display_begin_spi_transaction();
 	display_setAddr(0, 0, 319, 239);
 	display_writecommand_cont(ILI9341_RAMWR);
@@ -1468,5 +1468,5 @@ void display_writeScreen(unsigned short *pcolors)
 	}
 	display_writedata16_last(*pftbft);
 	display_end_spi_transaction();
-	displayUpdated = false;
+	disableSPIIRQ = false;
 }

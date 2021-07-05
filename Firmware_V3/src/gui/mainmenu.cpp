@@ -1428,6 +1428,9 @@ void mainMenuHandler(byte *pos)
 	//Main loop
 	while (true)
 	{
+		//Enter mass storage on USB connect
+		checkMassStorage();
+
 		//Check for screen sleep
 		if (screenOffCheck())
 			drawMainMenu(*pos);

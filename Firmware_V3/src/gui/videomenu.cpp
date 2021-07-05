@@ -173,15 +173,14 @@ bool videoIntervalChooser() {
 }
 
 /* Captures video frames in an interval */
-void videoCaptureInterval(int16_t* remainingTime, int* framesCaptured) {
-	char buffer[30];
-
+void videoCaptureInterval(int16_t* remainingTime, uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName) {
 	//Measure time
 	long measure = millis();
 
 	//If there is no more time or the first frame
-	if ((*remainingTime <= 0) || (*framesCaptured == 0)) {
-		saveRawData(false, NULL, *framesCaptured);
+	if ((*remainingTime <= 0) || (*folderFrames == 0)) {
+		saveRawData(false, dirName, *folderFrames);
+		*folderFrames = *folderFrames + 1;
 	}
 
 	//Convert lepton data to RGB565 colors
@@ -230,11 +229,10 @@ void videoCaptureInterval(int16_t* remainingTime, int* framesCaptured) {
 }
 
 /* Normal video capture */
-void videoCaptureNormal(int* framesCaptured) {
-	char buffer[30];
-
+void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName) {
 	//Save video raw frame
-	saveRawData(false, NULL, *framesCaptured);
+	saveRawData(false, dirName, *folderFrames);
+	*folderFrames = *folderFrames + 1;
 
 	//Convert the colors
 	convertColors();
@@ -252,7 +250,7 @@ void videoCaptureNormal(int* framesCaptured) {
 	*framesCaptured = *framesCaptured + 1;
 
 	//Display current frames captured
-	sprintf(buffer, "Frames captured: %5d", *framesCaptured);
+	sprintf(buffer, "Frames captured: %6lu", *framesCaptured);
 	display_print(buffer, 70, 200);
 
 	//Disable image buffer
@@ -262,31 +260,52 @@ void videoCaptureNormal(int* framesCaptured) {
 	displayBuffer();
 }
 
+void videoCreateFolder(char *dirName) {
+	createSDName(dirName, true);
+	if(!sd.chdir("/"))
+	{
+		beginSD();
+		if(!sd.chdir("/"))
+		{
+			showFullMessage((char*) "Error creating folder!");
+			delay(1000);
+			return;
+		}
+	}
+	sd.mkdir(dirName);
+	sd.chdir(dirName);
+}
+
 /* This screen is shown during the video capture */
 void videoCapture() {
 	//Help variables
-	char dirname[20];
+	char dirName[20];
+	char buffer[30];
 	int16_t delayTime = videoInterval;
-	int framesCaptured = 0;
+	uint32_t framesCaptured = 0;
+	uint16_t folderFrames = 0;
 
 	//Show message
-	showFullMessage((char*)"Touch screen to turn it off");
-	display_print((char*) "STARTING VIDEO MODE", CENTER, 50);
-	display_print((char*) "Press the button to abort", CENTER, 170);
+	showFullMessage((char*)"Touch screen to turn it on/off");
+	display_print((char*) "CAPTURING FRAMES..", CENTER, 50);
+	display_print((char*) "Press push button to stop", CENTER, 170);
 	delay(1000);
 
 	//Create folder
-	createSDName(dirname, true);
-	sd.chdir("/");
-	sd.mkdir(dirname);
-	sd.chdir(dirname);
+	videoCreateFolder(dirName);
 
 	//Switch to recording mode
 	videoSave = videoSave_recording;
+	lepton_startFrame();
 
 	//Main loop
-	lepton_startFrame();
 	while (videoSave == videoSave_recording) {
+		//Do not store too many files in one folder, otherwise MTP will make issues
+		if(folderFrames >= 1000)
+		{
+			videoCreateFolder(dirName);
+			folderFrames = 0;
+		}
 
 		//Touch - turn display on or off
 		if (!digitalRead(pin_touch_irq)) {
@@ -299,11 +318,11 @@ void videoCapture() {
 
 		//Video capture
 		if (videoInterval == 0) {
-			videoCaptureNormal(&framesCaptured);
+			videoCaptureNormal(&framesCaptured, &folderFrames, buffer, dirName);
 		}
 		//Interval capture
 		else {
-			videoCaptureInterval(&delayTime, &framesCaptured);
+			videoCaptureInterval(&delayTime, &framesCaptured, &folderFrames, buffer, dirName);
 		}
 
 		lepton_startFrame();
@@ -313,18 +332,15 @@ void videoCapture() {
 	if (!checkScreenLight())
 		enableScreenLight();
 
-	//Post processing for interval videos if enabled and wished
-	if ((framesCaptured > 0) && (convertPrompt()))
-		processVideoFrames(framesCaptured, dirname);
+	//Post processing for interval videos if enabled
+	if ((framesCaptured > 0) && convertEnabled)
+		processVideoFrames(framesCaptured, dirName);
 
 	//Show finished message
 	else {
 		showFullMessage((char*) "Video capture finished");
 		delay(1000);
 	}
-
-	//Go back to root directory
-	sd.chdir("/");
 
 	//Refresh free space
 	refreshFreeSpace();

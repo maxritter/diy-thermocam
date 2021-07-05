@@ -71,15 +71,8 @@ void lepton_endFrame()
 /* Start Lepton SPI Transmission */
 void lepton_begin()
 {
-	if(videoSave == videoSave_recording)
-	{
-		SPI1.beginTransaction(SPISettings(60000000, MSBFIRST, SPI_MODE1));
-	}
-	else
-	{
 		SPI1.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE1));
-	}
-	digitalWriteFast(pin_lepton_cs, LOW);
+		digitalWriteFast(pin_lepton_cs, LOW);
 }
 
 /* Reset the SPI bus to re-initiate Lepton communication */
@@ -93,8 +86,8 @@ void lepton_reset()
 /* End Lepton SPI Transmission */
 void lepton_end()
 {
-	digitalWriteFast(pin_lepton_cs, HIGH);
-	SPI1.endTransaction();
+		digitalWriteFast(pin_lepton_cs, HIGH);
+		SPI1.endTransaction();
 }
 
 /* Store one package of 80 columns into RAM */
@@ -250,7 +243,7 @@ bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg)
 /* Get one frame of raw values from the Lepton asynchronously */
 void lepton_getFrameAsync()
 {
-	if(displayUpdated)
+	if (disableSPIIRQ)
 		return;
 
 	uint32_t startUsec;

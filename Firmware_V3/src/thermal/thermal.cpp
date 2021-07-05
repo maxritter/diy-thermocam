@@ -116,11 +116,6 @@ void buttonIRQ()
 	}
 }
 
-/* Lepton interrupt handler */
-void leptonIRQ()
-{
-}
-
 /* Handler for a long touch press */
 void longTouchHandler()
 {
@@ -552,7 +547,7 @@ void liveModeInit()
 	showMenu = showMenu_disabled;
 	usbConnected = true;
 	longTouch = false;
-	displayUpdated = false;
+	disableSPIIRQ = false;
 
 	clearTempPoints();
 	lepton_startFrame();

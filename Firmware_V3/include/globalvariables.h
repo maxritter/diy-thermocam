@@ -85,6 +85,6 @@ extern volatile bool longTouch;
 extern volatile bool serialMode;
 extern volatile byte loadTouch;
 extern volatile bool leptonBufferValid;
-extern volatile bool displayUpdated;
+extern volatile bool disableSPIIRQ;
 
 #endif /* GLOBALVARIABLES_H */

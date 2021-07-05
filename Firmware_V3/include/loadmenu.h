@@ -23,11 +23,11 @@ bool convertPrompt();
 void convertVideo(char* dirname);
 void deleteImage(char* filename);
 void deleteVideo(char* dirname);
-void displayGUI(int imgCount, char* infoText);
-void displayVideoFrame(int i);
-uint16_t getVideoFrameNumber();
+void displayGUI(uint32_t imgCount, char* infoText);
+void displayVideoFrame(uint32_t imgCount);
+uint32_t getVideoFrameNumber();
 int loadMenu(char* title, int* array, int length);
-void openImage(char* filename, int imgCount);
-void playVideo(char* dirname, int imgCount);
+void openImage(char* filename, uint32_t imgCount);
+void playVideo(char* dirname, uint32_t imgCount);
 
 #endif /* LOADMENU_H */

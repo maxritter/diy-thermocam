@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.tcc": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "typeinfo": "cpp"
     }
 }

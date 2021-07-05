@@ -16,9 +16,9 @@
 /*################################# INCLUDES ##################################*/
 
 #include <Arduino.h>
+#include <TimeLib.h>
 #include <globaldefines.h>
 #include <globalvariables.h>
-#include <TimeLib.h>
 #include <hardware.h>
 #include <gui.h>
 #include <sdcard.h>
@@ -122,16 +122,6 @@ void createSDName(char *filename, boolean folder)
 	}
 }
 
-/* Creates a bmp file for the thermal image */
-void createBMPFile(char *filename)
-{
-	//File extension and open
-	strcpy(&filename[14], ".BMP");
-	sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END);
-	//Write the BMP header
-	sdFile.write((uint8_t *)bmp_header_large, 66);
-}
-
 /* Start the image save procedure */
 void imgSaveStart()
 {
@@ -167,22 +157,30 @@ void imgSaveStart()
 }
 
 /* Creates the filename for the video frames */
-void frameFilename(char *filename, uint16_t count)
+void frameFilename(char *filename, uint32_t count)
 {
-	filename[0] = '0' + count / 10000 % 10;
-	filename[1] = '0' + count / 1000 % 10;
-	filename[2] = '0' + count / 100 % 10;
-	filename[3] = '0' + count / 10 % 10;
-	filename[4] = '0' + count % 10;
+	filename[0] = '0' + count / 100000 % 10;
+	filename[1] = '0' + count / 10000 % 10;
+	filename[2] = '0' + count / 1000 % 10;
+	filename[3] = '0' + count / 100 % 10;
+	filename[4] = '0' + count / 10 % 10;
+	filename[5] = '0' + count % 10;
 }
 
 /* Save video frame to image file */
 void saveVideoFrame(char *filename)
 {
-	
-
 	// Open the file for writing
-	sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END);
+	if (!sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END))
+	{
+		beginSD();
+		if (!sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END))
+		{
+			showFullMessage((char *)"Error saving BMP!");
+			delay(1000);
+			return;
+		}
+	}
 
 	//Write 160x120 BMP header
 	sdFile.write((uint8_t *)bmp_header_small, 66);
@@ -198,11 +196,11 @@ void saveVideoFrame(char *filename)
 }
 
 /* Proccess video frames */
-void processVideoFrames(int framesCaptured, char *dirname)
+void processVideoFrames(uint32_t framesCaptured, char *dirname)
 {
 	char buffer[30];
-	char filename[] = "00000.DAT";
-	int framesConverted = 0;
+	char filename[] = "000000.DAT";
+	uint32_t framesConverted = 0;
 
 	//Display title
 	display_fillScr(200, 200, 200);
@@ -218,7 +216,7 @@ void processVideoFrames(int framesCaptured, char *dirname)
 	display_print((char *)"Press button to abort the process", CENTER, 120);
 
 	//Display content
-	sprintf(buffer, "Frames converted: %5d / %5d", framesConverted, framesCaptured);
+	sprintf(buffer, "Frames converted: %6lu / %6lu", framesConverted, framesCaptured);
 	display_print(buffer, CENTER, 160);
 	sprintf(buffer, "Folder name: %s", dirname);
 	display_print(buffer, CENTER, 200);
@@ -235,7 +233,7 @@ void processVideoFrames(int framesCaptured, char *dirname)
 
 		//Get filename
 		frameFilename(filename, framesConverted);
-		strcpy(&filename[5], ".DAT");
+		strcpy(&filename[6], ".DAT");
 
 		//Load Raw data
 		loadRawData(filename);
@@ -257,7 +255,7 @@ void processVideoFrames(int framesCaptured, char *dirname)
 		displayInfos();
 
 		//Save frame to image file
-		strcpy(&filename[5], ".BMP");
+		strcpy(&filename[6], ".BMP");
 		saveVideoFrame(filename);
 
 		//Font color
@@ -266,7 +264,7 @@ void processVideoFrames(int framesCaptured, char *dirname)
 		display_setColor(VGA_BLACK);
 
 		//Update screen content
-		sprintf(buffer, "Frames converted: %5d / %5d", framesConverted + 1, framesCaptured);
+		sprintf(buffer, "Frames converted: %6lu / %6lu", framesConverted + 1, framesCaptured);
 		display_print(buffer, CENTER, 160);
 	}
 
@@ -276,7 +274,7 @@ void processVideoFrames(int framesCaptured, char *dirname)
 }
 
 /* Saves raw data for an image or an video frame */
-void saveRawData(bool isImage, char *name, uint16_t framesCaptured)
+void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 {
 	uint16_t result;
 
@@ -284,15 +282,34 @@ void saveRawData(bool isImage, char *name, uint16_t framesCaptured)
 	if (isImage)
 	{
 		strcpy(&name[14], ".DAT");
-		sdFile.open(name, O_RDWR | O_CREAT | O_AT_END);
+		if (!sdFile.open(name, O_RDWR | O_CREAT | O_AT_END))
+		{
+			beginSD();
+			if (!sdFile.open(name, O_RDWR | O_CREAT | O_AT_END))
+			{
+				showFullMessage((char *)"Error saving image!");
+				delay(1000);
+				return;
+			}
+		}
 	}
 
 	//Create filename for video frame
 	else
 	{
-		char filename[] = "00000.DAT";
-		frameFilename(filename, framesCaptured);
-		sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END);
+		char fileName[] = "000000.DAT";
+		frameFilename(fileName, framesCaptured);
+		if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_AT_END))
+		{
+			beginSD();
+			sd.chdir("/" + String(name));
+			if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_AT_END))
+			{
+				showFullMessage((char *)"Error saving frame!");
+				delay(1000);
+				return;
+			}
+		}
 	}
 
 	//For the Lepton2.5 sensor, write 4800 raw values
@@ -386,7 +403,20 @@ void saveBuffer(char *filename)
 	unsigned short pixel;
 
 	//Create file
-	createBMPFile(filename);
+	strcpy(&filename[14], ".BMP");
+	if (!sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END))
+	{
+		beginSD();
+		if (!sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END))
+		{
+			showFullMessage((char *)"Error saving BMP!");
+			delay(1000);
+			return;
+		}
+	}
+
+	//Write the BMP header
+	sdFile.write((uint8_t *)bmp_header_large, 66);
 
 	//Allocate space for sd buffer
 	uint8_t *sdBuffer = (uint8_t *)calloc(1280, sizeof(uint8_t));
