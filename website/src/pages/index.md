@@ -11,6 +11,9 @@ sections:
       - label: Order the DIY-Thermocam now!
         url: 'https://groupgets.com/campaigns/942-diy-thermocam-v3'
         style: primary
+      - label: Download the latest Firmware
+        url: 'https://groupgets.com/campaigns/942-diy-thermocam-v3'
+        style: secondary
   - type: section_content
     template: section_content
     section_id: text-img
