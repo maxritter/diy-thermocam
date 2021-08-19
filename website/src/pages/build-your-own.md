@@ -165,7 +165,7 @@ And for the **new version**, insert it rotated so that the font is at the top:
 
 ![](/images/13_1-1.png)
 
-The following images will show the old version with the components at the top. If you have the new version, don't worry that it will look different from now on.
+The following images will show the old version with the components at the top. If you have the new version, don't worry that this place will look different from now on.
 
 #### 12.
 
