@@ -49,5 +49,3 @@ If you want to source the parts for the DIY-Thermocam V3 on your own instead of 
 - 3 x [Nut M2 Zinc](https://www.ettinger.de/en/p/hexagon-nut-d934-m2/4x1-6-steel-zinc-plated/002.10.011) (German link, only for comparison)
 - 3 x [Washer M2 Steel](https://www.ettinger.de/en/p/flat-washers-for-m2-d433-2-2/4-5x0-35-steel-nickel-pl./003.01.013) (German link, only for comparison)
 - 8 x [Screw M2.5x6](https://www.ettinger.de/en/p/machine-screw-pan-head-pozidrive-d7985z-m2-5x06-steel-zinc-plated/001.18.221) (German link, only for comparison
-
-
