@@ -22,7 +22,7 @@
             {
                 "type": "action_menu",
                 "template": "action_menu",
-                "label": "Build Your Own",
+                "label": "Building Instructions",
                 "url": "/build-your-own",
                 "style": "link",
                 "has_subnav": false,
