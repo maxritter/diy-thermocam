@@ -12,7 +12,7 @@ title: Partlist
 
 If you want to source the parts for the DIY-Thermocam V3 on your own instead of **[buying the KIT from GroupGets](https://store.groupgets.com/products/diy-thermocam-v3)**, you can get a full partlist with sources [from this document](https://docs.google.com/spreadsheets/d/1B4XH-kP6_4ti1G9iLi1pfKy7VSKpWhfmBFcuIxgEaYw/edit?usp=sharing) or the list below:
 
-- 1 x [PCB from GroupGets](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0) OR 1 x [PCB](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0)
+- 1 x [PCB from GroupGets](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0) OR 1 x [PCB from your own service](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0)
 - 1 x [2D Laser Cutted Enclosure](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3.0) OR 1x [3D Printed Enclosure](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b)
   3mm Acryl GS Grey for Laser Cutted Enclosure
 - 1 x [Teensy 4.1 Microcontroller](https://www.pjrc.com/store/teensy41.html)
