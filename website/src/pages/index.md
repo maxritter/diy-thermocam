@@ -9,7 +9,8 @@ sections:
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_sensor and an **open-source ecosystem**.\n"
     actions:
       - label: Buy the KIT
-        url: 'https://groupgets.com/campaigns/952-diy-thermocam-v3-round-3'
+        url: >-
+          https://store.groupgets.com/products/diy-thermocam-v3?_pos=1&_sid=68613fefd&_ss=r
         style: primary
       - label: Download the Latest Firmware
         url: 'https://github.com/maxritter/DIY-Thermocam/releases'
