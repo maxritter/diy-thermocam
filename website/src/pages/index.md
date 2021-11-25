@@ -12,7 +12,7 @@ sections:
         url: 'https://store.groupgets.com/products/diy-thermocam-v3'
         style: primary
       - label: Source the parts on your own
-        url: 'https://github.com/maxritter/DIY-Thermocam/releases'
+        url: 'https://www.diy-thermocam.net/docs/partlist/'
         style: secondary
   - type: section_content
     template: section_content
