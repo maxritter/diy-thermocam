@@ -23,7 +23,7 @@
                 "type": "action_menu",
                 "template": "action_menu",
                 "label": "Building Instructions",
-                "url": "/build-your-own",
+                "url": "/building-instructions",
                 "style": "link",
                 "has_subnav": false,
                 "icon_class": "",
