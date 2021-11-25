@@ -1,5 +1,5 @@
 ---
-title: Software Ecosystem
+title: Software
 subtitle: >-
   Extend the capabilities of the DIY-Thermocam V3 towards a software ecosystem,
   that offers limitless possibilities for your own applications
