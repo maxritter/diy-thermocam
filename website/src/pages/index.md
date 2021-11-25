@@ -11,7 +11,7 @@ sections:
       - label: Buy the Kit (On Sale!)
         url: 'https://store.groupgets.com/products/diy-thermocam-v3'
         style: primary
-      - label: Source the Parts on your Own
+      - label: Source the Parts on your own
         url: 'https://www.diy-thermocam.net/docs/partlist/'
         style: secondary
   - type: section_content
