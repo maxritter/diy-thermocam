@@ -38,7 +38,7 @@ For most of the parts, there are also links to source included, in case you want
   - Fiducial Mark: Yes
   - Polishing Technique: Polishing
   - Gerber Files (zip or rar): gerber.zip
-- 1 x [2D Laser Cutted Enclosure](https://www.ponoko.com/) (or your own laser cutting service)
+- 1 x [2D Laser Cutted Enclosure](https://www.ponoko.com/) or 
   - 3mm Acryl GS Grey
   - Inkscape File: enclosure.zip
 - 1 x [Teensy 4.1 Microcontroller](https://www.pjrc.com/store/teensy41.html)
