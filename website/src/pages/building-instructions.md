@@ -1,8 +1,6 @@
 ---
 title: Build Your Own
-subtitle: >-
-  This guide enables you to build your own DIY-Thermocam V3 at home easily. It's
-  like LEGO, but for grown-ups!
+subtitle: This guide enables you to build your own DIY-Thermocam V3 thermal camera.
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for the rest of us
   description: >-
