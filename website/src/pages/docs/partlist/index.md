@@ -12,7 +12,7 @@ title: Partlist
 
 If you want to source the parts for the DIY-Thermocam V3 on your own instead of **[buying the KIT from GroupGets](https://store.groupgets.com/products/diy-thermocam-v3)**, you can get a full partlist with sources [from this document](https://docs.google.com/spreadsheets/d/1B4XH-kP6_4ti1G9iLi1pfKy7VSKpWhfmBFcuIxgEaYw/edit?usp=sharing) or the list below:
 
-- 1 x [PCB](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0) (or use your own service with specs below)
+- 1 x [PCB](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0) (or use your own service)
   Material: FR-4 TG130
   Layer: 2
   Dimension (Length): 89.40
