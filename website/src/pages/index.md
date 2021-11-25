@@ -11,7 +11,7 @@ sections:
       - label: BUY THE KIT
         url: 'https://store.groupgets.com/products/diy-thermocam-v3'
         style: primary
-      - label: Download the Latest Firmware
+      - label: Source the parts on your own
         url: 'https://github.com/maxritter/DIY-Thermocam/releases'
         style: secondary
   - type: section_content
