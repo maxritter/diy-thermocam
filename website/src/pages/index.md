@@ -91,20 +91,6 @@ sections:
       DIY-Thermocam**](https://github.com/maxritter/DIY-Thermocam/tree/master/Firmware_V3)
       is completely **open-source** and written in C/C++. Just download **Visual
       Studio Code** and the **PlatformIO extension**, and you are ready to go!
-  - type: section_cta
-    template: section_cta
-    title: Stay up-to-date on the latest news and updates
-    section_id: cta
-    subtitle: >-
-      Subscribe now to get notified first when there is a new software or
-      hardware update
-    actions:
-      - type: action
-        template: action
-        label: Subscribe Now
-        url: 'https://mailchi.mp/3e0df5458871/diy-thermocam-v3-kit'
-        style: primary
-        new_window: true
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
