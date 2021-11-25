@@ -1,5 +1,5 @@
 ---
-title: Build Your Own
+title: Building Instructions
 subtitle: This guide instructs you how to build your DIY-Thermocam V3 from the KIT
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for the rest of us
