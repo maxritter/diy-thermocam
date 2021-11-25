@@ -14,7 +14,7 @@ This page contains all parts that are part of the DIY-Thermocam V3 KIT.
 
 For most of the parts, there are also links to source included, in case you want to order them on your own:
 
-- 1 x [Printed Circuit Board](https://www.smart-prototyping.com/PCB-Prototyping.html) (or your own PCB service)
+- 1 x [Printed Circuit Board](https://store.groupgets.com/products/diy-thermocam-pcb?_pos=2&_sid=68613fefd&_ss=r) (or your own PCB service)
   - Material: FR-4 TG130
   - Layer: 2
   - Dimension (Length): 89.40
