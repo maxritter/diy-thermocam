@@ -160,17 +160,7 @@
                 "no_follow": false
             }
         ],
-        "links": [
-            {
-                "url": "https://maxritter.net/",
-                "style": "link",
-                "icon_class": "dev",
-                "new_window": true,
-                "no_follow": false,
-                "type": "action",
-                "label": "Personal Website"
-            }
-        ],
+        "links": [],
         "content": "© 2021 DIY-Thermocam"
     },
     "domain": "https://www.diy-thermocam.net",
