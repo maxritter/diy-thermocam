@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@stackbit/gatsby-plugin-menus": "0.0.4",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.1",
     "babel-runtime": "^6.26.0",
     "chokidar": "^3.4.0",
     "classnames": "^2.2.6",
     "fs-extra": "^7.0.1",
-    "gatsby": "2.22.17",
+    "gatsby": "^5.9.0",
     "gatsby-plugin-react-helmet": "^3.3.3",
     "gatsby-plugin-sass": "^2.3.12",
     "gatsby-source-filesystem": "2.3.10",
@@ -25,14 +27,14 @@
     "marked": "^0.6.1",
     "moment": "^2.23.0",
     "moment-strftime": "^0.5.0",
-    "node-sass": "^4.14.0",
-    "node-sass-utils": "^1.1.2",
-    "react": "^16.5.1",
-    "react-dom": "^16.5.1",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
     "react-helmet": "^5.2.0",
     "react-html-parser": "^2.0.2",
     "react-script-tag": "^1.1.2",
     "rehype-react": "^3.0.2",
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2",
     "sprintf-js": "^1.1.2"
   }
 }
