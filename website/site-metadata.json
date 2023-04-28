@@ -131,6 +131,15 @@
     "has_social": true,
     "social_links": [
       {
+        "url": "https://maxritter.net/",
+        "style": "icon",
+        "icon_class": "dev",
+        "new_window": true,
+        "no_follow": false,
+        "type": "action",
+        "label": "Website"
+      },
+      {
         "url": "https://www.youtube.com/channel/UC4XjTWGf-Umvk3ypZHzNSAw",
         "style": "icon",
         "icon_class": "youtube",
@@ -161,7 +170,7 @@
       }
     ],
     "links": [],
-    "content": "©2023 DIY-Thermocam. All Rights Reserved."
+    "content": "©2023 by Max Ritter. All Rights Reserved."
   },
   "domain": "https://www.diy-thermocam.net",
   "favicon": "/images/Icon.png",
