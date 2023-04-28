@@ -1,6 +1,6 @@
 ---
 title: Building Instructions
-subtitle: This guide instructs you how to build your DIY-Thermocam V3 from the KIT
+subtitle: This guide instructs you how to build your DIY-Thermocam V3 from the GroupGets Kit
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for the rest of us
   description: >-
@@ -34,7 +34,7 @@ _template: page
 
 ![](https://www.diy-thermocam.net/images/1.jpg)
 
-The [**DIY-Thermocam V3 KIT**](https://store.groupgets.com/products/diy-thermocam-v3) contains **all required parts to build the device on your own**:
+The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermocam-v3) contains **all required parts to build the device on your own**:
 
 *   1 x PCB V3.0
 *   6 x 2D Laser Cutted Enclosure Parts
