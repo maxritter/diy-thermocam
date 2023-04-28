@@ -111,4 +111,6 @@ seo:
       keyName: property
       relativeUrl: false
 template: advanced
+_template: advanced
 ---
+

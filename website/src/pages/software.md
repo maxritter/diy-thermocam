@@ -22,7 +22,9 @@ seo:
       relativeUrl: false
   type: stackbit_page_meta
 template: page
+_template: page
 ---
+
 # **ThermoVision Software**
 
 ![](https://cdn.forestry.io/res2/CyukiIw18DrUH43O_urwNm-m_FV9K_ohC-sQnqBoqS4/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDUjFaQ1FsRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tNTY4/ZDM3NzBlM2U0YzE0/OWI2YzhhZDA0NmQ1/YjczZjU2ZWEwMDE0/Ny9UaGVybW9WaXNp/b24ucG5n)

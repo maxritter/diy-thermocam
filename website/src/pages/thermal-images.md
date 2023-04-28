@@ -148,4 +148,6 @@ seo:
       value: images/5.jpg
       relativeUrl: true
 template: advanced
+_template: advanced
 ---
+

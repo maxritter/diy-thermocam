@@ -21,7 +21,9 @@ seo:
       relativeUrl: false
   type: stackbit_page_meta
 template: page
+_template: page
 ---
+
 
  - Fast **ARM Cortex M7** processor (**600MHz**), based on the popular **Teensy 4.1** microcontroller
  - Frame rate of up to **9 FPS** (US export compliance)

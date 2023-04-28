@@ -1,168 +1,169 @@
 {
-    "title": "DIY-Thermocam",
-    "palette": "blue",
-    "header": {
-        "type": "header",
-        "template": "header",
-        "logo_img_alt": "DIY-Thermocam Logo",
-        "has_nav": true,
-        "nav_links": [
-            {
-                "type": "action_menu",
-                "template": "action_menu",
-                "label": "Home",
-                "url": "/",
-                "style": "link",
-                "has_subnav": false,
-                "icon_class": "",
-                "new_window": false,
-                "no_follow": false,
-                "subnav_links": []
-            },
-            {
-                "type": "action_menu",
-                "template": "action_menu",
-                "label": "Building Instructions",
-                "url": "/building-instructions",
-                "style": "link",
-                "has_subnav": false,
-                "icon_class": "",
-                "new_window": false,
-                "no_follow": false,
-                "subnav_links": []
-            },
-            {
-                "type": "action_menu",
-                "template": "action_menu",
-                "url": "/software",
-                "style": "link",
-                "has_subnav": false,
-                "icon_class": "",
-                "new_window": false,
-                "no_follow": false,
-                "subnav_links": [],
-                "label": "Software"
-            },
-            {
-                "type": "action_menu",
-                "template": "action_menu",
-                "label": "Thermal Images",
-                "url": "/thermal-images",
-                "style": "link",
-                "has_subnav": false,
-                "subnav_links": [
-                    {
-                        "type": "action",
-                        "template": "action",
-                        "label": "Overview",
-                        "url": "/overview",
-                        "style": "link",
-                        "icon_class": "",
-                        "new_window": false,
-                        "no_follow": false
-                    },
-                    {
-                        "type": "action",
-                        "template": "action",
-                        "label": "Showcase",
-                        "url": "/showcase",
-                        "style": "link",
-                        "icon_class": "",
-                        "new_window": false,
-                        "no_follow": false
-                    }
-                ],
-                "icon_class": "",
-                "new_window": false,
-                "no_follow": false
-            },
-            {
-                "label": "Device Images",
-                "url": "/device-images",
-                "style": "link",
-                "icon_class": "dev",
-                "new_window": false,
-                "no_follow": false,
-                "has_subnav": false,
-                "subnav_links": [],
-                "type": "action_menu"
-            },
-            {
-                "label": "Device Features",
-                "url": "/device-features",
-                "style": "link",
-                "icon_class": "dev",
-                "new_window": false,
-                "no_follow": false,
-                "has_subnav": false,
-                "subnav_links": [],
-                "type": "action_menu"
-            },
-            {
-                "type": "action_menu",
-                "template": "action_menu",
-                "label": "Documentation",
-                "url": "/docs",
-                "style": "secondary",
-                "has_subnav": false,
-                "icon_class": "",
-                "new_window": false,
-                "no_follow": false,
-                "subnav_links": []
-            },
-            {
-                "label": "GitHub Repo",
-                "url": "https://github.com/maxritter/DIY-Thermocam",
-                "style": "primary",
-                "icon_class": "dev",
-                "new_window": true,
-                "no_follow": false,
-                "has_subnav": false,
-                "subnav_links": [],
-                "type": "action_menu"
-            }
+  "title": "DIY-Thermocam",
+  "palette": "blue",
+  "header": {
+    "type": "header",
+    "template": "header",
+    "logo_img_alt": "DIY-Thermocam Logo",
+    "has_nav": true,
+    "nav_links": [
+      {
+        "type": "action_menu",
+        "template": "action_menu",
+        "label": "Home",
+        "url": "/",
+        "style": "link",
+        "has_subnav": false,
+        "icon_class": "",
+        "new_window": false,
+        "no_follow": false,
+        "subnav_links": []
+      },
+      {
+        "type": "action_menu",
+        "template": "action_menu",
+        "label": "Building Instructions",
+        "url": "/building-instructions",
+        "style": "link",
+        "has_subnav": false,
+        "icon_class": "",
+        "new_window": false,
+        "no_follow": false,
+        "subnav_links": []
+      },
+      {
+        "type": "action_menu",
+        "template": "action_menu",
+        "url": "/software",
+        "style": "link",
+        "has_subnav": false,
+        "icon_class": "",
+        "new_window": false,
+        "no_follow": false,
+        "subnav_links": [],
+        "label": "Software"
+      },
+      {
+        "type": "action_menu",
+        "template": "action_menu",
+        "label": "Thermal Images",
+        "url": "/thermal-images",
+        "style": "link",
+        "has_subnav": false,
+        "subnav_links": [
+          {
+            "type": "action",
+            "template": "action",
+            "label": "Overview",
+            "url": "/overview",
+            "style": "link",
+            "icon_class": "",
+            "new_window": false,
+            "no_follow": false
+          },
+          {
+            "type": "action",
+            "template": "action",
+            "label": "Showcase",
+            "url": "/showcase",
+            "style": "link",
+            "icon_class": "",
+            "new_window": false,
+            "no_follow": false
+          }
         ],
-        "url": "",
-        "logo_img": "/images/DIY-Thermocam-01.png"
-    },
-    "footer": {
-        "type": "footer",
-        "template": "footer",
-        "has_social": true,
-        "social_links": [
-            {
-                "url": "https://www.youtube.com/channel/UC4XjTWGf-Umvk3ypZHzNSAw",
-                "style": "icon",
-                "icon_class": "youtube",
-                "new_window": true,
-                "no_follow": false,
-                "type": "action",
-                "label": "Youtube"
-            },
-            {
-                "type": "action",
-                "template": "action",
-                "label": "LinkedIn",
-                "url": "https://www.linkedin.com/in/rittermax/",
-                "style": "icon",
-                "icon_class": "linkedin",
-                "new_window": true,
-                "no_follow": false
-            },
-            {
-                "type": "action",
-                "template": "action",
-                "label": "GitHub",
-                "url": "https://github.com/maxritter",
-                "style": "icon",
-                "icon_class": "github",
-                "new_window": true,
-                "no_follow": false
-            }
-        ],
-        "links": [],
-        "content": "©2021 DIY-Thermocam. All Rights Reserved."
-    },
-    "domain": "https://www.diy-thermocam.net",
-    "favicon": "/images/Icon.png"
+        "icon_class": "",
+        "new_window": false,
+        "no_follow": false
+      },
+      {
+        "label": "Device Images",
+        "url": "/device-images",
+        "style": "link",
+        "icon_class": "dev",
+        "new_window": false,
+        "no_follow": false,
+        "has_subnav": false,
+        "subnav_links": [],
+        "type": "action_menu"
+      },
+      {
+        "label": "Device Features",
+        "url": "/device-features",
+        "style": "link",
+        "icon_class": "dev",
+        "new_window": false,
+        "no_follow": false,
+        "has_subnav": false,
+        "subnav_links": [],
+        "type": "action_menu"
+      },
+      {
+        "type": "action_menu",
+        "template": "action_menu",
+        "label": "Documentation",
+        "url": "/docs",
+        "style": "secondary",
+        "has_subnav": false,
+        "icon_class": "",
+        "new_window": false,
+        "no_follow": false,
+        "subnav_links": []
+      },
+      {
+        "label": "GitHub Repo",
+        "url": "https://github.com/maxritter/DIY-Thermocam",
+        "style": "primary",
+        "icon_class": "dev",
+        "new_window": true,
+        "no_follow": false,
+        "has_subnav": false,
+        "subnav_links": [],
+        "type": "action_menu"
+      }
+    ],
+    "url": "",
+    "logo_img": "/images/DIY-Thermocam-01.png"
+  },
+  "footer": {
+    "type": "footer",
+    "template": "footer",
+    "has_social": true,
+    "social_links": [
+      {
+        "url": "https://www.youtube.com/channel/UC4XjTWGf-Umvk3ypZHzNSAw",
+        "style": "icon",
+        "icon_class": "youtube",
+        "new_window": true,
+        "no_follow": false,
+        "type": "action",
+        "label": "Youtube"
+      },
+      {
+        "type": "action",
+        "template": "action",
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/rittermax/",
+        "style": "icon",
+        "icon_class": "linkedin",
+        "new_window": true,
+        "no_follow": false
+      },
+      {
+        "type": "action",
+        "template": "action",
+        "label": "GitHub",
+        "url": "https://github.com/maxritter",
+        "style": "icon",
+        "icon_class": "github",
+        "new_window": true,
+        "no_follow": false
+      }
+    ],
+    "links": [],
+    "content": "©2023 DIY-Thermocam. All Rights Reserved."
+  },
+  "domain": "https://www.diy-thermocam.net",
+  "favicon": "/images/Icon.png",
+  "_template": "config"
 }

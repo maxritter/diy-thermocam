@@ -27,10 +27,12 @@ seo:
   type: stackbit_page_meta
 template: page
 image: ''
+_template: page
 ---
+
 # Prerequisites
 
-![](https://cdn.forestry.io/res2/B1n3GNdrd8BwBLUxPMurAfEwZ5yy-h6TSVUsEqH7LJo/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU2xFMVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYWY0/ZmNhM2ZhNDRmYWQ5/ZDRlMDEwMjhkNTIy/MjI0YWYyZGU4ZjFm/My8xLmpwZw)
+![](https://www.diy-thermocam.net/images/1.jpg)
 
 The [**DIY-Thermocam V3 KIT**](https://store.groupgets.com/products/diy-thermocam-v3) contains **all required parts to build the device on your own**:
 
@@ -76,7 +78,7 @@ In case you do not already have the **FLIR Lepton3.5 sensor **or **FLIR Lepton B
 
 For the **tools**, you need the following ones in order to follow the assembly process:
 
-![](https://cdn.forestry.io/res2/MJhD9QBhahfNBqUfKOQpGtqZp5W00rnh3YyS-jsRlMY/fit/512/512/sm/0/aHR0cHM6Ly9hcHAu/Zm9yZXN0cnkuaW8v/cmFpbHMvYWN0aXZl/X3N0b3JhZ2UvYmxv/YnMvZXlKZmNtRnBi/SE1pT25zaWJXVnpj/MkZuWlNJNklrSkJh/SEJDU2swMVVWRXdQ/U0lzSW1WNGNDSTZi/blZzYkN3aWNIVnlJ/am9pWW14dllsOXBa/Q0o5ZlE9PS0tYTI2/ODRlY2ZkY2E2ZDkw/NzgyMDFkMGY4MGE3/OGY3Njc4YzM4ZjA1/YS8yLmpwZw)
+![](https://www.diy-thermocam.net/images/2.jpg)
 
 *   Soldering Iron
 *   Soldering Tin

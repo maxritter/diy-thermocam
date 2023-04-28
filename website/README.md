@@ -1,2 +1,1 @@
-# ✨ diythermocam-website ✨
-
+Website for www.diy-thermocam.net
