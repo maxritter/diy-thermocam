@@ -37,7 +37,7 @@ seo:
       relativeUrl: false
     - name: 'og:image'
       value: >-
-        https://www.diy-thermocam.net/images/icon.png
+        https://www.diy-thermocam.net/images/inside.jpg
       keyName: property
       relativeUrl: false
   robots: []
