@@ -5,7 +5,7 @@ sections:
     template: section_hero
     title: Thermal Images
     section_id: hero
-    image: /images/background.jpg
+    image: /images/website/background.jpg
     content: |
       Images were created with the DIY-Thermocam and ThermoVision software
   - type: section_grid
@@ -16,103 +16,103 @@ sections:
       - type: grid_item
         template: grid_item
         title: German Ravioli
-        image: /images/pasta-squares.png
+        image: /images/thermal/pasta_squares.png
       - type: grid_item
         template: grid_item
         title: Houses in the Neighbourhood
-        image: /images/houses_2.jpg
+        image: /images/thermal/houses_2.jpg
       - type: grid_item
         template: grid_item
         title: Pig behind a fence
-        image: /images/pig.jpg
+        image: /images/thermal/pig.jpg
       - type: grid_item
         template: grid_item
         title: Laptop
-        image: /images/laptop.jpg
+        image: /images/thermal/laptop.jpg
       - type: grid_item
         template: grid_item
         title: Human Body
-        image: /images/body.jpg
+        image: /images/thermal/body.jpg
       - type: grid_item
         template: grid_item
         title: Soldering Iron
-        image: /images/soldering-iron.jpg
+        image: /images/thermal/soldering_iron.jpg
       - type: grid_item
         template: grid_item
         title: Milk
-        image: /images/milk.jpg
+        image: /images/thermal/milk.jpg
       - type: grid_item
         template: grid_item
         title: Neighbourhood and Garden
-        image: /images/houses_1.jpg
+        image: /images/thermal/houses_1.jpg
       - type: grid_item
         template: grid_item
         title: Window Cold Airstream
-        image: /images/cold-air.jpg
+        image: /images/thermal/cold_air.jpg
       - type: grid_item
         template: grid_item
         title: Heater before Venting
-        image: /images/heaterbefore.jpg
+        image: /images/thermal/heater_before.jpg
       - type: grid_item
         template: grid_item
         title: Heater after Venting
-        image: /images/heaterafter.jpg
+        image: /images/thermal/heater_after.jpg
       - type: grid_item
         template: grid_item
         title: Washbowl
-        image: /images/water-faucet.jpg
+        image: /images/thermal/water_faucet.jpg
       - type: grid_item
         template: grid_item
         title: Fridge
-        image: /images/refrigerator.jpg
+        image: /images/thermal/refrigerator.jpg
       - type: grid_item
         template: grid_item
         title: Mikrocontroller
-        image: /images/processor.jpg
+        image: /images/thermal/processor.jpg
       - type: grid_item
         template: grid_item
         title: Three Lamps
-        image: /images/lamp.jpg
+        image: /images/thermal/lamp.jpg
       - type: grid_item
         template: grid_item
         title: Car Engine
-        image: /images/car-engine.jpg
+        image: /images/thermal/car_engine.jpg
       - type: grid_item
         template: grid_item
         title: Wall Adaptor
-        image: /images/wall-adaptor.jpg
+        image: /images/thermal/wall_adaptor.jpg
       - type: grid_item
         template: grid_item
         title: Human Face
-        image: /images/human.jpg
+        image: /images/thermal/human.jpg
       - type: grid_item
         template: grid_item
         title: House Front
-        image: /images/house-front.jpg
+        image: /images/thermal/house_front.jpg
       - type: grid_item
         template: grid_item
         title: Internet Router
-        image: /images/fritz-box.jpg
+        image: /images/thermal/fritz_box.jpg
       - type: grid_item
         template: grid_item
         title: Coffee
-        image: /images/coffee.jpg
+        image: /images/thermal/coffee.jpg
       - type: grid_item
         template: grid_item
         title: Attic
-        image: /images/attic.jpg
+        image: /images/thermal/attic.jpg
       - type: grid_item
         template: grid_item
         title: Row Houses
-        image: /images/buildings.png
+        image: /images/thermal/buildings.png
       - type: grid_item
         template: grid_item
         title: 'Central Heating #1'
-        image: /images/central-heating_1.jpg
+        image: /images/thermal/heating_1.jpg
       - type: grid_item
         template: grid_item
         title: 'Central Heating #2'
-        image: /images/central-heating_2.jpg
+        image: /images/thermal/heating_2.jpg
 seo:
   type: stackbit_page_meta
   template: stackbit_page_meta
@@ -135,7 +135,7 @@ seo:
       keyName: property
     - name: 'og:image'
       value: >-
-        https://www.diy-thermocam.net/images/inside.jpg
+        https://www.diy-thermocam.net/images/device/inside.jpg
       keyName: property
       relativeUrl: false
     - name: 'twitter:card'

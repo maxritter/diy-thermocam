@@ -5,7 +5,7 @@ sections:
     template: section_hero
     title: Device Images
     section_id: hero
-    image: /images/background.jpg
+    image: /images/website/background.jpg
   - type: section_grid
     template: section_grid
     section_id: showcase
@@ -14,31 +14,31 @@ sections:
       - type: grid_item
         template: grid_item
         title: Front
-        image: /images/front.jpg
+        image: /images/device/front.jpg
       - type: grid_item
         template: grid_item
         title: Inside
-        image: /images/inside.jpg
+        image: /images/device/inside.jpg
         content: A personal theme for Unibit
       - type: grid_item
         template: grid_item
         title: Back
-        image: /images/back.jpg
+        image: /images/device/back.jpg
         content: A minimal blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Left
-        image: /images/left.jpg
+        image: /images/device/left.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Back Open
-        image: /images/open.jpg
+        image: /images/device/open.jpg
         content: Medium inspired blogging theme for Unibit
       - type: grid_item
         template: grid_item
         title: Right
-        image: /images/right.jpg
+        image: /images/device/right.jpg
         content: Medium inspired blogging theme for Unibit
 seo:
   type: stackbit_page_meta
@@ -59,7 +59,7 @@ seo:
       keyName: property
     - name: 'og:image'
       value: >-
-        https://www.diy-thermocam.net/images/inside.jpg
+        https://www.diy-thermocam.net/images/device/inside.jpg
       keyName: property
       relativeUrl: false
     - name: 'twitter:card'

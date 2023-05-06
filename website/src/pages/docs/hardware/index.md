@@ -11,7 +11,7 @@ title: Hardware
 ---
 ## Schematic
 
-![](https://www.diy-thermocam.net/images/Schematic.JPG)
+![](https://www.diy-thermocam.net/images/device/schematic.jpg)
 
 ## Pinmap
 
@@ -42,17 +42,17 @@ The printed circuit board has been created with [**Autosoft Eagle**](http://www.
 
 You can also use the Gerber.zip and upload it to any PCB service of your choice to manufacture the board, for example [PCB Protoyping](http://www.smart-prototyping.com/PCB-Prototyping.html). Dimensions are 89.4mm (w) x 68.4mm (h), 1.6mm thickness and 2 layers.
 
-[![FRONT](https://github.com/maxritter/DIY-Thermocam/raw/master/PCB/3.0/FRONT.PNG)](https://github.com/maxritter/DIY-Thermocam/blob/master/PCB/3.0/FRONT.PNG)
+[![FRONT](https://https://github.com/maxritter/diy-thermocam/raw/master/pcb/3.0/front.png)](https://https://github.com/maxritter/diy-thermocam/blob/master/pcb/3.0/front.png)
 
-[![FRONT](https://github.com/maxritter/DIY-Thermocam/raw/master/PCB/3.0/BACK.PNG)](https://github.com/maxritter/DIY-Thermocam/blob/master/PCB/3.0/BACK.PNG)
+[![FRONT](https://https://github.com/maxritter/diy-thermocam/raw/master/pcb/3.0/back.png)](https://https://github.com/maxritter/diy-thermocam/blob/master/pcb/3.0/back.png)
 
-[**Get PCB Revision 3.0**](https://github.com/maxritter/DIY-Thermocam/tree/master/PCB/3.0)
+[**Get PCB Revision 3.0**](https://https://github.com/maxritter/diy-thermocam/tree/master/pcb/3.0)
 
 ## Enclosure
 
 The enclosure has been designed with [**Google Sketchup**](https://www.sketchup.com/plans-and-pricing/sketchup-free) in 3D and converted to 2D files to laser-cut them. The 2D SVG file can be opened with [**Inkscape**](https://inkscape.org/).
 
-[**Get Enclosure Revision 3.0**](https://github.com/maxritter/DIY-Thermocam/tree/master/Enclosure/3.0)
+[**Get Enclosure Revision 3.0**](https://https://github.com/maxritter/diy-thermocam/tree/master/enclosure/3.0)
 
 helmarw has created an updated design for 3D printing, than can be found [**here**](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b):
 

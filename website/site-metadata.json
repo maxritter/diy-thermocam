@@ -112,7 +112,7 @@
       },
       {
         "label": "GitHub Repo",
-        "url": "https://github.com/maxritter/DIY-Thermocam",
+        "url": "https://https://github.com/maxritter/diy-thermocam",
         "style": "primary",
         "icon_class": "dev",
         "new_window": true,
@@ -123,7 +123,7 @@
       }
     ],
     "url": "",
-    "logo_img": "/images/DIY-Thermocam-01.png"
+    "logo_img": "/images/logo.png"
   },
   "footer": {
     "type": "footer",
@@ -173,6 +173,6 @@
     "content": "©2023 by Max Ritter. All Rights Reserved."
   },
   "domain": "https://www.diy-thermocam.net",
-  "favicon": "/images/Icon.png",
+  "favicon": "/images/icon.png",
   "_template": "config"
 }

@@ -10,7 +10,7 @@ seo:
   extra:
     - name: 'og:image'
       value: >-
-        https://www.diy-thermocam.net/images/inside.jpg
+        https://www.diy-thermocam.net/images/device/inside.jpg
       keyName: property
       relativeUrl: false
     - name: 'og:description'
