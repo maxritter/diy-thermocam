@@ -11,7 +11,7 @@ title: Raw Data Structure
 ---
 This page describes how to **interpret the raw data files (\*.DAT)**, which are **created by the device for each saved image and video / time-lapse frame on the internal storage**.
 
-The **structure of the DAT file** is define as following - see “method “SaveRawData” [here](https://https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/src/thermal/save.cpp) as reference:
+The **structure of the DAT file** is define as following - see “method “SaveRawData” [here](https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/src/thermal/save.cpp) as reference:
 
 *   **Lepton raw values** - 9600 byte (Lepton2) or 38400 byte (Lepton3)
     *   4800 / 19200 raw values for the Lepton2 / Lepton3, split to two bytes, MSB first, then LSB
@@ -26,7 +26,7 @@ The **structure of the DAT file** is define as following - see “method “Save
     *   Format is Celsius or Fahrenheit, depending on the set temperature format
 *   **Color scheme** - 1 byte
     *   Number of the color scheme, the image was created with
-    *   Number definitions can be looked up in [this file](https://https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/include/globaldefines.h) under "Color scheme numbers"
+    *   Number definitions can be looked up in [this file](https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/include/globaldefines.h) under "Color scheme numbers"
 *   **Temperature format** - 1 byte
     *   The temperature format is applied to all absolute temperatures
     *   Celsius (0) or Fahrenheit (1)

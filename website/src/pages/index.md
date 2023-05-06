@@ -20,9 +20,9 @@ sections:
       The **DIY-Thermocam V3** gives **private persons, educational institutes
       and companies** access to a **portable,  affordable and customizable
       thermal imaging platform** that is based on open-source
-      [**software**](https://https://github.com/maxritter/diy-thermocam/tree/master/software)
+      [**software**](https://github.com/maxritter/diy-thermocam/tree/master/software)
       and
-      [**hardware**](https://https://github.com/maxritter/diy-thermocam/tree/master/pcb).
+      [**hardware**](https://github.com/maxritter/diy-thermocam/tree/master/pcb).
       It is constructed as a [**self-assembly
       solution**](https://www.diy-thermocam.net/build-your-own), that can be
       build **at home** by only using **some standard tools**.
@@ -43,16 +43,16 @@ sections:
       The device has a [**large ecosystem of
       software**](https://www.diy-thermocam.net/software) around it, that allows
       to **extend the functionalities of the device** beyond the firmware
-      itself. You can use the [**ThermoVision
-      software**](https://https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_analysis_software/)
+      itself. You can use the [**Thermal Analysis 
+      Software**](https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_analysis_software/)
       to **edit raw data files on your PC** and **save them in various file
       formats**. In addition to that, the [**Thermal Live
-      Viewer**](https://https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_live_viewer/)
+      Viewer**](https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_live_viewer/)
       can **stream live thermal images to your PC**, change settings on the fly
       and **record images or videos**. The [**Thermal Data
-      Viewer**](https://https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_data_viewer/)
+      Viewer**](https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_data_viewer/)
       provides another way of **editing raw files**, and with the [**Video
-      Converter**](https://https://github.com/maxritter/diy-thermocam/tree/master/software/video_converter)
+      Converter**](https://github.com/maxritter/diy-thermocam/tree/master/software/video_converter)
       you can **convert series of captures images to movie files**.
   - type: section_content
     template: section_content
@@ -61,7 +61,7 @@ sections:
     image_position: left
     content: >
       The [**Device
-      Firmware**](https://https://github.com/maxritter/diy-thermocam/releases) provides
+      Firmware**](https://github.com/maxritter/diy-thermocam/releases) provides
       a lot of functionalities, that can be accessed over the **3.2" TFT LCD
       touch screen**. **Flashing the firmware** is easy and can be done without
       any programming knowledge on **any operating system** over the command line interface.
@@ -82,7 +82,7 @@ sections:
 
       In case you want to **extend the existing featureset** with your own
       functionality, that's possible too. The [**firmware of the
-      DIY-Thermocam**](https://https://github.com/maxritter/diy-thermocam/tree/master/firmware)
+      DIY-Thermocam**](https://github.com/maxritter/diy-thermocam/tree/master/firmware)
       is completely **open-source** and written in C/C++. Just download **Visual
       Studio Code** and the **PlatformIO extension**, and you are ready to go!
 seo:

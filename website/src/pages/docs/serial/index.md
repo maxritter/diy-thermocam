@@ -16,7 +16,7 @@ This guide describes how you can communicate with your **DIY-Thermocam V3** over
 
 The **maximum transfer speed is 12 Mbit/s and is always active**, no matter what baud rate you use to connect to the device from your PC. This allows you to receive thermal frames with high speed.  The **device needs to be turned on, connected to the PC over USB and set to live mode**.  The protocol uses **big endian** for transmission of multibyte values, which means MSB first, then LSB.
 
-To see how the **protocol is implemented inside the firmware** in C, check out [this file](https://https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/src/hardware/connection.cpp). The [Thermal Live Viewer](https://https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_live_viewer/) can be used on any Windows PC to use the protocol and communicate to the device. 
+To see how the **protocol is implemented inside the firmware** in C, check out [this file](https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/src/hardware/connection.cpp). The [Thermal Live Viewer](https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_live_viewer/) can be used on any Windows PC to use the protocol and communicate to the device. 
 
 ## Commands 
 

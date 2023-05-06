@@ -7,7 +7,7 @@ sections:
     section_id: hero
     image: /images/website/background.jpg
     content: |
-      Images were created with the DIY-Thermocam and ThermoVision software
+      Images were created with the DIY-Thermocam and Thermal Analysis Software
   - type: section_grid
     template: section_grid
     section_id: showcase

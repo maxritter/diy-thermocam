@@ -51,9 +51,9 @@ _template: docs
 
 The **Wiki Subsections** provide **more information** about certain aspects of the **DIY-Thermocam V3**.
 
-The [**GitHub repository**](https://https://github.com/maxritter/diy-thermocam) contains the [**latest firmware releases**](https://https://github.com/maxritter/diy-thermocam/releases) for the device, as well as the [**Enclosure**](https://https://github.com/maxritter/diy-thermocam/tree/master/enclosure), the [**PCB**](https://https://github.com/maxritter/diy-thermocam/tree/master/pcb) and various [**Desktop Software**](https://https://github.com/maxritter/diy-thermocam/tree/master/software) to **extend the functionalities of the Thermocam beyond the on-device capabilities**. 
+The [**GitHub repository**](https://github.com/maxritter/diy-thermocam) contains the [**latest firmware releases**](https://github.com/maxritter/diy-thermocam/releases) for the device, as well as the [**Enclosure**](https://github.com/maxritter/diy-thermocam/tree/master/enclosure), the [**PCB**](https://github.com/maxritter/diy-thermocam/tree/master/pcb) and various [**Desktop Software**](https://github.com/maxritter/diy-thermocam/tree/master/software) to **extend the functionalities of the Thermocam beyond the on-device capabilities**. 
 
-The **whole firmware is open-source** and can be **modified by anybody** using the **source code** provided [**here**](https://https://github.com/maxritter/diy-thermocam/tree/master/firmware).
+The **whole firmware is open-source** and can be **modified by anybody** using the **source code** provided [**here**](https://github.com/maxritter/diy-thermocam/tree/master/firmware).
 
 Check out this **video walkthrough** to get an **overview about the on-device features**:
 

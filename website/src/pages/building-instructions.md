@@ -319,7 +319,7 @@ Make sure the USB port of the Teensy 4.1 Microcontroller fits inside the cutout 
 
 While the backside is still open, you need to flash the latest firmware to the device. 
 
-First get the newest version of the firmware from [here](https://https://github.com/maxritter/diy-thermocam/releases) and extract the .hex file from the zip archive to your computer.
+First get the newest version of the firmware from [here](https://github.com/maxritter/diy-thermocam/releases) and extract the .hex file from the zip archive to your computer.
 
 Next, download the Teensy Load CLI from [here](https://github.com/PaulStoffregen/teensy_loader_cli) and install it according to the instructions. 
 
@@ -348,3 +348,5 @@ If you want to, you can put the **Lepton Enclosure Protector** on top of the cut
 #### 45.
 
 Congratulations, you have assembled your own thermal camera! Check out the [**documentation**](https://www.diy-thermocam.net/docs) to learn more about the capabilities of the DIY-Thermocam V3 and also have a look at the open-source [**software ecosystem**](https://www.diy-thermocam.net/software), that extends the device capabilities on your computer.
+
+If you have any improvements to this guide, create an issue or a PR with the changes in the [**diy-thermocam-website repository**](https://github.com/maxritter/diy-thermocam-website).

@@ -14,7 +14,7 @@ title: Firmware
 
 To flash the firmware to the DIY-Thermocam, use the Teensy Loader CLI that works under Windows, Linux and Mac OSX.
 
-First get the newest version of the firmware from [here](https://https://github.com/maxritter/diy-thermocam/releases) and extract the .hex file from the zip archive to your computer.
+First get the newest version of the firmware from [here](https://github.com/maxritter/diy-thermocam/releases) and extract the .hex file from the zip archive to your computer.
 
 Next, download the Teensy Load CLI from [here](https://github.com/PaulStoffregen/teensy_loader_cli) and install it according to the instructions. Remove the backside of the device and press the button on the Teensy microcontroller while it is connected to your PC via USB to put it into programmer mode:
 
@@ -30,7 +30,7 @@ Afterwards, you should see the device rebooting with the logo on the screen. Tur
 
 ## Development
 
-You need to **setup the development IDE** if you want to make your **own changes** to the [open-source firmware of the DIY-Thermocam](https://https://github.com/maxritter/diy-thermocam/tree/master/firmware). This guide should work on **all common operating systems** (**Windows, Linux & macOS**).
+You need to **setup the development IDE** if you want to make your **own changes** to the [open-source firmware of the DIY-Thermocam](https://github.com/maxritter/diy-thermocam/tree/master/firmware). This guide should work on **all common operating systems** (**Windows, Linux & macOS**).
 
 **Download** and **install** the following programs:
 

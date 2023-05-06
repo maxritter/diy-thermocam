@@ -1,6 +1,6 @@
 # DIY-Thermocam
 
-![Thermocam Logo](https://www.diy-thermocam.net/images/logo_text.png)
+![Thermocam Logo](https://www.diy-thermocam.net/images/website/logo_text.png)
 
 **The DIY-Thermocam V3 is an open-source thermal imager based on the FLIR Lepton3.5 sensor.**
 

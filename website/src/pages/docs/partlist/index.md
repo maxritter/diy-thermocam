@@ -12,8 +12,8 @@ title: Partlist
 
 If you want to source the parts for the DIY-Thermocam V3 on your own instead of **[buying the Kit from GroupGets](https://store.groupgets.com/products/diy-thermocam-v3)** that has all parts in it, check out this list:
 
-- 1 x [PCB from GroupGets](https://store.groupgets.com/products/diy-thermocam-pcb) OR 1 x [PCB from your own service](https://https://github.com/maxritter/diy-thermocam/tree/master/pcb/3.0)
-- 1 x [2D Laser Cutted Enclosure](https://https://github.com/maxritter/diy-thermocam/tree/master/enclosure/3.0) OR 1x [3D Printed Enclosure](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b)
+- 1 x [PCB from GroupGets](https://store.groupgets.com/products/diy-thermocam-pcb) OR 1 x [PCB from your own service](https://github.com/maxritter/diy-thermocam/tree/master/pcb/3.0)
+- 1 x [2D Laser Cutted Enclosure](https://github.com/maxritter/diy-thermocam/tree/master/enclosure/3.0) OR 1x [3D Printed Enclosure](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b)
   3mm Acryl GS Grey for Laser Cutted Enclosure
 - 1 x [Pololu 5V Step-Up Voltage Regulator U3V16F5](https://www.pololu.com/product/4941)
 - 1 x [3.2 Inch TFT LCD Touch Display](http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display) (Pin Header Connection-4-wire-SPI, Power Supply: 5V, Touch Panel: 3.2" Resistive, Font Chip: None)
@@ -36,7 +36,7 @@ If you want to source the parts for the DIY-Thermocam V3 on your own instead of 
 - 1 x [Short Pieces of Red Cable Stranded Wire 26AWG](https://www.adafruit.com/product/1877)
 - 1 x [Short Pieces of Black Cable Stranded Wire 26AWG](https://www.adafruit.com/product/1881)
 - 1 x [Tripod Socket](https://www.amazon.com/gp/product/B00HYLZ33W/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1) (link contains 13 pieces, only one is needed per unit)
-- 1 x [TP4056 Charging Module](https://www.amazon.com/-/de/dp/B09SWBM31Z/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=310SOY22ZWJ2A&keywords=TP4056&qid=1683368773&sprefix=tp4056%2Caps%2C168&sr=8-1) (the PCB has been designed for TP4057 but it is out of stock - check out [this page](https://https://github.com/maxritter/diy-thermocam/issues/103) for further discussions)
+- 1 x [TP4056 Charging Module](https://www.amazon.com/-/de/dp/B09SWBM31Z/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=310SOY22ZWJ2A&keywords=TP4056&qid=1683368773&sprefix=tp4056%2Caps%2C168&sr=8-1) (the PCB has been designed for TP4057 but it is out of stock - check out [this page](https://github.com/maxritter/diy-thermocam/issues/103) for further discussions)
 - 1 x [16GB Class10 microSD card](https://www.amazon.com/-/de/dp/B073K14CVB/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=3D1EBSQIC4JET&keywords=16GB%2BmicrosD%2Bclass%2B10&qid=1683368579&sprefix=16gb%2Bmicrosd%2Bclass%2B10%2Caps%2C215&sr=8-3&th=1) (any size works, but should be Class10 for best performance)
 - 4 x [Screw M2x18](https://www.ettinger.de/en/p/cheese-head-slotted-d84-m2x18-steel-zinc-plated/001.14.177) (German link, only for comparison)
 - 4 x [Spacer M2x12](https://www.ettinger.de/p/isolier-distanzhuelse/besonders-fuer-m-2/005.81.120) (German link, only for comparison)
