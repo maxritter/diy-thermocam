@@ -24,7 +24,7 @@ sections:
       and
       [**hardware**](https://github.com/maxritter/diy-thermocam/tree/master/pcb).
       It is constructed as a [**self-assembly
-      solution**](https://www.diy-thermocam.net/build-your-own), that can be
+      solution**](https://www.diy-thermocam.net/building-instructions), that can be
       build **at home** by only using **some standard tools**.
 
 

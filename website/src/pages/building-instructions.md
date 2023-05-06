@@ -36,7 +36,7 @@ The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermoca
 
 ![](https://www.diy-thermocam.net/images/manual/1.jpg)
 
-In case you do not already have the **FLIR Lepton3.5 sensor **or **FLIR Lepton Breakout Board V2**, you can add it during the **checkout process at GroupGets**. If you want to source the parts on your own, you can get links from the [**Partlist page**](https://www.diy-thermocam.net/docs/partlist/).
+In case you do not already have a **FLIR Lepton sensor** (2.5 or 3.5) or **FLIR Lepton Breakout Board V2**, you can add it during the **checkout process at GroupGets**. If you want to source the parts on your own, you can get links from the [**Partlist page**](https://www.diy-thermocam.net/docs/partlist/).
 
 For the **tools**, you need the following ones in order to follow the assembly process:
 
