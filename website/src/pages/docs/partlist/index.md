@@ -10,7 +10,7 @@ title: Partlist
 
 ---
 
-If you want to source the parts for the DIY-Thermocam V3 on your own instead of **[buying the Kit from GroupGets](https://store.groupgets.com/products/diy-thermocam-v3)** that has all parts in it, check out this list:
+If you want to source the parts for the DIY-Thermocam V3 on your own instead of **[buying the Kit from GroupGets](https://store.groupgets.com/products/diy-thermocam-v3)** that has all parts in it (excluding the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2 that can be added during checkout), use this list as a reference:
 
 - 1 x [PCB from GroupGets](https://store.groupgets.com/products/diy-thermocam-pcb) OR [PCB from your own service](https://github.com/maxritter/diy-thermocam/tree/master/pcb/3.0)
 - 1 x [FLIR Lepton 3.5](https://store.groupgets.com/products/flir-lepton-3-5) (160x120) OR [FLIR Lepton2.5](https://store.groupgets.com/products/flir-lepton-2-5) (80x60)
