@@ -319,19 +319,13 @@ Make sure the USB port of the Teensy 4.1 Microcontroller fits inside the cutout 
 
 While the backside is still open, you need to flash the latest firmware to the device. 
 
-First get the newest version of the firmware from [here](https://github.com/maxritter/diy-thermocam/releases) and extract the .hex file from the zip archive to your computer.
+First, get the newest version of the firmware from [here](https://github.com/maxritter/diy-thermocam/releases) and extract the firmware.hex file from the zip archive to your computer.
 
-Next, download the Teensy Load CLI from [here](https://github.com/PaulStoffregen/teensy_loader_cli) and install it according to the instructions. 
+Next, download the Teensy Loader from [here](https://www.pjrc.com/teensy/loader.html) and open it. Click the "Auto" button, or choose "Automatic Mode" from the Operations menu. The Auto button should illuminate bright green. Now load the firmware.hex file, it should show up on the bottom side of the GUI.
 
-Press the button on the Teensy microcontroller while it is connected to your PC via USB to put it into programmer mode:
+Press the button on the Teensy microcontroller while it is connected to your PC via USB to start the flashing procedure:
 
 ![](https://www.diy-thermocam.net/images/manual/flash.png)
-
- The flash procedure can be started like this:
-
-```
-teensy_loader_cli -w --mcu=TEENSY41 firmware.hex
-```
 
 Afterwards, you should see the device rebooting with the logo on the screen. Turn it off to continue with the last steps.
 
