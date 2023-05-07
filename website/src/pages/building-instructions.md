@@ -32,7 +32,7 @@ _template: page
 
 # Prerequisites
 
-The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermocam-v3) from GroupGets contains **all required parts to build the device on your own**:
+The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermocam-v3) from GroupGets contains **all required parts to build the device**:
 
 ![](https://www.diy-thermocam.net/images/manual/1.jpg)
 
