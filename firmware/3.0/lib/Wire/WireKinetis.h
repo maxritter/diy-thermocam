@@ -32,7 +32,14 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#define BUFFER_LENGTH 32
+#if defined(__MKL26Z64__) || defined(__MK20DX128__)
+#define BUFFER_LENGTH 40
+#elif defined(__MK20DX256__)
+#define BUFFER_LENGTH 72
+#else
+#define BUFFER_LENGTH 136
+#endif
+
 #define WIRE_HAS_END 1
 
 
@@ -78,7 +85,7 @@ class TwoWire : public Stream
 public:
 	// Hardware description struct
 	typedef struct {
-		volatile uint32_t &clock_gate_register;
+		uintptr_t clock_gate_register;
 		uint32_t clock_gate_mask;
 		uint8_t  sda_pin[5];
 		uint8_t  sda_mux[5];
@@ -116,6 +123,9 @@ public:
 		return endTransmission(1);
 	}
 	uint8_t requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop);
+	uint8_t requestFrom(uint8_t address, uint8_t quantity, bool sendStop) {
+		return requestFrom(address, quantity, (uint8_t)(sendStop ? 1 : 0));
+	}
 	uint8_t requestFrom(uint8_t address, uint8_t quantity) {
 		return requestFrom(address, quantity, (uint8_t)1);
 	}

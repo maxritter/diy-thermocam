@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -31,11 +31,10 @@
 #include <string.h>
 #include <stddef.h>
 #include <limits.h>
-#include "FatLibConfig.h"
 #include "../common/FmtNumber.h"
 #include "../common/FsApiConstants.h"
 #include "../common/FsDateTime.h"
-#include "../common/FsStructs.h"
+#include "../common/FsName.h"
 #include "FatPartition.h"
 class FatVolume;
 //------------------------------------------------------------------------------
@@ -76,21 +75,41 @@ struct FatPos_t {
 #define isDirSeparator(c) ((c) == '/')
 //------------------------------------------------------------------------------
 /**
- * \struct fname_t
- * \brief Internal type for Short File Name - do not use in user apps.
+ * \class FatLfn_t
+ * \brief Internal type for Long File Name - do not use in user apps.
  */
-struct fname_t {
+
+class FatLfn_t : public FsName {
+ public:
+  /** UTF-16 length of Long File Name */
+  size_t len;
+  /** Position for sequence number. */
+  uint8_t seqPos;
   /** Flags for base and extension character case and LFN. */
   uint8_t flags;
-  /** length of Long File Name */
-  size_t len;
-  /** Long File Name start. */
-  const char* lfn;
-  /** position for sequence number */
-  uint8_t seqPos;
   /** Short File Name */
   uint8_t sfn[11];
 };
+/**
+ * \class FatSfn_t
+ * \brief Internal type for Short 8.3 File Name - do not use in user apps.
+ */
+class FatSfn_t {
+ public:
+  /** Flags for base and extension character case and LFN. */
+  uint8_t flags;
+  /** Short File Name */
+  uint8_t sfn[11];
+};
+
+#if USE_LONG_FILE_NAMES
+/** Internal class for file names */
+typedef FatLfn_t FatName_t;
+#else  // USE_LONG_FILE_NAMES
+/** Internal class for file names */
+typedef FatSfn_t FatName_t;
+#endif  // USE_LONG_FILE_NAMES
+
 /** Derived from a LFN with loss or conversion of characters. */
 const uint8_t FNAME_FLAG_LOST_CHARS = 0X01;
 /** Base-name or extension has mixed case. */
@@ -102,6 +121,9 @@ const uint8_t FNAME_FLAG_NEED_LFN =
 const uint8_t FNAME_FLAG_LC_BASE = FAT_CASE_LC_BASE;
 /** Filename extension is all lower case. */
 const uint8_t FNAME_FLAG_LC_EXT = FAT_CASE_LC_EXT;
+#if FNAME_FLAG_NEED_LFN & (FAT_CASE_LC_BASE || FAT_CASE_LC_EXT)
+#error FNAME_FLAG_NEED_LFN & (FAT_CASE_LC_BASE || FAT_CASE_LC_EXT)
+#endif  // FNAME_FLAG_NEED_LFN & (FAT_CASE_LC_BASE || FAT_CASE_LC_EXT)
 //==============================================================================
 /**
  * \class FatFile
@@ -169,7 +191,7 @@ class FatFile {
   /** Check for contiguous file and return its raw sector range.
    *
    * \param[out] bgnSector the first sector address for the file.
-   * \param[out] endSector the last  sector address for the file.
+   * \param[out] endSector the last sector address for the file.
    *
    * Set the contiguous flag if the file is contiguous.
    * The parameters may be nullptr to only set the flag.
@@ -224,7 +246,7 @@ class FatFile {
    *
    * The calling instance must be an open directory file.
    *
-   * dirFile.exists("TOFIND.TXT") searches for "TOFIND.TXT" in  the directory
+   * dirFile.exists("TOFIND.TXT") searches for "TOFIND.TXT" in the directory
    * dirFile.
    *
    * \return True if the file exists.
@@ -323,19 +345,39 @@ class FatFile {
    */
   size_t getName(char* name, size_t size);
   /**
+   * Get a file's ASCII name followed by a zero.
+   *
+   * \param[out] name An array of characters for the file's name.
+   * \param[in] size The size of the array in characters.
+   * \return the name length.
+   */
+  size_t getName7(char* name, size_t size);
+  /**
+   * Get a file's UTF-8 name followed by a zero.
+   *
+   * \param[out] name An array of characters for the file's name.
+   * \param[in] size The size of the array in characters.
+   * \return the name length.
+   */
+  size_t getName8(char* name, size_t size);
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  size_t __attribute__((error("use getSFN(name, size)"))) getSFN(char* name);
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+  /**
    * Get a file's Short File Name followed by a zero byte.
    *
    * \param[out] name An array of characters for the file's name.
-   *                  The array must be at least 13 bytes long.
+   *                  The array should be at least 13 bytes long.
+   * \param[in] size size of name array.
    * \return true for success or false for failure.
    */
-  size_t getSFN(char* name);
+  size_t getSFN(char* name, size_t size);
   /** \return value of writeError */
   bool getWriteError() const {
     return isOpen() ? m_error & WRITE_ERROR : true;
   }
   /**
-   * Check for BlockDevice busy.
+   * Check for device busy.
    *
    * \return true if busy else false.
    */
@@ -370,28 +412,6 @@ class FatFile {
   bool isSystem() const {return m_attributes & FILE_ATTR_SYSTEM;}
   /** \return True file is writable. */
   bool isWritable() const {return m_flags & FILE_FLAG_WRITE;}
-  /** Check for a legal 8.3 character.
-   * \param[in] c Character to be checked.
-   * \return true for a legal 8.3 character.
-   */
-  static bool legal83Char(uint8_t c) {
-    if (c == '"' || c == '|') {
-      return false;
-    }
-    // *+,./
-    if (0X2A <= c && c <= 0X2F && c != 0X2D) {
-      return false;
-    }
-    // :;<=>?
-    if (0X3A <= c && c <= 0X3F) {
-      return false;
-    }
-    // [\]
-    if (0X5B <= c && c <= 0X5D) {
-      return false;
-    }
-    return 0X20 < c && c < 0X7F;
-  }
   /** List directory contents.
    *
    * \param[in] pr Print stream for list.
@@ -422,14 +442,6 @@ class FatFile {
    * \return true for success or false for failure.
    */
   bool mkdir(FatFile* dir, const char* path, bool pFlag = true);
-  /** No longer implemented due to Long File Names.
-   *
-   * Use getName(char* name, size_t size).
-   * \return a pointer to replacement suggestion.
-   */
-  const char* name() const {
-    return "use getName()";
-  }
   /** Open a file in the volume root directory.
    *
    * \param[in] vol Volume where the file is located.
@@ -512,6 +524,16 @@ class FatFile {
    * \return true for success or false for failure.
    */
   bool open(const char* path, oflag_t oflag = O_RDONLY);
+  /** Open existing file wih Short 8.3 names.
+   * \param[in] path with short 8.3 names.
+   *
+   * the purpose of this function is to save flash on Uno
+   * and other small boards.
+   *
+   * Directories will be opened O_RDONLY, files O_RDWR.
+   * \return true for success or false for failure.
+   */
+  bool openExistingSFN(const char* path);
   /** Open the next file or subdirectory in a directory.
    *
    * \param[in] dirFile An open FatFile instance for the directory
@@ -530,6 +552,7 @@ class FatFile {
    * \return true for success or false for failure.
    */
   bool openRoot(FatVolume* vol);
+
   /** Return the next available byte without consuming it.
    *
    * \return The byte if no error and not at eof else -1;
@@ -661,10 +684,23 @@ class FatFile {
    *
    * \param[in] pr Print stream for output.
    *
-   * \return true for success or false for failure.
+   * \return length for success or zero for failure.
    */
   size_t printName(print_t* pr);
-
+  /** Print a file's ASCII name
+   *
+   * \param[in] pr Print stream for output.
+   *
+   * \return true for success or false for failure.
+   */
+  size_t printName7(print_t* pr);
+  /** Print a file's UTF-8 name
+   *
+   * \param[in] pr Print stream for output.
+   *
+   * \return true for success or false for failure.
+   */
+  size_t printName8(print_t* pr);
   /** Print a file's Short File Name.
    *
    * \param[in] pr Print stream for output.
@@ -885,10 +921,7 @@ class FatFile {
    * \param[in] count Number of bytes to write.
    *
    * \return For success write() returns the number of bytes written, always
-   * \a count.  If an error occurs, write() returns -1.  Possible errors
-   * include write() is called before a file has been opened, write is called
-   * for a read-only file, device is full, a corrupt file system or an I/O
-   * error.
+   * \a count.  If an error occurs, write() returns zero and writeError is set.
    *
    */
   size_t write(const void* buf, size_t count);
@@ -911,7 +944,7 @@ class FatFile {
   }
   /** Print a file's name.
    *
-   * \return true for success or false for failure.
+   * \return length for success or zero for failure.
    */
   size_t printName() {
     return FatFile::printName(&Serial);
@@ -949,15 +982,32 @@ class FatFile {
                        FAT_ATTRIB_SYSTEM | FAT_ATTRIB_DIRECTORY;
 
   // private functions
+
   bool addCluster();
   bool addDirCluster();
+  DirFat_t* cacheDir(uint16_t index) {
+    return seekSet(32UL*index) ? readDirCache() : nullptr;
+  }
   DirFat_t* cacheDirEntry(uint8_t action);
-  static uint8_t lfnChecksum(uint8_t* name);
-  bool lfnUniqueSfn(fname_t* fname);
+  bool cmpName(uint16_t index, FatLfn_t* fname, uint8_t lfnOrd);
+  bool createLFN(uint16_t index, FatLfn_t* fname, uint8_t lfnOrd);
+  uint16_t getLfnChar(DirLfn_t* ldir, uint8_t i);
+  uint8_t lfnChecksum(uint8_t* name) {
+    uint8_t sum = 0;
+    for (uint8_t i = 0; i < 11; i++) {
+        sum = (((sum & 1) << 7) | (sum >> 1)) + name[i];
+    }
+    return sum;
+  }
+  static bool makeSFN(FatLfn_t* fname);
+  bool makeUniqueSfn(FatLfn_t* fname);
   bool openCluster(FatFile* file);
-  static bool parsePathName(const char* str, fname_t* fname, const char** ptr);
-  bool mkdir(FatFile* parent, fname_t* fname);
-  bool open(FatFile* dirFile, fname_t* fname, oflag_t oflag);
+  bool parsePathName(const char* str, FatLfn_t* fname, const char** ptr);
+  bool parsePathName(const char* str, FatSfn_t* fname, const char** ptr);
+  bool mkdir(FatFile* parent, FatName_t* fname);
+  bool open(FatFile* dirFile, FatLfn_t* fname, oflag_t oflag);
+  bool open(FatFile* dirFile, FatSfn_t* fname, oflag_t oflag);
+  bool openSFN(FatSfn_t* fname);
   bool openCachedEntry(FatFile* dirFile, uint16_t cacheIndex, oflag_t oflag,
                        uint8_t lfnOrd);
   DirFat_t* readDirCache(bool skipReadOk = false);

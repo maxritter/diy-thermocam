@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -92,10 +92,6 @@ class SdSpiDriverBareUno {
  public:
   /** Activate SPI hardware. */
   void activate() {}
-  /** deactivate SPI driver. */
-  void end() {}
-  /** Deactivate SPI hardware. */
-  void deactivate() {}
   /** Initialize the SPI bus.
    *
    * \param[in] spiConfig SD card configuration.
@@ -112,6 +108,10 @@ class SdSpiDriverBareUno {
     unoPinMode(UNO_SCK, OUTPUT);
     unoPinMode(UNO_MOSI, OUTPUT);
   }
+  /** Deactivate SPI hardware. */
+  void deactivate() {}
+  /** deactivate SPI driver. */
+  void end() {}
   /** Receive a byte.
    *
    * \return The byte.

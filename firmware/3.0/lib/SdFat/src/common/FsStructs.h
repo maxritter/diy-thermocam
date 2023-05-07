@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,7 +24,9 @@
  */
 #ifndef FsStructs_h
 #define FsStructs_h
+#include <stddef.h>
 #include <stdint.h>
+#include "SdFatConfig.h"
 //-----------------------------------------------------------------------------
 void lbaToMbrChs(uint8_t* chs, uint32_t capacityMB, uint32_t lba);
 //-----------------------------------------------------------------------------
@@ -42,7 +44,6 @@ inline uint64_t getLe64(const uint8_t* src) {
 inline void setLe16(uint8_t* dst, uint16_t src) {
   *reinterpret_cast<uint16_t*>(dst) = src;
 }
-
 inline void setLe32(uint8_t* dst, uint32_t src) {
   *reinterpret_cast<uint32_t*>(dst) = src;
 }
@@ -91,7 +92,29 @@ inline void setLe64(uint8_t* dst, uint64_t src) {
   dst[7] = src >> 56;
 }
 #endif  // USE_SIMPLE_LITTLE_ENDIAN
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Size of FAT and exFAT directory structures.
+const size_t FS_DIR_SIZE = 32;
+//------------------------------------------------------------------------------
+// Reserved characters for exFAT names and FAT LFN.
+inline bool lfnReservedChar(uint8_t c) {
+  return c < 0X20 || c == '"' || c == '*' || c == '/' || c == ':'
+    || c == '<' || c == '>' || c == '?' || c == '\\'|| c == '|';
+}
+//------------------------------------------------------------------------------
+// Reserved characters for FAT short 8.3 names.
+inline bool sfnReservedChar(uint8_t c) {
+  if (c == '"' || c == '|' || c == '[' || c == '\\' || c == ']') {
+    return true;
+  }
+  //  *+,./ or :;<=>?
+  if ((0X2A <= c && c <= 0X2F && c != 0X2D) || (0X3A <= c && c <= 0X3F)) {
+    return true;
+  }
+  // Reserved if not in range (0X20, 0X7F).
+  return !(0X20 < c && c < 0X7F);
+}
+//------------------------------------------------------------------------------
 const uint16_t MBR_SIGNATURE = 0xAA55;
 const uint16_t PBR_SIGNATURE = 0xAA55;
 
@@ -103,13 +126,13 @@ typedef struct mbrPartition {
   uint8_t relativeSectors[4];
   uint8_t totalSectors[4];
 } MbrPart_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct masterBootRecordSector {
   uint8_t   bootCode[446];
   MbrPart_t part[4];
   uint8_t   signature[2];
 } MbrSector_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct partitionBootSector {
   uint8_t  jmpInstruction[3];
   char     oemName[8];
@@ -117,12 +140,12 @@ typedef struct partitionBootSector {
   uint8_t  bootCode[390];
   uint8_t  signature[2];
 } pbs_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct {
   uint8_t type;
   uint8_t data[31];
 } DirGeneric_t;
-//=============================================================================
+//==============================================================================
 typedef struct {
   uint64_t position;
   uint32_t cluster;
@@ -257,7 +280,9 @@ static inline bool isSubdir(const DirFat_t* dir) {
  * begin with an entry having this mask.
  */
 const uint8_t FAT_ORDER_LAST_LONG_ENTRY = 0X40;
+/** Max long file name length */
 
+const uint8_t FAT_MAX_LFN_LENGTH = 255;
 typedef struct {
   uint8_t  order;
   uint8_t  unicode1[10];
@@ -381,4 +406,43 @@ typedef struct {
   uint8_t  mustBeZero;
   uint8_t  unicode[30];
 } DirName_t;
+
+//-----------------------------------------------------------------------------
+// WIP GPT support for now just assume 16 bytes...
+typedef struct {
+  uint8_t data[16];
+} Guid_t;
+
+typedef struct {
+  uint8_t  signature[8];
+  uint8_t  revision[4];
+  uint8_t  headerSize[4];
+  uint8_t  crc32[4];
+  uint8_t  reserved[4];
+  uint8_t  currentLBA[8];
+  uint8_t  backupLBA[8];
+  uint8_t  firstLBA[8];
+  uint8_t  lastLBA[8];
+  uint8_t  diskGUID[16];
+  uint8_t  startLBAArray[8];
+  uint8_t  numberPartitions[4];
+  uint8_t  sizePartitionEntry[4];
+  uint8_t  crc32PartitionEntries[4];
+  uint8_t  unused[420]; // should be 0;
+} GPTPartitionHeader_t;
+
+typedef struct {
+  uint8_t  partitionTypeGUID[16];
+  uint8_t  uniqueGUID[16];
+  uint8_t  firstLBA[8];
+  uint8_t  lastLBA[8];
+  uint8_t  attributeFlags[8];
+  uint16_t name[36];
+} GPTPartitionEntryItem_t;
+
+typedef struct {
+  GPTPartitionEntryItem_t items[4];
+} GPTPartitionEntrySector_t;
+
+
 #endif  // FsStructs_h

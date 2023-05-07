@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -22,11 +22,36 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#ifndef FsFormatter_h
+#define FsFormatter_h
+#include "FatLib/FatLib.h"
+#include "ExFatLib/ExFatLib.h"
 /**
- * \file
- * \brief configuration definitions
+ * \class FsFormatter
+ * \brief Format a exFAT/FAT volume.
  */
-#ifndef FatLibConfig_h
-#define FatLibConfig_h
-#include "SdFatConfig.h"
-#endif  // FatLibConfig_h
+class FsFormatter {
+ public:
+  /**
+   * Format a FAT volume.
+   *
+   * \param[in] dev Block device for volume.
+   * \param[in] secBuffer buffer for writing to volume.
+   * \param[in] pr Print device for progress output.
+   *
+   * \return true for success or false for failure.
+   */
+  bool format(FsBlockDevice* dev, uint8_t* secBuffer, print_t* pr = nullptr) {
+    uint32_t sectorCount = dev->sectorCount();
+    if (sectorCount == 0) {
+      return false;
+    }
+    return sectorCount <= 67108864 ?
+      m_fFmt.format(dev, secBuffer, pr) :
+      m_xFmt.format(dev, secBuffer, pr);
+  }
+ private:
+  FatFormatter m_fFmt;
+  ExFatFormatter m_xFmt;
+};
+#endif  // FsFormatter_h

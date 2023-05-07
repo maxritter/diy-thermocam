@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -36,14 +36,18 @@ inline void SdSpiArduinoDriver::activate() {
 inline void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
   if (spiConfig.spiPort) {
     m_spi = spiConfig.spiPort;
-#if defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
-  } else if (spiConfig.csPin == SDCARD_SS_PIN) {
-    m_spi = &SDCARD_SPI;
-#endif  // defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
+#if defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
+  } else if (spiConfig.csPin == SDFAT_SDCARD_SS_PIN) {
+    m_spi = &SDFAT_SDCARD_SPI;
+#endif  // defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
   } else {
     m_spi = &SPI;
   }
   m_spi->begin();
+}
+//------------------------------------------------------------------------------
+inline void SdSpiArduinoDriver::end() {
+  m_spi->end();
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::deactivate() {
@@ -55,9 +59,14 @@ inline uint8_t SdSpiArduinoDriver::receive() {
 }
 //------------------------------------------------------------------------------
 inline uint8_t SdSpiArduinoDriver::receive(uint8_t* buf, size_t count) {
+#if USE_SPI_ARRAY_TRANSFER
+  memset(buf, 0XFF, count);
+  m_spi->transfer(buf, count);
+#else  // USE_SPI_ARRAY_TRANSFER
   for (size_t i = 0; i < count; i++) {
     buf[i] = m_spi->transfer(0XFF);
   }
+#endif  // USE_SPI_ARRAY_TRANSFER
   return 0;
 }
 //------------------------------------------------------------------------------
@@ -66,8 +75,16 @@ inline void SdSpiArduinoDriver::send(uint8_t data) {
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::send(const uint8_t* buf, size_t count) {
+#if USE_SPI_ARRAY_TRANSFER
+  if (count <= 512) {
+    uint8_t tmp[512];
+    memcpy(tmp, buf, count);
+    m_spi->transfer(tmp, count);
+  }
+#else  // USE_SPI_ARRAY_TRANSFER
   for (size_t i = 0; i < count; i++) {
     m_spi->transfer(buf[i]);
   }
+#endif  // USE_SPI_ARRAY_TRANSFER
 }
 #endif  // SdSpiLibDriver_h

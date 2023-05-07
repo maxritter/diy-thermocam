@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -22,7 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "FatFormatter.h"
+#include "FatLib.h"
 // Set nonzero to use calculated CHS in MBR.  Should not be required.
 #define USE_LBA_TO_CHS 1
 
@@ -45,7 +45,7 @@ const uint16_t FAT16_ROOT_SECTOR_COUNT =
 #define writeMsg(str) if (m_pr) m_pr->write(str)
 #endif  // PRINT_FORMAT_PROGRESS
 //------------------------------------------------------------------------------
-bool FatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
+bool FatFormatter::format(FsBlockDevice* dev, uint8_t* secBuf, print_t* pr) {
   bool rtn;
   m_dev = dev;
   m_secBuf = secBuf;
@@ -72,7 +72,7 @@ bool FatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
     // SDXC cards
     m_sectorsPerCluster = 128;
   }
-  rtn = m_sectorCount < 0X400000 ? makeFat16() :makeFat32();
+  rtn = m_sectorCount < 0X400000 ? makeFat16() : makeFat32();
   if (rtn) {
     writeMsg("Format Done\r\n");
   } else {
@@ -81,17 +81,31 @@ bool FatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
   return rtn;
 }
 //------------------------------------------------------------------------------
+struct initFatDirState {
+  uint8_t * buffer;
+  print_t * pr;
+  uint16_t count;
+  uint16_t dotcount;
+};
+static const uint8_t * initFatDirCallback(uint32_t sector, void *context) {
+  struct initFatDirState * state = (struct initFatDirState *)context;
+  if (state->pr && ++state->count >= state->dotcount) {
+    state->pr->write(".");
+    state->count = 0;
+  }
+  return state->buffer;
+}
 bool FatFormatter::initFatDir(uint8_t fatType, uint32_t sectorCount) {
   size_t n;
   memset(m_secBuf, 0, BYTES_PER_SECTOR);
   writeMsg("Writing FAT ");
-  for (uint32_t i = 1; i < sectorCount; i++) {
-    if (!m_dev->writeSector(m_fatStart + i, m_secBuf)) {
-       return false;
-    }
-    if ((i%(sectorCount/32)) == 0) {
-      writeMsg(".");
-    }
+  struct initFatDirState state;
+  state.buffer = m_secBuf;
+  state.pr = m_pr;
+  state.count = 0;
+  state.dotcount = sectorCount/32;
+  if (!m_dev->writeSectorsCallback(m_fatStart + 1, sectorCount - 1, initFatDirCallback, &state)) {
+     return false;
   }
   writeMsg("\r\n");
   // Allocate reserved clusters and root for FAT32.

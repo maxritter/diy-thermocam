@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,8 +24,7 @@
  */
 #define DBG_FILE "ExFatPartition.cpp"
 #include "../common/DebugMacros.h"
-#include "ExFatVolume.h"
-#include "../common/FsStructs.h"
+#include "ExFatLib.h"
 //------------------------------------------------------------------------------
 // return 0 if error, 1 if no space, else start cluster.
 uint32_t ExFatPartition::bitmapFind(uint32_t cluster, uint32_t count) {
@@ -42,7 +41,7 @@ uint32_t ExFatPartition::bitmapFind(uint32_t cluster, uint32_t count) {
   while (true) {
     uint32_t sector = m_clusterHeapStartSector +
                      (endAlloc >> (m_bytesPerSectorShift + 3));
-    cache = bitmapCacheGet(sector, FsCache::CACHE_FOR_READ);
+    cache = bitmapCachePrepare(sector, FsCache::CACHE_FOR_READ);
     if (!cache) {
       return 0;
     }
@@ -102,7 +101,7 @@ bool ExFatPartition::bitmapModify(uint32_t cluster,
                    (start >> (m_bytesPerSectorShift + 3));
   i = (start >> 3) & m_sectorMask;
   while (true) {
-    cache = bitmapCacheGet(sector++, FsCache::CACHE_FOR_WRITE);
+    cache = bitmapCachePrepare(sector++, FsCache::CACHE_FOR_WRITE);
     if (!cache) {
       DBG_FAIL_MACRO;
       goto fail;
@@ -141,7 +140,7 @@ uint32_t ExFatPartition::chainSize(uint32_t cluster) {
 uint8_t* ExFatPartition::dirCache(DirPos_t* pos, uint8_t options) {
   uint32_t sector = clusterStartSector(pos->cluster);
   sector += (m_clusterMask & pos->position) >> m_bytesPerSectorShift;
-  uint8_t* cache = dataCacheGet(sector, options);
+  uint8_t* cache = dataCachePrepare(sector, options);
   return cache ? cache + (pos->position & m_sectorMask) : nullptr;
 }
 //------------------------------------------------------------------------------
@@ -164,7 +163,8 @@ int8_t ExFatPartition::dirSeek(DirPos_t* pos, uint32_t offset) {
   return 1;
 }
 //------------------------------------------------------------------------------
-uint8_t ExFatPartition::fatGet(uint32_t cluster, uint32_t* value) {
+// return -1 error, 0 EOC, 1 OK
+int8_t ExFatPartition::fatGet(uint32_t cluster, uint32_t* value) {
   uint8_t* cache;
   uint32_t next;
   uint32_t sector;
@@ -175,12 +175,11 @@ uint8_t ExFatPartition::fatGet(uint32_t cluster, uint32_t* value) {
   }
   sector = m_fatStartSector + (cluster >> (m_bytesPerSectorShift - 2));
 
-  cache = dataCacheGet(sector, FsCache::CACHE_FOR_READ);
+  cache = dataCachePrepare(sector, FsCache::CACHE_FOR_READ);
   if (!cache) {
     return -1;
   }
   next = getLe32(cache + ((cluster << 2) & m_sectorMask));
-
   if (next == EXFAT_EOC) {
     return 0;
   }
@@ -196,7 +195,7 @@ bool ExFatPartition::fatPut(uint32_t cluster, uint32_t value) {
     goto fail;
   }
   sector = m_fatStartSector + (cluster >> (m_bytesPerSectorShift - 2));
-  cache = dataCacheGet(sector, FsCache::CACHE_FOR_WRITE);
+  cache = dataCachePrepare(sector, FsCache::CACHE_FOR_WRITE);
   if (!cache) {
     DBG_FAIL_MACRO;
     goto fail;
@@ -222,7 +221,7 @@ bool ExFatPartition::freeChain(uint32_t cluster) {
       DBG_FAIL_MACRO;
       goto fail;
     }
-    if ((cluster + 1) != next || status == 0) {
+    if (status == 0 || (cluster + 1) != next) {
       if (!bitmapModify(start, cluster - start + 1, 0)) {
         DBG_FAIL_MACRO;
         goto fail;
@@ -245,7 +244,7 @@ uint32_t ExFatPartition::freeClusterCount() {
   uint8_t* cache;
 
   while (true) {
-    cache = dataCacheGet(sector++, FsCache::CACHE_FOR_READ);
+    cache = dataCachePrepare(sector++, FsCache::CACHE_FOR_READ);
     if (!cache) {
       return 0;
     }
@@ -267,7 +266,7 @@ uint32_t ExFatPartition::freeClusterCount() {
   }
 }
 //------------------------------------------------------------------------------
-bool ExFatPartition::init(BlockDevice* dev, uint8_t part) {
+bool ExFatPartition::init(FsBlockDevice* dev, uint8_t part) {
   uint32_t volStart = 0;
   uint8_t* cache;
   pbs_t* pbs;
@@ -278,7 +277,7 @@ bool ExFatPartition::init(BlockDevice* dev, uint8_t part) {
   m_fatType = 0;
   m_blockDev = dev;
   cacheInit(m_blockDev);
-  cache = dataCacheGet(0, FsCache::CACHE_FOR_READ);
+  cache = dataCachePrepare(0, FsCache::CACHE_FOR_READ);
   if (part > 4 || !cache) {
     DBG_FAIL_MACRO;
     goto fail;
@@ -291,11 +290,53 @@ bool ExFatPartition::init(BlockDevice* dev, uint8_t part) {
       goto fail;
     }
     volStart = getLe32(mp->relativeSectors);
-    cache = dataCacheGet(volStart, FsCache::CACHE_FOR_READ);
+    cache = dataCachePrepare(volStart, FsCache::CACHE_FOR_READ);
     if (!cache) {
       DBG_FAIL_MACRO;
       goto fail;
     }
+  }
+  pbs = reinterpret_cast<pbs_t*>(cache);
+  if (strncmp(pbs->oemName, "EXFAT", 5)) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+  bpb = reinterpret_cast<BpbExFat_t*>(pbs->bpb);
+  if (bpb->bytesPerSectorShift != m_bytesPerSectorShift) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+  m_fatStartSector = volStart + getLe32(bpb->fatOffset);
+  m_fatLength = getLe32(bpb->fatLength);
+  m_clusterHeapStartSector = volStart + getLe32(bpb->clusterHeapOffset);
+  m_clusterCount = getLe32(bpb->clusterCount);
+  m_rootDirectoryCluster = getLe32(bpb->rootDirectoryCluster);
+  m_sectorsPerClusterShift = bpb->sectorsPerClusterShift;
+  m_bytesPerCluster = 1UL << (m_bytesPerSectorShift + m_sectorsPerClusterShift);
+  m_clusterMask = m_bytesPerCluster - 1;
+  // Set m_bitmapStart to first free cluster.
+  m_bitmapStart = 0;
+  bitmapFind(0, 1);
+  m_fatType = FAT_TYPE_EXFAT;
+  return true;
+
+ fail:
+  return false;
+}
+//------------------------------------------------------------------------------
+bool ExFatPartition::init(FsBlockDevice* dev, uint32_t firstSector, uint32_t numSectors) {
+  uint32_t volStart = firstSector;
+  uint8_t* cache;
+  pbs_t* pbs;
+  BpbExFat_t* bpb;
+
+  m_fatType = 0;
+  m_blockDev = dev;
+  cacheInit(m_blockDev);
+  cache = dataCachePrepare(volStart, FsCache::CACHE_FOR_READ);
+  if (!cache) {
+    DBG_FAIL_MACRO;
+    goto fail;
   }
   pbs = reinterpret_cast<pbs_t*>(cache);
   if (strncmp(pbs->oemName, "EXFAT", 5)) {

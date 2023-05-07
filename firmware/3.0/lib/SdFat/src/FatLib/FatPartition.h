@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -29,9 +29,8 @@
  * \brief FatPartition class
  */
 #include <stddef.h>
-#include "FatLibConfig.h"
 #include "../common/SysCall.h"
-#include "../common/BlockDevice.h"
+#include "../common/FsBlockDevice.h"
 #include "../common/FsCache.h"
 #include "../common/FsStructs.h"
 
@@ -44,20 +43,6 @@ const uint8_t FAT_TYPE_FAT16 = 16;
 /** Type for FAT12 partition */
 const uint8_t FAT_TYPE_FAT32 = 32;
 
-//------------------------------------------------------------------------------
-/**
- * \brief Cache type for a sector.
- */
-union cache_t {
-  /** Used to access cached file data sectors. */
-  uint8_t  data[512];
-  /** Used to access cached FAT16 entries. */
-  uint16_t fat16[256];
-  /** Used to access cached FAT32 entries. */
-  uint32_t fat32[128];
-  /** Used to access cached directory entries. */
-  DirFat_t dir[16];
-};
 //==============================================================================
 /**
  * \class FatPartition
@@ -85,6 +70,10 @@ class FatPartition {
   uint8_t bytesPerSectorShift() const {
     return m_bytesPerSectorShift;
   }
+  /** \return Number of directory entries per sector. */
+  uint16_t dirEntriesPerCluster() const {
+    return m_sectorsPerCluster*(m_bytesPerSector/FS_DIR_SIZE);
+  }
   /** \return Mask for sector offset. */
   uint16_t sectorMask() const {
     return m_sectorMask;
@@ -94,8 +83,7 @@ class FatPartition {
     return m_sectorsPerCluster;
   }
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  // Use sectorsPerCluster(). blocksPerCluster() will be removed in the future.
-  uint8_t blocksPerCluster() __attribute__ ((deprecated)) {return sectorsPerCluster();} //NOLINT
+  uint8_t __attribute__((error("use sectorsPerCluster()"))) blocksPerCluster();
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
   /** \return The number of sectors in one FAT. */
   uint32_t sectorsPerFat()  const {
@@ -119,9 +107,16 @@ class FatPartition {
   uint32_t dataStartSector() const {
     return m_dataStartSector;
   }
+  /** End access to volume
+   * \return pointer to sector size buffer for format.
+   */
+  uint8_t* end() {
+    m_fatType = 0;
+    return cacheClear();
+  }
   /** \return The number of File Allocation Tables. */
   uint8_t fatCount() const {
-    return 2;
+    return m_fatCount;
   }
   /** \return The logical sector number for the start of the first FAT. */
   uint32_t fatStartSector() const {
@@ -138,7 +133,7 @@ class FatPartition {
   int32_t freeClusterCount();
   /** Initialize a FAT partition.
    *
-   * \param[in] dev BlockDevice for this partition.
+   * \param[in] dev FsBlockDevice for this partition.
    * \param[in] part The partition to be used.  Legal values for \a part are
    * 1-4 to use the corresponding partition on a device formatted with
    * a MBR, Master Boot Record, or zero if the device is formatted as
@@ -146,7 +141,8 @@ class FatPartition {
    *
    * \return true for success or false for failure.
    */
-  bool init(BlockDevice* dev, uint8_t part = 1);
+  bool init(FsBlockDevice* dev, uint8_t part = 1);
+  bool init(FsBlockDevice* dev, uint32_t firstSector, uint32_t numSectors);
   /** \return The number of entries in the root directory for FAT16 volumes. */
   uint16_t rootDirEntryCount() const {
     return m_rootDirEntryCount;
@@ -170,16 +166,16 @@ class FatPartition {
     return fatGet(n, v);
   }
   /**
-   * Check for BlockDevice busy.
+   * Check for FsBlockDevice busy.
    *
    * \return true if busy else false.
    */
   bool isBusy() {return m_blockDev->isBusy();}
   //----------------------------------------------------------------------------
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  void dmpDirSector(print_t* pr, uint32_t sector);
+  bool dmpDirSector(print_t* pr, uint32_t sector);
   void dmpFat(print_t* pr, uint32_t start, uint32_t count);
-  void dmpRootDir(print_t* pr);
+  bool dmpRootDir(print_t* pr, uint32_t n = 0);
   void dmpSector(print_t* pr, uint32_t sector, uint8_t bits = 8);
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
   //----------------------------------------------------------------------------
@@ -188,14 +184,15 @@ class FatPartition {
   friend class FatFile;
   //----------------------------------------------------------------------------
   static const uint8_t  m_bytesPerSectorShift = 9;
-  static const uint16_t m_bytesPerSector = 512;
-  static const uint16_t m_sectorMask = 0x1FF;
+  static const uint16_t m_bytesPerSector = 1 << m_bytesPerSectorShift;
+  static const uint16_t m_sectorMask = m_bytesPerSector - 1;
   //----------------------------------------------------------------------------
-  BlockDevice* m_blockDev;            // sector device
+  FsBlockDevice* m_blockDev;            // sector device
   uint8_t  m_sectorsPerCluster;       // Cluster size in sectors.
   uint8_t  m_clusterSectorMask;       // Mask to extract sector of cluster.
   uint8_t  m_sectorsPerClusterShift;  // Cluster count to sector count shift.
   uint8_t  m_fatType = 0;             // Volume type (12, 16, OR 32).
+  uint8_t  m_fatCount = 2;            // How many fats mostly 2 will support 1
   uint16_t m_rootDirEntryCount;       // Number of entries in FAT16 root dir.
   uint32_t m_allocSearchStart;        // Start cluster for alloc search.
   uint32_t m_sectorsPerFat;           // FAT size in sectors
@@ -217,14 +214,8 @@ class FatPartition {
   bool cacheSafeWrite(uint32_t sector, const uint8_t* dst, size_t count) {
     return m_cache.cacheSafeWrite(sector, dst, count);
   }
-  bool readSector(uint32_t sector, uint8_t* dst) {
-    return m_blockDev->readSector(sector, dst);
-  }
   bool syncDevice() {
     return m_blockDev->syncDevice();
-  }
-  bool writeSector(uint32_t sector, const uint8_t* src) {
-    return m_blockDev->writeSector(sector, src);
   }
 #if MAINTAIN_FREE_CLUSTER_COUNT
   int32_t  m_freeClusterCount;     // Count of free clusters in volume.
@@ -246,26 +237,30 @@ class FatPartition {
 #endif  // MAINTAIN_FREE_CLUSTER_COUNT
 // sector caches
   FsCache m_cache;
+  bool cachePrepare(uint32_t sector, uint8_t option) {
+    return m_cache.prepare(sector, option);
+  }
+  FsCache* dataCache() {return &m_cache;}
 #if USE_SEPARATE_FAT_CACHE
   FsCache m_fatCache;
-  cache_t* cacheFetchFat(uint32_t sector, uint8_t options) {
-    options |= FsCache::CACHE_STATUS_MIRROR_FAT;
-    return reinterpret_cast<cache_t*>(m_fatCache.get(sector, options));
+  uint8_t* fatCachePrepare(uint32_t sector, uint8_t options) {
+    if (m_fatCount == 2) options |= FsCache::CACHE_STATUS_MIRROR_FAT;
+    return m_fatCache.prepare(sector, options);
   }
   bool cacheSync() {
     return m_cache.sync() && m_fatCache.sync() && syncDevice();
   }
 #else  // USE_SEPARATE_FAT_CACHE
-  cache_t* cacheFetchFat(uint32_t sector, uint8_t options) {
-    options |= FsCache::CACHE_STATUS_MIRROR_FAT;
-    return cacheFetchData(sector, options);
+  uint8_t* fatCachePrepare(uint32_t sector, uint8_t options) {
+    if (m_fatCount == 2) options |= FsCache::CACHE_STATUS_MIRROR_FAT;
+    return dataCachePrepare(sector, options);
   }
   bool cacheSync() {
     return m_cache.sync() && syncDevice();
   }
 #endif  // USE_SEPARATE_FAT_CACHE
-  cache_t* cacheFetchData(uint32_t sector, uint8_t options) {
-    return reinterpret_cast<cache_t*>(m_cache.get(sector, options));
+  uint8_t* dataCachePrepare(uint32_t sector, uint8_t options) {
+    return m_cache.prepare(sector, options);
   }
   void cacheInvalidate() {
     m_cache.invalidate();
@@ -273,8 +268,8 @@ class FatPartition {
   bool cacheSyncData() {
     return m_cache.sync();
   }
-  cache_t* cacheAddress() {
-    return reinterpret_cast<cache_t*>(m_cache.cacheBuffer());
+  uint8_t* cacheAddress() {
+    return m_cache.cacheBuffer();
   }
   uint32_t cacheSectorNumber() {
     return m_cache.sector();
@@ -300,5 +295,9 @@ class FatPartition {
   bool isEOC(uint32_t cluster) const {
     return cluster > m_lastCluster;
   }
+  // freeClusterCount static helper functions
+  static void freeClusterCount_cb_fat16(uint32_t sector, uint8_t *buf, void *context);
+  static void freeClusterCount_cb_fat32(uint32_t sector, uint8_t *buf, void *context);
 };
+
 #endif  // FatPartition

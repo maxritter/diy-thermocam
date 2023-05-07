@@ -23,6 +23,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include "PrintBasic.h"
+#if ENABLE_ARDUINO_FEATURES == 0
 #include <math.h>
 
 size_t PrintBasic::print(long n, uint8_t base) {
@@ -87,3 +88,4 @@ size_t PrintBasic::printDouble(double n, uint8_t prec) {
   }
   return rtn;
 }
+#endif //  ENABLE_ARDUINO_FEATURES == 0

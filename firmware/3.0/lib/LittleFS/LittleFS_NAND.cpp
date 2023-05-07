@@ -62,7 +62,7 @@
 
 
 
-#define SPICONFIG_NAND   SPISettings(55000000, MSBFIRST, SPI_MODE0)
+#define SPICONFIG_NAND   SPISettings(30000000, MSBFIRST, SPI_MODE0)
 
 
 PROGMEM static const struct chipinfo {
@@ -70,18 +70,20 @@ PROGMEM static const struct chipinfo {
 	uint8_t addrbits;	// number of address bits, 24 or 32
 	uint16_t progsize;	// page size for programming, in bytes
 	uint32_t erasesize;	// sector size for erasing, in bytes
+	uint8_t  erasecmd;	// command to use for sector erase
 	uint32_t chipsize;	// total number of bytes in the chip
 	uint32_t progtime;	// maximum microseconds to wait for page programming
 	uint32_t erasetime;	// maximum microseconds to wait for sector erase
+	const char pn[14];		//flash name
 } known_chips[] = {
 	//NAND
 	//{{0xEF, 0xAA, 0x21}, 24, 2048, 131072, 134217728,   2000, 15000},  //Winbond W25N01G
 	//Upper 24 blocks * 128KB/block will be used for bad block replacement area
 	//so reducing total chip size: 134217728 - 24*131072
-	{{0xEF, 0xAA, 0x21}, 24, 2048, 131072, 131596288,   2000, 15000},  //Winbond W25N01G
+    {{0xEF, 0xAA, 0x21}, 24, 2048, 131072, 0, 131596288, 2000, 15000, "W25N01GVZEIG"},  //Winbond W25N01G
 	//{{0xEF, 0xAA, 0x22}, 24, 2048, 131072, 134217728*2, 2000, 15000},  //Winbond W25N02G
-	{{0xEF, 0xAA, 0x22}, 24, 2048, 131072, 265289728, 2000, 15000},  //Winbond W25N02G
-	{{0xEF, 0xBB, 0x21}, 24, 2048, 131072, 265289728, 2000, 15000},  //Winbond W25M02
+	{{0xEF, 0xAA, 0x22}, 24, 2048, 131072, 0, 265289728, 2000, 15000, "W25N02KVZEIR"},  //Winbond W25N02G
+    {{0xEF, 0xBB, 0x21}, 24, 2048, 131072, 0, 265289728, 2000, 15000, "W25M02"},  //Winbond W25M02
 };
 
 volatile uint32_t currentPage     = UINT32_MAX;
@@ -774,6 +776,22 @@ bool LittleFS_SPINAND::lowLevelFormat(char progressChar, Print* pr)
 }
 
 
+const char * LittleFS_SPINAND::getMediaName(){
+  const uint8_t cmd_buf[5] = {0x9F, 0, 0, 0, 0};
+  uint8_t buf[5];
+  
+  SPI.beginTransaction(SPICONFIG_NAND);
+  digitalWrite(pin, LOW);
+  SPI.transfer(cmd_buf, buf, 5);
+  digitalWrite(pin, HIGH);
+  SPI.endTransaction();
+
+  const struct chipinfo *info = chip_lookup(buf+2);
+
+  return info->pn;
+}
+
+
 #if defined(__IMXRT1062__)
 
 #define LUT0(opcode, pads, operand) (FLEXSPI_LUT_INSTRUCTION((opcode), (pads), (operand)))
@@ -1353,7 +1371,7 @@ uint8_t LittleFS_QPINAND::readECC(uint32_t targetPage, uint8_t *buf, int size)
 	  case 3: // Uncorrectable ECC in multiple pages
 		//addError(address, eccCode);
 		//Serial.printf("ECC Error (addr, code): %x, %x\n", address, eccCode);
-		addBBLUT(LINEAR_TO_BLOCK(targetPage*eccSize));
+	  //addBBLUT(LINEAR_TO_BLOCK(targetPage*eccSize));
 		//deviceReset();
 		break;
 	}
@@ -1497,4 +1515,11 @@ bool LittleFS_QPINAND::lowLevelFormat(char progressChar)
 	return val;
 }
 
+const char * LittleFS_QPINAND::getMediaName(){
+  uint8_t buf[5] = {0, 0, 0, 0, 0};
+  flexspi2_ip_read(8, 0x00800000, buf, 4);
+  const struct chipinfo *info = chip_lookup(buf+1);
+
+  return info->pn;
+}
 #endif // __IMXRT1062__

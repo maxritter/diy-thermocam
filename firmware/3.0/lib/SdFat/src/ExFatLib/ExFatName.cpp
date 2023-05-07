@@ -22,131 +22,54 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#define DBG_FILE "ExFatFilePrint.cpp"
+#define DBG_FILE "ExFatName.cpp"
 #include "../common/DebugMacros.h"
-#include "ExFatLib.h"
+#include "../common/upcase.h"
 #include "../common/FsUtf.h"
+#include "ExFatLib.h"
 //------------------------------------------------------------------------------
-bool ExFatFile::ls(print_t* pr) {
-  ExFatFile file;
-  if (!isDir()) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  rewind();
-  while (file.openNext(this, O_RDONLY)) {
-    if (!file.isHidden()) {
-      file.printName(pr);
-      if (file.isDir()) {
-        pr->write('/');
-      }
-      pr->write('\r');
-      pr->write('\n');
+static char toUpper(char c) {
+  return 'a' <= c && c <= 'z' ? c - 'a' + 'A' : c;
+}
+//------------------------------------------------------------------------------
+inline uint16_t exFatHash(char c, uint16_t hash) {
+  uint8_t u = toUpper(c);
+  hash = ((hash << 15) | (hash >> 1)) + u;
+  hash = ((hash << 15) | (hash >> 1));
+  return hash;
+}
+//------------------------------------------------------------------------------
+inline uint16_t exFatHash(uint16_t u, uint16_t hash) {
+  uint16_t c = toUpcase(u);
+  hash = ((hash << 15) | (hash >> 1)) + (c & 0XFF);
+  hash = ((hash << 15) | (hash >> 1)) + (c >> 8);
+  return hash;
+}
+//------------------------------------------------------------------------------
+bool ExFatFile::cmpName(const DirName_t* dirName, ExName_t* fname) {
+  for (uint8_t i = 0; i < 15; i++) {
+    uint16_t u = getLe16(dirName->unicode + 2*i);
+    if (fname->atEnd()) {
+      return u == 0;
     }
-    file.close();
-  }
-  if (getError()) {
-    DBG_FAIL_MACRO;
-    goto fail;
+#if USE_UTF8_LONG_NAMES
+    uint16_t cp = fname->get16();
+    if (toUpcase(cp) != toUpcase(u)) {
+       return false;
+    }
+#else  // USE_UTF8_LONG_NAMES
+    char c = fname->getch();
+    if (u >= 0x7F || toUpper(c) != toUpper(u)) {
+      return false;
+    }
+#endif  // USE_UTF8_LONG_NAMES
   }
   return true;
-
- fail:
-  return false;
 }
 //------------------------------------------------------------------------------
-bool ExFatFile::ls(print_t* pr, uint8_t flags, uint8_t indent) {
-  ExFatFile file;
-  if (!isDir()) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  rewind();
-  while (file.openNext(this, O_RDONLY)) {
-    // indent for dir level
-    if (!file.isHidden() || (flags & LS_A)) {
-      for (uint8_t i = 0; i < indent; i++) {
-        pr->write(' ');
-      }
-      if (flags & LS_DATE) {
-        file.printModifyDateTime(pr);
-        pr->write(' ');
-      }
-      if (flags & LS_SIZE) {
-        file.printFileSize(pr);
-        pr->write(' ');
-      }
-      file.printName(pr);
-      if (file.isDir()) {
-        pr->write('/');
-      }
-      pr->write('\r');
-      pr->write('\n');
-      if ((flags & LS_R) && file.isDir()) {
-        file.ls(pr, flags, indent + 2);
-      }
-    }
-    file.close();
-  }
-  if (getError()) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  return true;
-
- fail:
-  return false;
-}
-//------------------------------------------------------------------------------
-size_t ExFatFile::printAccessDateTime(print_t* pr) {
-  uint16_t date;
-  uint16_t time;
-  if (getAccessDateTime(&date, &time)) {
-    return fsPrintDateTime(pr, date, time);
-  }
-  return 0;
-}
-//------------------------------------------------------------------------------
-size_t ExFatFile::printCreateDateTime(print_t* pr) {
-  uint16_t date;
-  uint16_t time;
-  if (getCreateDateTime(&date, &time)) {
-    return fsPrintDateTime(pr, date, time);
-  }
-  return 0;
-}
-//------------------------------------------------------------------------------
-size_t ExFatFile::printFileSize(print_t* pr) {
-  uint64_t n = m_validLength;
-  char buf[21];
-  char *str = &buf[sizeof(buf) - 1];
-  char *bgn = str - 12;
-  *str = '\0';
-  do {
-    uint64_t m = n;
-    n /= 10;
-    *--str = m - 10*n + '0';
-  } while (n);
-  while (str > bgn) {
-    *--str = ' ';
-  }
-  return pr->write(str);
-}
-//------------------------------------------------------------------------------
-size_t ExFatFile::printModifyDateTime(print_t* pr) {
-  uint16_t date;
-  uint16_t time;
-  if (getModifyDateTime(&date, &time)) {
-    return fsPrintDateTime(pr, date, time);
-  }
-  return 0;
-}
-//------------------------------------------------------------------------------
-size_t ExFatFile::printName7(print_t* pr) {
+size_t ExFatFile::getName7(char* name, size_t count) {
   DirName_t* dn;
   size_t n = 0;
-  uint8_t in;
-  uint8_t buf[15];
   if (!isOpen()) {
       DBG_FAIL_MACRO;
       goto fail;
@@ -158,29 +81,34 @@ size_t ExFatFile::printName7(print_t* pr) {
       DBG_FAIL_MACRO;
       goto fail;
     }
-    for (in = 0; in < 15; in++) {
+    for (uint8_t in = 0; in < 15; in++) {
       uint16_t c = getLe16(dn->unicode + 2*in);
-      if (!c) {
-        break;
+      if (c == 0) {
+        goto done;
       }
-      buf[in] = c < 0X7F ? c : '?';
-      n++;
+      if ((n + 1) >= count) {
+        DBG_FAIL_MACRO;
+        goto fail;
+      }
+      name[n++] = c < 0X7F ? c : '?';
     }
-    pr->write(buf, in);
   }
+ done:
+  name[n] = 0;
   return n;
 
  fail:
+  *name = 0;
   return 0;
 }
 //------------------------------------------------------------------------------
-size_t ExFatFile::printName8(print_t *pr) {
+size_t ExFatFile::getName8(char* name, size_t count) {
+  char* end = name + count;
+  char* str = name;
+  char* ptr;
   DirName_t* dn;
   uint16_t hs = 0;
   uint32_t cp;
-  size_t n = 0;
-  uint8_t in;
-  char buf[5];
   if (!isOpen()) {
       DBG_FAIL_MACRO;
       goto fail;
@@ -192,7 +120,7 @@ size_t ExFatFile::printName8(print_t *pr) {
       DBG_FAIL_MACRO;
       goto fail;
     }
-    for (in = 0; in < 15; in++) {
+    for (uint8_t in = 0; in < 15; in++) {
       uint16_t c = getLe16(dn->unicode + 2*in);
       if (hs) {
         if (!FsUtf::isLowSurrogate(c)) {
@@ -203,7 +131,7 @@ size_t ExFatFile::printName8(print_t *pr) {
         hs = 0;
       } else if (!FsUtf::isSurrogate(c)) {
         if (c == 0) {
-          break;
+          goto done;
         }
         cp = c;
       } else if (FsUtf::isHighSurrogate(c)) {
@@ -213,16 +141,54 @@ size_t ExFatFile::printName8(print_t *pr) {
         DBG_FAIL_MACRO;
         goto fail;
       }
-      char* str = FsUtf::cpToMb(cp, buf, buf + sizeof(buf));
-      if (!str) {
+      // Save space for zero byte.
+      ptr = FsUtf::cpToMb(cp, str, end - 1);
+      if (!ptr) {
         DBG_FAIL_MACRO;
         goto fail;
       }
-      n += pr->write(buf, str - buf);
+      str = ptr;
     }
   }
-  return n;
+ done:
+  *str = '\0';
+  return str - name;
 
  fail:
+  *name = 0;
   return 0;
 }
+//------------------------------------------------------------------------------
+bool ExFatFile::hashName(ExName_t* fname) {
+  uint16_t hash = 0;
+  fname->reset();
+#if USE_UTF8_LONG_NAMES
+  fname->nameLength = 0;
+  while (!fname->atEnd()) {
+    uint16_t u = fname->get16();
+    if (u == 0XFFFF) {
+    DBG_FAIL_MACRO;
+      goto fail;
+    }
+    hash = exFatHash(u, hash);
+    fname->nameLength++;
+  }
+#else  // USE_UTF8_LONG_NAMES
+  while (!fname->atEnd()) {
+    // Convert to byte for smaller exFatHash.
+    char c = fname->getch();
+    hash = exFatHash(c, hash);
+  }
+  fname->nameLength = fname->end - fname->begin;
+#endif  // USE_UTF8_LONG_NAMES
+  fname->nameHash = hash;
+  if (!fname->nameLength || fname->nameLength > EXFAT_MAX_NAME_LENGTH) {
+    DBG_FAIL_MACRO;
+    goto fail;
+  }
+  return true;
+
+ fail:
+  return false;
+}
+

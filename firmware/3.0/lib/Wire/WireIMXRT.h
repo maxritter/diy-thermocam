@@ -32,7 +32,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#define BUFFER_LENGTH 32
+#define BUFFER_LENGTH 136
 //#define WIRE_HAS_END 1
 #define WIRE_IMPLEMENT_WIRE
 #define WIRE_IMPLEMENT_WIRE1
@@ -56,7 +56,8 @@ public:
 		uint32_t clock_gate_mask;
 		pin_info_t sda_pins[cnt_sda_pins];
 		pin_info_t scl_pins[cnt_scl_pins];
-		IRQ_NUMBER_t irq;
+		IRQ_NUMBER_t irq_number;
+		void (*irq_function)(void);
 	} I2C_Hardware_t;
 	static const I2C_Hardware_t i2c1_hardware;
 	static const I2C_Hardware_t i2c2_hardware;
@@ -88,6 +89,9 @@ public:
 		return endTransmission(1);
 	}
 	uint8_t requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop);
+	uint8_t requestFrom(uint8_t address, uint8_t quantity, bool sendStop) {
+		return requestFrom(address, quantity, (uint8_t)(sendStop ? 1 : 0));
+	}
 	uint8_t requestFrom(uint8_t address, uint8_t quantity) {
 		return requestFrom(address, quantity, (uint8_t)1);
 	}
@@ -152,8 +156,10 @@ public:
 	}
 	using Print::write;
 private:
-	//void isr(void);
+	void isr(void);
 	//bool wait_idle(void);
+	void configSDApin(uint8_t index);
+	void configSCLpin(uint8_t index);
 	bool wait_idle();
 	bool force_clock();
 	IMXRT_LPI2C_t * const port;
@@ -177,10 +183,10 @@ private:
 	void (*user_onRequest)(void) = nullptr;
 	void (*user_onReceive)(int) = nullptr;
 	void sda_rising_isr(void);
-	friend void i2c0_isr(void);
-	friend void i2c1_isr(void);
-	friend void i2c2_isr(void);
-	friend void i2c3_isr(void);
+	friend void lpi2c1_isr(void);
+	friend void lpi2c2_isr(void);
+	friend void lpi2c3_isr(void);
+	friend void lpi2c4_isr(void);
 	friend void sda_rising_isr0(void);
 	friend void sda_rising_isr1(void);
 };

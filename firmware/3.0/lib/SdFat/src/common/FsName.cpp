@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -22,12 +22,33 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifndef BlockDevice_h
-#define  BlockDevice_h
-#include "SdCard/SdCard.h"
-#if HAS_SDIO_CLASS || USE_BLOCK_DEVICE_INTERFACE
-typedef BlockDeviceInterface BlockDevice;
-#else
-typedef SdCard BlockDevice;
-#endif
-#endif  // BlockDevice_h
+#include "FsName.h"
+#include "FsUtf.h"
+#if USE_UTF8_LONG_NAMES
+uint16_t FsName::get16() {
+  uint16_t rtn;
+  if (ls) {
+    rtn = ls;
+    ls = 0;
+  } else if (next >= end) {
+    rtn = 0;
+  } else {
+    uint32_t cp;
+    const char* ptr = FsUtf::mbToCp(next, end, &cp);
+    if (!ptr) {
+      goto fail;
+    }
+    next = ptr;
+    if (cp <= 0XFFFF) {
+      rtn = cp;
+    } else {
+      ls = FsUtf::lowSurrogate(cp);
+      rtn = FsUtf::highSurrogate(cp);
+    }
+  }
+  return rtn;
+
+ fail:
+  return 0XFFFF;
+}
+#endif  // USE_UTF8_LONG_NAMES

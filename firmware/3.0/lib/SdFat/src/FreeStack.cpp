@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -39,7 +39,7 @@ inline char* stackBegin() {
 }
 //------------------------------------------------------------------------------
 inline char* stackPointer() {
-#if  defined(__AVR__)
+#if defined(__AVR__)
   return reinterpret_cast<char*>(SP);
 #elif defined(__arm__)
   register uint32_t sp asm("sp");

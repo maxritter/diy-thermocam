@@ -75,11 +75,6 @@ void TwoWire::begin(uint8_t address)
   begin();
 }
 
-void TwoWire::begin(int address)
-{
-  begin((uint8_t)address);
-}
-
 void TwoWire::end()
 {
   TWCR &= ~(_BV(TWEN) | _BV(TWIE) | _BV(TWEA));
@@ -115,21 +110,6 @@ uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop
   return read;
 }
 
-uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity)
-{
-  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
-}
-
-uint8_t TwoWire::requestFrom(int address, int quantity)
-{
-  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
-}
-
-uint8_t TwoWire::requestFrom(int address, int quantity, int sendStop)
-{
-  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)sendStop);
-}
-
 uint8_t TwoWire::requestFrom(uint8_t addr, uint8_t qty, uint32_t iaddr, uint8_t n, uint8_t stop)
 {
 	if (n > 0) {
@@ -158,11 +138,6 @@ void TwoWire::beginTransmission(uint8_t address)
   txBufferLength = 0;
 }
 
-void TwoWire::beginTransmission(int address)
-{
-  beginTransmission((uint8_t)address);
-}
-
 //
 //	Originally, 'endTransmission' was an f(void) function.
 //	It has been modified to take one parameter indicating
@@ -186,14 +161,6 @@ uint8_t TwoWire::endTransmission(uint8_t sendStop)
   // indicate that we are done transmitting
   transmitting = 0;
   return ret;
-}
-
-//	This provides backwards compatibility with the original
-//	definition, and expected behaviour, of endTransmission
-//
-uint8_t TwoWire::endTransmission(void)
-{
-  return endTransmission(true);
 }
 
 // must be called in:

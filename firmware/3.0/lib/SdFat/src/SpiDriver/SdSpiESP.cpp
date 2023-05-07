@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -34,10 +34,10 @@ void SdSpiArduinoDriver::activate() {
 void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
   if (spiConfig.spiPort) {
     m_spi = spiConfig.spiPort;
-#if defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
-  } else if (spiConfig.csPin == SDCARD_SS_PIN) {
-    m_spi = &SDCARD_SPI;
-#endif  // defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
+#if defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
+  } else if (spiConfig.csPin == SDFAT_SDCARD_SS_PIN) {
+    m_spi = &SDFAT_SDCARD_SPI;
+#endif  // defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
   } else {
     m_spi = &SPI;
   }
@@ -46,6 +46,10 @@ void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::deactivate() {
   m_spi->endTransaction();
+}
+//------------------------------------------------------------------------------
+void SdSpiArduinoDriver::end() {
+  m_spi->end();
 }
 //------------------------------------------------------------------------------
 uint8_t SdSpiArduinoDriver::receive() {

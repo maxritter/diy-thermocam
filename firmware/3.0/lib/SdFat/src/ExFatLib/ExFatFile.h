@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -30,58 +30,27 @@
  */
 #include <limits.h>
 #include <string.h>
-#include "ExFatConfig.h"
 #include "../common/FsDateTime.h"
-#include "../common/FsStructs.h"
 #include "../common/FsApiConstants.h"
 #include "../common/FmtNumber.h"
-#include "ExFatTypes.h"
+#include "../common/FsName.h"
 #include "ExFatPartition.h"
 
 class ExFatVolume;
-
 //------------------------------------------------------------------------------
 /** Expression for path name separator. */
 #define isDirSeparator(c) ((c) == '/')
 //------------------------------------------------------------------------------
-/** test for legal character.
- *
- * \param[in] c character to be tested.
- *
- * \return true for legal character else false.
- */
-inline bool lfnLegalChar(ExChar_t c) {
-  if (c == '/' || c == '\\' || c == '"' || c == '*' ||
-      c == ':' || c == '<' || c == '>' || c == '?' || c == '|') {
-    return false;
-  }
-#if USE_EXFAT_UNICODE_NAMES
-  return 0X1F < c;
-#else  // USE_EXFAT_UNICODE_NAMES
-  return 0X1F < c && c < 0X7F;
-#endif  // USE_EXFAT_UNICODE_NAMES
-}
-//------------------------------------------------------------------------------
 /**
- * \struct ExName_t
+ * \class ExName_t
  * \brief Internal type for file name - do not use in user apps.
  */
-struct ExName_t {
-  /** length of Long File Name */
-  size_t len;
-  /** Long File Name start. */
-  const ExChar_t* lfn;
-};
-//------------------------------------------------------------------------------
-/**
- * \struct ExFatPos_t
- * \brief Internal type for file position - do not use in user apps.
- */
-struct ExFatPos_t {
-  /** stream position */
-  uint64_t position;
-  /** cluster for position */
-  uint32_t cluster;
+class ExName_t : public FsName {
+ public:
+  /** Length of UTF-16 name */
+  size_t nameLength;
+  /** Hash for UTF-16 name */
+  uint16_t nameHash;
 };
 //------------------------------------------------------------------------------
 /**
@@ -153,7 +122,7 @@ class ExFatFile {
   /** Check for contiguous file and return its raw sector range.
    *
    * \param[out] bgnSector the first sector address for the file.
-   * \param[out] endSector the last  sector address for the file.
+   * \param[out] endSector the last sector address for the file.
    *
    * Parameters may be nullptr.
    *
@@ -166,22 +135,22 @@ class ExFatFile {
   /** \return Total data length for file. */
   uint64_t dataLength() const {return m_dataLength;}
   /** \return Directory entry index. */
-  uint32_t dirIndex() const {return m_dirPos.position/32;}
+  uint32_t dirIndex() const {return m_dirPos.position/FS_DIR_SIZE;}
   /** Test for the existence of a file in a directory
    *
    * \param[in] path Path of the file to be tested for.
    *
    * The calling instance must be an open directory file.
    *
-   * dirFile.exists("TOFIND.TXT") searches for "TOFIND.TXT" in  the directory
+   * dirFile.exists("TOFIND.TXT") searches for "TOFIND.TXT" in the directory
    * dirFile.
    *
    * \return true if the file exists else false.
    */
-  bool exists(const ExChar_t* path) {
-    ExFatFile file;
-    return file.open(this, path, O_RDONLY);
-  }
+    bool exists(const char* path) {
+      ExFatFile file;
+      return file.open(this, path, O_RDONLY);
+    }
   /** get position for streams
    * \param[out] pos struct to receive position
    */
@@ -247,19 +216,41 @@ class ExFatFile {
    */
   bool getModifyDateTime(uint16_t* pdate, uint16_t* ptime);
   /**
-   * Get a file's name followed by a zero byte.
+   * Get a file's name followed by a zero.
    *
    * \param[out] name An array of characters for the file's name.
    * \param[in] size The size of the array in characters.
    * \return the name length.
    */
-  size_t getName(ExChar_t* name, size_t size);
+  size_t getName(char* name, size_t size) {
+#if USE_UTF8_LONG_NAMES
+    return getName8(name, size);
+#else  // USE_UTF8_LONG_NAMES
+    return getName7(name, size);
+#endif  // USE_UTF8_LONG_NAMES
+  }
+  /**
+   * Get a file's ASCII name followed by a zero.
+   *
+   * \param[out] name An array of characters for the file's name.
+   * \param[in] size The size of the array in characters.
+   * \return the name length.
+   */
+  size_t getName7(char* name, size_t size);
+  /**
+   * Get a file's UTF-8 name followed by a zero.
+   *
+   * \param[out] name An array of characters for the file's name.
+   * \param[in] size The size of the array in characters.
+   * \return the name length.
+   */
+  size_t getName8(char* name, size_t size);
   /** \return value of writeError */
   bool getWriteError() const {
     return isOpen() ? m_error & WRITE_ERROR : true;
   }
   /**
-   * Check for BlockDevice busy.
+   * Check for FsBlockDevice busy.
    *
    * \return true if busy else false.
    */
@@ -319,7 +310,7 @@ class ExFatFile {
    *
    * \return true for success or false for failure.
    */
-  bool mkdir(ExFatFile* parent, const ExChar_t* path, bool pFlag = true);
+  bool mkdir(ExFatFile* parent, const char* path, bool pFlag = true);
   /** Open a file or directory by name.
    *
    * \param[in] dirFile An open directory containing the file to be opened.
@@ -364,7 +355,7 @@ class ExFatFile {
    *
    * \return true for success or false for failure.
    */
-  bool open(ExFatFile* dirFile, const ExChar_t* path, oflag_t oflag);
+  bool open(ExFatFile* dirFile, const char* path, oflag_t oflag);
   /** Open a file in the volume working directory.
    *
    * \param[in] vol Volume where the file is located.
@@ -376,7 +367,7 @@ class ExFatFile {
    *
    * \return true for success or false for failure.
    */
-  bool open(ExFatVolume* vol, const ExChar_t* path, int oflag);
+  bool open(ExFatVolume* vol, const char* path, oflag_t oflag);
   /** Open a file by index.
    *
    * \param[in] dirFile An open ExFatFile instance for the directory.
@@ -385,7 +376,7 @@ class ExFatFile {
    * opened.  The value for \a index is (directory file position)/32.
    *
    * \param[in] oflag bitwise-inclusive OR of open flags.
-   *            See see ExFatFile::open(ExFatFile*, const ExChar_t*, uint8_t).
+   *            See see ExFatFile::open(ExFatFile*, const char*, uint8_t).
    *
    * See open() by path for definition of flags.
    * \return true for success or false for failure.
@@ -400,7 +391,7 @@ class ExFatFile {
    *
    * \return true for success or false for failure.
    */
-  bool open(const ExChar_t* path, int oflag = O_RDONLY);
+  bool open(const char* path, oflag_t oflag = O_RDONLY);
   /** Open the next file or subdirectory in a directory.
    *
    * \param[in] dirFile An open instance for the directory
@@ -523,9 +514,29 @@ class ExFatFile {
    *
    * \param[in] pr Print stream for output.
    *
+   * \return length for success or zero for failure.
+   */
+  size_t printName(print_t* pr) {
+#if USE_UTF8_LONG_NAMES
+    return printName8(pr);
+#else  // USE_UTF8_LONG_NAMES
+    return printName7(pr);
+#endif  // USE_UTF8_LONG_NAMES
+  }
+  /** Print a file's ASCII name
+   *
+   * \param[in] pr Print stream for output.
+   *
    * \return true for success or false for failure.
    */
-  size_t printName(print_t* pr);
+  size_t printName7(print_t* pr);
+  /** Print a file's UTF-8 name
+   *
+   * \param[in] pr Print stream for output.
+   *
+   * \return true for success or false for failure.
+   */
+  size_t printName8(print_t* pr);
   /** Read the next byte from a file.
    *
    * \return For success read returns the next byte in the file as an int.
@@ -572,14 +583,14 @@ class ExFatFile {
    *
    * \return true for success or false for failure.
    */
-  bool remove(const ExChar_t* path);
+  bool remove(const char* path);
    /** Rename a file or subdirectory.
    *
    * \param[in] newPath New path name for the file/directory.
    *
    * \return true for success or false for failure.
    */
-  bool rename(const ExChar_t* newPath);
+  bool rename(const char* newPath);
    /** Rename a file or subdirectory.
    *
    * \param[in] dirFile Directory for the new path.
@@ -587,7 +598,7 @@ class ExFatFile {
    *
    * \return true for success or false for failure.
    */
-  bool rename(ExFatFile* dirFile, const ExChar_t* newPath);
+  bool rename(ExFatFile* dirFile, const char* newPath);
   /** Set the file's current position to zero. */
   void rewind() {
     seekSet(0);
@@ -627,6 +638,8 @@ class ExFatFile {
    * \return true for success or false for failure.
    */
   bool seekSet(uint64_t pos);
+  /** \return directory set count */
+  uint8_t setCount() const {return m_setCount;}
   /** The sync() call causes all modified data and directory fields
    * to be written to the storage device.
    *
@@ -714,37 +727,48 @@ class ExFatFile {
    * \param[in] count Number of bytes to write.
    *
    * \return For success write() returns the number of bytes written, always
-   * \a count.
+   * \a count. If an error occurs, write() returns zero and writeError is set.
    */
   size_t write(const void* buf, size_t count);
-  //============================================================================
-#if USE_EXFAT_UNICODE_NAMES
-  // Not Implemented when Unicode is selected.
-  bool exists(const char* path);
-  size_t getName(char *name, size_t size);
-  bool mkdir(ExFatFile* parent, const char* path, bool pFlag = true);
-  bool open(ExFatVolume* vol, const char* path, int oflag);
-  bool open(ExFatFile* dir, const char* path, int oflag);
-  bool open(const char* path, int oflag = O_RDONLY);
-  bool remove(const char* path);
-  bool rename(const char* newPath);
-  bool rename(ExFatFile* dirFile, const char* newPath);
-#endif  // USE_EXFAT_UNICODE_NAMES
+//------------------------------------------------------------------------------
+#if ENABLE_ARDUINO_SERIAL
+  /** List directory contents.
+   *
+   * \param[in] flags The inclusive OR of
+   *
+   * LS_DATE - %Print file modification date
+   *
+   * LS_SIZE - %Print file size.
+   *
+   * LS_R - Recursive list of subdirectories.
+   *
+   * \return true for success or false for failure.
+   */
+  bool ls(uint8_t flags = 0) {
+    return ls(&Serial, flags);
+  }
+  /** Print a file's name.
+   *
+   * \return length for success or zero for failure.
+   */
+  size_t printName() {
+    return ExFatFile::printName(&Serial);
+  }
+#endif  // ENABLE_ARDUINO_SERIAL
 
  private:
   /** ExFatVolume allowed access to private members. */
   friend class ExFatVolume;
   bool addCluster();
   bool addDirCluster();
-  uint8_t setCount() const {return m_setCount;}
+  bool cmpName(const DirName_t* dirName, ExName_t* fname);
+  uint8_t* dirCache(uint8_t set, uint8_t options);
+  bool hashName(ExName_t* fname);
   bool mkdir(ExFatFile* parent, ExName_t* fname);
-  bool openRootFile(ExFatFile* dir,
-                    const ExChar_t* name, uint8_t nameLength, oflag_t oflag);
-  bool open(ExFatFile* dirFile, ExName_t* fname, oflag_t oflag) {
-    return openRootFile(dirFile, fname->lfn, fname->len, oflag);
-  }
-  bool parsePathName(const ExChar_t* path,
-                            ExName_t* fname, const ExChar_t** ptr);
+
+  bool openPrivate(ExFatFile* dir, ExName_t* fname, oflag_t oflag);
+  bool parsePathName(const char* path,
+                            ExName_t* fname, const char** ptr);
   uint32_t curCluster() const {return m_curCluster;}
   ExFatVolume* volume() const {return m_vol;}
   bool syncDir();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -22,10 +22,11 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#define DBG_FILE "FsCache.cpp"
 #include "DebugMacros.h"
 #include "FsCache.h"
 //------------------------------------------------------------------------------
-uint8_t* FsCache::get(uint32_t sector, uint8_t option) {
+uint8_t* FsCache::prepare(uint32_t sector, uint8_t option) {
   if (!m_blockDev) {
     DBG_FAIL_MACRO;
     goto fail;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -46,12 +46,14 @@ class FsVolume {
   /**
    * Initialize an FatVolume object.
    * \param[in] blockDev Device block driver.
+   * \param[in] setCwv Set current working volume if true.
+   * \param[in] part partition to initialize.
    * \return true for success or false for failure.
    */
-  bool begin(BlockDevice* blockDev);
+  bool begin(FsBlockDevice* blockDev, bool setCwv = true, uint8_t part = 1);
+  bool begin(FsBlockDevice* blockDev, bool setCwv, uint32_t firstSector, uint32_t numSectors);
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  // Use sectorsPerCluster(). blocksPerCluster() will be removed in the future.
-  uint32_t blocksPerCluster() __attribute__ ((deprecated)) {return sectorsPerCluster();} //NOLINT
+  uint32_t __attribute__((error("use sectorsPerCluster()"))) blocksPerCluster();
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
   /** \return the number of bytes in a cluster. */
   uint32_t bytesPerCluster() const {
@@ -87,10 +89,14 @@ class FsVolume {
     return m_fVol ? m_fVol->dataStartSector() :
            m_xVol ? m_xVol->clusterHeapStartSector() : 0;
   }
-  /** free dynamic memory and end access to volume */
-  void end() {
+  /** End access to volume
+   * \return pointer to sector size buffer for format.
+   */
+  uint8_t* end() {
     m_fVol = nullptr;
     m_xVol = nullptr;
+    static_assert(sizeof(m_volMem) >= 512, "m_volMem too small");
+    return reinterpret_cast<uint8_t*>(m_volMem);
   }
   /** Test for the existence of a file in a directory
    *
@@ -120,7 +126,7 @@ class FsVolume {
            m_xVol ? m_xVol->freeClusterCount() : 0;
   }
   /**
-   * Check for BlockDevice busy.
+   * Check for device busy.
    *
    * \return true if busy else false.
    */
@@ -367,6 +373,25 @@ class FsVolume {
    */
 #endif  // ENABLE_ARDUINO_STRING
 
+// TODO: #if ENABLE_VOLUME_LABEL so this isn't compiled on limited memory boards
+  /** Retrieve a volume label name.
+   *
+   * \param[in] character buffer to re receive the name
+   *
+   * \param[in] size of buffer
+   *
+   * \return true for success or false for failure.
+   */
+  bool getVolumeLabel(char *volume_label, size_t cb);
+  /** set a volume label name.
+   *
+   * \param[in] Null terminated string with new volume label
+   *
+   * \return true for success or false for failure.
+   */
+  bool setVolumeLabel(const char *volume_label);
+
+
  protected:
   newalign_t   m_volMem[FS_ALIGN_DIM(ExFatVolume, FatVolume)];
 
@@ -380,6 +405,6 @@ class FsVolume {
   static FsVolume* m_cwv;
   FatVolume*   m_fVol = nullptr;
   ExFatVolume* m_xVol = nullptr;
-  BlockDevice* m_blockDev;
+  FsBlockDevice* m_blockDev;
 };
 #endif  // FsVolume_h

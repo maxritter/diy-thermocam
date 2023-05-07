@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -61,13 +61,12 @@ class SdioCard : public SdCardInterface {
    */
   bool begin(SdioConfig sdioConfig);
   /** Disable an SDIO card.
-   * \return false - not implemented.
+   * not implemented.
    */
-  bool end() {return false;}
+  void end() {}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  // Use sectorCount(). cardSize() will be removed in the future.
-  uint32_t cardSize() __attribute__ ((deprecated)) {return sectorCount();}
+    uint32_t __attribute__((error("use sectorCount()"))) cardSize();
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
   /** Erase a range of sectors.
    *

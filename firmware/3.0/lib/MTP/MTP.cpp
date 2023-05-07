@@ -1042,10 +1042,6 @@ const uint16_t supported_events[] =
             len=0;
           }
         }
-        if(len>0)
-        { push_packet(tx_data_buffer,MTP_TX_SIZE);
-          len=0;
-        }
       }
       return size;
     }
@@ -1081,7 +1077,7 @@ const uint16_t supported_events[] =
       uint32_t dlen = FUN;                                \
       \
       MTPContainer header;                                   \
-      header.len = write_length_ + sizeof(MTPHeader)+4;      \
+      header.len = write_length_ + sizeof(MTPHeader);      \
       header.type = 2;                                    \
       header.op = CONTAINER->op;                          \
       header.transaction_id = CONTAINER->transaction_id;  \

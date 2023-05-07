@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -285,8 +285,8 @@ class istream : public virtual ios {
    *
    */
   int peek();
-// istream& read(char *str, streamsize count);
-// streamsize readsome(char *str, streamsize count);
+  // istream& read(char *str, streamsize count);
+  // streamsize readsome(char *str, streamsize count);
   /**
    * \return the stream position
    */

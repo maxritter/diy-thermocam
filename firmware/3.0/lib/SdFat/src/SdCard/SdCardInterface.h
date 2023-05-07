@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,14 +24,16 @@
  */
 #ifndef SdCardInterface_h
 #define SdCardInterface_h
-#include "../common/BlockDeviceInterface.h"
+#include "../common/FsBlockDeviceInterface.h"
 #include "SdCardInfo.h"
 /**
  * \class SdCardInterface
  * \brief Abstract interface for an SD card.
  */
-class SdCardInterface : public BlockDeviceInterface {
+class SdCardInterface : public FsBlockDeviceInterface {
  public:
+  /** end use of card */
+  virtual void end() = 0;
    /** Erase a range of sectors.
    *
    * \param[in] firstSector The address of the first sector in the range.
@@ -46,6 +48,18 @@ class SdCardInterface : public BlockDeviceInterface {
   virtual uint32_t errorData() const = 0;
   /** \return true if card is busy. */
   virtual bool isBusy() = 0;
+  /** \return false by default */
+  virtual bool hasDedicatedSpi() {return false;}
+  /** \return false by default */
+  bool virtual isDedicatedSpi() {return false;}
+  /** Set SPI sharing state
+   * \param[in] value desired state.
+   * \return false by default.
+   */
+  virtual bool setDedicatedSpi(bool value) {
+    (void)value;
+    return false;
+  }
   /**
    * Read a card's CID register.
    *

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,10 +24,7 @@
  */
 #ifndef ExFatFormatter_h
 #define ExFatFormatter_h
-#include "ExFatConfig.h"
-#include "../common/SysCall.h"
-#include "../common/BlockDevice.h"
-#include "upcase.h"
+#include "../common/FsBlockDevice.h"
 /**
  * \class ExFatFormatter
  * \brief Format an exFAT volume.
@@ -43,7 +40,7 @@ class ExFatFormatter {
    *
    * \return true for success or false for failure.
    */
-  bool format(BlockDevice* dev, uint8_t* secBuf, print_t* pr = nullptr);
+  bool format(FsBlockDevice* dev, uint8_t* secBuf, print_t* pr = nullptr);
  private:
   bool syncUpcase();
   bool writeUpcase(uint32_t sector);
@@ -52,7 +49,7 @@ class ExFatFormatter {
   uint32_t m_upcaseSector;
   uint32_t m_upcaseChecksum;
   uint32_t m_upcaseSize;
-  BlockDevice* m_dev;
+  FsBlockDevice* m_dev;
   uint8_t* m_secBuf;
 };
 #endif  // ExFatFormatter_h

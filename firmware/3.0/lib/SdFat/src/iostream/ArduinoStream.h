@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -28,7 +28,6 @@
  * \file
  * \brief ArduinoInStream and ArduinoOutStream classes
  */
-#include "SdFatConfig.h"
 #include "bufstream.h"
 //==============================================================================
 /**
@@ -54,7 +53,7 @@ class ArduinoInStream : public ibufstream {
     uint32_t t;
     m_line[0] = '\0';
     while (!m_hw->available()) {
-      SysCall::yield();
+      yield();
     }
 
     while (1) {
@@ -111,7 +110,7 @@ class ArduinoOutStream : public ostream {
    *
    * \param[in] pr Print object for this ArduinoOutStream.
    */
-  explicit ArduinoOutStream(Print& pr) : m_pr(&pr) {}
+  explicit ArduinoOutStream(print_t& pr) : m_pr(&pr) {}
 
  protected:
   /// @cond SHOW_PROTECTED
@@ -146,6 +145,6 @@ class ArduinoOutStream : public ostream {
   /// @endcond
  private:
   ArduinoOutStream() {}
-  Print* m_pr;
+  print_t* m_pr;
 };
 #endif  // ArduinoStream_h

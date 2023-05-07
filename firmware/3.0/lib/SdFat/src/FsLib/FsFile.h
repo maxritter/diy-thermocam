@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -239,7 +239,7 @@ class FsBaseFile {
            m_xFile ? m_xFile->getWriteError() : true;
   }
   /**
-   * Check for BlockDevice busy.
+   * Check for FsBlockDevice busy.
    *
    * \return true if busy else false.
    */
@@ -355,14 +355,6 @@ class FsBaseFile {
    * \return true for success or false for failure.
    */
   bool mkdir(FsBaseFile* dir, const char* path, bool pFlag = true);
-  /** No longer implemented due to Long File Names.
-   *
-   * Use getName(char* name, size_t size).
-   * \return a pointer to replacement suggestion.
-   */
-  const char* name() const {
-    return "use getName()";
-  }
   /** Open a file or directory by name.
    *
    * \param[in] dir An open file instance for the directory containing
@@ -761,6 +753,14 @@ class FsBaseFile {
     return m_fFile ? length < (1ULL << 32) && m_fFile->truncate(length) :
            m_xFile ? m_xFile->truncate(length) : false;
   }
+  /** Write a string to a file. Used by the Arduino Print class.
+   * \param[in] str Pointer to the string.
+   * Use getWriteError to check for errors.
+   * \return count of characters written for success or -1 for failure.
+   */
+  size_t write(const char* str) {
+    return write(str, strlen(str));
+  }
   /** Write a byte to a file. Required by the Arduino Print class.
    * \param[in] b the byte to be written.
    * Use getWriteError to check for errors.
@@ -777,10 +777,7 @@ class FsBaseFile {
    * \param[in] count Number of bytes to write.
    *
    * \return For success write() returns the number of bytes written, always
-   * \a nbyte.  If an error occurs, write() returns -1.  Possible errors
-   * include write() is called before a file has been opened, write is called
-   * for a read-only file, device is full, a corrupt file system or an
-   * I/O error.
+   * \a nbyte.  If an error occurs, write() returns zero and writeError is set.
    */
   size_t write(const void* buf, size_t count) {
     return m_fFile ? m_fFile->write(buf, count) :

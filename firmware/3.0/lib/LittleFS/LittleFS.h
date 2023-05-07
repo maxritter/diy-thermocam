@@ -27,10 +27,10 @@
 #include "littlefs/lfs.h"
 //#include <algorithm>
 
-class LittleFSFile : public File
+class LittleFSFile : public FileImpl
 {
 private:
-	// Classes derived from File are never meant to be constructed from
+	// Classes derived from FileImpl are never meant to be constructed from
 	// anywhere other than openNextFile() and open() in their parent FS
 	// class.  Only the abstract File class which references these
 	// derived classes is meant to have a public constructor!
@@ -54,12 +54,38 @@ public:
 		//Serial.printf("  LittleFSFile dtor, this=%x\n", (int)this);
 		close();
 	}
-#ifdef FILE_WHOAMI
-	virtual void whoami() {
-		Serial.printf("  LittleFSFile this=%x, refcount=%u\n",
-			(int)this, getRefcount());
+
+	// These will all return false as only some FS support it.
+
+  	virtual bool getCreateTime(DateTimeFields &tm){
+		uint32_t mdt = getCreationTime();
+		if (mdt == 0) { return false;} // did not retrieve a date;
+		breakTime(mdt, tm);
+		return true;  	}
+  	virtual bool getModifyTime(DateTimeFields &tm){
+		uint32_t mdt = getModifiedTime();
+		if (mdt == 0) {return false;} // did not retrieve a date;
+		breakTime(mdt, tm);
+		return true;
+  	}
+	virtual bool setCreateTime(const DateTimeFields &tm) {
+		if (tm.year < 80 || tm.year > 207) return false;
+		bool success = true;
+		uint32_t mdt = makeTime(tm);
+		int rcode = lfs_setattr(lfs, name(), 'c', (const void *) &mdt, sizeof(mdt));
+		if(rcode < 0)
+			success = false;
+		return success;
 	}
-#endif
+	virtual bool setModifyTime(const DateTimeFields &tm) {
+		if (tm.year < 80 || tm.year > 207) return false;
+		bool success = true;
+		uint32_t mdt = makeTime(tm);
+		int rcode = lfs_setattr(lfs, name(), 'm', (const void *) &mdt, sizeof(mdt));
+		if(rcode < 0) 
+			success = false;
+		return success;
+	}
 	virtual size_t write(const void *buf, size_t size) {
 		//Serial.println("write");
 		if (!file) return 0;
@@ -130,7 +156,7 @@ public:
 		}
 		//Serial.println("  end of close");
 	}
-	virtual operator bool() {
+	virtual bool isOpen() {
 		return file || dir;
 	}
 	virtual const char * name() {
@@ -148,7 +174,7 @@ public:
 			memset(&info, 0, sizeof(info)); // is this necessary?
 			if (lfs_dir_read(lfs, dir, &info) <= 0) return File();
 		} while (strcmp(info.name, ".") == 0 || strcmp(info.name, "..") == 0);
-		//Serial.printf("  next name = \"%s\"\n", info.name);
+		//Serial.printf("ONF::  next name = \"%s\"\n", info.name);
 		char pathname[128];
 		strlcpy(pathname, fullpath, sizeof(pathname));
 		size_t len = strlen(pathname);
@@ -158,6 +184,7 @@ public:
 			pathname[len] = 0;
 		}
 		strlcpy(pathname + len, info.name, sizeof(pathname) - len);
+		//Serial.print("ONF:: pathname --- "); Serial.println(pathname);
 		if (info.type == LFS_TYPE_REG) {
 			lfs_file_t *f = (lfs_file_t *)malloc(sizeof(lfs_file_t));
 			if (!f) return File();
@@ -179,13 +206,28 @@ public:
 		if (dir) lfs_dir_rewind(lfs, dir);
 	}
 
-	using Print::write;
 private:
 	lfs_t *lfs;
 	lfs_file_t *file;
 	lfs_dir_t *dir;
 	char *filename;
 	char fullpath[128];
+	
+	uint32_t getCreationTime() {
+		uint32_t filetime = 0;
+		int rc = lfs_getattr(lfs, fullpath, 'c', (void *)&filetime, sizeof(filetime));
+		if(rc != sizeof(filetime))
+			filetime = 0;   // Error so clear read value		
+		return filetime;
+	}
+	uint32_t getModifiedTime() {
+		uint32_t filetime = 0;
+		int rc = lfs_getattr(lfs, fullpath, 'm', (void *)&filetime, sizeof(filetime));
+		if(rc != sizeof(filetime)) 
+			filetime = 0;   // Error so clear read value	
+		return filetime;
+	}
+
 };
 
 
@@ -199,10 +241,19 @@ public:
 		mounted = false;
 		config.context = nullptr;
 	}
+	virtual bool format(int type=0, char progressChar=0, Print& pr=Serial) {
+		if(type == 0) { return quickFormat(); }
+		if(type == 1) { return lowLevelFormat(progressChar, &pr); }
+		return true;
+	}
+	
+	virtual const char * getMediaName() {return (const char*)F("");}
+
 	bool quickFormat();
 	bool lowLevelFormat(char progressChar=0, Print* pr=&Serial);
 	uint32_t formatUnused(uint32_t blockCnt, uint32_t blockStart);
 	File open(const char *filepath, uint8_t mode = FILE_READ) {
+		int rcode;
 		//Serial.println("LittleFS open");
 		if (!mounted) return File();
 		if (mode == FILE_READ) {
@@ -210,7 +261,6 @@ public:
 			if (lfs_stat(&lfs, filepath, &info) < 0) return File();
 			//Serial.printf("LittleFS open got info, name=%s\n", info.name);
 			if (info.type == LFS_TYPE_REG) {
-				//Serial.println("  regular file");
 				lfs_file_t *file = (lfs_file_t *)malloc(sizeof(lfs_file_t));
 				if (!file) return File();
 				if (lfs_file_open(&lfs, file, filepath, LFS_O_RDONLY) >= 0) {
@@ -218,7 +268,6 @@ public:
 				}
 				free(file);
 			} else { // LFS_TYPE_DIR
-				//Serial.println("  directory");
 				lfs_dir_t *dir = (lfs_dir_t *)malloc(sizeof(lfs_dir_t));
 				if (!dir) return File();
 				if (lfs_dir_open(&lfs, dir, filepath) >= 0) {
@@ -230,8 +279,19 @@ public:
 			lfs_file_t *file = (lfs_file_t *)malloc(sizeof(lfs_file_t));
 			if (!file) return File();
 			if (lfs_file_open(&lfs, file, filepath, LFS_O_RDWR | LFS_O_CREAT) >= 0) {
+				//attributes get written when the file is closed
+				uint32_t filetime = 0;
+				uint32_t _now = Teensy3Clock.get();
+				rcode = lfs_getattr(&lfs, filepath, 'c', (void *)&filetime, sizeof(filetime));
+				if(rcode != sizeof(filetime)) {
+					rcode = lfs_setattr(&lfs, filepath, 'c', (const void *) &_now, sizeof(_now));
+					if(rcode < 0)
+						Serial.println("FO:: set attribute creation failed");
+				}
+				rcode = lfs_setattr(&lfs, filepath, 'm', (const void *) &_now, sizeof(_now));
+				if(rcode < 0)
+					Serial.println("FO:: set attribute modified failed");
 				if (mode == FILE_WRITE) {
-					// FILE_WRITE opens at end of file
 					lfs_file_seek(&lfs, file, 0, LFS_SEEK_END);
 				} // else FILE_WRITE_BEGIN
 				return File(new LittleFSFile(&lfs, file, filepath));
@@ -246,13 +306,25 @@ public:
 		return true;
 	}
 	bool mkdir(const char *filepath) {
+		int rcode;
 		if (!mounted) return false;
 		if (lfs_mkdir(&lfs, filepath) < 0) return false;
+		uint32_t _now = Teensy3Clock.get();
+		rcode = lfs_setattr(&lfs, filepath, 'c', (const void *) &_now, sizeof(_now));
+		if(rcode < 0)
+			Serial.println("FD:: set attribute creation failed");
+		rcode = lfs_setattr(&lfs, filepath, 'm', (const void *) &_now, sizeof(_now));
+		if(rcode < 0)
+			Serial.println("FD:: set attribute modified failed");
 		return true;
 	}
 	bool rename(const char *oldfilepath, const char *newfilepath) {
 		if (!mounted) return false;
 		if (lfs_rename(&lfs, oldfilepath, newfilepath) < 0) return false;
+		uint32_t _now = Teensy3Clock.get();
+		int rcode = lfs_setattr(&lfs, newfilepath, 'm', (const void *) &_now, sizeof(_now));
+		if(rcode < 0)
+			Serial.println("FD:: set attribute modified failed");
 		return true;
 	}
 	bool remove(const char *filepath) {
@@ -273,11 +345,14 @@ public:
 		if (!mounted) return 0;
 		return config.block_count * config.block_size;
 	}
+	
+
 protected:
 	bool configured;
 	bool mounted;
 	lfs_t lfs;
 	lfs_config config;
+
 };
 
 
@@ -299,7 +374,7 @@ public:
 		//Serial.println("configure "); delay(5);
 		configured = false;
 		if (!ptr) return false;
-		// memset(ptr, 0xFF, size); // always start with blank slate
+		memset(ptr, 0xFF, size); // always start with blank slate
 		size = size & 0xFFFFFF00;
 		memset(&lfs, 0, sizeof(lfs));
 		memset(&config, 0, sizeof(config));
@@ -330,12 +405,9 @@ public:
 		config.file_max = 0;
 		config.attr_max = 0;
 		configured = true;
-		if (lfs_mount(&lfs, &config) < 0) {
-			memset(ptr, 0xFF, size); // always start with blank slate
-			if (lfs_format(&lfs, &config) < 0) return false;
-			//Serial.println("formatted");
-			if (lfs_mount(&lfs, &config) < 0) return false;
-		}
+		if (lfs_format(&lfs, &config) < 0) return false;
+		//Serial.println("formatted");
+		if (lfs_mount(&lfs, &config) < 0) return false;
 		//Serial.println("mounted atfer format");
 		mounted = true;
 		return true;
@@ -344,6 +416,9 @@ public:
 	uint32_t formatUnused(uint32_t blockCnt, uint32_t blockStart) {
 		return 0;
 	}
+	FLASHMEM
+	const char * getMediaName();
+
 private:
 	static int static_read(const struct lfs_config *c, lfs_block_t block,
 	  lfs_off_t offset, void *buffer, lfs_size_t size) {
@@ -365,10 +440,6 @@ private:
 		return 0;
 	}
 	static int static_sync(const struct lfs_config *c) {
-		if ( c->context >= (void *)0x20200000 ) {
-			//Serial.printf("    arm_dcache_flush_delete: ptr=0x%x, size=%d\n", c->context, c->block_count * c->block_size);
-			arm_dcache_flush_delete(c->context, c->block_count * c->block_size );
-		}
 		return 0;
 	}
 };
@@ -381,6 +452,7 @@ public:
 		port = nullptr;
 	}
 	bool begin(uint8_t cspin, SPIClass &spiport=SPI);
+	const char * getMediaName();
 private:
 	int read(lfs_block_t block, lfs_off_t offset, void *buf, lfs_size_t size);
 	int prog(lfs_block_t block, lfs_off_t offset, const void *buf, lfs_size_t size);
@@ -406,6 +478,7 @@ private:
 	SPIClass *port;
 	uint8_t pin;
 	uint8_t addrbits;
+	uint8_t erasecmd;
 	uint32_t progtime;
 	uint32_t erasetime;
 };
@@ -419,6 +492,7 @@ public:
 		port = nullptr;
 	}
 	bool begin(uint8_t cspin, SPIClass &spiport=SPI);
+	const char * getMediaName();
 private:
 	int read(lfs_block_t block, lfs_off_t offset, void *buf, lfs_size_t size);
 	int prog(lfs_block_t block, lfs_off_t offset, const void *buf, lfs_size_t size);
@@ -458,6 +532,7 @@ class LittleFS_QSPIFlash : public LittleFS
 public:
 	LittleFS_QSPIFlash() { }
 	bool begin();
+	const char * getMediaName();
 private:
 	int read(lfs_block_t block, lfs_off_t offset, void *buf, lfs_size_t size);
 	int prog(lfs_block_t block, lfs_off_t offset, const void *buf, lfs_size_t size);
@@ -501,6 +576,7 @@ class LittleFS_Program : public LittleFS
 public:
 	LittleFS_Program() { }
 	bool begin(uint32_t size);
+	const char * getMediaName();
 private:
 	static int static_read(const struct lfs_config *c, lfs_block_t block,
 	  lfs_off_t offset, void *buffer, lfs_size_t size);
@@ -517,6 +593,7 @@ class LittleFS_Program : public LittleFS
 public:
 	LittleFS_Program() { }
 	bool begin(uint32_t size) { return false; }
+	const char * getMediaName() { return (const char *)F("PROGRAM"); }
 };
 #endif
 
@@ -531,7 +608,7 @@ public:
 	void readBBLUT(uint16_t *LBA, uint16_t *PBA, uint8_t *linkStatus);
 	bool lowLevelFormat(char progressChar, Print* pr=&Serial);
 	uint8_t addBBLUT(uint32_t block_address);  //temporary for testing
-  
+    const char * getMediaName();
 private:
 	int read(lfs_block_t block, lfs_off_t offset, void *buf, lfs_size_t size);
 	int prog(lfs_block_t block, lfs_off_t offset, const void *buf, lfs_size_t size);
@@ -594,7 +671,7 @@ public:
 	void readBBLUT(uint16_t *LBA, uint16_t *PBA, uint8_t *linkStatus);
 	bool lowLevelFormat(char progressChar);
 	uint8_t addBBLUT(uint32_t block_address);  //temporary for testing
-	
+	const char * getMediaName();
 private:
 	int read(lfs_block_t block, lfs_off_t offset, void *buf, lfs_size_t size);
 	int prog(lfs_block_t block, lfs_off_t offset, const void *buf, lfs_size_t size);
@@ -642,11 +719,87 @@ private:
 };
 #endif
 
+//----------------------------------------------------------------------------
+// Simple SPI wrapper that allows you to specify an IO pin and the
+// begin method will try the known types of SPI LittleFS file systems
+// begin methods until it finds one that return true. 
+// you can then query which one using the fs() method. 
+//----------------------------------------------------------------------------
+// This FS simply errors out all calls...
+class FS_NONE : public FS {
+  virtual File open(const char *filename, uint8_t mode = FILE_READ) { return File();}
+  virtual bool exists(const char *filepath) {return false;}
+  virtual bool mkdir(const char *filepath)  {return false;}
+  virtual bool rename(const char *oldfilepath, const char *newfilepath) { return false;}
+  virtual bool remove(const char *filepath) { return false;}
+  virtual bool rmdir(const char *filepath) { return false;}
+  virtual uint64_t usedSize()  { return 0;} 
+  virtual uint64_t totalSize() { return 0;}
+};
+
+class LittleFS_SPI : public FS {
+public:
+  LittleFS_SPI(uint8_t pin=0xff) : csPin_(pin) {}
+  bool begin(uint8_t cspin=0xff, SPIClass &spiport=SPI);
+  inline LittleFS * fs() { return (pfs == &fsnone)? nullptr : (LittleFS*)pfs ;}
+  inline const char * displayName() {return display_name;}
+  inline const char * getMediaName() {return (pfs == &fsnone)? (const char *)F("") : ((LittleFS*)pfs)->getMediaName();}
+
+  // You have full access to internals.
+  uint8_t csPin_;
+  LittleFS_SPIFlash flash;
+  LittleFS_SPIFram fram;
+  LittleFS_SPINAND nand;
+  FS_NONE fsnone;
+  
+  // FS overrides
+  virtual File open(const char *filename, uint8_t mode = FILE_READ) { return pfs->open(filename, mode); }
+  virtual bool exists(const char *filepath) { return pfs->exists(filepath); }
+  virtual bool mkdir(const char *filepath)  { return pfs->mkdir(filepath); }
+  virtual bool rename(const char *oldfilepath, const char *newfilepath) { return pfs->rename(oldfilepath, newfilepath); }
+  virtual bool remove(const char *filepath)  { return pfs->remove(filepath); }
+  virtual bool rmdir(const char *filepath)  { return pfs->rmdir(filepath); }
+  virtual uint64_t usedSize()  { return pfs->usedSize(); } 
+  virtual uint64_t totalSize() { return pfs->totalSize(); }
+  virtual bool format(int type=0, char progressChar=0, Print& pr=Serial) { return pfs->format(type, progressChar, pr); }
+
+private:
+  FS *pfs = &fsnone;
+  char display_name[10];
+
+};
+
+//----------------------------------------------------------------------------
+// Simple QSPI wraper for T4.1
+//----------------------------------------------------------------------------
+#ifdef __IMXRT1062__
+class LittleFS_QSPI : public FS {
+public:
+  LittleFS_QSPI(){}
+  bool begin();
+  inline LittleFS * fs() { return (pfs == &fsnone)? nullptr : (LittleFS*)pfs ;}
+  inline const char * displayName() {return display_name;}
+  inline const char * getMediaName() {return (pfs == &fsnone)? (const char *)F("") : ((LittleFS*)pfs)->getMediaName();}
+  // You have full access to internals.
+  uint8_t csPin;
+  LittleFS_QSPIFlash flash;
+  LittleFS_QPINAND nand;
+  FS_NONE fsnone;
 
 
-
-
-
-
-
+  // FS overrides
+  virtual File open(const char *filename, uint8_t mode = FILE_READ) { return pfs->open(filename, mode); }
+  virtual bool exists(const char *filepath) { return pfs->exists(filepath); }
+  virtual bool mkdir(const char *filepath)  { return pfs->mkdir(filepath); }
+  virtual bool rename(const char *oldfilepath, const char *newfilepath) { return pfs->rename(oldfilepath, newfilepath); }
+  virtual bool remove(const char *filepath)  { return pfs->remove(filepath); }
+  virtual bool rmdir(const char *filepath)  { return pfs->rmdir(filepath); }
+  virtual uint64_t usedSize()  { return pfs->usedSize(); } 
+  virtual uint64_t totalSize() { return pfs->totalSize();}
+  virtual bool format(int type=0, char progressChar=0, Print& pr=Serial) { return pfs->format(type, progressChar, pr); }
+private:
+  FS *pfs = &fsnone;
+  char display_name[10];
+};
+#endif
 

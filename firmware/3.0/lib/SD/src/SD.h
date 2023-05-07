@@ -25,6 +25,9 @@
 
 #include <Arduino.h>
 #include <SdFat.h>
+#if !defined(SD_FAT_TEENSY_MODIFIED)
+#error "Teensy's SD library uses a custom modified copy of SdFat.  Standard SdFat was mistakenly used.  Arduino should print multiple libraries found for SdFat.h.  To resolve this error, you will need to move or delete the copy Arduino is using, or otherwise take steps to cause Teensy's special copy of SdFat to be used."
+#endif
 // Use FILE_READ & FILE_WRITE as defined by FS.h
 #if defined(FILE_READ) && !defined(FS_H)
 #undef FILE_READ
@@ -50,7 +53,7 @@
   #define MAX_FILENAME_LEN 64
 #endif
 
-class SDFile : public File
+class SDFile : public FileImpl
 {
 private:
 	// Classes derived from File are never meant to be constructed
@@ -62,15 +65,8 @@ private:
 	friend class SDClass;
 public:
 	virtual ~SDFile(void) {
-		if (sdfatfile) sdfatfile.close();
-		if (filename) free(filename);
+		close();
 	}
-#ifdef FILE_WHOAMI
-	virtual void whoami() {
-		Serial.printf("   SDFile this=%x, refcount=%u\n",
-			(int)this, getRefcount());
-	}
-#endif
 	virtual size_t write(const void *buf, size_t size) {
 		return sdfatfile.write(buf, size);
 	}
@@ -106,9 +102,11 @@ public:
 			free(filename);
 			filename = nullptr;
 		}
-		sdfatfile.close();
+		if (sdfatfile.isOpen()) {
+			sdfatfile.close();
+		}
 	}
-	virtual operator bool() {
+	virtual bool isOpen() {
 		return sdfatfile.isOpen();
 	}
 	virtual const char * name() {
@@ -134,7 +132,40 @@ public:
 	virtual void rewindDirectory(void) {
 		sdfatfile.rewindDirectory();
 	}
-	using Print::write;
+	virtual bool getCreateTime(DateTimeFields &tm) {
+		uint16_t fat_date, fat_time;
+		if (!sdfatfile.getCreateDateTime(&fat_date, &fat_time)) return false;
+		if ((fat_date == 0) && (fat_time == 0)) return false;
+		tm.sec = FS_SECOND(fat_time);
+		tm.min = FS_MINUTE(fat_time);
+		tm.hour = FS_HOUR(fat_time);
+		tm.mday = FS_DAY(fat_date);
+		tm.mon = FS_MONTH(fat_date) - 1;
+		tm.year = FS_YEAR(fat_date) - 1900;
+		return true;
+	}
+	virtual bool getModifyTime(DateTimeFields &tm) {
+		uint16_t fat_date, fat_time;
+		if (!sdfatfile.getModifyDateTime(&fat_date, &fat_time)) return false;
+		if ((fat_date == 0) && (fat_time == 0)) return false;
+		tm.sec = FS_SECOND(fat_time);
+		tm.min = FS_MINUTE(fat_time);
+		tm.hour = FS_HOUR(fat_time);
+		tm.mday = FS_DAY(fat_date);
+		tm.mon = FS_MONTH(fat_date) - 1;
+		tm.year = FS_YEAR(fat_date) - 1900;
+		return true;
+	}
+	virtual bool setCreateTime(const DateTimeFields &tm) {
+		if (tm.year < 80 || tm.year > 207) return false;
+		return sdfatfile.timestamp(T_CREATE, tm.year + 1900, tm.mon + 1,
+			tm.mday, tm.hour, tm.min, tm.sec);
+	}
+	virtual bool setModifyTime(const DateTimeFields &tm) {
+		if (tm.year < 80 || tm.year > 207) return false;
+		return sdfatfile.timestamp(T_WRITE, tm.year + 1900, tm.mon + 1,
+			tm.mday, tm.hour, tm.min, tm.sec);
+	}
 private:
 	SDFAT_FILE sdfatfile;
 	char *filename;
@@ -146,16 +177,7 @@ class SDClass : public FS
 {
 public:
 	SDClass() { }
-	bool begin(uint8_t csPin = 10) {
-#ifdef BUILTIN_SDCARD
-		if (csPin == BUILTIN_SDCARD) {
-			return sdfs.begin(SdioConfig(FIFO_SDIO));
-			//return sdfs.begin(SdioConfig(DMA_SDIO));
-		}
-#endif
-		return sdfs.begin(SdSpiConfig(csPin, SHARED_SPI, SD_SCK_MHZ(16)));
-		//return sdfs.begin(csPin, SD_SCK_MHZ(24));
-	}
+	bool begin(uint8_t csPin = 10);
 	File open(const char *filepath, uint8_t mode = FILE_READ) {
 		oflag_t flags = O_READ;
 		if (mode == FILE_WRITE) flags = O_RDWR | O_CREAT | O_AT_END;
@@ -180,15 +202,32 @@ public:
 		return sdfs.rmdir(filepath);
 	}
 	uint64_t usedSize() {
+		if (!cardPreviouslyPresent) return (uint64_t)0;
 		return (uint64_t)(sdfs.clusterCount() - sdfs.freeClusterCount())
 		  * (uint64_t)sdfs.bytesPerCluster();
 	}
 	uint64_t totalSize() {
+		if (!cardPreviouslyPresent) return (uint64_t)0;
 		return (uint64_t)sdfs.clusterCount() * (uint64_t)sdfs.bytesPerCluster();
 	}
+	bool format(int type=0, char progressChar=0, Print& pr=Serial);
+	bool mediaPresent();
+
+	// call to allow you to specify if your SD reader has an IO pin that
+	// can be used to detect if an chip is inserted.  On BUILTIN_SDCARD
+	// we will default to use it if you use the begin method, howver
+	// if you bypass this and call directly to SDFat begin, then you
+	// can use this to let us know. 
+	bool setMediaDetectPin(uint8_t pin);
+
 public: // allow access, so users can mix SD & SdFat APIs
 	SDFAT_BASE sdfs;
 	operator SDFAT_BASE & () { return sdfs; }
+	static void dateTime(uint16_t *date, uint16_t *time);
+private:
+	bool cardPreviouslyPresent = false;
+	uint8_t csPin_ = 0xff;
+	uint8_t cdPin_ = 0xff;
 };
 
 extern SDClass SD;
@@ -226,6 +265,13 @@ public:
 	}
 	uint32_t clusterCount() {
 		return SD.sdfs.vol()->clusterCount();
+	}
+#if defined(__arm__)
+	operator FsVolume * () __attribute__ ((deprecated("Use SD.begin() to access SD cards"))) {
+#elif defined(__AVR__)
+	operator FatVolume * () __attribute__ ((deprecated("Use SD.begin() to access SD cards"))) {
+#endif
+		return SD.sdfs.vol();
 	}
 };
 

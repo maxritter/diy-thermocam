@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -29,15 +29,30 @@
  * \brief ExFatPartition include file.
  */
 #include "../common/SysCall.h"
-#include "../common/BlockDevice.h"
+#include "../common/FsBlockDevice.h"
 #include "../common/FsCache.h"
-#include "ExFatConfig.h"
-#include "ExFatTypes.h"
+#include "../common/FsStructs.h"
+/** Set EXFAT_READ_ONLY non-zero for read only */
+#ifndef EXFAT_READ_ONLY
+#define EXFAT_READ_ONLY 0
+#endif  // EXFAT_READ_ONLY
 /** Type for exFAT partition */
 const uint8_t FAT_TYPE_EXFAT = 64;
 
 class ExFatFile;
-
+//------------------------------------------------------------------------------
+/**
+ * \struct DirPos_t
+ * \brief Internal type for position in directory file.
+ */
+struct DirPos_t {
+  /** current cluster */
+  uint32_t cluster;
+  /** offset */
+  uint32_t position;
+  /** directory is contiguous */
+  bool     isContiguous;
+};
 //==============================================================================
 /**
  * \class ExFatPartition
@@ -67,6 +82,13 @@ class ExFatPartition {
   uint32_t clusterCount() const {return m_clusterCount;}
   /** \return the cluster heap start sector. */
   uint32_t clusterHeapStartSector() const {return m_clusterHeapStartSector;}
+  /** End access to volume
+   * \return pointer to sector size buffer for format.
+   */
+  uint8_t* end() {
+    m_fatType = 0;
+    return cacheClear();
+  }
   /** \return the FAT length in sectors */
   uint32_t fatLength() const {return m_fatLength;}
   /** \return the FAT start sector number. */
@@ -84,9 +106,10 @@ class ExFatPartition {
    *
    * \return true for success or false for failure.
    */
-  bool init(BlockDevice* dev, uint8_t part);
+  bool init(FsBlockDevice* dev, uint8_t part);
+  bool init(FsBlockDevice* dev, uint32_t firstSector, uint32_t numberSectors);
   /**
-   * Check for BlockDevice busy.
+   * Check for device busy.
    *
    * \return true if busy else false.
    */
@@ -98,8 +121,7 @@ class ExFatPartition {
   /** \return the number of sectors in a cluster. */
   uint32_t sectorsPerCluster() const {return 1UL << m_sectorsPerClusterShift;}
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  // Use sectorsPerCluster(). blocksPerCluster() will be removed in the future.
-  uint32_t blocksPerCluster() __attribute__ ((deprecated)) {return sectorsPerCluster();} //NOLINT
+  uint32_t __attribute__((error("use sectorsPerCluster()"))) blocksPerCluster();
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
   /** \return the power of two for sectors per cluster. */
   uint8_t  sectorsPerClusterShift() const {return m_sectorsPerClusterShift;}
@@ -124,14 +146,14 @@ class ExFatPartition {
   bool bitmapModify(uint32_t cluster, uint32_t count, bool value);
   //----------------------------------------------------------------------------
   // Cache functions.
-  uint8_t* bitmapCacheGet(uint32_t sector, uint8_t option) {
+  uint8_t* bitmapCachePrepare(uint32_t sector, uint8_t option) {
 #if USE_EXFAT_BITMAP_CACHE
-    return m_bitmapCache.get(sector, option);
+    return m_bitmapCache.prepare(sector, option);
 #else  // USE_EXFAT_BITMAP_CACHE
-    return m_dataCache.get(sector, option);
+    return m_dataCache.prepare(sector, option);
 #endif  // USE_EXFAT_BITMAP_CACHE
   }
-  void cacheInit(BlockDevice* dev) {
+  void cacheInit(FsBlockDevice* dev) {
 #if USE_EXFAT_BITMAP_CACHE
     m_bitmapCache.init(dev);
 #endif  // USE_EXFAT_BITMAP_CACHE
@@ -146,8 +168,8 @@ class ExFatPartition {
   }
   void dataCacheDirty() {m_dataCache.dirty();}
   void dataCacheInvalidate() {m_dataCache.invalidate();}
-  uint8_t* dataCacheGet(uint32_t sector, uint8_t option) {
-    return m_dataCache.get(sector, option);
+  uint8_t* dataCachePrepare(uint32_t sector, uint8_t option) {
+    return m_dataCache.prepare(sector, option);
   }
   uint32_t dataCacheSector() {return m_dataCache.sector();}
   bool dataCacheSync() {return m_dataCache.sync();}
@@ -159,7 +181,7 @@ class ExFatPartition {
   }
   uint8_t* dirCache(DirPos_t* pos, uint8_t options);
   int8_t dirSeek(DirPos_t* pos, uint32_t offset);
-  uint8_t fatGet(uint32_t cluster, uint32_t* value);
+  int8_t fatGet(uint32_t cluster, uint32_t* value);
   bool fatPut(uint32_t cluster, uint32_t value);
   uint32_t chainSize(uint32_t cluster);
   bool freeChain(uint32_t cluster);
@@ -187,8 +209,8 @@ class ExFatPartition {
   }
   //----------------------------------------------------------------------------
   static const uint8_t  m_bytesPerSectorShift = 9;
-  static const uint16_t m_bytesPerSector = 512;
-  static const uint16_t m_sectorMask = 0x1FF;
+  static const uint16_t m_bytesPerSector = 1 << m_bytesPerSectorShift;
+  static const uint16_t m_sectorMask = m_bytesPerSector - 1;
   //----------------------------------------------------------------------------
 #if USE_EXFAT_BITMAP_CACHE
   FsCache  m_bitmapCache;
@@ -202,7 +224,7 @@ class ExFatPartition {
   uint32_t m_rootDirectoryCluster;
   uint32_t m_clusterMask;
   uint32_t m_bytesPerCluster;
-  BlockDevice* m_blockDev;
+  FsBlockDevice* m_blockDev;
   uint8_t  m_fatType = 0;
   uint8_t  m_sectorsPerClusterShift;
 };

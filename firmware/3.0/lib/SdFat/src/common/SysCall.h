@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -37,26 +37,6 @@
 #define nullptr NULL
 #endif  // __cplusplus < 201103
 //------------------------------------------------------------------------------
-/** Type for millis. */
-typedef uint16_t SdMillis_t;
-//------------------------------------------------------------------------------
-/**
- * \class SysCall
- * \brief SysCall - Class to wrap system calls.
- */
-class SysCall {
- public:
-  /** \return the time in milliseconds. */
-  static SdMillis_t curTimeMS();
-  /** Halt execution of this thread. */
-  static void halt() {
-    while (1) {
-      yield();
-    }
-  }
-  /** Yield to other threads. */
-  static void yield();
-};
 #if ENABLE_ARDUINO_FEATURES
 #if defined(ARDUINO)
 /** Use Arduino Print. */
@@ -72,33 +52,11 @@ typedef Stream stream_t;
 #define F(str) (str)
 #endif  // F
 //------------------------------------------------------------------------------
-/** \return the time in milliseconds. */
-inline SdMillis_t SysCall::curTimeMS() {
-  return millis();
-}
-//------------------------------------------------------------------------------
-#if defined(PLATFORM_ID)  // Only defined if a Particle device
-inline void SysCall::yield() {
-  // Recommended to only call Particle.process() if system threading is disabled
-  if (system_thread_get_state(NULL) == spark::feature::DISABLED) {
-    Particle.process();
-  }
-}
-#elif defined(ARDUINO)
-inline void SysCall::yield() {
-  // Use the external Arduino yield() function.
-  ::yield();
-}
-#else  // defined(PLATFORM_ID)
-inline void SysCall::yield() {}
-#endif  // defined(PLATFORM_ID)
-//------------------------------------------------------------------------------
 #else  // ENABLE_ARDUINO_FEATURES
 #include "PrintBasic.h"
 /** If not Arduino */
 typedef PrintBasic print_t;
 /** If not Arduino */
 typedef PrintBasic stream_t;
-inline void SysCall::yield() {}
 #endif  // ENABLE_ARDUINO_FEATURES
 #endif  // SysCall_h

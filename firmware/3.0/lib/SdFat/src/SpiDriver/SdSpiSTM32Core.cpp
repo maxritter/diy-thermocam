@@ -22,17 +22,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-// Driver for: https://github.com/rogerclarkmelbourne/Arduino_STM32
+// Driver for: https://github.com/stm32duino/Arduino_Core_STM32
 #include "SdSpiDriver.h"
-#if defined(SD_USE_CUSTOM_SPI)\
-  && (defined(__STM32F1__) || defined(__STM32F4__))
-#if defined(__STM32F1__)
-#define USE_STM32_DMA 1
-#elif defined(__STM32F4__)
-#define USE_STM32_DMA 1
-#else  // defined(__STM32F1__)
-#error Unknown STM32 type
-#endif  // defined(__STM32F1__)
+#if defined(SD_USE_CUSTOM_SPI) && defined(STM32_CORE_VERSION)
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::activate() {
   m_spi->beginTransaction(m_spiSettings);
@@ -60,23 +52,24 @@ uint8_t SdSpiArduinoDriver::receive() {
 }
 //------------------------------------------------------------------------------
 uint8_t SdSpiArduinoDriver::receive(uint8_t* buf, size_t count) {
-#if USE_STM32_DMA
-  return m_spi->dmaTransfer(nullptr, buf, count);
-#else  // USE_STM32_DMA
-  m_spi->read(buf, count);
+  // Must send 0XFF - SD looks at send data for command.
+  memset(buf, 0XFF, count);
+  m_spi->transfer(buf, count);
   return 0;
-#endif  // USE_STM32_DMA
 }
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::send(uint8_t data) {
   m_spi->transfer(data);
 }
 //------------------------------------------------------------------------------
-void SdSpiArduinoDriver::send(const uint8_t* buf , size_t count) {
-#if USE_STM32_DMA
-  m_spi->dmaTransfer(const_cast<uint8*>(buf), nullptr, count);
-#else  // USE_STM32_DMA
-  m_spi->write(const_cast<uint8*>(buf), count);
-#endif  // USE_STM32_DMA
+void SdSpiArduinoDriver::send(const uint8_t* buf, size_t count) {
+  // Avoid stack overflow if bad count.  This should cause a write error.
+  if (count > 512) {
+    return;
+  }
+  // Not easy to avoid receive so use tmp RX buffer.
+  uint8_t rxBuf[512];
+  // Discard const - STM32 not const correct.
+  m_spi->transfer(const_cast<uint8_t*>(buf), rxBuf, count);
 }
-#endif  // defined(SD_USE_CUSTOM_SPI) &&  defined(__STM32F1__)
+#endif  // defined(SD_USE_CUSTOM_SPI) && defined(STM32_CORE_VERSION)

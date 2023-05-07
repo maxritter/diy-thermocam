@@ -32,28 +32,37 @@ PROGMEM static const struct chipinfo {
 	uint8_t addrbits;	// number of address bits, 24 or 32
 	uint16_t progsize;	// page size for programming, in bytes
 	uint32_t erasesize;	// sector size for erasing, in bytes
+	uint8_t  erasecmd;	// command to use for sector erase
 	uint32_t chipsize;	// total number of bytes in the chip
 	uint32_t progtime;	// maximum microseconds to wait for page programming
 	uint32_t erasetime;	// maximum microseconds to wait for sector erase
+	const char pn[22];		//flash name
 } known_chips[] = {
-	{{0xEF, 0x40, 0x15}, 24, 256, 4096, 2097152, 3000, 400000}, // Winbond W25Q16JV*IQ/W25Q16FV
-	{{0xEF, 0x40, 0x16}, 24, 256, 4096, 4194304, 3000, 400000}, // Winbond W25Q32JV*IQ/W25Q32FV
-	{{0xEF, 0x40, 0x17}, 24, 256, 4096, 8388608, 3000, 400000}, // Winbond W25Q64JV*IQ/W25Q64FV
-	{{0xEF, 0x40, 0x18}, 24, 256, 4096, 16777216, 3000, 400000}, // Winbond W25Q128JV*IQ/W25Q128FV
-	{{0xEF, 0x40, 0x19}, 32, 256, 4096, 33554432, 3000, 400000}, // Winbond W25Q256JV*IQ
-	{{0xEF, 0x40, 0x20}, 32, 256, 4096, 67108864, 3500, 400000}, // Winbond W25Q512JV*IQ
-	{{0xEF, 0x70, 0x17}, 24, 256, 4096, 8388608, 3000, 400000}, // Winbond W25Q64JV*IM (DTR)
-	{{0xEF, 0x70, 0x18}, 24, 256, 4096, 16777216, 3000, 400000}, // Winbond W25Q128JV*IM (DTR)
-	{{0xEF, 0x70, 0x19}, 32, 256, 4096, 33554432, 3000, 400000}, // Winbond W25Q256JV*IM (DTR)
-	{{0xEF, 0x70, 0x20}, 32, 256, 4096, 67108864, 3500, 400000}, // Winbond W25Q512JV*IM (DTR)
-	{{0x1F, 0x84, 0x01}, 24, 256, 4096, 524288, 2500, 300000}, // Adesto/Atmel AT25SF041
-	{{0x01, 0x40, 0x14}, 24, 256, 4096, 1048576, 5000, 300000}, // Spansion S25FL208K
-	//FRAM
-	{{0x03, 0x2E, 0xC2}, 24, 64, 128, 1048576, 250, 1200},  //Cypress 8Mb FRAM
-	{{0xC2, 0x24, 0x00}, 24, 64, 128, 131072, 250, 1200},  //Cypress 1Mb FRAM
-	{{0xC2, 0x24, 0x01}, 24, 64, 128, 131072, 250, 1200},  //Cypress 1Mb FRAM, rev1
-	{{0xAE, 0x83, 0x09}, 24, 64, 128, 131072, 250, 1200},  //ROHM MR45V100A 1 Mbit FeRAM Memory
-	{{0xC2, 0x26, 0x08}, 24, 64, 128, 131072, 250, 1200},  //Cypress 4Mb FRAM
+{{0xEF, 0x40, 0x15}, 24, 256, 32768, 0x52, 2097152, 3000, 1600000, "W25Q16JV*Q/W25Q16FV"},  // Winbond W25Q16JV*Q/W25Q16FV
+{{0xEF, 0x40, 0x16}, 24, 256, 32768, 0x52, 4194304, 3000, 1600000, "W25Q32JV*Q/W25Q32FV"},  // Winbond W25Q32JV*Q/W25Q32FV
+{{0xEF, 0x40, 0x17}, 24, 256, 65536, 0xD8, 8388608, 3000, 2000000, "W25Q64JV*Q/W25Q64FV"},  // Winbond W25Q64JV*Q/W25Q64FV
+{{0xEF, 0x40, 0x18}, 24, 256, 65536, 0xD8, 16777216, 3000, 2000000, "W25Q128JV*Q/W25Q128FV"}, // Winbond W25Q128JV*Q/W25Q128FV
+{{0xEF, 0x40, 0x19}, 32, 256, 65536, 0xDC, 33554432, 3000, 2000000, "W25Q256JV*Q"}, // Winbond W25Q256JV*Q
+{{0xEF, 0x40, 0x20}, 32, 256, 65536, 0xDC, 67108864, 3500, 2000000, "W25Q512JV*Q"}, // Winbond W25Q512JV*Q
+{{0xEF, 0x40, 0x21}, 32, 256, 65536, 0xDC, 134217728, 3500, 2000000, "W25Q01JV*Q"},// Winbond W25Q01JV*Q
+{{0x62, 0x06, 0x13}, 24, 256,  4096, 0x20, 524288, 5000, 300000, "SST25PF040C"},  // Microchip SST25PF040C
+//{{0xEF, 0x40, 0x14}, 24, 256,  4096, 0x20, 1048576, 5000, 300000, "W25Q80DV"},  // Winbond W25Q80DV  not tested
+{{0xEF, 0x70, 0x17}, 24, 256, 65536, 0xD8, 8388608, 3000, 2000000, "W25Q64JV*M (DTR)"},  // Winbond W25Q64JV*M (DTR)
+{{0xEF, 0x70, 0x18}, 24, 256, 65536, 0xD8, 16777216, 3000, 2000000, "W25Q128JV*M (DTR)"}, // Winbond W25Q128JV*M (DTR)
+{{0xEF, 0x70, 0x19}, 32, 256, 65536, 0xDC, 33554432, 3000, 2000000, "W25Q256JV*M (DTR)"}, // Winbond W25Q256JV*M (DTR)
+{{0xEF, 0x80, 0x19}, 32, 256, 65536, 0xDC, 33554432, 3000, 2000000, "W25Q256JW*M"}, // Winbond (W25Q256JW*M)
+{{0xEF, 0x70, 0x20}, 32, 256, 65536, 0xDC, 67108864, 3500, 2000000, "W25Q512JV*M (DTR)"}, // Winbond W25Q512JV*M (DTR)
+{{0x1F, 0x84, 0x01}, 24, 256,  4096, 0x20, 524288, 2500, 300000, "AT25SF041"},    // Adesto/Atmel AT25SF041
+{{0x01, 0x40, 0x14}, 24, 256,  4096, 0x20, 1048576, 5000, 300000, "S25FL208K"},   // Spansion S25FL208K
+//FRAM
+{{0x03, 0x2E, 0xC2}, 24, 64, 128, 0, 1048576, 250, 1200, "CY15B108QN"}, //Cypress 8Mb FRAM, CY15B108QN
+{{0xC2, 0x24, 0x00}, 24, 64, 128, 0, 131072, 250, 1200, "FM25V10-G"},  //Cypress 1Mb FRAM, FM25V10-G
+{{0xC2, 0x24, 0x01}, 24, 64, 128, 0, 131072, 250, 1200, "FM25V10-G (rev 1)"},  //Cypress 1Mb FRAM, rev1
+{{0xAE, 0x83, 0x09}, 24, 64, 128, 0, 131072, 250, 1200, "MR45V100A"},  //ROHM MR45V100A 1 Mbit FeRAM Memory
+{{0xC2, 0x26, 0x08}, 24, 64, 128, 0, 524288, 250, 1200, "CY15B104Q"},  //Cypress 4Mb FRAM, CY15B104Q
+{{0x60, 0x2A, 0xC2}, 24, 64, 128, 0, 262144, 250, 1200, "CY15B102Q"},  //Cypress 2Mb FRAM, CY15B102Q
+{{0x60, 0x2A, 0xC2}, 24, 64, 128, 0, 262144, 250, 1200, "CY15B102Q"},  //Cypress 2Mb FRAM, CY15B102Q
+{{0x04, 0x7F, 0x48}, 24, 64, 128, 0, 262144, 250, 1200, "MB85RS2MTAPNF"},  //Fujitsu 2Mb FRAM, MB85RS2MTAPNF
 
 };
 
@@ -67,6 +76,19 @@ static const struct chipinfo * chip_lookup(const uint8_t *id)
 		}
 	}
 	return nullptr;
+}
+
+
+const char * LittleFS_RAM::getMediaName() {
+	PROGMEM static const char ram_pn_name[] = "MEMORY";
+#if defined(__IMXRT1062__)
+	PROGMEM static const char ext_pn_name[] = "EXTMEM";
+	PROGMEM static const char dma_pn_name[] = "DMAMEM";
+
+	if ((uint32_t)config.context >= 0x70000000) return ext_pn_name;
+	if ((uint32_t)config.context >= 0x20200000) return dma_pn_name;
+#endif
+	return ram_pn_name;
 }
 
 FLASHMEM
@@ -112,6 +134,7 @@ bool LittleFS_SPIFlash::begin(uint8_t cspin, SPIClass &spiport)
 	addrbits = info->addrbits;
 	progtime = info->progtime;
 	erasetime = info->erasetime;
+	erasecmd = info->erasecmd;
 	configured = true;
 
 	//Serial.println("attempting to mount existing media");
@@ -135,12 +158,27 @@ bool LittleFS_SPIFlash::begin(uint8_t cspin, SPIClass &spiport)
 }
 
 FLASHMEM
+const char * LittleFS_SPIFlash::getMediaName(){
+  const uint8_t cmd_buf[4] = {0x9F, 0, 0, 0};
+  uint8_t buf[5];
+  port->beginTransaction(SPICONFIG);
+  digitalWrite(pin, LOW);
+  port->transfer(cmd_buf, buf, 4);
+  digitalWrite(pin, HIGH);
+  port->endTransaction();
+
+  const struct chipinfo *info = chip_lookup(buf + 1);
+
+  return info->pn;
+}
+
+FLASHMEM
 bool LittleFS_SPIFram::begin(uint8_t cspin, SPIClass &spiport)
 {
 	pin = cspin;
 	port = &spiport;
 
-	//Serial.println("flash begin");
+	//Serial.printf("flash begin cs:%u\n", pin);
 	configured = false;
 	digitalWrite(pin, HIGH);
 	pinMode(pin, OUTPUT);
@@ -150,21 +188,21 @@ bool LittleFS_SPIFram::begin(uint8_t cspin, SPIClass &spiport)
 	uint8_t buf[9];
 	
 	port->beginTransaction(SPICONFIG);
-    digitalWrite(pin, LOW);
+	digitalWrite(pin, LOW);
 	delayNanoseconds(50);
-    port->transfer(0x9f);  //0x9f - JEDEC register
-    for(uint8_t i = 0; i<9; i++)
-      buf[i] = port->transfer(0);
+	port->transfer(0x9f);  //0x9f - JEDEC register
+	for(uint8_t i = 0; i<9; i++) {
+		buf[i] = port->transfer(0);
+	}
 	//delayNanoseconds(50);
-    digitalWriteFast(pin, HIGH); // Chip deselect
-    port->endTransaction();
+	digitalWriteFast(pin, HIGH); // Chip deselect
+	port->endTransaction();
 
-
-    if(buf[0] == 0x7F){
+	if (buf[0] == 0x7F) {
 		buf[0] = buf[6];
 		buf[1] = buf[7];
 		buf[2] = buf[8];
-    }
+	}
 	//Serial.printf("Flash ID: %02X %02X %02X\n", buf[0], buf[1], buf[2]);
 	const struct chipinfo *info = chip_lookup(buf );
 	if (!info) return false;
@@ -210,6 +248,31 @@ bool LittleFS_SPIFram::begin(uint8_t cspin, SPIClass &spiport)
 	return true;
 }
 
+FLASHMEM
+const char * LittleFS_SPIFram::getMediaName(){
+	uint8_t buf[9];
+	
+	port->beginTransaction(SPICONFIG);
+	digitalWrite(pin, LOW);
+	delayNanoseconds(50);
+	port->transfer(0x9f);  //0x9f - JEDEC register
+	for(uint8_t i = 0; i<9; i++) {
+		buf[i] = port->transfer(0);
+	}
+	//delayNanoseconds(50);
+	digitalWriteFast(pin, HIGH); // Chip deselect
+	port->endTransaction();
+
+	if (buf[0] == 0x7F) {
+		buf[0] = buf[6];
+		buf[1] = buf[7];
+		buf[2] = buf[8];
+	}
+	//Serial.printf("Flash ID: %02X %02X %02X\n", buf[0], buf[1], buf[2]);
+	const struct chipinfo *info = chip_lookup(buf );
+
+  return info->pn;
+}
 
 FLASHMEM
 bool LittleFS::quickFormat()
@@ -417,9 +480,8 @@ int LittleFS_SPIFlash::erase(lfs_block_t block)
 		free(buffer);
 	}
 	const uint32_t addr = block * config.block_size;
-	const uint8_t cmd = (addrbits == 24) ? 0x20 : 0x21; // erase sector
 	uint8_t cmdaddr[5];
-	make_command_and_address(cmdaddr, cmd, addr, addrbits);
+	make_command_and_address(cmdaddr, erasecmd, addr, addrbits);
 	//printtbuf(cmdaddr, 1 + (addrbits >> 3));
 	port->beginTransaction(SPICONFIG);
 	digitalWrite(pin, LOW);
@@ -457,7 +519,7 @@ int LittleFS_SPIFram::read(lfs_block_t block, lfs_off_t offset, void *buf, lfs_s
 	if (!port) return LFS_ERR_IO;
 	const uint32_t addr = block * config.block_size + offset;
 
-  //FRAM READ OPERATION
+	//FRAM READ OPERATION
 	uint8_t cmdaddr[5];
 	//Serial.printf("  addrbits=%d\n", addrbits);
 	make_command_and_address(cmdaddr, 0x03, addr, addrbits);
@@ -478,7 +540,7 @@ int LittleFS_SPIFram::prog(lfs_block_t block, lfs_off_t offset, const void *buf,
 	if (!port) return LFS_ERR_IO;
 	const uint32_t addr = block * config.block_size + offset;
 
-  // F-RAM WRITE ENABLE COMMAND
+	// F-RAM WRITE ENABLE COMMAND
 	uint8_t cmdaddr[5];
 	//Serial.printf("  addrbits=%d\n", addrbits);
 	make_command_and_address(cmdaddr, 0x02, addr, addrbits);
@@ -486,7 +548,7 @@ int LittleFS_SPIFram::prog(lfs_block_t block, lfs_off_t offset, const void *buf,
 	port->beginTransaction(SPICONFIG);
 	digitalWrite(pin,LOW);  //chip select
 	delayNanoseconds(50);
-	SPI.transfer(0x06);    //transmit write enable opcode
+	port->transfer(0x06);    //transmit write enable opcode
 	digitalWrite(pin,HIGH); //release chip, signal end transfer
 	delayNanoseconds(50);
 	// F-RAM WRITE OPERATION
@@ -522,7 +584,7 @@ int LittleFS_SPIFram::erase(lfs_block_t block)
 	// F-RAM WRITE ENABLE COMMAND
 	port->beginTransaction(SPICONFIG);
 	digitalWrite(pin,LOW);  //chip select
-	SPI.transfer(0x06);    //transmit write enable opcode
+	port->transfer(0x06);    //transmit write enable opcode
 	digitalWrite(pin,HIGH); //release chip, signal end transfer
 	delayNanoseconds(50);
 	// F-RAM WRITE OPERATION
@@ -744,7 +806,7 @@ bool LittleFS_QSPIFlash::begin()
 		FLEXSPI2_LUT44 = LUT0(CMD_SDR, PINS1, 0x32) | LUT1(ADDR_SDR, PINS1, 24);
 		FLEXSPI2_LUT45 = LUT0(WRITE_SDR, PINS4, 1);
 		// cmd index 12 = sector erase
-		FLEXSPI2_LUT48 = LUT0(CMD_SDR, PINS1, 0x20) | LUT1(ADDR_SDR, PINS1, 24);
+		FLEXSPI2_LUT48 = LUT0(CMD_SDR, PINS1, info->erasecmd) | LUT1(ADDR_SDR, PINS1, 24);
 		FLEXSPI2_LUT49 = 0;
 	} else {
 		// cmd index 9 = read QSPI (1-1-4)
@@ -755,7 +817,7 @@ bool LittleFS_QSPIFlash::begin()
 		FLEXSPI2_LUT44 = LUT0(CMD_SDR, PINS1, 0x34) | LUT1(ADDR_SDR, PINS1, 32);
 		FLEXSPI2_LUT45 = LUT0(WRITE_SDR, PINS4, 1);
 		// cmd index 12 = sector erase
-		FLEXSPI2_LUT48 = LUT0(CMD_SDR, PINS1, 0x21) | LUT1(ADDR_SDR, PINS1, 32);
+		FLEXSPI2_LUT48 = LUT0(CMD_SDR, PINS1, info->erasecmd) | LUT1(ADDR_SDR, PINS1, 32);
 		FLEXSPI2_LUT49 = 0;
 		// cmd index 9 = read SPI (1-1-1)
 		//FLEXSPI2_LUT36 = LUT0(CMD_SDR, PINS1, 0x13) | LUT1(ADDR_SDR, PINS1, 32);
@@ -839,6 +901,20 @@ int LittleFS_QSPIFlash::wait(uint32_t microseconds)
 	return 0; // success
 }
 
+
+FLASHMEM
+const char * LittleFS_QSPIFlash::getMediaName(){
+	uint8_t buf[4] = {0, 0, 0, 0};
+
+	flexspi2_ip_read(8, 0x00800000, buf, 3);
+
+	//Serial.printf("Flash ID: %02X %02X %02X\n", buf[0], buf[1], buf[2]);
+	const struct chipinfo *info = chip_lookup(buf);
+
+  return info->pn;
+}
+
+
 #endif // __IMXRT1062__
 
 
@@ -851,10 +927,13 @@ int LittleFS_QSPIFlash::wait(uint32_t microseconds)
 
 #if defined(ARDUINO_TEENSY40)
 #define FLASH_SIZE  0x1F0000
+#define SECTOR_SIZE 32768
 #elif defined(ARDUINO_TEENSY41)
 #define FLASH_SIZE  0x7C0000
+#define SECTOR_SIZE 65536
 #elif defined(ARDUINO_TEENSY_MICROMOD)
 #define FLASH_SIZE  0xFC0000
+#define SECTOR_SIZE 65536
 #endif
 extern unsigned long _flashimagelen;
 uint32_t LittleFS_Program::baseaddr = 0;
@@ -863,18 +942,21 @@ FLASHMEM
 bool LittleFS_Program::begin(uint32_t size)
 {
 	//Serial.println("Program flash begin");
+	//Serial.printf("size in bytes - %u \n", size); 
+	
 	configured = false;
 	baseaddr = 0;
-	size = size & 0xFFFF0000;
+	//size = size & 0xFFFF0000;
+	size = (size + 0xFFFF) & 0xFFFF0000;
 	if (size == 0) return false;
-	const uint32_t program_size = (uint32_t)&_flashimagelen + 4096; // extra 4K for CSF
+	const uint32_t program_size = (uint32_t)&_flashimagelen; 
 	if (program_size >= FLASH_SIZE) return false;
 	const uint32_t available_space = FLASH_SIZE - program_size;
+	//Serial.printf("FLASH_SIZE - %u, program_size - %u\n", FLASH_SIZE, program_size);
 	//Serial.printf("available_space = %u\n", available_space);
 	if (size > available_space) return false;
-
 	baseaddr = 0x60000000 + FLASH_SIZE - size;
-	//Serial.printf("baseaddr = %x\n", baseaddr);
+	//Serial.printf("size - %u,  baseaddr = %x\n", size, baseaddr);
 
 	memset(&lfs, 0, sizeof(lfs));
 	memset(&config, 0, sizeof(config));
@@ -885,8 +967,8 @@ bool LittleFS_Program::begin(uint32_t size)
 	config.sync = &static_sync;
 	config.read_size = 128;
 	config.prog_size = 128;
-	config.block_size = 4096;
-	config.block_count = size >> 12;
+	config.block_size = SECTOR_SIZE;
+	config.block_count = size / SECTOR_SIZE;
 	config.block_cycles = 800;
 	config.cache_size = 128;
 	config.lookahead_size = 128;
@@ -914,20 +996,27 @@ int LittleFS_Program::static_read(const struct lfs_config *c, lfs_block_t block,
 	lfs_off_t offset, void *buffer, lfs_size_t size)
 {
 	//Serial.printf("   prog rd: block=%d, offset=%d, size=%d\n", block, offset, size);
-	const uint8_t *p = (uint8_t *)(baseaddr + block * 4096 + offset);
+	const uint8_t *p = (uint8_t *)(baseaddr + block * SECTOR_SIZE + offset);
 	memcpy(buffer, p, size);
 	return 0;
+}
+
+const char * LittleFS_Program::getMediaName() { 
+	PROGMEM static const char prog_pn_name[] = "PROGRAM";
+	return prog_pn_name; 
 }
 
 // from eeprom.c
 extern "C" void eepromemu_flash_write(void *addr, const void *data, uint32_t len);
 extern "C" void eepromemu_flash_erase_sector(void *addr);
+extern "C" void eepromemu_flash_erase_32K_block(void *addr);
+extern "C" void eepromemu_flash_erase_64K_block(void *addr);
 
 int LittleFS_Program::static_prog(const struct lfs_config *c, lfs_block_t block,
 	lfs_off_t offset, const void *buffer, lfs_size_t size)
 {
 	//Serial.printf("   prog wr: block=%d, offset=%d, size=%d\n", block, offset, size);
-	uint8_t *p = (uint8_t *)(baseaddr + block * 4096 + offset);
+	uint8_t *p = (uint8_t *)(baseaddr + block * SECTOR_SIZE + offset);
 	eepromemu_flash_write(p, buffer, size);
 	return 0;
 }
@@ -935,15 +1024,60 @@ int LittleFS_Program::static_prog(const struct lfs_config *c, lfs_block_t block,
 int LittleFS_Program::static_erase(const struct lfs_config *c, lfs_block_t block)
 {
 	//Serial.printf("   prog er: block=%d\n", block);
-	uint8_t *p = (uint8_t *)(baseaddr + block * 4096);
+	uint8_t *p = (uint8_t *)(baseaddr + block * SECTOR_SIZE);
+#if SECTOR_SIZE == 4096
 	eepromemu_flash_erase_sector(p);
+#elif SECTOR_SIZE == 32768
+	eepromemu_flash_erase_32K_block(p);
+#elif SECTOR_SIZE == 65536
+	eepromemu_flash_erase_64K_block(p);
+#else
+#error "Program SECTOR_SIZE must be 4096, 32768, or 65536"
+#endif
 	return 0;
 }
 
 
 #endif // __IMXRT1062__
+//-----------------------------------------------------------------------------
+// Wrapper classes begin methods
+//-----------------------------------------------------------------------------
+bool LittleFS_SPI::begin(uint8_t cspin, SPIClass &spiport) {
+  if (cspin != 0xff) csPin_ = cspin;	
+  if (flash.begin(csPin_, spiport)) {
+    sprintf(display_name, (const char *)F("Flash_%u"), csPin_);
+    pfs = &flash;
+    return true;
+  } else if (fram.begin(csPin_, spiport)) {
+    sprintf(display_name, (const char *)F("Fram_%u"), csPin_);
+    pfs = &fram;
+    return true;
+  } else if (nand.begin(csPin_, spiport)) {
+    sprintf(display_name, (const char *)F("NAND_%u"), csPin_);
+    pfs = &nand;
+    return true;
+  }
+  // none of the above. 
+  pfs = &fsnone;
+  return false;
+}
 
-
-
-
-
+#ifdef __IMXRT1062__
+bool LittleFS_QSPI::begin() {
+  //Serial.printf("Try QSPI");
+  if (flash.begin()) {
+    //Serial.println(" *** Flash ***");
+    strcpy(display_name, (const char *)F("QFlash"));
+    pfs = &flash;
+    return true;
+  } else if (nand.begin()) {
+    //Serial.println(" *** Nand ***");
+    strcpy(display_name, (const char *)F("QNAND"));
+    pfs = &nand;
+    return true;
+  }
+  //Serial.println(" ### Failed ###");
+  pfs = &fsnone;
+  return false;
+}
+#endif // __IMXRT1062__

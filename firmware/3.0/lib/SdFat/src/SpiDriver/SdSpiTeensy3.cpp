@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -33,13 +33,13 @@ void SdSpiArduinoDriver::activate() {
 void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
   if (spiConfig.spiPort) {
     m_spi = spiConfig.spiPort;
-#if defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
-  } else if (spiConfig.csPin == SDCARD_SS_PIN) {
-    m_spi = &SDCARD_SPI;
-    m_spi->setMISO(SDCARD_MISO_PIN);
-    m_spi->setMOSI(SDCARD_MOSI_PIN);
-    m_spi->setSCK(SDCARD_SCK_PIN);
-#endif  // defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
+#if defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
+  } else if (spiConfig.csPin == SDFAT_SDCARD_SS_PIN) {
+    m_spi = &SDFAT_SDCARD_SPI;
+    m_spi->setMISO(SDFAT_SDCARD_MISO_PIN);
+    m_spi->setMOSI(SDFAT_SDCARD_MOSI_PIN);
+    m_spi->setSCK(SDFAT_SDCARD_SCK_PIN);
+#endif  // defined(SDFAT_SDCARD_SPI) && defined(SDFAT_SDCARD_SS_PIN)
   } else {
     m_spi = &SPI;
   }
@@ -48,6 +48,10 @@ void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::deactivate() {
   m_spi->endTransaction();
+}
+//------------------------------------------------------------------------------
+void SdSpiArduinoDriver::end() {
+  m_spi->end();
 }
 //------------------------------------------------------------------------------
 uint8_t SdSpiArduinoDriver::receive() {

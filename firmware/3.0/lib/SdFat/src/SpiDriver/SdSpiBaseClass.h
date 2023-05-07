@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -43,6 +43,8 @@ class SdSpiBaseClass {
   virtual void begin(SdSpiConfig config) = 0;
   /** Deactivate SPI hardware. */
   virtual void deactivate() {}
+  /** deactivate SPI driver. */
+  virtual void end() {}
   /** Receive a byte.
    *
    * \return The byte.

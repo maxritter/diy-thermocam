@@ -57,21 +57,37 @@ class TwoWire : public Stream
   public:
     TwoWire();
     void begin();
-    void begin(uint8_t);
-    void begin(int);
+    void begin(uint8_t address);
+    void begin(int address) {
+      begin((uint8_t)address);
+    }
     void end();
-    void setClock(uint32_t);
-    void setSDA(uint8_t);
-    void setSCL(uint8_t);
-    void beginTransmission(uint8_t);
-    void beginTransmission(int);
-    uint8_t endTransmission(void);
-    uint8_t endTransmission(uint8_t);
-    uint8_t requestFrom(uint8_t, uint8_t);
-    uint8_t requestFrom(uint8_t, uint8_t, uint8_t);
-    uint8_t requestFrom(int, int);
-    uint8_t requestFrom(int, int, int);
-    uint8_t requestFrom(uint8_t, uint8_t, uint32_t, uint8_t, uint8_t);
+    void setClock(uint32_t frequency);
+    void setSDA(uint8_t pin);
+    void setSCL(uint8_t pin);
+    void beginTransmission(uint8_t address);
+    void beginTransmission(int address) {
+      beginTransmission((uint8_t)address);
+    }
+    uint8_t endTransmission(uint8_t sendStop);
+    uint8_t endTransmission(void) {
+      return endTransmission(1);
+    }
+    uint8_t requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop);
+    uint8_t requestFrom(uint8_t address, uint8_t quantity, bool sendStop) {
+      return requestFrom(address, quantity, (uint8_t)(sendStop ? 1 : 0));
+    }
+    uint8_t requestFrom(uint8_t address, uint8_t quantity) {
+      return requestFrom(address, quantity, (uint8_t)1);
+    }
+    uint8_t requestFrom(int address, int quantity, int sendStop) {
+      return requestFrom((uint8_t)address, (uint8_t)quantity,
+        (uint8_t)(sendStop ? 1 : 0));
+    }
+    uint8_t requestFrom(int address, int quantity) {
+      return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)1);
+    }
+    uint8_t requestFrom(uint8_t addr, uint8_t qty, uint32_t iaddr, uint8_t n, uint8_t stop);
     virtual size_t write(uint8_t);
     virtual size_t write(const uint8_t *, size_t);
     virtual int available(void);

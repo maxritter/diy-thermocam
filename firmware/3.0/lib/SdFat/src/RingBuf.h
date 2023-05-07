@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -28,7 +28,7 @@
  * \file
  * \brief Ring buffer for data loggers.
  */
-#include "Arduino.h"
+#include "common/SysCall.h"
 #include "common/FmtNumber.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -142,7 +142,7 @@ class RingBuf : public Print {
     while (nread != count) {
         n = minSize(Size - m_head, count - nread);
         memcpyBuf(m_buf + m_head, src + nread, n);
-        m_head = advance(m_head, n);;
+        m_head = advance(m_head, n);
         nread += n;
     }
     m_count += nread;
@@ -266,8 +266,7 @@ class RingBuf : public Print {
   }
   /**
    * Write all data in the RingBuf to the underlying file.
-   * \param[in] data Byte to be written.
-   * \return Number of bytes actually written.
+   * \return true for success.
    */
   bool sync() {
     size_t n = bytesUsed();
@@ -290,6 +289,15 @@ class RingBuf : public Print {
       setWriteError();
     }
     return memcpyIn(buf, count);
+  }
+  /**
+   * Copy str to RingBuf.
+   *
+   * \param[in] str Location of data to be written.
+   * \return Number of bytes actually written.
+   */
+  size_t write(const char* str) {
+    return Print::write(str);
   }
   /**
    * Override virtual function in Print for efficiency.
@@ -315,6 +323,9 @@ class RingBuf : public Print {
    *
    * The number of bytes written may be less than count if
    * bytesUsed is less than count or if an error occurs.
+   *
+   * This function may be used in non-interrupt code with
+   * memcopyIn() in an ISR.
    *
    * \return Number of bytes actually written.
    */

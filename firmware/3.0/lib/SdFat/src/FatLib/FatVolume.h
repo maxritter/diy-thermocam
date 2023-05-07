@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,7 +24,6 @@
  */
 #ifndef FatVolume_h
 #define FatVolume_h
-#include "FatPartition.h"
 #include "FatFile.h"
 /**
  * \file
@@ -44,7 +43,7 @@ class FatVolume : public  FatPartition {
    * \param[in] part partition to initialize.
    * \return true for success or false for failure.
    */
-  bool begin(BlockDevice* dev, bool setCwv = true, uint8_t part = 1) {
+  bool begin(FsBlockDevice* dev, bool setCwv = true, uint8_t part = 1) {
     if (!init(dev, part)) {
       return false;
     }
@@ -56,6 +55,19 @@ class FatVolume : public  FatPartition {
     }
     return true;
   }
+  bool begin(FsBlockDevice* dev, bool setCwv, uint32_t firstSector, uint32_t numSectors) {
+    if (!init(dev, firstSector, numSectors)) {
+      return false;
+    }
+    if (!chdir()) {
+      return false;
+    }
+    if (setCwv || !m_cwv) {
+      m_cwv = this;
+    }
+    return true;
+  }
+
   /** Change global current working volume to this volume. */
   void chvol() {m_cwv = this;}
 
@@ -73,7 +85,6 @@ class FatVolume : public  FatPartition {
    * \return true for success or false for failure.
    */
   bool chdir(const char *path);
-
   //----------------------------------------------------------------------------
   /**
    * Test for the existence of a file.

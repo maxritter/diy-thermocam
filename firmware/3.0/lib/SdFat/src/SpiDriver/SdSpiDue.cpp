@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -33,13 +33,13 @@
 /* chip select register number */
 #define SPI_CHIP_SEL 3
 /* DMAC receive channel */
-#define SPI_DMAC_RX_CH  1
+#define SPI_DMAC_RX_CH 1
 /* DMAC transmit channel */
-#define SPI_DMAC_TX_CH  0
+#define SPI_DMAC_TX_CH 0
 /* DMAC Channel HW Interface Number for SPI TX. */
-#define SPI_TX_IDX  1
+#define SPI_TX_IDX 1
 /* DMAC Channel HW Interface Number for SPI RX. */
-#define SPI_RX_IDX  2
+#define SPI_RX_IDX 2
 //------------------------------------------------------------------------------
 /* Disable DMA Controller. */
 static void dmac_disable() {
@@ -60,25 +60,6 @@ static void dmac_channel_enable(uint32_t ul_num) {
 /* Poll for transfer complete. */
 static bool dmac_channel_transfer_done(uint32_t ul_num) {
   return (DMAC->DMAC_CHSR & (DMAC_CHSR_ENA0 << ul_num)) ? false : true;
-}
-//------------------------------------------------------------------------------
-void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
-  (void)spiConfig;
-  SPI.begin();
-#if USE_SAM3X_DMAC
-  pmc_enable_periph_clk(ID_DMAC);
-  dmac_disable();
-  DMAC->DMAC_GCFG = DMAC_GCFG_ARB_CFG_FIXED;
-  dmac_enable();
-#if USE_SAM3X_BUS_MATRIX_FIX
-  MATRIX->MATRIX_WPMR = 0x4d415400;
-  MATRIX->MATRIX_MCFG[1] = 1;
-  MATRIX->MATRIX_MCFG[2] = 1;
-  MATRIX->MATRIX_SCFG[0] = 0x01000010;
-  MATRIX->MATRIX_SCFG[1] = 0x01000010;
-  MATRIX->MATRIX_SCFG[7] = 0x01000010;
-#endif  // USE_SAM3X_BUS_MATRIX_FIX
-#endif  // USE_SAM3X_DMAC
 }
 //------------------------------------------------------------------------------
 // start RX DMA
@@ -141,8 +122,31 @@ void SdSpiArduinoDriver::activate() {
   pSpi->SPI_CR |= SPI_CR_SPIEN;
 }
 //------------------------------------------------------------------------------
+void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
+  (void)spiConfig;
+  SPI.begin();
+#if USE_SAM3X_DMAC
+  pmc_enable_periph_clk(ID_DMAC);
+  dmac_disable();
+  DMAC->DMAC_GCFG = DMAC_GCFG_ARB_CFG_FIXED;
+  dmac_enable();
+#if USE_SAM3X_BUS_MATRIX_FIX
+  MATRIX->MATRIX_WPMR = 0x4d415400;
+  MATRIX->MATRIX_MCFG[1] = 1;
+  MATRIX->MATRIX_MCFG[2] = 1;
+  MATRIX->MATRIX_SCFG[0] = 0x01000010;
+  MATRIX->MATRIX_SCFG[1] = 0x01000010;
+  MATRIX->MATRIX_SCFG[7] = 0x01000010;
+#endif  // USE_SAM3X_BUS_MATRIX_FIX
+#endif  // USE_SAM3X_DMAC
+}
+//------------------------------------------------------------------------------
 void SdSpiArduinoDriver::deactivate() {
   SPI.endTransaction();
+}
+//------------------------------------------------------------------------------
+void SdSpiArduinoDriver::end() {
+  SPI.end();
 }
 //------------------------------------------------------------------------------
 static inline uint8_t spiTransfer(uint8_t b) {

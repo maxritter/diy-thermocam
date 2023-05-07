@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -32,18 +32,25 @@
 #ifdef __AVR__
 #include <avr/io.h>
 #endif  // __AVR__
+//
+// To try UTF-8 encoded filenames.
+// #define USE_UTF8_LONG_NAMES 1
+//
+// For minimum flash size use these settings:
+// #define USE_FAT_FILE_FLAG_CONTIGUOUS 0
+// #define ENABLE_DEDICATED_SPI 0
+// #define USE_LONG_FILE_NAMES 0
+// #define SDFAT_FILE_TYPE 1
+//
+// Options can be set in a makefile or an IDE like platformIO
+// if they are in a #ifndef/#endif block below.
+//------------------------------------------------------------------------------
 /** For Debug - must be one */
 #define ENABLE_ARDUINO_FEATURES 1
 /** For Debug - must be one */
 #define ENABLE_ARDUINO_SERIAL 1
 /** For Debug - must be one */
 #define ENABLE_ARDUINO_STRING 1
-//------------------------------------------------------------------------------
-/** Set zero to disable mod for non-blocking write. */
-#define ENABLE_TEENSY_SDIO_MOD 1
-//------------------------------------------------------------------------------
-/** Set USE_BLOCK_DEVICE_INTERFACE nonzero to use generic block device */
-#define USE_BLOCK_DEVICE_INTERFACE 0
 //------------------------------------------------------------------------------
 #if ENABLE_ARDUINO_FEATURES
 #include "Arduino.h"
@@ -54,18 +61,6 @@
 #endif  // ENABLE_ARDUINO_FEATURES
 //------------------------------------------------------------------------------
 /**
- * Set INCLUDE_SDIOS nonzero to include sdios.h in SdFat.h.
- * sdios.h provides C++ style IO Streams.
- */
-#define INCLUDE_SDIOS 0
-//------------------------------------------------------------------------------
-/**
- * Set USE_FAT_FILE_FLAG_CONTIGUOUS nonzero to optimize access to
- * contiguous files.
- */
-#define USE_FAT_FILE_FLAG_CONTIGUOUS 1
-//------------------------------------------------------------------------------
-/**
  * File types for SdFat, File, SdFile, SdBaseFile, fstream,
  * ifstream, and ofstream.
  *
@@ -73,16 +68,27 @@
  *
  * 1 for FAT16/FAT32, 2 for exFAT, 3 for FAT16/FAT32 and exFAT.
  */
+#ifndef SDFAT_FILE_TYPE
 #if defined(__AVR__) && FLASHEND < 0X8000
 // 32K AVR boards.
 #define SDFAT_FILE_TYPE 1
 #elif defined(__arm__)
 // ARM boards usually have plenty of memory
 #define SDFAT_FILE_TYPE 3
+#define USE_UTF8_LONG_NAMES 1
 #else  // defined(__AVR__) && FLASHEND < 0X8000
 // All other boards.
-#define SDFAT_FILE_TYPE 1
+#define SDFAT_FILE_TYPE 3
 #endif  // defined(__AVR__) && FLASHEND < 0X8000
+#endif  // SDFAT_FILE_TYPE
+//------------------------------------------------------------------------------
+/**
+ * Set USE_FAT_FILE_FLAG_CONTIGUOUS nonzero to optimize access to
+ * contiguous files.  A small amount of flash is flash is used.
+ */
+#ifndef USE_FAT_FILE_FLAG_CONTIGUOUS
+#define USE_FAT_FILE_FLAG_CONTIGUOUS 1
+#endif  // USE_FAT_FILE_FLAG_CONTIGUOUS
 //------------------------------------------------------------------------------
 /**
  * Set ENABLE_DEDICATED_SPI non-zero to enable dedicated use of the SPI bus.
@@ -90,8 +96,9 @@
  * performance by using very large multi-block transfers to and
  * from the SD card.
  *
- * Enabling dedicated SPI will cost some extra flash and RAM.
+ * Enabling dedicated SPI will cost extra flash and RAM.
  */
+#ifndef ENABLE_DEDICATED_SPI
 #if defined(__AVR__) && FLASHEND < 0X8000
 // 32K AVR boards.
 #define ENABLE_DEDICATED_SPI 1
@@ -99,7 +106,9 @@
 // All other boards.
 #define ENABLE_DEDICATED_SPI 1
 #endif  // defined(__AVR__) && FLASHEND < 0X8000
+#endif  // ENABLE_DEDICATED_SPI
 //------------------------------------------------------------------------------
+// Driver options
 /**
  * If the symbol SPI_DRIVER_SELECT is:
  *
@@ -112,9 +121,50 @@
  *
  * 3 - An external SPI driver derived from SdSpiBaseClass is always used.
  */
+#ifndef SPI_DRIVER_SELECT
 #define SPI_DRIVER_SELECT 0
-//------------------------------------------------------------------------------
+#endif  // SPI_DRIVER_SELECT
 /**
+ * If USE_SPI_ARRAY_TRANSFER is non-zero and the standard SPI library is
+ * use, the array transfer function, transfer(buf, size), will be used.
+ * This option will allocate up to a 512 byte temporary buffer for send.
+ * This may be faster for some boards.  Do not use this with AVR boards.
+ */
+#ifndef USE_SPI_ARRAY_TRANSFER
+#define USE_SPI_ARRAY_TRANSFER 0
+#endif  // USE_SPI_ARRAY_TRANSFER
+/**
+ * SD maximum initialization clock rate.
+ */
+#ifndef SD_MAX_INIT_RATE_KHZ
+#define SD_MAX_INIT_RATE_KHZ 400
+#endif  // SD_MAX_INIT_RATE_KHZ
+/**
+ * Set USE_BLOCK_DEVICE_INTERFACE nonzero to use a generic block device.
+ * This allow use of an external FsBlockDevice driver that is derived from
+ * the FsBlockDeviceInterface like this:
+ *
+ * class UsbMscDriver : public FsBlockDeviceInterface {
+ *   ... code for USB mass storage class driver.
+ * };
+ *
+ * UsbMscDriver usbMsc;
+ * FsVolume key;
+ * ...
+ *
+ *   // Init USB MSC driver.
+ *   if (!usbMsc.begin()) {
+ *     ... handle driver init failure.
+ *   }
+ *   // Init FAT/exFAT volume.
+ *   if (!key.begin(&usbMsc)) {
+ *     ... handle FAT/exFAT failure.
+ *   }
+ */
+#ifndef USE_BLOCK_DEVICE_INTERFACE
+#define USE_BLOCK_DEVICE_INTERFACE 1
+#endif  // USE_BLOCK_DEVICE_INTERFACE
+ /**
  * SD_CHIP_SELECT_MODE defines how the functions
  * void sdCsInit(SdCsPin_t pin) {pinMode(pin, OUTPUT);}
  * and
@@ -127,14 +177,11 @@
  *
  * 2 - No internal definition and must be defined in the application.
  */
+#ifndef SD_CHIP_SELECT_MODE
 #define SD_CHIP_SELECT_MODE 0
+#endif  // SD_CHIP_SELECT_MODE
 /** Type for card chip select pin. */
 typedef uint8_t SdCsPin_t;
-//------------------------------------------------------------------------------
-/**
- * SD maximum initialization clock rate.
- */
-#define SD_MAX_INIT_RATE_KHZ 400
 //------------------------------------------------------------------------------
 /**
  * Set USE_LONG_FILE_NAMES nonzero to use long file names (LFN) in FAT16/FAT32.
@@ -156,7 +203,41 @@ typedef uint8_t SdCsPin_t;
  *  * (asterisk)
  *
  */
+#ifndef USE_LONG_FILE_NAMES
 #define USE_LONG_FILE_NAMES 1
+#endif  // USE_LONG_FILE_NAMES
+/**
+ * Set USE_UTF8_LONG_NAMES nonzero to use UTF-8 file names. Use of UTF-8 names
+ * will require significantly more flash memory and a small amount of extra
+ * RAM.
+ *
+ * UTF-8 filenames allow encoding of 1,112,064 code points in Unicode using
+ * one to four one-byte (8-bit) code units.
+ *
+ * As of Version 13.0, the Unicode Standard defines 143,859 characters.
+ *
+ * getName() will return UTF-8 strings and printName() will write UTF-8 strings.
+ */
+#ifndef USE_UTF8_LONG_NAMES
+#define USE_UTF8_LONG_NAMES 0
+#endif  // USE_UTF8_LONG_NAMES
+
+#if USE_UTF8_LONG_NAMES && !USE_LONG_FILE_NAMES
+#error "USE_UTF8_LONG_NAMES requires USE_LONG_FILE_NAMES to be non-zero."
+#endif  // USE_UTF8_LONG_NAMES && !USE_LONG_FILE_NAMES
+//------------------------------------------------------------------------------
+/**
+ * Set MAINTAIN_FREE_CLUSTER_COUNT nonzero to keep the count of free clusters
+ * updated.  This will increase the speed of the freeClusterCount() call
+ * after the first call.  Extra flash will be required.
+ */
+#ifndef MAINTAIN_FREE_CLUSTER_COUNT
+#if defined(__arm__)
+#define MAINTAIN_FREE_CLUSTER_COUNT 1
+#else
+#define MAINTAIN_FREE_CLUSTER_COUNT 0
+#endif
+#endif  // MAINTAIN_FREE_CLUSTER_COUNT
 //------------------------------------------------------------------------------
 /**
  * Set the default file time stamp when a RTC callback is not used.
@@ -184,14 +265,9 @@ typedef uint8_t SdCsPin_t;
  * Some cards will not sleep in low power mode unless CHECK_FLASH_PROGRAMMING
  * is non-zero.
  */
+#ifndef CHECK_FLASH_PROGRAMMING
 #define CHECK_FLASH_PROGRAMMING 0
-//------------------------------------------------------------------------------
-/**
- * Set MAINTAIN_FREE_CLUSTER_COUNT nonzero to keep the count of free clusters
- * updated.  This will increase the speed of the freeClusterCount() call
- * after the first call.  Extra flash will be required.
- */
-#define MAINTAIN_FREE_CLUSTER_COUNT 0
+#endif  // CHECK_FLASH_PROGRAMMING
 //------------------------------------------------------------------------------
 /**
  * To enable SD card CRC checking for SPI, set USE_SD_CRC nonzero.
@@ -202,12 +278,15 @@ typedef uint8_t SdCsPin_t;
  * Set USE_SD_CRC to 2 to used a larger table driven CRC-CCITT function.  This
  * function is faster for AVR but may be slower for ARM and other processors.
  */
-#define USE_SD_CRC 1
+#ifndef USE_SD_CRC
+#define USE_SD_CRC 0
+#endif  // USE_SD_CRC
 //------------------------------------------------------------------------------
 /** If the symbol USE_FCNTL_H is nonzero, open flags for access modes O_RDONLY,
  * O_WRONLY, O_RDWR and the open modifiers O_APPEND, O_CREAT, O_EXCL, O_SYNC
  * will be defined by including the system file fcntl.h.
  */
+#ifndef USE_FCNTL_H
 #if defined(__AVR__)
 // AVR fcntl.h does not define open flags.
 #define USE_FCNTL_H 0
@@ -222,32 +301,37 @@ typedef uint8_t SdCsPin_t;
 #else  // defined(__AVR__)
 #define USE_FCNTL_H 0
 #endif  // defined(__AVR__)
+#endif  // USE_FCNTL_H
 //------------------------------------------------------------------------------
 /**
- * Handle Watchdog Timer for WiFi modules.
- *
- * Yield will be called before accessing the SPI bus if it has been more
- * than WDT_YIELD_TIME_MILLIS milliseconds since the last yield call by SdFat.
+ * Set INCLUDE_SDIOS nonzero to include sdios.h in SdFat.h.
+ * sdios.h provides C++ style IO Streams.
  */
-#if defined(PLATFORM_ID) || defined(ESP8266)
-// If Particle device or ESP8266 call yield.
-#define WDT_YIELD_TIME_MILLIS 100
-#else  // defined(PLATFORM_ID) || defined(ESP8266)
-#define WDT_YIELD_TIME_MILLIS 0
-#endif  // defined(PLATFORM_ID) || defined(ESP8266)
+#ifndef INCLUDE_SDIOS
+#define INCLUDE_SDIOS 0
+#endif  // INCLUDE_SDIOS
 //------------------------------------------------------------------------------
 /**
  * Set FAT12_SUPPORT nonzero to enable use if FAT12 volumes.
  * FAT12 has not been well tested and requires additional flash.
  */
+#ifndef FAT12_SUPPORT
+#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)
+// mainly defined for support of USBHost builds... But included T3.5...
+#define FAT12_SUPPORT 1
+#else
 #define FAT12_SUPPORT 0
+#endif
+#endif  // FAT12_SUPPORT
 //------------------------------------------------------------------------------
 /**
  * Set DESTRUCTOR_CLOSES_FILE nonzero to close a file in its destructor.
  *
  * Causes use of lots of heap in ARM.
  */
+#ifndef DESTRUCTOR_CLOSES_FILE
 #define DESTRUCTOR_CLOSES_FILE 0
+#endif  // DESTRUCTOR_CLOSES_FILE
 //------------------------------------------------------------------------------
 /**
  * Call flush for endl if ENDL_CALLS_FLUSH is nonzero
@@ -266,14 +350,16 @@ typedef uint8_t SdCsPin_t;
  * If ENDL_CALLS_FLUSH is zero, you must call flush and/or close to force
  * all data to be written to the SD.
  */
+#ifndef ENDL_CALLS_FLUSH
 #define ENDL_CALLS_FLUSH 0
+#endif  // ENDL_CALLS_FLUSH
 //------------------------------------------------------------------------------
 /**
  * Set USE_SIMPLE_LITTLE_ENDIAN nonzero for little endian processors
  * with no memory alignment restrictions.
  */
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ && !defined(__SAMD21G18A__)\
-  && !defined(__MKL26Z64__) && !defined(ESP8266)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__\
+  && (defined(__AVR__) || defined(__ARM_FEATURE_UNALIGNED) || defined(__ARM_ARCH_7EM__))
 #define USE_SIMPLE_LITTLE_ENDIAN 1
 #else  // __BYTE_ORDER_
 #define USE_SIMPLE_LITTLE_ENDIAN 0
@@ -300,6 +386,7 @@ typedef uint8_t SdCsPin_t;
 #else  // __arm__
 #define USE_EXFAT_BITMAP_CACHE 0
 #endif  // __arm__
+
 //------------------------------------------------------------------------------
 /**
  * Set USE_MULTI_SECTOR_IO nonzero to use multi-sector SD read/write.
@@ -319,13 +406,13 @@ typedef uint8_t SdCsPin_t;
 #define BUILTIN_SDCARD 254
 #endif  // BUILTIN_SDCARD
 // SPI for built-in card.
-#ifndef SDCARD_SPI
-#define SDCARD_SPI      SPI1
-#define SDCARD_MISO_PIN 59
-#define SDCARD_MOSI_PIN 61
-#define SDCARD_SCK_PIN  60
-#define SDCARD_SS_PIN   62
-#endif  // SDCARD_SPI
+#ifndef SDFAT_SDCARD_SPI
+#define SDFAT_SDCARD_SPI      SPI1
+#define SDFAT_SDCARD_MISO_PIN 59
+#define SDFAT_SDCARD_MOSI_PIN 61
+#define SDFAT_SDCARD_SCK_PIN  60
+#define SDFAT_SDCARD_SS_PIN   62
+#endif  // SDFAT_SDCARD_SPI
 #define HAS_SDIO_CLASS 1
 #endif  // defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #if defined(__IMXRT1062__)
@@ -336,10 +423,12 @@ typedef uint8_t SdCsPin_t;
  * Determine the default SPI configuration.
  */
 #if defined(ARDUINO_ARCH_APOLLO3)\
-  || defined(__AVR__)\
+  || (defined(__AVR__) && defined(SPDR) && defined(SPSR) && defined(SPIF))\
+  || (defined(__AVR__) && defined(SPI0) && defined(SPI_RXCIF_bm))\
   || defined(ESP8266) || defined(ESP32)\
   || defined(PLATFORM_ID)\
   || defined(ARDUINO_SAM_DUE)\
+  || defined(STM32_CORE_VERSION)\
   || defined(__STM32F1__) || defined(__STM32F4__)\
   || (defined(CORE_TEENSY) && defined(__arm__))
 #define SD_HAS_CUSTOM_SPI 1
@@ -352,4 +441,5 @@ typedef uint8_t SdCsPin_t;
 /** Default is no SDIO. */
 #define HAS_SDIO_CLASS 0
 #endif  // HAS_SDIO_CLASS
+
 #endif  // SdFatConfig_h

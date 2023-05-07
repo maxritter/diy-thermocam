@@ -192,7 +192,7 @@ More details on how littlefs works can be found in [DESIGN.md](DESIGN.md) and
 ## Testing
 
 The littlefs comes with a test suite designed to run on a PC using the
-[emulated block device](emubd/lfs_emubd.h) found in the emubd directory.
+[emulated block device](bd/lfs_testbd.h) found in the `bd` directory.
 The tests assume a Linux environment and can be started with make:
 
 ``` bash
@@ -221,6 +221,11 @@ License Identifiers that are here available: http://spdx.org/licenses/
 - [littlefs-js] - A javascript wrapper for littlefs. I'm not sure why you would
   want this, but it is handy for demos.  You can see it in action
   [here][littlefs-js-demo].
+  
+- [littlefs-python] - A Python wrapper for littlefs. The project allows you
+  to create images of the filesystem on your PC. Check if littlefs will fit
+  your needs, create images for a later download to the target memory or
+  inspect the content of a binary image of the target memory.
 
 - [mklfs] - A command line tool built by the [Lua RTOS] guys for making
   littlefs images from a host PC. Supports Windows, Mac OS, and Linux.
@@ -250,3 +255,4 @@ License Identifiers that are here available: http://spdx.org/licenses/
 [LittleFileSystem]: https://os.mbed.com/docs/mbed-os/v5.12/apis/littlefilesystem.html
 [SPIFFS]: https://github.com/pellepl/spiffs
 [Dhara]: https://github.com/dlbeer/dhara
+[littlefs-python]: https://pypi.org/project/littlefs-python/

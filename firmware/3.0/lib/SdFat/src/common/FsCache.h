@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2021 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -29,8 +29,7 @@
  * \brief Common cache code for exFAT and FAT.
  */
 #include "SysCall.h"
-#include "BlockDevice.h"
-#include "DebugMacros.h"
+#include "FsBlockDevice.h"
 /**
  * \class FsCache
  * \brief Sector cache.
@@ -128,7 +127,7 @@ class FsCache {
   /** Initialize the cache.
    * \param[in] blockDev Block device for this cache.
    */
-  void init(BlockDevice* blockDev) {
+  void init(FsBlockDevice* blockDev) {
     m_blockDev = blockDev;
     invalidate();
   }
@@ -154,6 +153,12 @@ class FsCache {
   bool isDirty() {
     return m_status & CACHE_STATUS_DIRTY;
   }
+  /** Prepare cache to access sector.
+   * \param[in] sector Sector to read.
+   * \param[in] option mode for cached sector.
+   * \return Address of cached sector.
+   */
+  uint8_t* prepare(uint32_t sector, uint8_t option);
   /** \return Logical sector number for cached sector. */
   uint32_t sector() {
     return m_sector;
@@ -164,11 +169,6 @@ class FsCache {
   void setMirrorOffset(uint32_t offset) {
     m_mirrorOffset = offset;
   }
-  /** Fill cache with sector data.
-   * \param[in] sector Sector to read.
-   * \param[in] option mode for cached sector.
-   * \return Address of cached sector. */
-  uint8_t* get(uint32_t sector, uint8_t option);
   /** Write current sector if dirty.
    * \return true for success or false for failure.
    */
@@ -176,7 +176,7 @@ class FsCache {
 
  private:
   uint8_t m_status;
-  BlockDevice* m_blockDev;
+  FsBlockDevice* m_blockDev;
   uint32_t m_mirrorOffset;
   uint32_t m_sector;
   uint8_t m_buffer[512];
