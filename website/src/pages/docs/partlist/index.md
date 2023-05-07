@@ -12,10 +12,10 @@ title: Partlist
 
 If you want to source the parts for the DIY-Thermocam V3 on your own instead of **[buying the Kit from GroupGets](https://store.groupgets.com/products/diy-thermocam-v3)** that has all parts in it, check out this list:
 
-- 1 x [PCB from GroupGets](https://store.groupgets.com/products/diy-thermocam-pcb) OR 1 x [PCB from your own service](https://github.com/maxritter/diy-thermocam/tree/master/pcb/3.0)
+- 1 x [PCB from GroupGets](https://store.groupgets.com/products/diy-thermocam-pcb) OR [PCB from your own service](https://github.com/maxritter/diy-thermocam/tree/master/pcb/3.0)
 - 1 x [FLIR Lepton 3.5](https://store.groupgets.com/products/flir-lepton-3-5) (160x120) OR [FLIR Lepton2.5](https://store.groupgets.com/products/flir-lepton-2-5) (80x60)
 - 1 x [FLIR Lepton Breakout Board V2.0](https://store.groupgets.com/products/lepton-breakout-board-v2-0)
-- 1 x [2D Laser Cutted Enclosure](https://github.com/maxritter/diy-thermocam/tree/master/enclosure/3.0) OR 1x [3D Printed Enclosure](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) (3mm Acryl GS Grey for Laser Cutted Enclosure)
+- 1 x [2D Laser Cutted Enclosure](https://github.com/maxritter/diy-thermocam/tree/master/enclosure/3.0) OR [3D Printed Enclosure](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) (3mm Acryl GS Grey for Laser Cutted Enclosure)
 - 1 x [Pololu 5V Step-Up Voltage Regulator U3V16F5](https://www.pololu.com/product/4941)
 - 1 x [3.2 Inch TFT LCD Touch Display](http://www.buydisplay.com/default/3-2-inch-capacitive-touchscreen-240x320-tft-lcd-module-display) (Pin Header Connection-4-wire-SPI, Power Supply: 5V, Touch Panel: 3.2" Resistive, Font Chip: None)
 - 1 x [Samsung Battery EB-BG355BBE](https://www.aliexpress.com/i/32855281429.html) (or Li-Ion battery with similar capacity and dimensions)
