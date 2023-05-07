@@ -3,10 +3,10 @@ title: DIY-Thermocam
 sections:
   - type: section_hero
     template: section_hero
-    title: The power of thermal imaging - now affordable for everyone!
+    title: Build your own thermal camera with an open-source ecosystem
     section_id: hero
     image: /images/website/background.jpg
-    content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular radiometric\_**FLIR Lepton**\_sensor and an **open-source ecosystem**.\n"
+    content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular \_**FLIR Lepton**\_ sensor and **open-source hardware and software**\n"
     actions:
       - label: Buy the DIY-Thermocam V3 Kit on GroupGets
         url: 'https://store.groupgets.com/products/diy-thermocam-v3'
