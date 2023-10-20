@@ -32,7 +32,7 @@ _template: page
 
 # Prerequisites
 
-The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermocam-v3) from GroupGets contains **all required parts excluding the FLIR Lepton 2.5/3.5 and the Lepton Breakout Board V2 to build the device**. In case you do not already have a **FLIR Lepton sensor** (2.5 or 3.5) or **FLIR Lepton Breakout Board V2**, you can add it during the **checkout process at GroupGets**. If you want to source the parts on your own, you can get the links from the [**Partlist**](https://www.diy-thermocam.net/docs/partlist/).
+The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermocam-v3) from GroupGets contains **all required parts excluding the FLIR Lepton 2.5 / 3.1R / 3.5 and the Lepton Breakout Board V2 to build the device**. In case you do not already have a **FLIR Lepton sensor** (2.5, 3.1R or 3.5) or **FLIR Lepton Breakout Board V2**, you can add it during the **checkout process at GroupGets**. If you want to source the parts on your own, you can get the links from the [**Partlist**](https://www.diy-thermocam.net/docs/partlist/).
 
 Here is an overview about the **required parts for this guide**:
 
@@ -299,7 +299,7 @@ Grab the front part of the **Enclosure** and use a **Screwdriver** to secure it 
 
 #### 39.
 
-Use a **Tweezer** or your fingers to carefully put the **Lepton2.5** or **Lepton3.5** into the socket of the Lepton Breakout Board V2. There is only one position it fits in. Make sure it snaps in and clicks on the top and bottom, otherwise there will be no connection to the Lepton possible. Next put the **Coin Cell Battery** inside the Coin Cell Holder by having the plus on the top as indicated on the holder:
+Use a **Tweezer** or your fingers to carefully put the **Lepton2.5**, **Lepton3.1R** or **Lepton3.5** into the socket of the Lepton Breakout Board V2. There is only one position it fits in. Make sure it snaps in and clicks on the top and bottom, otherwise there will be no connection to the Lepton possible. Next put the **Coin Cell Battery** inside the Coin Cell Holder by having the plus on the top as indicated on the holder:
 
 ![](https://www.diy-thermocam.net/images/manual/41.jpg)
 

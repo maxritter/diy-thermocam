@@ -190,7 +190,7 @@ Each command returns either its own command ID as response if it was executed su
   | 0xB5  | Touch screen was pressed short; user wants to save a visual image  (only used in Thermal Live Viewer) |
   | 0xB7  | No button pressed: normal frame, followed by the byte stream  (should be used by default) |
 
-- rawData (9600 (Lepton2.5) / 38400 (Lepton3.5) byte): 14-bit raw values (0 … 16383) for each pixel, equivalent to infrared intensity
+- rawData (9600 (Lepton2.5) / 38400 (Lepton3.1R/3.5) byte): 14-bit raw values (0 … 16383) for each pixel, equivalent to infrared intensity
 
 - rawLimits (4 byte): minTemp MSB, minTemp LSB, maxTemp MSB, maxTemp LSB  
 

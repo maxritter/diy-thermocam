@@ -56,7 +56,7 @@ _template: page
          Thermal resolution
       </td>
       <td>
-         80x60 (Lepton2.5) or 160x120 (Lepton3.5)
+         80x60 (Lepton2.5) or 160x120 (Lepton 3.1R or 3.5)
       </td>
       <td>
          160x120
