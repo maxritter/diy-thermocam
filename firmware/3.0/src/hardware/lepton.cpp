@@ -593,8 +593,8 @@ bool lepton_version()
 		leptonVersion = leptonVersion_2_5_shutter;
 	}
 
-	//Detected Lepton3.5 Shuttered (Radiometric)
-	else if (strstr(leptonhw, "05-070170") != NULL)
+	//Detected Lepton3.1R or Lepton3.5 Shuttered (Radiometric)
+	else if ((strstr(leptonhw, "05-070170") != NULL) || (strstr(leptonhw, "05-070850") != NULL))
 	{
 		leptonVersion = leptonVersion_3_5_shutter;
 	}
