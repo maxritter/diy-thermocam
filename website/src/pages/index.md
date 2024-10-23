@@ -3,12 +3,12 @@ title: DIY-Thermocam
 sections:
   - type: section_hero
     template: section_hero
-    title: Build your own thermal camera with an open-source ecosystem
+    title: Open Thermal Imaging for Everyone
     section_id: hero
     image: /images/website/background.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular \_**FLIR Lepton**\_ sensor and **open-source hardware and software**\n"
     actions:
-      - label: Get Started
+      - label: Build Your Own Thermal Camera
         url: 'https://www.diy-thermocam.net/building-instructions'
         style: primary
   - type: section_content
