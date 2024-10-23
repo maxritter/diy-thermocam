@@ -8,8 +8,8 @@ sections:
     image: /images/website/background.jpg
     content: "The\_**DIY-Thermocam V3**\_is a\_**low-cost, do-it-yourself**\_thermal imager, based on the popular \_**FLIR Lepton**\_ sensor and **open-source hardware and software**\n"
     actions:
-      - label: Buy the DIY-Thermocam V3 Kit on GroupGets
-        url: 'https://store.groupgets.com/products/diy-thermocam-v3'
+      - label: Get Started
+        url: 'https://www.diy-thermocam.net/building-instructions'
         style: primary
   - type: section_content
     template: section_content

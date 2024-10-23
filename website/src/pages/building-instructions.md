@@ -1,6 +1,6 @@
 ---
 title: Building Instructions
-subtitle: This guide instructs you how to build your DIY-Thermocam V3 from the GroupGets Kit
+subtitle: This guide instructs you how to build your DIY-Thermocam V3 thermal imager
 seo:
   title: DIY-Thermocam | Open-source thermal imaging for the rest of us
   description: >-
@@ -32,9 +32,7 @@ _template: page
 
 # Prerequisites
 
-The [**DIY-Thermocam V3 Kit**](https://store.groupgets.com/products/diy-thermocam-v3) from GroupGets contains **all required parts excluding the FLIR Lepton 2.5 / 3.1R / 3.5 and the Lepton Breakout Board V2 to build the device**. In case you do not already have a **FLIR Lepton sensor** (2.5, 3.1R or 3.5) or **FLIR Lepton Breakout Board V2**, you can add it during the **checkout process at GroupGets**. If you want to source the parts on your own, you can get the links from the [**Partlist**](https://www.diy-thermocam.net/docs/partlist/).
-
-Here is an overview about the **required parts for this guide**:
+Please refer to the [**Partlist**](https://www.diy-thermocam.net/docs/partlist/) for the **required parts for this guide**:
 
 ![](https://www.diy-thermocam.net/images/manual/1.jpg)
 
