@@ -6,7 +6,6 @@ com_ports = list(ports.comports())
 for i in com_ports:            
     print(i.device) 
 
-
 SERIAL_PORT = "COM10"
 
 if __name__ == "__main__":
