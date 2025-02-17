@@ -13,7 +13,7 @@ import platform
 import io
 from skimage.transform import resize
 from src.colorschemes import ColorSchemes
-
+import cv2
 
 class LiveViewer:
     def __init__(self, serial_port):
