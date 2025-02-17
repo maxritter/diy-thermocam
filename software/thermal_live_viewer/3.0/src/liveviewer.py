@@ -839,6 +839,35 @@ class LiveViewer:
         if wait:
             time.sleep(1)
 
+    def SaveVideoFile(self,image_folder,output_video):
+        # Get all image files in the folder (assuming they're named sequentially)
+        images = [img for img in os.listdir(image_folder) if img.endswith(".jpg")]
+        images.sort()  # Ensure images are in the correct order (e.g., image001, image002, etc.)
+
+
+
+        # Read the first image to get the size (all images should be the same size)
+        first_image = cv2.imread(os.path.join(image_folder, images[0]))
+        height, width, _ = first_image.shape
+
+        # Define the codec and create VideoWriter object
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # for .mp4 format
+        fps = 4  # Frames per second in the video
+
+        # Create VideoWriter object to save the video
+        video_writer = cv2.VideoWriter(output_video, fourcc, fps, (width, height))
+
+        # Loop through images and add them to the video
+        for image in images:
+            img_path = os.path.join(image_folder, image)
+            img = cv2.imread(img_path)
+            video_writer.write(img)
+
+        # Release the video writer object
+        video_writer.release()
+
+        print(f"Video saved as {output_video}")
+
     # Starts or stops video recording
     def videoRecord(self):
         # Start recording a video
@@ -887,7 +916,13 @@ class LiveViewer:
                 self.videoFolder,
                 self.videoFolder + ".avi",
             )
-            os.system(ffmpegCmd)
+            split_string = ffmpegCmd.split(' ')
+            
+            # Get the path for the images and the video directory
+            video_save_folder = split_string[-1]
+            image_folder_for_video = video_save_folder[:-4]
+
+            self.SaveVideoFile(image_folder_for_video,video_save_folder)
 
             # Remove the folder with the single frames
             shutil.rmtree(self.videoFolder, True)
