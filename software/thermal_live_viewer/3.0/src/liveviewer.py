@@ -1470,7 +1470,10 @@ class LiveViewer:
 
     # Extracts RGB values from the lepton raw data
     def extractRGB(self, buff):
-        arr = numpy.fromstring(buff, dtype=numpy.uint16).newbyteorder("S")
+        # Updated to use the new numpy 2.0 syntax for byte order conversion
+        arr = numpy.frombuffer(buff, dtype=numpy.uint16)
+        arr = arr.view(arr.dtype.newbyteorder('S'))
+        
         r = (((arr & 0xF800) >> 11) * 255.0 / 31.0).astype(numpy.uint8)
         g = (((arr & 0x07E0) >> 5) * 255.0 / 63.0).astype(numpy.uint8)
         b = (((arr & 0x001F) >> 0) * 255.0 / 31.0).astype(numpy.uint8)
