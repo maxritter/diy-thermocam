@@ -6,6 +6,7 @@ export default function HTML(props) {
     <html {...props.htmlAttributes}>
       <head>
         {props.headComponents}
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="efb7f48a-b0e1-46ff-9e74-2a2c1a76e868"></script>
       </head>
       <body {...props.bodyAttributes}>
         {props.preBodyComponents}
