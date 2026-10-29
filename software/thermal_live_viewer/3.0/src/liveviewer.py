@@ -141,6 +141,15 @@ class LiveViewer:
         base_path = os.path.abspath("./res")
         return os.path.join(base_path, relative_path)
 
+    # Send raw bytes to the device, one byte per value (0-255).
+    # chr(x).encode() would use UTF-8 and send two bytes for values >= 0x80
+    def sendBytes(self, *values):
+        self.ser.write(bytes(values))
+
+    # Read up to n bytes from the device as a list of integers
+    def readBytes(self, n):
+        return list(self.ser.read(n))
+
     # Set the color scheme
     def setColorScheme(self, updateValue):
         # Update value
@@ -154,22 +163,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_colorscheme), chr(self.colorScheme))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_colorscheme, self.colorScheme)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_colorscheme:
+            if inData[0] != self.cmd_set_colorscheme:
                 return False
 
         # Arctic
@@ -284,22 +292,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_showspot), chr(self.spotEnabled))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_showspot, self.spotEnabled)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_showspot:
+            if inData[0] != self.cmd_set_showspot:
                 return False
 
         # Update UI
@@ -322,22 +329,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_showcolorbar), chr(self.barEnabled))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_showcolorbar, self.barEnabled)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_showcolorbar:
+            if inData[0] != self.cmd_set_showcolorbar:
                 return False
 
         # Update UI
@@ -363,22 +369,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_showminmax), chr(self.minMaxEnabled))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_showminmax, self.minMaxEnabled)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_showminmax:
+            if inData[0] != self.cmd_set_showminmax:
                 return False
 
         # Update UI
@@ -408,22 +413,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_textcolor), chr(self.textColor))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_textcolor, self.textColor)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_textcolor:
+            if inData[0] != self.cmd_set_textcolor:
                 return False
 
         # Update UI
@@ -455,18 +459,17 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_filtertype), chr(self.filterType))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_filtertype, self.filterType)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[0]:
+            if not inData:
                 return False
 
             # Check for ACK
@@ -495,22 +498,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_limits), chr(self.adjustLimits))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_limits, self.adjustLimits)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_limits:
+            if inData[0] != self.cmd_set_limits:
                 return False
 
         # Update UI
@@ -533,22 +535,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_tempformat), chr(self.tempFormat))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_tempformat, self.tempFormat)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_tempformat:
+            if inData[0] != self.cmd_set_tempformat:
                 return False
 
         # Update UI
@@ -571,22 +572,21 @@ class LiveViewer:
             # Send new value to the device
             try:
                 # Send command and new value
-                sendArray = (chr(self.cmd_set_rotation), chr(self.rotateScreen))
-                self.ser.write(b"".join([x.encode() for x in sendArray]))
+                self.sendBytes(self.cmd_set_rotation, self.rotateScreen)
 
                 # Get ACK
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
             # Check for ACK
-            if inData[1] != self.cmd_set_rotation:
+            if inData[0] != self.cmd_set_rotation:
                 return False
 
         # Everything worked
@@ -600,17 +600,17 @@ class LiveViewer:
         # Send new value to the device
         try:
             # Send command
-            self.ser.write(chr(self.cmd_set_shutterrun).encode())
+            self.sendBytes(self.cmd_set_shutterrun)
 
             # Get ACK
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+            inData = self.readBytes(1)
 
         # Error
         except serial.serialutil.SerialException:
             return False
 
         # Timeout
-        if not inData[0]:
+        if not inData:
             return False
 
         # Check for ACK
@@ -631,23 +631,23 @@ class LiveViewer:
         # Send new value to the device
         try:
             # Send command
-            self.ser.write(chr(self.cmd_set_calibration).encode())
+            self.sendBytes(self.cmd_set_calibration)
 
             # Get ACK
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+            inData = self.readBytes(1)
 
         # Error
         except serial.serialutil.SerialException:
             return False
 
         # Timeout
-        if not inData[1]:
+        if not inData:
             return False
 
         # Wait until ACK received
-        while inData[1] != self.cmd_set_calibration:
+        while inData[0] != self.cmd_set_calibration:
             # If not ACK, check if status valid
-            if inData[1] > 100:
+            if inData[0] > 100:
                 return False
 
             # Display current status
@@ -657,14 +657,14 @@ class LiveViewer:
             # Receive the next status or ACK
             try:
                 # Get data
-                inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+                inData = self.readBytes(1)
 
             # Error
             except serial.serialutil.SerialException:
                 return False
 
             # Timeout
-            if not inData[1]:
+            if not inData:
                 return False
 
         # Show finish message
@@ -673,9 +673,9 @@ class LiveViewer:
         # Get the new offset and slope
         try:
             # Send command
-            self.ser.write(chr(self.cmd_get_calibdata).encode())
+            self.sendBytes(self.cmd_get_calibdata)
             # Get data
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(8)))
+            inData = self.readBytes(8)
 
         # Error
         except serial.serialutil.SerialException:
@@ -965,10 +965,9 @@ class LiveViewer:
         # Receive the visual image data length
         try:
             # Send visual img and high res command
-            sendArray = (chr(self.cmd_get_visualimg), chr(1))
-            self.ser.write(b"".join([x.encode() for x in sendArray]))
+            self.sendBytes(self.cmd_get_visualimg, 1)
             # Get visual image length
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+            inData = self.readBytes(2)
 
         # Error
         except serial.serialutil.SerialException:
@@ -988,7 +987,7 @@ class LiveViewer:
         # Try to read JPEG bytestream
         try:
             # Get data by length
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(dataLen)))
+            inData = self.readBytes(dataLen)
 
         # Error
         except serial.serialutil.SerialException:
@@ -1034,7 +1033,7 @@ class LiveViewer:
         try:
             if self.ser:
                 if self.ser.isOpen():
-                    self.ser.write(chr(self.cmd_end).encode())
+                    self.sendBytes(self.cmd_end)
                     self.ser.close()
 
         # Discard error
@@ -1123,31 +1122,31 @@ class LiveViewer:
         # Update tempPoints on device
         try:
             # Build send array
-            sendArray = (chr(self.cmd_set_temppoints),)
+            sendArray = [self.cmd_set_temppoints]
             for i in range(0, 96):
                 # Index
-                sendArray += (chr((self.tempPoints[i][0] & 0xFF00) >> 8),)
-                sendArray += (chr(self.tempPoints[i][0] & 0x00FF),)
+                sendArray.append((self.tempPoints[i][0] & 0xFF00) >> 8)
+                sendArray.append(self.tempPoints[i][0] & 0x00FF)
                 # Value
-                sendArray += (chr((self.tempPoints[i][1] & 0xFF00) >> 8),)
-                sendArray += (chr(self.tempPoints[i][1] & 0x00FF),)
+                sendArray.append((self.tempPoints[i][1] & 0xFF00) >> 8)
+                sendArray.append(self.tempPoints[i][1] & 0x00FF)
 
             # Send byte array
-            self.ser.write(b"".join([x.encode() for x in sendArray]))
+            self.sendBytes(*sendArray)
 
             # Wait for ACK
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+            inData = self.readBytes(1)
 
         # Error
         except serial.serialutil.SerialException:
             return False
 
         # Timeout
-        if not inData[1]:
+        if not inData:
             return False
 
         # Check if ACK matches
-        if inData[1] != self.cmd_set_temppoints:
+        if inData[0] != self.cmd_set_temppoints:
             return False
 
         # Everything OK
@@ -1533,7 +1532,7 @@ class LiveViewer:
 
         # Try to receive the data
         try:
-            self.leptonData = list(map(lambda x: ord(chr(x)), self.ser.read(length)))
+            self.leptonData = self.readBytes(length)
 
         # Error
         except serial.serialutil.SerialException:
@@ -1549,7 +1548,7 @@ class LiveViewer:
 
         # Try to receive the additional data
         try:
-            additionalData = list(map(lambda x: ord(chr(x)), self.ser.read(16)))
+            additionalData = self.readBytes(16)
 
         # Error
         except serial.serialutil.SerialException:
@@ -1608,9 +1607,9 @@ class LiveViewer:
         # Try to receive the config data
         try:
             # Send config receive command
-            self.ser.write(chr(self.cmd_get_configdata).encode())
+            self.sendBytes(self.cmd_get_configdata)
             # Get data
-            configData = list(map(lambda x: ord(chr(x)), self.ser.read(10)))
+            configData = self.readBytes(10)
 
         # Error
         except serial.serialutil.SerialException:
@@ -1680,24 +1679,24 @@ class LiveViewer:
         try:
             # Send get raw frame command
             if self.renderMode:
-                self.ser.write(chr(self.cmd_rawframe).encode())
+                self.sendBytes(self.cmd_rawframe)
             # Send a get display frame command
             else:
-                self.ser.write(chr(self.cmd_displayframe).encode())
+                self.sendBytes(self.cmd_displayframe)
 
             # Wait for command response
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+            inData = self.readBytes(1)
 
         # Error
         except serial.serialutil.SerialException:
             return False
 
         # Timeout
-        if not inData[1]:
+        if not inData:
             return False
 
         # Parse the command
-        cmd = inData[1]
+        cmd = inData[0]
 
         # Save thermal image command
         if cmd == self.frame_capture_thermal:
@@ -1746,9 +1745,9 @@ class LiveViewer:
         # Try to get the temperature points
         try:
             # Send set time command
-            self.ser.write(chr(self.cmd_get_temppoints).encode())
+            self.sendBytes(self.cmd_get_temppoints)
             # Wait for response
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(384)))
+            inData = self.readBytes(384)
 
         # Error
         except serial.serialutil.SerialException:
@@ -1795,17 +1794,17 @@ class LiveViewer:
         # Try to receive it
         try:
             # Send get diagnostic command
-            self.ser.write(chr(self.cmd_get_diagnostic).encode())
+            self.sendBytes(self.cmd_get_diagnostic)
 
             # Receive answer
-            inData = list(map(lambda x: ord(chr(x)), self.ser.read(2)))
+            inData = self.readBytes(1)
 
         # Error
         except serial.serialutil.SerialException:
             return False
 
         # Timeout
-        if not inData[0]:
+        if not inData:
             return False
 
         cmd = inData[0]
@@ -1833,7 +1832,7 @@ class LiveViewer:
         # Send start and wait for ACK
         try:
             # Send start command
-            self.ser.write(chr(self.cmd_start).encode())
+            self.sendBytes(self.cmd_start)
             # Read answer
             inData = self.ser.read(1)
             if inData:
