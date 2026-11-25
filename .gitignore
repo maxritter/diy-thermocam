@@ -1,4 +1,5 @@
 .DS_Store
+.claude/
 __pycache__/
 *.pyc
 *.pyo
@@ -7,3 +8,9 @@ __pycache__/
 *.pyz
 *.pywz
 .pytest_cache/
+.venv/
+node_modules/
+dist/
+.astro/
+target/
+release-artifacts/

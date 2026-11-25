@@ -1,20 +1,19 @@
 # DIY-Thermocam - PCB
 
-## General
+## V3.0 Baseline (Eagle)
 
-The printed circuit board has been created with [Autosoft Eagle](http://www.autodesk.com/education/free-software/eagle).
-Use this software to open the [schematic](3.0/pcb.sch) or [board](3.0/pcb.brd) file.
+The V3.0 printed circuit board in [`eagle-v3.0/`](eagle-v3.0/) was created with Autodesk Eagle:
 
-You can also use the [Gerber.zip](3.0/gerber.zip) and upload it to any PCB service of your choice to manufacture the board, for example [Smart Prototyping](http://www.smart-prototyping.com/PCB-Prototyping.html). 
+- Schematic: [`eagle-v3.0/pcb.sch`](eagle-v3.0/pcb.sch)
+- Board layout: [`eagle-v3.0/pcb.brd`](eagle-v3.0/pcb.brd)
+- Manufacturing Gerbers: [`eagle-v3.0/gerber.zip`](eagle-v3.0/gerber.zip)
 
-The PCB dimensions are 89.4mm (w) x 68.4mm (h), 1.6mm thickness and 2 layers.
+Board dimensions: **89.4 mm (w) × 68.4 mm (h)**, 1.6 mm thickness, 2 layers.
 
-## Front
+### Front
 
-![Front](3.0/front.png)
+![Front](eagle-v3.0/front.png)
 
-## Back
+### Back
 
-![FRONT](3.0/back.png)
-
-
+![Back](eagle-v3.0/back.png)

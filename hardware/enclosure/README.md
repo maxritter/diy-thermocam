@@ -1,3 +1,5 @@
 # DIY-Thermocam - Enclosure
 
-The enclosure has been designed with Google Sketchup in 3D and converted to 2D files to laser-cut them. The 2D SVG file can be opened with Inkscape.
+## V3.0 Baseline (Laser-Cut Acrylic)
+
+The V3.0 enclosure files in [`legacy-v3.0/`](legacy-v3.0/) were designed in SketchUp (`.skp`/`.skb`) and exported as a 2D SVG (`enclosure.svg`) for 3 mm acrylic laser cutting (editable in Inkscape).
