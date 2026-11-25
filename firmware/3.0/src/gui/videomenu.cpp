@@ -500,7 +500,8 @@ redraw:
 
 	//Touch handler
 	while (true) {
-		checkSerial();
+		if (checkSerial())
+			drawVideoModeMenu();
 
 		//If touch pressed
 		if (touch_touched() == true) {

@@ -5,6 +5,7 @@ on:
     tags:
       - 'firmware-v*'
       - 'app-v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,6 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Run firmware host C++17 unit tests
+        working-directory: firmware/3.0/tests_host
+        run: |
+          make clean
+          make test
 
       - uses: arduino/setup-arduino-cli@v2
         with:
@@ -33,7 +40,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#firmware-v}"
           mkdir -p ../../release-artifacts
-          arduino-cli compile --export-binaries --output-dir ../../release-artifacts/build
+          arduino-cli compile --warnings all --export-binaries --output-dir ../../release-artifacts/build
           HEX_FILE=$(find ../../release-artifacts/build -maxdepth 1 -name '*.hex' | head -n 1)
           test -n "$HEX_FILE"
           cp "$HEX_FILE" "../../release-artifacts/diy-thermocam-v3-firmware-${VERSION}.hex"
@@ -43,7 +50,7 @@ jobs:
             sha256sum "diy-thermocam-v3-firmware-${VERSION}.hex" "diy-thermocam-v3-firmware-${VERSION}.zip" > SHA256SUMS.txt
           )
 
-      - name: Publish GitHub Release
+      - name: Publish draft GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
@@ -72,10 +79,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify desktop app exists
-        shell: bash
-        run: test -f app/package.json
-
       - name: Install Linux Tauri dependencies
         if: matrix.platform == 'ubuntu-22.04'
         run: |
@@ -88,9 +91,19 @@ jobs:
         with:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: Install frontend dependencies
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app -> target
+
+      - name: Install, verify frontend & run Rust core tests
         working-directory: app
-        run: bun install --frozen-lockfile
+        shell: bash
+        run: |
+          bun install --frozen-lockfile
+          bun run lint
+          bun run typecheck
+          bun test
+          cargo test --workspace
 
       - name: Build & attach Tauri bundles
         uses: tauri-apps/tauri-action@v0

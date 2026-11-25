@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+# Fast area-scoped pre-commit hook for DIY-Thermocam monorepo.
+# Install with: bash scripts/setup-hooks.sh
+# Manual full run: .githooks/pre-commit --all
+
+set -euo pipefail
+
+export PATH="$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+RUN_ALL=0
+if [ "${1:-}" = "--all" ]; then
+  RUN_ALL=1
+fi
+
+if [ "$RUN_ALL" -eq 1 ]; then
+  STAGED_FILES="$(git ls-files)"
+else
+  STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR || true)"
+fi
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "[pre-commit] No staged files to check."
+  exit 0
+fi
+
+has_match() {
+  printf '%s\n' "$STAGED_FILES" | grep -Eq "$1"
+}
+
+echo "[pre-commit] Running fast area-scoped checks..."
+
+# 1. Block accidental temp/OS/build artifacts
+if has_match '(^|/)\.DS_Store$|^app/target/|^website/dist/|real-v3-1080p-live\.mp4$'; then
+  echo "[pre-commit] ERROR: Temp/build/OS artifact staged; unstage before committing." >&2
+  exit 1
+fi
+
+# 2. Validate staged JSON files
+JSON_FILES="$(printf '%s\n' "$STAGED_FILES" | grep -E '\.json$' || true)"
+if [ -n "$JSON_FILES" ]; then
+  echo "[pre-commit] Checking JSON syntax..."
+  python3 - "$JSON_FILES" <<'PY'
+import json, pathlib, sys
+files = [f for f in sys.argv[1].splitlines() if f.strip()]
+for f in files:
+    p = pathlib.Path(f)
+    if p.exists():
+        json.loads(p.read_text(encoding="utf-8"))
+print(f"[pre-commit] JSON OK ({len(files)} file(s))")
+PY
+fi
+
+# 3. Validate staged YAML files
+YAML_FILES="$(printf '%s\n' "$STAGED_FILES" | grep -E '\.ya?ml$' || true)"
+if [ -n "$YAML_FILES" ]; then
+  echo "[pre-commit] Checking YAML syntax..."
+  if command -v ruby >/dev/null 2>&1; then
+    while IFS= read -r f; do
+      [ -n "$f" ] && [ -f "$f" ] && ruby -ryaml -e 'YAML.load_file(ARGV[0])' "$f"
+    done <<< "$YAML_FILES"
+    echo "[pre-commit] YAML OK"
+  elif python3 -c "import yaml" >/dev/null 2>&1; then
+    while IFS= read -r f; do
+      [ -n "$f" ] && [ -f "$f" ] && python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' "$f"
+    done <<< "$YAML_FILES"
+    echo "[pre-commit] YAML OK"
+  else
+    echo "[pre-commit] WARN: neither ruby nor PyYAML found; skipping YAML syntax check."
+  fi
+fi
+
+# 4. Desktop App (app/): Biome + cargo fmt --check
+if has_match '^app/src/|^app/index\.html$|^app/vite\.config\.ts$|^app/biome\.json$'; then
+  if command -v bun >/dev/null 2>&1 && [ -x app/node_modules/.bin/biome ]; then
+    echo "[pre-commit] Running Biome check in app/..."
+    (cd app && bun run lint)
+  else
+    echo "[pre-commit] WARN: app/node_modules biome not installed (run 'bun install' in app/); skipping app Biome check."
+  fi
+fi
+
+if has_match '^app/(src-tauri|crates)/.*\.rs$|^app/Cargo\.toml$'; then
+  if command -v cargo >/dev/null 2>&1; then
+    echo "[pre-commit] Running cargo fmt --check in app/..."
+    (cd app && cargo fmt --all -- --check)
+  else
+    echo "[pre-commit] WARN: cargo not found; skipping cargo fmt check."
+  fi
+fi
+
+# 5. Website (website/): Biome
+if has_match '^website/src/|^website/astro\.config\.mjs$|^website/biome\.json$'; then
+  if command -v bun >/dev/null 2>&1 && [ -x website/node_modules/.bin/biome ]; then
+    echo "[pre-commit] Running Biome check in website/..."
+    (cd website && bun run lint)
+  else
+    echo "[pre-commit] WARN: website/node_modules biome not installed (run 'bun install' in website/); skipping website Biome check."
+  fi
+fi
+
+# 6. BOM validation (hardware/bom/)
+if has_match '^hardware/bom/'; then
+  echo "[pre-commit] Validating hardware/bom/bom.csv..."
+  python3 hardware/bom/validate_bom.py
+fi
+
+# 7. Firmware C++17 host unit tests (firmware/3.0/)
+if has_match '^firmware/3\.0/(src/core/|tests_host/|include/)'; then
+  echo "[pre-commit] Running firmware C++17 host unit tests..."
+  (cd firmware/3.0/tests_host && make test)
+fi
+
+echo "[pre-commit] All checks passed!"

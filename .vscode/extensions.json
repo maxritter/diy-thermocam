@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb",
+    "tauri-apps.tauri-vscode",
+    "biomejs.biome",
+    "astro-build.astro-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.cpptools",
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "redhat.vscode-yaml",
+    "tamasfe.even-better-toml"
+  ]
+}

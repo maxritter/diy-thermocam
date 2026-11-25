@@ -71,14 +71,21 @@ impl<'a> RgbCanvas<'a> {
         let idx = (y as usize * self.w + x as usize) * 3;
         let inv = 1.0 - alpha;
         for (c, &col) in color.iter().enumerate() {
-            self.buf[idx + c] =
-                (f32::from(self.buf[idx + c]) * inv + f32::from(col) * alpha)
-                    .round()
-                    .clamp(0.0, 255.0) as u8;
+            self.buf[idx + c] = (f32::from(self.buf[idx + c]) * inv + f32::from(col) * alpha)
+                .round()
+                .clamp(0.0, 255.0) as u8;
         }
     }
 
-    pub fn fill_rect(&mut self, x: isize, y: isize, rw: isize, rh: isize, color: [u8; 3], alpha: f32) {
+    pub fn fill_rect(
+        &mut self,
+        x: isize,
+        y: isize,
+        rw: isize,
+        rh: isize,
+        color: [u8; 3],
+        alpha: f32,
+    ) {
         for py in y..(y + rh) {
             for px in x..(x + rw) {
                 self.blend_px(px, py, color, alpha);
@@ -86,14 +93,30 @@ impl<'a> RgbCanvas<'a> {
         }
     }
 
-    pub fn stroke_rect(&mut self, x: isize, y: isize, rw: isize, rh: isize, t: isize, color: [u8; 3]) {
+    pub fn stroke_rect(
+        &mut self,
+        x: isize,
+        y: isize,
+        rw: isize,
+        rh: isize,
+        t: isize,
+        color: [u8; 3],
+    ) {
         self.fill_rect(x, y, rw, t, color, 1.0);
         self.fill_rect(x, y + rh - t, rw, t, color, 1.0);
         self.fill_rect(x, y, t, rh, color, 1.0);
         self.fill_rect(x + rw - t, y, t, rh, color, 1.0);
     }
 
-    pub fn draw_line(&mut self, x0: isize, y0: isize, x1: isize, y1: isize, t: isize, color: [u8; 3]) {
+    pub fn draw_line(
+        &mut self,
+        x0: isize,
+        y0: isize,
+        x1: isize,
+        y1: isize,
+        t: isize,
+        color: [u8; 3],
+    ) {
         let steps = (x1 - x0).abs().max((y1 - y0).abs()).max(1);
         for i in 0..=steps {
             let f = i as f32 / steps as f32;
@@ -142,7 +165,14 @@ impl<'a> RgbCanvas<'a> {
         let s = scale.max(1);
         let tw = (text.chars().count() as isize) * 6 * s;
         let pad = 3 * s;
-        self.fill_rect(x - pad, y - pad, tw + pad * 2, 7 * s + pad * 2, [10, 12, 16], 0.78);
+        self.fill_rect(
+            x - pad,
+            y - pad,
+            tw + pad * 2,
+            7 * s + pad * 2,
+            [10, 12, 16],
+            0.78,
+        );
         self.draw_text(x, y, s, text, fg);
     }
 }
@@ -215,7 +245,13 @@ pub fn composite_export_hud(
                 let rx = (radius * sx).round() as isize;
                 let ry = (radius * sy).round() as isize;
                 cv.draw_ellipse(px, py, rx, ry, stroke, [111, 211, 159]);
-                cv.draw_pill_label(px - rx, py - ry - 12 * scale, scale, &label, [245, 248, 252]);
+                cv.draw_pill_label(
+                    px - rx,
+                    py - ry - 12 * scale,
+                    scale,
+                    &label,
+                    [245, 248, 252],
+                );
             }
             RoiGeometry::Polygon { points } if points.len() >= 2 => {
                 for pair in points.windows(2) {
@@ -253,7 +289,14 @@ pub fn composite_export_hud(
         let bar_x = (out_w as isize) - bar_w - (out_w / 10).clamp(72, 220) as isize;
         let bar_y = ((out_h as isize) - bar_h) / 2;
 
-        cv.stroke_rect(bar_x - 2, bar_y - 2, bar_w + 4, bar_h + 4, 2, [210, 215, 222]);
+        cv.stroke_rect(
+            bar_x - 2,
+            bar_y - 2,
+            bar_w + 4,
+            bar_h + 4,
+            2,
+            [210, 215, 222],
+        );
         for row in 0..bar_h {
             let t = 1.0 - (row as f32 / (bar_h - 1).max(1) as f32);
             let c = palette.sample(t);

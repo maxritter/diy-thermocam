@@ -62,7 +62,7 @@
 
 void buttonHandler();
 bool checkNoDisplay();
-void checkSerial();
+bool checkSerial();
 int getInt(String text);
 void saveFrame();
 void sendBatteryStatus();

@@ -118,7 +118,11 @@ pub fn evaluate_roi(
     }
 
     let n = coords.len();
-    let mean_raw = if n > 0 { (sum_raw / n as f64) as f32 } else { 0.0 };
+    let mean_raw = if n > 0 {
+        (sum_raw / n as f64) as f32
+    } else {
+        0.0
+    };
     let mean_c = if n > 0 {
         (temps.iter().map(|&t| f64::from(t)).sum::<f64>() / n as f64) as f32
     } else {
@@ -136,8 +140,16 @@ pub fn evaluate_roi(
     } else {
         0.0
     };
-    let min_c = if n > 0 { raw_to_object_c(min_raw, params) } else { 0.0 };
-    let max_c = if n > 0 { raw_to_object_c(max_raw, params) } else { 0.0 };
+    let min_c = if n > 0 {
+        raw_to_object_c(min_raw, params)
+    } else {
+        0.0
+    };
+    let max_c = if n > 0 {
+        raw_to_object_c(max_raw, params)
+    } else {
+        0.0
+    };
     let delta_c = match roi.geometry {
         RoiGeometry::Delta { x0, y0, x1, y1 } => {
             let p0 = pixels[usize::from(y0.min(height - 1)) * w + usize::from(x0.min(width - 1))];
@@ -210,8 +222,12 @@ pub fn sample_line_profile(
     (0..=steps)
         .map(|i| {
             let t = i as f32 / steps as f32;
-            let x = (f32::from(x0) + dx * t).round().clamp(0.0, f32::from(width - 1)) as u16;
-            let y = (f32::from(y0) + dy * t).round().clamp(0.0, f32::from(height - 1)) as u16;
+            let x = (f32::from(x0) + dx * t)
+                .round()
+                .clamp(0.0, f32::from(width - 1)) as u16;
+            let y = (f32::from(y0) + dy * t)
+                .round()
+                .clamp(0.0, f32::from(height - 1)) as u16;
             let raw = pixels[usize::from(y) * w + usize::from(x)];
             LineSample {
                 dist_px: total_dist * t,
@@ -414,10 +430,30 @@ fn collect_roi_coords(geom: &RoiGeometry, width: u16, height: u16) -> Vec<(u16, 
             if points.len() < 3 {
                 return Vec::new();
             }
-            let min_x = points.iter().map(|p| p[0]).fold(f32::INFINITY, f32::min).floor().clamp(0.0, f32::from(max_x)) as u16;
-            let max_px = points.iter().map(|p| p[0]).fold(f32::NEG_INFINITY, f32::max).ceil().clamp(0.0, f32::from(max_x)) as u16;
-            let min_y = points.iter().map(|p| p[1]).fold(f32::INFINITY, f32::min).floor().clamp(0.0, f32::from(max_y)) as u16;
-            let max_py = points.iter().map(|p| p[1]).fold(f32::NEG_INFINITY, f32::max).ceil().clamp(0.0, f32::from(max_y)) as u16;
+            let min_x = points
+                .iter()
+                .map(|p| p[0])
+                .fold(f32::INFINITY, f32::min)
+                .floor()
+                .clamp(0.0, f32::from(max_x)) as u16;
+            let max_px = points
+                .iter()
+                .map(|p| p[0])
+                .fold(f32::NEG_INFINITY, f32::max)
+                .ceil()
+                .clamp(0.0, f32::from(max_x)) as u16;
+            let min_y = points
+                .iter()
+                .map(|p| p[1])
+                .fold(f32::INFINITY, f32::min)
+                .floor()
+                .clamp(0.0, f32::from(max_y)) as u16;
+            let max_py = points
+                .iter()
+                .map(|p| p[1])
+                .fold(f32::NEG_INFINITY, f32::max)
+                .ceil()
+                .clamp(0.0, f32::from(max_y)) as u16;
             let mut pts = Vec::new();
             for py in min_y..=max_py {
                 for px in min_x..=max_px {
@@ -436,14 +472,21 @@ fn collect_roi_coords(geom: &RoiGeometry, width: u16, height: u16) -> Vec<(u16, 
                 .map(|i| {
                     let t = i as f32 / steps as f32;
                     (
-                        (f32::from(*x0) + dx * t).round().clamp(0.0, f32::from(max_x)) as u16,
-                        (f32::from(*y0) + dy * t).round().clamp(0.0, f32::from(max_y)) as u16,
+                        (f32::from(*x0) + dx * t)
+                            .round()
+                            .clamp(0.0, f32::from(max_x)) as u16,
+                        (f32::from(*y0) + dy * t)
+                            .round()
+                            .clamp(0.0, f32::from(max_y)) as u16,
                     )
                 })
                 .collect()
         }
         RoiGeometry::Delta { x0, y0, x1, y1 } => {
-            vec![((*x0).min(max_x), (*y0).min(max_y)), ((*x1).min(max_x), (*y1).min(max_y))]
+            vec![
+                ((*x0).min(max_x), (*y0).min(max_y)),
+                ((*x1).min(max_x), (*y1).min(max_y)),
+            ]
         }
     }
 }

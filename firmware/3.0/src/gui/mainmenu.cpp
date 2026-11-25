@@ -1269,10 +1269,12 @@ void drawLiveDispGrid()
 bool liveDispMenu()
 {
 	drawLiveDispGrid();
-	while (touch_touched()) {}
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			drawLiveDispGrid();
 		if (touch_touched())
 		{
 			int pressed = buttons_checkButtons(true);
@@ -1374,10 +1376,12 @@ bool colorMenu()
 	const byte totalPages = (colorSchemeTotal + 3) / 4;
 	byte page = selected / 4;
 	drawColorMenuPage(page, selected);
-	while (touch_touched()) {}
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			drawColorMenuPage(page, selected);
 		if (touch_touched())
 		{
 			int pressed = buttons_checkButtons(true);
@@ -1583,10 +1587,12 @@ bool mainMenuSelect(byte pos, byte page)
 void mainMenuHandler(byte *pos)
 {
 	if (*pos > 1) *pos = 0;
-	while (touch_touched()) {}
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			drawMainMenu(*pos);
 		if (screenOffCheck())
 			drawMainMenu(*pos);
 

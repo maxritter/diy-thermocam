@@ -1162,6 +1162,7 @@ static void drain_serial_rx(uint32_t now_ms) {
 } // namespace
 
 void serialConnectV2(bool headless) {
+	const byte prevShowMenu = showMenu;
 	s_v2 = V2Session{};
 	s_v2.running = true;
 	s_v2.headless = headless;
@@ -1303,6 +1304,8 @@ void serialConnectV2(bool headless) {
 	if (!headless) {
 		enableScreenLight();
 		ui_waitTouchReleaseAndLockout(250u);
+		// Preserve caller menu state if USB session ran from inside a menu/gallery/video screen
+		showMenu = prevShowMenu;
 	}
 	lepton_startFrame();
 }

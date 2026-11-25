@@ -20,6 +20,8 @@ jobs:
       app: ${{ steps.filter.outputs.app }}
       website: ${{ steps.filter.outputs.website }}
       bom: ${{ steps.filter.outputs.bom }}
+      pcb: ${{ steps.filter.outputs.pcb }}
+      enclosure: ${{ steps.filter.outputs.enclosure }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -32,6 +34,7 @@ jobs:
             app:
               - 'app/**'
               - 'firmware/3.0/src/general/colorschemes.cpp'
+              - 'firmware/3.0/test/fixtures/**'
               - 'docs/protocol-v2.md'
               - '.github/workflows/ci.yml'
             website:
@@ -42,6 +45,13 @@ jobs:
               - '.github/workflows/ci.yml'
             bom:
               - 'hardware/bom/**'
+              - '.github/workflows/ci.yml'
+            pcb:
+              - 'hardware/pcb/**'
+              - 'hardware/bom/**'
+              - '.github/workflows/ci.yml'
+            enclosure:
+              - 'hardware/enclosure/**'
               - '.github/workflows/ci.yml'
 
   firmware-build:
@@ -78,56 +88,45 @@ jobs:
           path: ${{ steps.arduino-dir.outputs.path }}
           key: arduino15-${{ runner.os }}-${{ hashFiles('firmware/3.0/sketch.yaml') }}
 
-      - name: Compile firmware
+      - name: Compile firmware (zero warnings)
         working-directory: firmware/3.0
         shell: bash
-        run: arduino-cli compile
+        run: arduino-cli compile --warnings all
 
-  firmware-host-tests:
-    name: Firmware host unit tests
+  firmware-host-tests-and-sim:
+    name: Firmware host C++17 tests & UI simulator
     needs: changes
     if: needs.changes.outputs.firmware == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run host C++17 unit tests (when present)
-        shell: bash
+      - name: Install host toolchain & zlib
         run: |
-          if [ ! -d firmware/3.0/tests_host ]; then
-            echo "::notice::firmware/3.0/tests_host not present yet (added in Phase 3); skipping."
-            exit 0
-          fi
-          cd firmware/3.0/tests_host
-          if [ -f CMakeLists.txt ]; then
-            cmake -B build -DCMAKE_BUILD_TYPE=Debug
-            cmake --build build --parallel
-            ctest --test-dir build --output-on-failure
-          elif [ -f Makefile ]; then
-            make test
-          elif [ -f run_tests.sh ]; then
-            bash run_tests.sh
-          else
-            echo "::error::firmware/3.0/tests_host exists but has no recognized test entrypoint."
-            exit 1
-          fi
+          sudo apt-get update
+          sudo apt-get install -y clang g++ make zlib1g-dev
 
-  bom-validate:
-    name: BOM schema & integrity check
-    needs: changes
-    if: needs.changes.outputs.bom == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate hardware/bom/bom.csv (when present)
-        shell: bash
+      - name: Run C++17 host unit tests
+        working-directory: firmware/3.0/tests_host
         run: |
-          if [ ! -f hardware/bom/validate_bom.py ]; then
-            echo "::notice::hardware/bom/validate_bom.py not present yet; skipping."
-            exit 0
-          fi
-          python3 hardware/bom/validate_bom.py
+          make clean
+          make test
+
+      - name: Build UI simulator & generate screenshots
+        working-directory: firmware/3.0/sim
+        run: |
+          make clean
+          make screenshots
+          count=$(find out -maxdepth 1 -name '*.png' | wc -l | tr -d ' ')
+          echo "Generated $count simulator UI screenshots"
+          test "$count" -ge 8
+
+      - name: Upload firmware simulator screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-ui-simulator-screenshots
+          path: firmware/3.0/sim/out/*.png
+          retention-days: 14
 
   app-ci:
     name: Desktop app (${{ matrix.os }})
@@ -141,124 +140,132 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check if desktop app exists
-        id: app-exists
-        shell: bash
-        run: |
-          if [ -f app/package.json ]; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::app/package.json not present yet (added in Phase 4); skipping."
-          fi
-
       - name: Install Linux Tauri dependencies
-        if: steps.app-exists.outputs.present == 'true' && runner.os == 'Linux'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libudev-dev libhidapi-dev
 
-      - name: Setup Bun
-        if: steps.app-exists.outputs.present == 'true'
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Setup Rust
-        if: steps.app-exists.outputs.present == 'true'
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
 
-      - name: Frontend install, check & tests
-        if: steps.app-exists.outputs.present == 'true'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app -> target
+
+      - name: Frontend install, Biome, typecheck, tests & build
         working-directory: app
         shell: bash
         run: |
           bun install --frozen-lockfile
-          bun run check
+          bun run lint
+          bun run typecheck
           bun test
+          bun run build
 
-      - name: Rust clippy & unit tests
-        if: steps.app-exists.outputs.present == 'true'
+      - name: Rust fmt, clippy, unit tests & Tauri check
         working-directory: app
         shell: bash
         run: |
-          if [ -f Cargo.toml ]; then
-            cargo clippy --workspace --all-targets -- -D warnings
-            cargo test --workspace
-          elif [ -f src-tauri/Cargo.toml ]; then
-            cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-            cargo test --manifest-path src-tauri/Cargo.toml
-          fi
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace
+          cargo check -p diy-thermocam-app
 
   website-ci:
-    name: Website build & route check
+    name: Website build, dist verification & link check
     needs: changes
     if: needs.changes.outputs.website == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Detect website stack
-        id: stack
-        shell: bash
-        run: |
-          if [ -f website/astro.config.mjs ] || [ -f website/astro.config.ts ]; then
-            echo "kind=astro" >> "$GITHUB_OUTPUT"
-          else
-            echo "kind=legacy-gatsby" >> "$GITHUB_OUTPUT"
-          fi
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Setup Bun (Astro 5)
-        if: steps.stack.outputs.kind == 'astro'
-        uses: oven-sh/setup-bun@v2
-
-      - name: Build & verify Astro 5 website
-        if: steps.stack.outputs.kind == 'astro'
+      - name: Install, lint, typecheck & build Astro 5 website
         working-directory: website
-        shell: bash
         run: |
           bun install --frozen-lockfile
+          bun run lint
           bun run check
           bun run build
-          for route in \
-            "index.html" \
-            "building-instructions/index.html" \
-            "device-features/index.html" \
-            "device-images/index.html" \
-            "software/index.html" \
-            "thermal-images/index.html" \
-            "docs/index.html" \
-            "docs/manual/index.html" \
-            "docs/hardware/index.html" \
-            "docs/partlist/index.html" \
-            "docs/firmware/index.html" \
-            "docs/raw-data/index.html" \
-            "docs/serial/index.html"; do
-            test -f "dist/$route" || { echo "Missing required legacy route: $route"; exit 1; }
+
+      - name: Verify built dist routes, assets, BOM & metadata
+        run: node website/scripts/verify-dist.mjs
+
+      - name: Check internal links with lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --root-dir ${{ github.workspace }}/website/dist --no-progress website/dist
+          fail: true
+
+  hardware-bom:
+    name: Hardware BOM schema & integrity check
+    needs: changes
+    if: needs.changes.outputs.bom == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate hardware/bom/bom.csv
+        run: python3 hardware/bom/validate_bom.py
+
+  hardware-pcb:
+    name: Hardware PCB KiCad ERC/DRC & V3 port verification
+    needs: changes
+    if: needs.changes.outputs.pcb == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: kicad/kicad:10.0
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gerbv for Gerber raster verification
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends gerbv python3
+
+      - name: Verify KiCad V3.0 port & run ERC/DRC on V3.0 / V4.0
+        env:
+          KICAD_CLI: /usr/bin/kicad-cli
+          GERBV: /usr/bin/gerbv
+        run: |
+          if [ -f hardware/pcb/scripts/verify_v3_port.py ]; then
+            python3 hardware/pcb/scripts/verify_v3_port.py
+          else
+            echo "::notice::hardware/pcb/scripts/verify_v3_port.py not present yet; skipping."
+          fi
+
+          for board in hardware/pcb/kicad-v3.0/diy-thermocam-v3.0 hardware/pcb/kicad-v4.0/diy-thermocam-v4.0; do
+            if [ -f "${board}.kicad_sch" ]; then
+              echo "Running ERC on ${board}.kicad_sch"
+              kicad-cli sch erc --severity-error --exit-code-violations --output /tmp/erc.json --format json "${board}.kicad_sch"
+            fi
+            if [ -f "${board}.kicad_pcb" ]; then
+              echo "Running DRC on ${board}.kicad_pcb"
+              kicad-cli pcb drc --severity-error --exit-code-violations --output /tmp/drc.json --format json "${board}.kicad_pcb"
+            fi
           done
 
-      - name: Verify imported legacy website integrity (pre-Phase 5)
-        if: steps.stack.outputs.kind == 'legacy-gatsby'
-        shell: bash
+  hardware-enclosure:
+    name: Hardware Enclosure CAD (build123d) geometry tests
+    needs: changes
+    if: needs.changes.outputs.enclosure == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Run parametric build123d geometry & clearance test suite
         run: |
-          test -f website/package.json
-          test -f netlify.toml
-          for page in \
-            website/src/pages/index.md \
-            website/src/pages/building-instructions.md \
-            website/src/pages/device-features.md \
-            website/src/pages/device-images.md \
-            website/src/pages/software.md \
-            website/src/pages/thermal-images.md \
-            website/src/pages/docs/index.md \
-            website/src/pages/docs/manual/index.md \
-            website/src/pages/docs/hardware/index.md \
-            website/src/pages/docs/partlist/index.md \
-            website/src/pages/docs/firmware/index.md \
-            website/src/pages/docs/raw-data/index.md \
-            website/src/pages/docs/serial/index.md; do
-            test -f "$page" || { echo "Missing legacy page source: $page"; exit 1; }
-          done
-          img_count=$(find website/static/images -type f | wc -l | tr -d ' ')
-          echo "Verified $img_count static images in website/static/images"
-          test "$img_count" -ge 93
+          if [ ! -f hardware/enclosure/cad/pyproject.toml ]; then
+            echo "::notice::hardware/enclosure/cad not present yet; skipping."
+            exit 0
+          fi
+          cd hardware/enclosure/cad
+          uv run --python 3.12 pytest

@@ -117,8 +117,11 @@ void drawLoadMenu() {
 	display_print((char*)"SD Card Media", 184, 202);
 }
 
-/* Display the GUI elements for the load menu (2026 translucent HUD pills, bezel-safe inset) */
+/* Composite the load/video HUD pills directly into bigBuffer in RAM (zero flicker!) */
 void displayGUI(uint32_t imgCount, char* infoText) {
+	const bool prevWrite = display_writeToImage;
+	display_writeToImage = true;
+
 	auto drawHudAction = [](int x, int y, int w, const char* label, bool accent = false) {
 		display_blendRect(x, y, w, 22, UI_HUD_BG, 6);
 		display_setColor(accent ? UI_HUD_ACCENT : UI_HUD_BORDER);
@@ -143,12 +146,36 @@ void displayGUI(uint32_t imgCount, char* infoText) {
 	int iw = static_cast<int>(strlen(infoText)) * 8 + 12;
 	int ix = (320 - iw) / 2;
 	if (ix < 72) ix = 72;
-	display_blendRect(ix, 10, iw, 22, UI_HUD_BG, 5);
-	display_setFont(smallFont);
+	if (ix + iw > 236) iw = 236 - ix;
+	if (iw > 8) {
+		display_blendRect(ix, 10, iw, 22, UI_HUD_BG, 6);
+		display_setColor(UI_HUD_BORDER);
+		display_drawRect(ix, 10, ix + iw - 1, 31);
+		display_setFont(smallFont);
+		display_setBackColor(VGA_TRANSPARENT);
+		display_setColor(UI_HUD_TEXT);
+		int tx = ix + (iw - static_cast<int>(strlen(infoText)) * 8) / 2;
+		display_print(infoText, tx, 15);
+	}
+	changeTextColor();
+	display_writeToImage = prevWrite;
+}
+
+/* Composite the centered translucent Play pill into bigBuffer in RAM (zero flicker!) */
+static void drawPlayPillToBuffer() {
+	const bool prevWrite = display_writeToImage;
+	display_writeToImage = true;
+	int py = spotEnabled ? 66 : 104;
+	display_blendRect(108, py, 105, 33, UI_HUD_BG, 6);
+	display_setColor(UI_ACCENT);
+	display_drawRoundRect(108, py, 212, py + 32);
 	display_setBackColor(VGA_TRANSPARENT);
 	display_setColor(UI_HUD_TEXT);
-	display_print(infoText, ix + 6, 15);
+	display_setFont(bigFont);
+	display_print((char*) "Play", CENTER, py + 8);
+	display_setFont(smallFont);
 	changeTextColor();
+	display_writeToImage = prevWrite;
 }
 
 /* Asks the user if he wants to delete the video */
@@ -416,26 +443,13 @@ void convertVideo(char* dirname) {
 	sd.chdir("/");
 }
 
-/* Loads an image from the SDCard and prints it on screen */
+/* Loads an image from the SDCard and prints it on screen (RAM-composited HUD, single atomic flush) */
 void openImage(char* filename, uint32_t imgCount) {
 	//Show message on screen
 	showFullMessage((char*) "Please wait, image is loading..");
 
-	//Display raw data
-	if (filename[15] == 'D') {
-		//Load Raw data
-		loadRawData(filename);
-		//Display Raw Data
-		displayRawData();
-	}
-
-	//Load bitmap
-	else if (filename[15] == 'B') {
-		loadBMPImage(filename);
-	}
-
-	//Unsupported file type
-	else {
+	//Unsupported file type check first
+	if ((filename[15] != 'D') && (filename[15] != 'B')) {
 		showFullMessage((char*) "Unsupported file type");
 		delay(1000);
 		return;
@@ -457,8 +471,19 @@ void openImage(char* filename, uint32_t imgCount) {
 		filename[12], filename[13], '\0'
 	};
 
-	//Display GUI
-	displayGUI(imgCount, nameStr);
+	auto renderImageWithHUD = [&]() {
+		if (filename[15] == 'D') {
+			loadRawData(filename);
+			renderRawDataToBuffer();
+		} else {
+			loadBMPToBuffer(filename);
+		}
+		displayGUI(imgCount, nameStr);
+		displayBuffer();
+	};
+
+	//Composite image + HUD in RAM and push to LCD in ONE atomic write
+	renderImageWithHUD();
 
 	//Attach lightweight edge-flag interrupt (all SPI/I2C touch reads stay in main loop!)
 	(void)loadTouchTakePending();
@@ -466,7 +491,9 @@ void openImage(char* filename, uint32_t imgCount) {
 
 	//Wait for touch press safely in main-loop context
 	while (loadTouch == loadTouch_none) {
-		checkSerial();
+		if (checkSerial()) {
+			renderImageWithHUD();
+		}
 		if (loadTouchTakePending() || touch_touched()) {
 			loadTouchProcess();
 		}
@@ -515,9 +542,10 @@ void displayVideoFrame(uint32_t imgCount)
 	displayRawData();
 }
 
-/* Play a video from the internal storage */
+/* Play a video from the internal storage (100% RAM-composited zero-flicker playback!) */
 void playVideo(char* dirname, uint32_t imgCount) {
 	char buffer[32];
+	char frameName[] = "000000.DAT";
 	//Save the current frame number
 	uint32_t frameNumber = 0;
 
@@ -527,31 +555,43 @@ void playVideo(char* dirname, uint32_t imgCount) {
 
 	//Get the total number of frames in the dir
 	uint32_t numberOfFrames = getVideoFrameNumber();
+	if (numberOfFrames == 0) {
+		showFullMessage((char*) "Empty video folder");
+		delay(1000);
+		sd.chdir("/");
+		return;
+	}
+
+	// Composite thermal frame + HUD pills + optional Play pill into bigBuffer BEFORE ONE atomic LCD write!
+	auto renderVideoFrameWithHUD = [&](uint32_t idx, bool showPlayPill) {
+		frameFilename(frameName, idx);
+		loadRawData(frameName);
+		renderRawDataToBuffer();
+		snprintf(buffer, sizeof(buffer), "%lu / %lu",
+			static_cast<unsigned long>(idx + 1),
+			static_cast<unsigned long>(numberOfFrames));
+		displayGUI(imgCount, buffer);
+		if (showPlayPill) {
+			drawPlayPillToBuffer();
+		}
+		displayBuffer();
+	};
 
 	//Jump here when pausing a video
 showFrame:
-	//Display frame
-	displayVideoFrame(frameNumber);
-	//Create string
-	sprintf(buffer, "%6lu / %-6lu", static_cast<unsigned long>(frameNumber + 1), static_cast<unsigned long>(numberOfFrames));
-	//Display GUI
-	displayGUI(imgCount, buffer);
-	//Display play pill overlay
-	int py = spotEnabled ? 66 : 104;
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(108, py, 212, py + 32);
-	display_setColor(UI_ACCENT);
-	display_drawRoundRect(108, py, 212, py + 32);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_setFont(bigFont);
-	display_print((char*) "Play", CENTER, py + 8);
-	display_setFont(smallFont);
+	renderVideoFrameWithHUD(frameNumber, true);
 
 	//Repeat until we get a valid touch
 	do {
-		//Wait for touch press
-		while (!touch_touched()) { checkSerial(); delay(5); }
+		//Wait for touch press while staying responsive to USB host (redraw frame if USB ran)
+		while (!touch_touched()) {
+			if (checkSerial()) {
+				sd.chdir("/");
+				sd.chdir(dirname);
+				renderVideoFrameWithHUD(frameNumber, true);
+			}
+			delay(5);
+		}
 		//Interpret touch coordinates safely in main loop
 		loadTouchProcess();
 	} while (loadTouch == loadTouch_none);
@@ -569,10 +609,15 @@ showFrame:
 		
 	loadTouch = loadTouch_none;
 
-	//Play forever
+	//Play forever until paused or exited
 	while (true) {
 		//Go through the frames
 		for (; frameNumber < numberOfFrames; frameNumber++) {
+			//Service USB host if connected during playback
+			if (Serial.available() > 0 && checkSerial()) {
+				sd.chdir("/");
+				sd.chdir(dirname);
+			}
 			//Check for touch press
 			if (touch_touched())
 				//Get touch function
@@ -593,12 +638,8 @@ showFrame:
 				return;
 			}
 
-			//Display frame
-			displayVideoFrame(frameNumber);
-			//Create string
-			sprintf(buffer, "%6lu / %-6lu", static_cast<unsigned long>(frameNumber + 1), static_cast<unsigned long>(numberOfFrames));
-			//Display GUI
-			displayGUI(imgCount, buffer);
+			//Render frame + HUD composited in bigBuffer and flush atomically (zero flicker!)
+			renderVideoFrameWithHUD(frameNumber, false);
 		}
 
 		//Reset frame number for next play

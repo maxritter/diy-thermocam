@@ -92,7 +92,15 @@ impl ResamplePlan {
                 precompute_taps(sh, dh, 3, lanczos3),
             ),
         };
-        Self { sw, sh, dw, dh, method, h_taps, v_taps }
+        Self {
+            sw,
+            sh,
+            dw,
+            dh,
+            method,
+            h_taps,
+            v_taps,
+        }
     }
 
     #[must_use]
@@ -134,7 +142,8 @@ impl ResamplePlan {
                 for (x, slot) in drow.iter_mut().enumerate() {
                     let sx = ((x as f32 + 0.5) * sw as f32 / dw as f32)
                         .floor()
-                        .clamp(0.0, (sw.saturating_sub(1)) as f32) as usize;
+                        .clamp(0.0, (sw.saturating_sub(1)) as f32)
+                        as usize;
                     *slot = srow[sx];
                 }
             });
@@ -222,7 +231,14 @@ impl RenderScratch {
         Self::default()
     }
 
-    fn plan_for(&mut self, sw: usize, sh: usize, dw: usize, dh: usize, method: UpscaleMethod) -> Arc<ResamplePlan> {
+    fn plan_for(
+        &mut self,
+        sw: usize,
+        sh: usize,
+        dw: usize,
+        dh: usize,
+        method: UpscaleMethod,
+    ) -> Arc<ResamplePlan> {
         if let Some(p) = &self.plan {
             if p.sw == sw && p.sh == sh && p.dw == dw && p.dh == dh && p.method == method {
                 return Arc::clone(p);
@@ -314,9 +330,17 @@ fn preprocess_into(
 ) {
     oriented.resize(width * height, 0.0);
     for y in 0..height {
-        let sy = if pipeline.rotate_180 { height - 1 - y } else { y };
+        let sy = if pipeline.rotate_180 {
+            height - 1 - y
+        } else {
+            y
+        };
         for x in 0..width {
-            let mut sx = if pipeline.rotate_180 { width - 1 - x } else { x };
+            let mut sx = if pipeline.rotate_180 {
+                width - 1 - x
+            } else {
+                x
+            };
             if pipeline.flip_horizontal {
                 sx = width - 1 - sx;
             }
@@ -328,7 +352,9 @@ fn preprocess_into(
             filtered.clear();
             filtered.extend_from_slice(oriented);
         }
-        SpatialFilter::Box3x3 => convolve_3x3_into(oriented, width, height, [1.0; 9], 9.0, filtered),
+        SpatialFilter::Box3x3 => {
+            convolve_3x3_into(oriented, width, height, [1.0; 9], 9.0, filtered)
+        }
         SpatialFilter::Gaussian3x3 => convolve_3x3_into(
             oriented,
             width,
@@ -350,7 +376,14 @@ pub fn preprocess_display_scalar(
 ) -> Vec<f32> {
     let mut oriented = Vec::new();
     let mut filtered = Vec::new();
-    preprocess_into(pixels, width, height, pipeline, &mut oriented, &mut filtered);
+    preprocess_into(
+        pixels,
+        width,
+        height,
+        pipeline,
+        &mut oriented,
+        &mut filtered,
+    );
     filtered
 }
 
@@ -363,7 +396,8 @@ fn convolve_3x3_into(src: &[f32], w: usize, h: usize, k: [f32; 9], div: f32, dst
             let mut idx = 0;
             for dy in -1isize..=1 {
                 for dx in -1isize..=1 {
-                    acc += src[(y as isize + dy) as usize * w + (x as isize + dx) as usize] * k[idx];
+                    acc +=
+                        src[(y as isize + dy) as usize * w + (x as isize + dx) as usize] * k[idx];
                     idx += 1;
                 }
             }
@@ -423,7 +457,13 @@ fn bilateral_denoise_into(src: &[f32], w: usize, h: usize, sigma_range: f32, dst
 /// Running at sensor resolution guarantees identical visual edge boost across 720p, 1080p, 1440p,
 /// and 4K (and matches the WebGL2 live viewport), while clamping to the 3x3 local `[min, max]`
 /// neighborhood completely eliminates bright/dark overshoot halos.
-fn unsharp_mask_local_clamped_into(src: &[f32], w: usize, h: usize, amount: f32, out: &mut Vec<f32>) {
+fn unsharp_mask_local_clamped_into(
+    src: &[f32],
+    w: usize,
+    h: usize,
+    amount: f32,
+    out: &mut Vec<f32>,
+) {
     if amount <= 0.001 || w < 3 || h < 3 {
         out.clear();
         out.extend_from_slice(src);
@@ -432,9 +472,15 @@ fn unsharp_mask_local_clamped_into(src: &[f32], w: usize, h: usize, amount: f32,
     let amt = amount.clamp(0.0, 2.0);
     out.resize(w * h, 0.0);
     let weights: [f32; 9] = [
-        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
-        2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0,
-        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
+        1.0 / 16.0,
+        2.0 / 16.0,
+        1.0 / 16.0,
+        2.0 / 16.0,
+        4.0 / 16.0,
+        2.0 / 16.0,
+        1.0 / 16.0,
+        2.0 / 16.0,
+        1.0 / 16.0,
     ];
     for y in 0..h {
         for x in 0..w {

@@ -276,29 +276,60 @@ impl SimulatorTransport {
                     }
                     Some((MsgType::StreamCtrlResp, 0, 0, sc.to_bytes().to_vec()))
                 } else {
-                    Some((MsgType::StreamCtrlResp, flags::ERROR, StatusCode::ErrInvalidArg as u16, Vec::new()))
+                    Some((
+                        MsgType::StreamCtrlResp,
+                        flags::ERROR,
+                        StatusCode::ErrInvalidArg as u16,
+                        Vec::new(),
+                    ))
                 }
             }
-            MsgType::GetConfigReq => {
-                Some((MsgType::GetConfigResp, 0, 0, self.config.to_bytes().to_vec()))
-            }
+            MsgType::GetConfigReq => Some((
+                MsgType::GetConfigResp,
+                0,
+                0,
+                self.config.to_bytes().to_vec(),
+            )),
             MsgType::SetConfigReq if pkt.payload.len() >= 36 => {
                 if let Ok(cfg) = DeviceConfig::from_bytes(&pkt.payload[4..36]) {
                     self.config = cfg;
-                    Some((MsgType::SetConfigResp, 0, 0, self.config.to_bytes().to_vec()))
+                    Some((
+                        MsgType::SetConfigResp,
+                        0,
+                        0,
+                        self.config.to_bytes().to_vec(),
+                    ))
                 } else {
-                    Some((MsgType::SetConfigResp, flags::ERROR, StatusCode::ErrInvalidArg as u16, Vec::new()))
+                    Some((
+                        MsgType::SetConfigResp,
+                        flags::ERROR,
+                        StatusCode::ErrInvalidArg as u16,
+                        Vec::new(),
+                    ))
                 }
             }
-            MsgType::GetRadParamsReq => {
-                Some((MsgType::GetRadParamsResp, 0, 0, self.rad_params.to_bytes().to_vec()))
-            }
+            MsgType::GetRadParamsReq => Some((
+                MsgType::GetRadParamsResp,
+                0,
+                0,
+                self.rad_params.to_bytes().to_vec(),
+            )),
             MsgType::SetRadParamsReq => {
                 if let Ok(rp) = RadParams::from_bytes(&pkt.payload) {
                     self.rad_params = rp;
-                    Some((MsgType::SetRadParamsResp, 0, 0, self.rad_params.to_bytes().to_vec()))
+                    Some((
+                        MsgType::SetRadParamsResp,
+                        0,
+                        0,
+                        self.rad_params.to_bytes().to_vec(),
+                    ))
                 } else {
-                    Some((MsgType::SetRadParamsResp, flags::ERROR, StatusCode::ErrInvalidArg as u16, Vec::new()))
+                    Some((
+                        MsgType::SetRadParamsResp,
+                        flags::ERROR,
+                        StatusCode::ErrInvalidArg as u16,
+                        Vec::new(),
+                    ))
                 }
             }
             MsgType::TriggerFfcReq => Some((MsgType::TriggerFfcResp, 0, 0, vec![0, 0])),
@@ -402,9 +433,8 @@ impl SimulatorTransport {
             MsgType::FsStatReq if pkt.payload.len() >= 4 => {
                 let compute_crc32 = (pkt.payload[0] & 0x01) != 0;
                 let path_len = u16::from_le_bytes([pkt.payload[2], pkt.payload[3]]) as usize;
-                let path = String::from_utf8_lossy(
-                    &pkt.payload[4..(4 + path_len).min(pkt.payload.len())],
-                );
+                let path =
+                    String::from_utf8_lossy(&pkt.payload[4..(4 + path_len).min(pkt.payload.len())]);
                 let name = path.trim_start_matches('/');
                 if let Some((_, data)) = self.sd_files.iter().find(|(n, _)| n == name) {
                     let stat = FsStatResp {
@@ -482,14 +512,18 @@ impl SimulatorTransport {
                     }
                     None
                 } else {
-                    Some((MsgType::FsReadData, flags::ERROR, StatusCode::ErrNotFound as u16, Vec::new()))
+                    Some((
+                        MsgType::FsReadData,
+                        flags::ERROR,
+                        StatusCode::ErrNotFound as u16,
+                        Vec::new(),
+                    ))
                 }
             }
             MsgType::FsDeleteReq if pkt.payload.len() >= 4 => {
                 let path_len = u16::from_le_bytes([pkt.payload[2], pkt.payload[3]]) as usize;
-                let path = String::from_utf8_lossy(
-                    &pkt.payload[4..(4 + path_len).min(pkt.payload.len())],
-                );
+                let path =
+                    String::from_utf8_lossy(&pkt.payload[4..(4 + path_len).min(pkt.payload.len())]);
                 let name = path.trim_start_matches('/');
                 let before = self.sd_files.len();
                 self.sd_files.retain(|(n, _)| n != name);
@@ -579,7 +613,8 @@ pub fn generate_demo_frame(frame_seq: u32, width: u16, height: u16) -> FrameRaw 
             temp_c += (31.0 + 1.5 * (phase * 1.3).cos()) * (-r2 / 0.0055).exp();
 
             // Warm copper trace connecting regulator to MCU
-            let trace_dist = ((ny - (0.34 + 0.14 * ((0.68 - nx) / 0.30).clamp(0.0, 1.0))) * 12.0).abs();
+            let trace_dist =
+                ((ny - (0.34 + 0.14 * ((0.68 - nx) / 0.30).clamp(0.0, 1.0))) * 12.0).abs();
             if (0.38..=0.68).contains(&nx) && trace_dist < 0.7 {
                 temp_c += 11.5 * (1.0 - trace_dist / 0.7);
             }
@@ -708,10 +743,17 @@ impl<T: Transport> ProtocolClient<T> {
             if now >= deadline {
                 return Err(ProtocolError::Timeout(seq));
             }
-            let wait = deadline.saturating_duration_since(now).min(Duration::from_millis(10));
+            let wait = deadline
+                .saturating_duration_since(now)
+                .min(Duration::from_millis(10));
             let n = self.transport.read_chunk(&mut self.rx_scratch, wait)?;
             if n > 0 {
-                for pkt in self.parser.feed(&self.rx_scratch[..n]).into_iter().flatten() {
+                for pkt in self
+                    .parser
+                    .feed(&self.rx_scratch[..n])
+                    .into_iter()
+                    .flatten()
+                {
                     self.pending.push_back(pkt);
                 }
             }
@@ -788,7 +830,11 @@ impl<T: Transport> ProtocolClient<T> {
         Ok(())
     }
 
-    pub fn fs_stat(&mut self, path: &str, compute_crc32: bool) -> Result<FsStatResp, ProtocolError> {
+    pub fn fs_stat(
+        &mut self,
+        path: &str,
+        compute_crc32: bool,
+    ) -> Result<FsStatResp, ProtocolError> {
         let req = FsStatResp::encode_req(compute_crc32, path);
         let pkt = self.request(MsgType::FsStatReq, &req, Duration::from_millis(3000))?;
         FsStatResp::from_bytes(&pkt.payload)
@@ -814,7 +860,12 @@ impl<T: Transport> ProtocolClient<T> {
             let wait = rem.min(Duration::from_millis(10));
             let n = self.transport.read_chunk(&mut self.rx_scratch, wait)?;
             if n > 0 {
-                for pkt in self.parser.feed(&self.rx_scratch[..n]).into_iter().flatten() {
+                for pkt in self
+                    .parser
+                    .feed(&self.rx_scratch[..n])
+                    .into_iter()
+                    .flatten()
+                {
                     out.push(pkt);
                 }
             }

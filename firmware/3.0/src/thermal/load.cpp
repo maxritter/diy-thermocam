@@ -107,8 +107,8 @@ void clearData()
 	clearTempPoints();
 }
 
-/* Display the image on the screen */
-void displayRawData()
+/* Render raw smallBuffer into bigBuffer in RAM (without flushing to LCD yet) */
+void renderRawDataToBuffer()
 {
 	//Select Color Scheme
 	selectColorScheme();
@@ -129,20 +129,25 @@ void displayRawData()
 	//Convert lepton data to RGB565 colors
 	convertColors();
 
-	//Display additional information
+	//Composite thermal HUD overlays into bigBuffer in RAM
 	displayInfos();
+}
 
-	//Display on screen
+/* Display the image on the screen */
+void displayRawData()
+{
+	renderRawDataToBuffer();
 	displayBuffer();
 }
 
-/* Loads a 640x480 BMP image from the SDCard and prints it on screen */
-void loadBMPImage(char *filename)
+/* Loads a 640x480 BMP image from the SDCard into bigBuffer (without flushing to LCD yet) */
+void loadBMPToBuffer(char *filename)
 {
 	//Help variables
 	byte low, high;
 	// Open the file for reading
-	sdFile.open(filename, O_READ);
+	if (!sdFile.open(filename, O_READ))
+		return;
 
 	//Skip the 66 bytes BMP header
 	for (int i = 0; i < 66; i++)
@@ -160,9 +165,14 @@ void loadBMPImage(char *filename)
 	}
 	//Close data file
 	sdFile.close();
+}
 
+/* Loads a 640x480 BMP image from the SDCard and prints it on screen */
+void loadBMPImage(char *filename)
+{
+	loadBMPToBuffer(filename);
 	//Draw it on the screen
-	display_drawBitmap(0, 0, 320, 240, bigBuffer);
+	displayBuffer();
 }
 
 /* Checks if the file is an image*/
@@ -1192,7 +1202,8 @@ redraw:
 	//Touch handler
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			drawLoadMenu();
 		//If touch pressed
 		if (touch_touched() == true)
 		{
@@ -1325,13 +1336,14 @@ redraw:
 			break;
 		}
 
-		//Wait for touch release
+		//Wait for touch release (bounded so touch glitch can never hang gallery exit)
+		uint32_t tRel = millis();
 		if (touch_capacitive)
-			while (touch_touched())
-				;
+			while (touch_touched() && (millis() - tRel) < 1500u)
+				delay(5);
 		else
-			while (!digitalRead(pin_touch_irq))
-				;
+			while (!digitalRead(pin_touch_irq) && (millis() - tRel) < 1500u)
+				delay(5);
 
 		//Leave
 		if (exit)

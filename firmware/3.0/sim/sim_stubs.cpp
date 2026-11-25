@@ -147,7 +147,7 @@ void touch_setRotation(bool) {}
 volatile bool touch_touched() { return false; }
 
 void checkBattery(bool, bool) {}
-void checkSerial() {}
+bool checkSerial() { return false; }
 bool lepton_ffc(bool, bool) { return false; }
 void lepton_ffcMode(bool) {}
 void lepton_setHighGain() {}
@@ -159,7 +159,9 @@ void initScreenOffTimer() {}
 bool formatCard() { return true; }
 void loadFiles() {}
 void loadRawData(char*) {}
+void renderRawDataToBuffer() {}
 void displayRawData() {}
+void loadBMPToBuffer(char*) {}
 void loadBMPImage(char*) {}
 void loadTouchIRQ() {}
 bool loadTouchTakePending() { return false; }

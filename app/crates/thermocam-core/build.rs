@@ -31,10 +31,7 @@ fn pretty_label(key: &str) -> &'static str {
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
-    let fw_root = manifest_dir
-        .join("../../..")
-        .join("firmware")
-        .join("3.0");
+    let fw_root = manifest_dir.join("../../..").join("firmware").join("3.0");
 
     let defines_path = fw_root.join("include/globaldefines.h");
     let schemes_path = fw_root.join("src/general/colorschemes.cpp");
@@ -157,10 +154,7 @@ fn main() {
     out.push_str("}\n\n");
 
     for (id, (name, elements, rgb)) in &ordered {
-        let _ = writeln!(
-            out,
-            "static FW_PALETTE_{id}_RGB: &[[u8; 3]] = &["
-        );
+        let _ = writeln!(out, "static FW_PALETTE_{id}_RGB: &[[u8; 3]] = &[");
         for entry in rgb.iter().take(*elements) {
             let _ = writeln!(out, "    [{}, {}, {}],", entry[0], entry[1], entry[2]);
         }

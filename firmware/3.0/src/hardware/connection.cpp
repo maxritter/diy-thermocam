@@ -879,9 +879,10 @@ void buttonHandler()
 	else
 	{
 		sendCmd = FRAME_CAPTURE_VIDEO;
-		//Wait until button release
-		while (extButtonPressed())
-			;
+		//Wait until button release (bounded)
+		uint32_t tRel = millis();
+		while (extButtonPressed() && (millis() - tRel) < 2000u)
+			delay(5);
 	}
 }
 
@@ -909,9 +910,9 @@ bool touchHandler()
 }
 
 /* Check for serial connection: auto-detect Protocol v2 ("TC2\0") vs temporary Phase 3 legacy v1 (0x64) */
-void checkSerial()
+bool checkSerial()
 {
-	checkSerialV2OrV1(false);
+	return checkSerialV2OrV1(false);
 }
 
 /* Go into video output mode and wait for connected module (non-blocking double-buffered!) */

@@ -44,7 +44,12 @@ impl TempUnit {
 
     #[must_use]
     pub fn format(self, temp_c: f32, decimals: usize) -> String {
-        format!("{:.*} {}", decimals, self.from_celsius(temp_c), self.symbol())
+        format!(
+            "{:.*} {}",
+            decimals,
+            self.from_celsius(temp_c),
+            self.symbol()
+        )
     }
 }
 
@@ -153,19 +158,94 @@ pub struct MaterialPreset {
 
 /// Built-in engineering/thermography material emissivity library.
 pub const MATERIAL_PRESETS: &[MaterialPreset] = &[
-    MaterialPreset { id: "blackbody", name: "Blackbody Reference", category: "Reference", emissivity: 1.00 },
-    MaterialPreset { id: "skin", name: "Human Skin", category: "Biological", emissivity: 0.98 },
-    MaterialPreset { id: "electrical_tape", name: "Black Electrical Tape (3M)", category: "Electronics", emissivity: 0.96 },
-    MaterialPreset { id: "matte_pcb", name: "PCB Solder Mask (FR-4)", category: "Electronics", emissivity: 0.91 },
-    MaterialPreset { id: "ic_epoxy", name: "IC Plastic Package (Epoxy)", category: "Electronics", emissivity: 0.94 },
-    MaterialPreset { id: "water", name: "Water / Ice", category: "Building", emissivity: 0.96 },
-    MaterialPreset { id: "brick", name: "Brick / Concrete / Plaster", category: "Building", emissivity: 0.93 },
-    MaterialPreset { id: "wood", name: "Wood / Paper / Cardboard", category: "Building", emissivity: 0.90 },
-    MaterialPreset { id: "paint_matte", name: "Matte Paint (Any Color)", category: "Coatings", emissivity: 0.94 },
-    MaterialPreset { id: "anodized_al", name: "Anodized Aluminum (Black)", category: "Metals", emissivity: 0.84 },
-    MaterialPreset { id: "oxidized_steel", name: "Oxidized Steel / Iron", category: "Metals", emissivity: 0.79 },
-    MaterialPreset { id: "oxidized_cu", name: "Oxidized Copper", category: "Metals", emissivity: 0.65 },
-    MaterialPreset { id: "solder_joint", name: "Solder Joint (Sn/Ag/Cu)", category: "Electronics", emissivity: 0.35 },
-    MaterialPreset { id: "brushed_al", name: "Brushed Aluminum", category: "Metals", emissivity: 0.22 },
-    MaterialPreset { id: "polished_cu", name: "Polished Copper / Brass", category: "Metals", emissivity: 0.08 },
+    MaterialPreset {
+        id: "blackbody",
+        name: "Blackbody Reference",
+        category: "Reference",
+        emissivity: 1.00,
+    },
+    MaterialPreset {
+        id: "skin",
+        name: "Human Skin",
+        category: "Biological",
+        emissivity: 0.98,
+    },
+    MaterialPreset {
+        id: "electrical_tape",
+        name: "Black Electrical Tape (3M)",
+        category: "Electronics",
+        emissivity: 0.96,
+    },
+    MaterialPreset {
+        id: "matte_pcb",
+        name: "PCB Solder Mask (FR-4)",
+        category: "Electronics",
+        emissivity: 0.91,
+    },
+    MaterialPreset {
+        id: "ic_epoxy",
+        name: "IC Plastic Package (Epoxy)",
+        category: "Electronics",
+        emissivity: 0.94,
+    },
+    MaterialPreset {
+        id: "water",
+        name: "Water / Ice",
+        category: "Building",
+        emissivity: 0.96,
+    },
+    MaterialPreset {
+        id: "brick",
+        name: "Brick / Concrete / Plaster",
+        category: "Building",
+        emissivity: 0.93,
+    },
+    MaterialPreset {
+        id: "wood",
+        name: "Wood / Paper / Cardboard",
+        category: "Building",
+        emissivity: 0.90,
+    },
+    MaterialPreset {
+        id: "paint_matte",
+        name: "Matte Paint (Any Color)",
+        category: "Coatings",
+        emissivity: 0.94,
+    },
+    MaterialPreset {
+        id: "anodized_al",
+        name: "Anodized Aluminum (Black)",
+        category: "Metals",
+        emissivity: 0.84,
+    },
+    MaterialPreset {
+        id: "oxidized_steel",
+        name: "Oxidized Steel / Iron",
+        category: "Metals",
+        emissivity: 0.79,
+    },
+    MaterialPreset {
+        id: "oxidized_cu",
+        name: "Oxidized Copper",
+        category: "Metals",
+        emissivity: 0.65,
+    },
+    MaterialPreset {
+        id: "solder_joint",
+        name: "Solder Joint (Sn/Ag/Cu)",
+        category: "Electronics",
+        emissivity: 0.35,
+    },
+    MaterialPreset {
+        id: "brushed_al",
+        name: "Brushed Aluminum",
+        category: "Metals",
+        emissivity: 0.22,
+    },
+    MaterialPreset {
+        id: "polished_cu",
+        name: "Polished Copper / Brass",
+        category: "Metals",
+        emissivity: 0.08,
+    },
 ];

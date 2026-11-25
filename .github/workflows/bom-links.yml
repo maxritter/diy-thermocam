@@ -1,0 +1,32 @@
+name: Weekly BOM Supplier Link Check
+
+on:
+  schedule:
+    # Run every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      strict_waf:
+        description: 'Treat distributor WAF 403/429 responses as errors'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: bom-links-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bom-links:
+    name: Verify external BOM supplier URLs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate BOM schema & live supplier links
+        run: |
+          ARGS="--check-links"
+          if [ "${{ inputs.strict_waf }}" = "true" ]; then
+            ARGS="$ARGS --strict-waf"
+          fi
+          python3 hardware/bom/validate_bom.py $ARGS

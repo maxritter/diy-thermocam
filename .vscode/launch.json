@@ -1,0 +1,80 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "App: Debug Tauri Desktop (Rust + Vite)",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": [
+          "build",
+          "--manifest-path",
+          "${workspaceFolder}/app/Cargo.toml",
+          "--package",
+          "diy-thermocam-app"
+        ],
+        "filter": {
+          "name": "diy-thermocam",
+          "kind": "bin"
+        }
+      },
+      "cwd": "${workspaceFolder}/app",
+      "preLaunchTask": "App: Frontend Dev (Vite)",
+      "args": []
+    },
+    {
+      "name": "App: Attach to Running Tauri Process",
+      "type": "lldb",
+      "request": "attach",
+      "program": "${workspaceFolder}/app/target/debug/diy-thermocam"
+    },
+    {
+      "name": "App: Debug Real Camera E2E",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": [
+          "build",
+          "--manifest-path",
+          "${workspaceFolder}/app/Cargo.toml",
+          "-p",
+          "thermocam-core",
+          "--example",
+          "real_camera_e2e"
+        ],
+        "filter": {
+          "name": "real_camera_e2e",
+          "kind": "example"
+        }
+      },
+      "cwd": "${workspaceFolder}/app",
+      "args": ["${input:serialPort}"]
+    },
+    {
+      "name": "Firmware: Debug Host Unit Tests",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/firmware/3.0/tests_host/run_tests",
+      "cwd": "${workspaceFolder}/firmware/3.0/tests_host",
+      "preLaunchTask": "Firmware: Host Unit Tests",
+      "args": []
+    },
+    {
+      "name": "Firmware: Debug UI Simulator",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/firmware/3.0/sim/thermocam_sim",
+      "cwd": "${workspaceFolder}/firmware/3.0/sim",
+      "preLaunchTask": "Firmware: UI Simulator Screenshots",
+      "args": ["--screenshot-all", "out"]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "serialPort",
+      "type": "promptString",
+      "description": "DIY-Thermocam V3 serial port (e.g. /dev/cu.usbmodem93126801, /dev/ttyACM0, COM4)",
+      "default": "/dev/cu.usbmodem93126801"
+    }
+  ]
+}

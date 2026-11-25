@@ -190,7 +190,9 @@ pub fn parse_custom_palette_png(name: &str, png_bytes: &[u8]) -> Result<Palette,
         .to_rgb8();
     let w = img.width();
     if w < 2 {
-        return Err(PaletteError::InvalidCustom("image width must be >= 2".into()));
+        return Err(PaletteError::InvalidCustom(
+            "image width must be >= 2".into(),
+        ));
     }
     let mut rgb = Vec::with_capacity(256);
     for i in 0..256 {
@@ -228,14 +230,20 @@ pub fn parse_custom_palette_text(name: &str, text: &str) -> Result<Palette, Pale
         } else {
             let parts: Vec<&str> = l.split([',', ';', ' ']).filter(|s| !s.is_empty()).collect();
             if parts.len() >= 3 {
-                if let (Ok(r), Ok(g), Ok(b)) = (parts[0].parse::<u8>(), parts[1].parse::<u8>(), parts[2].parse::<u8>()) {
+                if let (Ok(r), Ok(g), Ok(b)) = (
+                    parts[0].parse::<u8>(),
+                    parts[1].parse::<u8>(),
+                    parts[2].parse::<u8>(),
+                ) {
                     entries.push([r, g, b]);
                 }
             }
         }
     }
     if entries.len() < 2 {
-        return Err(PaletteError::InvalidCustom("need at least 2 RGB entries".into()));
+        return Err(PaletteError::InvalidCustom(
+            "need at least 2 RGB entries".into(),
+        ));
     }
     let stops: Vec<(f32, u8, u8, u8)> = entries
         .iter()

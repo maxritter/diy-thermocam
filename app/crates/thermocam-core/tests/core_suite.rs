@@ -313,7 +313,7 @@ fn radiometry_emissivity_roi_and_tempswitch() {
     assert!(rule.evaluate(62.0, 2000));
     assert!(!rule.evaluate(65.0, 4000)); // still in cooldown
     assert!(rule.evaluate(65.0, 7500)); // cooldown elapsed
-    // Circle, Polygon, and 2-point Delta ROIs
+                                        // Circle, Polygon, and 2-point Delta ROIs
     let circle = Roi {
         id: "c1".into(),
         label: "VRM".into(),
@@ -447,11 +447,8 @@ fn full_hd_1080p_upscaler_png_mp4_gif_tiff_csv_and_reports() {
     let mp4_bytes = encode_h264_mp4(w, h, &[rgb.clone(), rgb.clone(), rgb.clone()], 9).unwrap();
     let mp4_ms = t_mp4.elapsed().as_millis();
     assert!(mp4_bytes.len() > 1000);
-    let reader = mp4::Mp4Reader::read_header(
-        Cursor::new(&mp4_bytes),
-        mp4_bytes.len() as u64,
-    )
-    .unwrap();
+    let reader =
+        mp4::Mp4Reader::read_header(Cursor::new(&mp4_bytes), mp4_bytes.len() as u64).unwrap();
     let track = reader.tracks().get(&1).expect("video track 1");
     assert_eq!(track.width(), 1920);
     assert_eq!(track.height(), 1080);
@@ -667,7 +664,10 @@ fn circle_polygon_delta_rois_and_uhd_4k_resolutions() {
     let d_stats = evaluate_roi(&delta, &frame.pixels, 160, 120, rad);
     assert!(d_stats.delta_c.expect("delta") > 25.0);
 
-    assert_eq!(ExportResolution::Qhd1440p.dimensions(160, 120), (2560, 1440));
+    assert_eq!(
+        ExportResolution::Qhd1440p.dimensions(160, 120),
+        (2560, 1440)
+    );
     assert_eq!(ExportResolution::Uhd4k.dimensions(160, 120), (3840, 2160));
 
     // Verify custom 256-px PNG LUT import roundtrip
@@ -720,8 +720,8 @@ fn real_v3_dat_and_protocol_v2_stream_fixtures() {
         .join("fixtures");
 
     // 1. Real DIY-Thermocam V3 `.DAT` capture (38,805 bytes)
-    let dat_bytes = std::fs::read(fixtures_dir.join("sample_real_v3.DAT"))
-        .expect("read sample_real_v3.DAT");
+    let dat_bytes =
+        std::fs::read(fixtures_dir.join("sample_real_v3.DAT")).expect("read sample_real_v3.DAT");
     assert_eq!(dat_bytes.len(), LEPTON3_BIG_SIZE);
     let dat = ThermalDat::from_bytes(&dat_bytes).expect("parse real V3 DAT");
     assert_eq!((dat.width, dat.height), (160, 120));
@@ -843,7 +843,9 @@ fn protocol_client_ignores_unsolicited_frame_with_colliding_seq_and_reads_multic
         .expect("should match PongResp, not colliding FrameRaw");
     assert_eq!(pong.msg_type().unwrap(), MsgType::PongResp);
 
-    let file = client.read_file_bytes("/test.dat").expect("read 2-chunk file");
+    let file = client
+        .read_file_bytes("/test.dat")
+        .expect("read 2-chunk file");
     assert_eq!(file, b"ABCDEFG");
 
     // The unsolicited FrameRaw must still be queued for poll_packets!
@@ -955,8 +957,8 @@ fn streaming_mp4_gif_pagination_temporal_heq_and_utc_metadata() {
     })
     .unwrap();
     let mp4_bytes = mp4_buf.into_inner();
-    let reader = mp4::Mp4Reader::read_header(Cursor::new(&mp4_bytes), mp4_bytes.len() as u64)
-        .unwrap();
+    let reader =
+        mp4::Mp4Reader::read_header(Cursor::new(&mp4_bytes), mp4_bytes.len() as u64).unwrap();
     let track = reader.tracks().get(&1).expect("video track 1");
     assert_eq!(track.sample_count(), frames.len() as u32);
     assert_eq!(track.timescale(), 100_000);

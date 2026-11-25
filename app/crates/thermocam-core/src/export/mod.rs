@@ -578,9 +578,9 @@ pub fn generate_html_report(
     let line_svg = rois
         .iter()
         .find_map(|r| match r.geometry {
-            RoiGeometry::Line { x0, y0, x1, y1 } => {
-                Some(sample_line_profile(pixels, sensor_w, sensor_h, x0, y0, x1, y1, rad))
-            }
+            RoiGeometry::Line { x0, y0, x1, y1 } => Some(sample_line_profile(
+                pixels, sensor_w, sensor_h, x0, y0, x1, y1, rad,
+            )),
             _ => None,
         })
         .map(|samples| render_line_profile_svg(&samples, opts.unit))
@@ -676,7 +676,10 @@ fn render_line_profile_svg(samples: &[LineSample], unit: TempUnit) -> String {
     if samples.len() < 2 {
         return String::new();
     }
-    let vals: Vec<f32> = samples.iter().map(|s| unit.from_celsius(s.temp_c)).collect();
+    let vals: Vec<f32> = samples
+        .iter()
+        .map(|s| unit.from_celsius(s.temp_c))
+        .collect();
     let lo = vals.iter().copied().fold(f32::INFINITY, f32::min);
     let hi = vals.iter().copied().fold(f32::NEG_INFINITY, f32::max);
     let span = (hi - lo).max(0.1);

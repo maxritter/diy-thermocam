@@ -19,9 +19,7 @@ use thermocam_core::imaging::{DisplayPipeline, RenderScratch, SpatialFilter, Ups
 use thermocam_core::palettes::find_palette;
 use thermocam_core::protocol::codec::{FrameRaw, StreamCtrl};
 use thermocam_core::protocol::crc::crc32_ieee;
-use thermocam_core::protocol::messages::{
-    AsyncEvent, FsInfoResp, PerfTelemetry, RadParams,
-};
+use thermocam_core::protocol::messages::{AsyncEvent, FsInfoResp, PerfTelemetry, RadParams};
 use thermocam_core::protocol::transport::{list_ports, ProtocolClient, SerialTransport};
 use thermocam_core::protocol::{capabilities, MsgType};
 use thermocam_core::radiometry::{raw_to_object_c, RadiometryParams, TempUnit};
@@ -221,7 +219,10 @@ fn run_session(
         .map_err(|e| format!("STREAM_CTRL stop failed: {e}"))?;
 
     if frames.len() < 20 {
-        return Err(format!("expected >=20 real live frames, got {}", frames.len()));
+        return Err(format!(
+            "expected >=20 real live frames, got {}",
+            frames.len()
+        ));
     }
     let post_fps = match (post_first_t, post_last_t) {
         (Some(t0), Some(t1)) if post_count >= 2 => {
@@ -428,7 +429,14 @@ fn run_session(
     fs::write(&tiff_path, &tiff_bytes).map_err(|e| format!("write TIFF failed: {e}"))?;
 
     // Constant-RAM streaming H.264 MP4 from 12 real consecutive post-FFC live V3 frames (1920x1080)
-    let mp4_frames_src: Vec<&FrameRaw> = frames.iter().rev().take(12).collect::<Vec<_>>().into_iter().rev().collect();
+    let mp4_frames_src: Vec<&FrameRaw> = frames
+        .iter()
+        .rev()
+        .take(12)
+        .collect::<Vec<_>>()
+        .into_iter()
+        .rev()
+        .collect();
     let mp4_timestamps: Vec<u64> = mp4_frames_src.iter().map(|f| f.meta.timestamp_us).collect();
     let mp4_fps = derive_sequence_fps(&mp4_timestamps);
     let mp4_path = out_dir.join("real-v3-1080p-live.mp4");
@@ -461,7 +469,10 @@ fn run_session(
     let mp4_bytes = fs::read(&mp4_path).map_err(|e| format!("read MP4 failed: {e}"))?;
     let mp4_reader = mp4::Mp4Reader::read_header(Cursor::new(&mp4_bytes), mp4_bytes.len() as u64)
         .map_err(|e| format!("MP4 verify failed: {e}"))?;
-    let track = mp4_reader.tracks().get(&1).ok_or("missing MP4 video track 1")?;
+    let track = mp4_reader
+        .tracks()
+        .get(&1)
+        .ok_or("missing MP4 video track 1")?;
 
     println!(
         "[5/6] EXPORTS OK: PNG={}x{} ({} B, {:.1} ms) -> {} | MP4={}x{} {} frames ({} B, {:.1} ms) -> {} | TIFF={}x{} ({} B) -> {}",

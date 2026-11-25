@@ -29,7 +29,9 @@ pub enum FlashError {
     HexParse(String),
     #[error("firmware image is truncated (missing Intel HEX End-Of-File record)")]
     TruncatedHex,
-    #[error("address 0x{0:08X} is outside Teensy 4.1 FlexSPI flash bounds (0x60000000..0x60800000)")]
+    #[error(
+        "address 0x{0:08X} is outside Teensy 4.1 FlexSPI flash bounds (0x60000000..0x60800000)"
+    )]
     AddressOutOfBounds(u32),
     #[error("invalid Teensy 4.1 boot header (expected 'FCFB' FlexSPI config block at 0x60000000)")]
     InvalidBootHeader,

@@ -80,7 +80,10 @@ impl ActiveTransport {
             Self::Simulator(c) => c.send_ping_nowait(host_time_us).map_err(|e| e.to_string()),
         }
     }
-    fn poll_packets(&mut self, timeout: Duration) -> Result<Vec<thermocam_core::protocol::Packet>, String> {
+    fn poll_packets(
+        &mut self,
+        timeout: Duration,
+    ) -> Result<Vec<thermocam_core::protocol::Packet>, String> {
         match self {
             Self::Serial(c) => c.poll_packets(timeout).map_err(|e| e.to_string()),
             Self::Simulator(c) => c.poll_packets(timeout).map_err(|e| e.to_string()),
@@ -498,14 +501,11 @@ async fn cmd_trigger_ffc(state: State<'_, AppState>, force: bool) -> Result<(), 
     let client_arc = Arc::clone(&state.client);
     tauri::async_runtime::spawn_blocking(move || {
         let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
-        let _ = guard
-            .as_mut()
-            .ok_or("not connected")?
-            .request_timeout(
-                MsgType::TriggerFfcReq,
-                &[u8::from(force)],
-                Duration::from_millis(4000),
-            )?;
+        let _ = guard.as_mut().ok_or("not connected")?.request_timeout(
+            MsgType::TriggerFfcReq,
+            &[u8::from(force)],
+            Duration::from_millis(4000),
+        )?;
         Ok(())
     })
     .await
@@ -689,7 +689,9 @@ fn cmd_pick_hex_file() -> Result<(String, String), String> {
 }
 
 #[tauri::command]
-fn cmd_load_dat_file(path: Option<String>) -> Result<(String, ThermalDat, Option<ThermoSidecar>), String> {
+fn cmd_load_dat_file(
+    path: Option<String>,
+) -> Result<(String, ThermalDat, Option<ThermoSidecar>), String> {
     let file_path = match path {
         Some(p) => PathBuf::from(p),
         None => rfd::FileDialog::new()
@@ -748,7 +750,12 @@ async fn cmd_export_media(
         _ => {
             let guard = state.latest_frame.lock().map_err(|e| e.to_string())?;
             let fr = guard.as_ref().ok_or("no frame available")?;
-            (fr.pixels.clone(), fr.meta.width, fr.meta.height, Some(Arc::clone(fr)))
+            (
+                fr.pixels.clone(),
+                fr.meta.width,
+                fr.meta.height,
+                Some(Arc::clone(fr)),
+            )
         }
     };
     let palette = resolve_palette(&state, &req.palette_id)?;
@@ -788,7 +795,12 @@ async fn cmd_export_media(
         let recorded = state.recorded_frames.lock().map_err(|e| e.to_string())?;
         if recorded.is_empty() {
             drop(recorded);
-            if let Some(fr) = state.latest_frame.lock().map_err(|e| e.to_string())?.clone() {
+            if let Some(fr) = state
+                .latest_frame
+                .lock()
+                .map_err(|e| e.to_string())?
+                .clone()
+            {
                 vec![fr]
             } else {
                 Vec::new()
@@ -1077,10 +1089,18 @@ async fn cmd_capture_timelapse_frame(
 #[tauri::command]
 fn cmd_toggle_recording(state: State<'_, AppState>, active: bool) -> Result<usize, String> {
     if active {
-        state.recorded_frames.lock().map_err(|e| e.to_string())?.clear();
+        state
+            .recorded_frames
+            .lock()
+            .map_err(|e| e.to_string())?
+            .clear();
     }
     state.recording.store(active, Ordering::SeqCst);
-    Ok(state.recorded_frames.lock().map_err(|e| e.to_string())?.len())
+    Ok(state
+        .recorded_frames
+        .lock()
+        .map_err(|e| e.to_string())?
+        .len())
 }
 
 #[tauri::command]
@@ -1112,8 +1132,8 @@ async fn cmd_flash_firmware(
 
     tauri::async_runtime::spawn_blocking(move || {
         let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
-        let img = parse_teensy41_hex(&hex_text, expected_sha256.as_deref())
-            .map_err(|e| e.to_string())?;
+        let img =
+            parse_teensy41_hex(&hex_text, expected_sha256.as_deref()).map_err(|e| e.to_string())?;
         let _ = app.emit(
             "flash-progress",
             serde_json::json!({ "stage": "verified", "sha256": img.sha256_hex }),
@@ -1186,9 +1206,16 @@ pub fn build_app() -> tauri::Builder<tauri::Wry> {
                                     ..ExportOptions::default()
                                 };
                                 let (w, h, rgb) = render_export_canvas(
-                                    &dat.pixels, dat.width, dat.height, dat.min_raw, dat.max_raw,
-                                    &pal, RadiometryParams::default(), &DisplayPipeline::default(),
-                                    &[], &opts,
+                                    &dat.pixels,
+                                    dat.width,
+                                    dat.height,
+                                    dat.min_raw,
+                                    dat.max_raw,
+                                    &pal,
+                                    RadiometryParams::default(),
+                                    &DisplayPipeline::default(),
+                                    &[],
+                                    &opts,
                                 );
                                 if let Ok(png) = encode_png(w, h, &rgb) {
                                     return tauri::http::Response::builder()

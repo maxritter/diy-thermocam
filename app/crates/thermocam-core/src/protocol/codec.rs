@@ -331,8 +331,7 @@ impl FrameRaw {
             meta.flags |= 0x04;
             meta.temp_point_count = self.temp_points.len() as u16;
         }
-        let mut out =
-            Vec::with_capacity(64 + self.pixels.len() * 2 + self.temp_points.len() * 6);
+        let mut out = Vec::with_capacity(64 + self.pixels.len() * 2 + self.temp_points.len() * 6);
         out.extend_from_slice(&meta.to_bytes());
         for &px in &self.pixels {
             out.extend_from_slice(&px.to_le_bytes());
