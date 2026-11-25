@@ -376,6 +376,7 @@ fn full_hd_1080p_upscaler_png_mp4_gif_tiff_csv_and_reports() {
         sharpen_amount: 0.5,
         rotate_180: false,
         flip_horizontal: false,
+        histogram_eq: false,
         isotherm: IsothermConfig {
             mode: IsothermMode::Above,
             low_c: 40.0,
@@ -635,8 +636,8 @@ fn circle_polygon_delta_rois_and_uhd_4k_resolutions() {
         120,
         320,
         240,
-        frame.min_raw,
-        frame.max_raw,
+        frame.meta.min_raw,
+        frame.meta.max_raw,
         &parsed_pal,
         rad,
         &heq_pipeline,
