@@ -1,0 +1,112 @@
+(footprint "AXIAL-0.4"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+		(layer "B.Cu")
+		(descr "1/4W Resistor, 0.4\" wide\n\nYageo CFR series http://www.yageo.com/pdf/yageo/Leaded-R_CFR_2008.pdf http://www.yageo.com/pdf/yageo/Leaded-R_CFR_2008.pdf")
+		(property "Reference" "R3"
+			(at -3.175 1.905 270)
+			(unlocked yes)
+			(layer "B.SilkS")
+			(hide yes)
+			(effects
+				(font
+					(size 0.69088 0.69088)
+					(thickness 0.12192)
+				)
+				(justify left bottom mirror)
+			)
+		)
+		(property "Value" "4k7"
+			(at -1.186 -0.481 270)
+			(unlocked yes)
+			(layer "B.SilkS")
+			(effects
+				(font
+					(size 0.930912 0.930912)
+					(thickness 0.069088)
+				)
+				(justify left bottom mirror)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 270)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify mirror)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 270)
+			(unlocked yes)
+			(layer "B.Fab")
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify mirror)
+			)
+		)
+		(duplicate_pad_numbers_are_jumpers no)
+		(fp_line
+			(start 3.15 -1.2)
+			(end -3.15 -1.2)
+			(stroke
+				(width 0.2032)
+				(type solid)
+			)
+			(layer "B.SilkS")
+		)
+		(fp_line
+			(start -3.15 -1.2)
+			(end -3.15 1.2)
+			(stroke
+				(width 0.2032)
+				(type solid)
+			)
+			(layer "B.SilkS")
+		)
+		(fp_line
+			(start 3.15 1.2)
+			(end 3.15 -1.2)
+			(stroke
+				(width 0.2032)
+				(type solid)
+			)
+			(layer "B.SilkS")
+		)
+		(fp_line
+			(start -3.15 1.2)
+			(end 3.15 1.2)
+			(stroke
+				(width 0.2032)
+				(type solid)
+			)
+			(layer "B.SilkS")
+		)
+		(pad "P$1" thru_hole circle
+			(at -5.08 0 90)
+			(size 1.8796 1.8796)
+			(drill 0.9)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(solder_mask_margin 0.0508)
+			(thermal_bridge_angle 0)
+		)
+		(pad "P$2" thru_hole circle
+			(at 5.08 0 90)
+			(size 1.8796 1.8796)
+			(drill 0.9)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(solder_mask_margin 0.0508)
+			(thermal_bridge_angle 0)
+		)
+		(embedded_fonts no)
+	)

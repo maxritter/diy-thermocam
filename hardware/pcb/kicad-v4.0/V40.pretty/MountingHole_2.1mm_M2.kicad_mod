@@ -1,0 +1,8 @@
+(footprint "MountingHole_2.1mm_M2"
+	(version 20241229)
+	(generator "pcbnew")
+	(layer "F.Cu")
+	(attr exclude_from_pos_files exclude_from_bom)
+	(fp_circle (center 0 0) (end 2.0 0) (stroke (width 0.12) (type solid)) (fill none) (layer "F.CrtYd"))
+	(pad "" np_thru_hole circle (at 0 0) (size 2.1 2.1) (drill 2.1) (layers "*.Cu" "*.Mask"))
+)

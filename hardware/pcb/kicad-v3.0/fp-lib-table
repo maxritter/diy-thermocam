@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "V30")(type "KiCad")(uri "${KIPRJMOD}/V30.pretty")(options "")(descr "DIY-Thermocam V3.0 Eagle-port footprints"))
+)

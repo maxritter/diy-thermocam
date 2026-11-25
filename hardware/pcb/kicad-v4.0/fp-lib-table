@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "V40")(type "KiCad")(uri "${KIPRJMOD}/V40.pretty")(options "")(descr "DIY-Thermocam V4.0 footprints"))
+)
