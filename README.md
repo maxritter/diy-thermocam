@@ -18,7 +18,7 @@
   <a href="https://www.diy-thermocam.net">Website</a>
 </p>
 
-<img src="website/public/images/brand/hero-thermal-banner.png" alt="DIY-Thermocam V4 thermal camera showing front touchscreen and rear FLIR Lepton lens" width="840">
+<img src="website/public/images/brand/readme-hero-v4.png" alt="DIY-Thermocam V4 thermal camera showing front touchscreen and rear FLIR Lepton lens" width="840">
 
 </div>
 
