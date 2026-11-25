@@ -1,0 +1,42 @@
+{
+  "status": "generated",
+  "submitted_at_unix": 1795617816.409815,
+  "voice_id": "hCzf8CazfMUP5S44zQWd",
+  "voice_name": "Max Ritter",
+  "request": {
+    "text": "DIY-Thermocam V4. Open-source thermal imaging, rebuilt from the ground up.",
+    "model_id": "eleven_v4",
+    "language_code": "en",
+    "voice_settings": {
+      "stability": 0.5,
+      "similarity_boost": 0.75
+    }
+  },
+  "output": "/Users/max/.gemini/antigravity-cli/worktrees/847fbb65-4436-4b6b-bcc9-72969cb9f46c/swarm-promo-video-bb58766e/video/public/vo/launch/intro-1.69e739f5f4.mp3",
+  "characters": 74,
+  "quota_before": 81930,
+  "quota_limit": 111348,
+  "conservative_quota_estimate": 74,
+  "sha256": "f09aecf4268856f1076291346ee90380ab2062aef011b6a27c26f9ca2b7a3a16",
+  "provider_request_id": "nY4CepzYb7oO7jWjLxe5",
+  "provider_character_cost": "30",
+  "media": {
+    "streams": [
+      {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 1
+      }
+    ],
+    "format": {
+      "duration": "6.320000"
+    }
+  },
+  "quota_after": 81930,
+  "observed_quota_delta": 0,
+  "quota_delta_note": "Account-wide delta; concurrent provider usage can affect it",
+  "overage_after": {
+    "amount": "0",
+    "currency": "usd"
+  }
+}

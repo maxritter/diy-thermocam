@@ -1,0 +1,30 @@
+{
+  "name": "diy-thermocam-v4-video",
+  "private": true,
+  "description": "Remotion source for the DIY-Thermocam V4 Launch & 3D Assembly Showcase Video",
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio",
+    "check": "tsc --noEmit",
+    "vo": "node scripts/vo.mjs launch",
+    "music": "bun scripts/music.ts",
+    "render": "remotion render DiyThermocamV4Launch out/diy-thermocam-v4-launch.mp4 --codec=h264 --audio-codec=aac"
+  },
+  "dependencies": {
+    "@remotion/captions": "4.0.532",
+    "@remotion/cli": "4.0.532",
+    "@remotion/fonts": "4.0.532",
+    "@remotion/media": "4.0.532",
+    "@remotion/transitions": "4.0.532",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "zod": "4.6.6"
+  }
+}
