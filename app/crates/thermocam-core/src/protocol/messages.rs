@@ -502,6 +502,50 @@ impl FsListResp {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FsStatResp {
+    pub size: u32,
+    pub mtime_epoch: u32,
+    pub crc32: u32,
+    pub is_dir: bool,
+    pub crc32_valid: bool,
+}
+
+impl FsStatResp {
+    #[must_use]
+    pub fn encode_req(compute_crc32: bool, path: &str) -> Vec<u8> {
+        let pb = path.as_bytes();
+        let mut out = Vec::with_capacity(4 + pb.len());
+        out.push(u8::from(compute_crc32));
+        out.push(0);
+        out.extend_from_slice(&(pb.len() as u16).to_le_bytes());
+        out.extend_from_slice(pb);
+        out
+    }
+
+    #[must_use]
+    pub fn to_bytes(&self) -> [u8; 16] {
+        let mut b = [0u8; 16];
+        b[0..4].copy_from_slice(&self.size.to_le_bytes());
+        b[4..8].copy_from_slice(&self.mtime_epoch.to_le_bytes());
+        b[8..12].copy_from_slice(&self.crc32.to_le_bytes());
+        b[12] = u8::from(self.is_dir);
+        b[13] = u8::from(self.crc32_valid);
+        b
+    }
+
+    pub fn from_bytes(b: &[u8]) -> Result<Self, ProtocolError> {
+        check_len(b, 16)?;
+        Ok(Self {
+            size: read_u32(b, 0),
+            mtime_epoch: read_u32(b, 4),
+            crc32: read_u32(b, 8),
+            is_dir: b[12] != 0,
+            crc32_valid: b[13] != 0,
+        })
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FsReadChunk {
     pub offset: u32,
     pub eof: bool,

@@ -55,13 +55,20 @@ impl ActiveTransport {
             Self::Simulator(c) => c.set_stream(ctrl).map_err(|e| e.to_string()),
         }
     }
-    fn request(&mut self, mt: MsgType, payload: &[u8]) -> Result<Vec<u8>, String> {
-        let timeout = Duration::from_millis(2000);
+    fn request_timeout(
+        &mut self,
+        mt: MsgType,
+        payload: &[u8],
+        timeout: Duration,
+    ) -> Result<Vec<u8>, String> {
         let pkt = match self {
             Self::Serial(c) => c.request(mt, payload, timeout).map_err(|e| e.to_string())?,
             Self::Simulator(c) => c.request(mt, payload, timeout).map_err(|e| e.to_string())?,
         };
         Ok(pkt.payload)
+    }
+    fn request(&mut self, mt: MsgType, payload: &[u8]) -> Result<Vec<u8>, String> {
+        self.request_timeout(mt, payload, Duration::from_millis(2000))
     }
     fn poll_packets(&mut self) -> Result<Vec<thermocam_core::protocol::Packet>, String> {
         match self {
@@ -220,6 +227,8 @@ fn cmd_start_stream(
     let rec_buf = Arc::clone(&state.recorded_frames);
 
     thread::spawn(move || {
+        let started = Instant::now();
+        let mut last_ping = Instant::now();
         while streaming_arc.load(Ordering::SeqCst) {
             let tick = Instant::now();
             let pkts = {
@@ -228,7 +237,14 @@ fn cmd_start_stream(
                     Err(_) => break,
                 };
                 match guard.as_mut() {
-                    Some(c) => c.poll_packets().unwrap_or_default(),
+                    Some(c) => {
+                        if last_ping.elapsed() >= Duration::from_secs(2) {
+                            let us = started.elapsed().as_micros() as u64;
+                            let _ = c.request(MsgType::PingReq, &us.to_le_bytes());
+                            last_ping = Instant::now();
+                        }
+                        c.poll_packets().unwrap_or_default()
+                    }
                     None => break,
                 }
             };
@@ -299,7 +315,11 @@ fn cmd_trigger_ffc(state: State<'_, AppState>, force: bool) -> Result<(), String
     let _ = guard
         .as_mut()
         .ok_or("not connected")?
-        .request(MsgType::TriggerFfcReq, &[u8::from(force)])?;
+        .request_timeout(
+            MsgType::TriggerFfcReq,
+            &[u8::from(force)],
+            Duration::from_millis(4000),
+        )?;
     Ok(())
 }
 

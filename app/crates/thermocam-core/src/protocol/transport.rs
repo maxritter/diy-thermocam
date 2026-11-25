@@ -8,10 +8,10 @@ use serde::{Deserialize, Serialize};
 
 use super::codec::{FrameRaw, FrameRawMeta, HelloReq, HelloResp, PongResp, StreamCtrl};
 use super::messages::{
-    DeviceConfig, Diagnostics, FsEntry, FsInfoResp, FsListResp, FsReadChunk, PerfTelemetry,
-    RadParams,
+    DeviceConfig, Diagnostics, FsEntry, FsInfoResp, FsListResp, FsReadChunk, FsStatResp,
+    PerfTelemetry, RadParams,
 };
-use super::parser::StreamParser;
+use super::parser::{ParserStats, StreamParser};
 use super::{
     capabilities, flags, MsgType, Packet, ProtocolError, StatusCode, PROTO_MAJOR, PROTO_MINOR,
     TEENSY_CDC_MTP_PID, TEENSY_CDC_PID, TEENSY_USB_VID,
@@ -352,28 +352,96 @@ impl SimulatorTransport {
                 };
                 Some((MsgType::FsListResp, 0, 0, list.to_bytes()))
             }
+            MsgType::FsStatReq if pkt.payload.len() >= 4 => {
+                let compute_crc32 = (pkt.payload[0] & 0x01) != 0;
+                let path_len = u16::from_le_bytes([pkt.payload[2], pkt.payload[3]]) as usize;
+                let path = String::from_utf8_lossy(
+                    &pkt.payload[4..(4 + path_len).min(pkt.payload.len())],
+                );
+                let name = path.trim_start_matches('/');
+                if let Some((_, data)) = self.sd_files.iter().find(|(n, _)| n == name) {
+                    let stat = FsStatResp {
+                        size: data.len() as u32,
+                        mtime_epoch: 1_764_065_700,
+                        crc32: if compute_crc32 {
+                            super::crc::crc32_ieee(data)
+                        } else {
+                            0
+                        },
+                        is_dir: false,
+                        crc32_valid: compute_crc32,
+                    };
+                    Some((MsgType::FsStatResp, 0, 0, stat.to_bytes().to_vec()))
+                } else {
+                    Some((
+                        MsgType::FsStatResp,
+                        flags::ERROR,
+                        StatusCode::ErrNotFound as u16,
+                        Vec::new(),
+                    ))
+                }
+            }
             MsgType::FsReadReq if pkt.payload.len() >= 12 => {
+                let req_offset = u32::from_le_bytes([
+                    pkt.payload[0],
+                    pkt.payload[1],
+                    pkt.payload[2],
+                    pkt.payload[3],
+                ]) as usize;
+                let req_len = u32::from_le_bytes([
+                    pkt.payload[4],
+                    pkt.payload[5],
+                    pkt.payload[6],
+                    pkt.payload[7],
+                ]) as usize;
+                let req_chunk = u16::from_le_bytes([pkt.payload[8], pkt.payload[9]]) as usize;
+                let chunk_sz = if req_chunk == 0 {
+                    8192
+                } else {
+                    req_chunk.clamp(256, 8192)
+                };
                 let path_len = u16::from_le_bytes([pkt.payload[10], pkt.payload[11]]) as usize;
                 let path = String::from_utf8_lossy(
                     &pkt.payload[12..(12 + path_len).min(pkt.payload.len())],
                 );
                 let name = path.trim_start_matches('/');
                 if let Some((_, data)) = self.sd_files.iter().find(|(n, _)| n == name) {
-                    let mut p = Vec::with_capacity(8 + data.len());
-                    p.extend_from_slice(&0u32.to_le_bytes());
-                    p.extend_from_slice(&(data.len() as u16).to_le_bytes());
-                    p.push(1);
-                    p.push(0);
-                    p.extend_from_slice(data);
-                    Some((MsgType::FsReadData, 0, 0, p))
+                    let start = req_offset.min(data.len());
+                    let end = if req_len == 0 {
+                        data.len()
+                    } else {
+                        start.saturating_add(req_len).min(data.len())
+                    };
+                    let mut pos = start;
+                    loop {
+                        let take = (end - pos).min(chunk_sz);
+                        let eof = pos + take >= end;
+                        let mut p = Vec::with_capacity(8 + take);
+                        p.extend_from_slice(&(pos as u32).to_le_bytes());
+                        p.extend_from_slice(&(take as u16).to_le_bytes());
+                        p.push(u8::from(eof));
+                        p.push(0);
+                        p.extend_from_slice(&data[pos..pos + take]);
+                        let pkt_flags = if eof { 0 } else { flags::MORE_CHUNKS };
+                        if let Ok(bytes) =
+                            Packet::encode(MsgType::FsReadData, pkt_flags, seq, 0, &p)
+                        {
+                            self.out_buf.extend(bytes);
+                        }
+                        pos += take;
+                        if eof {
+                            break;
+                        }
+                    }
+                    None
                 } else {
                     Some((MsgType::FsReadData, flags::ERROR, StatusCode::ErrNotFound as u16, Vec::new()))
                 }
             }
-            MsgType::FsDeleteReq if pkt.payload.len() >= 2 => {
-                let path_len = u16::from_le_bytes([pkt.payload[0], pkt.payload[1]]) as usize;
+            MsgType::FsDeleteReq if pkt.payload.len() >= 4 => {
+                let path_len = u16::from_le_bytes([pkt.payload[2], pkt.payload[3]]) as usize;
                 let path = String::from_utf8_lossy(
-                    &pkt.payload[2..(2 + path_len).min(pkt.payload.len())],
+                    &pkt.payload[4..(4 + path_len).min(pkt.payload.len())],
                 );
                 let name = path.trim_start_matches('/');
                 let before = self.sd_files.len();
@@ -550,21 +618,23 @@ impl<T: Transport> ProtocolClient<T> {
         s
     }
 
-    pub fn request(
+    fn is_unsolicited_msg(msg_type: u8) -> bool {
+        (0x80..=0xDF).contains(&msg_type)
+    }
+
+    fn recv_response_for_seq(
         &mut self,
-        msg_type: MsgType,
-        payload: &[u8],
+        seq: u16,
         timeout: Duration,
     ) -> Result<Packet, ProtocolError> {
-        let seq = self.alloc_seq();
-        let bytes = Packet::encode(msg_type, 0, seq, 0, payload)?;
-        self.transport.write_all(&bytes)?;
-        self.transport.flush()?;
-
         let deadline = Instant::now() + timeout;
-        let mut buf = [0u8; 4096];
+        let mut buf = vec![0u8; 65_536];
         loop {
-            if let Some(pos) = self.pending.iter().position(|p| p.header.seq == seq) {
+            if let Some(pos) = self
+                .pending
+                .iter()
+                .position(|p| !Self::is_unsolicited_msg(p.header.msg_type) && p.header.seq == seq)
+            {
                 let pkt = self.pending.remove(pos).expect("valid idx");
                 if pkt.is_error() {
                     return Err(ProtocolError::DeviceError {
@@ -588,6 +658,24 @@ impl<T: Transport> ProtocolClient<T> {
         }
     }
 
+    pub fn request(
+        &mut self,
+        msg_type: MsgType,
+        payload: &[u8],
+        timeout: Duration,
+    ) -> Result<Packet, ProtocolError> {
+        let seq = self.alloc_seq();
+        let bytes = Packet::encode(msg_type, 0, seq, 0, payload)?;
+        self.transport.write_all(&bytes)?;
+        self.transport.flush()?;
+        self.recv_response_for_seq(seq, timeout)
+    }
+
+    #[must_use]
+    pub fn parser_stats(&self) -> ParserStats {
+        self.parser.stats()
+    }
+
     pub fn hello(&mut self) -> Result<HelloResp, ProtocolError> {
         let pkt = self.request(
             MsgType::HelloReq,
@@ -595,6 +683,26 @@ impl<T: Transport> ProtocolClient<T> {
             Duration::from_millis(1000),
         )?;
         HelloResp::from_bytes(&pkt.payload)
+    }
+
+    pub fn ping(&mut self, host_time_us: u64) -> Result<PongResp, ProtocolError> {
+        let pkt = self.request(
+            MsgType::PingReq,
+            &host_time_us.to_le_bytes(),
+            Duration::from_millis(1000),
+        )?;
+        PongResp::from_bytes(&pkt.payload)
+    }
+
+    pub fn goodbye(&mut self) -> Result<(), ProtocolError> {
+        let _ = self.request(MsgType::GoodbyeReq, &[], Duration::from_millis(1000))?;
+        Ok(())
+    }
+
+    pub fn fs_stat(&mut self, path: &str, compute_crc32: bool) -> Result<FsStatResp, ProtocolError> {
+        let req = FsStatResp::encode_req(compute_crc32, path);
+        let pkt = self.request(MsgType::FsStatReq, &req, Duration::from_millis(3000))?;
+        FsStatResp::from_bytes(&pkt.payload)
     }
 
     pub fn set_stream(&mut self, ctrl: StreamCtrl) -> Result<StreamCtrl, ProtocolError> {
@@ -626,15 +734,19 @@ impl<T: Transport> ProtocolClient<T> {
     }
 
     pub fn read_file_bytes(&mut self, path: &str) -> Result<Vec<u8>, ProtocolError> {
+        let seq = self.alloc_seq();
+        let req = FsReadChunk::encode_req(0, 0, 8192, path);
+        let bytes = Packet::encode(MsgType::FsReadReq, 0, seq, 0, &req)?;
+        self.transport.write_all(&bytes)?;
+        self.transport.flush()?;
+
         let mut out = Vec::new();
-        let mut offset = 0u32;
         loop {
-            let req = FsReadChunk::encode_req(offset, 0, 8192, path);
-            let pkt = self.request(MsgType::FsReadReq, &req, Duration::from_millis(3000))?;
+            let pkt = self.recv_response_for_seq(seq, Duration::from_millis(3000))?;
+            let more = (pkt.header.flags & flags::MORE_CHUNKS) != 0;
             let chunk = FsReadChunk::from_bytes(&pkt.payload)?;
-            offset = offset.saturating_add(chunk.data.len() as u32);
             out.extend_from_slice(&chunk.data);
-            if chunk.eof || chunk.data.is_empty() {
+            if chunk.eof || !more {
                 break;
             }
         }
@@ -643,7 +755,9 @@ impl<T: Transport> ProtocolClient<T> {
 
     pub fn delete_file(&mut self, path: &str) -> Result<(), ProtocolError> {
         let pb = path.as_bytes();
-        let mut req = Vec::with_capacity(2 + pb.len());
+        let mut req = Vec::with_capacity(4 + pb.len());
+        req.push(0); // flags
+        req.push(0); // reserved
         req.extend_from_slice(&(pb.len() as u16).to_le_bytes());
         req.extend_from_slice(pb);
         let _ = self.request(MsgType::FsDeleteReq, &req, Duration::from_millis(2000))?;

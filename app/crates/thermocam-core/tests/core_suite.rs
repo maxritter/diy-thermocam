@@ -644,3 +644,148 @@ fn circle_polygon_delta_rois_and_uhd_4k_resolutions() {
     );
     assert_eq!(heq_rgb.len(), 320 * 240 * 3);
 }
+
+#[test]
+fn real_v3_dat_and_protocol_v2_stream_fixtures() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixtures_dir = manifest_dir
+        .join("../../..")
+        .join("firmware")
+        .join("3.0")
+        .join("test")
+        .join("fixtures");
+
+    // 1. Real DIY-Thermocam V3 `.DAT` capture (38,805 bytes)
+    let dat_bytes = std::fs::read(fixtures_dir.join("sample_real_v3.DAT"))
+        .expect("read sample_real_v3.DAT");
+    assert_eq!(dat_bytes.len(), LEPTON3_BIG_SIZE);
+    let dat = ThermalDat::from_bytes(&dat_bytes).expect("parse real V3 DAT");
+    assert_eq!((dat.width, dat.height), (160, 120));
+    assert_eq!(dat.pixels.len(), 19_200);
+    assert!(dat.min_raw > 10_000 && dat.max_raw > dat.min_raw);
+
+    let rad = RadiometryParams {
+        cal_offset: dat.cal_offset,
+        cal_slope: dat.cal_slope,
+        emissivity: 0.95,
+        reflected_temp_c: 22.0,
+    };
+    let min_c = raw_to_object_c(dat.min_raw, rad);
+    let max_c = raw_to_object_c(dat.max_raw, rad);
+    assert!(min_c > -20.0 && min_c < 80.0, "unexpected min_c={min_c}");
+    assert!(max_c > min_c && max_c < 150.0, "unexpected max_c={max_c}");
+    let reencoded = dat.to_bytes();
+    assert_eq!(reencoded.len(), LEPTON3_BIG_SIZE);
+    let reparsed = ThermalDat::from_bytes(&reencoded).expect("reparse real V3 DAT");
+    assert_eq!(reparsed.pixels, dat.pixels);
+    assert_eq!(reparsed.min_raw, dat.min_raw);
+    assert_eq!(reparsed.max_raw, dat.max_raw);
+
+    // Render 1080p PNG and 16-bit radiometric Kelvin TIFF directly from the real V3 fixture
+    let pal = find_palette("ironblack").unwrap();
+    let (w, h, rgb) = render_export_canvas(
+        &dat.pixels,
+        dat.width,
+        dat.height,
+        dat.min_raw,
+        dat.max_raw,
+        &pal,
+        rad,
+        &DisplayPipeline::default(),
+        &[],
+        &ExportOptions::default(),
+    );
+    assert_eq!((w, h), (1920, 1080));
+    let png = encode_png(w, h, &rgb).unwrap();
+    assert!(png.starts_with(&[0x89, b'P', b'N', b'G']));
+    let tiff = encode_radiometric_tiff_16(&dat.pixels, dat.width, dat.height, rad).unwrap();
+    assert!(tiff.starts_with(b"II*\0") || tiff.starts_with(b"MM\0*"));
+
+    // 2. Real DIY-Thermocam V3 Protocol v2 binary capture stream (153,992 bytes)
+    let stream_bytes = std::fs::read(fixtures_dir.join("sample_v2_stream.bin"))
+        .expect("read sample_v2_stream.bin");
+    assert_eq!(stream_bytes.len(), 153_992);
+    let mut parser = StreamParser::new();
+    let mut packets = Vec::new();
+    for chunk in stream_bytes.chunks(1024) {
+        for res in parser.feed(chunk) {
+            packets.push(res.expect("valid v2 packet in real stream fixture"));
+        }
+    }
+    assert_eq!(parser.stats().usb_rx_errors, 0);
+    assert_eq!(parser.stats().usb_crc_errors, 0);
+    assert_eq!(packets.len(), 6);
+    assert_eq!(packets[0].msg_type().unwrap(), MsgType::StreamCtrlReq);
+    assert_eq!(packets[1].msg_type().unwrap(), MsgType::StreamCtrlResp);
+
+    let mut prev_seq: Option<u32> = None;
+    for pkt in &packets[2..] {
+        assert_eq!(pkt.msg_type().unwrap(), MsgType::FrameRaw);
+        let frame = FrameRaw::from_bytes(&pkt.payload).expect("decode real FrameRaw");
+        assert_eq!((frame.meta.width, frame.meta.height), (160, 120));
+        assert_eq!(frame.pixels.len(), 19_200);
+        assert_eq!(frame.meta.dropped_frames, 0);
+        assert!(frame.meta.max_raw > frame.meta.min_raw);
+        assert!(
+            frame.meta.spot_temp_c > -20.0 && frame.meta.spot_temp_c < 150.0,
+            "unexpected spot_temp_c={}",
+            frame.meta.spot_temp_c
+        );
+        if let Some(prev) = prev_seq {
+            assert!(frame.meta.frame_seq > prev, "frame_seq must be monotonic");
+        }
+        prev_seq = Some(frame.meta.frame_seq);
+    }
+}
+
+#[test]
+fn protocol_client_ignores_unsolicited_frame_with_colliding_seq_and_reads_multichunk_fs() {
+    use thermocam_core::protocol::transport::MockTransport;
+    use thermocam_core::protocol::{flags, Packet};
+
+    let mut mock = MockTransport::default();
+    // Simulate camera pushing an unsolicited FrameRaw with cam_seq == 1 BEFORE PongResp with host_seq == 1
+    let demo = generate_demo_frame(1, 80, 60);
+    mock.push_rx(&Packet::encode(MsgType::FrameRaw, 0, 1, 0, &demo.to_bytes()).unwrap());
+    let mut pong_payload = [0u8; 16];
+    pong_payload[0..8].copy_from_slice(&42u64.to_le_bytes());
+    pong_payload[8..16].copy_from_slice(&999u64.to_le_bytes());
+    mock.push_rx(&Packet::encode(MsgType::PongResp, 0, 1, 0, &pong_payload).unwrap());
+
+    // Also pre-queue a 2-chunk FsReadData stream for seq == 2
+    let mut c1 = Vec::new();
+    c1.extend_from_slice(&0u32.to_le_bytes());
+    c1.extend_from_slice(&4u16.to_le_bytes());
+    c1.push(0); // eof = false
+    c1.push(0);
+    c1.extend_from_slice(b"ABCD");
+    mock.push_rx(&Packet::encode(MsgType::FsReadData, flags::MORE_CHUNKS, 2, 0, &c1).unwrap());
+
+    let mut c2 = Vec::new();
+    c2.extend_from_slice(&4u32.to_le_bytes());
+    c2.extend_from_slice(&3u16.to_le_bytes());
+    c2.push(1); // eof = true
+    c2.push(0);
+    c2.extend_from_slice(b"EFG");
+    mock.push_rx(&Packet::encode(MsgType::FsReadData, 0, 2, 0, &c2).unwrap());
+
+    let mut client = ProtocolClient::new(mock);
+    let pong = client
+        .request(
+            MsgType::PingReq,
+            &42u64.to_le_bytes(),
+            std::time::Duration::from_millis(500),
+        )
+        .expect("should match PongResp, not colliding FrameRaw");
+    assert_eq!(pong.msg_type().unwrap(), MsgType::PongResp);
+
+    let file = client.read_file_bytes("/test.dat").expect("read 2-chunk file");
+    assert_eq!(file, b"ABCDEFG");
+
+    // The unsolicited FrameRaw must still be queued for poll_packets!
+    let leftover = client
+        .poll_packets(std::time::Duration::from_millis(10))
+        .unwrap();
+    assert_eq!(leftover.len(), 1);
+    assert_eq!(leftover[0].msg_type().unwrap(), MsgType::FrameRaw);
+}
