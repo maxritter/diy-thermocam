@@ -1092,8 +1092,8 @@ class LiveViewer:
             return True
 
         # Divide to match array size
-        xpos /= 4
-        ypos /= 4
+        xpos //= 4
+        ypos //= 4
 
         # Add point
         if add:
@@ -1287,10 +1287,10 @@ class LiveViewer:
             # Get position
             if self.leptonVersion == 0:
                 xpos = (minTempPos % 80) * 8
-                ypos = (minTempPos / 80) * 8
+                ypos = (minTempPos // 80) * 8
             else:
                 xpos = (minTempPos % 160) * 4
-                ypos = (minTempPos / 160) * 4
+                ypos = (minTempPos // 160) * 4
 
             # Draw it on the screen
             self.drawTemperature(xpos, ypos, minValue, 1)
@@ -1300,10 +1300,10 @@ class LiveViewer:
             # Get position
             if self.leptonVersion == 0:
                 xpos = (maxTempPos % 80) * 8
-                ypos = (maxTempPos / 80) * 8
+                ypos = (maxTempPos // 80) * 8
             else:
                 xpos = (maxTempPos % 160) * 4
-                ypos = (maxTempPos / 160) * 4
+                ypos = (maxTempPos // 160) * 4
 
             # Draw it on the screen
             self.drawTemperature(xpos, ypos, maxValue, 2)
@@ -1392,12 +1392,12 @@ class LiveViewer:
 
                 # Calculate x and y position
                 xpos = index % 160
-                ypos = index / 160
+                ypos = index // 160
 
                 # Update raw value
                 if self.leptonVersion == 0:
                     self.tempPoints[i][1] = self.leptonValues[
-                        (xpos / 2) + (ypos / 2) * 80
+                        (xpos // 2) + (ypos // 2) * 80
                     ]
                 else:
                     self.tempPoints[i][1] = self.leptonValues[xpos + (ypos * 160)]
