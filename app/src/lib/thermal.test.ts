@@ -5,15 +5,19 @@ import {
   compensateEmissivityC,
   computeHistogram256,
   computeTempGrid,
+  createViewportScratch,
   decodeFrameRawBinary,
   evaluateRoi,
   formatDeltaTemp,
   formatTemp,
   generateDemoFrame,
+  objectCToRaw,
+  prepareDisplay16Bit,
+  rawToObjectC,
   roiContrastRange,
   sampleLineProfile,
 } from "./thermal";
-import type { RadiometryParams, Roi } from "./types";
+import type { DisplayPipeline, RadiometryParams, Roi } from "./types";
 
 describe("DIY-Thermocam frontend thermal engine", () => {
   const rad: RadiometryParams = {
@@ -113,5 +117,53 @@ describe("DIY-Thermocam frontend thermal engine", () => {
     expect(custom.rgb.length).toBe(256);
     expect(custom.rgb[0]).toEqual([0, 0, 0]);
     expect(custom.rgb[255]).toEqual([255, 255, 255]);
+  });
+
+  test("16-bit WebGL2 pipeline parity: objectCToRaw inverse, raw16 vs HEQ disp16, and halo-clamped USM", () => {
+    const lowEpsRad: RadiometryParams = {
+      cal_offset: -273.15,
+      cal_slope: 0.01,
+      emissivity: 0.65,
+      reflected_temp_c: 22.0,
+    };
+    const rawIn = 32500;
+    const tempC = rawToObjectC(rawIn, lowEpsRad);
+    const rawBack = objectCToRaw(tempC, lowEpsRad);
+    expect(Math.abs(rawBack - rawIn)).toBeLessThan(0.05);
+
+    const frame = generateDemoFrame(4, 160, 120);
+    const scratch = createViewportScratch(160 * 120);
+    const pipeline: DisplayPipeline = {
+      filter: "none",
+      upscaler: "edge_preserve",
+      sharpen_amount: 0.9,
+      rotate_180: false,
+      flip_horizontal: false,
+      histogram_eq: true,
+      isotherm: { mode: "above", low_c: 40, high_c: 60, color: [0, 230, 160] },
+    };
+
+    prepareDisplay16Bit(
+      frame.pixels,
+      null,
+      160,
+      160,
+      120,
+      frame.min_raw,
+      frame.max_raw,
+      pipeline,
+      scratch,
+    );
+
+    // raw16 preserves linear normalized values (for isotherm before HEQ) while disp16 applies HEQ+USM
+    let diffCount = 0;
+    let fine16BitCount = 0;
+    for (let i = 0; i < scratch.raw16.length; i++) {
+      if (scratch.raw16[i] !== scratch.disp16[i]) diffCount++;
+      if ((scratch.raw16[i] & 0xff) !== 0) fine16BitCount++;
+    }
+    expect(diffCount).toBeGreaterThan(1000);
+    expect(fine16BitCount).toBeGreaterThan(1000);
+    expect(scratch.heq.smoothedCdf).not.toBeNull();
   });
 });

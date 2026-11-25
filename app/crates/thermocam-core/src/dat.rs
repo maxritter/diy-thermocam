@@ -65,12 +65,12 @@ impl ThermalDat {
             .take(96)
             .map(|p| {
                 let scale = if frame.meta.width == 80 { 2 } else { 1 };
-                let x160 = p.x * scale;
-                let y120 = p.y * scale;
+                let x160 = (u32::from(p.x) * scale).min(159) as u16;
+                let y120 = (u32::from(p.y) * scale).min(119) as u16;
                 DatTempPoint {
                     index: x160 + y120 * 160 + 1,
-                    x: p.x,
-                    y: p.y,
+                    x: p.x.min(frame.meta.width.saturating_sub(1)),
+                    y: p.y.min(frame.meta.height.saturating_sub(1)),
                     raw: p.raw,
                 }
             })
@@ -90,6 +90,54 @@ impl ThermalDat {
             cal_offset: frame.meta.cal_offset,
             cal_slope: frame.meta.cal_slope,
             temp_points,
+            has_temp_points_block: true,
+        }
+    }
+
+    /// Construct a `.DAT` directly from displayed pixel data & radiometry parameters
+    /// (used when exporting a paused frame, time-lapse snapshot, or edited `.DAT`).
+    #[must_use]
+    pub fn from_pixels(
+        pixels: Vec<u16>,
+        width: u16,
+        height: u16,
+        rad: crate::radiometry::RadiometryParams,
+        color_scheme: u8,
+        temp_format: u8,
+    ) -> Self {
+        let mut min_raw = u16::MAX;
+        let mut max_raw = 0u16;
+        for &px in &pixels {
+            if px < min_raw {
+                min_raw = px;
+            }
+            if px > max_raw {
+                max_raw = px;
+            }
+        }
+        if pixels.is_empty() {
+            min_raw = 0;
+        }
+        let w = usize::from(width);
+        let h = usize::from(height);
+        let center_idx = (h / 2) * w + (w / 2);
+        let spot_raw = pixels.get(center_idx).copied().unwrap_or(min_raw);
+        let spot_temp = crate::radiometry::raw_to_object_c(spot_raw, rad);
+        Self {
+            width,
+            height,
+            pixels,
+            min_raw,
+            max_raw,
+            spot_temp,
+            color_scheme,
+            temp_format,
+            spot_enabled: true,
+            colorbar_enabled: true,
+            min_max_points: 3,
+            cal_offset: rad.cal_offset,
+            cal_slope: rad.cal_slope,
+            temp_points: Vec::new(),
             has_temp_points_block: true,
         }
     }
@@ -303,4 +351,35 @@ pub struct SequenceManifest {
     pub frame_count: usize,
     pub frames: Vec<String>,
     pub palette_id: String,
+}
+
+/// Format a UNIX timestamp (seconds since 1970-01-01T00:00:00Z) as ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SSZ`).
+#[must_use]
+pub fn format_utc_iso8601(unix_secs: u64) -> String {
+    let days = (unix_secs / 86_400) as i64;
+    let rem = unix_secs % 86_400;
+    let hour = rem / 3600;
+    let minute = (rem % 3600) / 60;
+    let second = rem % 60;
+    // Howard Hinnant's civil_from_days algorithm (exact Gregorian calendar)
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = (z - era * 146_097) as u64;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365;
+    let y = (yoe as i64) + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = if month <= 2 { y + 1 } else { y };
+    format!("{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}Z")
+}
+
+/// Current system time formatted as ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SSZ`).
+#[must_use]
+pub fn format_utc_now_iso8601() -> String {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    format_utc_iso8601(secs)
 }

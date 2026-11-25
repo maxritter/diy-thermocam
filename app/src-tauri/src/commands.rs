@@ -1,9 +1,10 @@
 //! Typed Tauri v2 commands, managed studio state, raw binary frame channel, and `thermo://` protocol.
 
-use std::collections::HashMap;
-use std::fs;
+use std::collections::{HashMap, VecDeque};
+use std::fs::{self, File};
+use std::io::BufWriter;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -12,23 +13,23 @@ use serde::{Deserialize, Serialize};
 use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::{Emitter, Manager, State};
 
-use thermocam_core::dat::{SequenceManifest, ThermalDat, ThermoSidecar};
+use thermocam_core::dat::{format_utc_now_iso8601, SequenceManifest, ThermalDat, ThermoSidecar};
 use thermocam_core::export::{
-    encode_gif, encode_h264_mp4, encode_jpeg, encode_png, encode_radiometric_tiff_16,
-    encode_temperature_csv, generate_html_report, generate_markdown_report, render_export_canvas,
+    derive_sequence_fps, encode_gif_streaming, encode_h264_mp4_streaming, encode_jpeg, encode_png,
+    encode_radiometric_tiff_16, encode_temperature_csv, generate_html_report,
+    generate_markdown_report, render_export_canvas, render_export_canvas_with_scratch,
     ExportOptions, ExportResolution,
 };
 use thermocam_core::flasher::{
     flash_firmware, parse_teensy41_hex, trigger_legacy_134_baud, FirmwareImage, RealHalfKayDevice,
 };
-use thermocam_core::imaging::DisplayPipeline;
+use thermocam_core::imaging::{DisplayPipeline, RenderScratch};
 use thermocam_core::palettes::{
     builtin_palettes, find_palette, parse_custom_palette_png, parse_custom_palette_text, Palette,
 };
-use thermocam_core::protocol::codec::{FrameRaw, HelloResp, StreamCtrl};
+use thermocam_core::protocol::codec::{FrameRaw, FrameRawMeta, HelloResp, StreamCtrl};
 use thermocam_core::protocol::messages::{
-    encode_enter_bootloader_req, DeviceConfig, Diagnostics, FsEntry, FsInfoResp, FsListResp,
-    PerfTelemetry, RadParams,
+    AsyncEvent, DeviceConfig, Diagnostics, FsEntry, FsInfoResp, PerfTelemetry, RadParams,
 };
 use thermocam_core::protocol::transport::{
     list_ports, ProtocolClient, SerialPortInfo, SerialTransport, SimulatorTransport,
@@ -36,6 +37,9 @@ use thermocam_core::protocol::transport::{
 use thermocam_core::protocol::MsgType;
 use thermocam_core::radiometry::{RadiometryParams, TempUnit, MATERIAL_PRESETS};
 use thermocam_core::roi::{evaluate_roi, Roi, RoiStats};
+
+const MAX_RECORDED_FRAMES: usize = 6_000;
+const MAX_SD_CACHE_ENTRIES: usize = 64;
 
 enum ActiveTransport {
     Serial(Box<ProtocolClient<SerialTransport>>),
@@ -70,14 +74,22 @@ impl ActiveTransport {
     fn request(&mut self, mt: MsgType, payload: &[u8]) -> Result<Vec<u8>, String> {
         self.request_timeout(mt, payload, Duration::from_millis(2000))
     }
-    fn poll_packets(&mut self) -> Result<Vec<thermocam_core::protocol::Packet>, String> {
+    fn send_ping_nowait(&mut self, host_time_us: u64) -> Result<(), String> {
         match self {
-            Self::Serial(c) => c
-                .poll_packets(Duration::from_millis(30))
-                .map_err(|e| e.to_string()),
-            Self::Simulator(c) => c
-                .poll_packets(Duration::from_millis(30))
-                .map_err(|e| e.to_string()),
+            Self::Serial(c) => c.send_ping_nowait(host_time_us).map_err(|e| e.to_string()),
+            Self::Simulator(c) => c.send_ping_nowait(host_time_us).map_err(|e| e.to_string()),
+        }
+    }
+    fn poll_packets(&mut self, timeout: Duration) -> Result<Vec<thermocam_core::protocol::Packet>, String> {
+        match self {
+            Self::Serial(c) => c.poll_packets(timeout).map_err(|e| e.to_string()),
+            Self::Simulator(c) => c.poll_packets(timeout).map_err(|e| e.to_string()),
+        }
+    }
+    fn list_dir_all(&mut self, path: &str) -> Result<Vec<FsEntry>, String> {
+        match self {
+            Self::Serial(c) => c.list_dir_all(path).map_err(|e| e.to_string()),
+            Self::Simulator(c) => c.list_dir_all(path).map_err(|e| e.to_string()),
         }
     }
     fn read_file(&mut self, path: &str) -> Result<Vec<u8>, String> {
@@ -94,14 +106,50 @@ impl ActiveTransport {
     }
 }
 
+#[derive(Default)]
+struct BoundedSdCache {
+    map: HashMap<String, Vec<u8>>,
+    order: VecDeque<String>,
+}
+
+impl BoundedSdCache {
+    fn insert(&mut self, key: String, val: Vec<u8>) {
+        if let Some(existing) = self.map.get_mut(&key) {
+            *existing = val;
+            return;
+        }
+        while self.map.len() >= MAX_SD_CACHE_ENTRIES {
+            if let Some(oldest) = self.order.pop_front() {
+                self.map.remove(&oldest);
+            } else {
+                break;
+            }
+        }
+        self.order.push_back(key.clone());
+        self.map.insert(key, val);
+    }
+
+    fn get(&self, key: &str) -> Option<&Vec<u8>> {
+        self.map.get(key)
+    }
+
+    fn remove(&mut self, key: &str) {
+        self.map.remove(key);
+        self.order.retain(|k| k != key);
+    }
+}
+
 pub struct AppState {
     client: Arc<Mutex<Option<ActiveTransport>>>,
     streaming: Arc<AtomicBool>,
-    latest_frame: Arc<Mutex<Option<FrameRaw>>>,
-    recorded_frames: Arc<Mutex<Vec<FrameRaw>>>,
+    stream_gen: Arc<AtomicU64>,
+    stream_lifecycle: Arc<Mutex<()>>,
+    stream_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
+    latest_frame: Arc<Mutex<Option<Arc<FrameRaw>>>>,
+    recorded_frames: Arc<Mutex<Vec<Arc<FrameRaw>>>>,
     recording: Arc<AtomicBool>,
     custom_palettes: Arc<Mutex<HashMap<String, Palette>>>,
-    sd_cache: Arc<Mutex<HashMap<String, Vec<u8>>>>,
+    sd_cache: Arc<Mutex<BoundedSdCache>>,
 }
 
 impl Default for AppState {
@@ -109,12 +157,28 @@ impl Default for AppState {
         Self {
             client: Arc::new(Mutex::new(None)),
             streaming: Arc::new(AtomicBool::new(false)),
+            stream_gen: Arc::new(AtomicU64::new(0)),
+            stream_lifecycle: Arc::new(Mutex::new(())),
+            stream_thread: Arc::new(Mutex::new(None)),
             latest_frame: Arc::new(Mutex::new(None)),
             recorded_frames: Arc::new(Mutex::new(Vec::new())),
             recording: Arc::new(AtomicBool::new(false)),
             custom_palettes: Arc::new(Mutex::new(HashMap::new())),
-            sd_cache: Arc::new(Mutex::new(HashMap::new())),
+            sd_cache: Arc::new(Mutex::new(BoundedSdCache::default())),
         }
+    }
+}
+
+fn stop_stream_and_join(
+    streaming: &AtomicBool,
+    stream_gen: &AtomicU64,
+    stream_thread: &Mutex<Option<thread::JoinHandle<()>>>,
+) {
+    stream_gen.fetch_add(1, Ordering::SeqCst);
+    streaming.store(false, Ordering::SeqCst);
+    let handle = stream_thread.lock().ok().and_then(|mut g| g.take());
+    if let Some(h) = handle {
+        let _ = h.join();
     }
 }
 
@@ -178,189 +242,337 @@ fn cmd_import_custom_palette(
 }
 
 #[tauri::command]
-fn cmd_connect(state: State<'_, AppState>, port: String) -> Result<HelloResp, String> {
-    state.streaming.store(false, Ordering::SeqCst);
-    let mut active = if port.starts_with("sim://") {
-        ActiveTransport::Simulator(Box::new(ProtocolClient::new(SimulatorTransport::new())))
-    } else {
-        let serial = SerialTransport::open(&port).map_err(|e| e.to_string())?;
-        ActiveTransport::Serial(Box::new(ProtocolClient::new(serial)))
-    };
-    let hello = active.hello()?;
-    *state.client.lock().map_err(|e| e.to_string())? = Some(active);
-    Ok(hello)
+async fn cmd_connect(state: State<'_, AppState>, port: String) -> Result<HelloResp, String> {
+    let client_arc = Arc::clone(&state.client);
+    let streaming = Arc::clone(&state.streaming);
+    let stream_gen = Arc::clone(&state.stream_gen);
+    let stream_lifecycle = Arc::clone(&state.stream_lifecycle);
+    let stream_thread = Arc::clone(&state.stream_thread);
+    tauri::async_runtime::spawn_blocking(move || {
+        let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
+        stop_stream_and_join(&streaming, &stream_gen, &stream_thread);
+        let mut active = if port.starts_with("sim://") {
+            ActiveTransport::Simulator(Box::new(ProtocolClient::new(SimulatorTransport::new())))
+        } else {
+            let serial = SerialTransport::open(&port).map_err(|e| e.to_string())?;
+            ActiveTransport::Serial(Box::new(ProtocolClient::new(serial)))
+        };
+        let hello = active.hello()?;
+        *client_arc.lock().map_err(|e| e.to_string())? = Some(active);
+        Ok(hello)
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_disconnect(state: State<'_, AppState>) -> Result<(), String> {
-    state.streaming.store(false, Ordering::SeqCst);
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    if let Some(mut c) = guard.take() {
-        let _ = c.request(MsgType::GoodbyeReq, &[]);
-    }
-    Ok(())
+async fn cmd_disconnect(state: State<'_, AppState>) -> Result<(), String> {
+    let client_arc = Arc::clone(&state.client);
+    let streaming = Arc::clone(&state.streaming);
+    let stream_gen = Arc::clone(&state.stream_gen);
+    let stream_lifecycle = Arc::clone(&state.stream_lifecycle);
+    let stream_thread = Arc::clone(&state.stream_thread);
+    tauri::async_runtime::spawn_blocking(move || {
+        let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
+        stop_stream_and_join(&streaming, &stream_gen, &stream_thread);
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        if let Some(mut c) = guard.take() {
+            let _ = c.request_timeout(MsgType::GoodbyeReq, &[], Duration::from_millis(500));
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 /// Stream raw `u16` frames + 64-byte LE metadata directly over Tauri v2 `Channel<InvokeResponseBody::Raw>`.
+/// Uses a per-stream generation token, joins any prior poll thread, reads continuously with a short
+/// 10 ms timeout (sub-5ms delivery), sends non-blocking heartbeats, and emits `camera-disconnected` on unplug.
 #[tauri::command]
-fn cmd_start_stream(
+async fn cmd_start_stream(
     app: tauri::AppHandle,
     state: State<'_, AppState>,
     channel: Channel<InvokeResponseBody>,
 ) -> Result<(), String> {
-    {
-        let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-        let client = guard.as_mut().ok_or("not connected")?;
-        client.set_stream(StreamCtrl {
-            mode: 1,
-            keep_lcd_on: false,
-            include_temp_points: true,
-            perf_interval_s: 1,
-            max_fps_x10: 0,
-        })?;
-    }
-    state.streaming.store(true, Ordering::SeqCst);
     let client_arc = Arc::clone(&state.client);
     let streaming_arc = Arc::clone(&state.streaming);
+    let stream_gen_arc = Arc::clone(&state.stream_gen);
+    let stream_lifecycle = Arc::clone(&state.stream_lifecycle);
+    let stream_thread_arc = Arc::clone(&state.stream_thread);
     let latest_arc = Arc::clone(&state.latest_frame);
     let rec_flag = Arc::clone(&state.recording);
     let rec_buf = Arc::clone(&state.recorded_frames);
 
-    thread::spawn(move || {
-        let started = Instant::now();
-        let mut last_ping = Instant::now();
-        while streaming_arc.load(Ordering::SeqCst) {
-            let tick = Instant::now();
-            let pkts = {
-                let mut guard = match client_arc.lock() {
-                    Ok(g) => g,
-                    Err(_) => break,
-                };
-                match guard.as_mut() {
-                    Some(c) => {
-                        if last_ping.elapsed() >= Duration::from_secs(2) {
-                            let us = started.elapsed().as_micros() as u64;
-                            let _ = c.request(MsgType::PingReq, &us.to_le_bytes());
-                            last_ping = Instant::now();
-                        }
-                        c.poll_packets().unwrap_or_default()
-                    }
-                    None => break,
-                }
-            };
-            for pkt in pkts {
-                if pkt.msg_type().ok() == Some(MsgType::FrameRaw) {
-                    if let Ok(fr) = FrameRaw::from_bytes(&pkt.payload) {
-                        let raw_bytes = fr.to_bytes();
-                        if let Ok(mut latest) = latest_arc.lock() {
-                            *latest = Some(fr.clone());
-                        }
-                        if rec_flag.load(Ordering::SeqCst) {
-                            if let Ok(mut buf) = rec_buf.lock() {
-                                buf.push(fr);
+    tauri::async_runtime::spawn_blocking(move || {
+        let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
+        stop_stream_and_join(&streaming_arc, &stream_gen_arc, &stream_thread_arc);
+        {
+            let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+            let client = guard.as_mut().ok_or("not connected")?;
+            client.set_stream(StreamCtrl {
+                mode: 1,
+                keep_lcd_on: false,
+                include_temp_points: true,
+                perf_interval_s: 1,
+                max_fps_x10: 0,
+            })?;
+        }
+        let my_gen = stream_gen_arc.fetch_add(1, Ordering::SeqCst) + 1;
+        streaming_arc.store(true, Ordering::SeqCst);
+
+        let worker_client = Arc::clone(&client_arc);
+        let worker_streaming = Arc::clone(&streaming_arc);
+        let worker_gen = Arc::clone(&stream_gen_arc);
+        let handle = thread::spawn(move || {
+            let started = Instant::now();
+            let mut last_ping = Instant::now();
+            let mut consecutive_io_errors: u32 = 0;
+
+            while worker_gen.load(Ordering::SeqCst) == my_gen
+                && worker_streaming.load(Ordering::SeqCst)
+            {
+                let tick = Instant::now();
+                let poll_res = {
+                    let mut guard = match worker_client.lock() {
+                        Ok(g) => g,
+                        Err(_) => break,
+                    };
+                    match guard.as_mut() {
+                        Some(c) => {
+                            let mut ping_err = None;
+                            if last_ping.elapsed() >= Duration::from_secs(2) {
+                                let us = started.elapsed().as_micros() as u64;
+                                if let Err(e) = c.send_ping_nowait(us) {
+                                    ping_err = Some(e);
+                                }
+                                last_ping = Instant::now();
+                            }
+                            if let Some(e) = ping_err {
+                                Err(e)
+                            } else {
+                                c.poll_packets(Duration::from_millis(10))
                             }
                         }
-                        if channel.send(InvokeResponseBody::Raw(raw_bytes)).is_err() {
-                            streaming_arc.store(false, Ordering::SeqCst);
-                            break;
+                        None => break,
+                    }
+                };
+
+                match poll_res {
+                    Ok(pkts) => {
+                        consecutive_io_errors = 0;
+                        let had_pkts = !pkts.is_empty();
+                        for pkt in pkts {
+                            if worker_gen.load(Ordering::SeqCst) != my_gen {
+                                break;
+                            }
+                            if pkt.msg_type().ok() == Some(MsgType::FrameRaw) {
+                                if let Ok(fr) = FrameRaw::from_bytes(&pkt.payload) {
+                                    let fr_arc = Arc::new(fr);
+                                    if let Ok(mut latest) = latest_arc.lock() {
+                                        *latest = Some(Arc::clone(&fr_arc));
+                                    }
+                                    if rec_flag.load(Ordering::SeqCst) {
+                                        if let Ok(mut buf) = rec_buf.lock() {
+                                            if buf.len() < MAX_RECORDED_FRAMES {
+                                                buf.push(Arc::clone(&fr_arc));
+                                            }
+                                        }
+                                    }
+                                    // Send raw wire payload directly (zero redundant re-encoding)
+                                    if channel.send(InvokeResponseBody::Raw(pkt.payload)).is_err() {
+                                        if worker_gen.load(Ordering::SeqCst) == my_gen {
+                                            worker_streaming.store(false, Ordering::SeqCst);
+                                        }
+                                        return;
+                                    }
+                                }
+                            } else if let Ok(Some(ev)) = AsyncEvent::from_packet(&pkt) {
+                                let is_exit = matches!(ev, AsyncEvent::SessionExit { .. });
+                                let _ = app.emit("camera-event", ev);
+                                if is_exit && worker_gen.load(Ordering::SeqCst) == my_gen {
+                                    worker_streaming.store(false, Ordering::SeqCst);
+                                    let _ = app.emit(
+                                        "camera-disconnected",
+                                        serde_json::json!({ "reason": "camera exited session" }),
+                                    );
+                                    return;
+                                }
+                            }
+                        }
+                        if !had_pkts && tick.elapsed() < Duration::from_millis(2) {
+                            thread::sleep(Duration::from_millis(2));
                         }
                     }
-                } else if let Ok(Some(ev)) =
-                    thermocam_core::protocol::messages::AsyncEvent::from_packet(&pkt)
-                {
-                    let _ = app.emit("camera-event", ev);
+                    Err(err) => {
+                        consecutive_io_errors += 1;
+                        if consecutive_io_errors >= 5 {
+                            if worker_gen.load(Ordering::SeqCst) == my_gen {
+                                if let Ok(mut g) = worker_client.lock() {
+                                    *g = None;
+                                }
+                                worker_streaming.store(false, Ordering::SeqCst);
+                                let _ = app.emit(
+                                    "camera-disconnected",
+                                    serde_json::json!({ "reason": err }),
+                                );
+                            }
+                            break;
+                        }
+                        thread::sleep(Duration::from_millis(15));
+                    }
                 }
             }
-            let elapsed = tick.elapsed();
-            if elapsed < Duration::from_millis(100) {
-                thread::sleep(Duration::from_millis(100) - elapsed);
+        });
+        if let Ok(mut slot) = stream_thread_arc.lock() {
+            *slot = Some(handle);
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn cmd_stop_stream(state: State<'_, AppState>) -> Result<(), String> {
+    let client_arc = Arc::clone(&state.client);
+    let streaming = Arc::clone(&state.streaming);
+    let stream_gen = Arc::clone(&state.stream_gen);
+    let stream_lifecycle = Arc::clone(&state.stream_lifecycle);
+    let stream_thread = Arc::clone(&state.stream_thread);
+    tauri::async_runtime::spawn_blocking(move || {
+        let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
+        stop_stream_and_join(&streaming, &stream_gen, &stream_thread);
+        if let Ok(mut guard) = client_arc.lock() {
+            if let Some(c) = guard.as_mut() {
+                let _ = c.set_stream(StreamCtrl {
+                    mode: 0,
+                    keep_lcd_on: true,
+                    include_temp_points: false,
+                    perf_interval_s: 0,
+                    max_fps_x10: 0,
+                });
             }
         }
-    });
-    Ok(())
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_stop_stream(state: State<'_, AppState>) {
-    state.streaming.store(false, Ordering::SeqCst);
+async fn cmd_get_config(state: State<'_, AppState>) -> Result<DeviceConfig, String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let payload = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request(MsgType::GetConfigReq, &[])?;
+        DeviceConfig::from_bytes(&payload).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_get_config(state: State<'_, AppState>) -> Result<DeviceConfig, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let payload = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request(MsgType::GetConfigReq, &[])?;
-    DeviceConfig::from_bytes(&payload).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn cmd_set_config(
+async fn cmd_set_config(
     state: State<'_, AppState>,
     config: DeviceConfig,
     persist: bool,
 ) -> Result<DeviceConfig, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let payload = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request(MsgType::SetConfigReq, &config.to_set_req_bytes(persist))?;
-    DeviceConfig::from_bytes(&payload).map_err(|e| e.to_string())
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let payload = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request(MsgType::SetConfigReq, &config.to_set_req_bytes(persist))?;
+        DeviceConfig::from_bytes(&payload).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_trigger_ffc(state: State<'_, AppState>, force: bool) -> Result<(), String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let _ = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request_timeout(
-            MsgType::TriggerFfcReq,
-            &[u8::from(force)],
-            Duration::from_millis(4000),
-        )?;
-    Ok(())
+async fn cmd_trigger_ffc(state: State<'_, AppState>, force: bool) -> Result<(), String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let _ = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request_timeout(
+                MsgType::TriggerFfcReq,
+                &[u8::from(force)],
+                Duration::from_millis(4000),
+            )?;
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_get_diagnostics(state: State<'_, AppState>) -> Result<Diagnostics, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let payload = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request(MsgType::GetDiagnosticsReq, &[])?;
-    Diagnostics::from_bytes(&payload).map_err(|e| e.to_string())
+async fn cmd_get_diagnostics(state: State<'_, AppState>) -> Result<Diagnostics, String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let payload = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request(MsgType::GetDiagnosticsReq, &[])?;
+        Diagnostics::from_bytes(&payload).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_get_perf(state: State<'_, AppState>, reset: bool) -> Result<PerfTelemetry, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let payload = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request(MsgType::GetPerfReq, &[u8::from(reset)])?;
-    PerfTelemetry::from_bytes(&payload).map_err(|e| e.to_string())
+async fn cmd_get_perf(state: State<'_, AppState>, reset: bool) -> Result<PerfTelemetry, String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let payload = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request(MsgType::GetPerfReq, &[u8::from(reset)])?;
+        PerfTelemetry::from_bytes(&payload).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_get_rad_params(state: State<'_, AppState>) -> Result<RadParams, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let payload = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request(MsgType::GetRadParamsReq, &[])?;
-    RadParams::from_bytes(&payload).map_err(|e| e.to_string())
+async fn cmd_get_rad_params(state: State<'_, AppState>) -> Result<RadParams, String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let payload = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request(MsgType::GetRadParamsReq, &[])?;
+        RadParams::from_bytes(&payload).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_set_rad_params(state: State<'_, AppState>, params: RadParams) -> Result<RadParams, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let payload = guard
-        .as_mut()
-        .ok_or("not connected")?
-        .request(MsgType::SetRadParamsReq, &params.to_bytes())?;
-    RadParams::from_bytes(&payload).map_err(|e| e.to_string())
+async fn cmd_set_rad_params(
+    state: State<'_, AppState>,
+    params: RadParams,
+) -> Result<RadParams, String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let payload = guard
+            .as_mut()
+            .ok_or("not connected")?
+            .request(MsgType::SetRadParamsReq, &params.to_bytes())?;
+        RadParams::from_bytes(&payload).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[derive(Serialize)]
@@ -370,64 +582,84 @@ struct SdListing {
 }
 
 #[tauri::command]
-fn cmd_sd_list(state: State<'_, AppState>, path: String) -> Result<SdListing, String> {
-    let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-    let client = guard.as_mut().ok_or("not connected")?;
-    let info_b = client.request(MsgType::FsInfoReq, &[])?;
-    let info = FsInfoResp::from_bytes(&info_b).map_err(|e| e.to_string())?;
-    let list_req = FsListResp::encode_req(0, 64, &path);
-    let list_b = client.request(MsgType::FsListReq, &list_req)?;
-    let list = FsListResp::from_bytes(&list_b).map_err(|e| e.to_string())?;
-    Ok(SdListing {
-        info,
-        entries: list.entries,
+async fn cmd_sd_list(state: State<'_, AppState>, path: String) -> Result<SdListing, String> {
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+        let client = guard.as_mut().ok_or("not connected")?;
+        let info_b = client.request(MsgType::FsInfoReq, &[])?;
+        let info = FsInfoResp::from_bytes(&info_b).map_err(|e| e.to_string())?;
+        let entries = client.list_dir_all(&path)?;
+        Ok(SdListing { info, entries })
     })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_sd_read_dat(state: State<'_, AppState>, path: String) -> Result<ThermalDat, String> {
-    let bytes = {
-        let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-        guard.as_mut().ok_or("not connected")?.read_file(&path)?
-    };
-    if let Ok(mut cache) = state.sd_cache.lock() {
-        cache.insert(path, bytes.clone());
-    }
-    ThermalDat::from_bytes(&bytes).map_err(|e| e.to_string())
+async fn cmd_sd_read_dat(state: State<'_, AppState>, path: String) -> Result<ThermalDat, String> {
+    let client_arc = Arc::clone(&state.client);
+    let sd_cache = Arc::clone(&state.sd_cache);
+    tauri::async_runtime::spawn_blocking(move || {
+        let bytes = {
+            let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+            guard.as_mut().ok_or("not connected")?.read_file(&path)?
+        };
+        if let Ok(mut cache) = sd_cache.lock() {
+            cache.insert(path, bytes.clone());
+        }
+        ThermalDat::from_bytes(&bytes).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_sd_delete(state: State<'_, AppState>, path: String) -> Result<(), String> {
-    {
-        let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-        guard.as_mut().ok_or("not connected")?.delete_file(&path)?;
-    }
-    if let Ok(mut cache) = state.sd_cache.lock() {
-        cache.remove(&path);
-    }
-    Ok(())
+async fn cmd_sd_delete(state: State<'_, AppState>, path: String) -> Result<(), String> {
+    let client_arc = Arc::clone(&state.client);
+    let sd_cache = Arc::clone(&state.sd_cache);
+    tauri::async_runtime::spawn_blocking(move || {
+        {
+            let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+            guard.as_mut().ok_or("not connected")?.delete_file(&path)?;
+        }
+        if let Ok(mut cache) = sd_cache.lock() {
+            cache.remove(&path);
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
-fn cmd_sd_download(
+async fn cmd_sd_download(
     state: State<'_, AppState>,
     path: String,
     output_path: Option<String>,
 ) -> Result<String, String> {
-    let bytes = {
-        let mut guard = state.client.lock().map_err(|e| e.to_string())?;
-        guard.as_mut().ok_or("not connected")?.read_file(&path)?
-    };
     let file_name = path.trim_start_matches('/').to_string();
     let target = match output_path {
         Some(p) => PathBuf::from(p),
-        None => rfd::FileDialog::new()
+        None => rfd::AsyncFileDialog::new()
             .set_file_name(&file_name)
             .save_file()
-            .ok_or("cancelled")?,
+            .await
+            .ok_or("cancelled")?
+            .path()
+            .to_path_buf(),
     };
-    fs::write(&target, bytes).map_err(|e| e.to_string())?;
-    Ok(target.to_string_lossy().into_owned())
+    let client_arc = Arc::clone(&state.client);
+    tauri::async_runtime::spawn_blocking(move || {
+        let bytes = {
+            let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
+            guard.as_mut().ok_or("not connected")?.read_file(&path)?
+        };
+        fs::write(&target, bytes).map_err(|e| e.to_string())?;
+        Ok(target.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -496,13 +728,27 @@ pub struct ExportRequest {
 }
 
 #[tauri::command]
-fn cmd_export_media(state: State<'_, AppState>, req: ExportRequest) -> Result<String, String> {
-    let (pixels, w, h) = match (req.pixels, req.width, req.height) {
-        (Some(px), Some(w), Some(h)) => (px, w, h),
+async fn cmd_export_media(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    req: ExportRequest,
+) -> Result<String, String> {
+    let has_req_pixels = req.pixels.is_some() && req.width.is_some() && req.height.is_some();
+    let (pixels, w, h, latest_snapshot) = match (req.pixels, req.width, req.height) {
+        (Some(px), Some(w), Some(h)) => {
+            let expected = usize::from(w) * usize::from(h);
+            if expected == 0 || px.len() != expected {
+                return Err(format!(
+                    "pixel buffer length {} does not match {w}x{h} ({expected})",
+                    px.len()
+                ));
+            }
+            (px, w, h, None)
+        }
         _ => {
             let guard = state.latest_frame.lock().map_err(|e| e.to_string())?;
             let fr = guard.as_ref().ok_or("no frame available")?;
-            (fr.pixels.clone(), fr.meta.width, fr.meta.height)
+            (fr.pixels.clone(), fr.meta.width, fr.meta.height, Some(Arc::clone(fr)))
         }
     };
     let palette = resolve_palette(&state, &req.palette_id)?;
@@ -517,123 +763,315 @@ fn cmd_export_media(state: State<'_, AppState>, req: ExportRequest) -> Result<St
     let ext = req.format.to_lowercase();
     let target = match req.output_path {
         Some(p) => PathBuf::from(p),
-        None => rfd::FileDialog::new()
-            .set_file_name(format!("thermocam_capture.{ext}"))
-            .save_file()
-            .ok_or("cancelled")?,
+        None => {
+            if ext == "seq" {
+                rfd::AsyncFileDialog::new()
+                    .pick_folder()
+                    .await
+                    .ok_or("cancelled")?
+                    .path()
+                    .to_path_buf()
+            } else {
+                rfd::AsyncFileDialog::new()
+                    .set_file_name(format!("thermocam_capture.{ext}"))
+                    .save_file()
+                    .await
+                    .ok_or("cancelled")?
+                    .path()
+                    .to_path_buf()
+            }
+        }
     };
 
-    match ext.as_str() {
-        "png" | "jpg" | "jpeg" => {
-            let (ow, oh, rgb) = render_export_canvas(
-                &pixels, w, h, req.min_raw, req.max_raw, &palette, req.rad, &req.pipeline,
-                &req.rois, &opts,
-            );
-            let bytes = if ext == "png" {
-                encode_png(ow, oh, &rgb)
+    // Snapshot lightweight Arc<FrameRaw> handles and release recorded_frames lock immediately!
+    let seq_snapshot: Vec<Arc<FrameRaw>> = if matches!(ext.as_str(), "mp4" | "gif" | "seq") {
+        let recorded = state.recorded_frames.lock().map_err(|e| e.to_string())?;
+        if recorded.is_empty() {
+            drop(recorded);
+            if let Some(fr) = state.latest_frame.lock().map_err(|e| e.to_string())?.clone() {
+                vec![fr]
             } else {
-                encode_jpeg(ow, oh, &rgb, opts.jpeg_quality)
+                Vec::new()
             }
-            .map_err(|e| e.to_string())?;
-            fs::write(&target, bytes).map_err(|e| e.to_string())?;
+        } else {
+            recorded.clone()
         }
-        "tiff" | "tif" => {
-            let bytes = encode_radiometric_tiff_16(&pixels, w, h, req.rad)
-                .map_err(|e| e.to_string())?;
-            fs::write(&target, bytes).map_err(|e| e.to_string())?;
-        }
-        "csv" => {
-            let csv = encode_temperature_csv(&pixels, w, h, req.rad, req.unit);
-            fs::write(&target, csv).map_err(|e| e.to_string())?;
-        }
-        "html" => {
-            let html = generate_html_report(
-                req.title.as_deref().unwrap_or("DIY-Thermocam Inspection Report"),
-                req.notes.as_deref().unwrap_or(""),
-                &pixels, w, h, req.min_raw, req.max_raw, &palette, req.rad, &req.pipeline,
-                &req.rois, &opts,
-            )
-            .map_err(|e| e.to_string())?;
-            fs::write(&target, html).map_err(|e| e.to_string())?;
-        }
-        "md" => {
-            let md = generate_markdown_report(
-                req.title.as_deref().unwrap_or("DIY-Thermocam Inspection Report"),
-                req.notes.as_deref().unwrap_or(""),
-                "capture.png",
-                &pixels, w, h, &palette, req.rad, &req.rois, req.unit,
-            );
-            fs::write(&target, md).map_err(|e| e.to_string())?;
-        }
-        "mp4" | "gif" => {
-            let recorded = state.recorded_frames.lock().map_err(|e| e.to_string())?;
-            let seq: Vec<FrameRaw> = if recorded.is_empty() {
-                let mut tmp = Vec::new();
-                if let Some(fr) = state.latest_frame.lock().map_err(|e| e.to_string())?.clone() {
-                    tmp.push(fr);
-                }
-                tmp
-            } else {
-                recorded.clone()
-            };
-            let mut rgb_frames = Vec::with_capacity(seq.len());
-            let mut dims = (0u32, 0u32);
-            for fr in &seq {
-                let (ow, oh, rgb) = render_export_canvas(
-                    &fr.pixels, fr.meta.width, fr.meta.height, req.min_raw, req.max_raw,
-                    &palette, req.rad, &req.pipeline, &req.rois, &opts,
-                );
-                dims = (ow, oh);
-                rgb_frames.push(rgb);
-            }
-            let bytes = if ext == "mp4" {
-                encode_h264_mp4(dims.0, dims.1, &rgb_frames, 9).map_err(|e| e.to_string())?
-            } else {
-                encode_gif(dims.0 as u16, dims.1 as u16, &rgb_frames, 9.0)
-                    .map_err(|e| e.to_string())?
-            };
-            fs::write(&target, bytes).map_err(|e| e.to_string())?;
-        }
-        "dat" => {
-            let fr = state
-                .latest_frame
-                .lock()
-                .map_err(|e| e.to_string())?
-                .clone()
-                .ok_or("no frame")?;
-            let dat = ThermalDat::from_frame(&fr, palette.firmware_id.unwrap_or(10), 0);
-            fs::write(&target, dat.to_bytes()).map_err(|e| e.to_string())?;
-        }
-        "seq" => {
-            let recorded = state.recorded_frames.lock().map_err(|e| e.to_string())?;
-            fs::create_dir_all(&target).map_err(|e| e.to_string())?;
-            let mut names = Vec::with_capacity(recorded.len());
-            for (i, fr) in recorded.iter().enumerate() {
-                let fname = format!("{i:06}.DAT");
-                let dat = ThermalDat::from_frame(fr, palette.firmware_id.unwrap_or(10), 0);
-                fs::write(target.join(&fname), dat.to_bytes()).map_err(|e| e.to_string())?;
-                names.push(fname);
-            }
-            let manifest = SequenceManifest {
-                schema_version: 1,
-                created_utc: "2026-11-25T00:00:00Z".into(),
-                sensor_w: w,
-                sensor_h: h,
-                fps: 8.78,
-                frame_count: names.len(),
-                frames: names,
-                palette_id: req.palette_id,
-            };
-            fs::write(
-                target.join("manifest.json"),
-                serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
-            )
-            .map_err(|e| e.to_string())?;
-        }
-        other => return Err(format!("unsupported export format: {other}")),
-    }
+    } else {
+        Vec::new()
+    };
 
-    Ok(target.to_string_lossy().into_owned())
+    let palette_id = req.palette_id;
+    let min_raw = req.min_raw;
+    let max_raw = req.max_raw;
+    let rad = req.rad;
+    let pipeline = req.pipeline;
+    let rois = req.rois;
+    let title = req.title;
+    let notes = req.notes;
+    let unit = req.unit;
+
+    tauri::async_runtime::spawn_blocking(move || {
+        match ext.as_str() {
+            "png" | "jpg" | "jpeg" => {
+                let (ow, oh, rgb) = render_export_canvas(
+                    &pixels, w, h, min_raw, max_raw, &palette, rad, &pipeline, &rois, &opts,
+                );
+                let bytes = if ext == "png" {
+                    encode_png(ow, oh, &rgb)
+                } else {
+                    encode_jpeg(ow, oh, &rgb, opts.jpeg_quality)
+                }
+                .map_err(|e| e.to_string())?;
+                fs::write(&target, bytes).map_err(|e| e.to_string())?;
+            }
+            "tiff" | "tif" => {
+                let bytes = encode_radiometric_tiff_16(&pixels, w, h, rad)
+                    .map_err(|e| e.to_string())?;
+                fs::write(&target, bytes).map_err(|e| e.to_string())?;
+            }
+            "csv" => {
+                let csv = encode_temperature_csv(&pixels, w, h, rad, unit);
+                fs::write(&target, csv).map_err(|e| e.to_string())?;
+            }
+            "html" => {
+                let html = generate_html_report(
+                    title.as_deref().unwrap_or("DIY-Thermocam Inspection Report"),
+                    notes.as_deref().unwrap_or(""),
+                    &pixels, w, h, min_raw, max_raw, &palette, rad, &pipeline, &rois, &opts,
+                )
+                .map_err(|e| e.to_string())?;
+                fs::write(&target, html).map_err(|e| e.to_string())?;
+            }
+            "md" => {
+                let md = generate_markdown_report(
+                    title.as_deref().unwrap_or("DIY-Thermocam Inspection Report"),
+                    notes.as_deref().unwrap_or(""),
+                    "capture.png",
+                    &pixels, w, h, &palette, rad, &rois, unit,
+                );
+                fs::write(&target, md).map_err(|e| e.to_string())?;
+            }
+            "mp4" | "gif" => {
+                if seq_snapshot.is_empty() {
+                    return Err("no frames available for video export".into());
+                }
+                let first = &seq_snapshot[0];
+                let (out_w, out_h) = opts.resolution.dimensions(first.meta.width, first.meta.height);
+                let timestamps: Vec<u64> = seq_snapshot.iter().map(|f| f.meta.timestamp_us).collect();
+                let fps = derive_sequence_fps(&timestamps);
+                let total = seq_snapshot.len();
+                let mut scratch = RenderScratch::new();
+                let file = File::create(&target).map_err(|e| e.to_string())?;
+                let writer = BufWriter::new(file);
+
+                if ext == "mp4" {
+                    encode_h264_mp4_streaming(writer, out_w, out_h, total, fps, |idx, emit| {
+                        let fr = &seq_snapshot[idx];
+                        render_export_canvas_with_scratch(
+                            &fr.pixels,
+                            fr.meta.width,
+                            fr.meta.height,
+                            min_raw,
+                            max_raw,
+                            &palette,
+                            rad,
+                            &pipeline,
+                            &rois,
+                            &opts,
+                            true,
+                            &mut scratch,
+                        );
+                        emit(&scratch.canvas)?;
+                        let _ = app.emit(
+                            "export-progress",
+                            serde_json::json!({ "stage": "encoding", "done": idx + 1, "total": total }),
+                        );
+                        Ok(())
+                    })
+                    .map_err(|e| e.to_string())?;
+                } else {
+                    encode_gif_streaming(
+                        writer,
+                        out_w as u16,
+                        out_h as u16,
+                        total,
+                        fps,
+                        |idx, emit| {
+                            let fr = &seq_snapshot[idx];
+                            render_export_canvas_with_scratch(
+                                &fr.pixels,
+                                fr.meta.width,
+                                fr.meta.height,
+                                min_raw,
+                                max_raw,
+                                &palette,
+                                rad,
+                                &pipeline,
+                                &rois,
+                                &opts,
+                                true,
+                                &mut scratch,
+                            );
+                            emit(&scratch.canvas)?;
+                            let _ = app.emit(
+                                "export-progress",
+                                serde_json::json!({ "stage": "encoding", "done": idx + 1, "total": total }),
+                            );
+                            Ok(())
+                        },
+                    )
+                    .map_err(|e| e.to_string())?;
+                }
+            }
+            "dat" => {
+                let scheme = palette.firmware_id.unwrap_or(10);
+                let dat = if has_req_pixels {
+                    ThermalDat::from_pixels(pixels, w, h, rad, scheme, 0)
+                } else if let Some(fr) = latest_snapshot {
+                    ThermalDat::from_frame(&fr, scheme, 0)
+                } else {
+                    ThermalDat::from_pixels(pixels, w, h, rad, scheme, 0)
+                };
+                fs::write(&target, dat.to_bytes()).map_err(|e| e.to_string())?;
+            }
+            "seq" => {
+                fs::create_dir_all(&target).map_err(|e| e.to_string())?;
+                let mut names = Vec::with_capacity(seq_snapshot.len());
+                let scheme = palette.firmware_id.unwrap_or(10);
+                for (i, fr) in seq_snapshot.iter().enumerate() {
+                    let fname = format!("{i:06}.DAT");
+                    let dat = ThermalDat::from_frame(fr, scheme, 0);
+                    fs::write(target.join(&fname), dat.to_bytes()).map_err(|e| e.to_string())?;
+                    names.push(fname);
+                }
+                let timestamps: Vec<u64> = seq_snapshot.iter().map(|f| f.meta.timestamp_us).collect();
+                let fps = derive_sequence_fps(&timestamps) as f32;
+                let manifest = SequenceManifest {
+                    schema_version: 1,
+                    created_utc: format_utc_now_iso8601(),
+                    sensor_w: w,
+                    sensor_h: h,
+                    fps,
+                    frame_count: names.len(),
+                    frames: names,
+                    palette_id,
+                };
+                fs::write(
+                    target.join("manifest.json"),
+                    serde_json::to_string_pretty(&manifest).map_err(|e| e.to_string())?,
+                )
+                .map_err(|e| e.to_string())?;
+            }
+            other => return Err(format!("unsupported export format: {other}")),
+        }
+
+        Ok(target.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn cmd_pick_directory() -> Result<String, String> {
+    let dir = rfd::AsyncFileDialog::new()
+        .pick_folder()
+        .await
+        .ok_or("cancelled")?;
+    Ok(dir.path().to_string_lossy().into_owned())
+}
+
+#[derive(Serialize)]
+struct TimelapseCaptureResult {
+    recorded_count: usize,
+    saved_path: Option<String>,
+}
+
+#[allow(clippy::too_many_arguments)]
+#[tauri::command]
+async fn cmd_capture_timelapse_frame(
+    state: State<'_, AppState>,
+    output_dir: Option<String>,
+    palette_id: String,
+    index: usize,
+    pixels: Vec<u16>,
+    width: u16,
+    height: u16,
+    rad: RadiometryParams,
+) -> Result<TimelapseCaptureResult, String> {
+    let expected = usize::from(width) * usize::from(height);
+    if expected == 0 || pixels.len() != expected {
+        return Err(format!(
+            "timelapse pixel buffer length {} does not match {width}x{height} ({expected})",
+            pixels.len()
+        ));
+    }
+    let palette = resolve_palette(&state, &palette_id)?;
+    let rec_buf = Arc::clone(&state.recorded_frames);
+    let latest_arc = Arc::clone(&state.latest_frame);
+    tauri::async_runtime::spawn_blocking(move || {
+        let scheme = palette.firmware_id.unwrap_or(10);
+        let dat = ThermalDat::from_pixels(pixels.clone(), width, height, rad, scheme, 0);
+        let saved_path = if let Some(dir) = output_dir {
+            let dir_path = PathBuf::from(dir);
+            fs::create_dir_all(&dir_path).map_err(|e| e.to_string())?;
+            let file_path = dir_path.join(format!("timelapse_{index:06}.DAT"));
+            fs::write(&file_path, dat.to_bytes()).map_err(|e| e.to_string())?;
+            Some(file_path.to_string_lossy().into_owned())
+        } else {
+            None
+        };
+
+        let now_us = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_micros() as u64);
+        let live_meta = latest_arc
+            .lock()
+            .ok()
+            .and_then(|g| g.as_ref().map(|fr| fr.meta.clone()));
+        let frame_arc = Arc::new(FrameRaw {
+            meta: FrameRawMeta {
+                frame_seq: index as u32,
+                timestamp_us: now_us,
+                rtc_epoch: (now_us / 1_000_000) as u32,
+                dropped_frames: 0,
+                width,
+                height,
+                pixel_format: 0,
+                gain_mode: live_meta.as_ref().map_or(0, |m| m.gain_mode),
+                ffc_state: live_meta.as_ref().map_or(0, |m| m.ffc_state),
+                flags: live_meta.as_ref().map_or(0, |m| m.flags),
+                min_raw: dat.min_raw,
+                max_raw: dat.max_raw,
+                min_x: live_meta.as_ref().map_or(0, |m| m.min_x),
+                min_y: live_meta.as_ref().map_or(0, |m| m.min_y),
+                max_x: live_meta.as_ref().map_or(0, |m| m.max_x),
+                max_y: live_meta.as_ref().map_or(0, |m| m.max_y),
+                spot_temp_c: dat.spot_temp,
+                cal_offset: rad.cal_offset,
+                cal_slope: rad.cal_slope,
+                fpa_temp_c: live_meta.as_ref().map_or(30.0, |m| m.fpa_temp_c),
+                bat_pct: live_meta.as_ref().map_or(100, |m| m.bat_pct),
+                usb_power: live_meta.as_ref().is_none_or(|m| m.usb_power),
+                temp_point_count: 0,
+            },
+            pixels,
+            temp_points: Vec::new(),
+        });
+
+        let recorded_count = {
+            let mut buf = rec_buf.lock().map_err(|e| e.to_string())?;
+            if buf.len() < MAX_RECORDED_FRAMES {
+                buf.push(frame_arc);
+            }
+            buf.len()
+        };
+        Ok(TimelapseCaptureResult {
+            recorded_count,
+            saved_path,
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -659,34 +1097,71 @@ fn cmd_evaluate_rois(
 }
 
 #[tauri::command]
-fn cmd_flash_firmware(
+async fn cmd_flash_firmware(
     app: tauri::AppHandle,
     state: State<'_, AppState>,
     hex_text: String,
     expected_sha256: Option<String>,
     legacy_port: Option<String>,
 ) -> Result<String, String> {
-    let img =
-        parse_teensy41_hex(&hex_text, expected_sha256.as_deref()).map_err(|e| e.to_string())?;
-    let _ = app.emit("flash-progress", serde_json::json!({ "stage": "verified", "sha256": img.sha256_hex }));
+    let client_arc = Arc::clone(&state.client);
+    let streaming = Arc::clone(&state.streaming);
+    let stream_gen = Arc::clone(&state.stream_gen);
+    let stream_lifecycle = Arc::clone(&state.stream_lifecycle);
+    let stream_thread = Arc::clone(&state.stream_thread);
 
-    // Trigger bootloader via Protocol v2 if connected, else optional 134-baud legacy CDC
-    if let Ok(mut guard) = state.client.lock() {
-        if let Some(c) = guard.as_mut() {
-            let _ = encode_enter_bootloader_req(1);
-            let _ = c.request(MsgType::EnterBootloaderReq, &thermocam_core::protocol::BOOTLOADER_MAGIC.to_le_bytes());
+    tauri::async_runtime::spawn_blocking(move || {
+        let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
+        let img = parse_teensy41_hex(&hex_text, expected_sha256.as_deref())
+            .map_err(|e| e.to_string())?;
+        let _ = app.emit(
+            "flash-progress",
+            serde_json::json!({ "stage": "verified", "sha256": img.sha256_hex }),
+        );
+
+        // Stop live stream & cleanly release serial port after triggering bootloader
+        stop_stream_and_join(&streaming, &stream_gen, &stream_thread);
+        if let Ok(mut guard) = client_arc.lock() {
+            if let Some(mut c) = guard.take() {
+                let _ = c.request_timeout(
+                    MsgType::EnterBootloaderReq,
+                    &thermocam_core::protocol::BOOTLOADER_MAGIC.to_le_bytes(),
+                    Duration::from_millis(500),
+                );
+                drop(c);
+            }
         }
-    }
-    if let Some(p) = legacy_port {
-        let _ = trigger_legacy_134_baud(&p);
-    }
+        if let Some(p) = legacy_port {
+            if !p.starts_with("sim://") {
+                let _ = trigger_legacy_134_baud(&p);
+            }
+        }
 
-    let mut hid = RealHalfKayDevice::open().map_err(|e| e.to_string())?;
-    flash_firmware(&mut hid, &img, |done, total| {
-        let _ = app.emit("flash-progress", serde_json::json!({ "stage": "flashing", "done": done, "total": total }));
+        let _ = app.emit(
+            "flash-progress",
+            serde_json::json!({ "stage": "waiting_bootloader" }),
+        );
+        let mut hid = RealHalfKayDevice::open_with_timeout(
+            Duration::from_secs(10),
+            Duration::from_millis(100),
+        )
+        .map_err(|e| e.to_string())?;
+
+        flash_firmware(&mut hid, &img, |done, total| {
+            let _ = app.emit(
+                "flash-progress",
+                serde_json::json!({ "stage": "flashing", "done": done, "total": total }),
+            );
+        })
+        .map_err(|e| e.to_string())?;
+        let _ = app.emit(
+            "flash-progress",
+            serde_json::json!({ "stage": "rebooted", "sha256": img.sha256_hex }),
+        );
+        Ok(img.sha256_hex)
     })
-    .map_err(|e| e.to_string())?;
-    Ok(img.sha256_hex)
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 /// Build the configured Tauri v2 application with `thermo://` custom protocol for SD thumbnails/media.
@@ -757,6 +1232,8 @@ pub fn build_app() -> tauri::Builder<tauri::Wry> {
             cmd_verify_hex,
             cmd_pick_hex_file,
             cmd_export_media,
+            cmd_pick_directory,
+            cmd_capture_timelapse_frame,
             cmd_toggle_recording,
             cmd_evaluate_rois,
             cmd_flash_firmware,

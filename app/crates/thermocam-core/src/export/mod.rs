@@ -4,7 +4,7 @@
 pub mod hud;
 
 use std::fmt::Write as _;
-use std::io::Cursor;
+use std::io::{Cursor, Seek, Write};
 
 use base64::Engine as _;
 use image::codecs::jpeg::JpegEncoder;
@@ -14,7 +14,7 @@ use openh264::formats::YUVBuffer;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::imaging::{render_thermal_rgb, DisplayPipeline};
+use crate::imaging::{render_thermal_rgb_with_scratch, DisplayPipeline, RenderScratch};
 use crate::palettes::Palette;
 use crate::radiometry::{raw_to_object_c, RadiometryParams, TempUnit};
 use crate::roi::{evaluate_roi, sample_line_profile, LineSample, Roi, RoiGeometry, RoiStats};
@@ -79,11 +79,9 @@ impl Default for ExportOptions {
     }
 }
 
-/// Render a full target-resolution RGB frame with letterboxed aspect-correct thermal image
-/// and crisp vector-composited scale bar, ROI overlays, and HUD.
+/// Render a target-resolution RGB frame into `scratch.canvas` with zero per-frame heap churn.
 #[allow(clippy::too_many_arguments)]
-#[must_use]
-pub fn render_export_canvas(
+pub fn render_export_canvas_with_scratch(
     pixels: &[u16],
     sensor_w: u16,
     sensor_h: u16,
@@ -94,12 +92,13 @@ pub fn render_export_canvas(
     pipeline: &DisplayPipeline,
     rois: &[Roi],
     opts: &ExportOptions,
-) -> (u32, u32, Vec<u8>) {
+    use_temporal_heq: bool,
+    scratch: &mut RenderScratch,
+) -> (u32, u32) {
     let (out_w, out_h) = opts.resolution.dimensions(sensor_w, sensor_h);
     let ow = out_w as usize;
     let oh = out_h as usize;
 
-    // Reserve crisp dark studio frame margin + colorbar area on the right
     let right_gutter = if opts.show_colorbar {
         (ow / 7).clamp(110, 380)
     } else {
@@ -120,7 +119,7 @@ pub fn render_export_canvas(
     let ix = (avail_w - img_w) / 2;
     let iy = (avail_h - img_h) / 2;
 
-    let thermal_rgb = render_thermal_rgb(
+    render_thermal_rgb_with_scratch(
         pixels,
         usize::from(sensor_w),
         usize::from(sensor_h),
@@ -131,14 +130,17 @@ pub fn render_export_canvas(
         palette,
         rad,
         pipeline,
+        use_temporal_heq,
+        scratch,
     );
 
-    let mut canvas = vec![14u8; ow * oh * 3];
+    scratch.canvas.resize(ow * oh * 3, 14);
+    scratch.canvas.fill(14);
     for row in 0..img_h {
         let src_off = row * img_w * 3;
         let dst_off = ((iy + row) * ow + ix) * 3;
-        canvas[dst_off..dst_off + img_w * 3]
-            .copy_from_slice(&thermal_rgb[src_off..src_off + img_w * 3]);
+        scratch.canvas[dst_off..dst_off + img_w * 3]
+            .copy_from_slice(&scratch.rgb[src_off..src_off + img_w * 3]);
     }
 
     let stats: Vec<RoiStats> = rois
@@ -149,7 +151,7 @@ pub fn render_export_canvas(
     let max_c = raw_to_object_c(max_raw, rad);
 
     hud::composite_export_hud(
-        &mut canvas,
+        &mut scratch.canvas,
         ow,
         oh,
         (ix, iy, img_w, img_h),
@@ -165,7 +167,41 @@ pub fn render_export_canvas(
         opts.show_colorbar,
         opts.show_hud,
     );
-    (out_w, out_h, canvas)
+    (out_w, out_h)
+}
+
+/// Render a full target-resolution RGB frame with letterboxed aspect-correct thermal image
+/// and crisp vector-composited scale bar, ROI overlays, and HUD.
+#[allow(clippy::too_many_arguments)]
+#[must_use]
+pub fn render_export_canvas(
+    pixels: &[u16],
+    sensor_w: u16,
+    sensor_h: u16,
+    min_raw: u16,
+    max_raw: u16,
+    palette: &Palette,
+    rad: RadiometryParams,
+    pipeline: &DisplayPipeline,
+    rois: &[Roi],
+    opts: &ExportOptions,
+) -> (u32, u32, Vec<u8>) {
+    let mut scratch = RenderScratch::new();
+    let (out_w, out_h) = render_export_canvas_with_scratch(
+        pixels,
+        sensor_w,
+        sensor_h,
+        min_raw,
+        max_raw,
+        palette,
+        rad,
+        pipeline,
+        rois,
+        opts,
+        false,
+        &mut scratch,
+    );
+    (out_w, out_h, scratch.canvas)
 }
 
 pub fn encode_png(width: u32, height: u32, rgb: &[u8]) -> Result<Vec<u8>, ExportError> {
@@ -245,6 +281,57 @@ pub fn encode_temperature_csv(
     out
 }
 
+/// Derive true capture FPS from microsecond frame timestamps (falls back to 8.78 Hz Lepton rate).
+#[must_use]
+pub fn derive_sequence_fps(timestamps_us: &[u64]) -> f64 {
+    if timestamps_us.len() < 2 {
+        return 8.78;
+    }
+    let first = timestamps_us[0];
+    let last = *timestamps_us.last().unwrap_or(&first);
+    if last <= first {
+        return 8.78;
+    }
+    let span_s = (last - first) as f64 / 1_000_000.0;
+    if span_s <= 1e-4 {
+        return 8.78;
+    }
+    let fps = (timestamps_us.len() - 1) as f64 / span_s;
+    fps.clamp(0.5, 60.0)
+}
+
+/// Constant-RAM streaming animated GIF encoder: renders and writes one frame at a time with zero clone.
+pub fn encode_gif_streaming<W, F>(
+    writer: W,
+    width: u16,
+    height: u16,
+    frame_count: usize,
+    fps: f64,
+    mut with_frame_rgb: F,
+) -> Result<(), ExportError>
+where
+    W: Write,
+    F: FnMut(usize, &mut dyn FnMut(&[u8]) -> Result<(), ExportError>) -> Result<(), ExportError>,
+{
+    if frame_count == 0 {
+        return Err(ExportError::EmptySequence);
+    }
+    let delay_cs = ((100.0 / fps.clamp(0.5, 30.0)).round() as u16).max(2);
+    let mut enc = gif::Encoder::new(writer, width, height, &[])
+        .map_err(|e| ExportError::Gif(e.to_string()))?;
+    enc.set_repeat(gif::Repeat::Infinite)
+        .map_err(|e| ExportError::Gif(e.to_string()))?;
+    for idx in 0..frame_count {
+        with_frame_rgb(idx, &mut |rgb: &[u8]| {
+            let mut frame = gif::Frame::from_rgb_speed(width, height, rgb, 15);
+            frame.delay = delay_cs;
+            enc.write_frame(&frame)
+                .map_err(|e| ExportError::Gif(e.to_string()))
+        })?;
+    }
+    Ok(())
+}
+
 /// Encode animated GIF from RGB8 frames.
 pub fn encode_gif(
     width: u16,
@@ -252,94 +339,53 @@ pub fn encode_gif(
     frames_rgb: &[Vec<u8>],
     fps: f32,
 ) -> Result<Vec<u8>, ExportError> {
-    if frames_rgb.is_empty() {
-        return Err(ExportError::EmptySequence);
-    }
-    let delay_cs = ((100.0 / fps.clamp(1.0, 30.0)).round() as u16).max(2);
     let mut out = Vec::new();
-    {
-        let mut enc = gif::Encoder::new(&mut out, width, height, &[])
-            .map_err(|e| ExportError::Gif(e.to_string()))?;
-        enc.set_repeat(gif::Repeat::Infinite)
-            .map_err(|e| ExportError::Gif(e.to_string()))?;
-        for rgb in frames_rgb {
-            let mut frame = gif::Frame::from_rgb_speed(width, height, rgb, 15);
-            frame.delay = delay_cs;
-            enc.write_frame(&frame)
-                .map_err(|e| ExportError::Gif(e.to_string()))?;
-        }
-    }
+    encode_gif_streaming(
+        &mut out,
+        width,
+        height,
+        frames_rgb.len(),
+        f64::from(fps),
+        |idx, emit| emit(&frames_rgb[idx]),
+    )?;
     Ok(out)
 }
 
-/// Zero-FFmpeg H.264 MP4 encoder (`openh264` Annex-B -> AVCC NALUs -> `mp4::Mp4Writer`).
-pub fn encode_h264_mp4(
+/// Constant-RAM streaming H.264 MP4 encoder (`openh264` -> AVCC -> `mp4::Mp4Writer`).
+///
+/// Renders, converts, encodes, and flushes **one frame at a time** directly to `writer` (e.g. a
+/// `BufWriter<File>`), keeping peak RAM constant (~1 frame) regardless of sequence length, and
+/// preserving exact fractional capture FPS (`timescale = 100_000`).
+pub fn encode_h264_mp4_streaming<W, F>(
+    writer: W,
     width: u32,
     height: u32,
-    frames_rgb: &[Vec<u8>],
-    fps: u32,
-) -> Result<Vec<u8>, ExportError> {
-    if frames_rgb.is_empty() {
+    frame_count: usize,
+    fps: f64,
+    mut with_frame_rgb: F,
+) -> Result<(), ExportError>
+where
+    W: Write + Seek,
+    F: FnMut(usize, &mut dyn FnMut(&[u8]) -> Result<(), ExportError>) -> Result<(), ExportError>,
+{
+    if frame_count == 0 {
         return Err(ExportError::EmptySequence);
     }
     let w = (width & !1) as usize;
     let h = (height & !1) as usize;
-    let fps = fps.clamp(1, 60);
+    let fps_clamped = fps.clamp(0.5, 60.0);
+    let timescale: u32 = 100_000;
+    let sample_dur: u32 = ((f64::from(timescale) / fps_clamped).round() as u32).max(1);
 
     let cfg = openh264::encoder::EncoderConfig::new()
         .bitrate(openh264::encoder::BitRate::from_bps(
             ((w * h) as u32 * 4).clamp(1_500_000, 12_000_000),
         ))
-        .max_frame_rate(openh264::encoder::FrameRate::from_hz(fps as f32));
+        .max_frame_rate(openh264::encoder::FrameRate::from_hz(fps_clamped as f32));
     let api = openh264::OpenH264API::from_source();
     let mut encoder = openh264::encoder::Encoder::with_api_config(api, cfg)
         .map_err(|e| ExportError::Video(e.to_string()))?;
 
-    let mut sps: Option<Vec<u8>> = None;
-    let mut pps: Option<Vec<u8>> = None;
-    let mut encoded_samples: Vec<(Vec<u8>, bool)> = Vec::with_capacity(frames_rgb.len());
-
-    for rgb in frames_rgb {
-        let rgb_src = openh264::formats::RgbSliceU8::new(rgb, (w, h));
-        let yuv = YUVBuffer::from_rgb_source(rgb_src);
-        let bitstream = encoder
-            .encode(&yuv)
-            .map_err(|e| ExportError::Video(e.to_string()))?;
-        let annex_b = bitstream.to_vec();
-        let mut avcc = Vec::with_capacity(annex_b.len());
-        let mut is_sync = false;
-        for nalu in split_annex_b(&annex_b) {
-            if nalu.is_empty() {
-                continue;
-            }
-            let nal_type = nalu[0] & 0x1F;
-            match nal_type {
-                7 => {
-                    sps = Some(nalu.to_vec());
-                }
-                8 => {
-                    pps = Some(nalu.to_vec());
-                }
-                5 => {
-                    is_sync = true;
-                    avcc.extend_from_slice(&(nalu.len() as u32).to_be_bytes());
-                    avcc.extend_from_slice(nalu);
-                }
-                _ => {
-                    avcc.extend_from_slice(&(nalu.len() as u32).to_be_bytes());
-                    avcc.extend_from_slice(nalu);
-                }
-            }
-        }
-        if !avcc.is_empty() {
-            encoded_samples.push((avcc, is_sync));
-        }
-    }
-
-    let seq_param_set = sps.ok_or_else(|| ExportError::Video("missing H.264 SPS".into()))?;
-    let pic_param_set = pps.ok_or_else(|| ExportError::Video("missing H.264 PPS".into()))?;
-
-    let mut cursor = Cursor::new(Vec::new());
     let mp4_cfg = mp4::Mp4Config {
         major_brand: str::parse("isom").expect("isom"),
         minor_version: 512,
@@ -351,38 +397,124 @@ pub fn encode_h264_mp4(
         ],
         timescale: 1000,
     };
-    let mut writer = mp4::Mp4Writer::write_start(&mut cursor, &mp4_cfg)
+    let mut mp4_writer = mp4::Mp4Writer::write_start(writer, &mp4_cfg)
         .map_err(|e| ExportError::Video(e.to_string()))?;
-    let track_cfg = mp4::TrackConfig {
-        track_type: mp4::TrackType::Video,
-        timescale: fps * 1000,
-        language: String::from("und"),
-        media_conf: mp4::MediaConfig::AvcConfig(mp4::AvcConfig {
-            width: w as u16,
-            height: h as u16,
-            seq_param_set,
-            pic_param_set,
-        }),
-    };
-    writer
-        .add_track(&track_cfg)
-        .map_err(|e| ExportError::Video(e.to_string()))?;
+    let mut track_added = false;
+    let mut sps: Option<Vec<u8>> = None;
+    let mut pps: Option<Vec<u8>> = None;
+    let mut deferred_samples: Vec<(Vec<u8>, bool)> = Vec::new();
+    let mut written_samples: u64 = 0;
 
-    for (idx, (bytes, is_sync)) in encoded_samples.into_iter().enumerate() {
-        let sample = mp4::Mp4Sample {
-            start_time: (idx as u64) * 1000,
-            duration: 1000,
-            rendering_offset: 0,
-            is_sync,
-            bytes: bytes.into(),
-        };
-        writer
-            .write_sample(1, &sample)
-            .map_err(|e| ExportError::Video(e.to_string()))?;
+    for idx in 0..frame_count {
+        let mut avcc = Vec::new();
+        let mut is_sync = false;
+        with_frame_rgb(idx, &mut |rgb: &[u8]| {
+            let rgb_src = openh264::formats::RgbSliceU8::new(rgb, (w, h));
+            let yuv = YUVBuffer::from_rgb_source(rgb_src);
+            let bitstream = encoder
+                .encode(&yuv)
+                .map_err(|e| ExportError::Video(e.to_string()))?;
+            let annex_b = bitstream.to_vec();
+            avcc.reserve(annex_b.len());
+            for nalu in split_annex_b(&annex_b) {
+                if nalu.is_empty() {
+                    continue;
+                }
+                let nal_type = nalu[0] & 0x1F;
+                match nal_type {
+                    7 => sps = Some(nalu.to_vec()),
+                    8 => pps = Some(nalu.to_vec()),
+                    5 => {
+                        is_sync = true;
+                        avcc.extend_from_slice(&(nalu.len() as u32).to_be_bytes());
+                        avcc.extend_from_slice(nalu);
+                    }
+                    _ => {
+                        avcc.extend_from_slice(&(nalu.len() as u32).to_be_bytes());
+                        avcc.extend_from_slice(nalu);
+                    }
+                }
+            }
+            Ok(())
+        })?;
+
+        if !track_added {
+            if let (Some(seq_param_set), Some(pic_param_set)) = (sps.clone(), pps.clone()) {
+                let track_cfg = mp4::TrackConfig {
+                    track_type: mp4::TrackType::Video,
+                    timescale,
+                    language: String::from("und"),
+                    media_conf: mp4::MediaConfig::AvcConfig(mp4::AvcConfig {
+                        width: w as u16,
+                        height: h as u16,
+                        seq_param_set,
+                        pic_param_set,
+                    }),
+                };
+                mp4_writer
+                    .add_track(&track_cfg)
+                    .map_err(|e| ExportError::Video(e.to_string()))?;
+                track_added = true;
+                for (bytes, sync) in deferred_samples.drain(..) {
+                    let sample = mp4::Mp4Sample {
+                        start_time: written_samples * u64::from(sample_dur),
+                        duration: sample_dur,
+                        rendering_offset: 0,
+                        is_sync: sync,
+                        bytes: bytes.into(),
+                    };
+                    mp4_writer
+                        .write_sample(1, &sample)
+                        .map_err(|e| ExportError::Video(e.to_string()))?;
+                    written_samples += 1;
+                }
+            }
+        }
+
+        if !avcc.is_empty() {
+            if track_added {
+                let sample = mp4::Mp4Sample {
+                    start_time: written_samples * u64::from(sample_dur),
+                    duration: sample_dur,
+                    rendering_offset: 0,
+                    is_sync,
+                    bytes: avcc.into(),
+                };
+                mp4_writer
+                    .write_sample(1, &sample)
+                    .map_err(|e| ExportError::Video(e.to_string()))?;
+                written_samples += 1;
+            } else {
+                deferred_samples.push((avcc, is_sync));
+            }
+        }
     }
-    writer
+
+    if !track_added {
+        return Err(ExportError::Video("missing H.264 SPS/PPS".into()));
+    }
+    mp4_writer
         .write_end()
         .map_err(|e| ExportError::Video(e.to_string()))?;
+    Ok(())
+}
+
+/// Zero-FFmpeg H.264 MP4 encoder (`openh264` Annex-B -> AVCC NALUs -> `mp4::Mp4Writer`).
+pub fn encode_h264_mp4(
+    width: u32,
+    height: u32,
+    frames_rgb: &[Vec<u8>],
+    fps: u32,
+) -> Result<Vec<u8>, ExportError> {
+    let mut cursor = Cursor::new(Vec::new());
+    encode_h264_mp4_streaming(
+        &mut cursor,
+        width,
+        height,
+        frames_rgb.len(),
+        f64::from(fps.clamp(1, 60)),
+        |idx, emit| emit(&frames_rgb[idx]),
+    )?;
     Ok(cursor.into_inner())
 }
 

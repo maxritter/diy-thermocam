@@ -527,26 +527,90 @@ fn full_hd_1080p_upscaler_png_mp4_gif_tiff_csv_and_reports() {
 
 #[test]
 fn halfkay_hex_parse_sha256_and_mock_hid_flash() {
-    // Valid Intel HEX record at Teensy 4.1 flash base 0x6000_0000
-    let hex = ":0200000460009A\n:100000000102030405060708090A0B0C0D0E0F1068\n:00000001FF\n";
+    use std::time::Duration;
+    use thermocam_core::flasher::{
+        flash_firmware_with_options, wait_for_device, FlashError, FlashOptions,
+    };
+
+    // Valid Intel HEX record at Teensy 4.1 flash base 0x6000_0000 with 'FCFB' FlexSPI boot header
+    let hex = ":0200000460009A\n:100000004643464200000156000000000000000088\n:00000001FF\n";
     let img = parse_teensy41_hex(hex, None).unwrap();
     assert_eq!(img.total_bytes, 16);
     assert_eq!(img.block_count, 1);
 
     // SHA-256 verification pass & mismatch
     assert!(parse_teensy41_hex(hex, Some(&img.sha256_hex)).is_ok());
-    assert!(parse_teensy41_hex(hex, Some("deadbeef")).is_err());
+    assert!(matches!(
+        parse_teensy41_hex(hex, Some("deadbeef")),
+        Err(FlashError::ChecksumMismatch { .. })
+    ));
 
+    // Reject non-Teensy 4.1 address below 0x6000_0000
+    let wrong_board = ":020000040000FA\n:100000004643464200000156000000000000000088\n:00000001FF\n";
+    assert!(matches!(
+        parse_teensy41_hex(wrong_board, None),
+        Err(FlashError::AddressOutOfBounds(0))
+    ));
+
+    // Reject truncated Intel HEX missing EOF record
+    let truncated = ":0200000460009A\n:100000004643464200000156000000000000000088\n";
+    assert!(matches!(
+        parse_teensy41_hex(truncated, None),
+        Err(FlashError::TruncatedHex)
+    ));
+
+    // Reject bad FlexSPI boot header (missing 'FCFB')
+    let bad_hdr = ":0200000460009A\n:100000000102030405060708090A0B0C0D0E0F1068\n:00000001FF\n";
+    assert!(matches!(
+        parse_teensy41_hex(bad_hdr, None),
+        Err(FlashError::InvalidBootHeader)
+    ));
+
+    // Verify enumeration polling succeeds once HalfKay appears
+    let mut polls = 0usize;
+    let found = wait_for_device(Duration::from_millis(200), Duration::from_millis(5), || {
+        polls += 1;
+        if polls < 3 {
+            Err(FlashError::DeviceNotFound)
+        } else {
+            Ok("halfkay-ready")
+        }
+    })
+    .unwrap();
+    assert_eq!(found, "halfkay-ready");
+    assert_eq!(polls, 3);
+
+    // Verify per-block retry recovers from transient erase busy errors on block 0 and reboot
     let mut mock = MockHalfKayDevice::default();
+    mock.fail_block_attempts.insert(0, 3);
+    mock.fail_block_attempts.insert(1, 2);
     let mut progress = Vec::new();
-    flash_firmware(&mut mock, &img, |done, total| progress.push((done, total))).unwrap();
+    let fast_opts = FlashOptions {
+        max_attempts: 4,
+        first_block_retry_delay: Duration::from_millis(1),
+        block_retry_delay: Duration::from_millis(1),
+        first_block_extra_attempts: 4,
+    };
+    flash_firmware_with_options(&mut mock, &img, fast_opts, |done, total| {
+        progress.push((done, total))
+    })
+    .unwrap();
     assert_eq!(progress, vec![(1, 1)]);
     // 1 data block + 1 reboot packet = 2 packets of 1088 bytes
     assert_eq!(mock.packets.len(), 2);
     assert_eq!(mock.packets[0].len(), TEENSY41_REPORT_SIZE);
     assert_eq!(&mock.packets[0][0..3], &[0, 0, 0]);
-    assert_eq!(&mock.packets[0][64..68], &[1, 2, 3, 4]);
+    // Header bytes [3..64] padded with 0x00 per Teensy 4 HalfKay spec
+    assert!(mock.packets[0][3..64].iter().all(|&b| b == 0x00));
+    assert_eq!(&mock.packets[0][64..68], b"FCFB");
+    // Unwritten flash bytes padded with 0xFF
+    assert!(mock.packets[0][80..1088].iter().all(|&b| b == 0xFF));
     assert_eq!(&mock.packets[1][0..3], &[0xFF, 0xFF, 0xFF]);
+
+    // Also exercise default flash_firmware convenience wrapper
+    let mut mock2 = MockHalfKayDevice::default();
+    flash_firmware(&mut mock2, &img, |_, _| {}).unwrap();
+    assert_eq!(mock2.packets.len(), 2);
 }
 
 #[test]
@@ -788,4 +852,134 @@ fn protocol_client_ignores_unsolicited_frame_with_colliding_seq_and_reads_multic
         .unwrap();
     assert_eq!(leftover.len(), 1);
     assert_eq!(leftover[0].msg_type().unwrap(), MsgType::FrameRaw);
+}
+
+#[test]
+fn streaming_mp4_gif_pagination_temporal_heq_and_utc_metadata() {
+    use thermocam_core::dat::{format_utc_iso8601, format_utc_now_iso8601};
+    use thermocam_core::export::{
+        derive_sequence_fps, encode_gif_streaming, encode_h264_mp4_streaming,
+        render_export_canvas_with_scratch,
+    };
+    use thermocam_core::imaging::{
+        apply_clipped_histogram_eq_into, RenderScratch, TemporalHeqState,
+    };
+
+    // 1. Multi-page SD FS_LIST pagination (>64 files -> multiple pages to 0xFFFFFFFF)
+    let mut sim = SimulatorTransport::new();
+    for i in 0..135usize {
+        sim.add_sd_file(format!("CAP_{i:04}.DAT"), vec![0u8; 64]);
+    }
+    let mut client = ProtocolClient::new(sim);
+    client.hello().unwrap();
+    let entries = client.list_dir_all("/").unwrap();
+    assert_eq!(entries.len(), 138); // 3 default + 135 added
+    client.send_ping_nowait(123_456).unwrap();
+    let pong_pkts = client
+        .poll_packets(std::time::Duration::from_millis(50))
+        .unwrap();
+    assert!(pong_pkts
+        .iter()
+        .any(|p| p.msg_type().ok() == Some(MsgType::PongResp)));
+
+    // 2. Real ISO-8601 UTC formatting and fractional FPS derivation
+    assert_eq!(format_utc_iso8601(0), "1970-01-01T00:00:00Z");
+    assert_eq!(format_utc_iso8601(1_764_066_000), "2025-11-25T10:20:00Z");
+    let now_iso = format_utc_now_iso8601();
+    assert!(now_iso.ends_with('Z') && now_iso.len() == 20);
+    assert_ne!(now_iso, "2026-11-25T00:00:00Z");
+
+    let frames: Vec<FrameRaw> = (0..5).map(|i| generate_demo_frame(i, 160, 120)).collect();
+    let ts: Vec<u64> = frames.iter().map(|f| f.meta.timestamp_us).collect();
+    let fps = derive_sequence_fps(&ts);
+    assert!((fps - 8.78).abs() < 0.05, "expected ~8.78 fps, got {fps}");
+
+    // 3. ThermalDat::from_pixels roundtrip (used by .DAT export and time-lapse)
+    let rad = RadiometryParams::default();
+    let dat_px = ThermalDat::from_pixels(frames[2].pixels.clone(), 160, 120, rad, 10, 0);
+    let dat_bytes = dat_px.to_bytes();
+    assert_eq!(dat_bytes.len(), LEPTON3_BIG_SIZE);
+    let reparsed = ThermalDat::from_bytes(&dat_bytes).unwrap();
+    assert_eq!(reparsed.pixels, frames[2].pixels);
+
+    // 4. Temporal HEQ EMA smoothing damps sudden contrast jumps across frames
+    let mut heq = TemporalHeqState::new(0.25);
+    let frame_a: Vec<f32> = (0..256).map(|i| (i as f32 / 255.0) * 0.3).collect();
+    let frame_b: Vec<f32> = (0..256).map(|i| 0.7 + (i as f32 / 255.0) * 0.3).collect();
+    let mut out_a = Vec::new();
+    let mut out_b_smooth = Vec::new();
+    let mut out_b_unsmoothed = Vec::new();
+    apply_clipped_histogram_eq_into(&frame_a, &mut out_a, Some(&mut heq));
+    apply_clipped_histogram_eq_into(&frame_b, &mut out_b_smooth, Some(&mut heq));
+    apply_clipped_histogram_eq_into(&frame_b, &mut out_b_unsmoothed, None);
+    let diff_smooth = (out_b_smooth[128] - out_a[128]).abs();
+    let diff_raw = (out_b_unsmoothed[128] - out_a[128]).abs();
+    assert!(diff_smooth < diff_raw || (out_b_smooth[128] - out_b_unsmoothed[128]).abs() > 0.02);
+
+    // 5. Constant-RAM streaming H.264 MP4 & GIF with RenderScratch reuse
+    let pal = find_palette("inferno").unwrap();
+    let pipeline = DisplayPipeline {
+        histogram_eq: true,
+        sharpen_amount: 0.8,
+        ..DisplayPipeline::default()
+    };
+    let opts = ExportOptions {
+        resolution: ExportResolution::Custom {
+            width: 320,
+            height: 240,
+        },
+        show_colorbar: true,
+        show_hud: true,
+        unit: TempUnit::Celsius,
+        jpeg_quality: 92,
+    };
+    let mut scratch = RenderScratch::new();
+    let mut mp4_buf = Cursor::new(Vec::new());
+    encode_h264_mp4_streaming(&mut mp4_buf, 320, 240, frames.len(), fps, |idx, emit| {
+        let fr = &frames[idx];
+        render_export_canvas_with_scratch(
+            &fr.pixels,
+            fr.meta.width,
+            fr.meta.height,
+            fr.meta.min_raw,
+            fr.meta.max_raw,
+            &pal,
+            rad,
+            &pipeline,
+            &[],
+            &opts,
+            true,
+            &mut scratch,
+        );
+        emit(&scratch.canvas)
+    })
+    .unwrap();
+    let mp4_bytes = mp4_buf.into_inner();
+    let reader = mp4::Mp4Reader::read_header(Cursor::new(&mp4_bytes), mp4_bytes.len() as u64)
+        .unwrap();
+    let track = reader.tracks().get(&1).expect("video track 1");
+    assert_eq!(track.sample_count(), frames.len() as u32);
+    assert_eq!(track.timescale(), 100_000);
+
+    let mut gif_buf = Vec::new();
+    encode_gif_streaming(&mut gif_buf, 320, 240, 2, fps, |idx, emit| {
+        let fr = &frames[idx];
+        render_export_canvas_with_scratch(
+            &fr.pixels,
+            fr.meta.width,
+            fr.meta.height,
+            fr.meta.min_raw,
+            fr.meta.max_raw,
+            &pal,
+            rad,
+            &pipeline,
+            &[],
+            &opts,
+            true,
+            &mut scratch,
+        );
+        emit(&scratch.canvas)
+    })
+    .unwrap();
+    assert!(gif_buf.starts_with(b"GIF89a"));
 }

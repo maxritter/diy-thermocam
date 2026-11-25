@@ -4,6 +4,7 @@ import {
   FileSpreadsheet,
   FileText,
   Film,
+  FolderOpen,
   Image as ImageIcon,
   Layers,
   Square,
@@ -20,6 +21,8 @@ interface CaptureExportPanelProps {
   timelapseActive: boolean;
   timelapseIntervalSec: number;
   timelapseCount: number;
+  timelapseDir: string | null;
+  onPickTimelapseDir: () => Promise<void>;
   onTimelapseIntervalChange: (sec: number) => void;
   onToggleTimelapse: () => void;
   hwButtonTrigger: boolean;
@@ -46,6 +49,8 @@ export function CaptureExportPanel({
   timelapseActive,
   timelapseIntervalSec,
   timelapseCount,
+  timelapseDir,
+  onPickTimelapseDir,
   onTimelapseIntervalChange,
   onToggleTimelapse,
   hwButtonTrigger,
@@ -213,9 +218,20 @@ export function CaptureExportPanel({
             <p className="mt-0.5 text-[11.5px] text-[var(--tc-text-muted)]">
               Capture lossless `.DAT` snapshots on schedule — feeds directly into the Time Plotter
               and Full HD H.264 MP4 exporter.
+              {timelapseDir ? ` Saving to ${timelapseDir}` : ""}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              disabled={timelapseActive}
+              onClick={() => void onPickTimelapseDir()}
+              title={timelapseDir ?? "Choose folder for time-lapse .DAT files"}
+              className="tc-btn px-2.5 text-[11.5px]"
+            >
+              <FolderOpen className="h-3.5 w-3.5" />
+              {timelapseDir ? "Folder Set" : "Folder"}
+            </button>
             <select
               value={timelapseIntervalSec}
               disabled={timelapseActive}
