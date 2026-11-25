@@ -29,13 +29,13 @@ CRITICAL_NET_ORDER = [
     "BOOST_SW", "BOOST_FB", "BOOST_EN",
     # 2. USB-C differential & ESD
     "USB_DP_RAW", "USB_DM_RAW", "USB_CC1", "USB_CC2",
-    # 3. BQ24075 fine-pitch control pins (route before wide power trunks!)
-    "BQ_EN2", "BQ_TS", "BQ_ISET", "BQ_ILIM", "BQ_TMR", "BQ_CHG_N",
+    # 3. BQ24074 & Q1/Q2 gate control pins (route before wide power trunks!)
+    "BQ_EN2", "BQ_TS", "BQ_ISET", "BQ_ITERM", "BQ_ILIM", "BQ_TMR", "BQ_CHG_N",
+    "Q1_GATE", "Q2_GATE",
     # 4. High-current power trunks (0.80mm wide!)
     "VSYS", "VBUS", "VLIPO", "LIPO_RAW", "LIPO_PROT", "5V",
-    "Q1_GATE", "Q2_GATE",
     # 5. Display J1 outer-edge pins first so none get boxed in
-    "D5", "D9", "D12", "D13", "D11", "D10", "D21", "D22", "CTP_INT", "D4",
+    "LCD_P30", "LCD_P31", "D5", "D9", "D12", "D13", "D11", "D10", "D21", "D22", "CTP_INT", "D4",
     # 6. Lepton SPI1 + VSYNC + I2C
     "D27", "D26", "D38", "D39", "D3", "D18", "D19",
     # 7. Medium power & RTC
@@ -193,7 +193,12 @@ def route_all_nets_exact(
             elif p["ref"] == "D1" and p["num"] == "5":
                 fx, fy = p["x"] + 1.15, p["y"]
             elif p["ref"].startswith("JP"):
-                fx, fy = p["x"] + (1.0 if dx >= 0 else -1.0), p["y"]
+                if abs(dx) < 0.1:
+                    fx, fy = p["x"], p["y"] - 1.35
+                else:
+                    fx, fy = p["x"] + (1.0 if dx > 0 else -1.0), p["y"]
+            elif p["ref"] == "U2" and p["num"] == "2":
+                fx, fy = p["x"] - 1.35, p["y"]
             elif p["ref"] == "U2" and p["num"] == "3":
                 fx, fy = p["x"], p["y"] - 1.2
             elif abs(dx) >= abs(dy):
@@ -418,11 +423,17 @@ def route_all_nets_exact(
         # From t_dm6 (57.2, -6.6) -> (57.2, -7.77) -> (68.17, -7.77) -> (68.17, -2.15) (pure B.Cu!).
         # From t_dp4 (57.2, -9.6) -> via to F.Cu at (58.0, -9.6) -> F.Cu (58.0, -5.23) -> (64.4, -5.23) -> via to B.Cu at (64.4, -5.23) -> (65.63, -5.23) -> (65.63, -2.15)!
         # Zero crossings AND both stay in the exact same corridor!
-        dm_pts = [t_dm6, (57.8, t_dm6[1]), (57.8, -7.77), (p_dm["x"], -7.77), (p_dm["x"], p_dm["y"])]
-        l_dm_leg = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(dm_pts, dm_pts[1:]))
-        # Compute DP base length via F.Cu bridge
-        dp_pre = [t_dp4, (58.0, t_dp4[1])]
-        dp_mid_base = [(58.0, t_dp4[1]), (58.0, -5.23), (64.4, -5.23)]
+        # Symmetric differential pair across adjacent J5 gaps (Y=-5.23 & Y=-7.77, 2 vias each, 0 crossings!)
+        dm_pre = [t_dm6, (57.8, t_dm6[1]), (57.8, -7.77), (63.6, -7.77)]
+        dm_mid_base = [(63.6, -7.77), (66.8, -7.77)]
+        dm_post = [(66.8, -7.77), (p_dm["x"], -7.77), (p_dm["x"], p_dm["y"])]
+        l_dm_leg = (
+            sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(dm_pre, dm_pre[1:]))
+            + sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(dm_mid_base, dm_mid_base[1:]))
+            + sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(dm_post, dm_post[1:]))
+        )
+        dp_pre = [t_dp4, (57.6, t_dp4[1])]
+        dp_mid_base = [(57.6, t_dp4[1]), (57.6, -5.23), (64.4, -5.23)]
         dp_post = [(64.4, -5.23), (p_dp["x"], -5.23), (p_dp["x"], p_dp["y"])]
         l_dp_leg = (
             sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(dp_pre, dp_pre[1:]))
@@ -430,28 +441,29 @@ def route_all_nets_exact(
             + sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(dp_post, dp_post[1:]))
         )
         delta = (usb_lens["USB_DM_RAW"] + l_dm_leg) - (usb_lens["USB_DP_RAW"] + l_dp_leg)
+        dm_mid, dp_mid = dm_mid_base, dp_mid_base
         if delta > 0.25:
             h = round(min(delta / 4.0, 2.0), 2)
             dp_mid = [
-                (58.0, t_dp4[1]), (58.0, -5.23),
+                (57.6, t_dp4[1]), (57.6, -5.23),
                 (61.0, -5.23), (61.0, -5.23 + h), (61.8, -5.23 + h), (61.8, -5.23),
                 (62.6, -5.23), (62.6, -5.23 + h), (63.4, -5.23 + h), (63.4, -5.23),
                 (64.4, -5.23),
             ]
         elif delta < -0.25:
             h = round(min((-delta) / 4.0, 2.0), 2)
-            dm_pts = [
-                t_dm6, (57.2, -7.77),
-                (61.0, -7.77), (61.0, -7.77 - h), (61.8, -7.77 - h), (61.8, -7.77),
-                (62.6, -7.77), (62.6, -7.77 - h), (63.4, -7.77 - h), (63.4, -7.77),
-                (p_dm["x"], -7.77), (p_dm["x"], p_dm["y"]),
+            dm_mid = [
+                (63.6, -7.77), (64.2, -7.77), (64.2, -7.77 - h), (65.0, -7.77 - h), (65.0, -7.77),
+                (65.6, -7.77), (65.6, -7.77 - h), (66.4, -7.77 - h), (66.4, -7.77),
+                (66.8, -7.77),
             ]
-            dp_mid = dp_mid_base
-        else:
-            dp_mid = dp_mid_base
-        l_dm_tot = usb_lens["USB_DM_RAW"] + add_poly(dm_pts, 0.20, 1, "USB_DM_RAW")
+        l_dm_tot = usb_lens["USB_DM_RAW"] + add_poly(dm_pre, 0.20, 1, "USB_DM_RAW")
+        vias.append((63.6, -7.77, "USB_DM_RAW")); mark_via(63.6, -7.77, "USB_DM_RAW")
+        l_dm_tot += add_poly(dm_mid, 0.20, 0, "USB_DM_RAW")
+        vias.append((66.8, -7.77, "USB_DM_RAW")); mark_via(66.8, -7.77, "USB_DM_RAW")
+        l_dm_tot += add_poly(dm_post, 0.20, 1, "USB_DM_RAW")
         l_dp_tot = usb_lens["USB_DP_RAW"] + add_poly(dp_pre, 0.20, 1, "USB_DP_RAW")
-        vias.append((58.0, t_dp4[1], "USB_DP_RAW")); mark_via(58.0, t_dp4[1], "USB_DP_RAW")
+        vias.append((57.6, t_dp4[1], "USB_DP_RAW")); mark_via(57.6, t_dp4[1], "USB_DP_RAW")
         l_dp_tot += add_poly(dp_mid, 0.20, 0, "USB_DP_RAW")
         vias.append((64.4, -5.23, "USB_DP_RAW")); mark_via(64.4, -5.23, "USB_DP_RAW")
         l_dp_tot += add_poly(dp_post, 0.20, 1, "USB_DP_RAW")

@@ -3,6 +3,6 @@
 	(generator "pcbnew")
 	(layer "F.Cu")
 	(attr smd)
-	(fp_circle (center 0 0) (end 1.15 0) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS"))
-	(pad "1" smd circle (at 0 0) (size 2.1 2.1) (layers "F.Cu" "F.Paste" "F.Mask"))
+	(fp_circle (center 0 0) (end 1.2 0) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS"))
+	(pad "1" smd circle (at 0 0) (size 2.25 2.25) (layers "F.Cu" "F.Paste" "F.Mask"))
 )

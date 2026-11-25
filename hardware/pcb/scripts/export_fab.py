@@ -65,7 +65,7 @@ V40_BOM_OVERRIDES: dict[str, dict[str, str]] = {
     "D1":   {"mpn": "USBLC6-2SC6",          "manufacturer": "STMicroelectronics",  "lcsc_part": "C7519",     "seeed_opl_part": "", "pcba_tier": "extended"},
     "D2":   {"mpn": "KT-0603R",             "manufacturer": "Hubei KENTO Elec",    "lcsc_part": "C2286",     "seeed_opl_part": "", "pcba_tier": "basic"},
     "U2":   {"mpn": "TPS61022RWUR",         "manufacturer": "Texas Instruments",   "lcsc_part": "C915088",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "U3":   {"mpn": "BQ24075RGTR",          "manufacturer": "Texas Instruments",   "lcsc_part": "C15464",    "seeed_opl_part": "", "pcba_tier": "extended"},
+    "U3":   {"mpn": "BQ24074RGTR",          "manufacturer": "Texas Instruments",   "lcsc_part": "C54313",    "seeed_opl_part": "", "pcba_tier": "extended"},
     "U4":   {"mpn": "XC6206P332MR-G",       "manufacturer": "Torex Semicon",       "lcsc_part": "C5446",     "seeed_opl_part": "", "pcba_tier": "basic"},
     "L1":   {"mpn": "FXL0630-1R0-M",        "manufacturer": "cjiang",              "lcsc_part": "C167216",   "seeed_opl_part": "", "pcba_tier": "extended"},
     "Q1":   {"mpn": "AO3401A",              "manufacturer": "Alpha & Omega",       "lcsc_part": "C15127",    "seeed_opl_part": "", "pcba_tier": "basic"},
@@ -94,6 +94,7 @@ V40_BOM_OVERRIDES: dict[str, dict[str, str]] = {
     "R9":   {"mpn": "0603WAF1002T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25804",    "seeed_opl_part": "", "pcba_tier": "basic"},
     "R19":  {"mpn": "0603WAF1002T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25804",    "seeed_opl_part": "", "pcba_tier": "basic"},
     "R22":  {"mpn": "0603WAF1002T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25804",    "seeed_opl_part": "", "pcba_tier": "basic"},
+    "R23":  {"mpn": "0603WAF3001T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C4211",     "seeed_opl_part": "", "pcba_tier": "basic"},
     "R7":   {"mpn": "0603WAF5101T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23186",    "seeed_opl_part": "", "pcba_tier": "basic"},
     "R8":   {"mpn": "0603WAF5101T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23186",    "seeed_opl_part": "", "pcba_tier": "basic"},
     "R10":  {"mpn": "0603WAF1001T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C21190",    "seeed_opl_part": "", "pcba_tier": "basic"},
@@ -201,29 +202,87 @@ def write_boms(fps: list[dict], master_bom: dict[str, dict], fab_dir: Path, stem
             w.writerow([idx, des, len(items), mfr, mpn, val, fp_name, mount])
 
 
-def write_cpls(raw_pos_csv: Path, fab_dir: Path, stem: str) -> None:
+# Vendor-basis JLCPCB/EasyEDA CPL calibration for V4.0 (dx_mm, dy_mm in PosXY [Y-up], drot_deg)
+# Verified against EasyEDA component footprints (C7519, C15127, C20917, C5446, C221660, C165948, C915088).
+V40_CPL_CALIBRATION: dict[str, tuple[float, float, float]] = {
+    "Q1":  ( 0.000,  0.000, 180.0),  # C15127 SOT-23 EasyEDA basis rotated 180 deg vs KiCad
+    "Q2":  ( 0.000,  0.000, 180.0),  # C20917 SOT-23 EasyEDA basis rotated 180 deg vs KiCad
+    "U4":  ( 0.000,  0.000, 180.0),  # C5446  SOT-23 EasyEDA basis rotated 180 deg vs KiCad
+    "D1":  ( 0.000,  0.000,  90.0),  # C7519  SOT-23-6 EasyEDA basis rotated +90 deg vs KiCad
+    "SW1": (-2.750,  0.000,   0.0),  # C221660 EasyEDA origin at middle terminal (Pin 2)
+    "J3":  ( 0.000,  1.570,   0.0),  # C165948 EasyEDA origin 1.57 mm along terminal axis from KiCad origin
+    "U2":  ( 0.175,  0.000,   0.0),  # C915088 EasyEDA symmetric pad origin (+0.175 mm X vs KiCad)
+    "J5":  ( 0.000,  0.000,  90.0),  # C41376163 horizontal EasyEDA basis vs vertical KiCad placement
+    "J6":  ( 0.000,  0.000,  90.0),  # C41376163 horizontal EasyEDA basis vs vertical KiCad placement
+    "J7":  ( 0.000,  0.000,  90.0),  # C50950 horizontal EasyEDA basis vs KiCad -90 deg placement
+}
+
+
+def compute_pad_midpoints(pcb_path: Path) -> dict[str, tuple[float, float]]:
+    """Compute true geometric pad-bounding-box midpoints in PosXY (X, -Y) for multi-pin headers."""
+    text = pcb_path.read_text(encoding="utf-8")
+    mids: dict[str, tuple[float, float]] = {}
+    for block in text.split("\n\t(footprint ")[1:]:
+        rm = re.search(r'\(property "Reference" "([^"]*)"', block)
+        am = re.search(r'\n\t\t\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+([-\d.]+))?\)', block)
+        if not rm or not am:
+            continue
+        ref = rm.group(1)
+        if ref not in ("J1", "J2", "J5", "J6", "J7"):
+            continue
+        fx, fy = float(am.group(1)), float(am.group(2))
+        rot = float(am.group(3) or 0.0)
+        import math
+        rad = math.radians(rot)
+        xs, ys = [], []
+        for pm in re.finditer(r'\(pad "[^"]+" \w+ \w+\s+\(at\s+([-\d.]+)\s+([-\d.]+)', block):
+            px, py = float(pm.group(1)), float(pm.group(2))
+            wx = fx + px * math.cos(rad) + py * math.sin(rad)
+            wy = fy - px * math.sin(rad) + py * math.cos(rad)
+            xs.append(wx)
+            ys.append(-wy)  # PosXY has Y-up = -KiCad_Y
+        if xs:
+            mids[ref] = (round((min(xs) + max(xs)) / 2.0, 4), round((min(ys) + max(ys)) / 2.0, 4))
+    return mids
+
+
+def write_cpls(raw_pos_csv: Path, fab_dir: Path, stem: str, rev: str = "", pad_mids: dict[str, tuple[float, float]] | None = None) -> None:
     rows = []
     with raw_pos_csv.open(newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             rows.append(row)
+
+    cal_rows = []
+    for r in rows:
+        ref = r["Ref"]
+        px, py, rot = float(r["PosX"]), float(r["PosY"]), float(r["Rot"])
+        if rev.lower() == "v4.0":
+            if pad_mids and ref in pad_mids:
+                px, py = pad_mids[ref]
+            if ref in V40_CPL_CALIBRATION:
+                dx, dy, drot = V40_CPL_CALIBRATION[ref]
+                px += dx
+                py += dy
+                rot = (rot + drot) % 360.0
+        cal_rows.append((ref, px, py, r["Side"].strip().lower(), rot))
 
     # JLCPCB CPL: Designator,Mid X,Mid Y,Layer,Rotation
     jlc_cpl = fab_dir / f"{stem}-cpl-jlcpcb.csv"
     with jlc_cpl.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
-        for r in rows:
-            side = "Top" if r["Side"].strip().lower() == "top" else "Bottom"
-            w.writerow([r["Ref"], f"{float(r['PosX']):.4f}mm", f"{float(r['PosY']):.4f}mm", side, f"{float(r['Rot']):.2f}"])
+        for ref, px, py, side_l, rot in cal_rows:
+            side = "Top" if side_l == "top" else "Bottom"
+            w.writerow([ref, f"{px:.4f}mm", f"{py:.4f}mm", side, f"{rot:.2f}"])
 
     # Seeed Fusion CPL: Designator,PosX,PosY,Layer,Rot
     seeed_cpl = fab_dir / f"{stem}-cpl-seeed.csv"
     with seeed_cpl.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["Designator", "PosX", "PosY", "Layer", "Rot"])
-        for r in rows:
-            side = "T" if r["Side"].strip().lower() == "top" else "B"
-            w.writerow([r["Ref"], f"{float(r['PosX']):.4f}", f"{float(r['PosY']):.4f}", side, f"{float(r['Rot']):.2f}"])
+        for ref, px, py, side_l, rot in cal_rows:
+            side = "T" if side_l == "top" else "B"
+            w.writerow([ref, f"{px:.4f}", f"{py:.4f}", side, f"{rot:.2f}"])
 
 
 def export_revision(pcb_root: Path, rev: str, skip_render: bool = False) -> None:
@@ -275,7 +334,8 @@ def export_revision(pcb_root: Path, rev: str, skip_render: bool = False) -> None
         "-o", str(raw_pos),
         str(pcb_path),
     ])
-    write_cpls(raw_pos, fab_dir, stem)
+    pad_mids = compute_pad_midpoints(pcb_path) if rev.lower() == "v4.0" else None
+    write_cpls(raw_pos, fab_dir, stem, rev=rev, pad_mids=pad_mids)
     raw_pos.unlink(missing_ok=True)
     print(f"  [OK] CPL CSVs (JLCPCB & Seeed Fusion)")
 

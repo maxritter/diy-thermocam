@@ -68,6 +68,7 @@ STD_FOOTPRINTS = {
     "FUSE_1206": "Fuse.pretty/Fuse_1206_3216Metric.kicad_mod",
     "I2C_PADS_1x04": "Connector_PinHeader_2.54mm.pretty/PinHeader_1x04_P2.54mm_Vertical.kicad_mod",
     "SJ_2P_OPEN": "Jumper.pretty/SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm.kicad_mod",
+    "SJ_3P_BRIDGED12": "Jumper.pretty/SolderJumper-3_P1.3mm_Bridged12_Pad1.0x1.5mm.kicad_mod",
 }
 
 
@@ -122,7 +123,7 @@ def build_local_footprints() -> None:
 \t(fp_rect (start -2.54 -25.4) (end 2.54 25.4) (stroke (width 0.1) (type solid)) (fill none) (layer "F.Fab"))
 {chr(10).join(pads_2x20)}
 \t(model "${{KICAD10_3DMODEL_DIR}}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x20_P2.54mm_Vertical.step"
-		(offset (xyz -1.27 24.13 0))
+		(offset (xyz 1.27 24.13 0))
 		(scale (xyz 1 1 1))
 		(rotate (xyz 0 0 0))
 \t)
@@ -170,8 +171,8 @@ def build_local_footprints() -> None:
 \t(generator "pcbnew")
 \t(layer "F.Cu")
 \t(attr smd)
-\t(fp_circle (center 0 0) (end 1.15 0) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS"))
-\t(pad "1" smd circle (at 0 0) (size 2.1 2.1) (layers "F.Cu" "F.Paste" "F.Mask"))
+\t(fp_circle (center 0 0) (end 1.2 0) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS"))
+\t(pad "1" smd circle (at 0 0) (size 2.25 2.25) (layers "F.Cu" "F.Paste" "F.Mask"))
 )
 """
     (FP_DIR / "PogoPin_SMD_2.0mm.kicad_mod").write_text(mod_pogo, encoding="utf-8")
@@ -248,7 +249,8 @@ J7_NETS = {
 }
 
 # Display 2x20 socket (J1, exact 14/14 V3.0 LCD-HEADER0 pins 1..34; pins 36/37/40 cleared for FT6206 CTP safety)
-# Optional open solder-jumpers JP1..JP3 enable FT6206 CTP: 30=SCL(D19), 31=SDA(D18), 39=INT(D4).
+# Pins 30 & 31 route via 3-pad cut-and-bridge jumpers JP1/JP2 (default 1-2 bridged: D9->J1.30, D5->J1.31 = 100% V3.0 RTP;
+# cut 1-2 & bridge 2-3 to switch to FT6206 CTP: D19->J1.30 SCL0, D18->J1.31 SDA0, JP3: D4->J1.39 INT with zero bus contention).
 J1_NETS = {
     "1": "GND",
     "2": "5V",
@@ -259,8 +261,8 @@ J1_NETS = {
     "27": "D11",
     "28": "D12",
     "29": "D22",
-    "30": "D9",
-    "31": "D5",
+    "30": "LCD_P30",
+    "31": "LCD_P31",
     "32": "D12",
     "33": "D13",
     "34": "D11",
@@ -301,9 +303,9 @@ D1_NETS = {
     "6": "USB_DM_RAW",
 }
 
-# TI BQ24075RGTR Dynamic Power-Path Li-Ion Charger (U3: VQFN-16-EP)
+# TI BQ24074RGTR Dynamic Power-Path Li-Ion Charger (U3: VQFN-16-EP, VOUT(REG)=4.4V < TPS61022 4.8V cold-start max!)
 # Pin 1:TS, 2:BAT, 3:BAT, 4:~CE, 5:EN2, 6:EN1, 7:~PGOOD, 8:VSS,
-# 9:~CHG, 10:OUT, 11:OUT, 12:ILIM, 13:IN, 14:TMR, 15:SYSOFF, 16:ISET, 17:EP(GND)
+# 9:~CHG, 10:OUT, 11:OUT, 12:ILIM, 13:IN, 14:TMR, 15:ITERM (R23=3.0k -> 90mA = 10.1% of 890mA), 16:ISET, 17:EP(GND)
 U3_NETS = {
     "1": "BQ_TS",
     "2": "VLIPO",
@@ -318,7 +320,7 @@ U3_NETS = {
     "12": "BQ_ILIM",
     "13": "VBUS",
     "14": "BQ_TMR",
-    "15": "GND",
+    "15": "BQ_ITERM",
     "16": "BQ_ISET",
     "17": "GND",
 }
@@ -352,12 +354,13 @@ COMPONENTS = [
     ("R7",   "5.1k",                "R_0603",                 52.50, -12.40,   0, "B.Cu", {"1": "USB_CC1", "2": "GND"}, "usbc"),
     ("R8",   "5.1k",                "R_0603",                 40.50, -10.80,   0, "B.Cu", {"1": "USB_CC2", "2": "GND"}, "usbc"),
 
-    # --- TI BQ24075 Power-Path Charger (tight C1/C2/C3, EN2->VSYS via 10k R22, ILIM=1.2k) ---
-    ("U3",   "BQ24075RGTR",         "BQ24075_VQFN16",         45.80, -15.60,   0, "B.Cu", U3_NETS, "charger"),
+    # --- TI BQ24074 Power-Path Charger (VOUT=4.4V < TPS61022 4.8V cold-start, ITERM=3.0k -> 90mA, ILIM=1.2k) ---
+    ("U3",   "BQ24074RGTR",         "BQ24075_VQFN16",         45.80, -15.60,   0, "B.Cu", U3_NETS, "charger"),
     ("C1",   "10uF",                "C_0805",                 48.60, -11.40,  90, "B.Cu", {"1": "VBUS", "2": "GND"}, "charger"),
     ("C2",   "10uF",                "C_0805",                 51.20, -15.60,  90, "B.Cu", {"1": "VSYS", "2": "GND"}, "charger"),
     ("C3",   "10uF",                "C_0805",                 40.40, -15.60,  90, "B.Cu", {"1": "VLIPO", "2": "GND"}, "charger"),
     ("R22",  "10k",                 "R_0603",                 50.80, -19.40,   0, "B.Cu", {"1": "VSYS", "2": "BQ_EN2"}, "charger"),
+    ("R23",  "3.0k",                "R_0603",                 44.80, -10.50,   0, "B.Cu", {"1": "BQ_ITERM", "2": "GND"}, "charger"),
     ("R9",   "10k",                 "R_0603",                 40.50, -19.40,   0, "B.Cu", {"1": "BQ_TS", "2": "GND"}, "charger"),
     ("R10",  "1.0k",                "R_0603",                 36.80, -11.50,   0, "B.Cu", {"1": "BQ_ISET", "2": "GND"}, "charger"),
     ("R11",  "1.2k",                "R_0603",                 54.20, -15.60,  90, "B.Cu", {"1": "BQ_ILIM", "2": "GND"}, "charger"),
@@ -373,24 +376,24 @@ COMPONENTS = [
     ("R17",  "100k",                "R_0603",                 25.00, -55.40,  90, "B.Cu", {"1": "BOOST_FB", "2": "GND"}, "boost"),
     ("R15",  "100k",                "R_0603",                 23.00, -51.40,   0, "B.Cu", {"1": "BOOST_EN", "2": "GND"}, "boost"),
 
-    # --- Optional FT6206 Capacitive Touch Solder Jumpers (Open by default = 100% V3.0 RTP parity) ---
-    ("JP1",  "CTP_SCL_OPT",         "SJ_2P_OPEN",              8.50, -36.00,   0, "B.Cu", {"1": "D9", "2": "D19"}, "display"),
-    ("JP2",  "CTP_SDA_OPT",         "SJ_2P_OPEN",              8.50, -40.00,   0, "B.Cu", {"1": "D5", "2": "D18"}, "display"),
+    # --- Optional FT6206 Capacitive Touch Cut-and-Bridge Jumpers (1-2 bridged by default = 100% V3.0 RTP, zero I2C contention) ---
+    ("JP1",  "CTP_SCL_SEL",         "SJ_3P_BRIDGED12",         8.80, -36.00,   0, "B.Cu", {"1": "D9", "2": "LCD_P30", "3": "D19"}, "display"),
+    ("JP2",  "CTP_SDA_SEL",         "SJ_3P_BRIDGED12",         8.80, -40.50,   0, "B.Cu", {"1": "D5", "2": "LCD_P31", "3": "D18"}, "display"),
     ("JP3",  "CTP_INT_OPT",         "SJ_2P_OPEN",              8.50, -60.50,   0, "B.Cu", {"1": "CTP_INT", "2": "D4"}, "display"),
 
-    # --- Local Rail Decoupling (SPI0/SPI1 & Lepton stability — Basic 10uF & 100nF) ---
+    # --- Local Rail Decoupling (SPI0/SPI1 & Lepton stability — Basic 10uF & 100nF; C7 inside Teensy bay clear of Lepton/cradle) ---
     ("C5",   "10uF",                "C_0805",                 27.50, -23.00,  90, "B.Cu", {"1": "5V", "2": "GND"}, "boost"),
     ("C6",   "100nF",               "C_0603",                  8.50, -12.00,  90, "B.Cu", {"1": "5V", "2": "GND"}, "boost"),
-    ("C7",   "100nF",               "C_0603",                 54.00, -37.00,  90, "B.Cu", {"1": "3V3", "2": "GND"}, "boost"),
+    ("C7",   "100nF",               "C_0603",                 62.50, -37.00,  90, "B.Cu", {"1": "3V3", "2": "GND"}, "boost"),
 
-    # --- Active LiPo Reverse-Polarity Safety Chain (JST-PH -> AO3401A + AO3400A gate guard -> 2A PTC) + 1uA RTC LDO ---
-    ("J4",   "S2B-PH-SM4-TB",       "JST_PH_2P_RA",           84.50, -52.10, 180, "B.Cu", {"1": "LIPO_RAW", "2": "GND", "MP": "GND"}, "io"),
-    ("Q1",   "AO3401A_RevPol",      "SOT23",                  83.00, -41.20,   0, "B.Cu", {"1": "Q1_GATE", "2": "LIPO_PROT", "3": "LIPO_RAW"}, "io"),
-    ("R18",  "750k",                "R_0603",                 83.00, -37.20,   0, "B.Cu", {"1": "Q1_GATE", "2": "LIPO_PROT"}, "io"),
-    ("Q2",   "AO3400A_RevPol_Ctl",  "SOT23",                  83.00, -46.20,   0, "B.Cu", {"1": "Q2_GATE", "2": "GND", "3": "Q1_GATE"}, "io"),
-    ("R20",  "47k",                 "R_0603",                 79.20, -46.20,  90, "B.Cu", {"1": "LIPO_RAW", "2": "Q2_GATE"}, "io"),
-    ("R21",  "750k",                "R_0603",                 79.20, -42.00,  90, "B.Cu", {"1": "Q2_GATE", "2": "GND"}, "io"),
-    ("F1",   "PTC_2A_1206",         "FUSE_1206",              83.00, -33.50,  90, "B.Cu", {"1": "LIPO_PROT", "2": "VLIPO"}, "io"),
+    # --- Active LiPo Reverse-Polarity Safety Chain (Adafruit/SparkFun JST-PH polarity: 1=GND, 2=VBAT+) + 1uA RTC LDO ---
+    ("J4",   "S2B-PH-SM4-TB",       "JST_PH_2P_RA",           84.50, -52.10, 180, "B.Cu", {"1": "GND", "2": "LIPO_RAW", "MP": "GND"}, "io"),
+    ("Q1",   "AO3401A_RevPol",      "SOT23",                  83.00, -39.50,   0, "B.Cu", {"1": "Q1_GATE", "2": "LIPO_PROT", "3": "LIPO_RAW"}, "io"),
+    ("R18",  "750k",                "R_0603",                 83.00, -35.80,   0, "B.Cu", {"1": "Q1_GATE", "2": "LIPO_PROT"}, "io"),
+    ("Q2",   "AO3400A_RevPol_Ctl",  "SOT23",                  83.00, -44.20,   0, "B.Cu", {"1": "Q2_GATE", "2": "GND", "3": "Q1_GATE"}, "io"),
+    ("R20",  "47k",                 "R_0603",                 79.20, -44.20,  90, "B.Cu", {"1": "LIPO_RAW", "2": "Q2_GATE"}, "io"),
+    ("R21",  "750k",                "R_0603",                 79.20, -39.50,  90, "B.Cu", {"1": "Q2_GATE", "2": "GND"}, "io"),
+    ("F1",   "PTC_2A_1206",         "FUSE_1206",              83.00, -31.80,  90, "B.Cu", {"1": "LIPO_PROT", "2": "VLIPO"}, "io"),
     ("U4",   "XC6206P332MR_RTC",    "SOT23",                  26.50,  -8.00,   0, "B.Cu", {"1": "GND", "2": "VBAT", "3": "VLIPO"}, "io"),
     ("C10",  "10uF",                "C_0805",                 26.50, -12.00,   0, "B.Cu", {"1": "VBAT", "2": "GND"}, "io"),
     ("C11",  "100nF",               "C_0603",                 26.50,  -4.20,   0, "B.Cu", {"1": "VLIPO", "2": "GND"}, "io"),
@@ -997,6 +1000,8 @@ def assert_v3_header_parity(all_pads: list[dict]) -> None:
         raise FileNotFoundError(f"Cannot verify V3.0 header parity: missing {v3_path}")
     b = pcbnew.LoadBoard(str(v3_path))
     net_alias = {"AGND": "GND", "N$42": "TEENSY_PROG"}
+    # J1.30 (LCD_P30) & J1.31 (LCD_P31) are copper-bridged to D9 & D5 by default via 3-pad net-tie jumpers JP1/JP2
+    lcd_net_tie = {("LCD-HEADER0", "30"): "LCD_P30", ("LCD-HEADER0", "31"): "LCD_P31"}
     v4_by_xy: dict[tuple[float, float], list[tuple[str, str, str]]] = defaultdict(list)
     for p in all_pads:
         if p["ref"] in ("J1", "J2", "J5", "J6", "J7"):
@@ -1015,13 +1020,19 @@ def assert_v3_header_parity(all_pads: list[dict]) -> None:
             # J1.40 is intentionally cleared on V4.0 (BuyDisplay CTP_RST safety — grounding holds FT6206 in reset)
             if ref == "LCD-HEADER0" and pad.GetNumber() == "40":
                 continue
-            exp_net = net_alias.get(net, net)
+            exp_net = lcd_net_tie.get((ref, pad.GetNumber()), net_alias.get(net, net))
             pp = pad.GetPosition()
             xy = (round(pcbnew.ToMM(pp.x), 2), round(pcbnew.ToMM(pp.y), 2))
             hits = v4_by_xy.get(xy, [])
             checked += 1
             if not any(h[2] == exp_net for h in hits):
                 mismatches.append(f"V3 {ref}.{pad.GetNumber()} @ {xy} expected {exp_net}, V4 got {hits}")
+    # Also assert J1.36/37/40 are disconnected and JP1/JP2 default 1-2 bridges tie D9<->LCD_P30 & D5<->LCD_P31
+    jp_nets = {(p["ref"], p["num"]): p["net"] for p in all_pads if p["ref"] in ("JP1", "JP2")}
+    if (jp_nets.get(("JP1", "1")), jp_nets.get(("JP1", "2")), jp_nets.get(("JP1", "3"))) != ("D9", "LCD_P30", "D19"):
+        mismatches.append(f"JP1 net-tie mismatch: {jp_nets}")
+    if (jp_nets.get(("JP2", "1")), jp_nets.get(("JP2", "2")), jp_nets.get(("JP2", "3"))) != ("D5", "LCD_P31", "D18"):
+        mismatches.append(f"JP2 net-tie mismatch: {jp_nets}")
     # Also assert J1.36/37/40 are disconnected on V4.0 (no ER-TFTM032-3 bus conflict / CTP reset lock)
     for p in all_pads:
         if p["ref"] == "J1" and p["num"] in ("36", "37", "40") and p["net"]:
@@ -1082,8 +1093,8 @@ def build_pcb() -> dict:
         ("5V BOOST", 19.2, -46.5, 1.0, "B.SilkS", 0),
         ("RTC 3V3", 26.5, -14.8, 1.0, "B.SilkS", 0),
         ("LIPO", 84.5, -59.6, 1.0, "B.SilkS", 0),
-        ("+", 85.8, -57.6, 1.2, "B.SilkS", 0),
-        ("-", 83.2, -57.6, 1.2, "B.SilkS", 0),
+        ("-", 85.8, -57.6, 1.2, "B.SilkS", 0),
+        ("+", 83.2, -57.6, 1.2, "B.SilkS", 0),
         ("PWR", 81.5, -12.7, 1.0, "B.SilkS", 0),
         ("CAPTURE", 84.0, -61.8, 1.0, "B.SilkS", 0),
         ("PROG", 85.0, -8.5, 1.0, "B.SilkS", 0),
