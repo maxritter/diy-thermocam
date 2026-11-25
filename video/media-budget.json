@@ -1,0 +1,16 @@
+{
+  "currency": "USD",
+  "cap_cents": 200,
+  "entries": {
+    "narration-v1": {
+      "provider": "elevenlabs",
+      "amount_cents": 9,
+      "state": "actual"
+    },
+    "music-v1": {
+      "provider": "elevenlabs",
+      "amount_cents": 26,
+      "state": "actual"
+    }
+  }
+}

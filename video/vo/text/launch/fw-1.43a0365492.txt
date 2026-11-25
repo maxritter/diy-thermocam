@@ -1,0 +1,1 @@
+Firmware 4.0 adds a redesigned on-device interface in dark and light themes. On real V3 hardware, it runs at 8.77 frames per second, with 0.26 millisecond USB latency, 9.2 megabytes per second SD transfer, and zero flicker.

@@ -1,0 +1,30 @@
+{
+  "language": "en",
+  "chunks": [
+    {
+      "id": "intro-1",
+      "scene": "intro",
+      "text": "DIY-Thermocam V4. Open-source thermal imaging, rebuilt from the ground up."
+    },
+    {
+      "id": "hw-1",
+      "scene": "hardware",
+      "text": "The factory-assembled V4 board needs no soldering. Plug in the Teensy, Lepton sensor, battery, and display, place them in the 3D-printed or laser-cut enclosure, and tighten eight screws."
+    },
+    {
+      "id": "fw-1",
+      "scene": "firmware",
+      "text": "Firmware 4.0 adds a redesigned on-device interface in dark and light themes. On real V3 hardware, it runs at 8.77 frames per second, with 0.26 millisecond USB latency, 9.2 megabytes per second SD transfer, and zero flicker."
+    },
+    {
+      "id": "studio-1",
+      "scene": "studio",
+      "text": "DIY-Thermocam Studio unifies Standard and Pro modes on the desktop, with per-region emissivity, 1080p and 4K Lanczos-3 upscaling, and built-in MP4 export without FFmpeg."
+    },
+    {
+      "id": "outro-1",
+      "scene": "outro",
+      "text": "Hardware, CAD, firmware, and Studio are open source under GPL 3.0 at diy-thermocam.net."
+    }
+  ]
+}
