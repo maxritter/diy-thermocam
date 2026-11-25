@@ -32,6 +32,7 @@
 #include <create.h>
 #include <buttons.h>
 #include <massstorage.h>
+#include <connection.h>
 #include <settingsmenu.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
@@ -360,9 +361,9 @@ void batteryGauge()
 {
 	//Title & Background
 	drawTitle((char *)"Battery Gauge", true);
-	display_setColor(0xF7DF);
+	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(0x08A5);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char *)"Do you want to calibrate the", CENTER, 75);
 	display_print((char *)"battery gauge? Fully charge the", CENTER, 95);
 	display_print((char *)"battery first (LED green/blue).", CENTER, 115);
@@ -622,9 +623,9 @@ void formatStorage()
 {
 	//Title & Background
 	drawTitle((char *)"Storage");
-	display_setColor(0xF7DF);
+	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(0x08A5);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char *)"Do you really want to format?", CENTER, 66);
 	display_print((char *)"This will delete all images", CENTER, 105);
 	display_print((char *)"and videos on the internal storage.", CENTER, 125);
@@ -740,6 +741,7 @@ void hardwareMenuHandler()
 {
 	while (true)
 	{
+		checkSerial();
 		if (touch_touched() == true)
 		{
 			int pressedButton = buttons_checkButtons();
@@ -772,6 +774,7 @@ void hardwareMenuHandler()
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -780,11 +783,12 @@ void hardwareMenu()
 {
 	drawTitle((char *)"Hardware Settings");
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 56, 130, 52, (char *)"Battery Gauge");
-	buttons_addButton(170, 56, 130, 52, (char *)"Lepton Gain");
-	buttons_addButton(20, 118, 130, 52, (char *)"Format SD");
-	buttons_addButton(170, 118, 130, 52, (char *)"USB MTP");
-	buttons_addButton(20, 180, 280, 44, (char *)"Back");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12,  46,  142, 62, (char *)"Battery Gauge");
+	buttons_addButton(166, 46,  142, 62, (char *)"Lepton Gain");
+	buttons_addButton(12,  118, 142, 62, (char *)"Format SD");
+	buttons_addButton(166, 118, 142, 62, (char *)"USB MTP");
+	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 }
 
@@ -967,11 +971,52 @@ void screenTimeoutMenu()
 	}
 }
 
+/* Draw dedicated 2026 Theme Selector screen (Dark / Daylight Light / High-Contrast) */
+void drawThemeMenu()
+{
+	drawTitle((char *)"UI Theme");
+	buttons_deleteAllButtons();
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12,  46,  296, 40, (char *)"Dark  (Obsidian + Amber)");
+	buttons_addButton(12,  94,  296, 40, (char *)"Light  (Daylight Outdoor)");
+	buttons_addButton(12,  142, 296, 40, (char *)"High-Contrast  (Glove/Sun)");
+	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
+	buttons_drawButtons();
+	buttons_setActive(uiThemeMode);
+}
+
+/* Interactive Theme Selector (persisted immediately to EEPROM) */
+void themeMenu()
+{
+	drawThemeMenu();
+	while (touch_touched()) {}
+	while (true)
+	{
+		checkSerial();
+		if (touch_touched())
+		{
+			int pressed = buttons_checkButtons(true);
+			if (pressed >= 0 && pressed <= 2)
+			{
+				ui_setThemeMode(static_cast<uint8_t>(pressed));
+				EEPROM.write(eeprom_uiTheme, uiThemeMode);
+				drawThemeMenu();
+			}
+			else if (pressed == 3)
+			{
+				return;
+			}
+		}
+		delay(5);
+	}
+}
+
 /* Display menu handler*/
 void displayMenuHandler()
 {
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -991,13 +1036,20 @@ void displayMenuHandler()
 			{
 				screenTimeoutMenu();
 			}
-			//Back
+			//Theme selector (Dark / Light / High-Contrast)
 			else if (pressedButton == 3)
+			{
+				themeMenu();
+				displayMenu();
+			}
+			//Back
+			else if (pressedButton == 4)
 			{
 				settingsMenu();
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -1006,10 +1058,14 @@ void displayMenu()
 {
 	drawTitle((char *)"Display Settings");
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Temp. format");
-	buttons_addButton(170, 60, 130, 70, (char *)"Disp. rotation");
-	buttons_addButton(20, 150, 130, 70, (char *)"Screen timeout");
-	buttons_addButton(170, 150, 130, 70, (char *)"Back");
+	buttons_setTextFont(smallFont);
+	static char themeLbl[24];
+	snprintf(themeLbl, sizeof(themeLbl), "Theme: %s", ui_themeName(uiThemeMode));
+	buttons_addButton(12,  46,  142, 62, (char *)"Temp. format");
+	buttons_addButton(166, 46,  142, 62, (char *)"Disp. rotation");
+	buttons_addButton(12,  118, 142, 62, (char *)"Screen timeout");
+	buttons_addButton(166, 118, 142, 62, themeLbl);
+	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 }
 
@@ -1018,6 +1074,7 @@ void settingsMenuHandler()
 {
 	while (true)
 	{
+		checkSerial();
 		//touch press
 		if (touch_touched() == true)
 		{
@@ -1041,22 +1098,32 @@ void settingsMenuHandler()
 				displayMenu();
 				displayMenuHandler();
 			}
-			//Back
+			//Theme selector
 			else if (pressedButton == 3)
+			{
+				themeMenu();
+				settingsMenu();
+			}
+			//Back
+			else if (pressedButton == 4)
 				break;
 		}
+		delay(5);
 	}
 }
 
-/* Settings menu main screen */
+/* Settings menu main screen (modern 2026 card grid + Theme selector + inset < Back) */
 void settingsMenu()
 {
 	drawTitle((char *)"Settings");
 	buttons_deleteAllButtons();
 	buttons_setTextFont(smallFont);
-	buttons_addButton(20, 60, 130, 70, (char *)"General");
-	buttons_addButton(170, 60, 130, 70, (char *)"Hardware");
-	buttons_addButton(20, 150, 130, 70, (char *)"Display");
-	buttons_addButton(170, 150, 130, 70, (char *)"Back");
+	static char themeLbl[24];
+	snprintf(themeLbl, sizeof(themeLbl), "Theme: %s", ui_themeName(uiThemeMode));
+	buttons_addButton(12,  46,  142, 62, (char *)"General");
+	buttons_addButton(166, 46,  142, 62, (char *)"Hardware");
+	buttons_addButton(12,  118, 142, 62, (char *)"Display");
+	buttons_addButton(166, 118, 142, 62, themeLbl);
+	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 }

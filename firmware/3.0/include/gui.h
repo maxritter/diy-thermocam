@@ -25,6 +25,8 @@ void drawMainMenuBorder();
 void drawTitle(char* name, bool firstStart = false);
 void floatToChar(char* buffer, float val);
 void showDiagnostic();
+void drawStatusScreen();
+void showStatusScreen();
 void showFullMessage(char* message, bool small = false);
 void showTransMessage(char* msg);
 

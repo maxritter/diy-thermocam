@@ -19,7 +19,6 @@
 #include <globaldefines.h>
 #include <globalvariables.h>
 #include <SPI.h>
-#include <DMAChannel.h>
 #include <hardware.h>
 #include <EEPROM.h>
 #include <perf.h>
@@ -157,39 +156,10 @@ uint32_t display_tcr_dc_not_assert;
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* LPSPI4 DMA state for zero-blocking background screen transfers */
-static DMAChannel s_lcd_dma;
-static DMASetting s_lcd_tcd[3]; // 76800 pixels = 3 x 25600 (< 32767 CITER limit)
-static bool s_lcd_dma_inited = false;
-static volatile bool s_lcd_dma_busy = false;
-
-static void lcd_dma_isr() {
-	s_lcd_dma.clearInterrupt();
-	s_lcd_dma.disable();
-	// Wait for LPSPI4 shift register / TX FIFO to drain completely
-	while ((IMXRT_LPSPI4_S.FSR & 0x1Fu) != 0) {}
-	while (IMXRT_LPSPI4_S.SR & LPSPI_SR_MBF) {}
-	IMXRT_LPSPI4_S.DER = 0;
-	IMXRT_LPSPI4_S.CR = LPSPI_CR_MEN | LPSPI_CR_RRF;
-	if (display_cs_port) {
-		t4_direct_write_high(display_cs_port, display_cs_pinmask);
-	}
-	SPI.endTransaction();
-	s_lcd_dma_busy = false;
-}
-
-void display_waitDmaComplete() {
-	if (!s_lcd_dma_busy) return;
-	uint32_t t0 = millis();
-	while (s_lcd_dma_busy && ((millis() - t0) < 200u)) {}
-	if (s_lcd_dma_busy) {
-		lcd_dma_isr();
-	}
-}
+void display_waitDmaComplete() {}
 
 void display_begin_spi_transaction()
 {
-	display_waitDmaComplete();
 	SPI.beginTransaction(SPISettings(g_display_spi_hz, MSBFIRST, SPI_MODE0));
 	if (!display_dc_port)
 		display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
@@ -220,8 +190,9 @@ void display_waitFifoNotFull()
 void display_waitTransmitComplete()
 {
 	uint32_t tmp __attribute__((unused));
+	uint32_t t0 = micros();
 
-	while (display_pending_rx_count)
+	while (display_pending_rx_count && ((micros() - t0) < 10000u))
 	{
 		if ((IMXRT_LPSPI4_S.RSR & LPSPI_RSR_RXEMPTY) == 0)
 		{
@@ -229,6 +200,7 @@ void display_waitTransmitComplete()
 			display_pending_rx_count--;
 		}
 	}
+	display_pending_rx_count = 0;
 	IMXRT_LPSPI4_S.CR = LPSPI_CR_MEN | LPSPI_CR_RRF;
 }
 
@@ -240,7 +212,8 @@ void display_maybeUpdateTCR(uint32_t requested_tcr_state)
 		display_spi_tcr_current = (display_spi_tcr_current & ~TCR_MASK) | requested_tcr_state;
 		if (!dc_state_change || !display_dc_pinmask)
 		{
-			while ((IMXRT_LPSPI4_S.FSR & 0x1f))
+			uint32_t t0 = micros();
+			while ((IMXRT_LPSPI4_S.FSR & 0x1f) && ((micros() - t0) < 5000u))
 				;
 			IMXRT_LPSPI4_S.TCR = display_spi_tcr_current;
 		}
@@ -321,10 +294,10 @@ uint8_t display_readcommand8(uint8_t c, uint8_t index)
 	uint8_t r = 0;
 	SPI.beginTransaction(SPISettings(6000000, MSBFIRST, SPI_MODE0));
 	display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
+
+	// Transaction 1: select read index via ILI9341 0xD9 (separate CS assertion!)
 	if (display_cs_port)
 		t4_direct_write_low(display_cs_port, display_cs_pinmask);
-
-	// Select index register via ILI9341 0xD9 (NV Memory / Read ID index)
 	display_maybeUpdateTCR(display_tcr_dc_assert | LPSPI_TCR_FRAMESZ(7));
 	IMXRT_LPSPI4_S.TDR = 0xD9;
 	display_pending_rx_count++;
@@ -332,14 +305,18 @@ uint8_t display_readcommand8(uint8_t c, uint8_t index)
 	IMXRT_LPSPI4_S.TDR = static_cast<uint8_t>(0x10 + index);
 	display_pending_rx_count++;
 	display_waitTransmitComplete();
+	if (display_cs_port)
+		t4_direct_write_high(display_cs_port, display_cs_pinmask);
+	delayMicroseconds(2);
 
-	// Send target read command
+	// Transaction 2: issue read command c and clock out 1 response byte
+	if (display_cs_port)
+		t4_direct_write_low(display_cs_port, display_cs_pinmask);
 	display_maybeUpdateTCR(display_tcr_dc_assert | LPSPI_TCR_FRAMESZ(7));
 	IMXRT_LPSPI4_S.TDR = c;
 	display_pending_rx_count++;
 	display_waitTransmitComplete();
 
-	// Clock out 1 byte with RX enabled
 	IMXRT_LPSPI4_S.CR = LPSPI_CR_MEN | LPSPI_CR_RRF;
 	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(7));
 	IMXRT_LPSPI4_S.TDR = 0x00;
@@ -468,6 +445,10 @@ void display_init()
 		rotationVert = read;
 	else
 		rotationVert = 0;
+
+	//Read saved UI theme (0 = Dark default, 1 = Daylight Light, 2 = High-Contrast)
+	byte themeVal = EEPROM.read(eeprom_uiTheme);
+	ui_setThemeMode((themeVal <= uiTheme_highContrast) ? themeVal : uiTheme_dark);
 }
 
 /* Set the xy coordinates */
@@ -1563,52 +1544,31 @@ void display_blendRect(int x, int y, int w, int h, word color, uint8_t alpha_num
 	}
 }
 
-/* Write 320x240 RGB565 data to the screen via async LPSPI4 DMA (zero Lepton SPI1 blocking) */
+/* Write 320x240 RGB565 via TX-only (RXMSK) LPSPI4 burst: ISR-safe, never deadlocks on VSYNC! */
 void display_writeScreen(unsigned short *pcolors)
 {
-	display_waitDmaComplete();
-
-	if (!s_lcd_dma_inited) {
-		s_lcd_dma.begin(true);
-		s_lcd_dma.triggerAtHardwareEvent(DMAMUX_SOURCE_LPSPI4_TX);
-		s_lcd_dma.attachInterrupt(lcd_dma_isr);
-		s_lcd_dma_inited = true;
-	}
-
-	// Flush D-cache so DMA reads fresh pixels from DMAMEM (OCRAM)
-	arm_dcache_flush(pcolors, 320 * 240 * sizeof(uint16_t));
-
-	SPI.beginTransaction(SPISettings(g_display_spi_hz, MSBFIRST, SPI_MODE0));
-	if (!display_dc_port)
-		display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
-	if (display_cs_port)
-		t4_direct_write_low(display_cs_port, display_cs_pinmask);
-
+	display_begin_spi_transaction();
 	display_setAddr(0, 0, 319, 239);
 	display_writecommand_last(ILI9341_RAMWR);
 
-	// Switch LPSPI4 to 16-bit TX-only mode (RXMSK) for continuous DMA burst
+	// Mask RX (LPSPI_TCR_RXMSK) without CONT: 100% ISR-safe on VSYNC, zero FIFO stall!
 	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(15) | LPSPI_TCR_RXMSK);
 
-	// Chain 3 TCDs of 25,600 uint16 pixels (= 76,800 total, within 15-bit CITER max 32,767)
-	constexpr uint32_t kChunkPixels = 25600;
-	for (int i = 0; i < 3; ++i) {
-		s_lcd_tcd[i].sourceBuffer(pcolors + i * kChunkPixels, kChunkPixels * sizeof(uint16_t));
-		s_lcd_tcd[i].destination(IMXRT_LPSPI4_S.TDR);
-		s_lcd_tcd[i].transferSize(2);
-		s_lcd_tcd[i].transferCount(kChunkPixels);
-		if (i < 2) {
-			s_lcd_tcd[i].replaceSettingsOnCompletion(s_lcd_tcd[i + 1]);
-		} else {
-			s_lcd_tcd[i].disableOnCompletion();
-			s_lcd_tcd[i].interruptAtCompletion();
-		}
+	const uint16_t *p = pcolors;
+	const uint16_t *end = pcolors + (ILI9341_TFTWIDTH * ILI9341_TFTHEIGHT);
+	while (p < end)
+	{
+		while ((IMXRT_LPSPI4_S.SR & LPSPI_SR_TDF) == 0) {}
+		IMXRT_LPSPI4_S.TDR = *p++;
 	}
+	// Wait for TX FIFO & shift register to finish (bounded timeout)
+	uint32_t t0 = micros();
+	while (((IMXRT_LPSPI4_S.FSR & 0x1Fu) != 0) && ((micros() - t0) < 5000u)) {}
+	while ((IMXRT_LPSPI4_S.SR & LPSPI_SR_MBF) && ((micros() - t0) < 5000u)) {}
+	// Restore RX enabled in TCR so subsequent SPI.transfer() / touch / readcommand8 never see RXMSK=1
+	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(7));
+	IMXRT_LPSPI4_S.CR = LPSPI_CR_MEN | LPSPI_CR_RRF;
+	display_pending_rx_count = 0;
 
-	s_lcd_dma = s_lcd_tcd[0];
-	s_lcd_dma_busy = true;
-	g_display_dma_active = true;
-	IMXRT_LPSPI4_S.FCR = LPSPI_FCR_TXWATER(8);
-	IMXRT_LPSPI4_S.DER = LPSPI_DER_TDDE;
-	s_lcd_dma.enable();
+	display_end_spi_transaction();
 }

@@ -81,7 +81,6 @@ static bool write_all_bounded(const uint8_t* data, size_t len, uint32_t max_ms) 
 	uint32_t start = millis();
 	size_t off = 0;
 	while (off < len) {
-		if (!Serial) return false;
 		int avail = Serial.availableForWrite();
 		if (avail > 0) {
 			size_t chunk = (static_cast<size_t>(avail) < (len - off))
@@ -1175,6 +1174,7 @@ void serialConnectV2(bool headless) {
 
 	uint32_t lastFramePushUs = micros();
 	uint32_t lastFpaPollMs = millis();
+	uint32_t dtrLowSinceMs = 0;
 
 	while (s_v2.running) {
 		uint32_t now_ms = millis();
@@ -1183,10 +1183,17 @@ void serialConnectV2(bool headless) {
 		drain_serial_rx(now_ms);
 		if (!s_v2.running) break;
 
-		// 2. Check USB DTR drop & 5 s heartbeat watchdog
-		if (!Serial) {
-			s_v2.running = false;
-			break;
+		// 2. Check debounced USB DTR drop (250 ms, post-HELLO) & 5 s heartbeat watchdog
+		if (s_v2.hello_done) {
+			if (!Serial) {
+				if (dtrLowSinceMs == 0) dtrLowSinceMs = now_ms;
+				else if ((now_ms - dtrLowSinceMs) >= 250u) {
+					s_v2.running = false;
+					break;
+				}
+			} else {
+				dtrLowSinceMs = 0;
+			}
 		}
 		if ((now_ms - s_v2.last_rx_ms) >= DEFAULT_HEARTBEAT_MS) {
 			emit_session_exit(1); // heartbeat_timeout
@@ -1276,7 +1283,6 @@ void serialConnectV2(bool headless) {
 		uint32_t t0 = millis();
 		while (touch_touched() && (millis() - t0) < 500u) {}
 	}
-	Serial.clear();
 }
 
 bool checkSerialV2OrV1(bool headless) {

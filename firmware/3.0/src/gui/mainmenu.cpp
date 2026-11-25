@@ -31,57 +31,59 @@
 #include <gui.h>
 #include <load.h>
 #include <bitmaps.h>
+#include <colorschemes.h>
+#include <connection.h>
 #include <massstorage.h>
 #include <touchscreen.h>
+#include <videomenu.h>
 #include <mainmenu.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Draws the background in the main menu (2026 dark-slate + thermal amber) */
+/* Draws the full-bleed modern 2026 submenu canvas */
 void mainMenuBackground()
 {
-	display_setColor(0x1947); // surface header/footer
-	display_fillRoundRect(6, 6, 314, 234);
-	display_setColor(0x08A5); // deep slate body
-	display_fillRect(6, 38, 314, 180);
-	display_setColor(0xFB82); // thermal amber header rule
-	display_drawHLine(6, 38, 308);
-	display_setColor(0x3A6C); // slate border footer rule
-	display_drawHLine(6, 180, 308);
+	display_fillScr(UI_BG_DARK);
+	display_setColor(UI_SURFACE);
+	display_fillRect(0, 0, 319, 34);
+	display_setColor(UI_ACCENT);
+	display_drawHLine(0, 34, 320);
+	display_setColor(UI_BORDER);
+	display_drawHLine(12, 184, 296);
 }
 
-/* Draws the content of the selection menu*/
+/* Draws the content of the selection menu (bezel-safe >=12px margins) */
 void drawSelectionMenu()
 {
 	//Buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 45, 38, 77, (char *)"<", 0, true);
-	buttons_addButton(267, 45, 38, 77, (char *)">", 0, true);
-	buttons_addButton(15, 188, 120, 40, (char *)"Back");
-	buttons_addButton(95, 132, 130, 35, (char *)"OK");
+	buttons_addButton(12, 46, 42, 74, (char *)"<", 0, true);
+	buttons_addButton(266, 46, 42, 74, (char *)">", 0, true);
+	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
+	buttons_addButton(95, 134, 130, 36, (char *)"OK");
 	buttons_drawButtons();
 	//Selection card border
-	display_setColor(0xFB82);
-	display_drawRect(65, 57, 257, 111);
+	display_setColor(UI_ACCENT);
+	display_drawRoundRect(64, 54, 256, 112);
 }
 
 /* Draws the title in the main menu */
 void mainMenuTitle(char *title)
 {
 	display_setFont(bigFont);
-	display_setBackColor(0x1947);
-	display_setColor(0xF7DF);
-	display_print(title, CENTER, 14);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	display_print(title, CENTER, 10);
 }
 
 /* Draws the current selection in the menu */
 void mainMenuSelection(char *selection)
 {
-	display_setColor(0x1947);
+	display_setColor(UI_SURFACE);
 	display_fillRect(66, 58, 256, 110);
-	display_setBackColor(0x1947);
-	display_setColor(0xFD20); // hot amber
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_ACCENT);
 	display_print(selection, CENTER, 77);
 }
 
@@ -90,9 +92,9 @@ bool massStoragePrompt()
 {
 	//Title & Background
 	drawTitle((char *)"USB File Transfer");
-	display_setColor(0xF7DF);
+	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(0x08A5);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char *)"Do you want to enter mass storage", CENTER, 65);
 	display_print((char *)"to transfer files to the PC?", CENTER, 85);
 	display_print((char *)"Do not use this for FW updates", CENTER, 105);
@@ -134,13 +136,13 @@ bool calibrationRepeat()
 	//Title & Background
 	mainMenuBackground();
 	mainMenuTitle((char *)"Bad Calibration");
-	display_setColor(VGA_BLACK);
+	display_setColor(UI_TEXT);
 	display_setFont(bigFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char *)"Try again?", CENTER, 66);
 	display_setFont(smallFont);
-	display_setBackColor(120, 120, 120);
-	display_setColor(VGA_WHITE);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT_MUTED);
 	display_print((char *)"Use different calibration objects", CENTER, 201);
 	//Draw the buttons
 	buttons_deleteAllButtons();
@@ -177,8 +179,8 @@ void calibrationScreen(bool firstStart)
 	{
 		mainMenuBackground();
 		mainMenuTitle((char *)"Calibrating..");
-		display_setColor(VGA_BLACK);
-		display_setBackColor(200, 200, 200);
+		display_setColor(UI_TEXT);
+		display_setBackColor(UI_BG_DARK);
 		display_setFont(smallFont);
 		display_print((char *)"Point the camera to different", CENTER, 63);
 		display_print((char *)"hot and cold objects in the area.", CENTER, 96);
@@ -192,10 +194,10 @@ void calibrationScreen(bool firstStart)
 	//First start
 	else
 	{
-		display_fillScr(200, 200, 200);
+		display_fillScr(UI_BG_DARK);
 		display_setFont(bigFont);
-		display_setBackColor(200, 200, 200);
-		display_setColor(VGA_BLACK);
+		display_setBackColor(UI_BG_DARK);
+		display_setColor(UI_TEXT);
 		display_print((char *)"Calibrating..", CENTER, 100);
 		display_print((char *)"Status:  0%", CENTER, 140);
 	}
@@ -212,10 +214,10 @@ redraw:
 	//Draw the selection menu
 	buttons_deleteAllButtons();
 	buttons_setTextFont(smallFont);
-	buttons_addButton(15, 45, 90, 122, (char *)"Add");
-	buttons_addButton(115, 45, 90, 122, (char *)"Remove");
-	buttons_addButton(215, 45, 90, 122, (char *)"Clear");
-	buttons_addButton(15, 188, 120, 40, (char *)"Back");
+	buttons_addButton(12, 46, 92, 122, (char *)"Add");
+	buttons_addButton(114, 46, 92, 122, (char *)"Remove");
+	buttons_addButton(216, 46, 92, 122, (char *)"Clear");
+	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 	//Save the current position inside the menu
 	while (true)
@@ -432,14 +434,14 @@ void hotColdChooser()
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 188, 140, 40, (char *)"Reset");
-	buttons_addButton(165, 188, 140, 40, (char *)"OK");
-	buttons_addButton(15, 48, 55, 120, (char *)"-");
-	buttons_addButton(250, 48, 55, 120, (char *)"+");
+	buttons_addButton(12, 192, 142, 34, (char *)"Reset");
+	buttons_addButton(166, 192, 142, 34, (char *)"OK");
+	buttons_addButton(12, 48, 56, 120, (char *)"-");
+	buttons_addButton(252, 48, 56, 120, (char *)"+");
 	buttons_drawButtons();
 
 	//Draw the border for the preview image
-	display_setColor(VGA_BLACK);
+	display_setColor(UI_BORDER);
 	display_drawRect(79, 47, 241, 169);
 
 	//Set text color
@@ -483,10 +485,10 @@ redraw:
 	//Draw the selection menu
 	buttons_deleteAllButtons();
 	buttons_setTextFont(smallFont);
-	buttons_addButton(15, 45, 90, 122, (char *)"Hot");
-	buttons_addButton(115, 45, 90, 122, (char *)"Cold");
-	buttons_addButton(215, 45, 90, 122, (char *)"Disabled");
-	buttons_addButton(15, 188, 120, 40, (char *)"Back");
+	buttons_addButton(12, 46, 92, 122, (char *)"Hot");
+	buttons_addButton(114, 46, 92, 122, (char *)"Cold");
+	buttons_addButton(216, 46, 92, 122, (char *)"Disabled");
+	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 
 	//Save the current position inside the menu
@@ -850,10 +852,10 @@ redraw:
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 188, 140, 40, (char *)"Reset");
-	buttons_addButton(165, 188, 140, 40, (char *)"OK");
-	buttons_addButton(15, 48, 55, 120, (char *)"Min");
-	buttons_addButton(250, 48, 55, 120, (char *)"Max");
+	buttons_addButton(12, 192, 142, 34, (char *)"Reset");
+	buttons_addButton(166, 192, 142, 34, (char *)"OK");
+	buttons_addButton(12, 48, 56, 120, (char *)"Min");
+	buttons_addButton(252, 48, 56, 120, (char *)"Max");
 	buttons_drawButtons();
 
 	//Prepare the preview image
@@ -865,7 +867,7 @@ redraw:
 	display_drawBitmap(80, 48, 160, 120, smallBuffer);
 
 	//Draw the border for the preview image
-	display_setColor(VGA_BLACK);
+	display_setColor(UI_BORDER);
 	display_drawRect(79, 47, 241, 169);
 
 	//Go into the normal touch handler
@@ -997,9 +999,9 @@ bool tempLimits()
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 47, 140, 120, (char *)"Auto");
-	buttons_addButton(165, 47, 140, 120, (char *)"Manual");
-	buttons_addButton(15, 188, 140, 40, (char *)"Back");
+	buttons_addButton(12, 46, 142, 120, (char *)"Auto");
+	buttons_addButton(166, 46, 142, 120, (char *)"Manual");
+	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 
 	//Touch handler
@@ -1132,359 +1134,469 @@ void liveDispMenuString(int pos)
 	mainMenuSelection(text);
 }
 
-/* Change the live display options */
+/* Helper: draw sleek 28px non-touch top header bar (never puts buttons in the bezel corner!) */
+static void drawModernHeader(const char* title, const char* rightBadge = nullptr)
+{
+	display_setColor(UI_SURFACE);
+	display_fillRect(0, 0, 319, 28);
+	display_setColor(UI_ACCENT);
+	display_drawHLine(0, 28, 320);
+
+	display_setFont(smallFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	display_print((char *)title, 12, 8);
+
+	if (rightBadge && rightBadge[0]) {
+		int rx = 308 - static_cast<int>(strlen(rightBadge)) * 8;
+		display_setColor(UI_TEXT_MUTED);
+		display_print((char *)rightBadge, rx, 8);
+	}
+}
+
+/* Helper: draw bezel-safe bottom pill button (>=12px side margin, >=14px bottom margin) */
+static void drawBottomPill(int x, int y, int w, int h, const char* lbl, bool accent = false)
+{
+	display_setColor(accent ? UI_ACCENT : UI_SURFACE);
+	display_fillRoundRect(x, y, x + w, y + h);
+	display_setColor(accent ? UI_ACCENT : UI_BORDER);
+	display_drawRoundRect(x, y, x + w, y + h);
+	display_setFont(smallFont);
+	display_setBackColor(accent ? UI_ACCENT : UI_SURFACE);
+	display_setColor(accent ? UI_ACCENT_FG : UI_TEXT);
+	int tx = x + (w - static_cast<int>(strlen(lbl)) * 8) / 2;
+	int ty = y + (h - 12) / 2;
+	display_print((char *)lbl, tx, ty);
+}
+
+/* Helper: lookup palette name, pointer and length directly from firmware single-source colorschemes */
+static void getPaletteMeta(byte idx, const char** nameOut, const byte** mapOut, int* lenOut)
+{
+	switch (idx) {
+	case colorScheme_arctic:        *nameOut = "Arctic";      *mapOut = colorMap_arctic;        *lenOut = 240; break;
+	case colorScheme_blackHot:      *nameOut = "Black-Hot";   *mapOut = colorMap_blackHot;      *lenOut = 224; break;
+	case colorScheme_blueRed:       *nameOut = "Blue-Red";    *mapOut = colorMap_blueRed;       *lenOut = 192; break;
+	case colorScheme_coldest:       *nameOut = "Coldest";     *mapOut = colorMap_coldest;       *lenOut = 224; break;
+	case colorScheme_contrast:      *nameOut = "Contrast";    *mapOut = colorMap_contrast;      *lenOut = 224; break;
+	case colorScheme_doubleRainbow: *nameOut = "Dbl-Rain";    *mapOut = colorMap_doubleRainbow; *lenOut = 256; break;
+	case colorScheme_grayRed:       *nameOut = "Gray-Red";    *mapOut = colorMap_grayRed;       *lenOut = 224; break;
+	case colorScheme_glowBow:       *nameOut = "Glowbow";     *mapOut = colorMap_glowBow;       *lenOut = 224; break;
+	case colorScheme_grayscale:     *nameOut = "Grayscale";   *mapOut = colorMap_grayscale;     *lenOut = 256; break;
+	case colorScheme_hottest:       *nameOut = "Hottest";     *mapOut = colorMap_hottest;       *lenOut = 224; break;
+	case colorScheme_ironblack:     *nameOut = "Ironblack";   *mapOut = colorMap_ironblack;     *lenOut = 256; break;
+	case colorScheme_lava:          *nameOut = "Lava";        *mapOut = colorMap_lava;          *lenOut = 240; break;
+	case colorScheme_medical:       *nameOut = "Medical";     *mapOut = colorMap_medical;       *lenOut = 224; break;
+	case colorScheme_rainbow:       *nameOut = "Rainbow";     *mapOut = colorMap_rainbow;       *lenOut = 256; break;
+	case colorScheme_wheel1:        *nameOut = "Wheel 1";     *mapOut = colorMap_wheel1;        *lenOut = 256; break;
+	case colorScheme_wheel2:        *nameOut = "Wheel 2";     *mapOut = colorMap_wheel2;        *lenOut = 256; break;
+	case colorScheme_wheel3:        *nameOut = "Wheel 3";     *mapOut = colorMap_wheel3;        *lenOut = 256; break;
+	case colorScheme_whiteHot:      *nameOut = "White-Hot";   *mapOut = colorMap_whiteHot;      *lenOut = 224; break;
+	default:                        *nameOut = "Yellow";      *mapOut = colorMap_yellow;        *lenOut = 224; break;
+	}
+}
+
+/* Draw 1-tap 3x3 Display & Theme Toggle Grid with bezel-safe bottom Back / Live pills */
+void drawLiveDispGrid()
+{
+	display_fillScr(UI_BG_DARK);
+	drawModernHeader("DISPLAY & HUD", ui_themeName(uiThemeMode));
+
+	buttons_deleteAllButtons();
+	buttons_addButton(12, 192, 142, 34, (char *)"", 0x0010);  // 0: < Back
+
+	const char* labels[9] = {"Battery", "Time", "Date", "Spot", "Scale", "Storage", "Filter", "Theme", "Min/Max"};
+	const char* values[9] = {
+		batteryEnabled ? "ON" : "OFF",
+		timeEnabled ? "ON" : "OFF",
+		dateEnabled ? "ON" : "OFF",
+		spotEnabled ? "ON" : "OFF",
+		colorbarEnabled ? "ON" : "OFF",
+		storageEnabled ? "ON" : "OFF",
+		(filterType == filterType_gaussian) ? "GAUSS" : (filterType == filterType_box ? "BOX" : "OFF"),
+		ui_themeName(uiThemeMode),
+		(minMaxPoints == minMaxPoints_both) ? "BOTH" : (minMaxPoints == minMaxPoints_min ? "COLD" : (minMaxPoints == minMaxPoints_max ? "HOT" : "OFF"))
+	};
+	bool active[9] = {
+		batteryEnabled, timeEnabled, dateEnabled, spotEnabled, colorbarEnabled, storageEnabled,
+		filterType != filterType_none, true, minMaxPoints != minMaxPoints_disabled
+	};
+
+	for (int i = 0; i < 9; ++i) {
+		int col = i % 3;
+		int row = i / 3;
+		int x = 12 + col * 102;
+		int y = 35 + row * 51;
+		int w = 92, h = 45;
+		buttons_addButton(x, y, w, h, (char *)"", 0x0010); // 1..9
+
+		display_setColor(UI_SURFACE);
+		display_fillRoundRect(x, y, x + w, y + h);
+		display_setColor(active[i] ? UI_ACCENT : UI_BORDER);
+		display_drawRoundRect(x, y, x + w, y + h);
+
+		display_setFont(smallFont);
+		display_setBackColor(UI_SURFACE);
+		display_setColor(UI_TEXT);
+		int lx = x + (w - static_cast<int>(strlen(labels[i])) * 8) / 2;
+		display_print((char *)labels[i], lx, y + 6);
+
+		// Status chip pill
+		display_setColor(active[i] ? UI_ACCENT : UI_ELEVATED);
+		display_fillRoundRect(x + 12, y + 22, x + w - 12, y + 39);
+		display_setBackColor(active[i] ? UI_ACCENT : UI_ELEVATED);
+		display_setColor(active[i] ? UI_ACCENT_FG : UI_TEXT_MUTED);
+		int vx = x + (w - static_cast<int>(strlen(values[i])) * 8) / 2;
+		display_print((char *)values[i], vx, y + 25);
+	}
+
+	buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 10: < Live
+	drawBottomPill(12,  192, 142, 34, "< Back", false);
+	drawBottomPill(166, 192, 142, 34, "< Live", true);
+}
+
+/* Change the live display options & Theme (1-tap toggle cards!) */
 bool liveDispMenu()
 {
-	//Save the current position inside the menu
-	static byte displayOptionsPos = 0;
-	//Background
-	mainMenuBackground();
-	//Title
-	mainMenuTitle((char *)"Live Disp. Options");
-	//Draw the selection menu
-	drawSelectionMenu();
-	//Rename OK button
-	buttons_relabelButton(3, (char *)"Switch", true);
-	//Draw the current item
-	liveDispMenuString(displayOptionsPos);
+	drawLiveDispGrid();
+	while (touch_touched()) {}
 	while (true)
 	{
-		//Touch screen pressed
-		if (touch_touched() == true)
+		checkSerial();
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//SELECT
-			if (pressedButton == 3)
-			{
-				changeDisplayOptions(&displayOptionsPos);
+			int pressed = buttons_checkButtons(true);
+			if (pressed == 0) return false;
+			if (pressed == 10) return true;
+			if (pressed == 8) {
+				// 1-tap Dark -> Light -> Hi-Con Theme cycle persisted in EEPROM
+				uint8_t nextMode = (uiThemeMode + 1) % 3;
+				ui_setThemeMode(nextMode);
+				EEPROM.write(eeprom_uiTheme, nextMode);
+				drawLiveDispGrid();
+			} else if (pressed >= 1 && pressed <= 9) {
+				byte pos = static_cast<byte>(pressed - 1);
+				changeDisplayOptions(&pos);
+				drawLiveDispGrid();
 			}
-			//BACK
-			if (pressedButton == 2)
-			{
-				return false;
-			}
-			//BACKWARD
-			else if (pressedButton == 0)
-			{
-				if (displayOptionsPos > 0)
-					displayOptionsPos--;
-				else if (displayOptionsPos == 0)
-					displayOptionsPos = 8;
-			}
-			//FORWARD
-			else if (pressedButton == 1)
-			{
-				if (displayOptionsPos < 8)
-					displayOptionsPos++;
-				else if (displayOptionsPos == 8)
-					displayOptionsPos = 0;
-			}
-			//Change the menu name
-			liveDispMenuString(displayOptionsPos);
 		}
+		delay(5);
 	}
 }
 
-/* Switch the current color scheme item */
+/* Switch the current color scheme item (kept for API compatibility) */
 void colorMenuString(int pos)
 {
-	char *text = (char *)"";
-	switch (pos)
-	{
-	case colorScheme_arctic:
-		text = (char *)"Arctic";
-		break;
-	case colorScheme_blackHot:
-		text = (char *)"Black-Hot";
-		break;
-	case colorScheme_blueRed:
-		text = (char *)"Blue-Red";
-		break;
-	case colorScheme_coldest:
-		text = (char *)"Coldest";
-		break;
-	case colorScheme_contrast:
-		text = (char *)"Contrast";
-		break;
-	case colorScheme_doubleRainbow:
-		text = (char *)"Double-Rain";
-		break;
-	case colorScheme_grayRed:
-		text = (char *)"Gray-Red";
-		break;
-	case colorScheme_glowBow:
-		text = (char *)"Glowbow";
-		break;
-	case colorScheme_grayscale:
-		text = (char *)"Grayscale";
-		break;
-	case colorScheme_hottest:
-		text = (char *)"Hottest";
-		break;
-	case colorScheme_ironblack:
-		text = (char *)"Ironblack";
-		break;
-	case colorScheme_lava:
-		text = (char *)"Lava";
-		break;
-	case colorScheme_medical:
-		text = (char *)"Medical";
-		break;
-	case colorScheme_rainbow:
-		text = (char *)"Rainbow";
-		break;
-	case colorScheme_wheel1:
-		text = (char *)"Wheel 1";
-		break;
-	case colorScheme_wheel2:
-		text = (char *)"Wheel 2";
-		break;
-	case colorScheme_wheel3:
-		text = (char *)"Wheel 3";
-		break;
-	case colorScheme_whiteHot:
-		text = (char *)"White-Hot";
-		break;
-	case colorScheme_yellow:
-		text = (char *)"Yellow";
-		break;
-	}
-	mainMenuSelection(text);
+	const char* name = "";
+	const byte* cmap = nullptr;
+	int clen = 0;
+	getPaletteMeta(static_cast<byte>(pos), &name, &cmap, &clen);
+	mainMenuSelection((char *)name);
 }
 
-/* Choose the applied color scale */
+/* Draw one page (4 palettes) of the Visual 2026 Palette Picker with bezel-safe bottom bar */
+void drawColorMenuPage(byte page, byte selected)
+{
+	display_fillScr(UI_BG_DARK);
+	char hdr[32];
+	const byte totalPages = (colorSchemeTotal + 3) / 4;
+	snprintf(hdr, sizeof(hdr), "COLOR PALETTE  %u/%u", (unsigned)(page + 1), (unsigned)totalPages);
+	drawModernHeader(hdr);
+
+	buttons_deleteAllButtons();
+	buttons_addButton(12,  192, 78,  34, (char *)"", 0x0010); // 0: < Back (bezel-safe!)
+	buttons_addButton(96,  192, 44,  34, (char *)"", 0x0010); // 1: Prev
+	buttons_addButton(146, 192, 112, 34, (char *)"", 0x0010); // 2: Apply
+	buttons_addButton(264, 192, 44,  34, (char *)"", 0x0010); // 3: Next
+
+	for (byte slot = 0; slot < 4; ++slot) {
+		byte idx = static_cast<byte>(page * 4 + slot);
+		if (idx >= colorSchemeTotal) break;
+		int y = 36 + slot * 37;
+		buttons_addButton(12, y, 296, 32, (char *)"", 0x0010); // 4..7
+
+		const char* name = "";
+		const byte* cmap = nullptr;
+		int clen = 0;
+		getPaletteMeta(idx, &name, &cmap, &clen);
+		bool isSel = (idx == selected);
+
+		display_setColor(UI_SURFACE);
+		display_fillRoundRect(12, y, 308, y + 32);
+		display_setColor(isSel ? UI_ACCENT : UI_BORDER);
+		display_drawRoundRect(12, y, 308, y + 32);
+
+		if (isSel) {
+			display_setColor(UI_ACCENT);
+			display_fillCircle(24, y + 16, 4);
+		}
+		display_setFont(smallFont);
+		display_setBackColor(UI_SURFACE);
+		display_setColor(isSel ? UI_TEXT : UI_TEXT_MUTED);
+		display_print((char *)name, isSel ? 36 : 22, y + 10);
+
+		// Real live color gradient bar rendered straight from firmware colorMap_*!
+		const int gx0 = 166, gx1 = 296;
+		const int gw = gx1 - gx0;
+		display_setColor(UI_BORDER);
+		display_drawRect(gx0 - 1, y + 7, gx1, y + 25);
+		for (int dx = 0; dx < gw; ++dx) {
+			int ci = (dx * (clen - 1)) / (gw - 1);
+			byte r = cmap[ci * 3];
+			byte g = cmap[ci * 3 + 1];
+			byte b = cmap[ci * 3 + 2];
+			display_setColor(r, g, b);
+			display_drawVLine(gx0 + dx, y + 8, 17);
+		}
+	}
+
+	// Bezel-safe bottom navigation pills (12px side margin, 14px bottom margin)
+	drawBottomPill(12,  192, 78,  34, "< Back", false);
+	drawBottomPill(96,  192, 44,  34, "<",      false);
+	drawBottomPill(146, 192, 112, 34, "Apply",  true);
+	drawBottomPill(264, 192, 44,  34, ">",      false);
+}
+
+/* Visual 2026 Palette Picker with live gradient bars */
 bool colorMenu()
 {
-	//Save the current position inside the menu
-	byte changeColorPos = colorScheme;
-	//Background
-	mainMenuBackground();
-	//Title
-	mainMenuTitle((char *)"Change Color");
-	//Draw the selection menu
-	drawSelectionMenu();
-	//Draw the current item
-	colorMenuString(changeColorPos);
+	byte selected = colorScheme;
+	const byte totalPages = (colorSchemeTotal + 3) / 4;
+	byte page = selected / 4;
+	drawColorMenuPage(page, selected);
+	while (touch_touched()) {}
 	while (true)
 	{
-		//Touch screen pressed
-		if (touch_touched() == true)
+		checkSerial();
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//SELECT
-			if (pressedButton == 3)
-			{
-				changeColorScheme(&changeColorPos);
+			int pressed = buttons_checkButtons(true);
+			if (pressed == 0) return false;
+			if (pressed == 1) {
+				page = (page == 0) ? (totalPages - 1) : (page - 1);
+				drawColorMenuPage(page, selected);
+			} else if (pressed == 2) {
+				changeColorScheme(&selected);
 				return true;
+			} else if (pressed == 3) {
+				page = (page + 1 >= totalPages) ? 0 : (page + 1);
+				drawColorMenuPage(page, selected);
+			} else if (pressed >= 4 && pressed <= 7) {
+				byte idx = static_cast<byte>(page * 4 + (pressed - 4));
+				if (idx < colorSchemeTotal) {
+					selected = idx;
+					changeColorScheme(&selected);
+					drawColorMenuPage(page, selected);
+				}
 			}
-			//BACK
-			if (pressedButton == 2)
-				return false;
-			//BACKWARD
-			else if (pressedButton == 0)
-			{
-				if (changeColorPos > 0)
-					changeColorPos--;
-				else if (changeColorPos == 0)
-					changeColorPos = colorSchemeTotal - 1;
-			}
-			//FORWARD
-			else if (pressedButton == 1)
-			{
-				if (changeColorPos < (colorSchemeTotal - 1))
-					changeColorPos++;
-				else if (changeColorPos == (colorSchemeTotal - 1))
-					changeColorPos = 0;
-			}
-			//Change the menu name
-			colorMenuString(changeColorPos);
 		}
+		delay(5);
 	}
 }
 
-/* Draws the content of the main menu*/
+/* Draws a sleek 2026 minimalist vector tile (zero white-background icons, zero crosshairs!) */
+static void drawModernMenuTile(int x, int y, int w, int h, const char* label, byte iconId, bool accentBorder = false)
+{
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(x, y, x + w, y + h);
+	display_setColor(accentBorder ? UI_ACCENT : UI_BORDER);
+	display_drawRoundRect(x, y, x + w, y + h);
+
+	int cx = x + w / 2;
+	int cy = y + 25;
+	display_setColor(UI_TEXT);
+
+	switch (iconId) {
+	case 0: // Palette (4 Ironbow thermal gradient bars)
+		display_setColor(UI_INDIGO);    display_fillRect(cx - 19, cy - 10, cx - 11, cy + 10);
+		display_setColor(UI_MAGENTA);   display_fillRect(cx - 9,  cy - 10, cx - 1,  cy + 10);
+		display_setColor(UI_ACCENT);    display_fillRect(cx + 1,  cy - 10, cx + 9,  cy + 10);
+		display_setColor(UI_ACCENT_HI); display_fillRect(cx + 11, cy - 10, cx + 19, cy + 10);
+		break;
+	case 1: // Range / Limits (dual range sliders)
+		display_setColor(UI_BORDER);
+		display_fillRect(cx - 16, cy - 7, cx + 16, cy - 5);
+		display_fillRect(cx - 16, cy + 5, cx + 16, cy + 7);
+		display_setColor(UI_ACCENT);
+		display_fillCircle(cx + 6, cy - 6, 4);
+		display_setColor(UI_TEXT);
+		display_fillCircle(cx - 6, cy + 6, 4);
+		break;
+	case 2: // FFC (concentric optical shutter iris)
+		display_setColor(UI_TEXT);
+		display_drawCircle(cx, cy, 12);
+		display_drawCircle(cx, cy, 11);
+		display_setColor(UI_ACCENT);
+		display_drawCircle(cx, cy, 7);
+		display_fillCircle(cx, cy, 3);
+		break;
+	case 3: // Points (minimalist thermal map pin)
+		display_setColor(UI_TEXT);
+		display_drawCircle(cx, cy - 4, 8);
+		display_setColor(UI_ACCENT);
+		display_fillCircle(cx, cy - 4, 3);
+		display_setColor(UI_TEXT);
+		display_drawLine(cx - 5, cy + 2, cx, cy + 11);
+		display_drawLine(cx + 5, cy + 2, cx, cy + 11);
+		break;
+	case 4: // Gallery (photo frame)
+		display_drawRoundRect(cx - 16, cy - 10, cx + 16, cy + 10);
+		display_setColor(UI_ACCENT);
+		display_fillCircle(cx - 7, cy - 3, 3);
+		display_setColor(UI_TEXT);
+		display_drawLine(cx - 12, cy + 8, cx - 2, cy - 2);
+		display_drawLine(cx - 2, cy - 2, cx + 4, cy + 4);
+		display_drawLine(cx + 4, cy + 4, cx + 11, cy - 3);
+		break;
+	case 6: // Overlays (HUD frame + colorbar)
+		display_drawRoundRect(cx - 16, cy - 10, cx + 16, cy + 10);
+		display_setColor(UI_ACCENT);
+		display_fillRect(cx + 9, cy - 7, cx + 12, cy + 7);
+		display_setColor(UI_TEXT);
+		display_fillRect(cx - 12, cy - 6, cx + 2, cy - 4);
+		display_fillRect(cx - 12, cy + 4, cx - 2, cy + 6);
+		break;
+	case 7: // Settings (3 equalizer sliders)
+		for (int i = -1; i <= 1; ++i) {
+			int yy = cy + i * 8;
+			display_setColor(UI_BORDER);
+			display_fillRect(cx - 16, yy - 1, cx + 16, yy);
+			display_setColor(i == 0 ? UI_ACCENT : UI_TEXT);
+			display_fillCircle(cx + i * 8, yy, 3);
+		}
+		break;
+	case 8: // Isotherm / Hot-Cold (split cyan / amber)
+		display_setColor(UI_CYAN);
+		display_fillRoundRect(cx - 15, cy - 10, cx - 2, cy + 10);
+		display_setColor(UI_ACCENT);
+		display_fillRoundRect(cx + 2, cy - 10, cx + 15, cy + 10);
+		break;
+	case 9: // Status / Telemetry (live bar meter)
+		display_setColor(UI_BORDER);
+		display_fillRect(cx - 14, cy + 2,  cx - 8,  cy + 10);
+		display_setColor(UI_TEXT);
+		display_fillRect(cx - 4,  cy - 4,  cx + 2,  cy + 10);
+		display_setColor(UI_ACCENT);
+		display_fillRect(cx + 6,  cy - 10, cx + 12, cy + 10);
+		break;
+	case 10: // USB MTP (USB connector icon)
+		display_setColor(UI_TEXT);
+		display_drawRoundRect(cx - 9, cy - 10, cx + 9, cy + 1);
+		display_fillRect(cx - 4, cy - 7, cx - 2, cy - 3);
+		display_fillRect(cx + 2, cy - 7, cx + 4, cy - 3);
+		display_setColor(UI_ACCENT);
+		display_fillRect(cx - 12, cy + 1, cx + 12, cy + 9);
+		break;
+	case 12: // Video (crisp REC ring + red/amber dot)
+		display_setColor(UI_TEXT);
+		display_drawCircle(cx, cy, 11);
+		display_setColor(UI_ERR);
+		display_fillCircle(cx, cy, 6);
+		break;
+	case 13: // Theme (half-filled contrast sun/moon disc)
+		display_setColor(UI_ACCENT);
+		display_fillCircle(cx, cy, 10);
+		display_setColor(UI_SURFACE);
+		display_fillRect(cx, cy - 10, cx + 11, cy + 10);
+		display_setColor(UI_TEXT);
+		display_drawCircle(cx, cy, 10);
+		break;
+	}
+
+	display_setFont(smallFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(accentBorder ? UI_TEXT : UI_TEXT_MUTED);
+	int lx = x + (w - static_cast<int>(strlen(label)) * 8) / 2;
+	display_print((char *)label, lx, y + h - 18);
+}
+
+/* Draws the redesigned 2026 2-page Main Menu with >=12px safe bezel margins & inset bottom < Live bar */
 void drawMainMenu(byte pos)
 {
-	//Border
-	drawMainMenuBorder();
-	//Dark slate surface
-	display_setColor(0x08A5);
-	display_fillRoundRect(6, 6, 314, 234);
-	//Page indicator dots at top
-	for (byte p = 0; p < 3; ++p) {
-		display_setColor(p == pos ? 0xFB82 : 0x3A6C);
-		display_fillCircle(144 + p * 16, 15, p == pos ? 4 : 3);
-	}
-	//Buttons
+	display_fillScr(UI_BG_DARK);
+	drawModernHeader((pos == 0) ? "MAIN MENU  1/2" : "MAIN MENU  2/2", ui_themeName(uiThemeMode));
+
 	buttons_deleteAllButtons();
+	// Buttons 0..5 = 3x2 grid cards (92x68, 12px left/right margins)
+	buttons_addButton(12,  36,  92, 68, (char *)"", 0x0010);
+	buttons_addButton(114, 36,  92, 68, (char *)"", 0x0010);
+	buttons_addButton(216, 36,  92, 68, (char *)"", 0x0010);
+	buttons_addButton(12,  112, 92, 68, (char *)"", 0x0010);
+	buttons_addButton(114, 112, 92, 68, (char *)"", 0x0010);
+	buttons_addButton(216, 112, 92, 68, (char *)"", 0x0010);
+	// Buttons 6..7 = ergonomic bottom bar (142x36, 12px side margin, 14px bottom margin!)
+	buttons_addButton(12,  190, 142, 36, (char *)"", 0x0010); // 6: < Live
+	buttons_addButton(166, 190, 142, 36, (char *)"", 0x0010); // 7: More > / < Page 1
 
-	//Page 1
-	if (pos == 0)
-	{
-		//1.1 Temperature points
-		buttons_addButton(23, 28, 80, 80, iconTempPointsBMP, iconTempPointsPalette);
-		//1.2 Temperature limits
-		buttons_addButton(120, 28, 80, 80, iconTempLimitsBMP, iconTempLimitsPalette);
-		//1.3 Hot / Cold
-		buttons_addButton(217, 28, 80, 80, iconHotColdBMP, iconHotColdPalette);
+	if (pos == 0) {
+		drawModernMenuTile(12,  36,  92, 68, "Palette",  0, true);
+		drawModernMenuTile(114, 36,  92, 68, "Range",    1);
+		drawModernMenuTile(216, 36,  92, 68, "FFC",      2);
+		drawModernMenuTile(12,  112, 92, 68, "Points",   3);
+		drawModernMenuTile(114, 112, 92, 68, "Gallery",  4);
+		drawModernMenuTile(216, 112, 92, 68, "Settings", 7);
+	} else {
+		drawModernMenuTile(12,  36,  92, 68, "Overlays", 6);
+		drawModernMenuTile(114, 36,  92, 68, "Isotherm", 8);
+		drawModernMenuTile(216, 36,  92, 68, "Status",   9);
+		drawModernMenuTile(12,  112, 92, 68, "USB MTP",  10);
+		drawModernMenuTile(114, 112, 92, 68, "Video",    12);
+		drawModernMenuTile(216, 112, 92, 68, "Theme",    13);
 	}
 
-	//Page 2
-	if (pos == 1)
-	{
-		//2.1 Load menu
-		buttons_addButton(23, 28, 80, 80, iconLoadMenuBMP, iconLoadMenuPalette);
-		//2.2 Settings menu
-		buttons_addButton(120, 28, 80, 80, iconSettingsMenuBMP, iconSettingsMenuPalette);
-		//2.3 Change color
-		buttons_addButton(217, 28, 80, 80, iconChangeColorBMP, iconChangeColorPalette);
-	}
-
-	//Page 3
-	if (pos == 2)
-	{
-		//3.1 Display settings
-		buttons_addButton(23, 28, 80, 80, iconDisplaySettingsBMP, iconDisplaySettingsPalette);
-		//3.2 Trigger shutter
-		buttons_addButton(120, 28, 80, 80, iconShutterBMP, iconShutterPalette);
-		//3.3 Display off for radiometric
-		buttons_addButton(217, 28, 80, 80, iconDisplayOffBMP, iconDisplayOffPalette);
-	}
-
-	buttons_addButton(23, 132, 80, 80, iconBWBitmap, iconBWColors);
-	buttons_addButton(120, 132, 80, 80, iconReturnBitmap, iconReturnColors);
-	buttons_addButton(217, 132, 80, 80, iconFWBitmap, iconFWColors);
-	buttons_drawButtons();
+	drawBottomPill(12,  190, 142, 36, "< Live", true);
+	drawBottomPill(166, 190, 142, 36, (pos == 0) ? "More >" : "< Page 1", false);
 }
 
-/* Select the action when the select button is pressed */
+/* Select the action when a card is pressed */
 bool mainMenuSelect(byte pos, byte page)
 {
-	//Page 1
-	if (page == 0)
-	{
-		//1.1 Temperature points
-		if (pos == 0)
-		{
-			return tempPointsMenu();
-		}
-		//1.2 Temperature limits
-		if (pos == 1)
-		{
-			return tempLimits();
-		}
-		//1.3 Hot / Cold
-		if (pos == 2)
-		{
-			return hotColdMenu();
-		}
+	if (page == 0) {
+		if (pos == 0) return colorMenu();
+		if (pos == 1) return tempLimits();
+		if (pos == 2) { lepton_ffc(true); return true; }
+		if (pos == 3) return tempPointsMenu();
+		if (pos == 4) { loadFiles(); return false; }
+		if (pos == 5) { settingsMenu(); settingsMenuHandler(); return false; }
+	} else {
+		if (pos == 0) return liveDispMenu();
+		if (pos == 1) return hotColdMenu();
+		if (pos == 2) { showStatusScreen(); return false; }
+		if (pos == 3) { if (massStoragePrompt()) setMassStorage(); return false; }
+		if (pos == 4) { videoMode(); return false; }
+		if (pos == 5) { themeMenu(); return false; }
 	}
-
-	//Page 2
-	if (page == 1)
-	{
-		//2.1 Load menu
-		if (pos == 0)
-		{
-			loadFiles();
-		}
-		//2.2 Settings menu
-		if (pos == 1)
-		{
-			settingsMenu();
-			settingsMenuHandler();
-		}
-		//2.3 Change color
-		if (pos == 2)
-		{
-			return colorMenu();
-		}
-	}
-
-	//Page 3
-	if (page == 2)
-	{
-		//3.1 Display settings
-		if (pos == 0)
-		{
-			return liveDispMenu();
-		}
-		//3.2 Trigger shutter
-		if (pos == 1)
-		{
-			lepton_ffc(true);
-		}
-		//3.3 Display off
-		if (pos == 2)
-		{
-			toggleDisplay();
-		}
-	}
-
 	return false;
 }
 
-/* Touch Handler for the Live Menu */
+/* Touch Handler for the Live Menu (always polls checkSerial() so USB never locks out!) */
 void mainMenuHandler(byte *pos)
 {
-	int numPages = 3;
-
-	//Main loop
+	if (*pos > 1) *pos = 0;
+	while (touch_touched()) {}
 	while (true)
 	{
-		//Check for screen sleep
+		checkSerial();
 		if (screenOffCheck())
 			drawMainMenu(*pos);
 
-		//Touch screen pressed
-		if (touch_touched() == true)
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//FIRST BUTTON
-			if (pressedButton == 0)
-			{
-				//Leave menu
-				if (mainMenuSelect(0, *pos))
-					break;
-			}
-			//SECOND BUTTON
-			if (pressedButton == 1)
-			{
-				//Leave menu
-				if (mainMenuSelect(1, *pos))
-					break;
-			}
-			//THIRD BUTTON
-			if (pressedButton == 2)
-			{
-				//Leave menu
-				if (mainMenuSelect(2, *pos))
-					break;
-			}
-			//BACKWARD
-			else if (pressedButton == 3)
-			{
-				if (*pos > 0)
-					*pos = *pos - 1;
-				else if (*pos == 0)
-					*pos = numPages - 1;
-			}
-			//EXIT
-			if (pressedButton == 4)
-			{
-				showFullMessage((char *)"Please wait..", true);
+			int pressed = buttons_checkButtons(true);
+			if (pressed == 6) { // Ergonomic bottom < Live pill
 				return;
 			}
-			//FORWARD
-			else if (pressedButton == 5)
-			{
-				if (*pos < numPages - 1)
-					*pos = *pos + 1;
-				else if (*pos == numPages - 1)
-					*pos = 0;
+			if (pressed == 7) { // More > / < Page 1 flip
+				*pos = (*pos == 0) ? 1 : 0;
+				drawMainMenu(*pos);
+				continue;
 			}
-			drawMainMenu(*pos);
+			if (pressed >= 0 && pressed <= 5) {
+				if (mainMenuSelect(static_cast<byte>(pressed), *pos))
+					return;
+				drawMainMenu(*pos);
+			}
 		}
+		delay(5);
 	}
 }
 

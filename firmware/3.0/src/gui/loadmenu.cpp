@@ -30,38 +30,47 @@
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Display the GUI elements for the load menu */
+/* Display the GUI elements for the load menu (2026 translucent HUD pills, bezel-safe inset) */
 void displayGUI(uint32_t imgCount, char* infoText) {
-	//Set text color
-	changeTextColor();
-	//set Background transparent
-	display_setBackColor(VGA_TRANSPARENT);
-	display_setFont(bigFont);
-	//Delete image or video from internal storage
-	display_print((char*) "Delete", 220, 10);
-	//Find image by time and date
-	display_print((char*) "Find", 5, 10);
-	//Display prev/next if there is more than one image
+	auto drawHudAction = [](int x, int y, int w, const char* label, bool accent = false) {
+		display_blendRect(x, y, w, 22, UI_HUD_BG, 6);
+		display_setColor(accent ? UI_HUD_ACCENT : UI_HUD_BORDER);
+		display_drawRect(x, y, x + w - 1, y + 21);
+		display_setFont(smallFont);
+		display_setBackColor(VGA_TRANSPARENT);
+		display_setColor(accent ? UI_HUD_ACCENT : UI_HUD_TEXT);
+		int tx = x + (w - static_cast<int>(strlen(label)) * 8) / 2;
+		display_print((char*)label, tx, y + 5);
+	};
+
+	drawHudAction(12, 10, 56, "Find");
+	drawHudAction(240, 10, 68, "Delete");
 	if (imgCount != 1) {
-		display_print((char*) "<", 10, 110);
-		display_print((char*) ">", 295, 110);
+		drawHudAction(12, 109, 26, "<");
+		drawHudAction(282, 109, 26, ">");
 	}
-	//Convert image to bitmap
-	display_print((char*) "Convert", 5, 210);
-	//Exit to main menu
-	display_print((char*) "Exit", 250, 210);
+	drawHudAction(12, 206, 76, "Convert");
+	drawHudAction(228, 206, 80, "< Back", true);
+
+	// Centered timestamp / frame counter pill
+	int iw = static_cast<int>(strlen(infoText)) * 8 + 12;
+	int ix = (320 - iw) / 2;
+	if (ix < 72) ix = 72;
+	display_blendRect(ix, 10, iw, 22, UI_HUD_BG, 5);
 	display_setFont(smallFont);
-	//Display either frame number or image date and time
-	display_print(infoText, 80, 12);
+	display_setBackColor(VGA_TRANSPARENT);
+	display_setColor(UI_HUD_TEXT);
+	display_print(infoText, ix + 6, 15);
+	changeTextColor();
 }
 
 /* Asks the user if he wants to delete the video */
 void deleteVideo(char* dirname) {
 	//Title & Background
 	drawTitle((char*) "Delete Video", true);
-	display_setColor(0xF7DF);
+	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(0x08A5);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char*)"Do you want to delete this video?", CENTER, 66);
 	display_print((char*)"This will also remove the", CENTER, 105);
 	display_print((char*)"other related files to it. ", CENTER, 125);
@@ -140,9 +149,9 @@ void deleteVideo(char* dirname) {
 void deleteImage(char* filename) {
 	//Title & Background
 	drawTitle((char*) "Delete Image", true);
-	display_setColor(0xF7DF);
+	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(0x08A5);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char*)"Do you want to delete this image?", CENTER, 66);
 	display_print((char*)"This will also remove the", CENTER, 105);
 	display_print((char*)"other related files to it. ", CENTER, 125);
@@ -187,9 +196,9 @@ void deleteImage(char* filename) {
 bool convertPrompt() {
 	//Title & Background
 	drawTitle((char*) "Conversion Prompt", true);
-	display_setColor(0xF7DF);
+	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(0x08A5);
+	display_setBackColor(UI_BG_DARK);
 	display_print((char*)"Do you want to convert?", CENTER, 66);
 	display_print((char*)"That process will create", CENTER, 105);
 	display_print((char*)"bitmap(s) out of the raw data.", CENTER, 125);

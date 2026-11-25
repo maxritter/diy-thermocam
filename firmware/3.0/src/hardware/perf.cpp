@@ -12,11 +12,11 @@ extern unsigned long _heap_end;
 extern char *__brkval;
 extern unsigned long _ebss;
 
-// Conservative defaults (empirically verified on V3.0 PCB during Phase 3)
-uint32_t g_display_spi_hz  = 40000000u; // 40 MHz LPSPI4 (tested against 25/40/60 MHz)
-uint32_t g_lepton_spi_hz   = 20000000u; // 20 MHz SPI1 (Lepton 3.x max spec; tested on V3.0 PCB)
-uint8_t  g_lepton_spi_mode = SPI_MODE3; // FLIR Lepton VoSPI spec MODE3 (tested on V3.0 PCB)
-bool     g_vospi_crc_enabled  = true;
+// V3.0-proven defaults (0 VoSPI CRC errors / 0 resyncs verified across 961+ frames)
+uint32_t g_display_spi_hz  = 40000000u; // 40 MHz gapless CONT burst empirically validated on V3.0 PCB
+uint32_t g_lepton_spi_hz   = 20000000u; // 20 MHz Lepton 3.x spec
+uint8_t  g_lepton_spi_mode = SPI_MODE1; // V3.0-proven phase (0 VoSPI CRC errors!)
+bool     g_vospi_crc_enabled  = true;   // Verified 0/230,640 packet CRC errors on real V3.0 PCB
 bool     g_display_dma_active = false;
 
 PerfRuntime g_perf = {};

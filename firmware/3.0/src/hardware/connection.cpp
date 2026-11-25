@@ -126,7 +126,6 @@ void sendRawData(bool color)
 		}
 	}
 	flush_v1();
-	Serial.send_now();
 }
 
 /* Sends the framebuffer (buffered bulk writes, big-endian v1 wire format) */
@@ -144,7 +143,6 @@ void sendFramebuffer()
 		}
 	}
 	if (idx > 0) Serial.write(s_v1TxBuf, idx);
-	Serial.send_now();
 }
 
 /* Sends the configuration data */
@@ -598,6 +596,10 @@ void setTempPoints()
 		tempPoints[i][1] = serialRead16();
 	}
 
+	//Refresh live sensor values for the newly set points & force next raw_frame() refresh
+	refreshTempPoints();
+	s_v1FrameConsumed = true;
+
 	//Send ACK
 	Serial.write(CMD_SET_TEMPPOINTS);
 }
@@ -623,7 +625,6 @@ void sendFrame(bool color)
 
 	//Send type of frame response
 	Serial.write(sendCmd);
-	Serial.send_now();
 
 	//Send frame
 	if (sendCmd == FRAME_NORMAL)
@@ -648,7 +649,6 @@ void sendFrame(bool color)
 		sendSpotTemp();
 		//Send calibration data
 		sendCalibrationData();
-		Serial.send_now();
 	}
 	//Switch back to send frame the next time
 	else
@@ -696,7 +696,6 @@ void sendDisplayFrame()
 
 	//Send type of frame response
 	Serial.write(sendCmd);
-	Serial.send_now();
 
 	//Send frame
 	if (sendCmd == FRAME_NORMAL)
@@ -996,8 +995,5 @@ void serialConnect()
 
 	//Show message
 	showFullMessage((char *)"Connection ended, return..");
-	delay(1000);
-
-	//Clear all serial buffers
-	Serial.clear();
+	delay(250);
 }

@@ -36,6 +36,8 @@ void screenTimeoutMenu();
 void secondMenu(bool firstStart);
 void settingsMenuHandler();
 void settingsMenu();
+void drawThemeMenu();
+void themeMenu();
 void hardwareMenuHandler();
 void hardwareMenu();
 void tempFormatMenu(bool firstStart = false);

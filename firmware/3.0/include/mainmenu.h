@@ -22,6 +22,8 @@ bool calibrationRepeat();
 void calibrationScreen(bool firstStart = false);
 bool colorMenu();
 void colorMenuString(int pos);
+void drawColorMenuPage(byte page, byte selected);
+void drawLiveDispGrid();
 void drawMainMenu(byte pos);
 void drawSelectionMenu();
 void hotColdChooserHandler();

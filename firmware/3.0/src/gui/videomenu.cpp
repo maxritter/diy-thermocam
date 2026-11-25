@@ -229,8 +229,42 @@ void videoCaptureInterval(int16_t* remainingTime, uint32_t* framesCaptured, uint
 	}
 }
 
-/* Normal video capture */
+/* Normal video capture with crisp zero-flicker 2026 REC MM:SS pill */
+static uint32_t s_videoStartMs = 0;
+
+void drawVideoRecordingOverlay(uint32_t framesCaptured, uint32_t elapsedSec) {
+	char buffer[32];
+	uint32_t mm = elapsedSec / 60u;
+	uint32_t ss = elapsedSec % 60u;
+
+	//Write crisp REC MM:SS pill directly into bigBuffer (zero flicker!)
+	display_writeToImage = true;
+	display_setFont((uint8_t *)smallFont);
+	display_setBackColor(VGA_TRANSPARENT);
+
+	display_blendRect(108, 4, 104, 18, UI_HUD_BG, 6);
+	display_setColor(UI_HUD_ERR);
+	display_drawRoundRect(108, 4, 211, 21);
+	if ((elapsedSec & 1u) == 0u) {
+		display_fillCircle(118, 13, 3);
+	}
+	display_setColor(UI_HUD_TEXT);
+	snprintf(buffer, sizeof(buffer), "REC %02lu:%02lu", static_cast<unsigned long>(mm), static_cast<unsigned long>(ss));
+	display_print(buffer, 126, 7);
+
+	// Bottom-left frame + live rate pill
+	snprintf(buffer, sizeof(buffer), "%lu FR | %.1f FPS", static_cast<unsigned long>(framesCaptured), g_perf.video_fps_x100 / 100.0f);
+	int pw = static_cast<int>(strlen(buffer)) * 8 + 12;
+	display_blendRect(4, 220, pw, 16, UI_HUD_BG, 5);
+	display_setColor(UI_HUD_BORDER);
+	display_drawRoundRect(4, 220, 4 + pw - 1, 235);
+	display_setColor(UI_HUD_TEXT);
+	display_print(buffer, 10, 222);
+	display_writeToImage = false;
+}
+
 void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName) {
+	(void)buffer;
 	//Save video raw frame
 	saveRawData(false, dirName, *folderFrames);
 	*folderFrames = *folderFrames + 1;
@@ -241,19 +275,9 @@ void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* 
 	//Display infos
 	displayInfos();
 
-	//Write REC pill directly into bigBuffer (zero flicker)
-	display_writeToImage = true;
-	display_blendRect(6, 4, 96, 16, 0x08A5, 6);
-	display_setColor(0xF800);
-	display_fillCircle(16, 12, 4);
-	display_setColor(0xF7DF);
-	display_print((char*) "REC", 26, 6);
-
 	*framesCaptured = *framesCaptured + 1;
-	sprintf(buffer, "Frames: %lu", *framesCaptured);
-	display_blendRect(6, 222, 130, 16, 0x08A5, 6);
-	display_print(buffer, 10, 224);
-	display_writeToImage = false;
+	uint32_t elapsedSec = (millis() - s_videoStartMs) / 1000u;
+	drawVideoRecordingOverlay(*framesCaptured, elapsedSec);
 
 	displayBuffer();
 }
@@ -294,6 +318,7 @@ void videoCapture() {
 
 	//Switch to recording mode
 	videoSave = videoSave_recording;
+	s_videoStartMs = millis();
 	lepton_startFrame();
 	uint32_t lastVidUs = micros();
 
@@ -376,9 +401,9 @@ redraw:
 	//Draw the buttons
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 47, 140, 120, (char*) "Normal");
-	buttons_addButton(165, 47, 140, 120, (char*) "Interval");
-	buttons_addButton(15, 188, 140, 40, (char*) "Back");
+	buttons_addButton(12, 46, 142, 120, (char*) "Normal");
+	buttons_addButton(166, 46, 142, 120, (char*) "Interval");
+	buttons_addButton(12, 192, 142, 34, (char*) "< Back");
 	buttons_drawButtons();
 
 	//Touch handler

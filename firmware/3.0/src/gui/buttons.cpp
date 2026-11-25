@@ -139,9 +139,6 @@ void buttons_drawButton(int buttonID) {
 		display_drawRoundRect(buttons[buttonID].pos_x, buttons[buttonID].pos_y,
 				buttons[buttonID].pos_x + buttons[buttonID].width,
 				buttons[buttonID].pos_y + buttons[buttonID].height);
-		display_drawRoundRect(buttons[buttonID].pos_x - 1, buttons[buttonID].pos_y - 1,
-				buttons[buttonID].pos_x + buttons[buttonID].width + 1,
-				buttons[buttonID].pos_y + buttons[buttonID].height + 1);
 		if (buttons[buttonID].flags & BUTTON_DISABLED)
 			display_setColor(buttons_colorTextInactive);
 		else
@@ -321,23 +318,21 @@ int buttons_checkButtons(boolean timeout, boolean fast) {
 	return result;
 }
 
-/* Set a specific button to active (thermal amber accent pill) */
+/* Set a specific button to active (thermal orange accent pill) */
 void buttons_setActive(int buttonID) {
 	int text_x, text_y;
-	const word activeBg = 0xFB82; // #F97316 thermal amber
-	const word activeFg = 0x08A5; // #0F172A deep slate
-	display_setColor(activeBg);
-	display_fillRect(buttons[buttonID].pos_x + 2, buttons[buttonID].pos_y + 2,
-			buttons[buttonID].pos_x + buttons[buttonID].width - 2,
-			buttons[buttonID].pos_y + buttons[buttonID].height - 2);
+	display_setColor(UI_ACCENT);
+	display_fillRoundRect(buttons[buttonID].pos_x + 1, buttons[buttonID].pos_y + 1,
+			buttons[buttonID].pos_x + buttons[buttonID].width - 1,
+			buttons[buttonID].pos_y + buttons[buttonID].height - 1);
 	display_setFont(buttons_fontText);
-	display_setColor(activeFg);
+	display_setColor(UI_ACCENT_FG);
 	text_x = ((buttons[buttonID].width / 2)
 			- ((strlen(buttons[buttonID].label) * display_getFontXsize()) / 2))
 				+ buttons[buttonID].pos_x;
 	text_y = (buttons[buttonID].height / 2) - (display_getFontYsize() / 2)
 				+ buttons[buttonID].pos_y;
-	display_setBackColor(activeBg);
+	display_setBackColor(UI_ACCENT);
 	display_print(buttons[buttonID].label, text_x, text_y);
 }
 
@@ -345,9 +340,9 @@ void buttons_setActive(int buttonID) {
 void buttons_setInactive(int buttonID) {
 	int text_x, text_y;
 	display_setColor(buttons_colorBackGround);
-	display_fillRect(buttons[buttonID].pos_x + 2, buttons[buttonID].pos_y + 2,
-			buttons[buttonID].pos_x + buttons[buttonID].width - 2,
-			buttons[buttonID].pos_y + buttons[buttonID].height - 2);
+	display_fillRoundRect(buttons[buttonID].pos_x + 1, buttons[buttonID].pos_y + 1,
+			buttons[buttonID].pos_x + buttons[buttonID].width - 1,
+			buttons[buttonID].pos_y + buttons[buttonID].height - 1);
 	display_setFont(buttons_fontText);
 	display_setColor(buttons_colorText);
 	text_x = ((buttons[buttonID].width / 2)
@@ -379,11 +374,10 @@ void buttons_setButtonColors(word atxt, word iatxt, word brd, word brdhi,
 	buttons_colorHilite = brdhi;
 }
 
-/* Init the buttons with modern 2026 dark-slate + thermal amber palette */
+/* Init the buttons with modern 2026 obsidian + thermal orange palette */
 void buttons_init() {
 	buttons_deleteAllButtons();
 	buttons_fontText = NULL;
 	buttons_fontSymbol = NULL;
-	// Text: crisp white, Inactive: muted slate, Border: slate-600, Highlight: thermal amber, Fill: slate-800
-	buttons_setButtonColors(0xF7DF, 0x9517, 0x3A6C, 0xFB82, 0x1947);
+	buttons_setButtonColors(UI_TEXT, UI_TEXT_MUTED, UI_BORDER, UI_ACCENT, UI_SURFACE);
 }

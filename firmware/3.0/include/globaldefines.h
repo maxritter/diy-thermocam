@@ -89,6 +89,11 @@ extern "C" {
 #define lepton_gain_high 0
 #define lepton_gain_low  1
 
+//On-device UI Theme (0 = Dark default, 1 = Daylight Light, 2 = High-Contrast)
+#define uiTheme_dark         0
+#define uiTheme_light        1
+#define uiTheme_highContrast 2
+
 //EEPROM registers
 #define eeprom_leptonVersion    100
 #define eeprom_tempFormat       101
@@ -143,6 +148,7 @@ extern "C" {
 #define eeprom_lepton_gain      184
 #define eeprom_radParamsSet     185
 #define eeprom_radParamsData    186 //16 Byte (186-201)
+#define eeprom_uiTheme          202 //0 = Dark (default), 1 = Light (Daylight)
 #define eeprom_fwVersionLow     250
 #define eeprom_fwVersionHigh    251
 #define eeprom_setValue         200

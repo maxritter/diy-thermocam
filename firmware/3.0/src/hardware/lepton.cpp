@@ -92,9 +92,11 @@ bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg) {
 	lepton_end();
 
 	if ((lepton_packet[0] & 0x0Fu) != 0x0Fu) {
-		if (g_vospi_crc_enabled && !tc_core::vospi_packet_crc_ok(lepton_packet)) {
+		if (!tc_core::vospi_packet_crc_ok(lepton_packet)) {
 			g_perf.vospi_crc_errors++;
-			return false;
+			if (g_vospi_crc_enabled) {
+				return false;
+			}
 		}
 		*line = lepton_packet[1];
 		if (*line == 20) {
@@ -105,21 +107,27 @@ bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg) {
 	return valid;
 }
 
-/* Continuous double-buffered VSYNC ISR: fills smallBufferBack without stopping */
+/* Continuous double-buffered VSYNC ISR: fills smallBufferBack while main() renders smallBuffer */
 void lepton_getFrameAsync() {
-	if (disableSPIIRQ) return;
+	if (disableSPIIRQ || leptonBufferValid) return;
 
 	uint32_t startUsec = micros();
 	uint8_t line = 0, prevLine = 255, segment = 0;
 	bool done = false;
 	bool beforeValidData = true;
+	bool seenValid = false;
+	uint16_t discardCount = 0;
+	int attempts = 0;
 
 	if (lepton_curSeg == 1 && !lepton_validSegRegion) {
 		lepton_frameStartUs = startUsec;
 	}
 
-	while (!done) {
+	while (!done && attempts < 100) {
+		attempts++;
 		if (lepton_getPacketAsync(&line, &segment)) {
+			seenValid = true;
+			discardCount = 0;
 			if (line == prevLine || line > 59) {
 				if (lepton_validSegRegion) {
 					g_perf.vospi_resyncs++;
@@ -181,7 +189,14 @@ void lepton_getFrameAsync() {
 				}
 			}
 			prevLine = line;
-		} else if (abs_diff_u32(startUsec, micros()) > 9450u) {
+		} else {
+			discardCount++;
+			// Blank/discard VSYNC slot: bail after ~1.8 ms instead of burning the full 9.45 ms VSYNC period!
+			if (!seenValid && discardCount >= 25u) {
+				done = true;
+			}
+		}
+		if (abs_diff_u32(startUsec, micros()) > 6500u) {
 			done = true;
 		}
 	}
@@ -201,6 +216,7 @@ bool lepton_acquireFrame(bool wait) {
 	}
 	uint32_t timer = millis();
 	while (!leptonBufferValid) {
+		yield();
 		if ((millis() - timer) > 3000u) {
 			if (!serialMode) {
 				showFullMessage((char *)"Lepton error, resetting..");
@@ -211,9 +227,11 @@ bool lepton_acquireFrame(bool wait) {
 		}
 	}
 	noInterrupts();
-	unsigned short* tmp = smallBuffer;
-	smallBuffer = smallBufferBack;
-	smallBufferBack = tmp;
+	if (smallBufferBack) {
+		unsigned short* tmp = smallBuffer;
+		smallBuffer = smallBufferBack;
+		smallBufferBack = tmp;
+	}
 	leptonBufferValid = false;
 	interrupts();
 	return true;

@@ -37,8 +37,9 @@
 
 // Double-buffered 320x240 RGB565 framebuffers in OCRAM (DMAMEM)
 DMAMEM static uint16_t s_bigBufPool[2][76800];
-// Front 160x120 raw buffer in DTCM
+// Double-buffered 160x120 raw Lepton buffers in DTCM
 static uint16_t s_smallBufFront[19200];
+static uint16_t s_smallBufBack[19200];
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
@@ -223,6 +224,10 @@ void readEEPROM()
 	else
 		minMaxPoints = minMaxPoints_disabled;
 
+	//UI Theme (0 = Dark default, 1 = Daylight Light, 2 = High-Contrast)
+	read = EEPROM.read(eeprom_uiTheme);
+	ui_setThemeMode((read <= uiTheme_highContrast) ? read : uiTheme_dark);
+
 	//Gain Mode
 	read = EEPROM.read(eeprom_lepton_gain);
 	if (read == lepton_gain_high)
@@ -339,16 +344,18 @@ void initBuffer()
 	bigBuffer = s_bigBufPool[0];
 	bigBufferBack = s_bigBufPool[1];
 	smallBuffer = s_smallBufFront;
-	smallBufferBack = nullptr;
+	smallBufferBack = s_smallBufBack;
 }
 
 /* Display the content of the big buffer on the screen (double-buffered swap) */
 void displayBuffer()
 {
+	uint32_t t0 = micros();
 	unsigned short* toSend = bigBuffer;
 	bigBuffer = bigBufferBack;
 	bigBufferBack = toSend;
 	display_writeScreen(toSend);
+	g_perf.display_us = micros() - t0;
 }
 
 /* Sets the display rotation depending on the setting */
@@ -380,7 +387,6 @@ void readTempLimits()
 		minMaxPreset = read;
 	else
 		minMaxPreset = minMax_temporary;
-	minMaxPresetCache = minMaxPreset;
 	minMaxPresetCache = minMaxPreset;
 
 	//Min / max preset 1
@@ -540,11 +546,12 @@ bool screenOffCheck()
 /* Init the hardware */
 void initHardware()
 {
-	//Init UART
+	//Init UART / USB serial first so host link is always ready
 	Serial.begin(115200);
 
-	//Init performance telemetry
+	//Init performance telemetry & framebuffers before any driver/ISR can touch them
 	perf_init();
+	initBuffer();
 
 	//Init GPIO
 	initGPIO();
@@ -578,9 +585,6 @@ void initHardware()
 
 	//Init screen off timer
 	initScreenOffTimer();
-
-	//Init the buffer(s)
-	initBuffer();
 
 	//Check battery for the first time
 	checkBattery(true);

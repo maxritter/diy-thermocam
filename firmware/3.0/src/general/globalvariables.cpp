@@ -25,9 +25,9 @@
 
 /*############################# PUBLIC VARIABLES ##############################*/
 
-//Current firmware version
-char versionString[] = "3.1.0 (2026-11-25)";
-uint16_t fwVersion = 310;
+//Current firmware version (unified V3 + V4 Teensy 4.1 firmware)
+char versionString[] = "4.0.0 (2026-11-25)";
+uint16_t fwVersion = 400;
 
 //320x240 double buffers
 unsigned short* bigBuffer;

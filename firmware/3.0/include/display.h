@@ -43,17 +43,55 @@
 #define VGA_PURPLE		0x8010
 #define VGA_TRANSPARENT	0xFFFFFFFF
 
-// Modern 2026 Dark-Slate + Thermal Amber UI palette (RGB565)
-#define UI_BG_DARK      0x08A5  // #0F172A deep slate
-#define UI_SURFACE      0x1947  // #1E293B slate panel
-#define UI_ELEVATED     0x21A9  // #263449 button surface
-#define UI_BORDER       0x3A6C  // #3B4D66 subtle border
-#define UI_TEXT         0xF7DF  // #F8FAFC crisp white
-#define UI_TEXT_MUTED   0x9517  // #94A3B8 muted slate
-#define UI_ACCENT       0xFB82  // #F97316 thermal amber/orange
-#define UI_ACCENT_DARK  0xC2C1  // #C2410C deep amber
-#define UI_OK           0x262B  // #22C55E green
-#define UI_ERR          0xEA28  // #EF4444 red
+// Modern 2026 Version 1 Ironbow Thermal Lens UI theme (Dark default + Daylight Light)
+struct UiThemePalette {
+	uint16_t bg;
+	uint16_t surface;
+	uint16_t elevated;
+	uint16_t border;
+	uint16_t text;
+	uint16_t muted;
+	uint16_t accent;
+	uint16_t accent_hi;
+	uint16_t accent_dark;
+	uint16_t accent_fg;
+	uint16_t indigo;
+	uint16_t magenta;
+	uint16_t cyan;
+	uint16_t ok;
+	uint16_t err;
+};
+
+extern UiThemePalette g_uiTheme;
+extern bool uiLightTheme;
+extern uint8_t uiThemeMode;
+void ui_setTheme(bool light);
+void ui_setThemeMode(uint8_t mode);
+const char* ui_themeName(uint8_t mode);
+
+#define UI_BG_DARK      (g_uiTheme.bg)
+#define UI_SURFACE      (g_uiTheme.surface)
+#define UI_ELEVATED     (g_uiTheme.elevated)
+#define UI_BORDER       (g_uiTheme.border)
+#define UI_TEXT         (g_uiTheme.text)
+#define UI_TEXT_MUTED   (g_uiTheme.muted)
+#define UI_ACCENT       (g_uiTheme.accent)
+#define UI_ACCENT_HI    (g_uiTheme.accent_hi)
+#define UI_ACCENT_DARK  (g_uiTheme.accent_dark)
+#define UI_ACCENT_FG    (g_uiTheme.accent_fg)
+#define UI_INDIGO       (g_uiTheme.indigo)
+#define UI_MAGENTA      (g_uiTheme.magenta)
+#define UI_CYAN         (g_uiTheme.cyan)
+#define UI_OK           (g_uiTheme.ok)
+#define UI_ERR          (g_uiTheme.err)
+// Live thermal HUD pill colors stay dark-obsidian high-contrast over thermal frames in both themes
+#define UI_HUD_BG       0x0862u
+#define UI_HUD_BORDER   0x2967u
+#define UI_HUD_TEXT     0xF7DFu
+#define UI_HUD_ACCENT   0xF364u
+#define UI_HUD_CYAN     0x3DFFu
+#define UI_HUD_OK       0x262Bu
+#define UI_HUD_ERR      0xEA28u
 
 struct propFont
 {

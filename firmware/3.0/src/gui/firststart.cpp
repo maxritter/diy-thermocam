@@ -42,20 +42,20 @@ boolean checkFirstStart()
 /* Show welcome Screen for the first start procedure */
 void welcomeScreen()
 {
-	//Background & Title (2026 dark-slate + thermal amber)
-	display_fillScr(0x08A5);
-	display_setBackColor(0x08A5);
+	//Background & Title (2026 minimalist dark obsidian + thermal orange)
+	display_fillScr(UI_BG_DARK);
+	display_setBackColor(UI_BG_DARK);
 	display_setFont(smallFont);
-	display_printC("Welcome to the", CENTER, 20, 0x9517);
+	display_printC("Welcome to the", CENTER, 20, UI_TEXT_MUTED);
 	display_setFont(bigFont);
-	display_printC("DIY-Thermocam V3", CENTER, 60, 0xFB82);
+	display_printC("DIY-Thermocam V3", CENTER, 60, UI_ACCENT);
 
 	//Explanation
 	display_setFont(smallFont);
-	display_printC("This is the first time setup.", CENTER, 110, 0xF7DF);
-	display_printC("It will guide you through the", CENTER, 140, 0xF7DF);
-	display_printC("basic settings for your device.", CENTER, 170, 0xF7DF);
-	display_printC("-> Please touch screen <-", CENTER, 210, 0xFB82);
+	display_printC("This is the first time setup.", CENTER, 110, UI_TEXT);
+	display_printC("It will guide you through the", CENTER, 140, UI_TEXT);
+	display_printC("basic settings for your device.", CENTER, 170, UI_TEXT);
+	display_printC("-> Please touch screen <-", CENTER, 210, UI_ACCENT);
 
 	//Wait for touch press
 	while (!touch_touched())
@@ -70,24 +70,24 @@ void welcomeScreen()
 void infoScreen(String *text, bool cont)
 {
 	//Background & Title
-	display_fillScr(0x08A5);
-	display_setBackColor(0x08A5);
+	display_fillScr(UI_BG_DARK);
+	display_setBackColor(UI_BG_DARK);
 	display_setFont(bigFont);
-	display_printC(text[0], CENTER, 20, 0xFB82);
+	display_printC(text[0], CENTER, 20, UI_ACCENT);
 
 	//Content
 	display_setFont(smallFont);
-	display_printC(text[1], CENTER, 55, 0xF7DF);
-	display_printC(text[2], CENTER, 80, 0xF7DF);
-	display_printC(text[3], CENTER, 105, 0xF7DF);
-	display_printC(text[4], CENTER, 130, 0xF7DF);
+	display_printC(text[1], CENTER, 55, UI_TEXT);
+	display_printC(text[2], CENTER, 80, UI_TEXT);
+	display_printC(text[3], CENTER, 105, UI_TEXT);
+	display_printC(text[4], CENTER, 130, UI_TEXT);
 
 	//Show hint to touch the screen
 	if (cont)
 	{
-		display_printC(text[5], CENTER, 155, 0xF7DF);
-		display_printC(text[6], CENTER, 180, 0xF7DF);
-		display_printC("-> Please touch screen <-", CENTER, 212, 0xFB82);
+		display_printC(text[5], CENTER, 155, UI_TEXT);
+		display_printC(text[6], CENTER, 180, UI_TEXT);
+		display_printC("-> Please touch screen <-", CENTER, 212, UI_ACCENT);
 		//Wait for touch press
 		while (!touch_touched())
 			;
@@ -265,6 +265,9 @@ void stdEEPROMSet()
 
 	//Battery gauge standard compensation values
 	EEPROM.write(eeprom_batComp, 6);
+
+	//Set UI theme to Dark default
+	EEPROM.write(eeprom_uiTheme, uiTheme_dark);
 
 	//Set current firmware version
 	EEPROM.write(eeprom_fwVersionHigh, (fwVersion & 0xFF00) >> 8);
