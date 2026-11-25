@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 import pytest
-from build123d import Box, Location, Solid, extrude
+from build123d import Box, Location, Plane, RectangleRounded, Solid, extrude
 
 from thermocam_case.export import default_enclosure_root, export_all
 from thermocam_case.keepout import build_keepouts
@@ -176,8 +176,20 @@ def test_printable_zero_interference_and_safety_gates(variant: str) -> None:
     assert enc.lens_cap_open.bounding_box().max.Z > e["z_track_floor"] + 0.15
     assert enc.lens_cap_closed.bounding_box().max.Z > e["z_track_floor"] + 0.15
     if p.is_zero_solder and enc.slide_switch_cap is not None and enc.capture_button is not None:
-        # Astra P0-3: Fork reaches <= 88.90 mm (>=1.1 mm axial overlap on SW1 knob at X=90.0)
-        assert enc.slide_switch_cap.bounding_box().min.X <= 88.90
+        # Astra ENC-DELTA-P0-2: Fork reaches X=89.10 (>=0.90 mm knob overlap) & clears SW1 B.Fab body (X<=89.0)!
+        assert 89.05 <= enc.slide_switch_cap.bounding_box().min.X <= 89.15
+        sw1_body = Location((87.50, 12.70, 18.00)) * Box(3.00, 6.00, 1.70)
+        assert _inter_vol(enc.slide_switch_cap, sw1_body) < 1e-4
+        for dy in (-1.25, 1.25):
+            assert _inter_vol(_move(enc.slide_switch_cap, 0, dy, 0), sw1_body) < 1e-4
+            sw1_knob = Location((90.00, 12.70 + dy, 17.35)) * Box(2.00, 1.50, 1.00)
+            assert _inter_vol(_move(enc.slide_switch_cap, 0, dy, 0), sw1_knob) < 1e-4
+        # Astra ENC-DELTA-P1-1: Sharp R=1.0 mm rectangular 13.8x7.8 USB-C boot clears BOTH shells!
+        boot_plane = Plane(origin=(45.80, -4.50, 18.40), x_dir=(1, 0, 0), z_dir=(0, -1, 0))
+        usb_boot_r1 = extrude(boot_plane * RectangleRounded(13.80, 7.80, 1.00), amount=-4.20)
+        usb_boot_r1 = usb_boot_r1 if isinstance(usb_boot_r1, Solid) else usb_boot_r1.solids()[0]
+        assert _inter_vol(usb_boot_r1, enc.back_shell) < 1e-4
+        assert _inter_vol(usb_boot_r1, enc.front_shell) < 1e-4
         # Astra P1-2: Rest tip sits at Y=69.10 (>=0.15 mm zero-preload gap above SW2 at Y=68.95)
         assert enc.capture_button.bounding_box().min.Y >= 69.09
         # Positive housing hard-stop engages back_shell shelf at 0.70 mm overtravel (prevents SW2 crush!)
@@ -240,16 +252,35 @@ def test_laser_plates_valid_and_zero_interference(variant: str) -> None:
         for keep_solid in (k.pcb, k.display_pcb, k.display_panel, k.battery):
             assert _inter_vol(plate_solid, keep_solid) < 1e-3, f"{variant} laser {name} hits keepout"
     if p.is_zero_solder:
-        # ENC-2D-P0-1: Verify working V4 acrylic capture_key & switch_key clearances & actuation!
+        # ENC-2D-P0-1 + ENC-DELTA-P0-2/P1-1: Working V4 acrylic capture_key & switch_key + hard-stop + R=1.0 USB!
         cap_k = laser.plates_3d["capture_key"]
         sw_k = laser.plates_3d["switch_key"]
         assert cap_k.bounding_box().min.Y >= 69.09  # 0.15 mm zero-preload above SW2 at Y=68.95
-        assert sw_k.bounding_box().min.X <= 88.95   # >=1.05 mm axial overlap on SW1 at X=90.0
-        for dy in (-1.65, 1.65):
+        assert 89.05 <= sw_k.bounding_box().min.X <= 89.15  # Clears SW1 B.Fab body (X<=89.0), >=0.9 mm knob overlap!
+        # Positive outer shoulder hard-stop on top plate at -0.55 mm travel (0.000 mm^3 at -0.50, >0.5 at -0.70!)
+        cap_50 = Location((0, -0.50, 0)) * cap_k
+        cap_50 = cap_50 if isinstance(cap_50, Solid) else cap_50.solids()[0]
+        cap_70 = Location((0, -0.70, 0)) * cap_k
+        cap_70 = cap_70 if isinstance(cap_70, Solid) else cap_70.solids()[0]
+        assert _inter_vol(cap_50, laser.plates_3d["top"]) < 1e-4
+        assert _inter_vol(cap_70, laser.plates_3d["top"]) > 0.5
+        # Zero SW1 B.Fab body & knob proxy interference across full throw!
+        sw1_body = Location((87.50, 12.70, 18.00)) * Box(3.00, 6.00, 1.70)
+        assert _inter_vol(sw_k, sw1_body) < 1e-4
+        for dy in (-1.65, -1.0, 1.0, 1.65):
             moved_sw = Location((0, dy, 0)) * sw_k
             moved_sw = moved_sw if isinstance(moved_sw, Solid) else moved_sw.solids()[0]
             assert _inter_vol(moved_sw, laser.plates_3d["right"]) < 1e-3
             assert _inter_vol(moved_sw, k.pcb) < 1e-3
+            assert _inter_vol(moved_sw, sw1_body) < 1e-4
+            if abs(dy) <= 1.25:
+                sw1_knob = Location((90.00, 12.70 + dy, 17.35)) * Box(2.00, 1.50, 1.00)
+                assert _inter_vol(moved_sw, sw1_knob) < 1e-4
+        # Sharp R=1.0 mm rectangular 13.8x7.8 USB-C boot clears laser bottom plate!
+        boot_plane = Plane(origin=(45.80, -4.50, 18.40), x_dir=(1, 0, 0), z_dir=(0, -1, 0))
+        usb_boot_r1 = extrude(boot_plane * RectangleRounded(13.80, 7.80, 1.00), amount=-4.20)
+        usb_boot_r1 = usb_boot_r1 if isinstance(usb_boot_r1, Solid) else usb_boot_r1.solids()[0]
+        assert _inter_vol(usb_boot_r1, laser.plates_3d["bottom"]) < 1e-4
     # ENC-2D-P1-4 + #221: Laser back plate clears 71 deg (3.5) AND 119 deg (3.1R) DFOV even at 3.20 mm stock!
     thick_back = extrude(laser.plates_2d["back"], amount=-3.20)
     thick_back = thick_back if isinstance(thick_back, Solid) else thick_back.solids()[0]

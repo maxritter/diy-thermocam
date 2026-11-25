@@ -274,7 +274,7 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
         )
         _cut_slot_or_unotch(
             p.usb.center_x, p.usb.center_z, p.usb.overmold_width, p.usb.overmold_height,
-            2.20, z_seam, _xz_plane(e["oy0"] - 0.05), -(p.usb.overmold_depth + 0.05),
+            1.00, z_seam, _xz_plane(e["oy0"] - 0.05), -(p.usb.overmold_depth + 0.05),
         )
 
         # 11. Top-wall microSD card guide tunnel + deep 22 mm fingertip/nail scoop (P1-5)

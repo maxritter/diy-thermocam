@@ -169,8 +169,9 @@ def _build_top_or_bottom_2d(p: EnclosureParams, b: dict[str, float], is_top: boo
             with Locations((p.microsd_x, p.microsd_z)):
                 SlotOverall(p.microsd_w, p.microsd_h, mode=Mode.SUBTRACT)
         else:
+            # ENC-DELTA-P1-1: R=1.0 mm rounded rectangle clears sharp rectangular 13.8x7.8 USB-C boots!
             with Locations((p.usb.center_x, p.usb.center_z)):
-                SlotOverall(p.usb.laser_width, p.usb.laser_height, mode=Mode.SUBTRACT)
+                RectangleRounded(p.usb.laser_width, p.usb.laser_height, 1.00, mode=Mode.SUBTRACT)
             # ENC-2D-P1-3: Rotated bolt circle (30, 150, 270 deg; R=8.2 mm) -> >=2.6 mm & >=9.6 mm webs!
             with Locations((p.laser_tripod_x, p.laser_tripod_z)):
                 Circle(p.laser_tripod_center_d / 2.0, mode=Mode.SUBTRACT)
@@ -221,29 +222,42 @@ def _build_v4_acrylic_keys_2d(p: EnclosureParams, b: dict[str, float]) -> dict[s
         reaching X=88.90 (1.10 mm axial overlap on C&K JS102011SAQN!), 6.0 mm neck -> +-1.8 mm stop!
     """
     t = b["t"]
-    # 1. Capture key (XY plane in world coords: centered at X=p.button_x, Y=69.10..75.80)
+    # 1. Capture key (XY plane in world coords: centered at X=p.button_x, Y=69.10..76.20)
+    #    - Outer 10.0 mm tactile cap starts at Y=y_plate_out+0.55 (74.35) -> positive hard-stop on top
+    #      plate outer face (Y=73.80) at -0.55 mm travel (0.40 mm SW2 stroke, prevents SW2 crush!).
+    #    - Inner 7.30 mm asymmetric retention ear (X=79.20..86.50, 1.10 mm tall) threads through the
+    #      7.20 mm slot at ~20 deg tilt and latches 1.20 mm behind the top plate!
     y_plate_in = b["y1"]          # 70.80 mm
     y_plate_out = b["y1"] + t     # 73.80 mm
+    y_stop_cap = y_plate_out + 0.55  # 74.35 mm -> exact 0.55 mm travel to positive top-plate stop!
     with BuildSketch() as sk_cap:
-        with Locations((p.button_x, 0.5 * (69.50 + (y_plate_in - 0.15)))):
-            RectangleRounded(11.40, (y_plate_in - 0.15) - 69.50, 0.35)
-        with Locations((p.button_x, 0.5 * (69.10 + 69.65))):
-            Rectangle(3.20, 69.65 - 69.10)
-        with Locations((p.button_x, 0.5 * (70.00 + (y_plate_out + 2.00)))):
-            RectangleRounded(6.20, (y_plate_out + 2.00) - 70.00, 0.8)
+        # Inner thread-in retention hook (X in [button_x-4.80, button_x+2.50], Y in [69.55, 70.65])
+        with Locations((p.button_x - 1.15, 0.5 * (69.55 + (y_plate_in - 0.15)))):
+            RectangleRounded(7.30, (y_plate_in - 0.15) - 69.55, 0.30)
+        # Narrow actuator nib reaching Y=69.10 (0.15 mm zero-preload gap above SW2 at Y=68.95!)
+        with Locations((p.button_x, 0.5 * (69.10 + 69.70))):
+            Rectangle(3.20, 69.70 - 69.10)
+        # Guided neck through 7.20 mm top-plate slot (5.00 mm wide -> easy tilted hook insertion!)
+        with Locations((p.button_x, 0.5 * (69.65 + y_stop_cap + 0.20))):
+            Rectangle(5.00, (y_stop_cap + 0.20) - 69.65)
+        # Outer 10.0 mm finger cap + positive hard-stop shoulder (overlaps top plate 1.4 mm each side!)
+        with Locations((p.button_x, 0.5 * (y_stop_cap + (y_stop_cap + 1.85)))):
+            RectangleRounded(10.00, 1.85, 0.55)
 
-    # 2. Switch key (XY plane in world coords: X=88.90..96.60, centered at Y=p.switch_y)
+    # 2. Switch key (XY plane in world coords: X=89.10..96.60, centered at Y=p.switch_y)
+    #    Fork starts at X=89.10 (+0.10 mm clear of SW1 B.Fab body X<=89.0!), pocket cut LAST to X=91.20!
     x_plate_in = b["x1"]          # 91.60 mm
     x_plate_out = b["x1"] + t     # 94.60 mm
     with BuildSketch() as sk_sw:
         with Locations((0.5 * (90.10 + (x_plate_in - 0.10)), p.switch_y)):
             RectangleRounded((x_plate_in - 0.10) - 90.10, 14.00, 0.5)
-        with Locations((0.5 * (88.90 + 90.40), p.switch_y)):
-            RectangleRounded(90.40 - 88.90, 7.20, 0.4)
-        with Locations((0.5 * (88.80 + 91.10), p.switch_y)):
-            Rectangle(91.10 - 88.80, 2.40, mode=Mode.SUBTRACT)
-        with Locations((0.5 * (90.90 + (x_plate_out + 2.00)), p.switch_y)):
-            RectangleRounded((x_plate_out + 2.00) - 90.90, 6.00, 0.8)
+        with Locations((0.5 * (89.10 + 90.40), p.switch_y)):
+            RectangleRounded(90.40 - 89.10, 7.20, 0.35)
+        with Locations((0.5 * (91.20 + (x_plate_out + 2.00)), p.switch_y)):
+            RectangleRounded((x_plate_out + 2.00) - 91.20, 6.00, 0.8)
+        # Cut fork pocket LAST (X=89.00..91.20) so outer slider never encroaches on SW1 knob (X<=91.0)!
+        with Locations((0.5 * (89.00 + 91.20), p.switch_y)):
+            Rectangle(91.20 - 89.00, 2.40, mode=Mode.SUBTRACT)
 
     return {
         "capture_key": sk_cap.sketch.faces()[0],

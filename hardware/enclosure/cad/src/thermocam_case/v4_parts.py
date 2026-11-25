@@ -178,7 +178,7 @@ def build_slide_switch_cap(p: EnclosureParams, e: dict[str, float]) -> Solid:
     """
     sy = p.switch_y
     z_bot = 16.70               # Common flush build-plate bottom plane (100% support-free!)
-    x_fork_tip = 88.80          # Reaches 1.20 mm onto SW1 knob (X=90.0) strictly below PCB (Z<=19.7 < 20.0)!
+    x_fork_tip = 89.10          # +0.10 mm clear of SW1 B.Fab body (X<=89.0), >=0.90 mm overlap on knob!
     x_shoulder_in = 89.55       # 0.15 mm clear of PCB right edge (89.40) for taller captive shoulder
     x_shoulder_out = e["ix1"] - 0.15  # 91.45 mm
     x_thumb_tip = e["ox1"] + 0.15     # 94.35 mm
