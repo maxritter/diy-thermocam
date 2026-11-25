@@ -11,7 +11,7 @@ DIY-Thermocam V3: an open-source thermal imager built on a FLIR Lepton sensor an
 
 The other folders hold binaries or design files that cannot be edited here: `software/*/` zips (third-party Windows tools), `pcb/3.0` (Eagle `.brd`/`.sch`, gerbers), `enclosure/3.0` (SketchUp). Firmware releases ship as `.hex` files on GitHub Releases, not in the repo.
 
-There are no tests, linters or CI. To check a change, build it; the only full check is flashing a real device.
+There are no unit tests, linters or CI. A firmware change is checked by building it, flashing a real camera and running the hardware regression suite in `firmware/3.0/test` (see Commands).
 
 ## Commands
 
@@ -25,7 +25,16 @@ arduino-cli board list              # find the port
 
 `sketch.yaml` is the single source of build settings: the FQBN (Teensy 4.1, `usb=serialmtp`, 450 MHz, `-O3`), the pinned `teensy:avr` core version, and a `dir:` entry for every library. The vendored copies in `lib/` are used instead of the core's bundled ones, so a new library needs both a folder in `lib/` and an entry in `sketch.yaml`. A library whose sources live in `src/` needs a `library.properties` file, or arduino-cli silently falls back to the core's copy (check the "Used library" table in the compile output). `include/` is listed as a library so the headers are on the include path. `3.0.ino` exists only because arduino-cli requires a sketch file named after the folder. Every compile and upload prints `discovery teensy:teensy-discovery not installed`; that line is harmless in profile mode.
 
-To check a firmware change on a connected camera, talk to it over serial: send `0x64` (start), expect `0x64` back, send commands, and finish with `0xC8`, after which the camera returns to live mode.
+Regression suite against the connected camera (run from `firmware/3.0/test`, after flashing the build under test):
+
+```sh
+pip install -r requirements.txt
+pytest --baseline baseline-3.0.4.json        # 34 tests, ~50 s; port found automatically
+pytest -k colorbar                           # a single test
+pytest --manual -s                           # adds button/touch tests that prompt a person
+```
+
+`thermocam.py` is the protocol client: a session starts with `0x64` and ends with `0xC8`, after which the camera returns to live mode. The camera reads one queued byte per frame loop, so a rejected payload leaves its bytes to be parsed as commands for up to a minute. After the first such failure every later answer is `0x00`, so fix the first failure only. Tests must restore any setting they change; the session fixture also restores all settings at the end.
 
 Live viewer (run from `software/thermal_live_viewer/3.0`):
 

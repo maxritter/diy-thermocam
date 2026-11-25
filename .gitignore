@@ -6,3 +6,4 @@ __pycache__/
 *.pyw
 *.pyz
 *.pywz
+.pytest_cache/
