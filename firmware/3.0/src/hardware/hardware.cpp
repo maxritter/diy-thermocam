@@ -428,10 +428,10 @@ void initScreenOffTimer()
 		screenOffTime = read;
 		//10 Minutes
 		if (screenOffTime == screenOffTime_5min)
-			screenOff.begin(300000, false);
+			screenOff = Metro(300000, false);
 		//30 Minutes
 		else if (screenOffTime == screenOffTime_20min)
-			screenOff.begin(1200000, false);
+			screenOff = Metro(1200000, false);
 		//Disable marker
 		screenPressed = false;
 	}

@@ -34,8 +34,8 @@ unsigned short* bigBuffer;
 //160x120 buffer
 unsigned short* smallBuffer;
 
-//Timer
-Metro screenOff;
+//Timer, the interval is set in initScreenOffTimer()
+Metro screenOff(0, false);
 boolean screenPressed;
 byte screenOffTime;
 

@@ -27,8 +27,7 @@
 #include <thermal.h>
 
 #include <SD.h>
-#include <MTP.h>
-#include <LittleFS.h>
+#include <MTP_Teensy.h>
 #include <TimeLib.h>
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
@@ -41,12 +40,8 @@ const char *sd_str[] = {"sdio", "sd1"};
 const int cs[] = {BUILTIN_SDCARD, 10};
 const int nsd = sizeof(sd_str) / sizeof(const char *);
 SDClass sdx[nsd];
-MTPStorage_SD storage;
-MTPD mtpd(&storage);
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
-
-extern "C" int usb_init_events(void);
 
 void dateTime(uint16_t *date, uint16_t *time, uint8_t *ms10)
 {
@@ -63,7 +58,7 @@ void storage_configure()
 		{
 			if (sdx[ii].sdfs.begin(SdioConfig(FIFO_SDIO)))
 			{
-				storage.addFilesystem(sdx[ii], sd_str[ii]);
+				MTP.addFilesystem(sdx[ii], sd_str[ii]);
 			}
 		}
 	}
@@ -76,14 +71,15 @@ void enterMassStorage()
 	{
 		EEPROM.write(eeprom_massStorage, 0);
 		showFullMessage((char *)"USB File Transfer, touch to exit!");
-		usb_init_events();
 		storage_configure();
 		FsDateTime::callback = dateTime;
+		//Start the core's MTP responder after the card is added
+		MTP.begin();
 
 		//Do MTP until user wants to exit via touch
 		while (true)
 		{
-			mtpd.loop();
+			MTP.loop();
 			if (touch_touched() || !isUSBConnected())
 				break;
 		}
