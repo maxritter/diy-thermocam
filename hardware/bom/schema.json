@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/maxritter/diy-thermocam/master/hardware/bom/schema.json",
+  "title": "DIY-Thermocam BOM Row",
+  "description": "Canonical schema for a single row in hardware/bom/bom.csv, shared by KiCad, CI validation, and the documentation website.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "hw_rev",
+    "category",
+    "designators",
+    "qty",
+    "name",
+    "value_spec",
+    "package",
+    "mpn",
+    "manufacturer",
+    "lcsc_part",
+    "seeed_opl_part",
+    "pcba_tier",
+    "primary_supplier",
+    "primary_url",
+    "alt_supplier",
+    "alt_url",
+    "unit_price_usd",
+    "status",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$",
+      "description": "Unique kebab-case part identifier."
+    },
+    "hw_rev": {
+      "type": "string",
+      "enum": ["all", "v3.0", "v3.1"],
+      "description": "Target hardware revision: all (shared), v3.0 (1:1 Eagle/KiCad port), or v3.1 (USB-C + BQ24075 PCBA revision)."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "sensor",
+        "compute",
+        "display",
+        "power",
+        "pcb_smd",
+        "pcb_tht",
+        "connector",
+        "electromechanical",
+        "storage",
+        "mechanical",
+        "fastener",
+        "consumable"
+      ],
+      "description": "Functional grouping used for website tables and cost breakdowns."
+    },
+    "designators": {
+      "type": "string",
+      "pattern": "^(|[A-Za-z0-9_$-]+(,[A-Za-z0-9_$-]+)*)$",
+      "description": "Comma-separated PCB reference designators (e.g. R1,R3,R4,R6), or empty for off-board items."
+    },
+    "qty": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Quantity required per camera unit (or pack count when unit_price_usd is a pack price, noted in notes)."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "description": "Human-readable component name."
+    },
+    "value_spec": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Electrical or mechanical specification (resistance, voltage, thread, capacity, config)."
+    },
+    "package": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Physical footprint, case code, or standard (e.g. 0603, VQFN-16, Axial-0.4, Module, ISO-M2.5)."
+    },
+    "mpn": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Manufacturer Part Number or ISO/DIN standard designation."
+    },
+    "manufacturer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Manufacturer or standard body."
+    },
+    "lcsc_part": {
+      "type": "string",
+      "pattern": "^(|C[0-9]+)$",
+      "description": "LCSC/JLCPCB C-number (e.g. C15464) when sourced for PCBA, otherwise empty."
+    },
+    "seeed_opl_part": {
+      "type": "string",
+      "pattern": "^(|[A-Za-z0-9_-]+)$",
+      "description": "Seeed Studio Fusion OPL SKU when pinned, or empty (Seeed Shenzhen OPL matches MPN/LCSC automatically)."
+    },
+    "pcba_tier": {
+      "type": "string",
+      "enum": ["basic", "extended", "tht_manual", "offboard", "optional"],
+      "description": "Assembly classification: JLCPCB/Seeed basic SMD, extended SMD/THT, manual THT soldering, off-board module/mechanical, or optional."
+    },
+    "primary_supplier": {
+      "type": "string",
+      "minLength": 2,
+      "description": "Primary verified 2026 distributor or store."
+    },
+    "primary_url": {
+      "type": "string",
+      "pattern": "^https://[^\\s]+$",
+      "description": "Verified HTTPS product URL for primary_supplier."
+    },
+    "alt_supplier": {
+      "type": "string",
+      "description": "Optional regional or backup supplier."
+    },
+    "alt_url": {
+      "type": "string",
+      "pattern": "^(|https://[^\\s]+)$",
+      "description": "Optional verified HTTPS product URL for alt_supplier."
+    },
+    "unit_price_usd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Estimated single-unit price in USD (2026 reference)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "optional", "workaround", "eol_notice"],
+      "description": "Lifecycle status: active, optional (excluded from required totals), workaround (e.g. V3.0 TP4056), or eol_notice."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Assembly, polarity, configuration, or sourcing notes."
+    }
+  }
+}
