@@ -24,7 +24,7 @@ Open a terminal in the `firmware/3.0` folder and run:
 arduino-cli compile
 ```
 
-The settings are in `sketch.yaml`: Teensy 4.1 at 450 MHz, USB type "Serial + MTP Disk", fastest optimization, Teensy core 1.58.2 and the libraries in `lib/`. The first build takes a few minutes for the downloads; later builds take about 30 seconds.
+The settings are in `sketch.yaml`: Teensy 4.1 at 450 MHz, USB type "Serial + MTP Disk", fastest optimization and Teensy core 1.62.0, whose bundled libraries the firmware uses. The first build takes a few minutes for the downloads; later builds take about 30 seconds.
 
 ## 3. Flash
 

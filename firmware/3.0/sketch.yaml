@@ -3,8 +3,9 @@
 #   arduino-cli upload -p <port>   (find the port with: arduino-cli board list)
 #
 # The first compile downloads the pinned Teensy core and its compiler.
-# Teensy core 1.59 and newer ship their own MTP library, which clashes
-# with the copy in lib/MTP, so the core stays on 1.58.2.
+# All libraries (ADC, Bounce, EEPROM, Metro, SD, SdFat, SPI, Time, Wire)
+# come with the core, and MTP is part of the core itself, so only the
+# firmware's own include folder is listed here.
 default_profile: thermocam
 
 profiles:
@@ -12,18 +13,7 @@ profiles:
     notes: DIY-Thermocam V3, Teensy 4.1 at 450 MHz, Serial + MTP Disk, -O3
     fqbn: teensy:avr:teensy41:usb=serialmtp,speed=450,opt=o3std
     platforms:
-      - platform: teensy:avr (1.58.2)
+      - platform: teensy:avr (1.62.0)
         platform_index_url: https://www.pjrc.com/teensy/package_teensy_index.json
     libraries:
       - dir: include
-      - dir: lib/ADC
-      - dir: lib/Bounce
-      - dir: lib/EEPROM
-      - dir: lib/LittleFS
-      - dir: lib/Metro
-      - dir: lib/MTP
-      - dir: lib/SD
-      - dir: lib/SdFat
-      - dir: lib/SPI
-      - dir: lib/Time
-      - dir: lib/Wire
