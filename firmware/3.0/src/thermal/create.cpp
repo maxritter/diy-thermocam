@@ -26,60 +26,26 @@
 #include <temperature.h>
 #include <lepton.h>
 #include <save.h>
+#include <perf.h>
+#include <tc_thermal_core.h>
 #include <create.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Filter a 160x120 smallBuffer with 3x3 gaussian kernel */
+/* Filter a 160x120 smallBuffer with 3x3 integer gaussian kernel */
 void gaussianFilter()
 {
-	byte gaussianKernel[3][3] = {
-		{1, 2, 1},
-		{2, 4, 2},
-		{1, 2, 1}};
-	long sum;
-
-	for (int y = 1; y < 119; y++)
-	{
-		for (int x = 1; x < 159; x++)
-		{
-			sum = 0;
-			for (int k = -1; k <= 1; k++)
-			{
-				for (int j = -1; j <= 1; j++)
-				{
-					sum += gaussianKernel[j + 1][k + 1] * smallBuffer[(y - j) * 160 + (x - k)];
-				}
-			}
-			smallBuffer[(y * 160) + x] = (unsigned short)(sum / 16.0);
-		}
-	}
+	uint32_t t0 = micros();
+	tc_core::filter_gaussian_3x3(smallBuffer, tc_core::SMALL_W, tc_core::SMALL_H);
+	g_perf.filter_us = micros() - t0;
 }
 
-/* Filter a 160x120 smallBuffer with a 3x3 box kernel */
+/* Filter a 160x120 smallBuffer with 3x3 integer box kernel */
 void boxFilter()
 {
-	byte boxKernel[3][3] = {
-		{1, 1, 1},
-		{1, 1, 1},
-		{1, 1, 1}};
-	long sum;
-
-	for (int y = 1; y < 119; y++)
-	{
-		for (int x = 1; x < 159; x++)
-		{
-			sum = 0;
-			for (int k = -1; k <= 1; k++)
-			{
-				for (int j = -1; j <= 1; j++)
-				{
-					sum += boxKernel[j + 1][k + 1] * smallBuffer[(y - j) * 160 + (x - k)];
-				}
-			}
-			smallBuffer[(y * 160) + x] = (unsigned short)(sum / 9.0);
-		}
-	}
+	uint32_t t0 = micros();
+	tc_core::filter_box_3x3(smallBuffer, tc_core::SMALL_W, tc_core::SMALL_H);
+	g_perf.filter_us = micros() - t0;
 }
 
 //Resize the pixels of thermal smallBuffer
@@ -115,41 +81,12 @@ void resizePixels(unsigned short *pixels, int w1, int h1, int w2, int h2)
 	}
 }
 
-/* Write the smallBuffer to the bigBuffer by resizing */
+/* Write the smallBuffer to the bigBuffer using fast integer clamped Catmull-Rom 2x */
 void smallToBigBuffer()
 {
-	unsigned short A, B, C, D, outVal;
-	int x, y, index;
-	float x_ratio = 159.0 / 320;
-	float y_ratio = 119.0 / 240;
-	float x_diff, y_diff;
-
-	int offset = 0;
-	for (int i = 0; i < 240; i++)
-	{
-		for (int j = 0; j < 320; j++)
-		{
-
-			x = (int)(x_ratio * j);
-			y = (int)(y_ratio * i);
-			x_diff = (x_ratio * j) - x;
-			y_diff = (y_ratio * i) - y;
-			index = y * 160 + x;
-
-			A = smallBuffer[index];
-			B = smallBuffer[index + 1];
-			C = smallBuffer[index + 160];
-			D = smallBuffer[index + 160 + 1];
-
-			outVal = (unsigned short)(A * (1 - x_diff) * (1 - y_diff) + B * (x_diff) * (1 - y_diff) +
-									  C * (y_diff) * (1 - x_diff) + D * (x_diff * y_diff));
-
-			bigBuffer[offset] = outVal;
-
-			//Raise counter
-			offset++;
-		}
-	}
+	uint32_t t0 = micros();
+	tc_core::upscale_sharp_2x(smallBuffer, bigBuffer);
+	g_perf.scale_us = micros() - t0;
 }
 
 /* Clears the temperature points array */
@@ -369,23 +306,17 @@ redraw:
 	delay(1000);
 }
 
-/* Go through the array of temperatures and find min and max temp */
+/* Go through the array of temperatures and find min and max temp (fused single pass) */
 void limitValues()
 {
-	maxValue = 0;
-	minValue = 65535;
-	uint16_t temp;
-	for (int i = 0; i < 19200; i++)
-	{
-		//Get value
-		temp = smallBuffer[i];
-		//Find maximum temp
-		if (temp > maxValue)
-			maxValue = temp;
-		//Find minimum temp
-		if (temp < minValue)
-			minValue = temp;
-	}
+	tc_core::MinMaxStats st{};
+	tc_core::scan_min_max(smallBuffer, 19200, st);
+	minValue = st.min_val;
+	maxValue = st.max_val;
+	minTempVal = st.min_val;
+	minTempPos = st.min_pos;
+	maxTempVal = st.max_val;
+	maxTempPos = st.max_pos;
 }
 
 /* Get the colors for hot / cold mode selection */
@@ -426,93 +357,35 @@ void getHotColdColors(byte *red, byte *green, byte *blue)
 	}
 }
 
-/* Convert the lepton values to RGB colors */
+/* Convert the lepton values to RGB565 colors using precomputed LUT & divide-by-zero guard */
 void convertColors(bool small)
 {
-	uint8_t red = 0;
-	uint8_t green = 0;
-	uint8_t blue = 0;
-	uint16_t value;
-
-	//Calculate the scale
-	float scale = (colorElements - 1.0) / (maxValue - minValue);
-
-	//For hot and cold mode, calculate rawlevel
-	float hotColdRawLevel = 0.0;
-	if (hotColdMode != hotColdMode_disabled)
-		hotColdRawLevel = tempToRaw(hotColdLevel);
-
-	//Size of the array & buffer
-	int size;
-	unsigned short* frameBuffer;
-	if (!small) {
-		size = 76800;
-		frameBuffer = bigBuffer;
+	uint32_t t0 = micros();
+	uint16_t hotColdRaw = 0;
+	uint16_t hotColdRgb = 0;
+	if (hotColdMode != hotColdMode_disabled) {
+		hotColdRaw = tempToRaw(hotColdLevel);
+		byte r = 0, g = 0, b = 0;
+		getHotColdColors(&r, &g, &b);
+		hotColdRgb = tc_core::pack_rgb565(r, g, b);
 	}
-	else {
-		size = 19200;
-		frameBuffer = smallBuffer;
-	}
-
-
-	//Repeat for 160x120 data
-	for (int i = 0; i < size; i++)
-	{
-
-		value = frameBuffer[i];
-
-		//Limit values
-		if (value > maxValue)
-			value = maxValue;
-		if (value < minValue)
-			value = minValue;
-
-		//Hot
-		if ((hotColdMode == hotColdMode_hot) && (value >= hotColdRawLevel))
-			getHotColdColors(&red, &green, &blue);
-		//Cold
-		else if ((hotColdMode == hotColdMode_cold) && (value <= hotColdRawLevel))
-			getHotColdColors(&red, &green, &blue);
-
-		//Apply colorscheme
-		else
-		{
-			value = (value - minValue) * scale;
-			red = colorMap[3 * value];
-			green = colorMap[3 * value + 1];
-			blue = colorMap[3 * value + 2];
-		}
-
-		//Convert to RGB565
-		frameBuffer[i] = (((red & 248) | green >> 5) << 8) | ((green & 28) << 3 | blue >> 3);
-	}
+	unsigned short* frameBuffer = small ? smallBuffer : bigBuffer;
+	size_t count = small ? tc_core::SMALL_PIXELS : tc_core::BIG_PIXELS;
+	tc_core::convert_colors_u16(
+		frameBuffer, count, minValue, maxValue, colorLut,
+		static_cast<uint16_t>(colorElements), hotColdMode, hotColdRaw, hotColdRgb);
+	g_perf.colorize_us = micros() - t0;
 }
 
 /* Refresh the position and value of the min / max value */
 void refreshMinMax()
 {
-	//Reset values
-	minTempVal = 65535;
-	maxTempVal = 0;
-
-	//Go through the smallBuffer
-	for (int i = 0; i < 19200; i++)
-	{
-		//We found a new min
-		if (smallBuffer[i] < minTempVal)
-		{
-			//Save position and value
-			minTempPos = i;
-			minTempVal = smallBuffer[i];
-		}
-
-		//We found a new max
-		if (smallBuffer[i] > maxTempVal)
-		{
-			maxTempPos = i;
-			maxTempVal = smallBuffer[i];
-		}
-	}
+	tc_core::MinMaxStats st{};
+	tc_core::scan_min_max(smallBuffer, tc_core::SMALL_PIXELS, st);
+	minTempPos = st.min_pos;
+	minTempVal = st.min_val;
+	maxTempPos = st.max_pos;
+	maxTempVal = st.max_val;
 }
 
 /* Refresh the temperature points*/
@@ -554,33 +427,29 @@ void calculatePointPos(int16_t *xpos, int16_t *ypos, uint16_t pixelIndex)
 		*xpos = 318;
 }
 
-/* Creates a thermal smallBuffer and stores it in the array */
+/* Creates a thermal frame and stores it in the buffer */
 void createThermalImg(bool small)
 {
-	//Get Lepton frame
-	if (small)
-		lepton_startFrame();
-	lepton_getFrame();
+	//Acquire double-buffered Lepton frame
+	lepton_acquireFrame(true);
 
-	//Get the spot temperature
+	//Stats stage: spotmeter + temp points + fused min/max scan
+	uint32_t t_stats = micros();
 	getSpotTemp();
-
-	//Refresh the temp points if required
 	refreshTempPoints();
-
-	//Find min / max position
-	if (minMaxPoints != minMaxPoints_disabled)
+	if (autoMode && !limitsLocked) {
+		limitValues(); // also populates minTempPos/maxTempPos in one pass!
+	} else if (minMaxPoints != minMaxPoints_disabled) {
 		refreshMinMax();
+	}
+	g_perf.stats_us = micros() - t_stats;
 
-	//Find min and max if not in manual mode and limits not locked
-	if ((autoMode) && (!limitsLocked))
-		limitValues();
-
-	//If smallBuffer save, save the raw data
+	//If image save, save the raw .DAT data before display filtering
 	if (imgSave == imgSave_create)
 		saveRawData(true, saveFilename);
 
 	//Apply low-pass filter
+	g_perf.filter_us = 0;
 	if (filterType == filterType_box)
 		boxFilter();
 	else if (filterType == filterType_gaussian)

@@ -88,7 +88,9 @@ void checkBattery(bool start, bool calibrate) {
 		vBat += (float) batComp / 100.0;
 
 	//Calculate the percentage out of the voltage
+	batMillivolts = (vBat > 0.5f) ? static_cast<uint16_t>(roundf(vBat * 1000.0f)) : 0u;
 	batPercentage = getLipoPerc(vBat);
+	batMillivolts = (batPercentage == -1 || vBat < 0.5f) ? 0 : static_cast<uint16_t>(round(vBat * 1000.0f));
 
 	//Show warning on startup if the battery is low
 	if ((batPercentage <= 20) && (batPercentage != -1) && (start)) {

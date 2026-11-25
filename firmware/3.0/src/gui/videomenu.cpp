@@ -31,6 +31,7 @@
 #include <livemode.h>
 #include <fonts.h>
 #include <buttons.h>
+#include <perf.h>
 #include <videomenu.h>
 
 /*######################### STATIC DATA DECLARATIONS ##########################*/
@@ -240,23 +241,20 @@ void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* 
 	//Display infos
 	displayInfos();
 
-	//Write to image buffer
+	//Write REC pill directly into bigBuffer (zero flicker)
 	display_writeToImage = true;
+	display_blendRect(6, 4, 96, 16, 0x08A5, 6);
+	display_setColor(0xF800);
+	display_fillCircle(16, 12, 4);
+	display_setColor(0xF7DF);
+	display_print((char*) "REC", 26, 6);
 
-	//Display title
-	display_print((char*) "Video capture", 115, 20);
-
-	//Raise capture counter
 	*framesCaptured = *framesCaptured + 1;
-
-	//Display current frames captured
-	sprintf(buffer, "Frames captured: %6lu", *framesCaptured);
-	display_print(buffer, 70, 200);
-
-	//Disable image buffer
+	sprintf(buffer, "Frames: %lu", *framesCaptured);
+	display_blendRect(6, 222, 130, 16, 0x08A5, 6);
+	display_print(buffer, 10, 224);
 	display_writeToImage = false;
 
-	//Refresh capture
 	displayBuffer();
 }
 
@@ -297,12 +295,11 @@ void videoCapture() {
 	//Switch to recording mode
 	videoSave = videoSave_recording;
 	lepton_startFrame();
+	uint32_t lastVidUs = micros();
 
 	//Main loop
 	while (videoSave == videoSave_recording) {
-		//Do not store too many files in one folder, otherwise MTP will make issues
-		if(folderFrames >= 1000)
-		{
+		if (folderFrames >= 1000) {
 			videoCreateFolder(dirName);
 			folderFrames = 0;
 		}
@@ -313,19 +310,26 @@ void videoCapture() {
 			while (!digitalRead(pin_touch_irq));
 		}
 
-		//Create the thermal image
+		uint32_t loopStartUs = micros();
+
+		//Create the thermal image (swaps double buffer; Lepton captures next in background)
 		createThermalImg();
 
-		//Video capture
 		if (videoInterval == 0) {
 			videoCaptureNormal(&framesCaptured, &folderFrames, buffer, dirName);
-		}
-		//Interval capture
-		else {
+		} else {
 			videoCaptureInterval(&delayTime, &framesCaptured, &folderFrames, buffer, dirName);
 		}
 
-		lepton_startFrame();
+		uint32_t nowUs = micros();
+		g_perf.loop_total_us = nowUs - loopStartUs;
+		if (videoInterval == 0) {
+			perf_record_frame_period(PERF_MODE_VIDEO, nowUs - lastVidUs);
+		}
+		lastVidUs = nowUs;
+	}
+	if (framesCaptured > 0 && videoInterval == 0) {
+		perf_save_video_snapshot();
 	}
 
 	//Turn the display on if it was off before

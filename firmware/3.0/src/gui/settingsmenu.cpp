@@ -31,6 +31,7 @@
 #include <sdcard.h>
 #include <create.h>
 #include <buttons.h>
+#include <massstorage.h>
 #include <settingsmenu.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
@@ -359,9 +360,9 @@ void batteryGauge()
 {
 	//Title & Background
 	drawTitle((char *)"Battery Gauge", true);
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(0x08A5);
 	display_print((char *)"Do you want to calibrate the", CENTER, 75);
 	display_print((char *)"battery gauge? Fully charge the", CENTER, 95);
 	display_print((char *)"battery first (LED green/blue).", CENTER, 115);
@@ -621,9 +622,9 @@ void formatStorage()
 {
 	//Title & Background
 	drawTitle((char *)"Storage");
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(0x08A5);
 	display_print((char *)"Do you really want to format?", CENTER, 66);
 	display_print((char *)"This will delete all images", CENTER, 105);
 	display_print((char *)"and videos on the internal storage.", CENTER, 125);
@@ -757,8 +758,15 @@ void hardwareMenuHandler()
 			{
 				formatStorage();
 			}
-			//Back
+			//USB MTP (moved out of automatic plug-in popup into Settings)
 			else if (pressedButton == 3)
+			{
+				if (massStoragePrompt())
+					setMassStorage();
+				hardwareMenu();
+			}
+			//Back
+			else if (pressedButton == 4)
 			{
 				settingsMenu();
 				break;
@@ -772,10 +780,11 @@ void hardwareMenu()
 {
 	drawTitle((char *)"Hardware Settings");
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Battery Gauge");
-	buttons_addButton(170, 60, 130, 70, (char *)"Lepton Gain");
-	buttons_addButton(20, 150, 130, 70, (char *)"Format");
-	buttons_addButton(170, 150, 130, 70, (char *)"Back");
+	buttons_addButton(20, 56, 130, 52, (char *)"Battery Gauge");
+	buttons_addButton(170, 56, 130, 52, (char *)"Lepton Gain");
+	buttons_addButton(20, 118, 130, 52, (char *)"Format SD");
+	buttons_addButton(170, 118, 130, 52, (char *)"USB MTP");
+	buttons_addButton(20, 180, 280, 44, (char *)"Back");
 	buttons_drawButtons();
 }
 

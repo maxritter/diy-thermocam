@@ -1,19 +1,6 @@
 /*
-*
-* GUI - Main Methods to lcd the Graphical-User-Interface
-*
-* DIY-Thermocam Firmware
-*
-* GNU General Public License v3.0
-*
-* Copyright by Max Ritter
-*
-* http://www.diy-thermocam.net
-* https://github.com/maxritter/diy-thermocam
-*
-*/
-
-/*################################# INCLUDES ##################################*/
+ * GUI - Modern 2026 Dark-Slate + Thermal Amber On-Device UI
+ */
 
 #include <Arduino.h>
 #include <globaldefines.h>
@@ -24,204 +11,233 @@
 #include <bitmaps.h>
 #include <buttons.h>
 #include <hardware.h>
+#include <tc_thermal_core.h>
 #include <gui.h>
 
-/*######################## PUBLIC FUNCTION BODIES #############################*/
+// 2026 Theme extra accents (base UI_* palette macros live in display.h)
+static constexpr uint16_t UI_BG        = UI_BG_DARK;
+static constexpr uint16_t UI_MUTED     = UI_TEXT_MUTED;
+static constexpr uint16_t UI_AMBER     = UI_ACCENT;
+static constexpr uint16_t UI_AMBER_HI  = 0xFD20; // #FFA500 hot amber
+static constexpr uint16_t UI_CRIMSON   = 0xE8C4; // #E81A24 thermal crimson
 
-/* Converts a given float to char array */
+/* Converts a given float to char array (fixes -1 < x < 0 minus sign bug) */
 void floatToChar(char *buffer, float val)
 {
-	int units = val;
-	int hundredths = val * 100;
-	hundredths = abs(hundredths % 100);
-	sprintf(buffer, "%d.%02d", units, hundredths);
+	tc_core::format_float_2dp(buffer, 16, val);
 }
 
 /* Sets the text color to the right one */
 void changeTextColor()
 {
-	//Red
 	if (textColor == textColor_red)
 		display_setColor(VGA_RED);
-	//Black
 	else if (textColor == textColor_black)
 		display_setColor(VGA_BLACK);
-	//Green
 	else if (textColor == textColor_green)
 		display_setColor(VGA_GREEN);
-	//Blue
 	else if (textColor == textColor_blue)
 		display_setColor(VGA_BLUE);
-	//White
 	else
 		display_setColor(VGA_WHITE);
 }
 
-/* Shows a full screen message */
+/* Shows a full screen or modal card message */
 void showFullMessage(char *message, bool small)
 {
-	//Fill screen complete
 	if (!small)
-		display_fillScr(200, 200, 200);
-
-	//Make a round corner around it
+	{
+		display_fillScr(UI_BG);
+		display_setColor(UI_SURFACE);
+		display_fillRoundRect(16, 82, 304, 158);
+		display_setColor(UI_BORDER);
+		display_drawRoundRect(16, 82, 304, 158);
+		display_setColor(UI_AMBER);
+		display_fillRect(18, 84, 302, 87);
+	}
 	else
 	{
-		display_setColor(200, 200, 200);
+		display_setColor(UI_SURFACE);
 		display_fillRoundRect(6, 6, 314, 234);
+		display_setColor(UI_BORDER);
+		display_drawRoundRect(6, 6, 314, 234);
 	}
 
-	//Display the text
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
-	display_setColor(VGA_BLACK);
-	display_print(message, CENTER, 110);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	display_print(message, CENTER, 114);
 }
 
-/* Shows a transparent message in live mode */
+/* Shows a transient status toast in live mode */
 void showTransMessage(char *msg)
 {
-	//Set text color
-	changeTextColor();
-	//Set background transparent
-	display_setBackColor(VGA_TRANSPARENT);
-	//Display to screen in big font
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(34, 88, 286, 146);
+	display_setColor(UI_AMBER);
+	display_drawRoundRect(34, 88, 286, 146);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
 	display_setFont(bigFont);
-	//Display higher if spot is enabled
-	if (spotEnabled)
-		display_print(msg, CENTER, 70);
-	else
-		display_print(msg, CENTER, 110);
-	//Switch back to small font
+	display_print(msg, CENTER, 109);
 	display_setFont(smallFont);
-	//Wait some time to read the text
-	delay(1000);
+	delay(800);
 }
 
-/* Draw a BigFont Text in the center of a menu*/
+/* Draw a BigFont value in the center of a stepper menu */
 void drawCenterElement(int element)
 {
+	display_setColor(UI_BG);
+	display_fillRoundRect(102, 64, 218, 126);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(102, 64, 218, 126);
 	display_setFont(bigFont);
-	display_setColor(VGA_BLACK);
-	display_setBackColor(200, 200, 200);
-	display_printNumI(element, CENTER, 80, 2, '0');
+	display_setColor(UI_AMBER_HI);
+	display_setBackColor(UI_BG);
+	display_printNumI(element, CENTER, 87, 2, '0');
 	display_setFont(smallFont);
 }
 
-/* Draws the border for the main menu */
+/* Draws the outer frame for the main menu */
 void drawMainMenuBorder()
 {
-	display_setColor(VGA_BLACK);
-	display_fillRoundRect(5, 5, 315, 235);
+	display_setColor(UI_BG);
 	display_fillRoundRect(4, 4, 316, 236);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(5, 5, 315, 235);
 }
 
-/* Draw a title on the screen */
+/* Draw a menu title header */
 void drawTitle(char *name, bool firstStart)
 {
 	if (firstStart)
-		display_fillScr(200, 200, 200);
+		display_fillScr(UI_BG);
 	else
 	{
-		display_setColor(200, 200, 200);
+		display_setColor(UI_BG);
 		display_fillRoundRect(6, 6, 314, 234);
+		display_setColor(UI_BORDER);
+		display_drawRoundRect(6, 6, 314, 234);
 	}
+	display_setColor(UI_SURFACE);
+	display_fillRect(7, 7, 313, 46);
+	display_setColor(UI_AMBER);
+	display_drawHLine(7, 46, 306);
+
 	display_setFont(bigFont);
-	display_setBackColor(200, 200, 200);
-	display_setColor(VGA_BLACK);
-	display_print(name, CENTER, 25);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	display_print(name, CENTER, 18);
 	display_setFont(smallFont);
 }
 
-/* Shows the hadware diagnostics */
+/* Shows the hardware self-diagnostics screen */
 void showDiagnostic()
 {
-	//Display title & background
-	display_fillScr(200, 200, 200);
+	display_fillScr(UI_BG);
+	display_setColor(UI_SURFACE);
+	display_fillRect(0, 0, 319, 40);
+	display_setColor(UI_AMBER);
+	display_drawHLine(0, 40, 320);
+
 	display_setFont(bigFont);
-	display_setBackColor(200, 200, 200);
-	display_setColor(VGA_BLUE);
-	display_print((char *)"Self-diagnostic", CENTER, 10);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	display_print((char *)"Self-Diagnostic", CENTER, 12);
 
-	//Change text color and font
 	display_setFont(smallFont);
-	display_setColor(VGA_BLACK);
+	display_setBackColor(UI_BG);
 
-	//Display hardware module names
-	display_print((char *)"Display", 50, 50);
-	display_print((char *)"Touch", 50, 85);
-	display_print((char *)"Battery Gauge", 50, 120);
-	display_print((char *)"FLIR Lepton", 50, 155);
-	display_print((char *)"SD card", 50, 190);
+	const char* names[5] = {"Display", "Touchscreen", "Battery Gauge", "FLIR Lepton", "SD Card"};
+	const byte bits[5]   = {diag_display, diag_touch, diag_bat, diag_lepton, diag_sd};
+	for (int i = 0; i < 5; ++i)
+	{
+		int y = 56 + i * 30;
+		display_setColor(UI_TEXT);
+		display_print((char *)names[i], 42, y);
+		if (checkDiagnostic(bits[i]))
+		{
+			display_setColor(UI_OK);
+			display_print((char *)"OK    ", 224, y);
+		}
+		else
+		{
+			display_setColor(UI_ERR);
+			display_print((char *)"FAILED", 224, y);
+		}
+	}
 
-	//Check display SPI
-	if (checkDiagnostic(diag_display))
-		display_print((char *)"OK    ", 220, 50);
-	else
-		display_print((char *)"Failed", 220, 50);
+	display_setColor(UI_MUTED);
+	display_print((char *)"Touch screen to continue", CENTER, 216);
 
-	//Check touch SPI
-	if (checkDiagnostic(diag_touch))
-		display_print((char *)"OK    ", 220, 85);
-	else
-		display_print((char *)"Failed", 220, 85);
-
-	//Check battery gauge
-	if (checkDiagnostic(diag_bat))
-		display_print((char *)"OK    ", 220, 120);
-	else
-		display_print((char *)"Failed", 220, 120);
-
-	//Check FLIR Lepton
-	if (checkDiagnostic(diag_lepton))
-		display_print((char *)"OK    ", 220, 155);
-	else
-		display_print((char *)"Failed", 220, 155);
-
-	//Check sd card
-	if (checkDiagnostic(diag_sd))
-		display_print((char *)"OK    ", 220, 190);
-	else
-		display_print((char *)"Failed", 220, 190);
-
-	//Show hint
-	display_print((char *)"Touch to continue", CENTER, 220);
-
-	//Wait until touch
-	while (!touch_touched());
-	showFullMessage((char*) "Trying to continue boot, may freeze..");
+	while (!touch_touched()) {}
+	showFullMessage((char *)"Continuing boot...");
 }
 
-/* Draw the Boot screen */
+/* Draw the modern 2026 Boot splash with geometric thermal-reticle emblem */
 void bootScreen()
 {
-	//Set rotation
 	setDisplayRotation();
-
-	//Init the buttons
 	buttons_init();
-
-	//Set Fonts
 	buttons_setTextFont((uint8_t *)smallFont);
 	display_setFont(smallFont);
 
-	//Draw Screen
-	display_fillScr(255, 255, 255);
+	// Deep slate backdrop
+	display_fillScr(UI_BG);
+
+	// Subtle top & bottom thermal-amber accent bars
+	display_setColor(UI_AMBER);
+	display_fillRect(0, 0, 319, 2);
+	display_fillRect(0, 237, 319, 239);
+
+	// Geometric 2026 Thermal-Reticle Emblem centered at (160, 86)
+	const int cx = 160, cy = 86;
+	// Corner viewfinder brackets
+	display_setColor(UI_BORDER);
+	const int bx = 46, by = 40, bl = 12;
+	display_drawHLine(cx - bx, cy - by, bl); display_drawVLine(cx - bx, cy - by, bl);
+	display_drawHLine(cx + bx - bl + 1, cy - by, bl); display_drawVLine(cx + bx, cy - by, bl);
+	display_drawHLine(cx - bx, cy + by, bl); display_drawVLine(cx - bx, cy + by - bl + 1, bl);
+	display_drawHLine(cx + bx - bl + 1, cy + by, bl); display_drawVLine(cx + bx, cy + by - bl + 1, bl);
+
+	// Concentric thermal rings (outer muted, mid amber, inner crimson)
+	display_setColor(UI_BORDER);
+	display_drawCircle(cx, cy, 34);
+	display_setColor(UI_AMBER);
+	display_drawCircle(cx, cy, 24);
+	display_drawCircle(cx, cy, 23);
+	display_setColor(UI_CRIMSON);
+	display_drawCircle(cx, cy, 13);
+
+	// Precision crosshair ticks
+	display_setColor(UI_AMBER_HI);
+	display_drawHLine(cx - 42, cy, 14);
+	display_drawHLine(cx + 29, cy, 14);
+	display_drawVLine(cx, cy - 36, 10);
+	display_drawVLine(cx, cy + 27, 10);
+
+	// Glowing thermal core
+	display_setColor(UI_AMBER_HI);
+	display_fillCircle(cx, cy, 5);
+	display_setColor(UI_TEXT);
+	display_fillCircle(cx, cy, 2);
+
+	// Brand typography
 	display_setFont(bigFont);
-	display_setBackColor(255, 255, 255);
-	display_setColor(VGA_BLACK);
+	display_setBackColor(UI_BG);
+	display_setColor(UI_TEXT);
+	display_print((char *)"DIY-THERMOCAM", CENTER, 142);
 
-	//Show the logo and boot text
-	display_writeRect4BPP(90, 35, 140, 149, logoBitmap, logoColors);
-	display_print((char *)"Booting", CENTER, 194);
+	// V3 badge + version line
 	display_setFont(smallFont);
+	display_setColor(UI_AMBER);
+	display_print((char *)"V3  |  RADIOMETRIC LWIR", CENTER, 170);
 
-	//Show hardware version
-	display_print((char *)"DIY-Thermocam V3", CENTER, 10);
+	// Subtle divider & version string
+	display_setColor(UI_BORDER);
+	display_drawHLine(70, 192, 180);
+	display_setColor(UI_MUTED);
+	display_print(versionString, CENTER, 204);
 
-	//Display version
-	display_print(versionString, CENTER, 220);
-
-	//Wait some time
-	delay(2000);
+	delay(500);
 }

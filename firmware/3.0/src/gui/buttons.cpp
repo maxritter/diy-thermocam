@@ -321,21 +321,23 @@ int buttons_checkButtons(boolean timeout, boolean fast) {
 	return result;
 }
 
-/* Set a specific button to active */
+/* Set a specific button to active (thermal amber accent pill) */
 void buttons_setActive(int buttonID) {
 	int text_x, text_y;
-	display_setColor(VGA_AQUA);
-	display_fillRect(buttons[buttonID].pos_x + 3, buttons[buttonID].pos_y + 3,
-			buttons[buttonID].pos_x + buttons[buttonID].width - 3,
-			buttons[buttonID].pos_y + buttons[buttonID].height - 3);
+	const word activeBg = 0xFB82; // #F97316 thermal amber
+	const word activeFg = 0x08A5; // #0F172A deep slate
+	display_setColor(activeBg);
+	display_fillRect(buttons[buttonID].pos_x + 2, buttons[buttonID].pos_y + 2,
+			buttons[buttonID].pos_x + buttons[buttonID].width - 2,
+			buttons[buttonID].pos_y + buttons[buttonID].height - 2);
 	display_setFont(buttons_fontText);
-	display_setColor(buttons_colorText);
+	display_setColor(activeFg);
 	text_x = ((buttons[buttonID].width / 2)
 			- ((strlen(buttons[buttonID].label) * display_getFontXsize()) / 2))
 				+ buttons[buttonID].pos_x;
 	text_y = (buttons[buttonID].height / 2) - (display_getFontYsize() / 2)
 				+ buttons[buttonID].pos_y;
-	display_setBackColor(VGA_AQUA);
+	display_setBackColor(activeBg);
 	display_print(buttons[buttonID].label, text_x, text_y);
 }
 
@@ -343,9 +345,9 @@ void buttons_setActive(int buttonID) {
 void buttons_setInactive(int buttonID) {
 	int text_x, text_y;
 	display_setColor(buttons_colorBackGround);
-	display_fillRect(buttons[buttonID].pos_x + 3, buttons[buttonID].pos_y + 3,
-			buttons[buttonID].pos_x + buttons[buttonID].width - 3,
-			buttons[buttonID].pos_y + buttons[buttonID].height - 3);
+	display_fillRect(buttons[buttonID].pos_x + 2, buttons[buttonID].pos_y + 2,
+			buttons[buttonID].pos_x + buttons[buttonID].width - 2,
+			buttons[buttonID].pos_y + buttons[buttonID].height - 2);
 	display_setFont(buttons_fontText);
 	display_setColor(buttons_colorText);
 	text_x = ((buttons[buttonID].width / 2)
@@ -377,16 +379,11 @@ void buttons_setButtonColors(word atxt, word iatxt, word brd, word brdhi,
 	buttons_colorHilite = brdhi;
 }
 
-/* Init the buttons */
+/* Init the buttons with modern 2026 dark-slate + thermal amber palette */
 void buttons_init() {
 	buttons_deleteAllButtons();
-	buttons_colorText = VGA_WHITE;
-	buttons_colorTextInactive = VGA_GRAY;
-	buttons_colorBackGround = VGA_BLUE;
-	buttons_colorBorder = VGA_BLACK;
-	buttons_colorHilite = VGA_BLUE;
 	buttons_fontText = NULL;
 	buttons_fontSymbol = NULL;
-	buttons_setButtonColors(VGA_BLACK, VGA_BLACK, VGA_BLACK, VGA_BLUE,
-			VGA_WHITE);
+	// Text: crisp white, Inactive: muted slate, Border: slate-600, Highlight: thermal amber, Fill: slate-800
+	buttons_setButtonColors(0xF7DF, 0x9517, 0x3A6C, 0xFB82, 0x1947);
 }

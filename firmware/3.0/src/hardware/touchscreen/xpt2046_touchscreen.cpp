@@ -19,6 +19,7 @@
 #include <touchscreen.h>
 #include <SPI.h>
 #include <globaldefines.h>
+#include <display.h>
 #include <xpt2046_touchscreen.h>
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
@@ -108,6 +109,7 @@ void XPT2046_Touchscreen::update()
 	if (!isrWake) return;
 	uint32_t now = millis();
 	if (now - msraw < MSEC_THRESHOLD) return;
+	display_waitDmaComplete();
 	SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 #if defined(__MK20DX256__)
 		CORE_PIN13_CONFIG = PORT_PCR_MUX(1);

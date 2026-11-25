@@ -28,7 +28,11 @@
 #include <load.h>
 #include <create.h>
 #include <livemode.h>
+#include <perf.h>
 #include <save.h>
+
+// Reusable 8 KB SD write buffer in RAM (replaces 38,400 single-byte SD writes!)
+static uint8_t s_sdWriteBuf[8192];
 
 /*######################### STATIC DATA DECLARATIONS ##########################*/
 
@@ -140,20 +144,8 @@ void imgSaveStart()
 	//Build save filename from the current time & date
 	createSDName(saveFilename);
 
-	//Set text color
-	changeTextColor();
-	//Set background transparent
-	display_setBackColor(VGA_TRANSPARENT);
-	//Display to screen in big font
-	display_setFont(bigFont);
-
-	if (spotEnabled)
-		display_print((char *)"SAVING", CENTER, 70);
-	else
-		display_print((char *)"SAVING", CENTER, 110);
-
+	//Mark create: "SAVING" badge is composited flicker-free in bigBuffer by displayInfos()
 	imgSave = imgSave_create;
-	display_setFont(smallFont);
 }
 
 /* Creates the filename for the video frames */
@@ -182,17 +174,22 @@ void saveVideoFrame(char *filename)
 		}
 	}
 
-	//Write 160x120 BMP header
-	sdFile.write((uint8_t *)bmp_header_small, 66);
-
-	//Write 160x120 data
+	//Write 160x120 BMP header + bulk buffered RGB565 pixels
+	sdFile.write((const uint8_t *)bmp_header_small, 66);
+	size_t off = 0;
 	for (int i = 0; i < 19200; i++)
 	{
-		sdFile.write(smallBuffer[i] & 0x00FF);
-		sdFile.write((smallBuffer[i] & 0xFF00) >> 8);
+		uint16_t v = smallBuffer[i];
+		s_sdWriteBuf[off++] = v & 0xFFu;
+		s_sdWriteBuf[off++] = (v >> 8) & 0xFFu;
+		if (off == sizeof(s_sdWriteBuf)) {
+			sdFile.write(s_sdWriteBuf, off);
+			off = 0;
+		}
 	}
-
+	if (off > 0) sdFile.write(s_sdWriteBuf, off);
 	sdFile.close();
+	sdNoteBytesWritten(66 + 38400);
 }
 
 /* Proccess video frames */
@@ -203,15 +200,15 @@ void processVideoFrames(uint32_t framesCaptured, char *dirname)
 	uint32_t framesConverted = 0;
 
 	//Display title
-	display_fillScr(200, 200, 200);
-	display_setBackColor(200, 200, 200);
+	display_fillScr(0x08A5);
+	display_setBackColor(0x08A5);
 	display_setFont(bigFont);
-	display_setColor(VGA_BLUE);
+	display_setColor(0xFB82);
 	display_print((char *)"Video conversion", CENTER, 30);
 
 	//Display info
 	display_setFont(smallFont);
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_print((char *)"Converts all .DAT to .BMP frames", CENTER, 80);
 	display_print((char *)"Press button to abort the process", CENTER, 120);
 
@@ -259,9 +256,9 @@ void processVideoFrames(uint32_t framesCaptured, char *dirname)
 		saveVideoFrame(filename);
 
 		//Font color
-		display_setBackColor(200, 200, 200);
+		display_setBackColor(0x08A5);
 		display_setFont(smallFont);
-		display_setColor(VGA_BLACK);
+		display_setColor(0xF7DF);
 
 		//Update screen content
 		sprintf(buffer, "Frames converted: %6lu / %6lu", framesConverted + 1, framesCaptured);
@@ -273,46 +270,67 @@ void processVideoFrames(uint32_t framesCaptured, char *dirname)
 	delay(1000);
 }
 
-/* Saves raw data for an image or an video frame */
+/* Saves raw data for an image or a video frame (8 KB bulk-buffered, 100% V1/V2/V3 .DAT compatible) */
 void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 {
+	uint32_t t0 = micros();
 	uint16_t result;
 
 	//Create filename for image
 	if (isImage)
 	{
 		strcpy(&name[14], ".DAT");
-		if (!sdFile.open(name, O_RDWR | O_CREAT | O_AT_END))
+		if (!sdFile.open(name, O_RDWR | O_CREAT | O_TRUNC))
 		{
 			beginSD();
-			if (!sdFile.open(name, O_RDWR | O_CREAT | O_AT_END))
+			if (!sdFile.open(name, O_RDWR | O_CREAT | O_TRUNC))
 			{
-				showFullMessage((char *)"Error saving image!");
-				delay(1000);
+				if (!serialMode) {
+					showFullMessage((char *)"Error saving image!");
+					delay(1000);
+				}
 				return;
 			}
 		}
 	}
-
 	//Create filename for video frame
 	else
 	{
 		char fileName[] = "000000.DAT";
 		frameFilename(fileName, framesCaptured);
-		if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_AT_END))
+		if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_TRUNC))
 		{
 			beginSD();
-			sd.chdir("/" + String(name));
-			if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_AT_END))
+			sd.chdir(("/" + String(name)).c_str());
+			if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_TRUNC))
 			{
-				showFullMessage((char *)"Error saving frame!");
-				delay(1000);
+				if (!serialMode) {
+					showFullMessage((char *)"Error saving frame!");
+					delay(1000);
+				}
 				return;
 			}
 		}
 	}
 
-	//For the Lepton2.5 sensor, write 4800 raw values
+	size_t off = 0;
+	auto flush_buf = [&]() {
+		if (off > 0) {
+			sdFile.write(s_sdWriteBuf, off);
+			off = 0;
+		}
+	};
+	auto put_u8 = [&](uint8_t b) {
+		if (off == sizeof(s_sdWriteBuf)) flush_buf();
+		s_sdWriteBuf[off++] = b;
+	};
+	auto put_be16 = [&](uint16_t v) {
+		if (off + 2 > sizeof(s_sdWriteBuf)) flush_buf();
+		s_sdWriteBuf[off++] = static_cast<uint8_t>(v >> 8);
+		s_sdWriteBuf[off++] = static_cast<uint8_t>(v & 0xFFu);
+	};
+
+	uint32_t totalBytes = 0;
 	if (leptonVersion == leptonVersion_2_5_shutter)
 	{
 		for (int line = 0; line < 60; line++)
@@ -320,67 +338,48 @@ void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 			for (int column = 0; column < 80; column++)
 			{
 				result = smallBuffer[(line * 2 * 160) + (column * 2)];
-				sdFile.write((result & 0xFF00) >> 8);
-				sdFile.write(result & 0x00FF);
+				put_be16(result);
 			}
 		}
+		totalBytes = 9600u + 21u + 384u;
 	}
-
-	//For the Lepton3.5 sensor, write 19200 raw values
 	else
 	{
 		for (int i = 0; i < 19200; i++)
 		{
-			sdFile.write((smallBuffer[i] & 0xFF00) >> 8);
-			sdFile.write(smallBuffer[i] & 0x00FF);
+			put_be16(smallBuffer[i]);
 		}
+		totalBytes = 38400u + 21u + 384u;
 	}
 
-	//Write min and max
-	sdFile.write((minValue & 0xFF00) >> 8);
-	sdFile.write(minValue & 0x00FF);
-	sdFile.write((maxValue & 0xFF00) >> 8);
-	sdFile.write(maxValue & 0x00FF);
+	put_be16(minValue);
+	put_be16(maxValue);
 
-	//Write the object temp
 	uint8_t farray[4];
 	floatToBytes(farray, spotTemp);
-	for (int i = 0; i < 4; i++)
-		sdFile.write(farray[i]);
+	for (int i = 0; i < 4; i++) put_u8(farray[i]);
 
-	//Write the color scheme
-	sdFile.write(colorScheme);
-	//Write the temperature format
-	sdFile.write(tempFormat);
-	//Write the show spot attribute
-	sdFile.write(spotEnabled);
-	//Write the show colorbar attribute
-	sdFile.write(colorbarEnabled);
-	//Write the show hottest / coldest attribute
-	sdFile.write(minMaxPoints);
+	put_u8(colorScheme);
+	put_u8(tempFormat);
+	put_u8(spotEnabled);
+	put_u8(colorbarEnabled);
+	put_u8(minMaxPoints);
 
-	//Write calibration offset
-	float calOffset = -273.15;
-	floatToBytes(farray, (float)calOffset);
-	for (int i = 0; i < 4; i++)
-		sdFile.write(farray[i]);
-	//Write calibration slope
-	floatToBytes(farray, (float)leptonCalSlope);
-	for (int i = 0; i < 4; i++)
-		sdFile.write(farray[i]);
+	floatToBytes(farray, -273.15f);
+	for (int i = 0; i < 4; i++) put_u8(farray[i]);
+	floatToBytes(farray, leptonCalSlope);
+	for (int i = 0; i < 4; i++) put_u8(farray[i]);
 
-	//Write temperature points
 	for (byte i = 0; i < 96; i++)
 	{
-		//Write index
-		sdFile.write((tempPoints[i][0] & 0xFF00) >> 8);
-		sdFile.write(tempPoints[i][0] & 0x00FF);
-		//Write value
-		sdFile.write((tempPoints[i][1] & 0xFF00) >> 8);
-		sdFile.write(tempPoints[i][1] & 0x00FF);
+		put_be16(tempPoints[i][0]);
+		put_be16(tempPoints[i][1]);
 	}
 
+	flush_buf();
 	sdFile.close();
+	sdNoteBytesWritten(totalBytes);
+	g_perf.sd_write_us = micros() - t0;
 }
 
 /* End the image save procedure */
@@ -390,55 +389,62 @@ void imgSaveEnd()
 	if (convertEnabled)
 		saveBuffer(saveFilename);
 
-	//Refresh free space
-	refreshFreeSpace();
+	//Update cached free space string without expensive full-FAT cluster walk
+	uint32_t totalMB = getSDTotalKB() / 1024u;
+	uint32_t freeMB = getSDFreeKB() / 1024u;
+	if (totalMB != 0)
+		sdInfo = String(freeMB) + "/" + String(totalMB) + " MB";
 
 	//Disable image save marker
 	imgSave = imgSave_disabled;
 }
 
-/* Saves the content of the screen buffer to the sd card */
+/* Saves the content of the screen buffer to the sd card (8 KB buffered 640x480 BMP) */
 void saveBuffer(char *filename)
 {
-	unsigned short pixel;
-
-	//Create file
+	uint32_t t0 = micros();
 	strcpy(&filename[14], ".BMP");
-	if (!sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END))
+	if (!sdFile.open(filename, O_RDWR | O_CREAT | O_TRUNC))
 	{
 		beginSD();
-		if (!sdFile.open(filename, O_RDWR | O_CREAT | O_AT_END))
+		if (!sdFile.open(filename, O_RDWR | O_CREAT | O_TRUNC))
 		{
-			showFullMessage((char *)"Error saving BMP!");
-			delay(1000);
+			if (!serialMode) {
+				showFullMessage((char *)"Error saving BMP!");
+				delay(1000);
+			}
 			return;
 		}
 	}
 
-	//Write the BMP header
-	sdFile.write((uint8_t *)bmp_header_large, 66);
+	sdFile.write((const uint8_t *)bmp_header_large, 66);
 
-	//Allocate space for sd buffer
-	uint8_t *sdBuffer = (uint8_t *)calloc(1280, sizeof(uint8_t));
-
-	//Save 640x480 pixels
+	// Pack 3 double-lines (3 * 2 * 1280 = 7680 B <= 8192 B) per bulk SD write!
+	size_t off = 0;
 	for (int16_t y = 239; y >= 0; y--)
 	{
-		//Write them into the sd buffer
+		const uint16_t* row = &bigBuffer[y * 320];
+		uint8_t* lineBuf = &s_sdWriteBuf[off];
 		for (uint16_t x = 0; x < 320; x++)
 		{
-			pixel = bigBuffer[(y * 320) + x];
-			sdBuffer[x * 4] = pixel & 0x00FF;
-			sdBuffer[(x * 4) + 1] = (pixel & 0xFF00) >> 8;
-			sdBuffer[(x * 4) + 2] = pixel & 0x00FF;
-			sdBuffer[(x * 4) + 3] = (pixel & 0xFF00) >> 8;
+			uint16_t pixel = row[x];
+			uint8_t lo = pixel & 0xFFu;
+			uint8_t hi = (pixel >> 8) & 0xFFu;
+			lineBuf[x * 4]     = lo;
+			lineBuf[x * 4 + 1] = hi;
+			lineBuf[x * 4 + 2] = lo;
+			lineBuf[x * 4 + 3] = hi;
 		}
-		//Write them to the sd card with 640x480 resolution
-		sdFile.write(sdBuffer, 1280);
-		sdFile.write(sdBuffer, 1280);
+		// Duplicate row immediately in buffer for 2x vertical scale (640x480)
+		memcpy(&s_sdWriteBuf[off + 1280], lineBuf, 1280);
+		off += 2560;
+		if (off >= 7680) {
+			sdFile.write(s_sdWriteBuf, off);
+			off = 0;
+		}
 	}
-
-	//De-allocate space
-	free(sdBuffer);
+	if (off > 0) sdFile.write(s_sdWriteBuf, off);
 	sdFile.close();
+	sdNoteBytesWritten(614466u);
+	g_perf.sd_write_us += (micros() - t0);
 }

@@ -33,86 +33,78 @@
 #include <livemode.h>
 #include <videomenu.h>
 #include <globalvariables.h>
+#include <perf.h>
+#include <tc_thermal_core.h>
 #include <thermal.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Touch interrupt handler */
+/* Non-blocking Touch ISR: only latches edge flag (no 1000 ms busy-wait in ISR!) */
 void touchIRQ()
 {
-	//When not in menu, video save, image save, serial mode or lock/release limits
 	if ((!showMenu) && (!videoSave) && (!longTouch) && (!imgSave) && (!serialMode))
 	{
-		//Count the time to choose selection
-		long startTime = millis();
-		delay(10);
-		long endTime = millis() - startTime;
+		touchIrqFlag = true;
+	}
+}
 
-		//Wait for touch release, but not longer than a second
-		if (touch_capacitive)
-		{
-			while ((touch_touched()) && (endTime <= 1000))
-				endTime = millis() - startTime;
-		}
-		else
-		{
-			while ((!digitalRead(pin_touch_irq)) && (endTime <= 1000))
-				endTime = millis() - startTime;
-		}
-		endTime = millis() - startTime;
+/* Non-blocking Button ISR: only latches edge flag (no busy-wait in ISR!) */
+void buttonIRQ()
+{
+	if (videoSave == videoSave_recording)
+	{
+		videoSave = videoSave_processing;
+		return;
+	}
+	if (videoSave == videoSave_processing)
+	{
+		videoSave = videoSave_menu;
+		return;
+	}
+	if ((!showMenu) && (!videoSave) && (!longTouch) && (!imgSave) && (!serialMode))
+	{
+		buttonIrqFlag = true;
+	}
+}
 
-		//Short press - show menu
-		if (endTime < 1000)
+/* Poll deferred touch / button presses in main loop without blocking IRQs */
+static void pollLiveInputs()
+{
+	if (touchIrqFlag)
+	{
+		touchIrqFlag = false;
+		uint32_t startTime = millis();
+		while ((millis() - startTime) < 1000u)
+		{
+			bool stillPressed = touch_capacitive ? touch_touched() : (!digitalRead(pin_touch_irq));
+			if (!stillPressed) break;
+			if (Serial.available() > 0) return; // yield immediately to USB host
+			delay(2);
+		}
+		if ((millis() - startTime) < 1000u)
 		{
 			if (showMenu == showMenu_disabled)
 				showMenu = showMenu_desired;
 		}
-		else{
+		else
+		{
 			longTouch = true;
 		}
-		
 	}
-}
 
-/* Button interrupt handler */
-void buttonIRQ()
-{
-	//When not in menu, video save, image save, serial mode or lock/release limits
-	if ((!showMenu) && (!videoSave) && (!longTouch) && (!imgSave) && (!serialMode))
+	if (buttonIrqFlag)
 	{
-		//Count the time to choose selection
-		long startTime = millis();
-		delay(10);
-		long endTime = millis() - startTime;
-
-		//As long as the button is pressed
-		while (extButtonPressed() && (endTime <= 1000))
-			endTime = millis() - startTime;
-
-		//Short press - save image to SD Card
-		if (endTime < 1000)
-			//Prepare image save but let screen refresh first
+		buttonIrqFlag = false;
+		uint32_t startTime = millis();
+		while (extButtonPressed() && ((millis() - startTime) < 1000u))
+		{
+			if (Serial.available() > 0) return;
+			delay(2);
+		}
+		if ((millis() - startTime) < 1000u)
 			imgSave = imgSave_set;
-
-		//Enable video mode
 		else
 			videoSave = videoSave_menu;
-	}
-
-	//When in video save recording mode, go to processing
-	if (videoSave == videoSave_recording)
-	{
-		videoSave = videoSave_processing;
-		while (extButtonPressed())
-			;
-	}
-
-	//When in video save processing, end it
-	else if (videoSave == videoSave_processing)
-	{
-		videoSave = videoSave_menu;
-		while (extButtonPressed())
-			;
 	}
 }
 
@@ -244,12 +236,21 @@ void showColorBar()
 	//Calculate color bar height corresponding on color elements
 	byte height = 240 - ((240 - (colorElements / 2)) / 2);
 
-	//Calculate color level for hot and cold
+	//Calculate color level for hot and cold (divide-by-zero guarded)
 	float colorLevel = 0;
-	if (hotColdMode != hotColdMode_disabled)
-		colorLevel = (tempToRaw(hotColdLevel) * 1.0 - minValue) / (maxValue * 1.0 - minValue);
+	if ((hotColdMode != hotColdMode_disabled) && (maxValue > minValue))
+		colorLevel = (tempToRaw(hotColdLevel) * 1.0f - minValue) / (maxValue * 1.0f - minValue);
 
-	//Display color bar
+	//Subtle 1px dark slate frame OUTSIDE x=298..314 so x=300..312 remains pixel-exact!
+	byte barRows = static_cast<byte>((colorElements) / 2);
+	int yTop = static_cast<int>(height) - static_cast<int>(barRows) + 1;
+	display_setColor(15, 23, 42);
+	display_drawHLine(297, yTop - 1, 19);
+	display_drawHLine(297, height + 1, 19);
+	display_drawVLine(297, yTop, barRows);
+	display_drawVLine(315, yTop, barRows);
+
+	//Display color bar (pixel-exact rows at x=298..314)
 	for (int i = 0; i < (colorElements - 1); i++)
 	{
 		fac = 2;
@@ -274,12 +275,15 @@ void showColorBar()
 
 			//Draw the line
 			display_setColor(red, green, blue);
-			display_drawLine(298, height - count, 314, height - count);
+			display_drawHLine(298, height - count, 17);
 
 			//Raise counter
 			count++;
 		}
 	}
+
+	//Translucent dark backdrop behind tick labels for razor-sharp contrast
+	display_blendRect(264, yTop - 6, 31, barRows + 12, 0x08A5, 4);
 
 	//Set text color
 	changeTextColor();
@@ -289,24 +293,24 @@ void showColorBar()
 	float max = rawToTemp(maxValue);
 
 	//Calculate step
-	float step = (max - min) / 3.0;
+	float step = (max - min) / 3.0f;
 	fac = 1;
 
 	//Draw min temp
 	sprintf(buffer, "%d", (int)round(min));
-	display_print(buffer, 270, (height * fac) - 5);
+	display_print(buffer, 267, (height * fac) - 5);
 
 	//Draw temperatures after min before max
 	for (int i = 2; i >= 1; i--)
 	{
 		float temp = min + (i * step);
 		sprintf(buffer, "%d", (int)round(temp));
-		display_print(buffer, 270, (height * fac) - 5 - (i * (colorElements / 6)));
+		display_print(buffer, 267, (height * fac) - 5 - (i * (colorElements / 6)));
 	}
 
 	//Draw max temp
 	sprintf(buffer, "%d", (int)round(max));
-	display_print(buffer, 270, (height * fac) - 5 - (3 * (colorElements / 6)));
+	display_print(buffer, 267, (height * fac) - 5 - (3 * (colorElements / 6)));
 }
 
 /* Change the display options */
@@ -511,6 +515,9 @@ void selectColorScheme()
 		colorElements = 224;
 		break;
 	}
+
+	//Rebuild 256-entry RGB565 LUT for fast integer colorization
+	tc_core::build_rgb565_lut(colorMap, static_cast<uint16_t>(colorElements), colorLut);
 }
 
 /* Change the color scheme for the thermal image */
@@ -559,11 +566,16 @@ void liveMode()
 	//Init
 	liveModeInit();
 
+	uint32_t lastFrameUs = micros();
+
 	//Main Loop
 	while (true)
 	{
-		//Check for serial connection
+		//Check for serial connection (non-blocking, <1 ms response!)
 		checkSerial();
+
+		//Poll deferred touch/button edge flags
+		pollLiveInputs();
 
 		//Check for screen sleep
 		screenOffCheck();
@@ -576,31 +588,36 @@ void liveMode()
 		if (imgSave == imgSave_set)
 			imgSaveStart();
 
-		//Create thermal image
-		createThermalImg();
-
-		//Display additional information
-		displayInfos();
-
-		//Show the content on the screen
-		showImage();
-
-		//Save the converted / visual image
-		if (imgSave == imgSave_save)
-			imgSaveEnd();
-
 		//Go into video mode
 		if (videoSave == videoSave_menu)
 			videoMode();
 
 		//Long touch handler
 		if (longTouch)
-			longTouchHandler();    
+			longTouchHandler();
 
-		//Enter mass storage on USB connect
-		checkMassStorage();
+		//Wait for new double-buffered frame while continuously servicing USB!
+		if (!lepton_hasNewFrame())
+			continue;
 
-		//Ready for next frame from Lepton
-		lepton_startFrame();	
+		uint32_t loopStartUs = micros();
+
+		//Create thermal image (swaps double buffer immediately; Lepton captures next frame in background)
+		createThermalImg();
+
+		//Composite ALL HUD overlays into bigBuffer in RAM (zero flicker!)
+		displayInfos();
+
+		//Push bigBuffer to ILI9341 via async LPSPI4 DMA (one atomic write!)
+		showImage();
+
+		//Save the converted BMP image if requested
+		if (imgSave == imgSave_save)
+			imgSaveEnd();
+
+		uint32_t nowUs = micros();
+		g_perf.loop_total_us = nowUs - loopStartUs;
+		perf_record_frame_period(PERF_MODE_LIVE, nowUs - lastFrameUs);
+		lastFrameUs = nowUs;
 	}
 }

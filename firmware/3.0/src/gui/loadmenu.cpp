@@ -59,9 +59,9 @@ void displayGUI(uint32_t imgCount, char* infoText) {
 void deleteVideo(char* dirname) {
 	//Title & Background
 	drawTitle((char*) "Delete Video", true);
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(0x08A5);
 	display_print((char*)"Do you want to delete this video?", CENTER, 66);
 	display_print((char*)"This will also remove the", CENTER, 105);
 	display_print((char*)"other related files to it. ", CENTER, 125);
@@ -140,9 +140,9 @@ void deleteVideo(char* dirname) {
 void deleteImage(char* filename) {
 	//Title & Background
 	drawTitle((char*) "Delete Image", true);
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(0x08A5);
 	display_print((char*)"Do you want to delete this image?", CENTER, 66);
 	display_print((char*)"This will also remove the", CENTER, 105);
 	display_print((char*)"other related files to it. ", CENTER, 125);
@@ -187,9 +187,9 @@ void deleteImage(char* filename) {
 bool convertPrompt() {
 	//Title & Background
 	drawTitle((char*) "Conversion Prompt", true);
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(0x08A5);
 	display_print((char*)"Do you want to convert?", CENTER, 66);
 	display_print((char*)"That process will create", CENTER, 105);
 	display_print((char*)"bitmap(s) out of the raw data.", CENTER, 125);

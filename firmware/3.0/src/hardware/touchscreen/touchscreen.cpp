@@ -25,7 +25,21 @@
 #include <SdFat.h>
 #include <ADC.h>
 #include <globalvariables.h>
+#include <SPI.h>
 #include <hardware.h>
+
+/* Probe XPT2046 via TEMP0 (0x84) / TEMP1 (0xF4) ADC reads to detect disconnected SPI (#115) */
+static bool xpt2046_probe_spi() {
+	SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
+	digitalWrite(pin_touch_cs, LOW);
+	SPI.transfer(0x84); // TEMP0, 12-bit, single-ended, power-down between conversions
+	uint16_t t0 = (SPI.transfer16(0xF4) >> 3) & 0x0FFFu;
+	uint16_t t1 = (SPI.transfer16(0x00) >> 3) & 0x0FFFu;
+	digitalWrite(pin_touch_cs, HIGH);
+	SPI.endTransaction();
+	// Disconnected MISO reads all-0 or all-1 (0x000 or 0xFFF)
+	return (t0 > 10 && t0 < 4085) || (t1 > 10 && t1 < 4085);
+}
 
 /*######################### STATIC DATA DECLARATIONS ##########################*/
 
@@ -62,40 +76,24 @@ void touch_init() {
 		touch_capacitive = false;
 	}
 
-	//If not capacitive, check if connected
+	//If not capacitive, check if resistive XPT2046 is genuinely present (#115)
 	if (!touch_capacitive)
 	{
-		//Get a point
-		TS_Point point = touch_getPoint();
-		//Wait short
+		if (!xpt2046_probe_spi()) {
+			setDiagnostic(diag_touch);
+			return;
+		}
+		//Ensure IRQ pin is not stuck low when untouched
 		delay(10);
-		//Read one time to stabilize
 		digitalRead(pin_touch_irq);
-
-		//Init touch status
-		bool touchStatus = true;
-		//Check IRQ 10 times, should be HIGH
+		bool irqHigh = false;
 		for (int i = 0; i < 10; i++)
 		{
-			if (!digitalRead(pin_touch_irq))
-				touchStatus = false;
-			delay(10);
+			if (digitalRead(pin_touch_irq))
+				irqHigh = true;
+			delay(5);
 		}
-
-		//Comparison value depending on rotation
-		uint16_t xval, yval;
-		if (rotationVert) {
-			xval = 320;
-			yval = 240;
-		}
-		else {
-			xval = 0;
-			yval = 0;
-		}
-
-		//Check if touch is working, otherwise set diagnostic
-		if (!(((point.x == xval) && (point.y == yval) && (touchStatus == true))
-			|| ((point.x != xval) && (point.y != yval) && (touchStatus == false))))
+		if (!irqHigh)
 			setDiagnostic(diag_touch);
 	}
 }

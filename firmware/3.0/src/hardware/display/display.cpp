@@ -19,8 +19,10 @@
 #include <globaldefines.h>
 #include <globalvariables.h>
 #include <SPI.h>
+#include <DMAChannel.h>
 #include <hardware.h>
 #include <EEPROM.h>
+#include <perf.h>
 #include <display.h>
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
@@ -155,16 +157,40 @@ uint32_t display_tcr_dc_not_assert;
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
+/* LPSPI4 DMA state for zero-blocking background screen transfers */
+static DMAChannel s_lcd_dma;
+static DMASetting s_lcd_tcd[3]; // 76800 pixels = 3 x 25600 (< 32767 CITER limit)
+static bool s_lcd_dma_inited = false;
+static volatile bool s_lcd_dma_busy = false;
+
+static void lcd_dma_isr() {
+	s_lcd_dma.clearInterrupt();
+	s_lcd_dma.disable();
+	// Wait for LPSPI4 shift register / TX FIFO to drain completely
+	while ((IMXRT_LPSPI4_S.FSR & 0x1Fu) != 0) {}
+	while (IMXRT_LPSPI4_S.SR & LPSPI_SR_MBF) {}
+	IMXRT_LPSPI4_S.DER = 0;
+	IMXRT_LPSPI4_S.CR = LPSPI_CR_MEN | LPSPI_CR_RRF;
+	if (display_cs_port) {
+		t4_direct_write_high(display_cs_port, display_cs_pinmask);
+	}
+	SPI.endTransaction();
+	s_lcd_dma_busy = false;
+}
+
+void display_waitDmaComplete() {
+	if (!s_lcd_dma_busy) return;
+	uint32_t t0 = millis();
+	while (s_lcd_dma_busy && ((millis() - t0) < 200u)) {}
+	if (s_lcd_dma_busy) {
+		lcd_dma_isr();
+	}
+}
+
 void display_begin_spi_transaction()
 {
-	if(videoSave == videoSave_recording)
-	{
-		SPI.beginTransaction(SPISettings(60000000, MSBFIRST, SPI_MODE0));
-	}
-	else
-	{
-		SPI.beginTransaction(SPISettings(25000000, MSBFIRST, SPI_MODE0));
-	}
+	display_waitDmaComplete();
+	SPI.beginTransaction(SPISettings(g_display_spi_hz, MSBFIRST, SPI_MODE0));
 	if (!display_dc_port)
 		display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
 	if (display_cs_port)
@@ -288,46 +314,44 @@ void display_setAddr(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 	display_writedata16_cont(y1);
 }
 
-/* Read 8-bit command from the screen */
+/* Read 8-bit command from the screen via hardware PCS at conservative 6 MHz (#115) */
 uint8_t display_readcommand8(uint8_t c, uint8_t index)
 {
+	display_waitDmaComplete();
 	uint8_t r = 0;
+	SPI.beginTransaction(SPISettings(6000000, MSBFIRST, SPI_MODE0));
+	display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
+	if (display_cs_port)
+		t4_direct_write_low(display_cs_port, display_cs_pinmask);
 
-	display_begin_spi_transaction();
+	// Select index register via ILI9341 0xD9 (NV Memory / Read ID index)
+	display_maybeUpdateTCR(display_tcr_dc_assert | LPSPI_TCR_FRAMESZ(7));
+	IMXRT_LPSPI4_S.TDR = 0xD9;
+	display_pending_rx_count++;
+	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(7));
+	IMXRT_LPSPI4_S.TDR = static_cast<uint8_t>(0x10 + index);
+	display_pending_rx_count++;
+	display_waitTransmitComplete();
 
-	if (display_dc_port)
-	{
-		t4_direct_write_low(display_dc_port, display_dc_pinmask);
-		IMXRT_LPSPI4_S.SR = LPSPI_SR_TCF | LPSPI_SR_FCF | LPSPI_SR_WCF;
-		IMXRT_LPSPI4_S.TCR = LPSPI_TCR_FRAMESZ(7) | LPSPI_TCR_RXMSK | LPSPI_TCR_CONT;
-		IMXRT_LPSPI4_S.TDR = 0xD9;
-		while (!(IMXRT_LPSPI4_S.SR & LPSPI_SR_WCF))
-			;
+	// Send target read command
+	display_maybeUpdateTCR(display_tcr_dc_assert | LPSPI_TCR_FRAMESZ(7));
+	IMXRT_LPSPI4_S.TDR = c;
+	display_pending_rx_count++;
+	display_waitTransmitComplete();
 
-		t4_direct_write_high(display_dc_port, display_dc_pinmask);
-		IMXRT_LPSPI4_S.SR = LPSPI_SR_TCF | LPSPI_SR_FCF | LPSPI_SR_WCF;
-		IMXRT_LPSPI4_S.TDR = 0x10 + index;
-		while (!(IMXRT_LPSPI4_S.SR & LPSPI_SR_WCF))
-			;
-
-		t4_direct_write_low(display_dc_port, display_dc_pinmask);
-		IMXRT_LPSPI4_S.SR = LPSPI_SR_TCF | LPSPI_SR_FCF | LPSPI_SR_WCF;
-		IMXRT_LPSPI4_S.TDR = c;
-		while (!(IMXRT_LPSPI4_S.SR & LPSPI_SR_WCF))
-			;
-
-		t4_direct_write_high(display_dc_port, display_dc_pinmask);
-		IMXRT_LPSPI4_S.SR = LPSPI_SR_TCF | LPSPI_SR_FCF | LPSPI_SR_WCF;
-		IMXRT_LPSPI4_S.TCR = LPSPI_TCR_FRAMESZ(7);
-		IMXRT_LPSPI4_S.TDR = 0x10 + index;
-		while (!(IMXRT_LPSPI4_S.SR & LPSPI_SR_WCF))
-			while (((IMXRT_LPSPI4_S.FSR >> 16) & 0x1F) == 0)
-
-				r = IMXRT_LPSPI4_S.RDR;
+	// Clock out 1 byte with RX enabled
+	IMXRT_LPSPI4_S.CR = LPSPI_CR_MEN | LPSPI_CR_RRF;
+	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(7));
+	IMXRT_LPSPI4_S.TDR = 0x00;
+	uint32_t t0 = micros();
+	while (((IMXRT_LPSPI4_S.FSR >> 16) & 0x1Fu) == 0 && (micros() - t0) < 1000u) {}
+	if (((IMXRT_LPSPI4_S.FSR >> 16) & 0x1Fu) != 0) {
+		r = static_cast<uint8_t>(IMXRT_LPSPI4_S.RDR);
 	}
 
-	display_end_spi_transaction();
-
+	if (display_cs_port)
+		t4_direct_write_high(display_cs_port, display_cs_pinmask);
+	SPI.endTransaction();
 	return r;
 }
 
@@ -376,9 +400,6 @@ byte display_InitLCD()
 
 	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(7));
 
-	//Read the self-diagnostic flag
-	byte diag = display_readcommand8(ILI9341_RDSELFDIAG);
-
 	//Send the init commands
 	display_begin_spi_transaction();
 	const uint8_t *addr = init_commands;
@@ -404,6 +425,11 @@ byte display_InitLCD()
 	display_writecommand_last(ILI9341_DISPON);
 	display_end_spi_transaction();
 
+	//Read PIXFMT (0x0C -> expects 0x55) & RDSELFDIAG (0x0F -> expects 0xC0) after init (#115)
+	byte pixfmt = display_readcommand8(ILI9341_RDPIXFMT);
+	byte selfdiag = display_readcommand8(ILI9341_RDSELFDIAG);
+	byte diag = ((pixfmt == 0x55) || ((selfdiag & 0xC0) == 0xC0 && selfdiag != 0xFF)) ? 0x00 : 0xFF;
+
 	//Init font & transparency
 	cfont.font = 0;
 	transparent = 0;
@@ -414,7 +440,7 @@ byte display_InitLCD()
 	//Disable write to image
 	display_writeToImage = 0;
 
-	//Return the diagnostic info
+	//Return 0x00 when ILI9341 verified present, else non-zero
 	return diag;
 }
 
@@ -425,8 +451,8 @@ void display_init()
 	//Init the display
 	byte check = display_InitLCD();
 
-	//Status not okay, try again 10 times
-	while ((check != 0x00) && (count < 10))
+	//Status not okay, try again 3 times
+	while ((check != 0x00) && (count < 3))
 	{
 		delay(10);
 		check = display_InitLCD();
@@ -490,30 +516,37 @@ void display_clrScr()
 /* Draw a pixel */
 void display_drawPixel(int x, int y)
 {
-	//Out of borders, return
 	if ((x < 0) || (x >= 320) || (y < 0) || (y >= 240))
 		return;
-	//Send pixel coordinates and color to screen
+	word color = (fch << 8) | fcl;
+	if (display_writeToImage) {
+		bigBuffer[(y * 320) + x] = color;
+		return;
+	}
 	display_begin_spi_transaction();
 	display_setAddr(x, y, x, y);
 	display_writecommand_cont(ILI9341_RAMWR);
-	display_writedata16_last(fch << 8 | fcl);
+	display_writedata16_last(color);
 	display_end_spi_transaction();
 }
 
 /* Draw a horizontal line */
 void display_drawHLine(int x, int y, int l)
 {
-	//Clipping
-	if ((x >= 320) || (y >= 240))
+	if (y < 0 || y >= 240 || l <= 0) return;
+	if (x < 0) { l += x; x = 0; }
+	if (x >= 320 || l <= 0) return;
+	if ((x + l) > 320) l = 320 - x;
+	word color = (fch << 8) | fcl;
+	if (display_writeToImage) {
+		uint16_t* dst = &bigBuffer[(y * 320) + x];
+		for (int i = 0; i < l; ++i) dst[i] = color;
 		return;
-	if ((x + l - 1) >= 320)
-		l = 320 - x;
+	}
 
 	display_begin_spi_transaction();
 	display_setAddr(x, y, x + l - 1, y);
 	display_writecommand_cont(ILI9341_RAMWR);
-	word color = (fch << 8 | fcl);
 	while (l-- > 1)
 	{
 		display_writedata16_cont(color);
@@ -525,16 +558,23 @@ void display_drawHLine(int x, int y, int l)
 /* Draw a vertical line */
 void display_drawVLine(int x, int y, int l)
 {
-	//Clipping
-	if ((x >= 320) || (y >= 240))
+	if (x < 0 || x >= 320 || l <= 0) return;
+	if (y < 0) { l += y; y = 0; }
+	if (y >= 240 || l <= 0) return;
+	if ((y + l) > 240) l = 240 - y;
+	word color = (fch << 8) | fcl;
+	if (display_writeToImage) {
+		uint16_t* dst = &bigBuffer[(y * 320) + x];
+		for (int i = 0; i < l; ++i) {
+			*dst = color;
+			dst += 320;
+		}
 		return;
-	if ((y + l - 1) >= 240)
-		l = 240 - y;
+	}
 
 	display_begin_spi_transaction();
 	display_setAddr(x, y, x, y + l - 1);
 	display_writecommand_cont(ILI9341_RAMWR);
-	word color = (fch << 8 | fcl);
 	while (l-- > 1)
 	{
 		display_writedata16_cont(color);
@@ -573,13 +613,16 @@ void display_LCD_Write_DATA(char VH, char VL)
 /* Draw a line */
 void display_drawLine(int x1, int y1, int x2, int y2)
 {
-	//Write to screen
-	if ((y1 == y2) && (!display_writeToImage))
-		display_drawHLine(x1, y1, x2 - x1);
-	else if ((x1 == x2) && (!display_writeToImage))
-		display_drawVLine(x1, y1, y2 - y1);
-	//Write to image buffer directly
-	else
+	if (y1 == y2) {
+		if (x1 > x2) swap(int, x1, x2);
+		display_drawHLine(x1, y1, (x2 - x1) + 1);
+		return;
+	}
+	if (x1 == x2) {
+		if (y1 > y2) swap(int, y1, y2);
+		display_drawVLine(x1, y1, (y2 - y1) + 1);
+		return;
+	}
 	{
 		unsigned int dx = (x2 > x1 ? x2 - x1 : x1 - x2);
 		short xstep = x2 > x1 ? 1 : -1;
@@ -687,18 +730,27 @@ void display_fillRect(int x1, int y1, int x2, int y2)
 	int h = y2 - y1;
 
 	//Clipping
-	if ((x1 >= 320) || (y1 >= 240))
+	if ((x1 >= 320) || (y1 >= 240) || w <= 0 || h <= 0)
 		return;
-	if ((x1 + w - 1) >= 320)
-		w = 320 - x1;
-	if ((y1 + h - 1) >= 240)
-		h = 240 - y1;
+	if (x1 < 0) { w += x1; x1 = 0; }
+	if (y1 < 0) { h += y1; y1 = 0; }
+	if (w <= 0 || h <= 0) return;
+	if ((x1 + w) > 320) w = 320 - x1;
+	if ((y1 + h) > 240) h = 240 - y1;
+
+	word color = (fch << 8 | fcl);
+	if (display_writeToImage) {
+		for (int yy = y1; yy < y1 + h; ++yy) {
+			uint16_t* row = &bigBuffer[yy * 320 + x1];
+			for (int xx = 0; xx < w; ++xx) row[xx] = color;
+		}
+		return;
+	}
 
 	//Send to display
 	display_begin_spi_transaction();
 	display_setAddr(x1, y1, x1 + w - 1, y1 + h - 1);
 	display_writecommand_cont(ILI9341_RAMWR);
-	word color = (fch << 8 | fcl);
 	for (int y = h; y > 0; y--)
 	{
 		for (int x = w; x > 1; x--)
@@ -887,6 +939,39 @@ void display_printChar(byte c, int x, int y)
 	byte i, ch;
 	word j;
 	word temp;
+
+	// Fast zero-flicker RAM path when compositing into bigBuffer
+	if (display_writeToImage)
+	{
+		const word fg = (fch << 8) | fcl;
+		const word bg = (bch << 8) | bcl;
+		const int row_bytes = cfont.x_size / 8;
+		temp = ((c - cfont.offset) * (row_bytes * cfont.y_size)) + 4;
+		for (j = 0; j < cfont.y_size; j++)
+		{
+			int py = y + j;
+			if (py >= 0 && py < 240) {
+				uint16_t* row = &bigBuffer[py * 320];
+				for (int zz = 0; zz < row_bytes; zz++)
+				{
+					ch = pgm_read_byte(&cfont.font[temp + zz]);
+					int bx = x + (zz * 8);
+					for (i = 0; i < 8; i++)
+					{
+						int px = bx + i;
+						if (px >= 0 && px < 320) {
+							if ((ch & (1 << (7 - i))) != 0)
+								row[px] = fg;
+							else if (!transparent)
+								row[px] = bg;
+						}
+					}
+				}
+			}
+			temp += row_bytes;
+		}
+		return;
+	}
 
 	//Not transparent
 	if (!transparent)
@@ -1452,21 +1537,78 @@ void display_exitSleepMode()
 	display_end_spi_transaction();
 }
 
-/* Write 320x240 RGB565 data to the screen */
-void display_writeScreen(unsigned short *pcolors)
-{	
-	disableSPIIRQ = true;
-	display_begin_spi_transaction();
-	display_setAddr(0, 0, 319, 239);
-	display_writecommand_cont(ILI9341_RAMWR);
-
-	uint16_t *pfbtft_end = &pcolors[(ILI9341_TFTWIDTH * ILI9341_TFTHEIGHT) - 1];
-	uint16_t *pftbft = pcolors;
-	while (pftbft < pfbtft_end)
-	{
-		display_writedata16_cont(*pftbft++);
+/* Alpha-blend a rectangle directly into bigBuffer (fast RGB565 integer blend) */
+void display_blendRect(int x, int y, int w, int h, word color, uint8_t alpha_num_of_8)
+{
+	if (!display_writeToImage || !bigBuffer || w <= 0 || h <= 0) return;
+	if (x < 0) { w += x; x = 0; }
+	if (y < 0) { h += y; y = 0; }
+	if (x + w > 320) w = 320 - x;
+	if (y + h > 240) h = 240 - y;
+	if (w <= 0 || h <= 0) return;
+	uint32_t a = (alpha_num_of_8 > 8) ? 8u : alpha_num_of_8;
+	uint32_t inv = 8u - a;
+	uint32_t sr = (color >> 11) & 0x1Fu;
+	uint32_t sg = (color >> 5) & 0x3Fu;
+	uint32_t sb = color & 0x1Fu;
+	for (int yy = y; yy < y + h; ++yy) {
+		uint16_t* row = &bigBuffer[yy * 320 + x];
+		for (int xx = 0; xx < w; ++xx) {
+			uint32_t bg = row[xx];
+			uint32_t r = (sr * a + ((bg >> 11) & 0x1Fu) * inv) >> 3;
+			uint32_t g = (sg * a + ((bg >> 5) & 0x3Fu) * inv) >> 3;
+			uint32_t b = (sb * a + (bg & 0x1Fu) * inv) >> 3;
+			row[xx] = static_cast<uint16_t>((r << 11) | (g << 5) | b);
+		}
 	}
-	display_writedata16_last(*pftbft);
-	display_end_spi_transaction();
-	disableSPIIRQ = false;
+}
+
+/* Write 320x240 RGB565 data to the screen via async LPSPI4 DMA (zero Lepton SPI1 blocking) */
+void display_writeScreen(unsigned short *pcolors)
+{
+	display_waitDmaComplete();
+
+	if (!s_lcd_dma_inited) {
+		s_lcd_dma.begin(true);
+		s_lcd_dma.triggerAtHardwareEvent(DMAMUX_SOURCE_LPSPI4_TX);
+		s_lcd_dma.attachInterrupt(lcd_dma_isr);
+		s_lcd_dma_inited = true;
+	}
+
+	// Flush D-cache so DMA reads fresh pixels from DMAMEM (OCRAM)
+	arm_dcache_flush(pcolors, 320 * 240 * sizeof(uint16_t));
+
+	SPI.beginTransaction(SPISettings(g_display_spi_hz, MSBFIRST, SPI_MODE0));
+	if (!display_dc_port)
+		display_spi_tcr_current = IMXRT_LPSPI4_S.TCR;
+	if (display_cs_port)
+		t4_direct_write_low(display_cs_port, display_cs_pinmask);
+
+	display_setAddr(0, 0, 319, 239);
+	display_writecommand_last(ILI9341_RAMWR);
+
+	// Switch LPSPI4 to 16-bit TX-only mode (RXMSK) for continuous DMA burst
+	display_maybeUpdateTCR(display_tcr_dc_not_assert | LPSPI_TCR_FRAMESZ(15) | LPSPI_TCR_RXMSK);
+
+	// Chain 3 TCDs of 25,600 uint16 pixels (= 76,800 total, within 15-bit CITER max 32,767)
+	constexpr uint32_t kChunkPixels = 25600;
+	for (int i = 0; i < 3; ++i) {
+		s_lcd_tcd[i].sourceBuffer(pcolors + i * kChunkPixels, kChunkPixels * sizeof(uint16_t));
+		s_lcd_tcd[i].destination(IMXRT_LPSPI4_S.TDR);
+		s_lcd_tcd[i].transferSize(2);
+		s_lcd_tcd[i].transferCount(kChunkPixels);
+		if (i < 2) {
+			s_lcd_tcd[i].replaceSettingsOnCompletion(s_lcd_tcd[i + 1]);
+		} else {
+			s_lcd_tcd[i].disableOnCompletion();
+			s_lcd_tcd[i].interruptAtCompletion();
+		}
+	}
+
+	s_lcd_dma = s_lcd_tcd[0];
+	s_lcd_dma_busy = true;
+	g_display_dma_active = true;
+	IMXRT_LPSPI4_S.FCR = LPSPI_FCR_TXWATER(8);
+	IMXRT_LPSPI4_S.DER = LPSPI_DER_TDDE;
+	s_lcd_dma.enable();
 }

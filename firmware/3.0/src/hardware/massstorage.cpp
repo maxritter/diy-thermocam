@@ -103,21 +103,7 @@ void setMassStorage()
 
 void checkMassStorage()
 {
-	if (!usbConnected && isUSBConnected())
-	{
-		detachInterrupt(pin_touch_irq);
-
-		//Check if the user really wants to enter MTP
-		if (massStoragePrompt())
-		{
-			setMassStorage();
-		}
-		
-		attachInterrupt(pin_touch_irq, touchIRQ, FALLING);
-		usbConnected = true;
-	}
-	else if (usbConnected && !isUSBConnected())
-	{
-		usbConnected = false;
-	}
+	// MTP is now accessed explicitly via Settings -> Hardware -> USB MTP,
+	// so plugging in USB never hijacks live mode with a blocking popup.
+	usbConnected = isUSBConnected();
 }

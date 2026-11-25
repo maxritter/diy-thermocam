@@ -1,19 +1,6 @@
 /*
-*
-* LIVE MODE - GUI functions used in the live mode
-*
-* DIY-Thermocam Firmware
-*
-* GNU General Public License v3.0
-*
-* Copyright by Max Ritter
-*
-* http://www.diy-thermocam.net
-* https://github.com/maxritter/diy-thermocam
-*
-*/
-
-/*################################# INCLUDES ##################################*/
+ * LIVE MODE - Zero-flicker HUD composited directly into bigBuffer (320x240 RGB565)
+ */
 
 #include <Arduino.h>
 #include <globaldefines.h>
@@ -27,15 +14,14 @@
 #include <gui.h>
 #include <create.h>
 #include <fonts.h>
-#include <EEPROM.h>
+#include <perf.h>
 #include <livemode.h>
 
-/*######################## PUBLIC FUNCTION BODIES #############################*/
+static constexpr uint16_t HUD_PILL_BG = 0x08A5; // deep slate translucent pill
 
 /* Display battery status in percentage */
 void displayBatteryStatus()
 {
-	//Check battery status every 60 seconds
 	if (batTimer == 0)
 		batTimer = millis();
 	if ((millis() - batTimer) > 60000)
@@ -44,37 +30,37 @@ void displayBatteryStatus()
 		batTimer = millis();
 	}
 
-	//USB Power only
 	if (batPercentage == -1)
-		display_print((char *)"USB Power", 225, 0);
-
-	//Low Battery
+	{
+		display_blendRect(222, 0, 96, 14, HUD_PILL_BG, 5);
+		display_print((char *)"USB Power", 225, 1);
+	}
 	else if (batPercentage == 0)
-		display_print((char *)"LOW", 270, 0);
-
-	//Display battery status in percentage
+	{
+		display_blendRect(267, 0, 50, 14, 0x8000, 6);
+		display_print((char *)"LOW", 270, 1);
+	}
 	else
 	{
-		//Charging, show plus symbol
+		display_blendRect(267, 0, 52, 14, HUD_PILL_BG, 5);
 		if (isUSBConnected() && (batPercentage != 100))
 		{
-			display_printNumI(batPercentage, 270, 0, 3, ' ');
-			display_print((char *)"%", 300, 0);
-			display_print((char *)"+", 310, 0);
+			display_printNumI(batPercentage, 270, 1, 3, ' ');
+			display_print((char *)"%", 300, 1);
+			display_print((char *)"+", 310, 1);
 		}
-
-		//Not charging
 		else
 		{
-			display_printNumI(batPercentage, 280, 0, 3, ' ');
-			display_print((char *)"%", 310, 0);
+			display_printNumI(batPercentage, 280, 1, 3, ' ');
+			display_print((char *)"%", 310, 1);
 		}
 	}
 }
 
-/* Display the current time on the screen*/
+/* Display the current time on the screen */
 void displayTime()
 {
+	display_blendRect(2, 226, 70, 14, HUD_PILL_BG, 5);
 	display_printNumI(hour(), 5, 228, 2, '0');
 	display_print((char *)":", 20, 228);
 	display_printNumI(minute(), 27, 228, 2, '0');
@@ -85,154 +71,127 @@ void displayTime()
 /* Display the date on screen */
 void displayDate()
 {
-	display_printNumI(day(), 5, 0, 2, '0');
-	display_print((char *)".", 20, 0);
-	display_printNumI(month(), 27, 0, 2, '0');
-	display_print((char *)".", 42, 0);
-	display_printNumI(year(), 49, 0, 4);
+	display_blendRect(2, 0, 86, 14, HUD_PILL_BG, 5);
+	display_printNumI(day(), 5, 1, 2, '0');
+	display_print((char *)".", 20, 1);
+	display_printNumI(month(), 27, 1, 2, '0');
+	display_print((char *)".", 42, 1);
+	display_printNumI(year(), 49, 1, 4);
 }
 
-/* Display the current temperature mode on top*/
+/* Display the current temperature mode on top (zero EEPROM reads per frame!) */
 void displayTempMode()
 {
-	char buffer[10];
-
+	const char* label;
 	if (limitsLocked)
-		sprintf(buffer, " LOCKED");
+		label = " LOCKED ";
 	else if (autoMode)
-		sprintf(buffer, "  AUTO");
-	//Temperature presets
+		label = "  AUTO  ";
+	else if (minMaxPresetCache == minMax_preset1)
+		label = "PRESET 1";
+	else if (minMaxPresetCache == minMax_preset2)
+		label = "PRESET 2";
+	else if (minMaxPresetCache == minMax_preset3)
+		label = "PRESET 3";
 	else
-	{
-		//Check which preset is active
-		byte minMaxPreset;
-		byte read = EEPROM.read(eeprom_minMaxPreset);
-		if ((read >= minMax_preset1) && (read <= minMax_preset3))
-			minMaxPreset = read;
-		else
-			minMaxPreset = minMax_temporary;
-		//Choose corresponding text
-		if ((minMaxPreset == minMax_preset1) && (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue))
-			sprintf(buffer, "PRESET 1");
-		else if ((minMaxPreset == minMax_preset2) && (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue))
-			sprintf(buffer, "PRESET 2");
-		else if ((minMaxPreset == minMax_preset3) && (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue))
-			sprintf(buffer, "PRESET 3");
-		else
-			sprintf(buffer, " MANUAL");
-	}
+		label = " MANUAL ";
 
-	display_print(buffer, 140, 0);
+	display_blendRect(128, 0, 68, 14, HUD_PILL_BG, 5);
+	display_print((char *)label, 130, 1);
 }
 
 /* Display the minimum and maximum point on the screen */
-void displayMinMaxPoint(bool min)
+void displayMinMaxPoint(bool isMin)
 {
 	int16_t xpos, ypos;
+	calculatePointPos(&xpos, &ypos, isMin ? minTempPos : maxTempPos);
 
-	//Calculate x and y position
-	if (min)
-		calculatePointPos(&xpos, &ypos, minTempPos);
-	else
-		calculatePointPos(&xpos, &ypos, maxTempPos);
+	// Crisp 5px crosshair marker
+	display_drawHLine(xpos - 3, ypos, 7);
+	display_drawVLine(xpos, ypos - 3, 7);
 
-	//Draw the marker
-	display_drawLine(xpos, ypos, xpos, ypos);
+	int16_t tx = xpos - 20;
+	if (tx < 2) tx = 2;
+	if (tx > 274) tx = 274;
+	int16_t ty = ypos + 8;
+	if (ty > 224) ty = ypos - 18;
 
-	//Calc x position for the text
-	xpos -= 20;
-	if (xpos < 0)
-		xpos = 0;
-	if (xpos > 279)
-		xpos = 279;
-
-	//Calc y position for the text
-	ypos += 15;
-	if (ypos > 229)
-		ypos = 229;
-
-	//Show min or max value as absolute temperature
-	if (min)
-		display_printNumF(rawToTemp(minTempVal), 2, xpos, ypos);
-	else
-		display_printNumF(rawToTemp(maxTempVal), 2, xpos, ypos);
+	display_blendRect(tx - 2, ty - 1, 48, 14, HUD_PILL_BG, 5);
+	display_printNumF(rawToTemp(isMin ? minTempVal : maxTempVal), 2, tx, ty);
 }
 
-/* Display free space on screen*/
+/* Display free space on screen */
 void displayFreeSpace()
 {
+	display_blendRect(202, 226, 116, 14, HUD_PILL_BG, 5);
 	display_print(sdInfo, 205, 228);
 }
 
-/* Show the current spot temperature on screen*/
+/* Show the current spot temperature crosshair & readout pill */
 void showSpot()
 {
-	char buffer[10];
+	char buffer[16];
+	display_drawCircle(160, 120, 11);
+	display_drawHLine(138, 120, 11);
+	display_drawHLine(172, 120, 11);
+	display_drawVLine(160, 98, 11);
+	display_drawVLine(160, 132, 11);
 
-	//Draw the spot circle
-	display_drawCircle(160, 120, 12);
-
-	//Draw the lines
-	display_drawLine(136, 120, 148, 120);
-	display_drawLine(172, 120, 184, 120);
-	display_drawLine(160, 96, 160, 108);
-	display_drawLine(160, 132, 160, 144);
-
-	//Convert spot temperature to char array
 	floatToChar(buffer, spotTemp);
-
-	//Print value on display
-	display_print(buffer, 145, 150);
+	int w = display_getStringWidth(buffer);
+	int tx = 160 - (w / 2);
+	display_blendRect(tx - 4, 146, w + 8, 15, HUD_PILL_BG, 5);
+	display_print(buffer, tx, 148);
 }
 
-/* Display addition information on the screen */
+/* Composite ALL HUD overlays into bigBuffer in RAM before ONE atomic DMA screen write */
 void displayInfos()
 {
-	//Set text color
+	uint32_t t0 = micros();
 	changeTextColor();
-	//Set font and background
 	display_setBackColor(VGA_TRANSPARENT);
 	display_setFont((uint8_t *)smallFont);
 
-	//Set write to image, not display
 	display_writeToImage = true;
 
-	//If  not saving image or video
 	if ((imgSave != imgSave_create) && (!videoSave))
 	{
-		//Show battery status in percantage
 		if (batteryEnabled)
 			displayBatteryStatus();
-		//Show the time
 		if (timeEnabled)
 			displayTime();
-		//Show the date
 		if (dateEnabled)
 			displayDate();
-		//Show storage information
 		if (storageEnabled)
 			displayFreeSpace();
-		//Display temperature mode
 		displayTempMode();
 	}
 
-	//Show the minimum / maximum points
 	if (minMaxPoints & minMaxPoints_min)
 		displayMinMaxPoint(true);
 	if (minMaxPoints & minMaxPoints_max)
 		displayMinMaxPoint(false);
 
-	//Show the spot in the middle
 	if (spotEnabled)
 		showSpot();
 
-	//Show the color bar
 	if (colorbarEnabled)
 		showColorBar();
 
-	//Show the temperature points
 	showTemperatures();
 
-	//Set write back to display
+	// Flicker-free SAVING badge composited in RAM
+	if (imgSave == imgSave_create && !serialMode)
+	{
+		int by = spotEnabled ? 66 : 106;
+		display_blendRect(102, by - 4, 116, 24, HUD_PILL_BG, 6);
+		display_setFont(bigFont);
+		display_setColor(0xFB82); // thermal amber
+		display_print((char *)"SAVING", CENTER, by);
+		display_setFont((uint8_t *)smallFont);
+		changeTextColor();
+	}
+
 	display_writeToImage = false;
+	g_perf.overlay_us = micros() - t0;
 }

@@ -42,20 +42,20 @@ boolean checkFirstStart()
 /* Show welcome Screen for the first start procedure */
 void welcomeScreen()
 {
-	//Background & Title
-	display_fillScr(200, 200, 200);
-	display_setBackColor(200, 200, 200);
+	//Background & Title (2026 dark-slate + thermal amber)
+	display_fillScr(0x08A5);
+	display_setBackColor(0x08A5);
 	display_setFont(smallFont);
-	display_printC("Welcome to the", CENTER, 20);
+	display_printC("Welcome to the", CENTER, 20, 0x9517);
 	display_setFont(bigFont);
-	display_printC("DIY-Thermocam V3", CENTER, 60, VGA_BLUE);
+	display_printC("DIY-Thermocam V3", CENTER, 60, 0xFB82);
 
 	//Explanation
 	display_setFont(smallFont);
-	display_printC("This is the first time setup.", CENTER, 110);
-	display_printC("It will guide you through the", CENTER, 140);
-	display_printC("basic settings for your device.", CENTER, 170);
-	display_printC("-> Please touch screen <-", CENTER, 210, VGA_BLUE);
+	display_printC("This is the first time setup.", CENTER, 110, 0xF7DF);
+	display_printC("It will guide you through the", CENTER, 140, 0xF7DF);
+	display_printC("basic settings for your device.", CENTER, 170, 0xF7DF);
+	display_printC("-> Please touch screen <-", CENTER, 210, 0xFB82);
 
 	//Wait for touch press
 	while (!touch_touched())
@@ -70,24 +70,24 @@ void welcomeScreen()
 void infoScreen(String *text, bool cont)
 {
 	//Background & Title
-	display_fillScr(200, 200, 200);
-	display_setBackColor(200, 200, 200);
+	display_fillScr(0x08A5);
+	display_setBackColor(0x08A5);
 	display_setFont(bigFont);
-	display_printC(text[0], CENTER, 20, VGA_BLUE);
+	display_printC(text[0], CENTER, 20, 0xFB82);
 
 	//Content
 	display_setFont(smallFont);
-	display_printC(text[1], CENTER, 55);
-	display_printC(text[2], CENTER, 80);
-	display_printC(text[3], CENTER, 105);
-	display_printC(text[4], CENTER, 130);
+	display_printC(text[1], CENTER, 55, 0xF7DF);
+	display_printC(text[2], CENTER, 80, 0xF7DF);
+	display_printC(text[3], CENTER, 105, 0xF7DF);
+	display_printC(text[4], CENTER, 130, 0xF7DF);
 
 	//Show hint to touch the screen
 	if (cont)
 	{
-		display_printC(text[5], CENTER, 155);
-		display_printC(text[6], CENTER, 180);
-		display_printC("-> Please touch screen <-", CENTER, 212, VGA_BLUE);
+		display_printC(text[5], CENTER, 155, 0xF7DF);
+		display_printC(text[6], CENTER, 180, 0xF7DF);
+		display_printC("-> Please touch screen <-", CENTER, 212, 0xFB82);
 		//Wait for touch press
 		while (!touch_touched())
 			;

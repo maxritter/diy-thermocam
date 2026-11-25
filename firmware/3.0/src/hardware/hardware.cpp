@@ -32,7 +32,13 @@
 #include <temperature.h>
 #include <lepton.h>
 #include <firststart.h>
+#include <perf.h>
 #include <hardware.h>
+
+// Double-buffered 320x240 RGB565 framebuffers in OCRAM (DMAMEM)
+DMAMEM static uint16_t s_bigBufPool[2][76800];
+// Front 160x120 raw buffer in DTCM
+static uint16_t s_smallBufFront[19200];
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
@@ -295,7 +301,6 @@ void initSPI()
 	SPI.setMISO(pin_miso);
 	SPI.setSCK(pin_sck);
 	SPI.setCS(pin_lcd_dc);
-	SPI.usingInterrupt(pin_lepton_vsync);
 	SPI.begin();
 
 	SPI1.setMOSI(pin_mosi1);
@@ -331,17 +336,19 @@ void initADC()
 /* Init the buffer(s) */
 void initBuffer()
 {
-	//Init 320x240 buffer
-	bigBuffer = (uint16_t *)malloc(153600);
-
-	//Init 160x120 buffer
-	smallBuffer = (uint16_t *)malloc(38400);
+	bigBuffer = s_bigBufPool[0];
+	bigBufferBack = s_bigBufPool[1];
+	smallBuffer = s_smallBufFront;
+	smallBufferBack = nullptr;
 }
 
-/* Display the content of the small/big buffer on the screen */
+/* Display the content of the big buffer on the screen (double-buffered swap) */
 void displayBuffer()
 {
-	display_writeScreen(bigBuffer);
+	unsigned short* toSend = bigBuffer;
+	bigBuffer = bigBufferBack;
+	bigBufferBack = toSend;
+	display_writeScreen(toSend);
 }
 
 /* Sets the display rotation depending on the setting */
@@ -366,13 +373,15 @@ void readTempLimits()
 	byte minValueHigh, minValueLow, maxValueHigh, maxValueLow, minMaxComp;
 	bool found = false;
 
-	//Min / max selection
+	//Min / max selection (cached in RAM to avoid per-frame EEPROM reads)
 	byte minMaxPreset;
 	byte read = EEPROM.read(eeprom_minMaxPreset);
 	if ((read >= minMax_preset1) && (read <= minMax_preset3))
 		minMaxPreset = read;
 	else
 		minMaxPreset = minMax_temporary;
+	minMaxPresetCache = minMaxPreset;
+	minMaxPresetCache = minMaxPreset;
 
 	//Min / max preset 1
 	if ((minMaxPreset == minMax_preset1) && (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue))
@@ -533,6 +542,9 @@ void initHardware()
 {
 	//Init UART
 	Serial.begin(115200);
+
+	//Init performance telemetry
+	perf_init();
 
 	//Init GPIO
 	initGPIO();

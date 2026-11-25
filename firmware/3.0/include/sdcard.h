@@ -1,39 +1,22 @@
 /*
-*
-* SD Card - Methods to access the internal SD storage
-*
-* DIY-Thermocam Firmware
-*
-* GNU General Public License v3.0
-*
-* Copyright by Max Ritter
-*
-* http://www.diy-thermocam.net
-* https://github.com/maxritter/diy-thermocam
-*
-*/
+ * SD Card - Methods to access the internal SD storage (SdFs: FAT16/FAT32/exFAT)
+ */
 
 #ifndef SD_H
 #define SD_H
 
-/*########################## PUBLIC PROCEDURES ################################*/
+#include <Arduino.h>
 
 bool beginSD();
-void clearCache(uint8_t addSig);
-void clearFatDir(uint32_t bgn, uint32_t count);
 void dateTime(uint16_t* date, uint16_t* time);
 bool formatCard();
-void formatFAT16();
-void formatFAT32();
-uint32_t getCardSize();
-uint32_t getSDSpace();
+uint32_t getCardSize();       // MB
+uint32_t getSDSpace();        // KB (legacy helper, >= 1000 means >= 1 MB)
+uint32_t getSDTotalKB();      // KiB (cached)
+uint32_t getSDFreeKB();       // KiB (cached)
+uint8_t  getSDFsType();       // 0=none, 1=FAT16, 2=FAT32, 3=exFAT
 void initSD();
-uint16_t lbnToCylinder(uint32_t lbn);
-uint8_t lbnToHead(uint32_t lbn);
-uint8_t lbnToSector(uint32_t lbn);
 void refreshFreeSpace();
-uint32_t volSerialNumber();
-uint8_t writeCache(uint32_t lbn);
-void writeMbr();
+void sdNoteBytesWritten(uint32_t bytes);
 
 #endif /* SD_H */

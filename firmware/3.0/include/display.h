@@ -43,6 +43,18 @@
 #define VGA_PURPLE		0x8010
 #define VGA_TRANSPARENT	0xFFFFFFFF
 
+// Modern 2026 Dark-Slate + Thermal Amber UI palette (RGB565)
+#define UI_BG_DARK      0x08A5  // #0F172A deep slate
+#define UI_SURFACE      0x1947  // #1E293B slate panel
+#define UI_ELEVATED     0x21A9  // #263449 button surface
+#define UI_BORDER       0x3A6C  // #3B4D66 subtle border
+#define UI_TEXT         0xF7DF  // #F8FAFC crisp white
+#define UI_TEXT_MUTED   0x9517  // #94A3B8 muted slate
+#define UI_ACCENT       0xFB82  // #F97316 thermal amber/orange
+#define UI_ACCENT_DARK  0xC2C1  // #C2410C deep amber
+#define UI_OK           0x262B  // #22C55E green
+#define UI_ERR          0xEA28  // #EF4444 red
+
 struct propFont
 {
 	byte charCode;
@@ -119,5 +131,7 @@ void display_writedata8_last(uint8_t c);
 void display_writeRect2BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t* pixels, const uint16_t* palette);
 void display_writeRect4BPP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t* pixels, const uint16_t* palette);
 void display_writeScreen(unsigned short *pcolors);
+void display_waitDmaComplete();
+void display_blendRect(int x, int y, int w, int h, word color, uint8_t alpha_num_of_8 = 5);
 
 #endif /* DISPLAY_H */

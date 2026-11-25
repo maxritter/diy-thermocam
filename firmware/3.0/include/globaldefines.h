@@ -141,6 +141,8 @@ extern "C" {
 #define eeprom_minMax2Comp      176 //4 Byte (176-179)
 #define eeprom_minMax3Comp      180 //4 Byte (180-183)
 #define eeprom_lepton_gain      184
+#define eeprom_radParamsSet     185
+#define eeprom_radParamsData    186 //16 Byte (186-201)
 #define eeprom_fwVersionLow     250
 #define eeprom_fwVersionHigh    251
 #define eeprom_setValue         200

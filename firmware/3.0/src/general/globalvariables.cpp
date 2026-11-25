@@ -26,13 +26,15 @@
 /*############################# PUBLIC VARIABLES ##############################*/
 
 //Current firmware version
-char versionString[] = "Firmware 3.0.4 from 20.10.2023";
-uint16_t fwVersion = 304;
+char versionString[] = "3.1.0 (2026-11-25)";
+uint16_t fwVersion = 310;
 
-//320x240 buffer
+//320x240 double buffers
 unsigned short* bigBuffer;
+unsigned short* bigBufferBack;
 //160x120 buffer
 unsigned short* smallBuffer;
+unsigned short* smallBufferBack;
 
 //Timer, the interval is set in initScreenOffTimer()
 Metro screenOff(0, false);
@@ -44,10 +46,13 @@ Bounce buttonDebouncer(pin_button, 200);
 Bounce touchDebouncer(pin_touch_irq, 200);
 
 //SD
-SdFat32 sd;
-File32 sdFile;
+SdFs sd;
+FsFile sdFile;
 String sdInfo;
-File32 dir;
+FsFile dir;
+uint32_t sdTotalKB = 0;
+uint32_t sdFreeKB = 0;
+uint8_t sdFsType = 0;
 
 //Save filename
 char saveFilename[20];
@@ -56,6 +61,7 @@ char saveFilename[20];
 ADC *batMeasure;
 //Battery
 int8_t batPercentage;
+uint16_t batMillivolts = 0;
 long batTimer;
 int8_t batComp;
 bool usbConnected;
@@ -104,6 +110,16 @@ byte colorScheme;
 const byte *colorMap;
 //Number of rgb elements inside the color scheme
 int16_t colorElements;
+//Precomputed 256-entry RGB565 LUT
+uint16_t colorLut[256];
+//Cached shutter mode and manual preset
+bool shutterModeAuto = true;
+byte minMaxPresetCache = minMax_temporary;
+//Lepton metadata
+char leptonPartNum[32] = {0};
+float leptonFpaTempC = NAN;
+volatile uint32_t leptonFrameSeq = 0;
+volatile uint64_t leptonFrameTimestampUs = 0;
 
 //Min & max lepton raw values
 uint16_t maxValue;
@@ -149,5 +165,9 @@ volatile bool serialMode;
 volatile byte loadTouch;
 //Current buffer valid
 volatile bool leptonBufferValid;
+volatile uint32_t leptonFrameReadyUs = 0;
 //Display is currently updated, do not use SPI in IRQ
 volatile bool disableSPIIRQ;
+//Non-blocking ISR edge flags
+volatile bool touchIrqFlag = false;
+volatile bool buttonIrqFlag = false;

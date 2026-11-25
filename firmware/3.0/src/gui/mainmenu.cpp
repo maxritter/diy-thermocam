@@ -37,16 +37,17 @@
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Draws the background in the main menu */
+/* Draws the background in the main menu (2026 dark-slate + thermal amber) */
 void mainMenuBackground()
 {
-	display_setColor(120, 120, 120);
+	display_setColor(0x1947); // surface header/footer
 	display_fillRoundRect(6, 6, 314, 234);
-	display_setColor(200, 200, 200);
-	display_fillRect(6, 36, 314, 180);
-	display_setColor(VGA_BLACK);
-	display_drawHLine(6, 36, 314);
-	display_drawHLine(6, 180, 314);
+	display_setColor(0x08A5); // deep slate body
+	display_fillRect(6, 38, 314, 180);
+	display_setColor(0xFB82); // thermal amber header rule
+	display_drawHLine(6, 38, 308);
+	display_setColor(0x3A6C); // slate border footer rule
+	display_drawHLine(6, 180, 308);
 }
 
 /* Draws the content of the selection menu*/
@@ -60,8 +61,8 @@ void drawSelectionMenu()
 	buttons_addButton(15, 188, 120, 40, (char *)"Back");
 	buttons_addButton(95, 132, 130, 35, (char *)"OK");
 	buttons_drawButtons();
-	//Border
-	display_setColor(VGA_BLUE);
+	//Selection card border
+	display_setColor(0xFB82);
 	display_drawRect(65, 57, 257, 111);
 }
 
@@ -69,20 +70,18 @@ void drawSelectionMenu()
 void mainMenuTitle(char *title)
 {
 	display_setFont(bigFont);
-	display_setBackColor(120, 120, 120);
-	display_setColor(VGA_WHITE);
+	display_setBackColor(0x1947);
+	display_setColor(0xF7DF);
 	display_print(title, CENTER, 14);
 }
 
 /* Draws the current selection in the menu */
 void mainMenuSelection(char *selection)
 {
-	//Clear the old content
-	display_setColor(VGA_WHITE);
-	display_fillRect(66, 58, 257, 111);
-	//Print the text
-	display_setBackColor(VGA_WHITE);
-	display_setColor(VGA_BLUE);
+	display_setColor(0x1947);
+	display_fillRect(66, 58, 256, 110);
+	display_setBackColor(0x1947);
+	display_setColor(0xFD20); // hot amber
 	display_print(selection, CENTER, 77);
 }
 
@@ -91,9 +90,9 @@ bool massStoragePrompt()
 {
 	//Title & Background
 	drawTitle((char *)"USB File Transfer");
-	display_setColor(VGA_BLACK);
+	display_setColor(0xF7DF);
 	display_setFont(smallFont);
-	display_setBackColor(200, 200, 200);
+	display_setBackColor(0x08A5);
 	display_print((char *)"Do you want to enter mass storage", CENTER, 65);
 	display_print((char *)"to transfer files to the PC?", CENTER, 85);
 	display_print((char *)"Do not use this for FW updates", CENTER, 105);
@@ -949,7 +948,7 @@ bool tempLimitsPresets()
 					break;
 					//Load Preset 3
 				case 3:
-					if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
+					if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
 						EEPROM.write(eeprom_minMaxPreset, minMax_preset3);
 					else
 					{
@@ -1308,9 +1307,14 @@ void drawMainMenu(byte pos)
 {
 	//Border
 	drawMainMenuBorder();
-	//Background
-	display_setColor(200, 200, 200);
+	//Dark slate surface
+	display_setColor(0x08A5);
 	display_fillRoundRect(6, 6, 314, 234);
+	//Page indicator dots at top
+	for (byte p = 0; p < 3; ++p) {
+		display_setColor(p == pos ? 0xFB82 : 0x3A6C);
+		display_fillCircle(144 + p * 16, 15, p == pos ? 4 : 3);
+	}
 	//Buttons
 	buttons_deleteAllButtons();
 
@@ -1428,9 +1432,6 @@ void mainMenuHandler(byte *pos)
 	//Main loop
 	while (true)
 	{
-		//Enter mass storage on USB connect
-		checkMassStorage();
-
 		//Check for screen sleep
 		if (screenOffCheck())
 			drawMainMenu(*pos);
