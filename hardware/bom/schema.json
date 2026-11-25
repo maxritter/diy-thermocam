@@ -35,8 +35,8 @@
     },
     "hw_rev": {
       "type": "string",
-      "enum": ["all", "v3.0", "v3.1"],
-      "description": "Target hardware revision: all (shared), v3.0 (1:1 Eagle/KiCad port), or v3.1 (USB-C + BQ24075 PCBA revision)."
+      "enum": ["all", "v3.0", "v4.0"],
+      "description": "Target hardware revision: all (shared), v3.0 (1:1 Eagle/KiCad port), or v4.0 (zero-solder USB-C + BQ24074 + TPS61022 PCBA revision)."
     },
     "category": {
       "type": "string",

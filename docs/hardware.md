@@ -35,8 +35,8 @@ Board outline: **89.4 × 68.4 mm**, **1.6 mm FR-4**, **2-layer**, 1 oz copper, H
 
 | Revision | Status | Power, USB & Controls | Assembly Style | Best For |
 |---|---|---|---|---|
-| **PCB V3.0** | **Verified & buildable** | Teensy micro-USB + external TP4056 + Pololu boost + wired switch/button (cut Teensy `VUSB–VIN`) | 100% through-hole hand soldering | Proven baseline build with standard hand tools |
-| **PCB V4.0 (Zero-Solder)** | **Prototype-pending** | Factory-populated **USB-C** + **TI BQ24075** power-path charger + onboard **5V boost** + onboard slide switch & tactile capture button + JST-PH + factory-soldered female headers | **Zero soldering** — snap in Teensy 4.1 (w/ pins), Lepton Breakout V2.0, and BuyDisplay 3.2" | Turnkey PCBA orders from Seeed Studio Fusion, JLCPCB, or PCBWay |
+| **PCB V3.0** | **Verified & buildable** | Teensy micro-USB + external TP4056 + Pololu `U3V16F5` boost + wired switch/button + CR1220 coin cell (cut Teensy `VUSB–VIN`) | 100% through-hole hand soldering | Proven baseline build with standard hand tools |
+| **PCB V4.0 (Zero-Solder)** | **`PROTOTYPE-PENDING`** | Factory-populated **USB-C** + **TI `BQ24074RGTR`** dynamic power-path charger (`4.4 V VSYS`) + **TI `TPS61022RWUR`** 5 V boost + `AO3401A`/`AO3400A` active reverse-polarity protection + `XC6206P332MR-G` 3.3 V RTC LDO (no coin cell) + onboard slide switch & tactile capture button + `P1`/`P2` USB D+/D- pogo pins + JST-PH + factory-soldered female headers | **Zero soldering** — snap in Teensy 4.1 (w/ pins), Lepton Breakout V2.0 (Lepton 3.5 or 3.1R), BuyDisplay 3.2", and slim `505060` UL/IEC 62133 LiPo | Turnkey PCBA orders from JLCPCB, Seeed Studio Fusion, or PCBWay |
 
 > **Prototype gate:** V3.0 remains the default verified build until the V4.0 zero-solder PCBA and 3D-printed enclosure complete physical assembly and bring-up testing.
 
@@ -54,7 +54,7 @@ Board outline: **89.4 × 68.4 mm**, **1.6 mm FR-4**, **2-layer**, 1 oz copper, H
 Enclosure sources live in [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure):
 
 - **Legacy V3.0 Acrylic (verified):** 6-plate 3 mm laser-cut acrylic (`hardware/enclosure/legacy-v3.0/enclosure.svg`). Open in Inkscape or send to any laser-cutting shop using 3 mm matte acrylic (e.g. Acryl GS Grey).
-- **2026 Parametric `build123d` CAD (prototype-pending):** Generates both an improved 6-plate laser-cut kit (**SVG / DXF**) and a **screwdriver-only 2-piece 3D-printable / CNC shell** (**STEP / STL / 3MF**) with captive M2.5 and 1/4"-20 hex nut pockets (no heat-set soldering iron needed), a 3D-printed shutter button plunger, widened Lepton aperture (≥ 8.5 mm to eliminate top-edge thermal vignetting), aligned USB & LED ports, Teensy Prog pinhole, and an integrated snap-fit lens cap.
+- **2026 Parametric `build123d` CAD (`PROTOTYPE-PENDING`):** Generates both an improved 6-plate laser-cut kit (**SVG / DXF**) and a **screwdriver-only 3D-printable / CNC shell** (**STEP / STL / 3MF**) using `4× M2.5×6` front + `4× M2.5×8` back DIN 965 countersunk screws, a blind-roofed `1/4"-20` metal hex-nut tripod pocket (max tripod stud `≤ 8.0 mm`, no heat-set iron needed), guided shutter plunger and captive slide-switch actuator, an insulating `battery_cradle` + `battery_lid` for a slim `≤5.0 mm` `505060` 2000 mAh LiPo, a widened `13.4→20.2 mm` cone clearing both **Lepton 3.5** (`71° DFOV`) and **Lepton 3.1R** (`95° HFOV / 119° DFOV`) with zero vignetting, support-free microSD chute, Teensy Prog pinhole, and a flush top-open dovetail lens cap.
 - **Community 3D-printed 3.0b:** Originally contributed by [helmarw/DIY-Thermocam](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) and incorporated into the 2026 parametric design.
 
 ### Recommended 3D Printing Settings

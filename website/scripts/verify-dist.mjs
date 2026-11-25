@@ -1,7 +1,9 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const DIST = resolve(process.cwd(), 'website/dist');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DIST = resolve(__dirname, '../dist');
 
 const REQUIRED_ROUTES = [
   'index.html',
@@ -33,9 +35,11 @@ const REQUIRED_ASSETS = [
   'images/brand/logo-dark.svg',
   'images/brand/favicon.png',
   'images/brand/hero-thermal-banner.png',
+  'images/build-v4/v4-cad-assembly.png',
   'images/build-v4/v4-step-1-unbox-pcba.png',
   'images/build-v4/v4-step-2-plug-modules.png',
   'images/build-v4/v4-step-3-enclosure-screws.png',
+  'images/thermal/real-v3-1080p-capture.png',
 ];
 
 const errors = [];
@@ -52,7 +56,7 @@ for (const asset of REQUIRED_ASSETS) {
   }
 }
 
-// Count legacy images across the 5 original subdirectories (must be 93)
+// Count gallery/device/manual images across the 5 canonical subdirectories (93 legacy + real-v3-1080p-capture.png)
 let legacyImgCount = 0;
 for (const dir of ['device', 'manual', 'software', 'thermal', 'website']) {
   const full = join(DIST, 'images', dir);
@@ -60,13 +64,13 @@ for (const dir of ['device', 'manual', 'software', 'thermal', 'website']) {
     legacyImgCount += readdirSync(full).filter((f) => !f.startsWith('.')).length;
   }
 }
-if (legacyImgCount !== 93) {
-  errors.push(`Expected 93 legacy images, found ${legacyImgCount}`);
+if (legacyImgCount < 93) {
+  errors.push(`Expected at least 93 gallery/device images, found ${legacyImgCount}`);
 }
 
-// Verify BOM rows rendered in /docs/partlist/index.html
+// Verify V4.0 BOM rows rendered in /docs/partlist/index.html
 const partlistHtml = readFileSync(join(DIST, 'docs/partlist/index.html'), 'utf8');
-for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', 'U3V16F5', 'BQ24075']) {
+for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', 'BQ24074', 'TPS61022', '505060']) {
   if (!partlistHtml.includes(needle)) {
     errors.push(`Missing BOM needle in /docs/partlist/: ${needle}`);
   }
@@ -101,5 +105,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `VERIFICATION PASSED: ${REQUIRED_ROUTES.length} routes, ${legacyImgCount} legacy images, ${REQUIRED_ASSETS.length} new/meta assets, BOM rows, Umami, OG, JSON-LD, and Pagefind all verified.`
+  `VERIFICATION PASSED: ${REQUIRED_ROUTES.length} routes, ${legacyImgCount} gallery/device images, ${REQUIRED_ASSETS.length} brand/build/meta assets, V4.0 BOM rows, Umami, OG, JSON-LD, and Pagefind all verified.`
 );

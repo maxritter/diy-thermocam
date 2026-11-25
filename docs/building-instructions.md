@@ -6,34 +6,36 @@ You can build a DIY-Thermocam in two ways: the **V4 Zero-Solder Kit** *(prototyp
 
 ## Option A: DIY-Thermocam V4 — Zero-Solder, Screwdriver-Only (Prototype-Pending)
 
-DIY-Thermocam V4 eliminates soldering irons, loose jumper wires, and trace cutting. Every power regulator, USB-C port, charger IC, slide switch, tactile shutter button, coin-cell holder, and female header socket arrives pre-soldered from the PCB fab. You plug in four off-the-shelf modules and fasten the 3D-printed shell with four M2.5 screws.
+DIY-Thermocam V4 eliminates soldering irons, loose jumper wires, coin cells, and trace cutting. Every power regulator, USB-C port, charger IC (`BQ24074`), 5 V synchronous boost (`TPS61022`), 3.3 V RTC LDO (`XC6206`), active reverse-polarity MOSFET chain, slide switch, tactile shutter button, USB D+/D- pogo pins, and female header socket arrives pre-soldered from the PCB fab. You plug in off-the-shelf modules and fasten the 3D-printed shell with `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws.
 
-> **Prototype status:** V4 PCB (`hardware/pcb/kicad-v4.0/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are prototype-pending until physical bring-up is completed. For a field-proven build today, follow the verified V3.0 guide below.
+> **Prototype status:** V4 PCB (`hardware/pcb/kicad-v4.0/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are `PROTOTYPE-PENDING` until physical bring-up is completed. For a field-proven build today, follow the verified V3.0 guide below.
 
 ### Minimal Worldwide Ordering Flow (4 Orders Total)
 
-1. **Seeed Studio Fusion (or JLCPCB) — PCBA + 3D-Printed Enclosure:** Upload the V4 Gerber, BOM, and CPL files to receive a 100% factory-populated board (TI `BQ24075` USB-C power-path charger, onboard 5V boost regulator, slide switch, capture button, SMD CR1220 holder, JST-PH socket, and female sockets for Teensy, Lepton, and Display) plus the 2-piece support-free 3D-printed shell with captive M2.5 and 1/4"-20 hex nut pockets.
-2. **DigiKey or Mouser (one consolidated electronics order):** Teensy 4.1 **with pre-soldered pins**, FLIR Lepton 3.5 (`500-0771-01`), FLIR Lepton Breakout Board V2.0 (`250-0577-00`), CR1220 coin cell, Class 10 microSD card, and M2.5×6 machine screws.
+1. **JLCPCB, Seeed Studio Fusion, or PCBWay — PCBA + 3D-Printed Enclosure:** Upload the V4 Gerber, BOM (31 verified LCSC SKUs), and CPL files to receive a factory-populated board (TI `BQ24074` USB-C power-path charger, TI `TPS61022` 5 V boost, `XC6206P332MR-G` 3.3 V RTC LDO, `AO3401A`/`AO3400A` active reverse-polarity protection, slide switch, capture button, pogo pins, JST-PH socket, and female sockets) plus the support-free 3D-printed shell (`front_shell`, `back_shell`, `lens_cap`, `capture_button`, `slide_switch_cap`, `battery_cradle`, `battery_lid`).
+2. **DigiKey or Mouser (one consolidated electronics order):** Teensy 4.1 **with pre-soldered pins** (plus 1×5 inner pin header for `J7`), FLIR Lepton 3.5 (`500-0771-01`) or optional wide-angle Lepton 3.1R (`500-0758-03`), FLIR Lepton Breakout Board V2.0 (`250-0577-00`), Class 10 microSD card, M2.5 standoff kit (`4× M2.5×6` front + `4× M2.5×8` back DIN 965 CSK screws), and a metal `1/4"-20` hex nut.
 3. **BuyDisplay:** `ER-TFTM032-3` 3.2" 240×320 SPI TFT touch display (ships with pre-soldered 2×20 pin header — select 4-Wire SPI, 5V, Resistive Touch, No Font Chip).
-4. **Adafruit / SparkFun / local hobby shop:** Protected 3.7 V 2000 mAh LiPo cell (`103450` or `60367`) with factory JST-PH 2-pin plug.
+4. **Battery supplier:** Slim **≤5.0 mm UL/IEC 62133 certified protected `505060` (5.0 × 50 × 60 mm) 3.7 V 2000 mAh LiPo** with standard Adafruit/SparkFun JST-PH polarity (always verify `+`/`-` against `J4` silkscreen).
 
-See the interactive [Bill of Materials](/docs/partlist/) for verified links and cost breakdowns.
+See the interactive [Bill of Materials](/docs/partlist/) for verified links, V3-upgrade reuse options, and live cost breakdowns.
+
+![V4.0 parametric build123d 4-step mechanical assembly overview](/images/build-v4/v4-cad-assembly.png)
 
 ### V4 Step 1: Unbox the factory PCBA and snap-in modules
 
-Lay out the factory-assembled V4 PCBA, Teensy 4.1 (with pre-soldered header pins), FLIR Lepton 3.5 + Breakout V2.0, BuyDisplay 3.2" TFT, JST-PH LiPo battery, CR1220 coin cell, microSD card, and a standard Phillips screwdriver. No soldering iron or wire stripper is needed.
+Lay out the factory-assembled V4 PCBA, Teensy 4.1 (with pre-soldered header pins), FLIR Lepton 3.5 (or 3.1R) + Breakout V2.0, BuyDisplay 3.2" TFT, slim `505060` JST-PH LiPo battery, microSD card, and a standard Phillips screwdriver. No soldering iron, coin cell, or wire stripper is needed.
 
 ![V4 Step 1: Factory PCBA and modular components laid out with screwdriver](/images/build-v4/v4-step-1-unbox-pcba.png)
 
 ### V4 Step 2: Plug in Teensy 4.1, Lepton, Display, and Battery
 
-Snap the FLIR Lepton 3.5 into the Breakout Board V2.0 until both clips click, then press the **Teensy 4.1**, **Lepton Breakout V2.0**, and **3.2" TFT Display** squarely into their factory-soldered sockets on the V4 PCB. Insert the CR1220 coin cell (`+` up) and microSD card, double-check JST-PH polarity against the silkscreen, and plug the LiPo battery straight into `J4`.
+Snap the FLIR Lepton 3.5 (or 3.1R) into the Breakout Board V2.0 until both clips click, then press the **Teensy 4.1**, **Lepton Breakout V2.0**, and **3.2" TFT Display** squarely into their factory-soldered sockets on the V4 PCB. Seat the slim `505060` LiPo inside the insulating `battery_cradle` + `battery_lid` between the PCB and Display, insert the microSD card, verify JST-PH polarity (`-` / `+`) against the silkscreen, and plug into `J4`.
 
 ![V4 Step 2: Plugging Teensy 4.1, FLIR Lepton, 3.2-inch display, and JST-PH battery into the V4 PCBA](/images/build-v4/v4-step-2-plug-modules.png)
 
-### V4 Step 3: Close the 3D-printed enclosure with four screws and flash over USB-C
+### V4 Step 3: Close the 3D-printed enclosure with M2.5 CSK screws and flash over USB-C
 
-Drop the printed shutter button plunger into the front shell, seat the assembled electronics stack, align the rear shell over the Lepton lens aperture, and tighten four M2.5 screws into the captive hex nuts with a Phillips screwdriver. Snap on the protective lens cap, connect a standard USB-C cable, and flash the firmware directly from the [DIY-Thermocam Desktop App](/software/).
+Slide the metal `1/4"-20` tripod hex nut into the rear shell pocket (max tripod stud `≤ 8.0 mm`), drop the guided `capture_button` plunger and `slide_switch_cap` into place, seat the electronics stack, and fasten `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws with a Phillips screwdriver. Slide on the dovetail lens cap, connect a standard USB-C cable, and flash Firmware 4.0 directly from the [DIY-Thermocam Desktop Studio](/software/).
 
 ![V4 Step 3: Exploded 3D-printed enclosure assembled with four screws and a Phillips screwdriver](/images/build-v4/v4-step-3-enclosure-screws.png)
 

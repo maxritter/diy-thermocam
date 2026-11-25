@@ -1,9 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+export type HardwareRevision = 'v3.0' | 'v4.0';
+
 export interface BomItem {
   id: string;
-  hwRev: 'all' | 'v3.0' | 'v3.1';
+  hwRev: 'all' | HardwareRevision;
   category: string;
   designators: string;
   qty: number;
@@ -73,7 +75,7 @@ export function loadBomItems(): BomItem[] {
     const cols = parseCsvLine(line);
     const hwRevRaw = (cols[1] || 'all').trim().toLowerCase();
     const hwRev: BomItem['hwRev'] =
-      hwRevRaw === 'v3.0' ? 'v3.0' : hwRevRaw === 'v3.1' ? 'v3.1' : 'all';
+      hwRevRaw === 'v3.0' ? 'v3.0' : hwRevRaw === 'v4.0' ? 'v4.0' : 'all';
 
     return {
       id: cols[0] ?? '',
@@ -100,7 +102,7 @@ export function loadBomItems(): BomItem[] {
   });
 }
 
-export function computeBomTotals(items: BomItem[], revision: 'v3.0' | 'v3.1') {
+export function computeBomTotals(items: BomItem[], revision: HardwareRevision) {
   const scoped = items.filter((item) => item.hwRev === 'all' || item.hwRev === revision);
   const required = scoped.filter((item) => item.pcbaTier !== 'optional');
   const optional = scoped.filter((item) => item.pcbaTier === 'optional');

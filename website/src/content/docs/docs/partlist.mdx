@@ -1,6 +1,6 @@
 ---
 title: Bill of Materials (Partlist)
-description: Single-source interactive Bill of Materials for DIY-Thermocam V3.0 (through-hole) and V3.1 (USB-C PCBA), with live USD totals and verified supplier links.
+description: Single-source interactive Bill of Materials for DIY-Thermocam V4.0 (Zero-Solder PCBA) and V3.0 (Classic Through-Hole), with modular build options, live USD totals, and verified supplier links.
 tableOfContents: false
 editUrl: https://github.com/maxritter/diy-thermocam/edit/master/hardware/bom/bom.csv
 ---
@@ -11,15 +11,15 @@ import { computeBomTotals, loadBomCsvRaw, loadBomItems } from '../../../lib/bom'
 export const bomItems = loadBomItems();
 export const bomCsvRaw = loadBomCsvRaw();
 export const v30 = computeBomTotals(bomItems, 'v3.0');
-export const v31 = computeBomTotals(bomItems, 'v3.1');
+export const v40 = computeBomTotals(bomItems, 'v4.0');
 
-This table is generated directly at build time from [`hardware/bom/bom.csv`](https://github.com/maxritter/diy-thermocam/blob/master/hardware/bom/bom.csv). Switch between the verified **V3.0 through-hole build** ({v30.requiredRows} required parts, ~${v30.requiredUsd.toFixed(2)} incl. FLIR Lepton 3.5) and the prototype **V3.1 USB-C + TI BQ24075 PCBA revision** ({v31.requiredRows} required parts, ~${v31.requiredUsd.toFixed(2)} incl. Lepton 3.5).
+This table is generated at build time from [`hardware/bom/bom.csv`](https://github.com/maxritter/diy-thermocam/blob/master/hardware/bom/bom.csv). Switch between the **V4.0 Zero-Solder PCBA** (`PROTOTYPE-PENDING`, {v40.requiredRows} required parts, ~${v40.requiredUsd.toFixed(2)} incl. FLIR Lepton 3.5) and the proven **V3.0 Classic Through-Hole** build ({v30.requiredRows} required parts, ~${v30.requiredUsd.toFixed(2)} incl. Lepton 3.5), or customize your enclosure and V3-upgrade reuse options below.
 
 <BomExplorer client:load items={bomItems} csvRaw={bomCsvRaw} />
 
 ## Ordering & Fabrication Notes
 
-- **FLIR Lepton sensor:** Both **Lepton 3.5** (`160×120`, recommended) and **Lepton 2.5** (`80×60`, optional budget fallback, EOL notice Sept 2027) fit the **Lepton Breakout Board V2.0**. Do not substitute PureThermal USB UVC boards — they lack the 2×10 SPI header.
-- **PCB & Enclosure fabrication:** Order bare boards or V3.1 turnkey PCBA from **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay** using the Gerber, Excellon, BOM, and CPL exports in [`hardware/pcb/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb). Laser-cut 3 mm acrylic or 3D-print / CNC the shell from [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure).
+- **FLIR Lepton sensor:** **Lepton 3.5** (`160×120`, 57° HFOV, recommended), optional wide-angle **Lepton 3.1R** (`160×120`, 95° HFOV / 119° DFOV, `500-0758-03`), and **Lepton 2.5** (`80×60`, EOL notice Sept 2027) all fit the **Lepton Breakout Board V2.0**. Both V3.0 and V4.0 parametric enclosures clear the full 119° cone of Lepton 3.1R. Do not substitute PureThermal USB UVC boards — they lack the 2×10 SPI header.
+- **PCB & Enclosure fabrication:** Order bare boards or V4.0 turnkey PCBA (31 verified LCSC SKUs) from **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay** using the Gerber, Excellon, BOM, and CPL exports in [`hardware/pcb/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb). 3D-print / CNC the shell or laser-cut 3 mm acrylic from [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure).
 - **Display options (BuyDisplay `ER-TFTM032-3`):** Select **Pin Header 4-Wire SPI**, **5V Power Supply**, **3.2-inch Resistive Touch Panel**, and **No Font Chip**.
-- **Battery polarity:** Always verify JST-PH 2-pin polarity (`+` / `-`) against the PCB silkscreen before plugging in a LiPo cell.
+- **Battery & polarity:** V4.0's 3D battery cradle requires a slim **≤5.0 mm UL/IEC 62133 protected `505060` (5.0 × 50 × 60 mm) 2000 mAh LiPo** wired to standard Adafruit/SparkFun JST-PH polarity (always verify `+`/`-` against `J4` silkscreen). V4.0 adds an active `AO3401A`/`AO3400A` reverse-polarity MOSFET interlock + 2 A PTC fuse, though you should still check polarity before plugging in.

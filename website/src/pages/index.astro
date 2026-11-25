@@ -5,7 +5,7 @@ import { SITE } from '../lib/site';
 
 const bomItems = loadBomItems();
 const v30 = computeBomTotals(bomItems, 'v3.0');
-const v31 = computeBomTotals(bomItems, 'v3.1');
+const v40 = computeBomTotals(bomItems, 'v4.0');
 
 const featuredThermal = [
   { title: 'Microcontroller PCB', src: '/images/thermal/processor.jpg' },
@@ -120,14 +120,14 @@ const jsonLd = [
             <span class="tag tag-amber">Prototype-pending</span>
           </div>
           <p>
-            Designed for screwdriver-only assembly with zero soldering iron required. Order a factory-populated PCBA and 2-piece 3D shell from Seeed Studio Fusion or JLCPCB, then snap in Teensy 4.1 (with pins), Lepton 3.5, display, and JST-PH LiPo.
+            Designed for screwdriver-only assembly with zero soldering iron required. Order a factory-populated PCBA and 2-piece 3D shell from JLCPCB, Seeed Studio Fusion, or PCBWay, then snap in Teensy 4.1 (with pins), Lepton 3.5 or 3.1R, display, and slim 505060 JST-PH LiPo.
           </p>
           <ul class="clean-list">
-            <li>Onboard USB-C + TI BQ24075 power-path charger + 5 V boost</li>
-            <li>Onboard slide power switch, tactile capture button, and SMD CR1220</li>
-            <li>3–4 worldwide vendor orders total; captive hex-nut 3D enclosure</li>
+            <li>Onboard USB-C + TI BQ24074 power-path charger + TI TPS61022 5 V boost</li>
+            <li>Onboard slide power switch, capture button, active reverse-polarity protection, and 3.3 V RTC LDO (no coin cell)</li>
+            <li>~${v40.requiredUsd.toFixed(0)} full BOM incl. Lepton 3.5 (~${v40.withoutSensorUsd.toFixed(0)} excl. Lepton); captive 1/4"-20 hex-nut 3D shell</li>
           </ul>
-          <a href="/building-instructions/#diy-thermocam-v4-zero-solder-screwdriver-only-build-prototype-pending" class="text-link">
+          <a href="/building-instructions/#option-a-diy-thermocam-v4-zero-solder-screwdriver-only-prototype-pending" class="text-link">
             See V4 zero-solder assembly &rarr;
           </a>
         </article>
@@ -141,12 +141,12 @@ const jsonLd = [
             The proven hand-solderable baseline built by makers, schools, and labs worldwide. Uses a 2-layer through-hole PCB, Pololu U3V16F5 regulator, and 6-plate 3 mm laser-cut acrylic or 3D-printed shell.
           </p>
           <ul class="clean-list">
-            <li>1:1 KiCad 9/10 port verified against original V3.0 Gerbers</li>
+            <li>1:1 KiCad 10 port verified against original V3.0 Gerbers (182/182 drills exact)</li>
             <li>Complete 45-step illustrated assembly guide with real photos</li>
-            <li>~${v30.requiredUsd.toFixed(0)} full BOM incl. Lepton 3.5 (~${v31.requiredUsd.toFixed(0)} for V3.1 PCBA)</li>
+            <li>~${v30.requiredUsd.toFixed(0)} full BOM incl. Lepton 3.5 (~${v40.requiredUsd.toFixed(0)} for V4.0 PCBA)</li>
           </ul>
           <a href="/docs/partlist/" class="text-link">
-            Compare V3.0 &amp; V3.1 in the interactive BOM &rarr;
+            Compare V4.0 &amp; V3.0 in the interactive BOM &rarr;
           </a>
         </article>
       </div>

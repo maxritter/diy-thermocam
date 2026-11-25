@@ -26,7 +26,7 @@ const REPO_DOCS: RepoDocSpec[] = [
     sourceFile: 'hardware.md',
     title: 'Hardware, PCB & Enclosure',
     description:
-      'Schematic, Teensy 4.1 pinmap, KiCad V3.0 and V3.1 PCBA revisions, and build123d laser-cut and 3D-printable enclosures.',
+      'Schematic, Teensy 4.1 pinmap, KiCad V3.0 and V4.0 Zero-Solder PCBA revisions, and build123d laser-cut and 3D-printable enclosures.',
   },
   {
     id: 'docs/firmware',
