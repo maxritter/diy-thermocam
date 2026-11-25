@@ -31,12 +31,15 @@
 #include <livemode.h>
 #include <sdcard.h>
 #include <create.h>
+#include <connection_v2.h>
 #include <connection.h>
 
 /*######################### STATIC DATA DECLARATIONS ##########################*/
 
 //Command, default send frame
 static byte sendCmd = FRAME_NORMAL;
+static bool s_v1FrameConsumed = true;
+static uint8_t s_v1TxBuf[1024];
 
 /*######################## STATIC FUNCTION BODIES #############################*/
 
@@ -89,10 +92,16 @@ void sendRawLimits()
 	Serial.write(maxValue & 0x00FF);
 }
 
-/* Send the lepton raw data*/
+/* Send the lepton raw data (buffered bulk writes, big-endian v1 wire format) */
 void sendRawData(bool color)
 {
-	//For the Lepton2.5 sensor, write 4800 raw values
+	size_t idx = 0;
+	auto flush_v1 = [&]() {
+		if (idx > 0) {
+			Serial.write(s_v1TxBuf, idx);
+			idx = 0;
+		}
+	};
 	if ((leptonVersion == leptonVersion_2_5_shutter) && (!color))
 	{
 		for (int line = 0; line < 60; line++)
@@ -100,30 +109,42 @@ void sendRawData(bool color)
 			for (int column = 0; column < 80; column++)
 			{
 				uint16_t result = smallBuffer[(line * 2 * 160) + (column * 2)];
-				Serial.write((result & 0xFF00) >> 8);
-				Serial.write(result & 0x00FF);
+				s_v1TxBuf[idx++] = (result >> 8) & 0xFF;
+				s_v1TxBuf[idx++] = result & 0xFF;
+				if (idx >= sizeof(s_v1TxBuf)) flush_v1();
 			}
 		}
 	}
-	//For the Lepton3.5 sensor, write 19200 raw values
 	else
 	{
 		for (int i = 0; i < 19200; i++)
 		{
-			Serial.write((smallBuffer[i] & 0xFF00) >> 8);
-			Serial.write(smallBuffer[i] & 0x00FF);
+			uint16_t v = smallBuffer[i];
+			s_v1TxBuf[idx++] = (v >> 8) & 0xFF;
+			s_v1TxBuf[idx++] = v & 0xFF;
+			if (idx >= sizeof(s_v1TxBuf)) flush_v1();
 		}
 	}
+	flush_v1();
+	Serial.send_now();
 }
 
-/* Sends the framebuffer */
+/* Sends the framebuffer (buffered bulk writes, big-endian v1 wire format) */
 void sendFramebuffer()
 {
+	size_t idx = 0;
 	for (uint32_t i = 0; i < 76800; i++)
 	{
-		Serial.write((bigBuffer[i] & 0xFF00) >> 8);
-		Serial.write(bigBuffer[i] & 0x00FF);
+		uint16_t v = bigBuffer[i];
+		s_v1TxBuf[idx++] = (v >> 8) & 0xFF;
+		s_v1TxBuf[idx++] = v & 0xFF;
+		if (idx >= sizeof(s_v1TxBuf)) {
+			Serial.write(s_v1TxBuf, idx);
+			idx = 0;
+		}
 	}
+	if (idx > 0) Serial.write(s_v1TxBuf, idx);
+	Serial.send_now();
 }
 
 /* Sends the configuration data */
@@ -581,18 +602,32 @@ void setTempPoints()
 	Serial.write(CMD_SET_TEMPPOINTS);
 }
 
+static void v1EnsureFreshFrame()
+{
+	if (s_v1FrameConsumed) {
+		lepton_acquireFrame(true);
+		getSpotTemp();
+		refreshTempPoints();
+		if (autoMode && !limitsLocked) limitValues();
+		else if (minMaxPoints != minMaxPoints_disabled) refreshMinMax();
+	}
+	s_v1FrameConsumed = true;
+}
+
 /* Sends a raw or color frame */
 void sendFrame(bool color)
 {
+	//Ensure a fresh frame is ready before answering
+	if (sendCmd == FRAME_NORMAL)
+		v1EnsureFreshFrame();
+
 	//Send type of frame response
 	Serial.write(sendCmd);
-	Serial.flush();
+	Serial.send_now();
 
 	//Send frame
 	if (sendCmd == FRAME_NORMAL)
 	{
-		//Clear all serial buffers
-		Serial.clear();
 		//Convert to colors
 		if (color)
 		{
@@ -613,6 +648,7 @@ void sendFrame(bool color)
 		sendSpotTemp();
 		//Send calibration data
 		sendCalibrationData();
+		Serial.send_now();
 	}
 	//Switch back to send frame the next time
 	else
@@ -634,8 +670,7 @@ void saveFrame()
 	//Enable image save marker
 	imgSave = imgSave_create;
 
-	//Create image and save raw file
-	lepton_startFrame();
+	//Create image and save raw file (buffered 8 KB writes!)
 	createThermalImg();
 
 	//Save Bitmap image if activated
@@ -645,30 +680,27 @@ void saveFrame()
 		saveBuffer(saveFilename);
 	}
 
-	//Refresh free space
-	refreshFreeSpace();
-
 	//Disable image save marker
 	imgSave = imgSave_disabled;
 
 	//Send ACK
 	Serial.write(CMD_FRAME_SAVE);
+	Serial.send_now();
 }
 
 /* Sends the display content as frame */
 void sendDisplayFrame()
 {
+	if (sendCmd == FRAME_NORMAL)
+		v1EnsureFreshFrame();
+
 	//Send type of frame response
 	Serial.write(sendCmd);
-	Serial.flush();
+	Serial.send_now();
 
 	//Send frame
 	if (sendCmd == FRAME_NORMAL)
 	{
-		//Find min / max position
-		if (minMaxPoints != minMaxPoints_disabled)
-			refreshMinMax();
-
 		//Apply low-pass filter
 		if (filterType == filterType_box)
 			boxFilter();
@@ -877,78 +909,66 @@ bool touchHandler()
 	return true;
 }
 
-/* Check for serial connection */
+/* Check for serial connection: auto-detect Protocol v2 ("TC2\0") vs temporary Phase 3 legacy v1 (0x64) */
 void checkSerial()
 {
-	//If start command received
-	if ((Serial.available() > 0) && (Serial.read() == CMD_START))
-	{
-		serialMode = true;
-		serialConnect();
-		serialMode = false;
-		lepton_startFrame();
-	}
-
-	//Another command received, discard it
-	else if ((Serial.available() > 0))
-		Serial.read();
+	checkSerialV2OrV1(false);
 }
 
-/* Go into video output mode and wait for connected module */
+/* Go into video output mode and wait for connected module (non-blocking double-buffered!) */
 void serialOutput()
 {
-	//Send the frames
+	lepton_startFrame();
+	s_v1FrameConsumed = true;
+
 	while (true)
 	{
-
-		//Abort transmission when touched long or save visual when short
-		if (touch_touched() && checkDiagnostic(diag_touch))
-			if (touchHandler())
-				break;
-
-		//Get the temps
-		lepton_startFrame();
-		lepton_getFrame();
-
-		//Get the spot temperature
-		getSpotTemp();
-
-		//Refresh the temp points
-		refreshTempPoints();
-
-		//Find min and max if not in manual mode and limits not locked
-		if ((autoMode) && (!limitsLocked))
-			limitValues();
-
-		//Check button press if not in terminal mode
-		if (extButtonPressed())
-			buttonHandler();
-
-		//Check for serial commands
+		//Check for serial commands IMMEDIATELY (<1 ms latency!)
 		if (Serial.available() > 0)
 		{
-			//Check for exit
 			if (serialHandler())
 				break;
 		}
+
+		//Abort transmission when touched long
+		if (checkDiagnostic(diag_touch) && touch_touched())
+			if (touchHandler())
+				break;
+
+		//Acquire newly completed Lepton frame asynchronously (never blocks commands!)
+		if (lepton_hasNewFrame())
+		{
+			lepton_acquireFrame(false);
+			getSpotTemp();
+			refreshTempPoints();
+			if ((autoMode) && (!limitsLocked))
+				limitValues();
+			else if (minMaxPoints != minMaxPoints_disabled)
+				refreshMinMax();
+			s_v1FrameConsumed = false;
+		}
+
+		//Check button press
+		if (extButtonPressed())
+			buttonHandler();
 	}
 }
 
-/* Method to init some basic values in case no display is used */
+/* Method to init some basic values in case no display is used (headless v2 + v1 auto-detect) */
 void serialInit()
 {
-	//Read all settings from EEPROM
 	readEEPROM();
-
-	//Select color scheme
 	selectColorScheme();
-
-	//Clear show temp array
 	clearTempPoints();
+	lepton_startFrame();
 
-	//Receive and send commands over serial port
 	while (true)
-		serialOutput();
+	{
+		checkSerialV2OrV1(true);
+		if (lepton_hasNewFrame()) {
+			lepton_acquireFrame(false);
+		}
+	}
 }
 
 /* Tries to establish a connection to a thermal viewer or video output module*/
