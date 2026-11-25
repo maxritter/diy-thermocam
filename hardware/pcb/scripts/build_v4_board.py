@@ -386,8 +386,8 @@ COMPONENTS = [
     ("C6",   "100nF",               "C_0603",                  8.50, -12.00,  90, "B.Cu", {"1": "5V", "2": "GND"}, "boost"),
     ("C7",   "100nF",               "C_0603",                 62.50, -37.00,  90, "B.Cu", {"1": "3V3", "2": "GND"}, "boost"),
 
-    # --- Active LiPo Reverse-Polarity Safety Chain (Adafruit/SparkFun JST-PH polarity: 1=GND, 2=VBAT+) + 1uA RTC LDO ---
-    ("J4",   "S2B-PH-SM4-TB",       "JST_PH_2P_RA",           84.50, -52.10, 180, "B.Cu", {"1": "GND", "2": "LIPO_RAW", "MP": "GND"}, "io"),
+    # --- Active LiPo Reverse-Polarity Safety Chain (Adafruit/SparkFun physical JST-PH polarity: KiCad pad 1=LIPO_RAW (+), pad 2=GND (-)) + 1uA RTC LDO ---
+    ("J4",   "S2B-PH-SM4-TB",       "JST_PH_2P_RA",           84.50, -52.10, 180, "B.Cu", {"1": "LIPO_RAW", "2": "GND", "MP": "GND"}, "io"),
     ("Q1",   "AO3401A_RevPol",      "SOT23",                  83.00, -39.50,   0, "B.Cu", {"1": "Q1_GATE", "2": "LIPO_PROT", "3": "LIPO_RAW"}, "io"),
     ("R18",  "750k",                "R_0603",                 83.00, -35.80,   0, "B.Cu", {"1": "Q1_GATE", "2": "LIPO_PROT"}, "io"),
     ("Q2",   "AO3400A_RevPol_Ctl",  "SOT23",                  83.00, -44.20,   0, "B.Cu", {"1": "Q2_GATE", "2": "GND", "3": "Q1_GATE"}, "io"),
@@ -1093,8 +1093,8 @@ def build_pcb() -> dict:
         ("5V BOOST", 19.2, -46.5, 1.0, "B.SilkS", 0),
         ("RTC 3V3", 26.5, -14.8, 1.0, "B.SilkS", 0),
         ("LIPO", 84.5, -59.6, 1.0, "B.SilkS", 0),
-        ("-", 85.8, -57.6, 1.2, "B.SilkS", 0),
-        ("+", 83.2, -57.6, 1.2, "B.SilkS", 0),
+        ("+", 85.8, -57.6, 1.2, "B.SilkS", 0),
+        ("-", 83.2, -57.6, 1.2, "B.SilkS", 0),
         ("PWR", 81.5, -12.7, 1.0, "B.SilkS", 0),
         ("CAPTURE", 84.0, -61.8, 1.0, "B.SilkS", 0),
         ("PROG", 85.0, -8.5, 1.0, "B.SilkS", 0),

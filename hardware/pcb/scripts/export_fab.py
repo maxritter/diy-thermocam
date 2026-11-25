@@ -203,18 +203,19 @@ def write_boms(fps: list[dict], master_bom: dict[str, dict], fab_dir: Path, stem
 
 
 # Vendor-basis JLCPCB/EasyEDA CPL calibration for V4.0 (dx_mm, dy_mm in PosXY [Y-up], drot_deg)
-# Verified against EasyEDA component footprints (C7519, C15127, C20917, C5446, C221660, C165948, C915088).
+# Applied AFTER the standard JLCPCB bottom-side (180 - angle) transform (kicad-jlcpcb-tools / KiKit convention).
+# Verified against EasyEDA component footprints (C7519, C15127, C20917, C5446, C221660, C165948, C915088, C54313, C295747, C963349).
 V40_CPL_CALIBRATION: dict[str, tuple[float, float, float]] = {
-    "Q1":  ( 0.000,  0.000, 180.0),  # C15127 SOT-23 EasyEDA basis rotated 180 deg vs KiCad
-    "Q2":  ( 0.000,  0.000, 180.0),  # C20917 SOT-23 EasyEDA basis rotated 180 deg vs KiCad
-    "U4":  ( 0.000,  0.000, 180.0),  # C5446  SOT-23 EasyEDA basis rotated 180 deg vs KiCad
-    "D1":  ( 0.000,  0.000,  90.0),  # C7519  SOT-23-6 EasyEDA basis rotated +90 deg vs KiCad
-    "SW1": (-2.750,  0.000,   0.0),  # C221660 EasyEDA origin at middle terminal (Pin 2)
+    "Q1":  ( 0.000,  0.000, 180.0),  # C15127 SOT-23: bottom (180-0)+180 = 0 deg
+    "Q2":  ( 0.000,  0.000, 180.0),  # C20917 SOT-23: bottom (180-0)+180 = 0 deg
+    "U4":  ( 0.000,  0.000, 180.0),  # C5446  SOT-23: bottom (180-0)+180 = 0 deg
+    "D1":  ( 0.000,  0.000, 270.0),  # C7519  SOT-23-6: bottom (180-0)+270 = 90 deg
+    "SW1": (-2.750,  0.000,   0.0),  # C221660 EasyEDA origin at middle terminal (Pin 2); bottom (180-270) = 270 deg
     "J3":  ( 0.000,  1.570,   0.0),  # C165948 EasyEDA origin 1.57 mm along terminal axis from KiCad origin
-    "U2":  ( 0.175,  0.000,   0.0),  # C915088 EasyEDA symmetric pad origin (+0.175 mm X vs KiCad)
-    "J5":  ( 0.000,  0.000,  90.0),  # C41376163 horizontal EasyEDA basis vs vertical KiCad placement
-    "J6":  ( 0.000,  0.000,  90.0),  # C41376163 horizontal EasyEDA basis vs vertical KiCad placement
-    "J7":  ( 0.000,  0.000,  90.0),  # C50950 horizontal EasyEDA basis vs KiCad -90 deg placement
+    "U2":  ( 0.175,  0.000,   0.0),  # C915088 EasyEDA symmetric pad origin (+0.175 mm X); bottom (180-0) = 180 deg
+    "J5":  ( 0.000,  0.000, 270.0),  # C41376163 horizontal EasyEDA basis: bottom (180-0)+270 = 90 deg
+    "J6":  ( 0.000,  0.000, 270.0),  # C41376163 horizontal EasyEDA basis: bottom (180-0)+270 = 90 deg
+    "J7":  ( 0.000,  0.000,  90.0),  # C50950 horizontal EasyEDA basis: bottom (180-270)+90 = 0 deg
 }
 
 
@@ -255,8 +256,12 @@ def write_cpls(raw_pos_csv: Path, fab_dir: Path, stem: str, rev: str = "", pad_m
     cal_rows = []
     for r in rows:
         ref = r["Ref"]
+        side_l = r["Side"].strip().lower()
         px, py, rot = float(r["PosX"]), float(r["PosY"]), float(r["Rot"])
         if rev.lower() == "v4.0":
+            if side_l == "bottom":
+                # Standard JLCPCB bottom-side transform (kicad-jlcpcb-tools / KiKit convention)
+                rot = (180.0 - rot) % 360.0
             if pad_mids and ref in pad_mids:
                 px, py = pad_mids[ref]
             if ref in V40_CPL_CALIBRATION:
@@ -264,7 +269,7 @@ def write_cpls(raw_pos_csv: Path, fab_dir: Path, stem: str, rev: str = "", pad_m
                 px += dx
                 py += dy
                 rot = (rot + drot) % 360.0
-        cal_rows.append((ref, px, py, r["Side"].strip().lower(), rot))
+        cal_rows.append((ref, px, py, side_l, rot))
 
     # JLCPCB CPL: Designator,Mid X,Mid Y,Layer,Rotation
     jlc_cpl = fab_dir / f"{stem}-cpl-jlcpcb.csv"

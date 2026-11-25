@@ -41,6 +41,7 @@ from build123d import (
     Text,
     Unit,
     extrude,
+    mirror,
     offset,
 )
 
@@ -333,6 +334,10 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
     engrave_placed = engrave_local
 
     kerfed = {name: _apply_kerf(f, eff_kerf) for name, f in plates_2d.items()}
+    # Flip the back plate outside-face UP on the flat cutting sheet so laser ENGRAVE text
+    # lands directly on the exterior face and reads forward from the outside when assembled!
+    back_mir = mirror(kerfed["back"], about=Plane.YZ.offset(b["fb_cx"]))
+    kerfed["back"] = back_mir if isinstance(back_mir, Face) else back_mir.faces()[0]
 
     def _place_row(names: tuple[str, ...], y_pos: float) -> float:
         nonlocal engrave_placed

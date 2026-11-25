@@ -10898,7 +10898,7 @@
 			)
 		)
 	)
-	(global_label "GND"
+	(global_label "LIPO_RAW"
 		(shape passive)
 		(at 647.7 73.66 0)
 		(effects
@@ -11492,7 +11492,7 @@
 			)
 		)
 	)
-	(global_label "LIPO_RAW"
+	(global_label "GND"
 		(shape passive)
 		(at 647.7 76.2 0)
 		(effects
