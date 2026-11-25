@@ -297,6 +297,7 @@ export function App(): React.JSX.Element {
   const [timelapseActive, setTimelapseActive] = useState(false);
   const [timelapseIntervalSec, setTimelapseIntervalSec] = useState(5);
   const [timelapseCount, setTimelapseCount] = useState(0);
+  const [timelapseDir, setTimelapseDir] = useState<string | null>(null);
   const [hwButtonTrigger, setHwButtonTrigger] = useState(true);
   const [lastExportMsg, setLastExportMsg] = useState<string | null>(null);
   const [editorStatusMsg, setEditorStatusMsg] = useState<string | null>(null);
@@ -314,6 +315,15 @@ export function App(): React.JSX.Element {
   const [toast, setToast] = useState<string | null>(null);
 
   const startMsRef = useRef<number>(Date.now());
+  const frameRef = useRef<ThermalFrame>(frame);
+  frameRef.current = frame;
+  const recordingRef = useRef<boolean>(recording);
+  recordingRef.current = recording;
+  const paletteIdRef = useRef<string>(paletteId);
+  paletteIdRef.current = paletteId;
+  const timelapseDirRef = useRef<string | null>(timelapseDir);
+  timelapseDirRef.current = timelapseDir;
+  const timelapseIndexRef = useRef<number>(0);
   const roisRef = useRef<Roi[]>(rois);
   roisRef.current = rois;
   const radRef = useRef<RadiometryParams>(rad);
@@ -386,7 +396,9 @@ export function App(): React.JSX.Element {
 
   const handleIncomingFrame = useCallback((fr: ThermalFrame) => {
     setFrame(fr);
-    setRecordedCount((c) => (c > 0 ? c + 1 : c));
+    if (recordingRef.current) {
+      setRecordedCount((c) => Math.min(6000, c + 1));
+    }
 
     const nowMs = Date.now();
     const tSec = (nowMs - startMsRef.current) / 1000;
@@ -459,9 +471,14 @@ export function App(): React.JSX.Element {
       if (!active) return;
       setHello(h);
       await Promise.all([refreshCameraTelemetry(), refreshSdListing()]);
+      if (!active) return;
       await backend.startStream((fr) => {
         if (active) handleIncomingFrame(fr);
       });
+      if (!active) {
+        void backend.stopStream();
+        return;
+      }
       setStreaming(true);
     })();
     return () => {
@@ -469,6 +486,29 @@ export function App(): React.JSX.Element {
       void backend.stopStream();
     };
   }, [handleIncomingFrame, refreshCameraTelemetry, refreshSdListing]);
+
+  // Listen for USB camera unplug / session-exit events from Rust poll worker
+  useEffect(() => {
+    let active = true;
+    let unlisten: (() => void) | null = null;
+    void backend
+      .onCameraDisconnected((reason) => {
+        if (!active) return;
+        setHello(null);
+        setStreaming(false);
+        setRecording(false);
+        setTimelapseActive(false);
+        showToast(`Camera disconnected: ${reason}`);
+      })
+      .then((fn) => {
+        if (active) unlisten = fn;
+        else fn();
+      });
+    return () => {
+      active = false;
+      unlisten?.();
+    };
+  }, [showToast]);
 
   const activePalette = useMemo(
     () => palettes.find((p) => p.id === paletteId) ?? palettes[0],
@@ -547,14 +587,38 @@ export function App(): React.JSX.Element {
     }
   };
 
+  const captureTimelapseNow = useCallback(async () => {
+    const fr = frameRef.current;
+    const idx = timelapseIndexRef.current;
+    timelapseIndexRef.current = idx + 1;
+    try {
+      const res = await backend.captureTimelapseFrame({
+        outputDir: timelapseDirRef.current,
+        paletteId: paletteIdRef.current,
+        index: idx,
+        pixels: Array.from(fr.pixels),
+        width: fr.width,
+        height: fr.height,
+        rad: radRef.current,
+      });
+      setTimelapseCount((c) => c + 1);
+      setRecordedCount(res.recorded_count);
+      if (res.saved_path) {
+        setLastExportMsg(`Time-lapse .DAT → ${res.saved_path}`);
+      }
+    } catch (err) {
+      setTimelapseActive(false);
+      showToast(`Time-lapse capture error: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }, [showToast]);
+
   useEffect(() => {
     if (!timelapseActive) return;
     const id = setInterval(() => {
-      setTimelapseCount((c) => c + 1);
-      setRecordedCount((c) => c + 1);
+      void captureTimelapseNow();
     }, timelapseIntervalSec * 1000);
     return () => clearInterval(id);
-  }, [timelapseActive, timelapseIntervalSec]);
+  }, [timelapseActive, timelapseIntervalSec, captureTimelapseNow]);
 
   const handleToggleRecording = async () => {
     const next = !recording;
@@ -1149,17 +1213,24 @@ export function App(): React.JSX.Element {
               timelapseActive={timelapseActive}
               timelapseIntervalSec={timelapseIntervalSec}
               timelapseCount={timelapseCount}
+              timelapseDir={timelapseDir}
+              onPickTimelapseDir={async () => {
+                const dir = await backend.pickDirectory();
+                if (dir) {
+                  setTimelapseDir(dir);
+                  showToast(`Time-lapse folder set → ${dir}`);
+                }
+              }}
               onTimelapseIntervalChange={setTimelapseIntervalSec}
               onToggleTimelapse={() => {
                 const next = !timelapseActive;
                 setTimelapseActive(next);
                 if (next) {
-                  setTimelapseCount((c) => c + 1);
-                  setRecordedCount((c) => c + 1);
+                  void captureTimelapseNow();
                 }
                 showToast(
                   next
-                    ? `Time-lapse capture started (every ${timelapseIntervalSec}s)`
+                    ? `Time-lapse .DAT capture started (every ${timelapseIntervalSec}s)`
                     : `Time-lapse capture stopped (${timelapseCount} frames)`,
                 );
               }}

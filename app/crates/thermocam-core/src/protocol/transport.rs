@@ -78,17 +78,22 @@ pub trait Transport: Send {
 /// Real USB CDC ACM serial transport using `serialport`.
 pub struct SerialTransport {
     port: Box<dyn serialport::SerialPort>,
+    last_timeout: Duration,
 }
 
 impl SerialTransport {
     pub fn open(port_name: &str) -> Result<Self, ProtocolError> {
+        let initial_timeout = Duration::from_millis(10);
         let mut port = serialport::new(port_name, 115_200)
-            .timeout(Duration::from_millis(50))
+            .timeout(initial_timeout)
             .open()
             .map_err(|e| ProtocolError::Io(io::Error::other(e.to_string())))?;
         let _ = port.write_data_terminal_ready(true);
         let _ = port.clear(serialport::ClearBuffer::All);
-        Ok(Self { port })
+        Ok(Self {
+            port,
+            last_timeout: initial_timeout,
+        })
     }
 }
 
@@ -97,8 +102,16 @@ impl Transport for SerialTransport {
         Write::write_all(&mut *self.port, data)
     }
     fn read_chunk(&mut self, buf: &mut [u8], timeout: Duration) -> io::Result<usize> {
-        let _ = self.port.set_timeout(timeout);
+        let effective = timeout.max(Duration::from_millis(1));
+        if effective != self.last_timeout {
+            let _ = self.port.set_timeout(effective);
+            self.last_timeout = effective;
+        }
         match Read::read(&mut *self.port, buf) {
+            Ok(0) if !buf.is_empty() => Err(io::Error::new(
+                io::ErrorKind::UnexpectedEof,
+                "serial port disconnected (EOF)",
+            )),
             Ok(n) => Ok(n),
             Err(e) if e.kind() == io::ErrorKind::TimedOut => Ok(0),
             Err(e) => Err(e),
@@ -143,6 +156,8 @@ pub struct SimulatorTransport {
     config: DeviceConfig,
     rad_params: RadParams,
     streaming: bool,
+    first_frame_pending: bool,
+    last_frame_at: Instant,
     frame_seq: u32,
     start: Instant,
     sd_files: Vec<(String, Vec<u8>)>,
@@ -169,6 +184,8 @@ impl SimulatorTransport {
             config: DeviceConfig::default(),
             rad_params: RadParams::default(),
             streaming: false,
+            first_frame_pending: false,
+            last_frame_at: Instant::now(),
             frame_seq: 0,
             start: Instant::now(),
             sd_files: vec![
@@ -177,6 +194,11 @@ impl SimulatorTransport {
                 ("20261125102845.DAT".to_string(), d2),
             ],
         }
+    }
+
+    /// Add an extra virtual SD file (used by tests verifying >64-file `FS_LIST` pagination).
+    pub fn add_sd_file(&mut self, name: String, data: Vec<u8>) {
+        self.sd_files.push((name, data));
     }
 
     pub fn push_next_frame(&mut self) {
@@ -248,6 +270,10 @@ impl SimulatorTransport {
             MsgType::StreamCtrlReq => {
                 if let Ok(sc) = StreamCtrl::from_bytes(&pkt.payload) {
                     self.streaming = sc.mode != 0;
+                    if self.streaming {
+                        self.first_frame_pending = true;
+                        self.last_frame_at = Instant::now();
+                    }
                     Some((MsgType::StreamCtrlResp, 0, 0, sc.to_bytes().to_vec()))
                 } else {
                     Some((MsgType::StreamCtrlResp, flags::ERROR, StatusCode::ErrInvalidArg as u16, Vec::new()))
@@ -337,10 +363,31 @@ impl SimulatorTransport {
                 Some((MsgType::FsInfoResp, 0, 0, info.to_bytes().to_vec()))
             }
             MsgType::FsListReq => {
+                let cursor = if pkt.payload.len() >= 4 {
+                    u32::from_le_bytes([
+                        pkt.payload[0],
+                        pkt.payload[1],
+                        pkt.payload[2],
+                        pkt.payload[3],
+                    ]) as usize
+                } else {
+                    0
+                };
+                let max_entries = if pkt.payload.len() >= 6 {
+                    usize::from(u16::from_le_bytes([pkt.payload[4], pkt.payload[5]])).clamp(1, 64)
+                } else {
+                    64
+                };
+                let start = cursor.min(self.sd_files.len());
+                let end = (start + max_entries).min(self.sd_files.len());
+                let next_cursor = if end >= self.sd_files.len() {
+                    u32::MAX
+                } else {
+                    end as u32
+                };
                 let list = FsListResp {
-                    next_cursor: u32::MAX,
-                    entries: self
-                        .sd_files
+                    next_cursor,
+                    entries: self.sd_files[start..end]
                         .iter()
                         .map(|(n, d)| FsEntry {
                             name: n.clone(),
@@ -476,9 +523,21 @@ impl Transport for SimulatorTransport {
         Ok(())
     }
 
-    fn read_chunk(&mut self, buf: &mut [u8], _timeout: Duration) -> io::Result<usize> {
+    fn read_chunk(&mut self, buf: &mut [u8], timeout: Duration) -> io::Result<usize> {
         if self.out_buf.is_empty() && self.streaming {
-            self.push_next_frame();
+            const FRAME_PERIOD: Duration = Duration::from_millis(114);
+            if self.first_frame_pending || self.last_frame_at.elapsed() >= FRAME_PERIOD {
+                self.first_frame_pending = false;
+                self.last_frame_at = Instant::now();
+                self.push_next_frame();
+            } else if !timeout.is_zero() {
+                let rem = FRAME_PERIOD.saturating_sub(self.last_frame_at.elapsed());
+                std::thread::sleep(timeout.min(rem));
+                if self.last_frame_at.elapsed() >= FRAME_PERIOD {
+                    self.last_frame_at = Instant::now();
+                    self.push_next_frame();
+                }
+            }
         }
         let n = buf.len().min(self.out_buf.len());
         for slot in buf.iter_mut().take(n) {
@@ -596,6 +655,7 @@ pub struct ProtocolClient<T: Transport> {
     parser: StreamParser,
     next_seq: u16,
     pending: VecDeque<Packet>,
+    rx_scratch: Vec<u8>,
 }
 
 impl<T: Transport> ProtocolClient<T> {
@@ -605,6 +665,7 @@ impl<T: Transport> ProtocolClient<T> {
             parser: StreamParser::new(),
             next_seq: 1,
             pending: VecDeque::new(),
+            rx_scratch: vec![0u8; 65_536],
         }
     }
 
@@ -628,7 +689,6 @@ impl<T: Transport> ProtocolClient<T> {
         timeout: Duration,
     ) -> Result<Packet, ProtocolError> {
         let deadline = Instant::now() + timeout;
-        let mut buf = vec![0u8; 65_536];
         loop {
             if let Some(pos) = self
                 .pending
@@ -644,14 +704,14 @@ impl<T: Transport> ProtocolClient<T> {
                 }
                 return Ok(pkt);
             }
-            if Instant::now() >= deadline {
+            let now = Instant::now();
+            if now >= deadline {
                 return Err(ProtocolError::Timeout(seq));
             }
-            let n = self
-                .transport
-                .read_chunk(&mut buf, Duration::from_millis(20))?;
+            let wait = deadline.saturating_duration_since(now).min(Duration::from_millis(10));
+            let n = self.transport.read_chunk(&mut self.rx_scratch, wait)?;
             if n > 0 {
-                for pkt in self.parser.feed(&buf[..n]).into_iter().flatten() {
+                for pkt in self.parser.feed(&self.rx_scratch[..n]).into_iter().flatten() {
                     self.pending.push_back(pkt);
                 }
             }
@@ -669,6 +729,35 @@ impl<T: Transport> ProtocolClient<T> {
         self.transport.write_all(&bytes)?;
         self.transport.flush()?;
         self.recv_response_for_seq(seq, timeout)
+    }
+
+    /// Send a non-blocking `PING_REQ` heartbeat without stalling the stream/command mutex.
+    pub fn send_ping_nowait(&mut self, host_time_us: u64) -> Result<(), ProtocolError> {
+        let seq = self.alloc_seq();
+        let bytes = Packet::encode(MsgType::PingReq, 0, seq, 0, &host_time_us.to_le_bytes())?;
+        self.transport.write_all(&bytes)?;
+        self.transport.flush()?;
+        Ok(())
+    }
+
+    /// Paginate `FS_LIST` all the way until `next_cursor == 0xFFFFFFFF` (no 64-file cap).
+    pub fn list_dir_all(&mut self, path: &str) -> Result<Vec<FsEntry>, ProtocolError> {
+        const PAGE_SIZE: u16 = 64;
+        const MAX_PAGES: usize = 256;
+        let mut cursor: u32 = 0;
+        let mut all = Vec::new();
+        for _ in 0..MAX_PAGES {
+            let req = FsListResp::encode_req(cursor, PAGE_SIZE, path);
+            let pkt = self.request(MsgType::FsListReq, &req, Duration::from_millis(3000))?;
+            let page = FsListResp::from_bytes(&pkt.payload)?;
+            let got_any = !page.entries.is_empty();
+            all.extend(page.entries);
+            if page.next_cursor == u32::MAX || page.next_cursor == cursor || !got_any {
+                break;
+            }
+            cursor = page.next_cursor;
+        }
+        Ok(all)
     }
 
     #[must_use]
@@ -716,17 +805,20 @@ impl<T: Transport> ProtocolClient<T> {
 
     pub fn poll_packets(&mut self, timeout: Duration) -> Result<Vec<Packet>, ProtocolError> {
         let mut out: Vec<Packet> = self.pending.drain(..).collect();
+        if !out.is_empty() {
+            return Ok(out);
+        }
         let deadline = Instant::now() + timeout;
-        let mut buf = vec![0u8; 65_536];
         loop {
             let rem = deadline.saturating_duration_since(Instant::now());
-            let n = self.transport.read_chunk(&mut buf, rem.min(Duration::from_millis(20)))?;
+            let wait = rem.min(Duration::from_millis(10));
+            let n = self.transport.read_chunk(&mut self.rx_scratch, wait)?;
             if n > 0 {
-                for pkt in self.parser.feed(&buf[..n]).into_iter().flatten() {
+                for pkt in self.parser.feed(&self.rx_scratch[..n]).into_iter().flatten() {
                     out.push(pkt);
                 }
             }
-            if !out.is_empty() || n == 0 || Instant::now() >= deadline {
+            if !out.is_empty() || Instant::now() >= deadline {
                 break;
             }
         }

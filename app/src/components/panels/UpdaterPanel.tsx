@@ -1,11 +1,11 @@
 import { CheckCircle2, Cpu, FileUp, ShieldCheck, UploadCloud } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StudioBadge, StudioSwitch } from "@/components/ui/Primitives";
 import { backend } from "@/lib/backend";
 import type { FirmwareImageInfo } from "@/lib/types";
 
 const SAMPLE_TEENSY41_HEX = `:0200000460009A
-:100000000102030405060708090A0B0C0D0E0F1068
+:100000004643464200000156000000000000000088
 :100010001112131415161718191A1B1C1D1E1F2058
 :00000001FF`;
 
@@ -22,6 +22,36 @@ export function UpdaterPanel({ connectedPort }: UpdaterPanelProps): React.JSX.El
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [flashing, setFlashing] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    let unlisten: (() => void) | null = null;
+    void backend
+      .onFlashProgress((ev) => {
+        if (!active) return;
+        if (ev.stage === "verified") {
+          setProgress(10);
+          setStatus("Firmware HEX verified; triggering HalfKay bootloader…");
+        } else if (ev.stage === "waiting_bootloader") {
+          setProgress(20);
+          setStatus("Waiting up to 10 s for HalfKay USB HID (16C0:0478) enumeration…");
+        } else if (ev.stage === "flashing" && ev.done && ev.total) {
+          const pct = Math.min(98, 20 + Math.round((ev.done / ev.total) * 78));
+          setProgress(pct);
+          setStatus(`Flashing Teensy 4.1 block ${ev.done}/${ev.total}…`);
+        } else if (ev.stage === "rebooted") {
+          setProgress(100);
+        }
+      })
+      .then((fn) => {
+        if (active) unlisten = fn;
+        else fn();
+      });
+    return () => {
+      active = false;
+      unlisten?.();
+    };
+  }, []);
 
   const handleVerify = async (): Promise<void> => {
     try {

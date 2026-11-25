@@ -73,7 +73,26 @@ let simSdFiles: { name: string; size: number; mtime_epoch: number; seq: number }
 
 export const backend = {
   async listPorts(): Promise<SerialPortInfo[]> {
-    if (isTauriRuntime()) return tauriInvoke<SerialPortInfo[]>("cmd_list_ports");
+    if (isTauriRuntime()) {
+      const raw =
+        await tauriInvoke<
+          Array<
+            Partial<SerialPortInfo> & {
+              name?: string;
+              label?: string;
+              is_thermocam?: boolean;
+            }
+          >
+        >("cmd_list_ports");
+      return raw.map((p) => ({
+        port_name: p.port_name ?? p.name ?? "sim://demo-lepton35",
+        vid: p.vid ?? null,
+        pid: p.pid ?? null,
+        manufacturer: p.manufacturer ?? null,
+        product: p.product ?? p.label ?? null,
+        is_teensy: p.is_teensy ?? p.is_thermocam ?? false,
+      }));
+    }
     return [
       {
         port_name: "sim://demo-lepton35",
@@ -271,7 +290,8 @@ export const backend = {
         max_raw: number;
         cal_offset: number;
         cal_slope: number;
-        spot_temp_c: number;
+        spot_temp?: number;
+        spot_temp_c?: number;
       }>("cmd_sd_read_dat", { path: `/${name.replace(/^\//, "")}` });
       return {
         frame_seq: 0,
@@ -286,7 +306,7 @@ export const backend = {
         min_y: 0,
         max_x: 0,
         max_y: 0,
-        spot_temp_c: dat.spot_temp_c,
+        spot_temp_c: dat.spot_temp ?? dat.spot_temp_c ?? 25.0,
         cal_offset: dat.cal_offset,
         cal_slope: dat.cal_slope,
         fpa_temp_c: 31.0,
@@ -330,7 +350,8 @@ export const backend = {
             max_raw: number;
             cal_offset: number;
             cal_slope: number;
-            spot_temp_c: number;
+            spot_temp?: number;
+            spot_temp_c?: number;
           },
           unknown,
         ]
@@ -350,7 +371,7 @@ export const backend = {
           min_y: 0,
           max_x: 0,
           max_y: 0,
-          spot_temp_c: dat.spot_temp_c,
+          spot_temp_c: dat.spot_temp ?? dat.spot_temp_c ?? 25.0,
           cal_offset: dat.cal_offset,
           cal_slope: dat.cal_slope,
           fpa_temp_c: 31.0,
@@ -450,5 +471,75 @@ export const backend = {
     }
     const info = await this.verifyHex(hexText, expectedSha256);
     return info.sha256_hex;
+  },
+
+  async pickDirectory(): Promise<string | null> {
+    if (isTauriRuntime()) {
+      try {
+        return await tauriInvoke<string>("cmd_pick_directory");
+      } catch {
+        return null;
+      }
+    }
+    return "~/Exports/timelapse";
+  },
+
+  async captureTimelapseFrame(args: {
+    outputDir: string | null;
+    paletteId: string;
+    index: number;
+    pixels: number[];
+    width: number;
+    height: number;
+    rad: RadiometryParams;
+  }): Promise<{ recorded_count: number; saved_path: string | null }> {
+    if (isTauriRuntime()) {
+      return tauriInvoke<{ recorded_count: number; saved_path: string | null }>(
+        "cmd_capture_timelapse_frame",
+        {
+          outputDir: args.outputDir,
+          paletteId: args.paletteId,
+          index: args.index,
+          pixels: args.pixels,
+          width: args.width,
+          height: args.height,
+          rad: args.rad,
+        },
+      );
+    }
+    const fname = `timelapse_${String(args.index).padStart(6, "0")}.DAT`;
+    return {
+      recorded_count: args.index + 1,
+      saved_path: args.outputDir ? `${args.outputDir}/${fname}` : null,
+    };
+  },
+
+  async onCameraDisconnected(cb: (reason: string) => void): Promise<() => void> {
+    if (!isTauriRuntime()) return () => {};
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ reason?: string }>("camera-disconnected", (ev) => {
+      cb(ev.payload?.reason ?? "USB camera disconnected");
+    });
+  },
+
+  async onFlashProgress(
+    cb: (ev: { stage: string; done?: number; total?: number; sha256?: string }) => void,
+  ): Promise<() => void> {
+    if (!isTauriRuntime()) return () => {};
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ stage: string; done?: number; total?: number; sha256?: string }>(
+      "flash-progress",
+      (ev) => cb(ev.payload),
+    );
+  },
+
+  async onExportProgress(
+    cb: (ev: { stage: string; done?: number; total?: number }) => void,
+  ): Promise<() => void> {
+    if (!isTauriRuntime()) return () => {};
+    const { listen } = await import("@tauri-apps/api/event");
+    return listen<{ stage: string; done?: number; total?: number }>("export-progress", (ev) =>
+      cb(ev.payload),
+    );
   },
 };

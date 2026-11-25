@@ -5,21 +5,22 @@
 
 use std::env;
 use std::fs;
-use std::io::Cursor;
+use std::fs::File;
+use std::io::{BufWriter, Cursor};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 use thermocam_core::dat::ThermalDat;
 use thermocam_core::export::{
-    encode_h264_mp4, encode_png, encode_radiometric_tiff_16, render_export_canvas, ExportOptions,
-    ExportResolution,
+    derive_sequence_fps, encode_h264_mp4_streaming, encode_png, encode_radiometric_tiff_16,
+    render_export_canvas, render_export_canvas_with_scratch, ExportOptions, ExportResolution,
 };
-use thermocam_core::imaging::{DisplayPipeline, SpatialFilter, UpscaleMethod};
+use thermocam_core::imaging::{DisplayPipeline, RenderScratch, SpatialFilter, UpscaleMethod};
 use thermocam_core::palettes::find_palette;
 use thermocam_core::protocol::codec::{FrameRaw, StreamCtrl};
 use thermocam_core::protocol::crc::crc32_ieee;
 use thermocam_core::protocol::messages::{
-    AsyncEvent, FsInfoResp, FsListResp, PerfTelemetry, RadParams,
+    AsyncEvent, FsInfoResp, PerfTelemetry, RadParams,
 };
 use thermocam_core::protocol::transport::{list_ports, ProtocolClient, SerialTransport};
 use thermocam_core::protocol::{capabilities, MsgType};
@@ -291,23 +292,19 @@ fn run_session(
     let fs_info = FsInfoResp::from_bytes(&info_pkt.payload)
         .map_err(|e| format!("FsInfoResp decode failed: {e}"))?;
 
-    let list_req = FsListResp::encode_req(0, 64, "/");
-    let list_pkt = client
-        .request(MsgType::FsListReq, &list_req, Duration::from_millis(2000))
-        .map_err(|e| format!("FS_LIST failed: {e}"))?;
-    let fs_list = FsListResp::from_bytes(&list_pkt.payload)
-        .map_err(|e| format!("FsListResp decode failed: {e}"))?;
+    let fs_entries = client
+        .list_dir_all("/")
+        .map_err(|e| format!("FS_LIST paginated failed: {e}"))?;
 
     // Find a .DAT file on SD (prefer 38,805 B real V3 .DAT)
-    let dat_entry = fs_list
-        .entries
+    let dat_entry = fs_entries
         .iter()
         .filter(|e| !e.is_dir && e.name.to_ascii_uppercase().ends_with(".DAT"))
         .max_by_key(|e| e.size)
         .ok_or_else(|| {
             format!(
                 "no .DAT file found on SD card (root entries: {})",
-                fs_list.entries.len()
+                fs_entries.len()
             )
         })?;
     let sd_path = format!("/{}", dat_entry.name);
@@ -430,34 +427,41 @@ fn run_session(
     let tiff_path = out_dir.join("real-v3-kelvin-16bit.tiff");
     fs::write(&tiff_path, &tiff_bytes).map_err(|e| format!("write TIFF failed: {e}"))?;
 
-    // Zero-FFmpeg H.264 MP4 from 12 real consecutive post-FFC live V3 frames (1280x720 or 1920x1080)
-    // Use 1920x1080 for full HD proof!
+    // Constant-RAM streaming H.264 MP4 from 12 real consecutive post-FFC live V3 frames (1920x1080)
     let mp4_frames_src: Vec<&FrameRaw> = frames.iter().rev().take(12).collect::<Vec<_>>().into_iter().rev().collect();
+    let mp4_timestamps: Vec<u64> = mp4_frames_src.iter().map(|f| f.meta.timestamp_us).collect();
+    let mp4_fps = derive_sequence_fps(&mp4_timestamps);
+    let mp4_path = out_dir.join("real-v3-1080p-live.mp4");
     let t_mp4 = Instant::now();
-    let mut rgb_seq: Vec<Vec<u8>> = Vec::with_capacity(mp4_frames_src.len());
-    for fr in &mp4_frames_src {
-        let (_, _, rgb) = render_export_canvas(
-            &fr.pixels,
-            fr.meta.width,
-            fr.meta.height,
-            fr.meta.min_raw,
-            fr.meta.max_raw,
-            &palette,
-            rad_cfg,
-            &pipeline,
-            &rois,
-            &opts,
-        );
-        rgb_seq.push(rgb);
+    {
+        let file = File::create(&mp4_path).map_err(|e| format!("create MP4 failed: {e}"))?;
+        let writer = BufWriter::new(file);
+        let mut scratch = RenderScratch::new();
+        encode_h264_mp4_streaming(writer, w, h, mp4_frames_src.len(), mp4_fps, |idx, emit| {
+            let fr = mp4_frames_src[idx];
+            render_export_canvas_with_scratch(
+                &fr.pixels,
+                fr.meta.width,
+                fr.meta.height,
+                fr.meta.min_raw,
+                fr.meta.max_raw,
+                &palette,
+                rad_cfg,
+                &pipeline,
+                &rois,
+                &opts,
+                true,
+                &mut scratch,
+            );
+            emit(&scratch.canvas)
+        })
+        .map_err(|e| format!("H.264 MP4 streaming encode failed: {e}"))?;
     }
-    let mp4_bytes =
-        encode_h264_mp4(w, h, &rgb_seq, 9).map_err(|e| format!("H.264 MP4 encode failed: {e}"))?;
     let mp4_ms = t_mp4.elapsed().as_secs_f64() * 1000.0;
+    let mp4_bytes = fs::read(&mp4_path).map_err(|e| format!("read MP4 failed: {e}"))?;
     let mp4_reader = mp4::Mp4Reader::read_header(Cursor::new(&mp4_bytes), mp4_bytes.len() as u64)
         .map_err(|e| format!("MP4 verify failed: {e}"))?;
     let track = mp4_reader.tracks().get(&1).ok_or("missing MP4 video track 1")?;
-    let mp4_path = out_dir.join("real-v3-1080p-live.mp4");
-    fs::write(&mp4_path, &mp4_bytes).map_err(|e| format!("write MP4 failed: {e}"))?;
 
     println!(
         "[5/6] EXPORTS OK: PNG={}x{} ({} B, {:.1} ms) -> {} | MP4={}x{} {} frames ({} B, {:.1} ms) -> {} | TIFF={}x{} ({} B) -> {}",

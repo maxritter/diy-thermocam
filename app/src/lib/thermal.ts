@@ -70,6 +70,20 @@ export function rawToObjectC(raw: number, rad: RadiometryParams): number {
   return compensateEmissivityC(app, rad.emissivity, rad.reflected_temp_c);
 }
 
+/** Exact inverse of `rawToObjectC` so WebGL2 raw-temperature isotherm thresholds match Rust `imaging.rs` at any emissivity. */
+export function objectCToRaw(tempC: number, rad: RadiometryParams): number {
+  const eps = Math.max(0.05, Math.min(1.0, rad.emissivity));
+  let apparentC = tempC;
+  if (Math.abs(eps - 1.0) >= 1e-6) {
+    const tObjK = Math.max(1.0, tempC + KELVIN_OFFSET);
+    const tReflK = Math.max(1.0, rad.reflected_temp_c + KELVIN_OFFSET);
+    const tAppK = (eps * tObjK ** 4 + (1 - eps) * tReflK ** 4) ** 0.25;
+    apparentC = tAppK - KELVIN_OFFSET;
+  }
+  const slope = Math.abs(rad.cal_slope) > 1e-9 ? rad.cal_slope : 0.01;
+  return (apparentC - rad.cal_offset) / slope;
+}
+
 export function matchesIsotherm(iso: IsothermConfig, tempC: number): boolean {
   switch (iso.mode) {
     case "off":
@@ -447,6 +461,250 @@ export function computeHistogram256(
     bins[Math.min(255, Math.round(norm * 255))]++;
   }
   return bins;
+}
+
+export interface TemporalHeqState {
+  smoothedCdf: Float32Array | null;
+  alpha: number;
+}
+
+export interface ViewportScratch {
+  raw16: Uint16Array;
+  disp16: Uint16Array;
+  bufA: Float32Array;
+  bufB: Float32Array;
+  heq: TemporalHeqState;
+}
+
+export function createViewportScratch(len: number): ViewportScratch {
+  return {
+    raw16: new Uint16Array(len),
+    disp16: new Uint16Array(len),
+    bufA: new Float32Array(len),
+    bufB: new Float32Array(len),
+    heq: { smoothedCdf: null, alpha: 0.25 },
+  };
+}
+
+/**
+ * Display-only clipped-CDF histogram equalization with optional temporal EMA smoothing
+ * (`temporal.alpha = 0.25`) so live thermal video contrast never flickers.
+ */
+export function applyClippedHistogramEqFloat(
+  norm: Float32Array,
+  out: Float32Array,
+  temporal?: TemporalHeqState,
+): void {
+  const n = norm.length;
+  if (n === 0) return;
+  const hist = new Uint32Array(256);
+  for (let i = 0; i < n; i++) {
+    const idx = Math.min(255, Math.max(0, Math.round(norm[i] * 255)));
+    hist[idx]++;
+  }
+  const clipLimit = Math.max(4, Math.floor((n / 256) * 3));
+  let excess = 0;
+  for (let i = 0; i < 256; i++) {
+    if (hist[i] > clipLimit) {
+      excess += hist[i] - clipLimit;
+      hist[i] = clipLimit;
+    }
+  }
+  const redist = Math.floor(excess / 256);
+  for (let i = 0; i < 256; i++) hist[i] += redist;
+
+  const lut = new Float32Array(256);
+  let running = 0;
+  let cdfMin = -1;
+  for (let i = 0; i < 256; i++) {
+    running += hist[i];
+    lut[i] = running;
+    if (cdfMin < 0 && running > 0) cdfMin = running;
+  }
+  const denom = Math.max(1, running - Math.max(0, cdfMin));
+  const minVal = Math.max(0, cdfMin);
+  for (let i = 0; i < 256; i++) {
+    lut[i] = Math.max(0, Math.min(1, (lut[i] - minVal) / denom));
+  }
+  if (temporal) {
+    if (temporal.smoothedCdf) {
+      const a = temporal.alpha;
+      const inv = 1 - a;
+      for (let i = 0; i < 256; i++) {
+        temporal.smoothedCdf[i] = temporal.smoothedCdf[i] * inv + lut[i] * a;
+        lut[i] = temporal.smoothedCdf[i];
+      }
+    } else {
+      temporal.smoothedCdf = new Float32Array(lut);
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const lin = Math.max(0, Math.min(1, norm[i]));
+    const idx = Math.min(255, Math.round(lin * 255));
+    out[i] = Math.max(0, Math.min(1, lut[idx] * 0.75 + lin * 0.25));
+  }
+}
+
+/**
+ * Compute matching 16-bit `raw16` (linear raw normalized 0..65535 for exact isotherm) and
+ * `disp16` (spatial filter + temporal HEQ + bilateral + local-range-clamped USM, 0..65535)
+ * into reusable typed-array scratch buffers (zero 8-bit quantization, matches Rust `imaging.rs`).
+ */
+export function prepareDisplay16Bit(
+  pixels: Uint16Array,
+  comparePixels: Uint16Array | null,
+  splitCol: number,
+  w: number,
+  h: number,
+  minRaw: number,
+  maxRaw: number,
+  pipeline: import("./types").DisplayPipeline,
+  scratch: ViewportScratch,
+): void {
+  const n = w * h;
+  if (scratch.raw16.length !== n) {
+    scratch.raw16 = new Uint16Array(n);
+    scratch.disp16 = new Uint16Array(n);
+    scratch.bufA = new Float32Array(n);
+    scratch.bufB = new Float32Array(n);
+  }
+  const invSpan = 1 / Math.max(1, maxRaw - minRaw);
+  const { raw16, disp16, bufA, bufB } = scratch;
+
+  for (let y = 0; y < h; y++) {
+    const rowOff = y * w;
+    for (let x = 0; x < w; x++) {
+      const idx = rowOff + x;
+      const raw =
+        comparePixels && x >= splitCol ? (comparePixels[idx] ?? pixels[idx]) : pixels[idx];
+      const norm = Math.max(0, Math.min(1, (raw - minRaw) * invSpan));
+      bufA[idx] = norm;
+      raw16[idx] = Math.round(norm * 65535);
+    }
+  }
+
+  let cur = bufA;
+  let next = bufB;
+
+  if (pipeline.filter !== "none") {
+    next.set(cur);
+    if (pipeline.filter === "box3x3" || pipeline.filter === "gaussian3x3") {
+      const isGauss = pipeline.filter === "gaussian3x3";
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x;
+          if (isGauss) {
+            next[i] =
+              (cur[i - w - 1] +
+                2 * cur[i - w] +
+                cur[i - w + 1] +
+                2 * cur[i - 1] +
+                4 * cur[i] +
+                2 * cur[i + 1] +
+                cur[i + w - 1] +
+                2 * cur[i + w] +
+                cur[i + w + 1]) /
+              16;
+          } else {
+            next[i] =
+              (cur[i - w - 1] +
+                cur[i - w] +
+                cur[i - w + 1] +
+                cur[i - 1] +
+                cur[i] +
+                cur[i + 1] +
+                cur[i + w - 1] +
+                cur[i + w] +
+                cur[i + w + 1]) /
+              9;
+          }
+        }
+      }
+    } else {
+      const win = new Float32Array(9);
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x;
+          win[0] = cur[i - w - 1];
+          win[1] = cur[i - w];
+          win[2] = cur[i - w + 1];
+          win[3] = cur[i - 1];
+          win[4] = cur[i];
+          win[5] = cur[i + 1];
+          win[6] = cur[i + w - 1];
+          win[7] = cur[i + w];
+          win[8] = cur[i + w + 1];
+          win.sort();
+          next[i] = win[4];
+        }
+      }
+    }
+    [cur, next] = [next, cur];
+  }
+
+  if (pipeline.histogram_eq) {
+    applyClippedHistogramEqFloat(cur, next, scratch.heq);
+    [cur, next] = [next, cur];
+  } else {
+    scratch.heq.smoothedCdf = null;
+  }
+
+  if (pipeline.upscaler === "edge_preserve") {
+    const inv2sr2 = 1 / (2 * 0.08 * 0.08);
+    const sp = [0.606, 0.778, 0.606, 0.778, 1.0, 0.778, 0.606, 0.778, 0.606];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const center = cur[y * w + x];
+        let num = 0;
+        let den = 0;
+        let ki = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const ny = Math.max(0, Math.min(h - 1, y + dy));
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = Math.max(0, Math.min(w - 1, x + dx));
+            const v = cur[ny * w + nx];
+            const diff = v - center;
+            const wt = sp[ki++] * Math.exp(-(diff * diff) * inv2sr2);
+            num += v * wt;
+            den += wt;
+          }
+        }
+        next[y * w + x] = den > 0 ? num / den : center;
+      }
+    }
+    [cur, next] = [next, cur];
+  }
+
+  if (pipeline.sharpen_amount > 0.001 && pipeline.upscaler !== "nearest" && w >= 3 && h >= 3) {
+    const amt = Math.max(0, Math.min(2, pipeline.sharpen_amount));
+    const kw = [1 / 16, 2 / 16, 1 / 16, 2 / 16, 4 / 16, 2 / 16, 1 / 16, 2 / 16, 1 / 16];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const orig = cur[y * w + x];
+        let blur = 0;
+        let lo = 1;
+        let hi = 0;
+        let ki = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const ny = Math.max(0, Math.min(h - 1, y + dy));
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = Math.max(0, Math.min(w - 1, x + dx));
+            const v = cur[ny * w + nx];
+            blur += v * kw[ki++];
+            if (v < lo) lo = v;
+            if (v > hi) hi = v;
+          }
+        }
+        const sharp = orig + amt * (orig - blur);
+        next[y * w + x] = Math.max(0, Math.min(1, Math.max(lo, Math.min(hi, sharp))));
+      }
+    }
+    [cur, next] = [next, cur];
+  }
+
+  for (let i = 0; i < n; i++) {
+    disp16[i] = Math.round(Math.max(0, Math.min(1, cur[i])) * 65535);
+  }
 }
 
 /**

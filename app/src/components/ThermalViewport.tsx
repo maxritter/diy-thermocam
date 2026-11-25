@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { samplePalette } from "@/lib/palettes";
 import {
-  applyClippedHistogramEq,
+  createViewportScratch,
   evaluateRoi,
   formatTemp,
   matchesIsotherm,
+  objectCToRaw,
+  prepareDisplay16Bit,
   rawToObjectC,
   unitSymbol,
+  type ViewportScratch,
 } from "@/lib/thermal";
 import type {
   DisplayPipeline,
@@ -60,18 +63,21 @@ void main() {
 
 const FRAG_SRC = `#version 300 es
 precision highp float;
+precision highp usampler2D;
 in vec2 v_uv;
-uniform sampler2D u_norm;
+uniform usampler2D u_disp;
+uniform usampler2D u_raw;
 uniform sampler2D u_lut;
 uniform vec2 u_texSize;
 uniform int u_mode;
-uniform float u_sharpen;
 uniform int u_isoMode;
 uniform float u_isoLow;
 uniform float u_isoHigh;
 uniform vec3 u_isoColor;
 uniform vec2 u_flipRot;
 out vec4 outColor;
+
+const float PI = 3.14159265359;
 
 float catmull(float x) {
   float ax = abs(x);
@@ -80,10 +86,27 @@ float catmull(float x) {
   return 0.0;
 }
 
-float sampleSmooth(vec2 uv) {
+float lanczos3(float x) {
+  float ax = abs(x);
+  if (ax < 1e-5) return 1.0;
+  if (ax < 3.0) {
+    float px = PI * ax;
+    return (sin(px) / px) * (sin(px / 3.0) / (px / 3.0));
+  }
+  return 0.0;
+}
+
+float fetchNorm(usampler2D tex, ivec2 coord, ivec2 maxCoord) {
+  ivec2 c = clamp(coord, ivec2(0), maxCoord);
+  return float(texelFetch(tex, c, 0).r) / 65535.0;
+}
+
+float sampleBicubic(usampler2D tex, vec2 uv) {
   vec2 coord = uv * u_texSize - 0.5;
   vec2 base = floor(coord);
   vec2 f = coord - base;
+  ivec2 ibase = ivec2(base);
+  ivec2 maxC = ivec2(u_texSize) - ivec2(1);
   float sum = 0.0;
   float wsum = 0.0;
   for (int j = -1; j <= 2; j++) {
@@ -91,12 +114,42 @@ float sampleSmooth(vec2 uv) {
     for (int i = -1; i <= 2; i++) {
       float wx = catmull(f.x - float(i));
       float w = wx * wy;
-      vec2 p = clamp((base + vec2(float(i), float(j)) + 0.5) / u_texSize, vec2(0.0), vec2(1.0));
-      sum += texture(u_norm, p).r * w;
+      sum += fetchNorm(tex, ibase + ivec2(i, j), maxC) * w;
       wsum += w;
     }
   }
-  return wsum > 1e-5 ? clamp(sum / wsum, 0.0, 1.0) : texture(u_norm, uv).r;
+  return wsum > 1e-5 ? clamp(sum / wsum, 0.0, 1.0) : fetchNorm(tex, ibase, maxC);
+}
+
+float sampleLanczos3(usampler2D tex, vec2 uv) {
+  vec2 coord = uv * u_texSize - 0.5;
+  vec2 base = floor(coord);
+  vec2 f = coord - base;
+  ivec2 ibase = ivec2(base);
+  ivec2 maxC = ivec2(u_texSize) - ivec2(1);
+  float sum = 0.0;
+  float wsum = 0.0;
+  for (int j = -2; j <= 3; j++) {
+    float wy = lanczos3(f.y - float(j));
+    for (int i = -2; i <= 3; i++) {
+      float wx = lanczos3(f.x - float(i));
+      float w = wx * wy;
+      sum += fetchNorm(tex, ibase + ivec2(i, j), maxC) * w;
+      wsum += w;
+    }
+  }
+  return wsum > 1e-5 ? clamp(sum / wsum, 0.0, 1.0) : fetchNorm(tex, ibase, maxC);
+}
+
+float sampleField(usampler2D tex, vec2 uv, int mode) {
+  if (mode == 0) {
+    ivec2 maxC = ivec2(u_texSize) - ivec2(1);
+    return fetchNorm(tex, ivec2(floor(uv * u_texSize)), maxC);
+  }
+  if (mode == 1) {
+    return sampleBicubic(tex, uv);
+  }
+  return sampleLanczos3(tex, uv);
 }
 
 void main() {
@@ -104,33 +157,45 @@ void main() {
   if (u_flipRot.x > 0.5) uv = 1.0 - uv;
   if (u_flipRot.y > 0.5) uv.x = 1.0 - uv.x;
 
-  float v = (u_mode == 0) ? texture(u_norm, (floor(uv * u_texSize) + 0.5) / u_texSize).r : sampleSmooth(uv);
-  if (u_mode > 0 && u_sharpen > 0.001) {
-    vec2 px = 1.0 / u_texSize;
-    float blur = (
-      texture(u_norm, uv + vec2(-px.x, 0.0)).r +
-      texture(u_norm, uv + vec2( px.x, 0.0)).r +
-      texture(u_norm, uv + vec2(0.0, -px.y)).r +
-      texture(u_norm, uv + vec2(0.0,  px.y)).r +
-      v * 2.0
-    ) / 6.0;
-    v = clamp(v + u_sharpen * 0.65 * (v - blur), 0.0, 1.0);
+  float vDisp = sampleField(u_disp, uv, u_mode);
+
+  // Isotherm ALWAYS evaluated against linear raw temperature before HEQ/USM!
+  bool isoHit = false;
+  if (u_isoMode > 0) {
+    float vLin = sampleField(u_raw, uv, u_mode);
+    if (u_isoMode == 1 && vLin >= u_isoHigh) isoHit = true;
+    if (u_isoMode == 2 && vLin <= u_isoLow) isoHit = true;
+    if (u_isoMode == 3 && vLin >= u_isoLow && vLin <= u_isoHigh) isoHit = true;
   }
 
-  bool isoHit = false;
-  if (u_isoMode == 1 && v >= u_isoHigh) isoHit = true;
-  if (u_isoMode == 2 && v <= u_isoLow) isoHit = true;
-  if (u_isoMode == 3 && v >= u_isoLow && v <= u_isoHigh) isoHit = true;
-
-  vec3 col = isoHit ? u_isoColor : texture(u_lut, vec2(v, 0.5)).rgb;
+  vec3 col = isoHit ? u_isoColor : texture(u_lut, vec2(vDisp, 0.5)).rgb;
   outColor = vec4(col, 1.0);
 }`;
+
+interface CachedUniforms {
+  u_disp: WebGLUniformLocation | null;
+  u_raw: WebGLUniformLocation | null;
+  u_lut: WebGLUniformLocation | null;
+  u_texSize: WebGLUniformLocation | null;
+  u_mode: WebGLUniformLocation | null;
+  u_isoMode: WebGLUniformLocation | null;
+  u_isoLow: WebGLUniformLocation | null;
+  u_isoHigh: WebGLUniformLocation | null;
+  u_isoColor: WebGLUniformLocation | null;
+  u_flipRot: WebGLUniformLocation | null;
+}
 
 interface WebGlHandles {
   gl: WebGL2RenderingContext;
   program: WebGLProgram;
-  normTex: WebGLTexture;
+  vbo: WebGLBuffer;
+  dispTex: WebGLTexture;
+  rawTex: WebGLTexture;
   lutTex: WebGLTexture;
+  texW: number;
+  texH: number;
+  lutUploaded: Uint8Array | null;
+  u: CachedUniforms;
 }
 
 function initWebGl2(canvas: HTMLCanvasElement): WebGlHandles | null {
@@ -155,27 +220,73 @@ function initWebGl2(canvas: HTMLCanvasElement): WebGlHandles | null {
   gl.attachShader(program, vs);
   gl.attachShader(program, fs);
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return null;
+  gl.deleteShader(vs);
+  gl.deleteShader(fs);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    gl.deleteProgram(program);
+    return null;
+  }
 
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  const vbo = gl.createBuffer();
+  if (!vbo) return null;
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(program, "a_pos");
   gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
-  const normTex = gl.createTexture();
+  const dispTex = gl.createTexture();
+  const rawTex = gl.createTexture();
   const lutTex = gl.createTexture();
-  if (!normTex || !lutTex) return null;
+  if (!dispTex || !rawTex || !lutTex) return null;
 
-  for (const tex of [normTex, lutTex]) {
+  for (const tex of [dispTex, rawTex]) {
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    // Integer R16UI textures require NEAREST filtering in WebGL2
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
-  return { gl, program, normTex, lutTex };
+  gl.bindTexture(gl.TEXTURE_2D, lutTex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+  const u: CachedUniforms = {
+    u_disp: gl.getUniformLocation(program, "u_disp"),
+    u_raw: gl.getUniformLocation(program, "u_raw"),
+    u_lut: gl.getUniformLocation(program, "u_lut"),
+    u_texSize: gl.getUniformLocation(program, "u_texSize"),
+    u_mode: gl.getUniformLocation(program, "u_mode"),
+    u_isoMode: gl.getUniformLocation(program, "u_isoMode"),
+    u_isoLow: gl.getUniformLocation(program, "u_isoLow"),
+    u_isoHigh: gl.getUniformLocation(program, "u_isoHigh"),
+    u_isoColor: gl.getUniformLocation(program, "u_isoColor"),
+    u_flipRot: gl.getUniformLocation(program, "u_flipRot"),
+  };
+
+  // Bind sampler units once
+  // biome-ignore lint/correctness/useHookAtTopLevel: WebGL2RenderingContext.useProgram is not a React hook
+  gl.useProgram(program);
+  gl.uniform1i(u.u_disp, 0);
+  gl.uniform1i(u.u_raw, 1);
+  gl.uniform1i(u.u_lut, 2);
+
+  return {
+    gl,
+    program,
+    vbo,
+    dispTex,
+    rawTex,
+    lutTex,
+    texW: 0,
+    texH: 0,
+    lutUploaded: null,
+    u,
+  };
 }
 
 export function ThermalViewport({
@@ -204,6 +315,8 @@ export function ThermalViewport({
 }: ThermalViewportProps): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const glRef = useRef<WebGlHandles | null>(null);
+  const scratchRef = useRef<ViewportScratch>(createViewportScratch(160 * 120));
+  const [canvasSize, setCanvasSize] = useState<[number, number]>([960, 720]);
   const [backendMode, setBackendMode] = useState<"WebGL2" | "Canvas2D">("WebGL2");
   const [hover, setHover] = useState<{ x: number; y: number; raw: number; tempC: number } | null>(
     null,
@@ -227,81 +340,171 @@ export function ThermalViewport({
     return out;
   }, [palette]);
 
+  // DPR-aware canvas backing store sizing via ResizeObserver
   useEffect(() => {
     const cv = canvasRef.current;
-    if (!cv || glRef.current) return;
-    const handles = initWebGl2(cv);
-    if (handles) {
-      glRef.current = handles;
-      setBackendMode("WebGL2");
-    } else {
-      setBackendMode("Canvas2D");
-    }
+    if (!cv) return;
+    const updateSize = () => {
+      const rect = cv.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const nextW = Math.max(320, Math.round(rect.width * dpr));
+      const nextH = Math.max(240, Math.round(rect.height * dpr));
+      setCanvasSize((prev) => (prev[0] === nextW && prev[1] === nextH ? prev : [nextW, nextH]));
+    };
+    updateSize();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(cv);
+    return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv) return;
-    const span = Math.max(1, maxRaw - minRaw);
-    const rawNormBytes = new Uint8Array(sensorW * sensorH);
-    const splitCol = compareFrame ? Math.round(sensorW * splitRatio) : sensorW;
-
-    for (let y = 0; y < sensorH; y++) {
-      for (let x = 0; x < sensorW; x++) {
-        const idx = y * sensorW + x;
-        const raw =
-          compareFrame && x >= splitCol
-            ? (compareFrame.pixels[idx] ?? frame.pixels[idx])
-            : frame.pixels[idx];
-        const norm = Math.max(0, Math.min(1, (raw - minRaw) / span));
-        rawNormBytes[idx] = Math.round(norm * 255);
+    const init = () => {
+      const handles = initWebGl2(cv);
+      if (handles) {
+        glRef.current = handles;
+        setBackendMode("WebGL2");
+      } else {
+        glRef.current = null;
+        setBackendMode("Canvas2D");
       }
+    };
+    init();
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      glRef.current = null;
+    };
+    const onRestored = () => {
+      init();
+    };
+    cv.addEventListener("webglcontextlost", onLost);
+    cv.addEventListener("webglcontextrestored", onRestored);
+    return () => {
+      cv.removeEventListener("webglcontextlost", onLost);
+      cv.removeEventListener("webglcontextrestored", onRestored);
+      const h = glRef.current;
+      if (h) {
+        h.gl.deleteTexture(h.dispTex);
+        h.gl.deleteTexture(h.rawTex);
+        h.gl.deleteTexture(h.lutTex);
+        h.gl.deleteBuffer(h.vbo);
+        h.gl.deleteProgram(h.program);
+        glRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const cv = canvasRef.current;
+    if (!cv) return;
+    if (cv.width !== canvasSize[0] || cv.height !== canvasSize[1]) {
+      cv.width = canvasSize[0];
+      cv.height = canvasSize[1];
     }
-    const normBytes = pipeline.histogram_eq ? applyClippedHistogramEq(rawNormBytes) : rawNormBytes;
+    const splitCol = compareFrame ? Math.round(sensorW * splitRatio) : sensorW;
+    const scratch = scratchRef.current;
+    prepareDisplay16Bit(
+      frame.pixels,
+      compareFrame ? compareFrame.pixels : null,
+      splitCol,
+      sensorW,
+      sensorH,
+      minRaw,
+      maxRaw,
+      pipeline,
+      scratch,
+    );
 
     const handles = glRef.current;
     if (handles) {
-      const { gl, program, normTex, lutTex } = handles;
+      const { gl, program, dispTex, rawTex, lutTex, u } = handles;
       gl.viewport(0, 0, cv.width, cv.height);
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL2RenderingContext.useProgram is not a React hook
       gl.useProgram(program);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 2);
 
+      const needAlloc = handles.texW !== sensorW || handles.texH !== sensorH;
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, normTex);
-      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-      gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.R8,
-        sensorW,
-        sensorH,
-        0,
-        gl.RED,
-        gl.UNSIGNED_BYTE,
-        normBytes,
-      );
-      gl.uniform1i(gl.getUniformLocation(program, "u_norm"), 0);
+      gl.bindTexture(gl.TEXTURE_2D, dispTex);
+      if (needAlloc) {
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.R16UI,
+          sensorW,
+          sensorH,
+          0,
+          gl.RED_INTEGER,
+          gl.UNSIGNED_SHORT,
+          scratch.disp16,
+        );
+      } else {
+        gl.texSubImage2D(
+          gl.TEXTURE_2D,
+          0,
+          0,
+          0,
+          sensorW,
+          sensorH,
+          gl.RED_INTEGER,
+          gl.UNSIGNED_SHORT,
+          scratch.disp16,
+        );
+      }
 
       gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, lutTex);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lutBytes);
-      gl.uniform1i(gl.getUniformLocation(program, "u_lut"), 1);
+      gl.bindTexture(gl.TEXTURE_2D, rawTex);
+      if (needAlloc) {
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.R16UI,
+          sensorW,
+          sensorH,
+          0,
+          gl.RED_INTEGER,
+          gl.UNSIGNED_SHORT,
+          scratch.raw16,
+        );
+        handles.texW = sensorW;
+        handles.texH = sensorH;
+      } else {
+        gl.texSubImage2D(
+          gl.TEXTURE_2D,
+          0,
+          0,
+          0,
+          sensorW,
+          sensorH,
+          gl.RED_INTEGER,
+          gl.UNSIGNED_SHORT,
+          scratch.raw16,
+        );
+      }
 
-      gl.uniform2f(gl.getUniformLocation(program, "u_texSize"), sensorW, sensorH);
-      gl.uniform1i(
-        gl.getUniformLocation(program, "u_mode"),
-        pipeline.upscaler === "nearest" ? 0 : pipeline.upscaler === "edge_preserve" ? 2 : 1,
-      );
-      gl.uniform1f(gl.getUniformLocation(program, "u_sharpen"), pipeline.sharpen_amount);
-      gl.uniform2f(
-        gl.getUniformLocation(program, "u_flipRot"),
-        pipeline.rotate_180 ? 1 : 0,
-        pipeline.flip_horizontal ? 1 : 0,
-      );
+      if (handles.lutUploaded !== lutBytes) {
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, lutTex);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RGBA, gl.UNSIGNED_BYTE, lutBytes);
+        handles.lutUploaded = lutBytes;
+      }
 
-      const minC = rawToObjectC(minRaw, rad);
-      const maxC = rawToObjectC(maxRaw, rad);
-      const cSpan = Math.max(0.1, maxC - minC);
+      gl.uniform2f(u.u_texSize, sensorW, sensorH);
+      const modeNum =
+        pipeline.upscaler === "nearest"
+          ? 0
+          : pipeline.upscaler === "bicubic"
+            ? 1
+            : pipeline.upscaler === "lanczos3"
+              ? 2
+              : 3;
+      gl.uniform1i(u.u_mode, modeNum);
+      gl.uniform2f(u.u_flipRot, pipeline.rotate_180 ? 1 : 0, pipeline.flip_horizontal ? 1 : 0);
+
+      const rawSpan = Math.max(1, maxRaw - minRaw);
       const isoModeNum =
         pipeline.isotherm.mode === "off"
           ? 0
@@ -310,17 +513,11 @@ export function ThermalViewport({
             : pipeline.isotherm.mode === "below"
               ? 2
               : 3;
-      gl.uniform1i(gl.getUniformLocation(program, "u_isoMode"), isoModeNum);
-      gl.uniform1f(
-        gl.getUniformLocation(program, "u_isoLow"),
-        (pipeline.isotherm.low_c - minC) / cSpan,
-      );
-      gl.uniform1f(
-        gl.getUniformLocation(program, "u_isoHigh"),
-        (pipeline.isotherm.high_c - minC) / cSpan,
-      );
+      gl.uniform1i(u.u_isoMode, isoModeNum);
+      gl.uniform1f(u.u_isoLow, (objectCToRaw(pipeline.isotherm.low_c, rad) - minRaw) / rawSpan);
+      gl.uniform1f(u.u_isoHigh, (objectCToRaw(pipeline.isotherm.high_c, rad) - minRaw) / rawSpan);
       gl.uniform3f(
-        gl.getUniformLocation(program, "u_isoColor"),
+        u.u_isoColor,
         pipeline.isotherm.color[0] / 255,
         pipeline.isotherm.color[1] / 255,
         pipeline.isotherm.color[2] / 255,
@@ -339,9 +536,10 @@ export function ThermalViewport({
     const imgData = octx.createImageData(sensorW, sensorH);
     const minC = rawToObjectC(minRaw, rad);
     const maxC = rawToObjectC(maxRaw, rad);
-    for (let i = 0; i < normBytes.length; i++) {
-      const n = normBytes[i];
-      const tempC = minC + (n / 255) * (maxC - minC);
+    for (let i = 0; i < scratch.disp16.length; i++) {
+      const n = Math.min(255, scratch.disp16[i] >> 8);
+      // Isotherm tested against linear raw16 (before HEQ)
+      const tempC = minC + (scratch.raw16[i] / 65535) * (maxC - minC);
       let r = lutBytes[n * 4];
       let g = lutBytes[n * 4 + 1];
       let b = lutBytes[n * 4 + 2];
@@ -358,7 +556,19 @@ export function ThermalViewport({
     ctx.imageSmoothingQuality = "high";
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.drawImage(off, 0, 0, cv.width, cv.height);
-  }, [frame, compareFrame, splitRatio, lutBytes, minRaw, maxRaw, pipeline, rad, sensorW, sensorH]);
+  }, [
+    frame,
+    compareFrame,
+    splitRatio,
+    lutBytes,
+    minRaw,
+    maxRaw,
+    pipeline,
+    rad,
+    sensorW,
+    sensorH,
+    canvasSize,
+  ]);
 
   const roiStatsMap = useMemo(() => {
     const map = new Map<string, ReturnType<typeof evaluateRoi>>();
@@ -545,8 +755,8 @@ export function ThermalViewport({
         <canvas
           ref={canvasRef}
           data-thermal-canvas="true"
-          width={960}
-          height={720}
+          width={canvasSize[0]}
+          height={canvasSize[1]}
           className="block h-full w-full rounded-[4px]"
         />
 
