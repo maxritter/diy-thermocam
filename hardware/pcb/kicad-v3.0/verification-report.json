@@ -1,0 +1,128 @@
+{
+  "erc": {
+    "errors": 0,
+    "warnings": 0,
+    "error_details": [],
+    "ok": true
+  },
+  "drc": {
+    "errors": 0,
+    "warnings": 136,
+    "unconnected": 0,
+    "error_details": [],
+    "ok": true
+  },
+  "netlist_pcb": {
+    "target": "kicad_pcb",
+    "parts_matched": 21,
+    "parts_expected": 21,
+    "missing_parts": [],
+    "extra_parts": [],
+    "nets_matched": 30,
+    "nets_expected": 30,
+    "net_diffs": [],
+    "ok": true
+  },
+  "netlist_sch": {
+    "target": "kicad_sch",
+    "parts_matched": 21,
+    "parts_expected": 21,
+    "missing_parts": [],
+    "extra_parts": [],
+    "nets_matched": 30,
+    "nets_expected": 30,
+    "net_diffs": [],
+    "ok": true
+  },
+  "drills": {
+    "eagle_hits": 182,
+    "kicad_hits": 182,
+    "matched": 182,
+    "extra_kicad_hits": 0,
+    "max_xy_err_mm": 0.0,
+    "max_dia_err_mm": 0.0,
+    "tolerance_mm": 0.05,
+    "mismatches": [],
+    "ok": true
+  },
+  "gerber_xor": [
+    {
+      "layer": "F_Cu",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 2766583,
+      "kicad_px": 2732861,
+      "xor_px": 53580,
+      "xor_board_pct": 1.4684,
+      "iou_pct": 98.07
+    },
+    {
+      "layer": "B_Cu",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 2700351,
+      "kicad_px": 2516133,
+      "xor_px": 200046,
+      "xor_board_pct": 5.4823,
+      "iou_pct": 92.61
+    },
+    {
+      "layer": "F_Mask",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 256168,
+      "kicad_px": 208040,
+      "xor_px": 48128,
+      "xor_board_pct": 1.319,
+      "iou_pct": 81.21
+    },
+    {
+      "layer": "B_Mask",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 294814,
+      "kicad_px": 246682,
+      "xor_px": 48140,
+      "xor_board_pct": 1.3193,
+      "iou_pct": 83.67
+    },
+    {
+      "layer": "F_Silkscreen",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 10345,
+      "kicad_px": 11497,
+      "xor_px": 4904,
+      "xor_board_pct": 0.1344,
+      "iou_pct": 63.33
+    },
+    {
+      "layer": "B_Silkscreen",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 152220,
+      "kicad_px": 146163,
+      "xor_px": 36565,
+      "xor_board_pct": 1.0021,
+      "iou_pct": 78.17
+    },
+    {
+      "layer": "Edge_Cuts",
+      "dpi": 600,
+      "width_px": 2172,
+      "height_px": 1680,
+      "eagle_px": 7456,
+      "kicad_px": 7456,
+      "xor_px": 0,
+      "xor_board_pct": 0.0,
+      "iou_pct": 100.0
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,26 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,10.0.8*%
+%TF.CreationDate,2026-11-25T13:57:47+01:00*%
+%TF.ProjectId,diy-thermocam-v4.0,6469792d-7468-4657-926d-6f63616d2d76,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 10.0.8) date 2026-11-25 13:57:47*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.100000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X0Y68400000D02*
+X0Y0D01*
+X0Y0D02*
+X89400000Y0D01*
+X89400000Y68400000D02*
+X0Y68400000D01*
+X89400000Y0D02*
+X89400000Y68400000D01*
+M02*
