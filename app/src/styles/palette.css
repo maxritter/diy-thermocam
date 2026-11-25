@@ -1,0 +1,76 @@
+/* DIY-Thermocam Studio 2026: QualityLayer-inspired flat-surface desktop palette.
+   Neutral grounds, crisp hairlines, Pilot blue for primary action, amber for attention,
+   thermal orange reserved for reticle core and live hotspots. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --tc-bg-sunken: #f5f5f5;
+  --tc-bg: #ffffff;
+  --tc-surface: #ffffff;
+  --tc-surface-2: #f2f2f2;
+  --tc-surface-3: #e8e8e8;
+  --tc-head: #fafafa;
+  --tc-line: #ebebeb;
+  --tc-border: #e4e4e4;
+  --tc-border-strong: #b0b0b0;
+  --tc-text: #171717;
+  --tc-text-muted: #525252;
+  --tc-text-dim: #737373;
+  --tc-text-on-accent: #ffffff;
+  --tc-accent: #2076c5;
+  --tc-accent-hover: #1a649f;
+  --tc-accent-soft: rgb(32 118 197 / 10%);
+  --tc-accent-line: rgb(32 118 197 / 36%);
+  --tc-thermal: #e8590c;
+  --tc-thermal-soft: rgb(232 89 12 / 12%);
+  --tc-amber: #f7b23b;
+  --tc-amber-ink: #925c05;
+  --tc-amber-soft: rgb(247 178 59 / 14%);
+  --tc-amber-line: rgb(157 102 7 / 35%);
+  --tc-pass: #1e7a4c;
+  --tc-pass-soft: rgb(30 122 76 / 10%);
+  --tc-pass-line: rgb(30 122 76 / 36%);
+  --tc-danger: #cc2936;
+  --tc-danger-soft: rgb(204 41 54 / 10%);
+  --tc-danger-line: rgb(204 41 54 / 35%);
+  --tc-canvas-bg: #111214;
+  --control-h: 32px;
+  --radius: 8px;
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --tc-bg-sunken: #050506;
+  --tc-bg: #0a0a0b;
+  --tc-surface: #0f1012;
+  --tc-surface-2: #17181b;
+  --tc-surface-3: #202226;
+  --tc-head: #121316;
+  --tc-line: #23252a;
+  --tc-border: #2c2e34;
+  --tc-border-strong: #555964;
+  --tc-text: #ededed;
+  --tc-text-muted: #a1a4ad;
+  --tc-text-dim: #7c808b;
+  --tc-text-on-accent: #081522;
+  --tc-accent: #5da3e5;
+  --tc-accent-hover: #79b5ec;
+  --tc-accent-soft: rgb(93 163 229 / 13%);
+  --tc-accent-line: rgb(93 163 229 / 38%);
+  --tc-thermal: #ff7a33;
+  --tc-thermal-soft: rgb(255 122 51 / 14%);
+  --tc-amber: #f7b23b;
+  --tc-amber-ink: #f7b23b;
+  --tc-amber-soft: rgb(247 178 59 / 14%);
+  --tc-amber-line: rgb(247 178 59 / 38%);
+  --tc-pass: #6fd39f;
+  --tc-pass-soft: rgb(111 211 159 / 12%);
+  --tc-pass-line: rgb(111 211 159 / 40%);
+  --tc-danger: #ff616b;
+  --tc-danger-soft: rgb(255 97 107 / 13%);
+  --tc-danger-line: rgb(255 97 107 / 38%);
+  --tc-canvas-bg: #060708;
+}

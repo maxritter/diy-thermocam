@@ -1,0 +1,26 @@
+[package]
+name = "diy-thermocam-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "DIY-Thermocam 2026 Cross-Platform Tauri v2 Desktop Studio"
+publish = false
+
+[lib]
+name = "diy_thermocam_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "diy-thermocam"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+base64 = "0.22"
+rfd = "0.15"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tauri = { version = "2", features = [] }
+thermocam-core = { path = "../crates/thermocam-core" }

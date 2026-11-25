@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/thermocam-core",
+  "src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+repository = "https://github.com/maxritter/diy-thermocam"
+authors = ["Max Ritter"]
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.dev]
+debug = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
