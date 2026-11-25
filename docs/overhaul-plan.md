@@ -2,7 +2,7 @@
 
 Comprehensive roadmap to modernize DIY-Thermocam into a single, agent-friendly 2026 monorepo covering Teensy 4.1 firmware, a clean-slate USB v2 protocol, a cross-platform Tauri v2 desktop app, a QualityLayer-inspired website + searchable documentation site, and open-source KiCad + parametric CAD hardware.
 
-> **Status:** Draft plan for Max's review on branch `overhaul-plan`. Local tool installs via `brew` / `uv` (`git-filter-repo`, `kicad`, `gerbv`, `build123d`) are pre-approved for implementation phases. Ron Brown's recovery email has been sent and all 14 GitHub issues + 2 PRs are now replied to and closed (0 open remaining). Remaining outward-facing actions (pushes, releases, Netlify live cutover, and deleting the old website repo) stay gated on Max's explicit approval.
+> **Status:** **Approved** (Step 0 locked by Max on branch `overhaul-plan`; implementation proceeds on `overhaul-2026`). Local tool installs via `brew` / `uv` (`git-filter-repo`, `kicad`, `gerbv`, `build123d`) are pre-approved for implementation phases. Ron Brown's recovery email has been sent and all 14 GitHub issues + 2 PRs are now replied to and closed (0 open remaining). Remaining outward-facing actions (pushes, releases, Netlify live cutover, and deleting the old website repo) stay gated on Max's explicit approval.
 
 ---
 
@@ -201,11 +201,13 @@ All **14 GitHub issues** and **2 pull requests** on `maxritter/diy-thermocam` ha
 
 ---
 
-## 8. Open Questions for Max's Approval
+## 8. Locked Decisions (Approved by Max)
 
-1. **Hardware revision & one-stop PCBA scope:** Deliver the verified **1:1 KiCad V3.0 port + verified best-price 2026 `bom.csv` + `build123d` laser/3D/CNC enclosure** first (recommended), or also design a **V3.1/V4 board** in Phase 6 optimized for **Seeed Studio Fusion / JLCPCB / PCBWay** turnkey PCBA + DIY hand-soldering (board-edge USB-C + TI BQ24075 power-path charger + D+/D- tap removing Teensy VUSB cut + protected `103450` LiPo JST-PH, keeping Teensy/Lepton/Display as plug-in headers)?
-2. **Legacy USB v1 protocol:** Once the Tauri v2 app and ported v2 hardware regression suite pass on real hardware, perform a **clean v2-only cutover** deleting legacy v1 from firmware 3.1+ (recommended; `.DAT` files stay 100% compatible and legacy v3.0.x cameras still upgrade via 134-baud bootloader), or keep the ~300-LOC v1 fallback behind `0x64` auto-detect?
-3. **Website + Docs framework:** Use unified **Astro 5 + Starlight (`/docs/*`) + Pagefind + Tailwind v4** sharing `palette.css` with the Tauri app (recommended—QualityLayer's exact marketing + searchable docs UX in one Bun build without React 18/19 split), or literally mirror QualityLayer's separate **Vite + React 19 site + Docusaurus 3 docs** build?
-4. **RuleSync configuration:** Keep plain **`AGENTS.md` + `CLAUDE.md` pointer** (recommended default—matches current repo with zero extra tooling), or initialize RuleSync for `diy-thermocam`?
-5. **Outward-facing approvals (when ready):** Approve pushing overhaul branches, publishing `firmware-v*`/`app-v*` releases, relinking `www.diy-thermocam.net` via the Netlify connector/CLI after Phase 5 preview sign-off, and—once live-verified—deleting `maxritter/diy-thermocam-website`. *(Support & GitHub triage completed: Ron Brown's email sent and all 14 issues + 2 PRs closed.)*
-6. **Plan adjustments:** Any tweaks to the phase order, desktop app scope (e.g., emissivity on camera vs app-only), or enclosure targets (both laser-cut 6-plate acrylic and 2-piece 3D-printable/CNC shell)?
+Max approved all 5 recommended Step 0 decisions:
+
+- **A1 (Hardware scope):** Deliver **both** the verified 1:1 KiCad V3.0 port (default buildable board) **and** a new V3.1/V4 USB-C + TI BQ24075 PCBA-ready revision (prototype-pending until physically built and tested), alongside `hardware/bom/bom.csv` and the `build123d` laser + 3D/CNC enclosure.
+- **A2 (USB protocol cutover):** Perform a **clean USB v2-only cutover** (deleting legacy v1 from firmware 3.1+) once the Tauri v2 desktop app and ported v2 hardware regression suite pass on real hardware (`.DAT` compatibility remains 100% intact; legacy v3.0.x cameras still upgrade via Teensy's 134-baud bootloader trigger).
+- **A3 (Website & docs stack):** Build unified **Astro 5 + Starlight (`/docs/*`) + Pagefind + Tailwind CSS v4** sharing `palette.css` with the Tauri app.
+- **A4 (Emissivity & radiometry):** Support **both** app-side global/per-ROI emissivity & reflected temperature correction **and** optional Lepton CCI emissivity/`T_bkg` configuration in firmware.
+- **A5 (Agent instructions):** Keep plain **`AGENTS.md` + thin `CLAUDE.md` pointer** (no RuleSync).
+- **Outward-facing actions (remain gated):** Pushing overhaul branches, publishing GitHub releases (`firmware-v*`, `app-v*`, `legacy-software-v3.0`), Netlify live cutover for `www.diy-thermocam.net`, and deleting `maxritter/diy-thermocam-website` each require Max's explicit sign-off when ready.
