@@ -1,0 +1,102 @@
+---
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const {
+  title,
+  description,
+  canonicalPath,
+  ogImage = SITE.ogImage,
+  ogType = 'website',
+  jsonLd,
+} = Astro.props;
+
+const canonicalUrl = `${SITE.url}${canonicalPath}`;
+const fullTitle =
+  title === SITE.name
+    ? `${SITE.name} — Open-Source Radiometric Thermal Camera`
+    : `${title} — ${SITE.name}`;
+const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/images/website/icon.png" />
+    <link rel="apple-touch-icon" href="/images/brand/favicon.png" />
+
+    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script is:inline>
+      (() => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const forced = params.get('theme');
+          const stored = localStorage.getItem('starlight-theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme =
+            forced === 'light' || forced === 'dark'
+              ? forced
+              : stored === 'light' || stored === 'dark'
+                ? stored
+                : prefersDark
+                  ? 'dark'
+                  : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+
+    <script
+      defer
+      src="https://cloud.umami.is/script.js"
+      data-website-id={SITE.umamiWebsiteId}
+    ></script>
+
+    {ldList.map((schema) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+  </head>
+  <body>
+    <Header currentPath={canonicalPath} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

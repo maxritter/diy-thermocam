@@ -1,0 +1,161 @@
+---
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { marked } from 'marked';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import { buildBreadcrumbs, SITE } from '../lib/site';
+
+const rawMd = readFileSync(resolve(process.cwd(), '../docs/building-instructions.md'), 'utf8');
+const withoutH1 = rawMd.replace(/^\s*#\s+[^\n]+\n+/, '');
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const renderer = new marked.Renderer();
+renderer.heading = ({ tokens, depth }) => {
+  const html = marked.Parser.parseInline(tokens);
+  const plain = html.replace(/<[^>]+>/g, '');
+  const id = slugify(plain);
+  return `<h${depth} id="${id}">${html}</h${depth}>`;
+};
+
+const guideHtml = await marked.parse(withoutH1, { renderer });
+
+const jsonLd = [
+  buildBreadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Building Instructions', path: '/building-instructions/' },
+  ]),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Build DIY-Thermocam V4 (Zero-Solder) or V3.0 Thermal Camera',
+    description:
+      'Step-by-step assembly manual for building DIY-Thermocam V4 with zero soldering (screwdriver-only PCBA) or the verified 45-step V3.0 through-hole camera.',
+    image: `${SITE.url}/images/build-v4/v4-step-1-unbox-pcba.png`,
+    supply: [
+      { '@type': 'HowToSupply', name: 'FLIR Lepton 3.5 Thermal Camera Module' },
+      { '@type': 'HowToSupply', name: 'Teensy 4.1 Development Board' },
+      { '@type': 'HowToSupply', name: 'DIY-Thermocam PCB (V4 PCBA or V3.0 THT)' },
+      { '@type': 'HowToSupply', name: '3.2 Inch ILI9341 TFT Touch Display (BuyDisplay ER-TFTM032-3)' },
+      { '@type': 'HowToSupply', name: 'Protected 3.7V 2000mAh LiPo Battery' },
+    ],
+    tool: [
+      { '@type': 'HowToTool', name: 'Precision Phillips screwdriver (only tool needed for V4)' },
+      { '@type': 'HowToTool', name: 'Soldering iron, flush cutters, and multimeter (V3.0 through-hole build)' },
+    ],
+  },
+];
+---
+
+<MarketingLayout
+  title="Building Instructions"
+  description="Build DIY-Thermocam V4 with zero soldering (screwdriver-only factory PCBA in 3-4 vendor orders) or follow the verified 45-step V3.0 through-hole assembly guide."
+  canonicalPath="/building-instructions/"
+  jsonLd={jsonLd}
+>
+  <section class="page-wrap">
+    <header class="page-head">
+      <h1>Building instructions</h1>
+      <p>
+        Choose the zero-solder <strong>DIY-Thermocam V4</strong> screwdriver-only kit (prototype-pending) or follow the verified 45-step <strong>V3.0</strong> through-hole assembly manual. Single-sourced directly from <code>docs/building-instructions.md</code>.
+      </p>
+
+      <nav class="jump-bar" aria-label="Jump to build track">
+        <a href="#diy-thermocam-v4-zero-solder-screwdriver-only-build-prototype-pending" class="jump-primary">
+          V4 Zero-Solder Guide (3 Steps)
+        </a>
+        <a href="#classic-v3-0-through-hole-build-verified-45-step-guide" class="jump-secondary">
+          Classic V3.0 Soldering Guide (45 Steps)
+        </a>
+        <a href="/docs/partlist/" class="jump-secondary">
+          Interactive BOM &amp; Prices
+        </a>
+      </nav>
+    </header>
+
+    <article class="tc-prose guide-content" set:html={guideHtml} />
+  </section>
+</MarketingLayout>
+
+<style>
+  .page-wrap {
+    max-width: var(--tc-container);
+    margin: 0 auto;
+    padding: 48px 24px 20px;
+  }
+  .page-head {
+    max-width: 72ch;
+    margin-bottom: 32px;
+  }
+  .page-head h1 {
+    margin: 0;
+    font-size: clamp(2rem, 3.6vw, 2.75rem);
+    font-weight: 650;
+  }
+  .page-head p {
+    margin: 12px 0 0;
+    font-size: 1.05rem;
+    color: var(--tc-text-muted);
+  }
+  .page-head code {
+    font-family: var(--tc-font-mono);
+    font-size: 0.88em;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--tc-surface-2);
+    color: var(--tc-text);
+  }
+  .jump-bar {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .jump-primary,
+  .jump-secondary {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .jump-primary {
+    background: var(--tc-thermal);
+    color: var(--tc-text-on-thermal);
+  }
+  .jump-secondary {
+    border: 1px solid var(--tc-border-strong);
+    background: var(--tc-surface);
+    color: var(--tc-text);
+  }
+  .guide-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0 2rem;
+    font-size: 14px;
+    border: 1px solid var(--tc-border);
+  }
+  .guide-content :global(th) {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--tc-bg-sunken);
+    color: var(--tc-text);
+    border-bottom: 1px solid var(--tc-border);
+  }
+  .guide-content :global(td) {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--tc-border);
+    vertical-align: top;
+  }
+  .guide-content :global(hr) {
+    display: none;
+  }
+</style>

@@ -1,0 +1,290 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import { buildBreadcrumbs, SITE } from '../lib/site';
+
+const appModules = [
+  {
+    title: '60 fps WebGL2 Live View',
+    body: 'Auto-detects connected cameras over USB Protocol v2, renders all 19 firmware palettes plus Inferno/Viridis/Magma/Plasma, and supports zoom, pan, pixel-grid loupe, and measurement-safe filters.',
+  },
+  {
+    title: 'ROIs & Per-Region Emissivity',
+    body: 'Place 1×1 and 3×3 spot meters, Box, Circle, and Freehand Polygon ROIs, bidirectional Line Profiles, 2-point ΔT, and per-ROI emissivity + reflected temperature corrections.',
+  },
+  {
+    title: 'Zero-FFmpeg Video & Radiometric Exports',
+    body: 'Export H.264 MP4 (bundled OpenH264), animated GIF, high-DPI PNG/JPEG with scale bar, temperature CSV, 16-bit Kelvin TIFF, lossless .DAT sequences, and HTML/PDF inspection reports.',
+  },
+  {
+    title: 'Direct SD Browser & HalfKay Updater',
+    body: 'Browse, preview, and download microSD captures without MTP prompts, and flash verified Teensy 4.1 firmware releases over native Rust HalfKay HID.',
+  },
+];
+
+const legacyTools = [
+  {
+    title: 'Thermal Analysis Software (ThermoVision by Joe-C)',
+    platform: 'Windows (legacy)',
+    image: '/images/software/thermal_analysis_sw_1.png',
+    desc: 'Third-party Windows radiometric editor for viewing, modifying, and converting DIY-Thermocam .DAT files via drag-and-drop.',
+    href: 'https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_analysis_software',
+    extraHref: 'http://joe-c.de/pages/projekte/thermovision.php',
+    extraLabel: 'Author site',
+  },
+  {
+    title: 'Thermal Live Viewer',
+    platform: 'Python (legacy v1 serial)',
+    image: '/images/software/thermal_live_viewer.png',
+    desc: 'Standalone live-streaming utility for capturing thermal frames and video over the legacy v1 USB serial protocol.',
+    href: 'https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_live_viewer/',
+  },
+  {
+    title: 'Thermal Data Viewer',
+    platform: 'Windows (legacy)',
+    image: '/images/software/thermal_data_viewer.png',
+    desc: 'Batch viewer and converter for folders of V1/V2/V3 .DAT captures to JPG, BMP, PNG, or AVI.',
+    href: 'https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_data_viewer/',
+  },
+  {
+    title: 'Video Converter',
+    platform: 'Windows (legacy)',
+    desc: 'Combines frame sequences recorded on the camera microSD card into standard movie files.',
+    href: 'https://github.com/maxritter/diy-thermocam/tree/master/software/video_converter/',
+  },
+];
+
+const jsonLd = [
+  buildBreadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Software', path: '/software/' },
+  ]),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'DIY-Thermocam Desktop App',
+    operatingSystem: 'macOS, Windows, Linux',
+    applicationCategory: 'UtilitiesApplication',
+    license: 'https://www.gnu.org/licenses/gpl-3.0.html',
+    url: `${SITE.url}/software/`,
+    downloadUrl: SITE.releasesUrl,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  },
+];
+---
+
+<MarketingLayout
+  title="Desktop App & Software"
+  description="Cross-platform Tauri v2 Desktop App for DIY-Thermocam (macOS, Windows, Linux) plus legacy Windows radiometric tools."
+  canonicalPath="/software/"
+  jsonLd={jsonLd}
+>
+  <section class="page-wrap">
+    <header class="page-head">
+      <h1>Desktop app &amp; software ecosystem</h1>
+      <p>
+        One open-source cross-platform app for live thermal streaming, radiometric `.DAT` editing, video export, microSD access, and firmware updates — built with Tauri v2, Rust, and WebGL2.
+      </p>
+      <div class="cta-row">
+        <a href={SITE.releasesUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
+          Download from GitHub Releases
+        </a>
+        <a href="/docs/desktop-app/" class="btn-secondary">Desktop App Docs</a>
+        <a href="/docs/protocol-v2/" class="btn-secondary">USB Protocol v2 Spec</a>
+      </div>
+    </header>
+
+    <div class="app-grid">
+      {appModules.map((mod) => (
+        <article class="app-card">
+          <h2>{mod.title}</h2>
+          <p>{mod.body}</p>
+        </article>
+      ))}
+    </div>
+
+    <section class="legacy-section">
+      <h2>Legacy V3.0 Windows &amp; Python tools</h2>
+      <p class="legacy-lead">
+        All legacy tools remain available in the repository for V1/V2/V3.0 workflows. Every `.DAT` file remains 100% compatible across both generations.
+      </p>
+
+      <div class="legacy-grid">
+        {legacyTools.map((tool) => (
+          <article class="legacy-card">
+            {tool.image && <img src={tool.image} alt={tool.title} loading="lazy" />}
+            <div class="legacy-body">
+              <div class="legacy-top">
+                <h3>{tool.title}</h3>
+                <span class="pill">{tool.platform}</span>
+              </div>
+              <p>{tool.desc}</p>
+              <div class="legacy-links">
+                <a href={tool.href} target="_blank" rel="noopener noreferrer">Download on GitHub &rarr;</a>
+                {tool.extraHref && (
+                  <a href={tool.extraHref} target="_blank" rel="noopener noreferrer">{tool.extraLabel} &rarr;</a>
+                )}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  </section>
+</MarketingLayout>
+
+<style>
+  .page-wrap {
+    max-width: var(--tc-container);
+    margin: 0 auto;
+    padding: 48px 24px 20px;
+  }
+  .page-head {
+    max-width: 70ch;
+    margin-bottom: 36px;
+  }
+  .page-head h1 {
+    margin: 0;
+    font-size: clamp(2rem, 3.6vw, 2.75rem);
+    font-weight: 650;
+  }
+  .page-head p {
+    margin: 12px 0 0;
+    font-size: 1.05rem;
+    color: var(--tc-text-muted);
+  }
+  .cta-row {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--tc-thermal);
+    color: var(--tc-text-on-thermal);
+  }
+  .btn-secondary {
+    border: 1px solid var(--tc-border-strong);
+    background: var(--tc-surface);
+    color: var(--tc-text);
+  }
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 56px;
+  }
+  .app-card {
+    padding: 24px;
+    border: 1px solid var(--tc-border);
+    border-radius: 12px;
+    background: var(--tc-bg-sunken);
+  }
+  .app-card h2 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 650;
+  }
+  .app-card p {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--tc-text-muted);
+  }
+  .legacy-section {
+    padding-top: 40px;
+    border-top: 1px solid var(--tc-border);
+  }
+  .legacy-section h2 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 650;
+  }
+  .legacy-lead {
+    margin: 8px 0 24px;
+    color: var(--tc-text-muted);
+    max-width: 68ch;
+  }
+  .legacy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .legacy-card {
+    border: 1px solid var(--tc-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--tc-surface);
+    display: flex;
+    flex-direction: column;
+  }
+  .legacy-card img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-bottom: 1px solid var(--tc-border);
+    display: block;
+  }
+  .legacy-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+  .legacy-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .legacy-body h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
+  .pill {
+    font-family: var(--tc-font-mono);
+    font-size: 11.5px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: 1px solid var(--tc-border);
+    color: var(--tc-text-dim);
+  }
+  .legacy-body p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--tc-text-muted);
+  }
+  .legacy-links {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--tc-accent);
+  }
+  .legacy-links a {
+    text-decoration: none;
+  }
+  .legacy-links a:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 820px) {
+    .app-grid,
+    .legacy-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

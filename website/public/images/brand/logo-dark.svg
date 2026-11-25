@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 36" fill="none" role="img" aria-label="DIY-Thermocam">
+  <g transform="translate(2 2)">
+    <rect x="2" y="2" width="28" height="28" rx="8.5" fill="#121933" stroke="#2d3a6b" stroke-width="1"/>
+    <circle cx="16" cy="16" r="10.6" fill="#23377d"/>
+    <circle cx="16" cy="16" r="7.9" fill="#9c2d6e"/>
+    <circle cx="16" cy="16" r="5.2" fill="#ea6d20"/>
+    <circle cx="16" cy="16" r="2.6" fill="#ffe6a3"/>
+  </g>
+  <text x="44" y="24.5" fill="#ededf0" font-family="Geist, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="18.5" font-weight="650" letter-spacing="-0.03em">DIY-Thermocam</text>
+</svg>

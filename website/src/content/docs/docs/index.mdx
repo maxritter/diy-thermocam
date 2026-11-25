@@ -1,0 +1,65 @@
+---
+title: Documentation
+description: Technical reference for building, flashing, operating, and integrating the DIY-Thermocam V3 open-source thermal camera.
+editUrl: https://github.com/maxritter/diy-thermocam/edit/master/website/src/content/docs/docs/index.mdx
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Everything you need to source parts, assemble the hardware, flash the Teensy 4.1 firmware, read `.DAT` captures, or talk to the camera over USB Protocol v2.
+
+![DIY-Thermocam open-source thermal imaging module and live PCB heatmap](/images/og/og-default.png)
+
+## Start Here
+
+<CardGrid>
+  <LinkCard
+    title="Interactive Bill of Materials"
+    description="Compare V3.0 through-hole vs. V3.1 USB-C PCBA parts, live costs, supplier links, and 1-click CSV export."
+    href="/docs/partlist/"
+  />
+  <LinkCard
+    title="45-Step Building Instructions"
+    description="Illustrated step-by-step assembly guide from header soldering to first firmware flash."
+    href="/building-instructions/"
+  />
+  <LinkCard
+    title="User Manual"
+    description="Live-mode shortcuts, touchscreen menu, charging LEDs, SD storage, and PC connection."
+    href="/docs/manual/"
+  />
+  <LinkCard
+    title="Hardware, PCB & Enclosure"
+    description="Schematic, Teensy 4.1 pinmap, KiCad fab exports for JLCPCB / Seeed Fusion / PCBWay, and build123d enclosures."
+    href="/docs/hardware/"
+  />
+</CardGrid>
+
+## Firmware, Protocol & Desktop Software
+
+<CardGrid>
+  <LinkCard
+    title="Firmware & Flashing"
+    description="Flash releases via the Desktop App or Teensy Loader, or build from source with arduino-cli + Teensy core 1.62.0."
+    href="/docs/firmware/"
+  />
+  <LinkCard
+    title="USB Protocol v2.0 Specification"
+    description="Little-endian binary packet framing, CRC-8/CRC-32, push streaming, concurrent commands, and SD access."
+    href="/docs/protocol-v2/"
+  />
+  <LinkCard
+    title="Raw Data Format (.DAT)"
+    description="100% V1/V2/V3 radiometric byte layout, raw-to-temperature formula, and non-destructive .thermo.json sidecars."
+    href="/docs/raw-data/"
+  />
+  <LinkCard
+    title="Desktop App Reference"
+    description="Cross-platform Tauri v2 + Rust + WebGL2 application for live view, ROI emissivity, H.264 MP4, and reports."
+    href="/docs/desktop-app/"
+  />
+</CardGrid>
+
+## On-Device Video Walkthrough
+
+Watch the [DIY-Thermocam V3 Device Walkthrough on YouTube](https://www.youtube.com/watch?v=rnlmHt4fbEg) for an overview of the touchscreen menus and thermal modes, or explore the full monorepo on [GitHub](https://github.com/maxritter/diy-thermocam).
