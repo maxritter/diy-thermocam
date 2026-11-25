@@ -1,16 +1,16 @@
 # Contributing to DIY-Thermocam
 
-Thank you for contributing to DIY-Thermocam! All contributions are licensed under the [GNU General Public License v3.0](LICENSE).
+Contributions are welcome. All contributions are licensed under the [GNU General Public License v3.0](LICENSE).
 
-## Monorepo Layout
+## Repository Layout
 
-- `firmware/` — Teensy 4.1 C++ firmware (`arduino-cli`) and hardware regression suite (`firmware/test/`)
+- `firmware/` — Teensy 4.1 C++17 firmware (`arduino-cli`), host tests, simulator, and hardware test suite
 - `app/` — Cross-platform Tauri v2 desktop application
-- `hardware/` — PCB (`hardware/pcb/`), enclosure (`hardware/enclosure/`), and Bill of Materials (`hardware/bom/`)
-- `docs/` — Technical documentation and specifications (single source of truth for GitHub and the website)
-- `website/` — Official site (`https://www.diy-thermocam.net`)
+- `hardware/` — KiCad 10 PCB (`pcb/`), parametric enclosure (`enclosure/`), and Bill of Materials (`bom/`)
+- `docs/` — Single-source technical documentation and specifications
+- `website/` — Source for `https://www.diy-thermocam.net`
 
-## Local Setup & Verification
+## Local Setup and Verification
 
 ### Firmware
 1. Install [Arduino CLI](https://arduino.github.io/arduino-cli/).
@@ -18,24 +18,28 @@ Thank you for contributing to DIY-Thermocam! All contributions are licensed unde
    ```sh
    arduino-cli compile
    ```
-3. If you have a DIY-Thermocam V3 connected, flash and run the hardware regression suite:
+3. Run host unit tests without hardware:
+   ```sh
+   make -C firmware/tests_host test
+   ```
+4. If a DIY-Thermocam is connected, flash and run the hardware regression suite:
    ```sh
    arduino-cli upload -p <port>
    cd test && pip install -r requirements.txt && pytest --baseline baseline-3.0.4.json
    ```
 
-### Hardware & BOM
-- Keep `hardware/bom/bom.csv` as the single source of truth for component specifications and supplier links.
-- Run `python3 hardware/bom/validate_bom.py` (when present) before opening a PR.
-- New PCB or enclosure revisions must pass DRC/ERC and clearance checks, and remain marked prototype-pending until physically tested.
+### Hardware and BOM
+- Keep `hardware/bom/bom.csv` as the single source of truth for component specs and supplier links.
+- Run `python3 hardware/bom/validate_bom.py` before opening a PR.
+- New PCB or enclosure revisions must pass ERC/DRC and geometry checks. Mark them `PROTOTYPE-PENDING` until physically verified.
 
-### Documentation & Website
-- Edit technical documentation in `docs/` rather than duplicating text across `website/` and READMEs.
+### Documentation and Website
+- Edit technical documentation in `docs/`. The website and READMEs read directly from those files.
 - Preserve all existing `www.diy-thermocam.net` URLs and `/images/*` asset paths.
 
 ## Pull Request Guidelines
 
-- Keep PRs focused on a single subsystem or well-scoped change.
-- Run the relevant local build and test checks before submitting.
-- Update `CHANGELOG.md` under `[Unreleased]` for user-visible changes.
-- Reference related issues and describe how hardware-facing changes were verified.
+- Keep PRs focused on a single subsystem or scoped change.
+- Run the relevant local build and test checks before opening a PR.
+- Update `CHANGELOG.md` for user-visible changes.
+- Reference related issues and note how hardware-facing changes were verified.

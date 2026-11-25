@@ -6,22 +6,22 @@ import { buildBreadcrumbs } from '../lib/site';
 const devicePhotos: GalleryItem[] = [
   {
     title: 'Front View',
-    caption: '3.2-inch 320×240 resistive touchscreen mounted on a standard 1/4"-20 tripod.',
+    caption: '3.2-inch 320×240 resistive touchscreen mounted on a 1/4"-20 tripod.',
     image: '/images/device/front.jpg',
   },
   {
     title: 'Internal Electronics',
-    caption: 'Teensy 4.1, FLIR Lepton 3.5 on Breakout V2.0, Pololu 5 V boost, and CR1220 RTC holder.',
+    caption: 'Teensy 4.1, FLIR Lepton 3.5 on Breakout V2.0, Pololu 5 V boost, and CR1220 holder.',
     image: '/images/device/inside.jpg',
   },
   {
     title: 'Back View',
-    caption: 'Centered FLIR Lepton LWIR aperture on the matte grey 3 mm laser-cut acrylic backplate.',
+    caption: 'Centered FLIR Lepton aperture on the matte grey 3 mm laser-cut acrylic backplate.',
     image: '/images/device/back.jpg',
   },
   {
     title: 'Left Side',
-    caption: 'Side enclosure finger joints and hardware clearance profile.',
+    caption: 'Side enclosure finger joints and clearance profile.',
     image: '/images/device/left.jpg',
   },
   {
@@ -31,7 +31,7 @@ const devicePhotos: GalleryItem[] = [
   },
   {
     title: 'Right Side',
-    caption: 'Side-mounted rocker power switch and top momentary capture button.',
+    caption: 'Side power switch and top momentary capture button.',
     image: '/images/device/right.jpg',
   },
 ];
@@ -44,7 +44,7 @@ const jsonLd = buildBreadcrumbs([
 
 <MarketingLayout
   title="Device Images"
-  description="High-resolution photographs of the assembled DIY-Thermocam V3 hardware, internal PCB layout, FLIR Lepton 3.5 sensor, and laser-cut enclosure."
+  description="Photographs of the assembled DIY-Thermocam V3 hardware, internal PCB layout, FLIR Lepton 3.5, and acrylic enclosure."
   canonicalPath="/device-images/"
   jsonLd={jsonLd}
 >
@@ -52,7 +52,8 @@ const jsonLd = buildBreadcrumbs([
     <header class="page-head">
       <h1>Device images</h1>
       <p>
-        Photographs of the assembled DIY-Thermocam V3 from every angle, including the internal Teensy 4.1 and FLIR Lepton 3.5 hardware stack. Click any photo to inspect full size.
+        Assembled DIY-Thermocam V3 photos from every angle, including the internal Teensy 4.1 and
+        FLIR Lepton 3.5 stack. Click any photo to inspect full size.
       </p>
     </header>
 
@@ -64,11 +65,11 @@ const jsonLd = buildBreadcrumbs([
   .page-wrap {
     max-width: var(--tc-container);
     margin: 0 auto;
-    padding: 48px 24px 20px;
+    padding: 56px 28px 24px;
   }
   .page-head {
-    max-width: 66ch;
-    margin-bottom: 32px;
+    max-width: 64ch;
+    margin-bottom: 36px;
   }
   .page-head h1 {
     margin: 0;

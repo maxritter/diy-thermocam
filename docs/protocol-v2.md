@@ -29,14 +29,10 @@ Legacy `.DAT` radiometric files on the SD card remain 100% unchanged and compati
 4. **Clean Exit & Watchdog Recovery:**
    - **Host-initiated:** Host sends `GOODBYE_REQ (0x02)` → camera stops streaming, sends `GOODBYE_RESP (0x42)`, flushes USB, restores standalone live mode and backlight.
    - **Device-initiated (touch):** Long touch on the camera screen (when touch is present) sends `EVT_SESSION_EXIT (0xC4, reason = 0)` and returns to standalone live mode.
-   - **Disconnect / Timeout:** If USB DTR drops (`!Serial`) **or** no valid host packet is received for `heartbeat_timeout_ms` (default **`5000 ms`**), the camera stops streaming, emits `EVT_SESSION_EXIT (0xC4, reason = 1 or 3)` if USB is still writable, and returns cleanly to standalone live mode.
+   - **Disconnect / Timeout:** If USB DTR drops (`!Serial`) or no valid host packet arrives within `heartbeat_timeout_ms` (default **`5000 ms`**), the camera stops streaming. If USB is still writable, it emits `EVT_SESSION_EXIT (0xC4, reason = 1 or 3)`, then returns cleanly to standalone live mode.
 
-### 1.3 Phase 3 Transition Note (Auto-Detect → Clean Cutover)
-During Phase 3 implementation only, `checkSerial()` / `serialInit()` temporarily distinguish sessions on the first byte received while idle:
-- `0x64` (`CMD_START`) → legacy v1 `serialConnect()` (keeps the original 34-test v1 regression suite runnable while porting).
-- `0x54` (`'T'`) followed within `50 ms` by `0x43 0x32 0x00` (`"TC2\0"`) → v2 session (note `0x54` collides with no v1 command byte).
-
-Once the Tauri v2 desktop app and the ported v2 hardware regression suite pass on real hardware, the temporary `0x64` v1 branch is **deleted** (clean v2-only cutover for firmware 3.1+). Legacy v3.0.x cameras remain upgradeable from the desktop app via the 134-baud CDC bootloader trigger (§4.7).
+### 1.3 Transition Note
+Firmware 4.0 uses USB Protocol v2 only (`"TC2\0"` sync prefix). Legacy v3.0.x cameras remain upgradeable from the desktop app via the 134-baud CDC bootloader trigger (§4.7).
 
 ---
 
@@ -117,16 +113,16 @@ Both firmware (`tc_proto_v2`) and host (`thermocam-core`) MUST implement a byte-
         +------------------------------------------------------------------------+   return to FIND_MAGIC
 ```
 
-**Critical resync rule (overlapping magic):**
+**Required resync rule (overlapping sync prefix):**
 When `READ_HEADER` completes 16 bytes and fails any of:
 - `header[4] != 0x02` (`version`)
 - `payload_len > 163840` (`MAX_PAYLOAD_LEN`)
 - `crc8_smbus(header[0..7] || header[8..16]) != header[7]` (`hdr_crc8`)
 
-the parser MUST increment `usb_rx_errors`, **shift `header[1..16]` left by 1 byte**, and scan those remaining 15 buffered bytes for `"TC2\0"` before consuming new bytes from the serial port. Discarding all 16 bytes on a false sync would drop a real packet whose magic started inside bytes `1..15`.
+the parser MUST increment `usb_rx_errors` and **shift `header[1..16]` left by 1 byte**. It MUST then scan those remaining 15 buffered bytes for `"TC2\0"` before reading new bytes from the serial port. Discarding all 16 bytes on a false sync would drop a real packet whose sync prefix started inside bytes `1..15`.
 
 **Receive timeouts:**
-- **Firmware RX timeout:** Once a valid header is accepted in `READ_PAYLOAD_AND_CRC`, if no new byte arrives for `500 ms` before `payload_len + 4` bytes complete, abort the partial packet, increment `usb_rx_errors`, and return to `FIND_MAGIC`.
+- **Firmware RX timeout:** After accepting a valid header in `READ_PAYLOAD_AND_CRC`, if `500 ms` passes with no new byte before `payload_len + 4` bytes complete, abort the partial packet. Increment `usb_rx_errors` and return to `FIND_MAGIC`.
 - **Host request timeout:** Default `1000 ms` for control commands (`3000 ms` for `TRIGGER_FFC`, `SAVE_CAPTURE`, and `FS_READ` windows).
 
 ### 3.2 Error Status Codes (`status_or_sub: u16`)
@@ -148,7 +144,7 @@ the parser MUST increment `usb_rx_errors`, **shift `header[1..16]` left by 1 byt
 ### 3.3 Backpressure & Frame Drop Policy
 - **Control responses & events have priority over stream frames.**
 - Before writing a `FRAME_RAW` or `FRAME_RENDERED` packet, firmware checks `Serial.availableForWrite()` and enforces a bounded TX write budget (`<= 15 ms` per frame).
-- If USB TX buffers are stalled (host paused or disconnected), firmware **drops the frame before starting transmission** (never truncates mid-packet), increments `dropped_frames`, and continues servicing the main loop and incoming control requests.
+- If USB TX buffers stall (host paused or disconnected), firmware **drops the frame before starting transmission** and never truncates mid-packet. It increments `dropped_frames` and keeps servicing the main loop and incoming control requests.
 - If a write stalls mid-packet for `> 100 ms`, firmware aborts the stream and relies on the 5 s heartbeat / DTR watchdog to tear down the session cleanly.
 
 ---
@@ -382,7 +378,7 @@ Optional on-device rendered screen mirror (used for diagnostics, screen capture,
 #### `GET_PERF_REQ (0x19)` — 1 byte / `GET_PERF_RESP (0x59)` — 84 bytes (`PerfTelemetry`)
 - Request: `0: flags: u8`:
   - `bit 0 (0x01)` `reset_counters`: reset cumulative counters (`frames_dropped`, `vospi_resyncs`, `vospi_crc_errors`, `usb_rx_errors`, `usb_crc_errors`) after capturing the snapshot.
-  - `bit 1 (0x02)` `select_last_video`: populate per-stage timings (`0..39`) and `frame_period_us` from the retained snapshot of the most recent on-device SD video recording (with `perf_mode = 1`), rather than the current live/serial session.
+  - `bit 1 (0x02)` `select_last_video`: populate per-stage timings (`0..39`) and `frame_period_us` from the retained snapshot of the most recent on-device SD video recording (`perf_mode = 1`) instead of the active live/serial session.
 - Response (84 bytes, identical to `EVT_PERF (0xC5)` payload). `live_fps_x100` and `video_fps_x100` are retained in RAM across USB connect so hosts can benchmark standalone live mode and on-device video recording empirically after a run:
 
 | Offset | Size | Type | Field | Description |
@@ -518,7 +514,7 @@ Protocol v2 SD access replaces MTP reboot mode as the primary file transfer path
   5. Invoke Teensy core `_reboot_Teensyduino_()` (`asm("bkpt #251")` on unlocked Teensy 4.1; NXP ROM jump on lockable boards).
   6. Device re-enumerates as PJRC HalfKay USB HID (`VID 0x16C0`, `PID 0x0478`, 1088-byte reports for Teensy 4.1).
 - **Legacy v3.0.x Upgrade Fallback (134-baud CDC trigger):**
-  - If a camera fails to answer `HELLO_REQ` (e.g., it is still running v1 firmware `<= 3.0.4`), the desktop updater can enter HalfKay without the hardware button by opening the CDC serial port at **134 baud** (`8N1`) and closing it. Teensyduino's USB ISR (`usb.c:841`) arms an 80-SOF (~10 ms) timer that calls `_reboot_Teensyduino_()`.
+  - If a camera does not answer `HELLO_REQ` (for example, v1 firmware `<= 3.0.4`), the desktop updater enters HalfKay without the hardware button. It opens the CDC port at **134 baud** (`8N1`) and closes it, which arms Teensyduino's USB ISR (`usb.c:841`) 80-SOF (~10 ms) timer to call `_reboot_Teensyduino_()`.
 
 #### `GENERIC_ERROR_RESP (0xFF)` — `0..128` bytes
 Sent whenever a request cannot be mapped to a dedicated response ID (e.g., `ERR_UNKNOWN_MSG`, `ERR_BAD_CRC` on a valid header, `FLAG_COMPRESSED` set).

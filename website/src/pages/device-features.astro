@@ -3,32 +3,32 @@ import MarketingLayout from '../layouts/MarketingLayout.astro';
 import { buildBreadcrumbs } from '../lib/site';
 
 const capabilities = [
-  'ARM Cortex-M7 processor (Teensy 4.1, 450 MHz default for low enclosure heat; 600 MHz capable)',
-  'Up to 8.78 fps native FLIR Lepton frame rate (US export compliant < 9 Hz)',
-  '19 built-in color schemes including Rainbow, Ironblack, Grayscale, Lava, Medical, and Hot/Cold alerts',
-  '3.2-inch 320×240 TFT LCD with resistive touchscreen and wide viewing angles',
-  'Radiometric 14-bit .DAT captures plus 640×480 preview bitmaps, continuous video, and interval time-lapse',
-  'microSDHC / microSDXC storage (FAT32 and exFAT on firmware 3.1+) accessible over USB',
-  'Protected 2000 mAh 3.7 V LiPo battery delivering 4–6 hours of field operation',
-  'Open-source C++17 firmware compiled cleanly with arduino-cli and Teensy core 1.62.0',
-  'Cross-platform Tauri v2 Desktop App (macOS, Windows, Linux) with WebGL2 live view, ROI emissivity, H.264 MP4, and built-in HalfKay firmware updates',
-  'Full .DAT compatibility with legacy V1/V2/V3 captures and ThermoVision by Joe-C',
-  'Binary USB Protocol v2 (480 Mbit/s USB HS CDC ACM) for concurrent streaming, live settings, SD browsing, and hardware button triggers',
+  'Teensy 4.1 ARM Cortex-M7 running at 450 MHz default (600 MHz capable)',
+  'Native 8.77 fps FLIR Lepton push streaming (export-compliant < 9 Hz)',
+  '19 on-device color palettes plus hot and cold threshold highlights',
+  '3.2-inch 320×240 TFT LCD with resistive touchscreen',
+  '14-bit radiometric .DAT images, continuous video, and interval time-lapse',
+  'Removable microSDHC / microSDXC storage (FAT32 and exFAT)',
+  'Protected 2000 mAh 3.7 V LiPo battery for 4–6 hours of field use',
+  'Open-source C++17 firmware compiled with arduino-cli and Teensy core 1.62.0',
+  'Cross-platform Tauri v2 Desktop Studio for macOS, Windows, and Linux',
+  'Byte-exact .DAT compatibility across V1, V2, V3, and V4 captures',
+  'Binary USB Protocol v2 with 0.26 ms command latency and 9.20 MB/s SD reads',
 ];
 
 const comparison = [
   { feature: 'Thermal resolution', tc: '80×60 (Lepton 2.5) or 160×120 (Lepton 3.1R / 3.5)', flir: '160×120' },
   { feature: 'Thermal sensitivity (NETD)', tc: '< 0.05 °C (50 mK)', flir: '< 0.06 °C (60 mK)' },
-  { feature: 'Temperature range', tc: '-10 °C to +140 °C (High Gain) or -10 °C to +450 °C (Low Gain)', flir: '-20 °C to +250 °C' },
-  { feature: 'Field of view (FOV)', tc: '57° HFOV, 71° diagonal (Lepton 3.5)', flir: '45° × 34°' },
-  { feature: 'Display', tc: '3.2" 320×240 TFT, resistive touchscreen', flir: '3.0" 320×240, non-touch' },
-  { feature: 'Temperature points', tc: 'Up to 96 custom spots on-device; unlimited ROIs in Desktop App', flir: 'Center spot only' },
-  { feature: 'Color schemes', tc: '19 on-device + Inferno/Viridis/Magma/Plasma & custom LUTs in app', flir: 'Rainbow, Iron, Grayscale' },
-  { feature: 'Recording modes', tc: 'Still images, continuous video, and interval time-lapse', flir: 'Still images only' },
-  { feature: 'Storage capacity', tc: 'Removable microSD card (FAT32 / exFAT)', flir: 'Internal (~500 image sets)' },
-  { feature: 'File formats', tc: 'Open 14-bit radiometric .DAT + BMP / PNG / 16-bit TIFF / CSV / MP4', flir: 'Proprietary radiometric JPEG' },
+  { feature: 'Temperature range', tc: '-10 °C to +140 °C (High Gain) or +450 °C (Low Gain)', flir: '-20 °C to +250 °C' },
+  { feature: 'Field of view (FOV)', tc: '57° HFOV / 71° DFOV (3.5) or 95° HFOV / 119° DFOV (3.1R)', flir: '45° × 34°' },
+  { feature: 'Display', tc: '3.2" 320×240 TFT, touchscreen', flir: '3.0" 320×240, non-touch' },
+  { feature: 'Temperature spots', tc: 'Up to 96 spots on-device; unlimited ROIs in Desktop Studio', flir: 'Center spot only' },
+  { feature: 'Color schemes', tc: '19 on-device + scientific LUTs in Desktop Studio', flir: 'Rainbow, Iron, Grayscale' },
+  { feature: 'Recording modes', tc: 'Still images, continuous video, and time-lapse', flir: 'Still images only' },
+  { feature: 'Storage', tc: 'Removable microSD card (FAT32 / exFAT)', flir: 'Internal (~500 image sets)' },
+  { feature: 'File formats', tc: 'Open 14-bit .DAT, BMP, PNG, 16-bit TIFF, CSV, H.264 MP4', flir: 'Proprietary radiometric JPEG' },
   { feature: 'Weight', tc: '~255 g', flir: '575 g' },
-  { feature: 'Source code & hardware', tc: '100% open-source (GPL-3.0)', flir: 'Closed proprietary' },
+  { feature: 'Hardware & source code', tc: 'Open-source (GPL-3.0)', flir: 'Closed proprietary' },
 ];
 
 const jsonLd = buildBreadcrumbs([
@@ -39,54 +39,55 @@ const jsonLd = buildBreadcrumbs([
 
 <MarketingLayout
   title="Device Features"
-  description="Complete hardware and firmware specifications for DIY-Thermocam V3 and V4, including side-by-side comparison with the FLIR E6."
+  description="Hardware and firmware specifications for DIY-Thermocam V3 and V4, compared side-by-side with the FLIR E6."
   canonicalPath="/device-features/"
   jsonLd={jsonLd}
 >
   <section class="page-wrap">
     <header class="page-head">
-      <h1>Device features &amp; specifications</h1>
+      <h1>Device features and specifications</h1>
       <p>
-        DIY-Thermocam delivers radiometric long-wave infrared imaging on open hardware at a fraction of commercial camera pricing, with complete firmware and protocol source code.
+        Radiometric long-wave infrared imaging on open hardware, with full KiCad, firmware, and
+        protocol source code.
       </p>
     </header>
 
-    <div class="feature-panel">
+    <section class="spec-block">
       <h2>Core capabilities</h2>
       <ul class="cap-grid">
         {capabilities.map((item) => (
           <li>{item}</li>
         ))}
       </ul>
-    </div>
+    </section>
 
-    <div class="compare-block">
-      <h2>DIY-Thermocam V3 vs. FLIR E6</h2>
+    <section class="spec-block">
+      <h2>DIY-Thermocam vs. FLIR E6</h2>
       <div class="table-wrap">
         <table class="spec-table tabular">
           <thead>
             <tr>
               <th>Specification</th>
-              <th>DIY-Thermocam V3</th>
+              <th>DIY-Thermocam</th>
               <th>FLIR E6</th>
             </tr>
           </thead>
           <tbody>
             {comparison.map((row) => (
               <tr>
-                <td><strong>{row.feature}</strong></td>
-                <td class="highlight-col">{row.tc}</td>
+                <td class="label-col">{row.feature}</td>
+                <td class="tc-col">{row.tc}</td>
                 <td>{row.flir}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
     <div class="next-links">
-      <a href="/docs/partlist/" class="btn-primary">Inspect Bill of Materials</a>
-      <a href="/building-instructions/" class="btn-secondary">Read Building Instructions</a>
+      <a href="/docs/partlist/" class="btn-primary">Bill of Materials</a>
+      <a href="/building-instructions/" class="btn-secondary">Building Instructions</a>
     </div>
   </section>
 </MarketingLayout>
@@ -95,11 +96,11 @@ const jsonLd = buildBreadcrumbs([
   .page-wrap {
     max-width: var(--tc-container);
     margin: 0 auto;
-    padding: 48px 24px 20px;
+    padding: 56px 28px 24px;
   }
   .page-head {
-    max-width: 68ch;
-    margin-bottom: 36px;
+    max-width: 64ch;
+    margin-bottom: 48px;
   }
   .page-head h1 {
     margin: 0;
@@ -111,17 +112,14 @@ const jsonLd = buildBreadcrumbs([
     font-size: 1.05rem;
     color: var(--tc-text-muted);
   }
-  .feature-panel {
-    padding: 28px;
-    border: 1px solid var(--tc-border);
-    border-radius: 12px;
-    background: var(--tc-bg-sunken);
-    margin-bottom: 44px;
+  .spec-block {
+    padding-top: 32px;
+    border-top: 1px solid var(--tc-border);
+    margin-bottom: 52px;
   }
-  .feature-panel h2,
-  .compare-block h2 {
-    margin: 0 0 18px;
-    font-size: 1.45rem;
+  .spec-block h2 {
+    margin: 0 0 20px;
+    font-size: 1.35rem;
     font-weight: 650;
   }
   .cap-grid {
@@ -129,15 +127,12 @@ const jsonLd = buildBreadcrumbs([
     padding-left: 18px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 28px;
+    gap: 10px 36px;
     color: var(--tc-text-muted);
-    font-size: 14.5px;
+    font-size: 15px;
   }
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid var(--tc-border);
-    border-radius: 12px;
-    background: var(--tc-surface);
   }
   .spec-table {
     width: 100%;
@@ -146,29 +141,26 @@ const jsonLd = buildBreadcrumbs([
   }
   .spec-table th {
     text-align: left;
-    padding: 13px 16px;
-    background: var(--tc-bg-sunken);
-    border-bottom: 1px solid var(--tc-border);
+    padding: 12px 14px 12px 0;
+    border-bottom: 1px solid var(--tc-border-strong);
     font-weight: 650;
+    color: var(--tc-text);
   }
   .spec-table td {
-    padding: 12px 16px;
+    padding: 13px 14px 13px 0;
     border-bottom: 1px solid var(--tc-border);
     color: var(--tc-text-muted);
     vertical-align: top;
   }
-  .spec-table tr:last-child td {
-    border-bottom: 0;
-  }
-  .spec-table td strong {
-    color: var(--tc-text);
-  }
-  .highlight-col {
+  .label-col {
     color: var(--tc-text) !important;
-    background: var(--tc-thermal-soft);
+    font-weight: 550;
+  }
+  .tc-col {
+    color: var(--tc-text) !important;
   }
   .next-links {
-    margin-top: 32px;
+    margin-top: 36px;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -179,7 +171,7 @@ const jsonLd = buildBreadcrumbs([
     align-items: center;
     height: 40px;
     padding: 0 18px;
-    border-radius: 8px;
+    border-radius: 7px;
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
@@ -191,7 +183,10 @@ const jsonLd = buildBreadcrumbs([
   .btn-secondary {
     border: 1px solid var(--tc-border-strong);
     color: var(--tc-text);
-    background: var(--tc-surface);
+    background: transparent;
+  }
+  .btn-secondary:hover {
+    background: var(--tc-surface-2);
   }
   @media (max-width: 780px) {
     .cap-grid {

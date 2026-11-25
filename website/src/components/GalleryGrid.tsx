@@ -93,7 +93,7 @@ export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-          gap: '18px',
+          gap: '24px',
         }}
       >
         {visibleItems.map((item, idx) => (
@@ -101,12 +101,9 @@ export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props
             key={item.image}
             style={{
               margin: 0,
-              border: '1px solid var(--tc-border)',
-              borderRadius: '10px',
-              overflow: 'hidden',
-              background: 'var(--tc-surface)',
               display: 'flex',
               flexDirection: 'column',
+              gap: '8px',
             }}
           >
             <button
@@ -114,7 +111,8 @@ export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props
               onClick={() => setActiveIndex(idx)}
               aria-label={`Inspect ${item.title} full size`}
               style={{
-                border: 0,
+                border: '1px solid var(--tc-border)',
+                borderRadius: '8px',
                 padding: 0,
                 background: 'var(--tc-bg-sunken)',
                 cursor: 'zoom-in',
@@ -136,7 +134,7 @@ export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props
                 }}
               />
             </button>
-            <figcaption style={{ padding: '12px 14px' }}>
+            <figcaption style={{ padding: '2px 0' }}>
               <div
                 style={{
                   display: 'flex',

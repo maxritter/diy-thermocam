@@ -33,20 +33,20 @@ const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: 'How to Build DIY-Thermocam V4 (Zero-Solder) or V3.0 Thermal Camera',
+    name: 'How to Build DIY-Thermocam V4 or V3.0 Thermal Camera',
     description:
-      'Step-by-step assembly manual for building DIY-Thermocam V4 with zero soldering (screwdriver-only PCBA) or the verified 45-step V3.0 through-hole camera.',
+      'Step-by-step assembly guide for the zero-solder V4 PCBA or the proven 45-step V3.0 through-hole camera.',
     image: `${SITE.url}/images/build-v4/v4-step-1-unbox-pcba.png`,
     supply: [
       { '@type': 'HowToSupply', name: 'FLIR Lepton 3.5 Thermal Camera Module' },
       { '@type': 'HowToSupply', name: 'Teensy 4.1 Development Board' },
       { '@type': 'HowToSupply', name: 'DIY-Thermocam PCB (V4 PCBA or V3.0 THT)' },
-      { '@type': 'HowToSupply', name: '3.2 Inch ILI9341 TFT Touch Display (BuyDisplay ER-TFTM032-3)' },
-      { '@type': 'HowToSupply', name: 'Protected 3.7V 2000mAh LiPo Battery' },
+      { '@type': 'HowToSupply', name: '3.2-inch ILI9341 TFT Touch Display (BuyDisplay ER-TFTM032-3)' },
+      { '@type': 'HowToSupply', name: 'Protected 3.7 V 2000 mAh LiPo Battery' },
     ],
     tool: [
-      { '@type': 'HowToTool', name: 'Precision Phillips screwdriver (only tool needed for V4)' },
-      { '@type': 'HowToTool', name: 'Soldering iron, flush cutters, and multimeter (V3.0 through-hole build)' },
+      { '@type': 'HowToTool', name: 'Phillips screwdriver (V4 zero-solder build)' },
+      { '@type': 'HowToTool', name: 'Soldering iron, flush cutters, and multimeter (V3.0 build)' },
     ],
   },
 ];
@@ -54,26 +54,23 @@ const jsonLd = [
 
 <MarketingLayout
   title="Building Instructions"
-  description="Build DIY-Thermocam V4 with zero soldering (screwdriver-only factory PCBA in 3-4 vendor orders) or follow the verified 45-step V3.0 through-hole assembly guide."
+  description="Assemble DIY-Thermocam V4 with a Phillips screwdriver or follow the proven 45-step V3.0 soldering guide."
   canonicalPath="/building-instructions/"
   jsonLd={jsonLd}
 >
   <section class="page-wrap">
     <header class="page-head">
       <h1>Building instructions</h1>
-      <p>
-        Choose the zero-solder <strong>DIY-Thermocam V4</strong> screwdriver-only kit (prototype-pending) or follow the verified 45-step <strong>V3.0</strong> through-hole assembly manual. Single-sourced directly from <code>docs/building-instructions.md</code>.
-      </p>
 
-      <nav class="jump-bar" aria-label="Jump to build track">
+      <nav class="jump-bar" aria-label="Build tracks">
         <a href="#option-a-diy-thermocam-v4-zero-solder-screwdriver-only-prototype-pending" class="jump-primary">
-          V4 Zero-Solder Guide (3 Steps)
+          V4 Zero-Solder (3 steps)
         </a>
         <a href="#option-b-classic-diy-thermocam-v3-0-45-step-through-hole-guide-verified-baseline" class="jump-secondary">
-          Classic V3.0 Soldering Guide (45 Steps)
+          Classic V3.0 (45 steps)
         </a>
         <a href="/docs/partlist/" class="jump-secondary">
-          Interactive BOM &amp; Prices
+          Interactive BOM
         </a>
       </nav>
     </header>
@@ -86,11 +83,11 @@ const jsonLd = [
   .page-wrap {
     max-width: var(--tc-container);
     margin: 0 auto;
-    padding: 48px 24px 20px;
+    padding: 56px 28px 24px;
   }
   .page-head {
-    max-width: 72ch;
-    margin-bottom: 32px;
+    max-width: 68ch;
+    margin-bottom: 40px;
   }
   .page-head h1 {
     margin: 0;
@@ -102,16 +99,8 @@ const jsonLd = [
     font-size: 1.05rem;
     color: var(--tc-text-muted);
   }
-  .page-head code {
-    font-family: var(--tc-font-mono);
-    font-size: 0.88em;
-    padding: 2px 6px;
-    border-radius: 5px;
-    background: var(--tc-surface-2);
-    color: var(--tc-text);
-  }
   .jump-bar {
-    margin-top: 22px;
+    margin-top: 24px;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -121,9 +110,9 @@ const jsonLd = [
     display: inline-flex;
     align-items: center;
     height: 38px;
-    padding: 0 15px;
-    border-radius: 8px;
-    font-size: 13.5px;
+    padding: 0 16px;
+    border-radius: 7px;
+    font-size: 14px;
     font-weight: 600;
     text-decoration: none;
   }
@@ -133,8 +122,11 @@ const jsonLd = [
   }
   .jump-secondary {
     border: 1px solid var(--tc-border-strong);
-    background: var(--tc-surface);
+    background: transparent;
     color: var(--tc-text);
+  }
+  .jump-secondary:hover {
+    background: var(--tc-surface-2);
   }
   .guide-content :global(table) {
     width: 100%;

@@ -140,21 +140,23 @@ const { currentPath } = Astro.props;
   }
   .tc-nav-link {
     padding: 6px 11px;
-    border-radius: 7px;
+    border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
     color: var(--tc-text-muted);
     text-decoration: none;
-    transition: background 140ms var(--tc-ease), color 140ms var(--tc-ease);
+    transition: color 140ms var(--tc-ease);
   }
   .tc-nav-link:hover {
-    background: var(--tc-surface-2);
     color: var(--tc-text);
   }
   .tc-nav-link.active {
-    background: var(--tc-thermal-soft);
-    color: var(--tc-thermal);
+    color: var(--tc-text);
     font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--tc-thermal);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
   }
   .tc-hdr-actions {
     display: flex;

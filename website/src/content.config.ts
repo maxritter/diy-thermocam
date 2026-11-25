@@ -56,7 +56,7 @@ const REPO_DOCS: RepoDocSpec[] = [
     description:
       'Communicating with DIY-Thermocam V3 over USB CDC ACM using binary Protocol v2.0 (replacing legacy single-byte v1 serial).',
     preamble:
-      '> **Protocol v2 Migration Note:** Firmware 3.1+ replaces the legacy v1 single-byte serial protocol with **USB Protocol v2.0** (full-duplex little-endian binary framing, CRC-8/CRC-32 integrity, push streaming, and direct SD card access without MTP). This page stays live at `/docs/serial/` for existing bookmarks and mirrors the authoritative [USB Protocol v2.0 Specification](/docs/protocol-v2/) directly from `docs/protocol-v2.md`.\n\n',
+      '> **Protocol v2 Note:** Firmware 4.0 uses **USB Protocol v2.0** (little-endian binary framing, CRC-8/CRC-32 checks, push streaming, and direct SD access without MTP). This page stays live at `/docs/serial/` for existing links and mirrors [USB Protocol v2.0](/docs/protocol-v2/).\n\n',
   },
   {
     id: 'docs/desktop-app',

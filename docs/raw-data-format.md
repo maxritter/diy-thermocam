@@ -1,24 +1,24 @@
 # Raw Data Format (`.DAT`)
 
-Every still image and video / time-lapse frame saved by DIY-Thermocam stores full 14-bit radiometric sensor data in a binary `.DAT` file. The layout is **100% compatible across DIY-Thermocam V1, V2, and V3** as well as the 2026 Desktop App and legacy Windows tools (`ThermoVision`, `Thermal Data Viewer`).
+Every still image and video or time-lapse frame saved by DIY-Thermocam stores 14-bit radiometric sensor data in a binary `.DAT` file. The layout stays 100% compatible across V1, V2, V3, and V4 cameras, Desktop Studio, and legacy Windows tools (`ThermoVision`, `Thermal Data Viewer`).
 
 Reference firmware writer: [`firmware/src/thermal/save.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/thermal/save.cpp).
 
 ## Valid File Sizes
 
-Identify the sensor geometry and optional temperature-point block directly from total file length:
+Identify the sensor geometry and optional temperature-point block directly from file length:
 
 | Sensor | Resolution | Without Temp Points | With 96 Temp Points (`+384 B`) |
-|---|---|---:|---:|
+| --- | --- | ---: | ---: |
 | **FLIR Lepton 2.x** (`2.5`) | `80 × 60` (`4,800` px) | `9,621` bytes | `10,005` bytes |
 | **FLIR Lepton 3.x** (`3.1R` / `3.5`) | `160 × 120` (`19,200` px) | `38,421` bytes | `38,805` bytes |
 
 ## Binary Field Layout
 
 | Offset (Lepton 3.x) | Offset (Lepton 2.x) | Size (B) | Endianness / Type | Field | Description |
-|---:|---:|---:|---|---|---|
+| ---: | ---: | ---: | --- | --- | --- |
 | `0` | `0` | `38,400` / `9,600` | Big-endian `u16[]` | **Lepton raw values** | 14-bit radiometric pixel counts (`0..16383`), row-major `(0,0)` to `(W-1,H-1)`, MSB first then LSB. |
-| `38,400` | `9,600` | `2` | Big-endian `u16` | **Min raw value** | Minimum raw count mapped to the bottom of the color scale (fixed when in Manual range mode). |
+| `38,400` | `9,600` | `2` | Big-endian `u16` | **Min raw value** | Minimum raw count mapped to the bottom of the color scale (fixed in Manual range mode). |
 | `38,402` | `9,602` | `2` | Big-endian `u16` | **Max raw value** | Maximum raw count mapped to the top of the color scale. |
 | `38,404` | `9,604` | `4` | Little-endian `f32` | **Spot temperature** | Center spot temperature in °C or °F (matches `temp_format`). IEEE 754 float, LSB first. |
 | `38,408` | `9,608` | `1` | `u8` | **Color scheme** | Palette index (`0..18`, see table below). |
@@ -32,20 +32,20 @@ Identify the sensor geometry and optional temperature-point block directly from 
 
 ## Raw-to-Temperature Conversion
 
-Convert any 14-bit raw pixel value to absolute temperature with the stored calibration slope and offset:
+Convert any 14-bit raw pixel value to absolute temperature using the stored calibration slope and offset:
 
 ```text
 absTemp = rawValue * calibrationSlope + calibrationOffset
 ```
 
-On radiometric FLIR Lepton 2.5 / 3.5 sensors in TLinear high-gain mode, typical values are `calibrationSlope = 0.01` K/count and `calibrationOffset = -273.15` °C (so a raw count of `30000` corresponds to `26.85 °C`; note firmware scales/clamps to the active gain mode).
+On radiometric FLIR Lepton 2.5 and 3.5 sensors in TLinear high-gain mode, typical values are `calibrationSlope = 0.01` K/count and `calibrationOffset = -273.15` °C. A raw count of `30000` then equals `26.85 °C`.
 
 ## Color Scheme Indices
 
 Defined in [`firmware/include/globaldefines.h`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/include/globaldefines.h) and [`firmware/src/general/colorschemes.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/general/colorschemes.cpp):
 
 | ID | Name | ID | Name | ID | Name |
-|---:|---|---:|---|---:|---|
+| ---: | --- | ---: | --- | ---: | --- |
 | `0` | Arctic | `7` | Glowbow | `14` | Wheel 1 |
 | `1` | Black-Hot | `8` | Grayscale | `15` | Wheel 2 |
 | `2` | Blue-Red | `9` | Hottest | `16` | Wheel 3 |
@@ -56,4 +56,4 @@ Defined in [`firmware/include/globaldefines.h`](https://github.com/maxritter/diy
 
 ## Non-Destructive Sidecar Metadata (`.thermo.json`)
 
-The 2026 Desktop App preserves the `.DAT` byte layout untouched so edited captures remain readable on the camera itself. Non-destructive desktop annotations — polygonal/box/circle ROIs, per-ROI emissivity and reflected temperature overrides, isotherms, and report notes — are saved alongside the capture in `<filename>.thermo.json`.
+Desktop Studio leaves the `.DAT` byte layout untouched so edited captures stay readable on the camera itself. Desktop annotations (ROIs, per-ROI emissivity and reflected temperature overrides, isotherms, and report notes) save beside the capture in `<filename>.thermo.json`.

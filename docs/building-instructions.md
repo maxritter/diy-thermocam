@@ -1,41 +1,39 @@
 # Building Instructions
 
-You can build a DIY-Thermocam in two ways: the **V4 Zero-Solder Kit** *(prototype-pending)* where a factory-assembled PCBA and 3D-printed enclosure snap together with only a Phillips screwdriver, or the **classic V3.0 Through-Hole Build** *(verified baseline)* for traditional hand soldering.
+You can build a DIY-Thermocam in two ways. The **V4 Zero-Solder Kit** *(prototype-pending)* snaps a factory-assembled PCBA and 3D-printed shell together with a Phillips screwdriver. The **classic V3.0 Through-Hole Build** *(proven baseline)* uses traditional hand soldering.
 
 ---
 
 ## Option A: DIY-Thermocam V4 — Zero-Solder, Screwdriver-Only (Prototype-Pending)
 
-DIY-Thermocam V4 eliminates soldering irons, loose jumper wires, coin cells, and trace cutting. Every power regulator, USB-C port, charger IC (`BQ24074`), 5 V synchronous boost (`TPS61022`), 3.3 V RTC LDO (`XC6206`), active reverse-polarity MOSFET chain, slide switch, tactile shutter button, USB D+/D- pogo pins, and female header socket arrives pre-soldered from the PCB fab. You plug in off-the-shelf modules and fasten the 3D-printed shell with `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws.
+DIY-Thermocam V4 removes soldering irons, loose jumper wires, coin cells, and trace cutting. The PCB fab populates the USB-C port, charger (`BQ24074`), 5 V boost (`TPS61022`), 3.3 V RTC LDO (`XC6206`), reverse-polarity protection, switches, USB pogo pins, and female headers. You plug in the modules and close the 3D-printed shell with `4× M2.5×6` front and `4× M2.5×8` back countersunk screws.
 
-> **Prototype status:** V4 PCB (`hardware/pcb/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are `PROTOTYPE-PENDING` until physical bring-up is completed. For a field-proven build today, follow the verified V3.0 guide below.
+> **Prototype status:** V4 PCB (`hardware/pcb/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are `PROTOTYPE-PENDING` until physical bring-up is complete. For a proven build today, follow the V3.0 guide below.
 
-### Minimal Worldwide Ordering Flow (4 Orders Total)
+### Ordering Flow (4 Orders Total)
 
-1. **JLCPCB, Seeed Studio Fusion, or PCBWay — PCBA + 3D-Printed Enclosure:** Upload the V4 Gerber, BOM (31 verified LCSC SKUs), and CPL files to receive a factory-populated board (TI `BQ24074` USB-C power-path charger, TI `TPS61022` 5 V boost, `XC6206P332MR-G` 3.3 V RTC LDO, `AO3401A`/`AO3400A` active reverse-polarity protection, slide switch, capture button, pogo pins, JST-PH socket, and female sockets) plus the support-free 3D-printed shell (`front_shell`, `back_shell`, `lens_cap`, `capture_button`, `slide_switch_cap`, `battery_cradle`, `battery_lid`).
-2. **DigiKey or Mouser (one consolidated electronics order):** Teensy 4.1 **with pre-soldered pins** (plus 1×5 inner pin header for `J7`), FLIR Lepton 3.5 (`500-0771-01`) or optional wide-angle Lepton 3.1R (`500-0758-03`), FLIR Lepton Breakout Board V2.0 (`250-0577-00`), Class 10 microSD card, M2.5 standoff kit (`4× M2.5×6` front + `4× M2.5×8` back DIN 965 CSK screws), and a metal `1/4"-20` hex nut.
-3. **BuyDisplay:** `ER-TFTM032-3` 3.2" 240×320 SPI TFT touch display (ships with pre-soldered 2×20 pin header — select 4-Wire SPI, 5V, Resistive Touch, No Font Chip).
-4. **Battery supplier:** Slim **≤5.0 mm UL/IEC 62133 certified protected `505060` (5.0 × 50 × 60 mm) 3.7 V 2000 mAh LiPo** with standard Adafruit/SparkFun JST-PH polarity (always verify `+`/`-` against `J4` silkscreen).
+1. **JLCPCB, Seeed Studio Fusion, or PCBWay (PCBA + 3D Shell):** Upload the V4 Gerbers, BOM (31 verified LCSC SKUs), and CPL files for a factory-populated board. Order the 7-part support-free 3D shell (`front_shell`, `back_shell`, `lens_cap`, `capture_button`, `slide_switch_cap`, `battery_cradle`, `battery_lid`) in the same checkout or print it at home.
+2. **DigiKey or Mouser:** Order a Teensy 4.1 with pre-soldered pins (plus 1×5 inner header for `J7`), FLIR Lepton 3.5 (`500-0771-01`) or wide-angle 3.1R (`500-0758-03`), Lepton Breakout Board V2.0 (`250-0577-00`), microSD card, M2.5 standoff and screw kit, and a metal `1/4"-20` hex nut.
+3. **BuyDisplay:** Order `ER-TFTM032-3` (3.2-inch 240×320 SPI TFT touch display, 4-Wire SPI, 5V, Resistive Touch, Pin Header, No Font Chip).
+4. **Battery supplier:** Order a slim **≤5.0 mm UL/IEC 62133 protected `505060` 3.7 V 2000 mAh LiPo** with standard Adafruit/SparkFun JST-PH polarity. Always verify `+`/`-` against the `J4` silkscreen.
 
-See the interactive [Bill of Materials](/docs/partlist/) for verified links, V3-upgrade reuse options, and live cost breakdowns.
-
-![V4.0 parametric build123d 4-step mechanical assembly overview](/images/build-v4/v4-cad-assembly.png)
+See the interactive [Bill of Materials](/docs/partlist/) for verified links, V3-upgrade reuse options, and live totals.
 
 ### V4 Step 1: Unbox the factory PCBA and snap-in modules
 
-Lay out the factory-assembled V4 PCBA, Teensy 4.1 (with pre-soldered header pins), FLIR Lepton 3.5 (or 3.1R) + Breakout V2.0, BuyDisplay 3.2" TFT, slim `505060` JST-PH LiPo battery, microSD card, and a standard Phillips screwdriver. No soldering iron, coin cell, or wire stripper is needed.
+Lay out the factory-assembled V4 PCBA, pre-pinned Teensy 4.1, FLIR Lepton 3.5 or 3.1R with Breakout V2.0, and BuyDisplay 3.2" TFT. Keep the slim `505060` LiPo, microSD card, and a Phillips screwdriver ready. No soldering iron, coin cell, or wire stripper is needed.
 
 ![V4 Step 1: Factory PCBA and modular components laid out with screwdriver](/images/build-v4/v4-step-1-unbox-pcba.png)
 
 ### V4 Step 2: Plug in Teensy 4.1, Lepton, Display, and Battery
 
-Snap the FLIR Lepton 3.5 (or 3.1R) into the Breakout Board V2.0 until both clips click, then press the **Teensy 4.1**, **Lepton Breakout V2.0**, and **3.2" TFT Display** squarely into their factory-soldered sockets on the V4 PCB. Seat the slim `505060` LiPo inside the insulating `battery_cradle` + `battery_lid` between the PCB and Display, insert the microSD card, verify JST-PH polarity (`-` / `+`) against the silkscreen, and plug into `J4`.
+Snap the FLIR Lepton into Breakout Board V2.0 until both clips click. Press Teensy 4.1, Lepton Breakout V2.0, and the 3.2-inch display squarely into their sockets on the V4 PCB. Place the slim `505060` LiPo inside the insulating `battery_cradle` and `battery_lid`, insert the microSD card, verify JST-PH polarity (`+`/`-`), and plug into `J4`.
 
 ![V4 Step 2: Plugging Teensy 4.1, FLIR Lepton, 3.2-inch display, and JST-PH battery into the V4 PCBA](/images/build-v4/v4-step-2-plug-modules.png)
 
-### V4 Step 3: Close the 3D-printed enclosure with M2.5 CSK screws and flash over USB-C
+### V4 Step 3: Close the 3D-printed enclosure and flash over USB-C
 
-Slide the metal `1/4"-20` tripod hex nut into the rear shell pocket (max tripod stud `≤ 8.0 mm`), drop the guided `capture_button` plunger and `slide_switch_cap` into place, seat the electronics stack, and fasten `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws with a Phillips screwdriver. Slide on the dovetail lens cap, connect a standard USB-C cable, and flash Firmware 4.0 directly from the [DIY-Thermocam Desktop Studio](/software/).
+Slide the metal `1/4"-20` hex nut into the rear shell pocket (max tripod stud `≤ 8.0 mm`). Drop in `capture_button` and `slide_switch_cap`, seat the electronics stack, and fasten `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws. Slide on the dovetail lens cap, plug in USB-C, and flash Firmware 4.0 from [DIY-Thermocam Desktop Studio](/software/).
 
 ![V4 Step 3: Exploded 3D-printed enclosure assembled with four screws and a Phillips screwdriver](/images/build-v4/v4-step-3-enclosure-screws.png)
 
@@ -206,7 +204,7 @@ Feed four **M2×18 screws** up through the four Lepton mounting holes in the PCB
 
 ### 23. Apply the battery insulating pad
 
-Hold the M2 screws in place while flipping the PCB over. Trim the **double-sided insulating mounting pad** slightly larger than the battery footprint, peel one liner, and stick it to the PCB backside without covering the two marked mounting holes.
+Hold the M2 screws in place while flipping the PCB over. Trim the **double-sided insulating mounting pad** slightly larger than the battery footprint, peel one liner, and stick it to the PCB backside. Keep the two marked mounting holes clear.
 
 ![Step 23: Applying the LiPo insulating pad on PCB backside](/images/manual/25.jpg)
 
@@ -236,7 +234,7 @@ Double-check battery polarity (`+` red, `-` black) before soldering 26 AWG silic
 
 ### 28. Mount and wire the LiPo battery
 
-Peel the second liner on the insulating pad, press the **2000 mAh LiPo battery** firmly in place, and solder the red wire to `LIPO +` and black wire to `LIPO -` on the PCB backside.
+Peel the second liner on the insulating pad and press the **2000 mAh LiPo battery** firmly in place. Solder the red wire to `LIPO +` and the black wire to `LIPO -` on the PCB backside.
 
 ![Step 28: Mounting the battery and soldering LIPO leads](/images/manual/30.jpg)
 
@@ -254,7 +252,7 @@ Solder the two red switch wires horizontally to the `SWITCH` pads on the PCB (po
 
 ### 31. Install and wire the capture push button
 
-Mount the **momentary capture button** into the top enclosure panel (with the LED hole oriented toward you), secure its locking nut, solder two black 26 AWG wires to the terminals, and insulate with short pieces of **heat shrink tubing** so the terminals clear the display.
+Mount the **momentary capture button** into the top enclosure panel (with the LED hole facing you) and secure its locking nut. Solder two black 26 AWG wires to the terminals and insulate them with **heat shrink tubing** so they clear the display.
 
 ![Step 31: Mounting and insulating the capture push button](/images/manual/33.jpg)
 
@@ -338,4 +336,4 @@ If using the 3D-printed parametric enclosure, snap on the integrated lens cap. I
 
 ### 45. First power-on and next steps
 
-Your DIY-Thermocam is ready! Explore the [User Manual](/docs/manual/) to learn on-device controls, install the [Desktop App](/software/) for live PC streaming and radiometric reporting, or dig into [USB Protocol v2](/docs/protocol-v2/) to build your own integrations.
+Your DIY-Thermocam is ready. Read the [User Manual](/docs/manual/) for on-device controls, install [Desktop Studio](/software/) for live PC viewing and reports, or inspect [USB Protocol v2](/docs/protocol-v2/) to build custom tools.

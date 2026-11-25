@@ -1,12 +1,17 @@
-# DIY-Thermocam
+# DIY-Thermocam Website
 
-<img src="https://www.diy-thermocam.net/images/website/logo_text.png" width="500">
+Astro 5 + Starlight source for [www.diy-thermocam.net](https://www.diy-thermocam.net).
 
-The DIY-Thermocam V3 is an open-source thermal imager based on the FLIR Lepton LWIR sensor.
+Technical pages read directly from `../docs/` and `../hardware/bom/bom.csv` at build time.
 
-Check out the official website for more information about the project: **[www.diy-thermocam.net](https://www.diy-thermocam.net/)**
+## Local commands
 
-This repository contains the website including the building instructions, images and the device wiki. The main repository can be found **[here](https://github.com/maxritter/diy-thermocam)**
-
-<img src="https://www.diy-thermocam.net/images/device/open.jpg" width="500">
-
+```sh
+cd website
+bun install
+bun run dev       # Local dev server
+bun run lint      # Biome lint
+bun run check     # Astro + TypeScript check
+bun run build     # Static production build into dist/
+bun scripts/verify-dist.mjs
+```

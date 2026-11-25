@@ -1,23 +1,23 @@
 # Firmware
 
-The DIY-Thermocam firmware is open-source C++17 targeting the **Teensy 4.1** (ARM Cortex-M7 running at **450 MHz** default for lower enclosure heat and ~36% lower CPU power draw than 600 MHz). Source code lives in [`firmware/`](https://github.com/maxritter/diy-thermocam/tree/master/firmware).
+DIY-Thermocam firmware is open-source C++17 targeting the **Teensy 4.1**. It defaults to **450 MHz** to cut enclosure heat and lower CPU power draw by ~36% compared to 600 MHz. Source code lives in [`firmware/`](https://github.com/maxritter/diy-thermocam/tree/master/firmware).
 
 ## Flashing Prebuilt Firmware
 
-### Option 1: DIY-Thermocam Desktop App (Recommended)
+### Option 1: DIY-Thermocam Desktop Studio (Recommended)
 
-1. Connect the camera over USB and power it on.
-2. Open the **DIY-Thermocam Desktop App** and navigate to **Camera → Firmware Update**.
-3. Pick the latest GitHub Release or browse to a local `firmware.hex` file.
-4. Click **Flash** — the app verifies the SHA-256 checksum, triggers the Teensy HalfKay bootloader over USB (no case disassembly needed, even from legacy 3.0.x firmware via Teensy's 134-baud trigger), writes the image, and reconnects automatically.
+1. Connect the camera over USB and turn it on.
+2. Open **DIY-Thermocam Desktop Studio** and go to **Camera → Firmware Update**.
+3. Choose the latest GitHub Release or a local `firmware.hex` file.
+4. Click **Flash**. The app verifies SHA-256, triggers the Teensy HalfKay bootloader over USB without opening the case (including from Firmware 3.0.x via Teensy's 134-baud trigger), flashes the image, and reconnects.
 
-### Option 2: PJRC Teensy Loader (First-Time Flash on a Blank Teensy)
+### Option 2: PJRC Teensy Loader (First Flash on a Blank Teensy)
 
-1. Download the latest `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases).
-2. Download and open [Teensy Loader](https://www.pjrc.com/teensy/loader.html) (Windows, macOS, or Linux).
-3. Enable **Auto** mode (Operations → Automatic Mode — the button lights green).
+1. Download `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases).
+2. Download and open [Teensy Loader](https://www.pjrc.com/teensy/loader.html) on Windows, macOS, or Linux.
+3. Enable **Auto** mode (Operations → Automatic Mode).
 4. Open `firmware.hex` in Teensy Loader.
-5. Connect the Teensy 4.1 via USB and press the physical **Program** button on the Teensy board.
+5. Connect the Teensy 4.1 over USB and press the physical **Program** button.
 
 ![Flashing Teensy 4.1 with Teensy Loader](/images/manual/flash.png)
 
@@ -25,7 +25,7 @@ The camera reboots automatically and displays the DIY-Thermocam boot screen.
 
 ## Building from Source (`arduino-cli`)
 
-The firmware builds reproducibly on macOS, Linux, and Windows using **`arduino-cli`** and **Teensy core 1.62.0** (pinned in `firmware/sketch.yaml`). No PlatformIO installation is required.
+The firmware builds on macOS, Linux, and Windows with **`arduino-cli`** and **Teensy core 1.62.0** (pinned in `firmware/sketch.yaml`). PlatformIO is not required.
 
 ```bash
 # 1. Install arduino-cli and Teensy board support
@@ -39,13 +39,13 @@ cd firmware
 arduino-cli compile
 
 # 3. Upload to a connected camera
-arduino-cli upload -p /dev/cu.usbmodem*   # macOS (use /dev/ttyACM0 on Linux or COMx on Windows)
+arduino-cli upload -p /dev/cu.usbmodem*   # macOS (/dev/ttyACM0 on Linux, COMx on Windows)
 ```
 
-## Architecture & Performance Highlights (2026 Overhaul)
+## Architecture
 
-- **Double-buffered acquisition & DMA display:** Lepton VoSPI (`SPI1`) fills the back frame buffer while the main loop renders the front buffer to the 3.2" ILI9341 display over DMA (`SPI0`) and services USB Protocol v2 concurrently.
-- **Integer & LUT thermal pipeline:** Precomputed 256-entry RGB565 palettes (19 color schemes) and fixed-point 2× bilinear / box / Gaussian filters keep display and USB frame rates near the Lepton's full **~8.78 fps** hardware limit.
-- **Fast buffered SD storage (`SdFs`):** Supports both FAT32 microSDHC and exFAT microSDXC cards (> 32 GB) with 4–8 KB buffered `.DAT` writes (< 40 ms save target).
-- **Host-side C++17 unit tests:** Pure logic under `firmware/src/core/` (Protocol v2 framing/CRC/resync, temperature conversion, palette LUTs, Lepton packet mapping, `.DAT` serialization) runs natively on CI without hardware.
-- **Hardware regression suite:** Automated `pytest` suite under `firmware/test/` verifies real camera timing, USB protocol conformance, FFC shutter execution, settings persistence, and SD capture integrity.
+- **Double-buffered acquisition and DMA display:** Lepton VoSPI (`SPI1`) fills the back buffer while the main loop renders the front buffer over DMA (`SPI0`) and handles USB Protocol v2.
+- **Integer and LUT pipeline:** Precomputed 256-entry RGB565 palettes (19 color schemes) and fixed-point spatial filters sustain the Lepton's **8.77 fps** native frame rate.
+- **Buffered SD storage (`SdFs`):** Supports FAT32 microSDHC and exFAT microSDXC cards (> 32 GB) with fast buffered `.DAT` writes.
+- **Host unit tests:** Hardware-independent logic in `firmware/src/core/` (Protocol v2 framing/CRC, temperature conversion, palette LUTs, `.DAT` serialization) runs natively on CI without hardware.
+- **Hardware regression suite:** `firmware/test/` runs `pytest` against a connected camera to verify frame timing, USB protocol conformance, FFC shutter execution, settings persistence, and SD captures.

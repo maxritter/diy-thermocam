@@ -2,168 +2,104 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="website/public/images/brand/logo-dark.svg">
-  <img src="website/public/images/brand/logo-light.svg" alt="DIY-Thermocam" width="280">
+  <img src="website/public/images/brand/logo-light.svg" alt="DIY-Thermocam" width="240">
 </picture>
 
 <br>
 
-**Build your own radiometric thermal imager — open KiCad hardware, Teensy 4.1 firmware, and a cross-platform Desktop Studio.**<br>
-160×120 LWIR radiometric imaging (-10 °C to +450 °C, < 50 mK NETD) on FLIR Lepton 3.5 or wide-angle 3.1R.
-
-<a href="https://github.com/maxritter/diy-thermocam/releases"><img src="https://img.shields.io/github/v/release/maxritter/diy-thermocam?sort=semver&amp;style=for-the-badge&amp;label=release&amp;color=ea6d20&amp;labelColor=24292f" alt="Latest release"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2076c5?style=for-the-badge&amp;labelColor=24292f" alt="GPL-3.0 license"></a>
-<a href="https://www.diy-thermocam.net"><img src="https://img.shields.io/badge/website-diy--thermocam.net-2076c5?style=for-the-badge&amp;labelColor=24292f" alt="Official website"></a>
-<a href="https://github.com/maxritter/diy-thermocam"><img src="https://img.shields.io/github/stars/maxritter/diy-thermocam?style=for-the-badge&amp;color=9d6607&amp;labelColor=24292f" alt="GitHub stars"></a>
+**Build your own open-source radiometric thermal camera.**<br>
+160×120 long-wave infrared (-10 °C to +450 °C, &lt; 50 mK NETD) on FLIR Lepton 3.5 or 3.1R and Teensy 4.1.
 
 <p>
-  <a href="#hardware-v30-vs-v40">Build V4</a> ·
-  <a href="#desktop-studio">Desktop Studio</a> ·
-  <a href="#firmware-40-benchmarks">Firmware 4.0</a> ·
+  <a href="docs/building-instructions.md">Build</a> ·
+  <a href="app/">App</a> ·
+  <a href="firmware/">Firmware</a> ·
   <a href="docs/">Docs</a> ·
-  <a href="https://www.diy-thermocam.net">Website</a> ·
-  <a href="https://github.com/maxritter/diy-thermocam/releases">Releases</a>
+  <a href="https://www.diy-thermocam.net">Website</a>
 </p>
 
-<img src="website/public/images/brand/hero-thermal-banner.png" alt="DIY-Thermocam V4.0 matte-charcoal 3D-printed enclosure with glowing 3.2-inch Ironbow PCB thermal display beside the green ENIG-gold V4.0 zero-solder PCBA" width="880">
-
-<sub>DIY-Thermocam V4.0 chamfered 3D/CNC shell and green ENIG-gold zero-solder PCBA (<code>PROTOTYPE-PENDING</code>). Proven V3.0 through-hole hardware remains buildable today.</sub>
+<img src="website/public/images/brand/hero-thermal-banner.png" alt="DIY-Thermocam V4 thermal camera showing front touchscreen and rear FLIR Lepton lens" width="840">
 
 </div>
 
 ---
 
-## What ships in this monorepo
+## What it is
 
-DIY-Thermocam is a complete open-source thermal camera platform: native KiCad 10 PCBs, parametric `build123d` enclosures, single-source BOM, Teensy 4.1 C++17 firmware with binary USB Protocol v2, a cross-platform Tauri v2 + Rust Desktop Studio, and the official documentation site. Every radiometric `.DAT` file remains 100% compatible across V1, V2, V3, and V4.
+DIY-Thermocam is an open-source hardware and software thermal imager licensed under GPL-3.0. It pairs a radiometric FLIR Lepton sensor and Teensy 4.1 with a 3.2-inch touchscreen, open KiCad schematics, parametric enclosures, and a cross-platform desktop app.
 
-| Subsystem | Path | What you get |
-| --- | --- | --- |
-| **Firmware 4.0** | [`firmware/`](firmware/) | Teensy 4.1 C++17 firmware (`arduino-cli`, Teensy core 1.62.0), binary USB Protocol v2, double-buffered VoSPI, direct SD access, host unit tests, and virtual camera simulator |
-| **Desktop Studio** | [`app/`](app/) | Cross-platform Tauri v2 + Rust + React 19 + WebGL2 app for macOS, Windows, and Linux (`Standard \| Pro` modes, H.264 MP4, 16-bit Kelvin TIFF, SD browser, HalfKay updater) |
-| **KiCad 10 PCB** | [`hardware/pcb/`](hardware/pcb/) | Zero-solder V4.0 KiCad 10 PCBA with Gerbers, BOMs, CPLs, and 3D STEP exports (legacy V3.0 Eagle baseline preserved at git tag `3.0.4`) |
-| **Parametric CAD** | [`hardware/enclosure/`](hardware/enclosure/) | `build123d` support-free 3D/CNC shells (`STEP`, `STL`, `3MF`) and improved 3 mm laser acrylic (`SVG`, `DXF`) clearing both Lepton 3.5 (71° DFOV) and Lepton 3.1R (119° DFOV) |
-| **Bill of Materials** | [`hardware/bom/`](hardware/bom/) | Single-source [`bom.csv`](hardware/bom/bom.csv) synced 1:1 with all 31 verified V4.0 LCSC SKUs, schema validator, and interactive cost calculator |
-| **Documentation & Site** | [`docs/`](docs/) · [`website/`](website/) | Single-source manuals, USB Protocol v2 & `.DAT` specs, and Astro 5 + Starlight website for [www.diy-thermocam.net](https://www.diy-thermocam.net) |
+Every radiometric `.DAT` file stays byte-compatible across V1, V2, V3, and V4 cameras.
 
----
+| Revision | Status | Assembly | Power &amp; USB | Est. BOM (incl. Lepton 3.5) |
+| --- | --- | --- | --- | --- |
+| **V3.0 Classic** | Proven default (tag `3.0.4`) | Hand-soldered through-hole PCB | Micro-USB, TP4056, Pololu 5 V boost, CR1220 | ~$367 (~$195 excl. sensor) |
+| **V4.0 Zero-Solder** | `PROTOTYPE-PENDING` | Factory PCBA + Phillips screwdriver | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$333 (~$161 excl. sensor) |
 
-<h2 id="firmware-40-benchmarks">Firmware 4.0 benchmarks (verified on real V3 hardware)</h2>
+> **Prototype status:** V4.0 (`hardware/pcb/` and `hardware/enclosure/exports/3d-v4.0/`) is `PROTOTYPE-PENDING` until physical hardware bring-up is complete. Use V3.0 (tag `3.0.4`) for a proven build today.
 
-Measured end-to-end on physical Teensy 4.1 + FLIR Lepton 3.5 hardware comparing release `3.0.4` against `4.0.0`:
+## Highlights
 
-| Metric | Firmware 3.0.4 | Firmware 4.0.0 | Improvement |
-| --- | --- | --- | --- |
-| **USB live streaming rate** | ~4–6 fps (polling v1 serial) | **8.77 fps** (full Lepton push rate) | Full native sensor throughput |
-| **USB command median latency** | ~15–40 ms | **0.26 ms** | > 50× faster control round-trip |
-| **Direct microSD read speed** | MTP reboot required | **9.20 MB/s** over USB Protocol v2 | Live SD browsing without rebooting |
-| **Video playback rendering** | Visible frame flicker | **Zero-flicker DMA double-buffer** | Smooth on-device review |
-| **Compiler health (`arduino-cli`)** | Legacy PlatformIO | **0 errors, 0 warnings** (Teensy 1.62.0) | Deterministic CI builds + host tests |
+- **Standalone touchscreen camera:** 3.2-inch display, 19 color palettes, auto or manual range, up to 96 temperature spots, and 4–6 hours on a 2000 mAh LiPo.
+- **Firmware 4.0 on Teensy 4.1:** Verified on real V3 hardware at **8.77 fps** USB streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads ([Protocol v2](docs/protocol-v2.md)).
+- **Cross-platform Desktop Studio:** Native Tauri v2 + Rust + WebGL2 app for macOS, Windows, and Linux. Offers Standard and Pro modes, ROI emissivity, MP4 and 16-bit TIFF export, SD browsing, and HalfKay updates.
 
-<div align="center">
-  <img src="website/public/images/thermal/real-v3-1080p-capture.png" alt="Real 1920x1080 radiometric thermal capture taken with DIY-Thermocam V3 showing a warm laptop lid in Ironbow palette with center 29.3 °C spot meter and 19.5–32.0 °C scale bar" width="760">
-  <br>
-  <sub>Authentic 1920×1080 radiometric capture exported directly from real DIY-Thermocam V3 hardware running Firmware 4.0.0.</sub>
-</div>
+## Quick start
 
----
-
-<h2 id="desktop-studio">Desktop Studio (macOS, Windows &amp; Linux)</h2>
-
-DIY-Thermocam Studio replaces the fragmented legacy Windows utilities and Python scripts with one native **Tauri v2 + Rust + WebGL2** application:
-
-- **Standard | Pro workspace modes:** Stay uncluttered in **Standard** mode for live streaming, palette switching, auto/manual range, and one-click captures. Switch to **Pro** mode for 1×1/3×3 spot meters, Box/Circle/Polygon ROIs, per-ROI emissivity and reflected temperature correction, bidirectional Line Profiles, isotherms, 256-bin histograms, Time Plotter curves, and TempSwitch threshold alarms.
-- **Zero-FFmpeg exports:** Export H.264 MP4 (bundled OpenH264), animated GIF, high-DPI PNG/JPEG with scale bars, temperature CSV, 16-bit Kelvin TIFF, lossless `.DAT` sequences, and HTML/PDF/Markdown inspection reports.
-- **Direct SD browser & HalfKay flasher:** Download and manage microSD captures at **9.20 MB/s** over USB Protocol v2 without MTP drivers, and flash signed Teensy 4.1 `.hex` firmware updates directly from the app.
-
-<div align="center">
-  <img src="website/public/images/software/thermal_analysis_sw_2.png" alt="Radiometric thermal analysis workspace displaying a thermal frame with Ironbow scale bar and temperature readouts" width="760">
-</div>
-
----
-
-<h2 id="hardware-v30-vs-v40">Hardware: V3.0 Classic vs. V4.0 Zero-Solder</h2>
-
-> **Prototype Gate:** **V4.0 (`hardware/pcb/` and `hardware/enclosure/exports/3d-v4.0/`) is strictly `PROTOTYPE-PENDING`** until a physical board and enclosure are manufactured, assembled, and verified by Max. **V3.0 (preserved at git tag `3.0.4`) remains the proven default buildable board today.**
-
-| Feature | V3.0 Classic (Proven Default) | V4.0 Zero-Solder (`PROTOTYPE-PENDING`) |
-| --- | --- | --- |
-| **Assembly effort** | Through-hole hand soldering + Teensy `VUSB–VIN` trace cut | **Zero soldering** — factory PCBA + Phillips screwdriver (`4× M2.5×6` front, `4× M2.5×8` back CSK) |
-| **USB & charging** | Teensy micro-USB + external TP4056 module (no power-path) | Board-edge **USB-C** + **TI `BQ24074RGTR`** dynamic power-path (`4.4 V VSYS`, `890 mA` charge) + ESD (`USBLC6`) |
-| **5 V boost & RTC** | Pololu `U3V16F5` module + CR1220 coin cell & holder | Onboard **TI `TPS61022RWUR`** (`5.10 V`) + **`XC6206P332MR-G`** `1 µA` 3.3 V RTC LDO (no coin cell) |
-| **Battery & safety** | Protected 2000 mAh LiPo (`103450`/`60367`) | Slim `≤ 5.0 mm` UL/IEC 62133 **`505060`** 2000 mAh LiPo + **`AO3401A`/`AO3400A`** reverse-polarity interlock + 2 A PTC |
-| **Controls & sockets** | Wired NKK power switch, RAFI capture button, hand-soldered headers | Onboard SMD `SW1` slide switch, `SW2` tactile capture, `SW3` PROG pinhole, `P1`/`P2` USB pogo pins, factory sockets |
-| **Lepton optics** | Lepton 3.5 (57° HFOV) & Lepton 2.5 (EOL 2027) | Clears **Lepton 3.5 (71° DFOV)** AND wide-angle **Lepton 3.1R (95° HFOV / 119° DFOV)** with zero vignetting |
-| **Est. BOM total** | **~$366.51** incl. Lepton 3.5 (~$194.51 excl.) | **~$333.06** incl. Lepton 3.5 (~$161.06 excl.; 31 verified LCSC SKUs) |
-
-See the interactive [Bill of Materials](https://www.diy-thermocam.net/docs/partlist/) (including the **"Upgrading from V3"** reuse calculator) and [Building Instructions](docs/building-instructions.md).
-
-<div align="center">
-  <img src="website/public/images/build-v4/v4-cad-assembly.png" alt="DIY-Thermocam V4.0 4-step mechanical assembly diagram showing snap-in modules, battery cradle, display stack, and flush M2.5 countersunk screws" width="760">
-</div>
-
----
-
-## Local development & one-command checks
-
-Each subsystem builds and verifies independently with one command:
+**Firmware** — download a release `.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), or build from source with `arduino-cli`:
 
 ```bash
-# 1. Firmware (Teensy 4.1 via arduino-cli + Teensy core 1.62.0)
 cd firmware && arduino-cli compile
+```
 
-# 2. Firmware host unit tests & virtual camera simulator
+**Desktop App** — download an installer from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), or build locally in `app/`:
+
+```bash
+cd app && bun install && bun run build
+```
+
+**Hardware** — pick V3.0 or V4.0 in the [interactive Bill of Materials](https://www.diy-thermocam.net/docs/partlist/), then follow the [Building Instructions](docs/building-instructions.md). Already own a V3? See the [V3 → V4 prototype order list](hardware/bom/README.md#v3--v4-first-prototype-order-list-minimum-vendors).
+
+<details>
+<summary><b>Developer checks and local test commands</b></summary>
+
+```bash
+# Firmware host tests and virtual simulator
 make -C firmware/tests_host test
 make -C firmware/sim
 
-# 3. Desktop Studio (Rust + Tauri v2 + React 19)
-cd app && cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run lint && bun run typecheck && bun test && bun run build
+# Desktop app checks
+cd app && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run lint && bun test
 
-# 4. Website (Astro 5 + Starlight + link check)
+# Website build and verification
 cd website && bun run lint && bun run check && bun run build && bun scripts/verify-dist.mjs
 
-# 5. Bill of Materials validation
+# Hardware BOM, KiCad ERC/DRC, and enclosure geometry tests
 python3 hardware/bom/validate_bom.py
-
-# 6. KiCad 10 PCB ERC/DRC
 kicad-cli sch erc --severity-error --exit-code-violations hardware/pcb/diy-thermocam-v4.0.kicad_sch
 kicad-cli pcb drc --refill-zones --severity-error --exit-code-violations hardware/pcb/diy-thermocam-v4.0.kicad_pcb
-
-# 7. Parametric build123d enclosure tests (15/15 geometry & optical checks)
 cd hardware/enclosure/cad && uv run --extra dev --python 3.12 pytest
 ```
 
-<details>
-<summary><b>VS Code workspace &amp; Git pre-commit hook setup</b></summary>
-
-The repository ships ready-to-use VS Code tasks/launch configs in [`.vscode/`](.vscode/) and a fast path-filtered pre-commit hook in [`.githooks/pre-commit`](.githooks/pre-commit). Enable the hook once after cloning:
-
-```bash
-git config core.hooksPath .githooks
-```
-
-Recommended VS Code extensions are listed in [`.vscode/extensions.json`](.vscode/extensions.json). See [CONTRIBUTING.md](CONTRIBUTING.md) for full environment setup and hardware safety rules.
+Enable the local pre-commit hook with `git config core.hooksPath .githooks`. Legacy V3.0 Windows and Python tools stay archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software).
 
 </details>
 
-<details>
-<summary><b>Legacy V3.0 desktop tools</b></summary>
+## Repository
 
-The original Windows tools (`ThermoVision`, `Thermal Data Viewer`, `Video Converter`) and Python v1 `Thermal Live Viewer` remain preserved in git history at tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software) for V1/V2/V3.0 compatibility. All `.DAT` files remain 100% compatible between legacy tools and DIY-Thermocam Studio.
+| Path | Contents |
+| --- | --- |
+| [`firmware/`](firmware/) | Teensy 4.1 C++17 firmware (`arduino-cli`), host unit tests, virtual simulator, hardware test suite |
+| [`app/`](app/) | Cross-platform Tauri v2 + Rust + React 19 Desktop Studio |
+| [`hardware/pcb/`](hardware/pcb/) | Native KiCad 10 V4.0 PCB, Gerbers, BOM/CPL exports, and 3D STEP model |
+| [`hardware/enclosure/`](hardware/enclosure/) | Parametric `build123d` CAD for 3D/CNC shells and 3 mm laser-cut acrylic |
+| [`hardware/bom/`](hardware/bom/) | Single-source `bom.csv`, schema validator, and prototype order guide |
+| [`docs/`](docs/) · [`website/`](website/) | Manuals, protocol specs, and Astro + Starlight site for [www.diy-thermocam.net](https://www.diy-thermocam.net) |
 
-</details>
-
----
-
-## Acknowledgements & license
-
-- **ThermoVision** by [Joe-C](http://joe-c.de/pages/projekte/thermovision.php) — pioneer third-party Windows radiometric analysis software for DIY-Thermocam `.DAT` files.
-- **Thermal Data Viewer** — original Windows batch converter for V1/V2/V3 captures.
-- **Community 3.0b 3D Enclosure** by [helmarw/DIY-Thermocam](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) — inspired key ergonomic details of the 2026 parametric enclosure.
+## License and credits
 
 Released under the **GNU General Public License v3.0** ([LICENSE](LICENSE)).
 
-<div align="center">
+- **ThermoVision** by [Joe-C](http://joe-c.de/pages/projekte/thermovision.php) — third-party Windows radiometric viewer for `.DAT` files.
+- **Community 3.0b Enclosure** by [helmarw/DIY-Thermocam](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) — inspired ergonomic details of the 3D-printed shell.
 
-Made by [Max Ritter](https://maxritter.net) · [www.diy-thermocam.net](https://www.diy-thermocam.net) · [Changelog](CHANGELOG.md)
-
-</div>
+Created by [Max Ritter](https://maxritter.net) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
