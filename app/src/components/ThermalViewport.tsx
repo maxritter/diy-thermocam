@@ -40,6 +40,7 @@ interface ThermalViewportProps {
   showHotCold: boolean;
   showLoupe: boolean;
   showGridOverlay: boolean;
+  minimalHud?: boolean;
   gridCols: number;
   gridRows: number;
   zoom: number;
@@ -193,6 +194,7 @@ export function ThermalViewport({
   showHotCold,
   showLoupe,
   showGridOverlay,
+  minimalHud = false,
   gridCols,
   gridRows,
   zoom,
@@ -503,24 +505,33 @@ export function ThermalViewport({
         <span>
           {sensorW}×{sensorH}
         </span>
-        <span className="text-white/35">·</span>
-        <span>{backendMode}</span>
-        <span className="text-white/35">·</span>
-        <span>{pipeline.upscaler.replace("_", " ")}</span>
-        {pipeline.sharpen_amount > 0 ? (
+        {minimalHud ? (
           <>
             <span className="text-white/35">·</span>
-            <span>USM {Math.round(pipeline.sharpen_amount * 100)}%</span>
+            <span>{palette.label}</span>
           </>
-        ) : null}
-        {pipeline.histogram_eq ? (
+        ) : (
           <>
             <span className="text-white/35">·</span>
-            <span className="text-[var(--tc-accent)]">HEQ</span>
+            <span>{backendMode}</span>
+            <span className="text-white/35">·</span>
+            <span>{pipeline.upscaler.replace("_", " ")}</span>
+            {pipeline.sharpen_amount > 0 ? (
+              <>
+                <span className="text-white/35">·</span>
+                <span>USM {Math.round(pipeline.sharpen_amount * 100)}%</span>
+              </>
+            ) : null}
+            {pipeline.histogram_eq ? (
+              <>
+                <span className="text-white/35">·</span>
+                <span className="text-[var(--tc-accent)]">HEQ</span>
+              </>
+            ) : null}
+            <span className="text-white/35">·</span>
+            <span>ε={rad.emissivity.toFixed(2)}</span>
           </>
-        ) : null}
-        <span className="text-white/35">·</span>
-        <span>ε={rad.emissivity.toFixed(2)}</span>
+        )}
       </div>
 
       {/* Main 4:3 thermal stage */}

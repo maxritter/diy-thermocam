@@ -24,6 +24,7 @@ interface ColorbarHistogramProps {
   rad: RadiometryParams;
   unit: TempUnit;
   isotherm: IsothermConfig;
+  showHistogram?: boolean;
   onRangeChange: (minRaw: number, maxRaw: number) => void;
   onToggleAutoScale: (auto: boolean) => void;
 }
@@ -37,6 +38,7 @@ export function ColorbarHistogram({
   rad,
   unit,
   isotherm,
+  showHistogram = true,
   onRangeChange,
   onToggleAutoScale,
 }: ColorbarHistogramProps): React.JSX.Element {
@@ -151,33 +153,35 @@ export function ColorbarHistogram({
         </div>
       </div>
 
-      {/* Live 256-bin Histogram */}
-      <div className="flex flex-col gap-1 border-t border-[var(--tc-line)] pt-2">
-        <div className="flex items-center justify-between text-[10px] text-[var(--tc-text-dim)]">
-          <span>HISTOGRAM</span>
-          <span className="font-mono-tech">
-            {isotherm.mode !== "off" ? `ISO:${isotherm.mode.slice(0, 3).toUpperCase()}` : "256b"}
-          </span>
+      {/* Live 256-bin Histogram (Pro mode) */}
+      {showHistogram ? (
+        <div className="flex flex-col gap-1 border-t border-[var(--tc-line)] pt-2">
+          <div className="flex items-center justify-between text-[10px] text-[var(--tc-text-dim)]">
+            <span>HISTOGRAM</span>
+            <span className="font-mono-tech">
+              {isotherm.mode !== "off" ? `ISO:${isotherm.mode.slice(0, 3).toUpperCase()}` : "256b"}
+            </span>
+          </div>
+          <svg viewBox="0 0 128 42" className="h-[44px] w-full rounded bg-[var(--tc-surface-2)]">
+            {HIST_BUCKETS.map((b) => {
+              const sum =
+                bins[b.offset] + bins[b.offset + 1] + bins[b.offset + 2] + bins[b.offset + 3];
+              const h = Math.max(1, (sum / (maxBin * 4)) * 38);
+              return (
+                <rect
+                  key={b.id}
+                  x={b.x}
+                  y={42 - h}
+                  width={1.6}
+                  height={h}
+                  fill="var(--tc-accent)"
+                  opacity={0.85}
+                />
+              );
+            })}
+          </svg>
         </div>
-        <svg viewBox="0 0 128 42" className="h-[44px] w-full rounded bg-[var(--tc-surface-2)]">
-          {HIST_BUCKETS.map((b) => {
-            const sum =
-              bins[b.offset] + bins[b.offset + 1] + bins[b.offset + 2] + bins[b.offset + 3];
-            const h = Math.max(1, (sum / (maxBin * 4)) * 38);
-            return (
-              <rect
-                key={b.id}
-                x={b.x}
-                y={42 - h}
-                width={1.6}
-                height={h}
-                fill="var(--tc-accent)"
-                opacity={0.85}
-              />
-            );
-          })}
-        </svg>
-      </div>
+      ) : null}
     </div>
   );
 }

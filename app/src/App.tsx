@@ -11,6 +11,7 @@ import {
   HardDrive,
   Image,
   LineChart,
+  Lock,
   Minus,
   Moon,
   MousePointer2,
@@ -24,7 +25,9 @@ import {
   Square,
   Sun,
   Triangle,
+  Unlock,
   Usb,
+  Zap,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -41,7 +44,7 @@ import { SdBrowserPanel } from "@/components/panels/SdBrowserPanel";
 import { UpdaterPanel } from "@/components/panels/UpdaterPanel";
 import { ThermalViewport } from "@/components/ThermalViewport";
 import { backend } from "@/lib/backend";
-import { DEFAULT_MATERIALS, DEFAULT_PALETTES } from "@/lib/palettes";
+import { DEFAULT_MATERIALS, DEFAULT_PALETTES, paletteGradientCss } from "@/lib/palettes";
 import {
   evaluateRoi,
   formatTemp,
@@ -132,22 +135,102 @@ const INITIAL_ALARMS: TempSwitchRule[] = [
   },
 ];
 
+type WorkspaceTier = "standard" | "pro";
+
+const WORKSPACE_STORAGE_KEY = "thermocam.workspace";
+const STANDARD_MODES: StudioMode[] = ["live", "sd", "editor"];
+
 const NAV_ITEMS: {
   id: StudioMode;
   label: string;
+  proLabel: string;
+  title: string;
+  standardVisible: boolean;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { id: "live", label: "Live View", icon: Radio },
-  { id: "measurements", label: "Measurements", icon: LineChart },
-  { id: "alarms", label: "Alarms", icon: BellRing },
-  { id: "export", label: "Export & Video", icon: Camera },
-  { id: "sd", label: "SD Card", icon: HardDrive },
-  { id: "editor", label: "Editor", icon: Image },
-  { id: "control", label: "Control", icon: Activity },
-  { id: "updater", label: "Updater", icon: Cpu },
+  {
+    id: "live",
+    label: "Live View",
+    proLabel: "Live",
+    title: "Live Thermal View",
+    standardVisible: true,
+    icon: Radio,
+  },
+  {
+    id: "measurements",
+    label: "Measurements",
+    proLabel: "Measure",
+    title: "Measurements, Line Profile & Time Plotter",
+    standardVisible: false,
+    icon: LineChart,
+  },
+  {
+    id: "alarms",
+    label: "Alarms",
+    proLabel: "Alarms",
+    title: "TempSwitch Threshold Alarms",
+    standardVisible: false,
+    icon: BellRing,
+  },
+  {
+    id: "export",
+    label: "Export & Video",
+    proLabel: "Export",
+    title: "Capture, Time-Lapse & Full-HD/4K Export",
+    standardVisible: false,
+    icon: Camera,
+  },
+  {
+    id: "sd",
+    label: "SD Card",
+    proLabel: "SD Card",
+    title: "Camera microSD Gallery",
+    standardVisible: true,
+    icon: HardDrive,
+  },
+  {
+    id: "editor",
+    label: "Editor",
+    proLabel: "Editor",
+    title: "Radiometric .DAT Editor & Sidecar",
+    standardVisible: true,
+    icon: Image,
+  },
+  {
+    id: "control",
+    label: "Control",
+    proLabel: "Control",
+    title: "Camera Control & SPI Telemetry",
+    standardVisible: false,
+    icon: Activity,
+  },
+  {
+    id: "updater",
+    label: "Updater",
+    proLabel: "Updater",
+    title: "In-App Teensy Firmware Updater",
+    standardVisible: false,
+    icon: Cpu,
+  },
 ];
 
 export function App(): React.JSX.Element {
+  const [workspace, setWorkspace] = useState<WorkspaceTier>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("workspace");
+    if (q === "standard" || q === "pro") return q;
+    const m = params.get("mode") as StudioMode | null;
+    if (m && !STANDARD_MODES.includes(m) && NAV_ITEMS.some((i) => i.id === m)) return "pro";
+    try {
+      const saved = window.localStorage.getItem(WORKSPACE_STORAGE_KEY);
+      if (saved === "standard" || saved === "pro") return saved;
+    } catch {
+      // Ignore storage restrictions in headless/private contexts
+    }
+    return "standard";
+  });
+  const isPro = workspace === "pro";
+
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("theme") === "light" ? "light" : "dark";
@@ -246,6 +329,42 @@ export function App(): React.JSX.Element {
     setToast(msg);
     setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 3200);
   }, []);
+
+  const applyWorkspaceTier = useCallback(
+    (next: WorkspaceTier, announce = false) => {
+      setWorkspace(next);
+      try {
+        window.localStorage.setItem(WORKSPACE_STORAGE_KEY, next);
+      } catch {
+        // Ignore storage restrictions
+      }
+      if (next === "standard") {
+        setMode((cur) => (STANDARD_MODES.includes(cur) ? cur : "live"));
+        setUnit((cur) => (cur === "kelvin" ? "celsius" : cur));
+      }
+      if (announce) {
+        showToast(
+          next === "standard"
+            ? "Standard mode — clean everyday thermal view (Shift+P for Pro)"
+            : "Pro workbench — all engineering & measurement tools unlocked",
+        );
+      }
+    },
+    [showToast],
+  );
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === "p") {
+        e.preventDefault();
+        applyWorkspaceTier(workspace === "pro" ? "standard" : "pro", true);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [workspace, applyWorkspaceTier]);
 
   const refreshCameraTelemetry = useCallback(async () => {
     const [cfg, diag, perf, rParams] = await Promise.all([
@@ -519,15 +638,16 @@ export function App(): React.JSX.Element {
           </div>
         </div>
 
-        {/* 8-Mode Desktop Navigation */}
+        {/* Desktop Navigation (3 essential views in Standard, full 8 modes in Pro) */}
         <nav className="flex items-center gap-0.5" aria-label="Studio modes">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.filter((item) => isPro || item.standardVisible).map((item) => {
             const Icon = item.icon;
             const active = mode === item.id;
             return (
               <button
                 key={item.id}
                 type="button"
+                title={item.title}
                 onClick={() => setMode(item.id)}
                 className={`tc-btn h-[30px] gap-1.5 px-2 text-[11.5px] ${
                   active
@@ -536,8 +656,8 @@ export function App(): React.JSX.Element {
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
-                <span>{item.label}</span>
-                {item.id === "alarms" && alarmEvents.length > 0 ? (
+                <span>{isPro ? item.proLabel : item.label}</span>
+                {isPro && item.id === "alarms" && alarmEvents.length > 0 ? (
                   <span className="rounded-full bg-[var(--tc-amber)] px-1.5 py-0 font-mono-tech text-[10px] font-semibold text-black">
                     {alarmEvents.length}
                   </span>
@@ -547,10 +667,33 @@ export function App(): React.JSX.Element {
           })}
         </nav>
 
-        {/* Connection + Unit + Theme Controls */}
+        {/* Standard | Pro + Connection + Unit + Theme Controls */}
         <div className="flex shrink-0 items-center gap-1.5">
+          {/* Standard | Pro Segmented Toggle */}
+          <fieldset
+            className="m-0 flex overflow-hidden rounded-[8px] border border-[var(--tc-border)] bg-[var(--tc-surface)] p-0"
+            aria-label="Workspace mode"
+            title="Switch Standard / Pro workspace (Shift+P)"
+          >
+            {(["standard", "pro"] as WorkspaceTier[]).map((tier) => (
+              <button
+                key={tier}
+                type="button"
+                aria-pressed={workspace === tier}
+                onClick={() => applyWorkspaceTier(tier, true)}
+                className={`h-[30px] cursor-pointer px-2.5 text-[11px] font-semibold transition-colors ${
+                  workspace === tier
+                    ? "bg-[var(--tc-accent)] text-[var(--tc-text-on-accent)]"
+                    : "text-[var(--tc-text-muted)] hover:bg-[var(--tc-surface-2)] hover:text-[var(--tc-text)]"
+                }`}
+              >
+                {tier === "standard" ? "Standard" : "Pro"}
+              </button>
+            ))}
+          </fieldset>
+
           <select
-            className="tc-select h-[30px] max-w-[152px] font-mono-tech text-[11px]"
+            className="tc-select h-[30px] max-w-[146px] font-mono-tech text-[11px]"
             value={selectedPort}
             onChange={(e) => setSelectedPort(e.target.value)}
             aria-label="Camera port"
@@ -579,7 +722,11 @@ export function App(): React.JSX.Element {
           </button>
 
           <div className="flex overflow-hidden rounded-[8px] border border-[var(--tc-border)]">
-            {(["celsius", "fahrenheit", "kelvin"] as TempUnit[]).map((u) => (
+            {(
+              (isPro
+                ? ["celsius", "fahrenheit", "kelvin"]
+                : ["celsius", "fahrenheit"]) as TempUnit[]
+            ).map((u) => (
               <button
                 key={u}
                 type="button"
@@ -612,117 +759,225 @@ export function App(): React.JSX.Element {
         {mode === "live" ? (
           <>
             <main className="flex min-w-0 flex-1 flex-col gap-2.5 overflow-hidden p-3">
-              {/* ROI & Capture Tool Ribbon */}
-              <div className="flex items-center justify-between gap-1.5 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-2 py-1.5">
-                <div className="flex items-center gap-1">
-                  {toolButtons.map((tb) => {
-                    const Icon = tb.icon;
-                    return (
-                      <button
-                        key={tb.id}
-                        type="button"
-                        onClick={() => setActiveTool(tb.id)}
-                        title={tb.title}
-                        className={`tc-btn h-[28px] gap-1 px-1.5 text-[11px] ${
-                          activeTool === tb.id ? "tc-btn-active" : ""
-                        }`}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        <span>{tb.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Top Control Bar: Essential Everyday Controls in Standard, Full ROI Ribbon in Pro */}
+              {isPro ? (
+                <div className="flex items-center justify-between gap-1.5 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-2 py-1.5">
+                  <div className="flex items-center gap-1">
+                    {toolButtons.map((tb) => {
+                      const Icon = tb.icon;
+                      return (
+                        <button
+                          key={tb.id}
+                          type="button"
+                          onClick={() => setActiveTool(tb.id)}
+                          title={tb.title}
+                          className={`tc-btn h-[28px] gap-1 px-1.5 text-[11px] ${
+                            activeTool === tb.id ? "tc-btn-active" : ""
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          <span>{tb.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowHotCold((s) => !s)}
-                    className={`tc-btn h-[28px] gap-1 px-2 text-[11px] ${showHotCold ? "tc-btn-active" : ""}`}
-                    title="Toggle Min/Max auto markers"
-                  >
-                    <Flame className="h-3.5 w-3.5" />
-                    Hot/Cold
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowLoupe((s) => !s)}
-                    className={`tc-btn h-[28px] gap-1 px-2 text-[11px] ${showLoupe ? "tc-btn-active" : ""}`}
-                    title="Toggle 7×7 zoomed pixel-grid loupe"
-                  >
-                    <Search className="h-3.5 w-3.5" />
-                    Loupe
-                  </button>
-                  <div className="mx-0.5 flex items-center gap-0.5">
+                  <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      className="tc-btn h-[28px] w-[26px] p-0"
-                      onClick={() => setZoom((z) => Math.max(0.75, Number((z - 0.25).toFixed(2))))}
-                      title="Zoom out"
+                      onClick={() => setShowHotCold((s) => !s)}
+                      className={`tc-btn h-[28px] gap-1 px-2 text-[11px] ${showHotCold ? "tc-btn-active" : ""}`}
+                      title="Toggle Min/Max auto markers"
                     >
-                      <ZoomOut className="h-3.5 w-3.5" />
+                      <Flame className="h-3.5 w-3.5" />
+                      Hot/Cold
                     </button>
-                    <span className="w-[36px] text-center font-mono-tech text-[11px] text-[var(--tc-text-muted)] tabular-nums">
-                      {Math.round(zoom * 100)}%
-                    </span>
                     <button
                       type="button"
-                      className="tc-btn h-[28px] w-[26px] p-0"
-                      onClick={() => setZoom((z) => Math.min(2.5, Number((z + 0.25).toFixed(2))))}
-                      title="Zoom in"
+                      onClick={() => setShowLoupe((s) => !s)}
+                      className={`tc-btn h-[28px] gap-1 px-2 text-[11px] ${showLoupe ? "tc-btn-active" : ""}`}
+                      title="Toggle 7×7 zoomed pixel-grid loupe"
                     >
-                      <ZoomIn className="h-3.5 w-3.5" />
+                      <Search className="h-3.5 w-3.5" />
+                      Loupe
+                    </button>
+                    <div className="mx-0.5 flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        className="tc-btn h-[28px] w-[26px] p-0"
+                        onClick={() =>
+                          setZoom((z) => Math.max(0.75, Number((z - 0.25).toFixed(2))))
+                        }
+                        title="Zoom out"
+                      >
+                        <ZoomOut className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="w-[36px] text-center font-mono-tech text-[11px] text-[var(--tc-text-muted)] tabular-nums">
+                        {Math.round(zoom * 100)}%
+                      </span>
+                      <button
+                        type="button"
+                        className="tc-btn h-[28px] w-[26px] p-0"
+                        onClick={() => setZoom((z) => Math.min(2.5, Number((z + 0.25).toFixed(2))))}
+                        title="Zoom in"
+                      >
+                        <ZoomIn className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleStream()}
+                      className="tc-btn h-[28px] gap-1 px-2 text-[11px]"
+                    >
+                      {streaming ? (
+                        <Pause className="h-3.5 w-3.5" />
+                      ) : (
+                        <Play className="h-3.5 w-3.5" />
+                      )}
+                      {streaming ? "Pause" : "Resume"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleCopyThermalImage()}
+                      className="tc-btn h-[28px] w-[28px] p-0"
+                      title="Copy thermal image (PNG) to clipboard"
+                      aria-label="Copy thermal image to clipboard"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handleExport("png", {
+                          resolution: "full_hd1080p",
+                          showColorbar: true,
+                          showHud: true,
+                          title: "Live Snapshot",
+                          notes: "",
+                        })
+                      }
+                      className="tc-btn tc-btn-primary h-[28px] gap-1 px-2 text-[11px]"
+                    >
+                      <Camera className="h-3.5 w-3.5" />
+                      Snap 1080p
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleRecording()}
+                      className={`tc-btn h-[28px] gap-1 px-2 text-[11px] ${
+                        recording ? "tc-btn-danger" : ""
+                      }`}
+                    >
+                      <CircleDot className="h-3.5 w-3.5" />
+                      {recording ? `REC (${recordedCount})` : "Rec"}
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void handleToggleStream()}
-                    className="tc-btn h-[28px] gap-1 px-2 text-[11px]"
-                  >
-                    {streaming ? (
-                      <Pause className="h-3.5 w-3.5" />
-                    ) : (
-                      <Play className="h-3.5 w-3.5" />
-                    )}
-                    {streaming ? "Pause" : "Resume"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleCopyThermalImage()}
-                    className="tc-btn h-[28px] w-[28px] p-0"
-                    title="Copy thermal image (PNG) to clipboard"
-                    aria-label="Copy thermal image to clipboard"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      void handleExport("png", {
-                        resolution: "full_hd1080p",
-                        showColorbar: true,
-                        showHud: true,
-                        title: "Live Snapshot",
-                        notes: "",
-                      })
-                    }
-                    className="tc-btn tc-btn-primary h-[28px] gap-1 px-2 text-[11px]"
-                  >
-                    <Camera className="h-3.5 w-3.5" />
-                    Snap 1080p
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleToggleRecording()}
-                    className={`tc-btn h-[28px] gap-1 px-2 text-[11px] ${
-                      recording ? "tc-btn-danger" : ""
-                    }`}
-                  >
-                    <CircleDot className="h-3.5 w-3.5" />
-                    {recording ? `REC (${recordedCount})` : "Rec"}
-                  </button>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-3 py-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="tc-section-label">Palette</span>
+                      <select
+                        value={activePalette.id}
+                        onChange={(e) => setPaletteId(e.target.value)}
+                        className="tc-select h-[30px] min-w-[155px] text-[12px]"
+                        aria-label="Thermal color palette"
+                      >
+                        {palettes.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        className="h-3.5 w-20 rounded-full border border-[var(--tc-border)]"
+                        style={{ background: paletteGradientCss(activePalette) }}
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (autoRange) setManualRange([frame.min_raw, frame.max_raw]);
+                        setAutoRange((a) => !a);
+                      }}
+                      className={`tc-btn h-[30px] px-2.5 text-[12px] ${autoRange ? "tc-btn-active" : ""}`}
+                      title="Toggle automatic or locked temperature scale"
+                    >
+                      {autoRange ? (
+                        <Unlock className="h-3.5 w-3.5" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5" />
+                      )}
+                      {autoRange ? "Auto Range" : "Range Locked"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await backend.triggerFfc(false);
+                        showToast("FFC shutter calibration complete");
+                      }}
+                      className="tc-btn h-[30px] px-2.5 text-[12px]"
+                      title="Trigger Lepton Flat-Field Correction (FFC) shutter"
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      FFC Shutter
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleStream()}
+                      className="tc-btn h-[30px] px-2.5 text-[12px]"
+                    >
+                      {streaming ? (
+                        <Pause className="h-3.5 w-3.5" />
+                      ) : (
+                        <Play className="h-3.5 w-3.5" />
+                      )}
+                      {streaming ? "Pause" : "Resume"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleCopyThermalImage()}
+                      className="tc-btn h-[30px] px-2.5 text-[12px]"
+                      title="Copy thermal image (PNG) to clipboard"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy PNG
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handleExport("png", {
+                          resolution: "full_hd1080p",
+                          showColorbar: true,
+                          showHud: true,
+                          title: "Thermal Snapshot",
+                          notes: "",
+                        })
+                      }
+                      className="tc-btn tc-btn-primary h-[30px] px-3 text-[12px]"
+                    >
+                      <Camera className="h-3.5 w-3.5" />
+                      Capture Still
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleRecording()}
+                      className={`tc-btn h-[30px] px-3 text-[12px] ${
+                        recording ? "tc-btn-danger" : ""
+                      }`}
+                    >
+                      <CircleDot className="h-3.5 w-3.5" />
+                      {recording ? `Stop (${recordedCount})` : "Record Video"}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Center Viewport + Draggable Colorbar & 256-bin Histogram */}
               <div className="flex min-h-0 flex-1 gap-2.5">
@@ -734,17 +989,19 @@ export function App(): React.JSX.Element {
                   rad={rad}
                   pipeline={pipeline}
                   unit={unit}
-                  rois={rois}
-                  selectedRoiId={selectedRoiId}
-                  activeTool={activeTool}
+                  rois={isPro ? rois : []}
+                  selectedRoiId={isPro ? selectedRoiId : null}
+                  activeTool={isPro ? activeTool : "select"}
                   showHotCold={showHotCold}
-                  showLoupe={showLoupe}
-                  showGridOverlay={showGridOverlay}
+                  showLoupe={isPro && showLoupe}
+                  showGridOverlay={isPro && showGridOverlay}
+                  minimalHud={!isPro}
                   gridCols={gridCols}
                   gridRows={gridRows}
                   zoom={zoom}
                   onSelectRoi={setSelectedRoiId}
                   onAddRoi={(r) => {
+                    if (!isPro) return;
                     setRois((prev) => [...prev, r]);
                     setSelectedRoiId(r.id);
                     setActiveTool("select");
@@ -760,6 +1017,7 @@ export function App(): React.JSX.Element {
                   rad={rad}
                   unit={unit}
                   isotherm={pipeline.isotherm}
+                  showHistogram={isPro}
                   onToggleAutoScale={(auto) => {
                     if (!auto && autoRange) setManualRange([frame.min_raw, frame.max_raw]);
                     setAutoRange(auto);
@@ -795,44 +1053,53 @@ export function App(): React.JSX.Element {
                   {hoverPixel ? (
                     <span className="border-l border-[var(--tc-line)] pl-3 text-[var(--tc-text)]">
                       CURSOR ({hoverPixel.x},{hoverPixel.y}) ={" "}
-                      {formatTemp(hoverPixel.tempC, unit, 2)} [raw {hoverPixel.raw}]
+                      {formatTemp(hoverPixel.tempC, unit, 2)}
+                      {isPro ? ` [raw ${hoverPixel.raw}]` : ""}
                     </span>
                   ) : null}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span>FPA {frame.fpa_temp_c.toFixed(1)} °C</span>
-                  <span>SEQ #{frame.frame_seq}</span>
+                  {isPro ? (
+                    <>
+                      <span>FPA {frame.fpa_temp_c.toFixed(1)} °C</span>
+                      <span>SEQ #{frame.frame_seq}</span>
+                    </>
+                  ) : (
+                    <span>Shift+P for Pro workbench</span>
+                  )}
                   <span>{hello?.fw_build_str ?? "Offline"}</span>
                   <span>BAT {frame.bat_pct}%</span>
                 </div>
               </div>
             </main>
 
-            <InspectorPanel
-              palettes={palettes}
-              activePaletteId={activePalette.id}
-              onSelectPalette={setPaletteId}
-              onImportPalette={handleImportCustomPalette}
-              materials={materials}
-              rad={rad}
-              onRadChange={setRad}
-              pipeline={pipeline}
-              onPipelineChange={setPipeline}
-              unit={unit}
-              onUnitChange={setUnit}
-              rois={rois}
-              roiStats={activeRoiStats}
-              selectedRoiId={selectedRoiId}
-              onSelectRoi={setSelectedRoiId}
-              onUpdateRoi={(updated) =>
-                setRois((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
-              }
-              onDeleteRoi={(id) => {
-                setRois((prev) => prev.filter((r) => r.id !== id));
-                if (selectedRoiId === id) setSelectedRoiId(null);
-              }}
-              onAutoScaleToRoi={handleScaleToRoi}
-            />
+            {isPro ? (
+              <InspectorPanel
+                palettes={palettes}
+                activePaletteId={activePalette.id}
+                onSelectPalette={setPaletteId}
+                onImportPalette={handleImportCustomPalette}
+                materials={materials}
+                rad={rad}
+                onRadChange={setRad}
+                pipeline={pipeline}
+                onPipelineChange={setPipeline}
+                unit={unit}
+                onUnitChange={setUnit}
+                rois={rois}
+                roiStats={activeRoiStats}
+                selectedRoiId={selectedRoiId}
+                onSelectRoi={setSelectedRoiId}
+                onUpdateRoi={(updated) =>
+                  setRois((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
+                }
+                onDeleteRoi={(id) => {
+                  setRois((prev) => prev.filter((r) => r.id !== id));
+                  if (selectedRoiId === id) setSelectedRoiId(null);
+                }}
+                onAutoScaleToRoi={handleScaleToRoi}
+              />
+            ) : null}
           </>
         ) : mode === "measurements" ? (
           <div className="min-w-0 flex-1 overflow-hidden">
@@ -955,12 +1222,13 @@ export function App(): React.JSX.Element {
                   rad={rad}
                   pipeline={pipeline}
                   unit={unit}
-                  rois={rois}
-                  selectedRoiId={selectedRoiId}
-                  activeTool={activeTool}
+                  rois={isPro ? rois : []}
+                  selectedRoiId={isPro ? selectedRoiId : null}
+                  activeTool={isPro ? activeTool : "select"}
                   showHotCold={showHotCold}
-                  showLoupe={showLoupe}
-                  showGridOverlay={showGridOverlay}
+                  showLoupe={isPro && showLoupe}
+                  showGridOverlay={isPro && showGridOverlay}
+                  minimalHud={!isPro}
                   gridCols={gridCols}
                   gridRows={gridRows}
                   zoom={zoom}
@@ -979,6 +1247,7 @@ export function App(): React.JSX.Element {
                   rad={rad}
                   unit={unit}
                   isotherm={pipeline.isotherm}
+                  showHistogram={isPro}
                   onToggleAutoScale={(auto) => {
                     if (!auto && autoRange) {
                       setManualRange([editorFrame.min_raw, editorFrame.max_raw]);
@@ -1025,31 +1294,33 @@ export function App(): React.JSX.Element {
                 />
               </div>
             </div>
-            <InspectorPanel
-              palettes={palettes}
-              activePaletteId={activePalette.id}
-              onSelectPalette={setPaletteId}
-              onImportPalette={handleImportCustomPalette}
-              materials={materials}
-              rad={rad}
-              onRadChange={setRad}
-              pipeline={pipeline}
-              onPipelineChange={setPipeline}
-              unit={unit}
-              onUnitChange={setUnit}
-              rois={rois}
-              roiStats={activeRoiStats}
-              selectedRoiId={selectedRoiId}
-              onSelectRoi={setSelectedRoiId}
-              onUpdateRoi={(updated) =>
-                setRois((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
-              }
-              onDeleteRoi={(id) => {
-                setRois((prev) => prev.filter((r) => r.id !== id));
-                if (selectedRoiId === id) setSelectedRoiId(null);
-              }}
-              onAutoScaleToRoi={handleScaleToRoi}
-            />
+            {isPro ? (
+              <InspectorPanel
+                palettes={palettes}
+                activePaletteId={activePalette.id}
+                onSelectPalette={setPaletteId}
+                onImportPalette={handleImportCustomPalette}
+                materials={materials}
+                rad={rad}
+                onRadChange={setRad}
+                pipeline={pipeline}
+                onPipelineChange={setPipeline}
+                unit={unit}
+                onUnitChange={setUnit}
+                rois={rois}
+                roiStats={activeRoiStats}
+                selectedRoiId={selectedRoiId}
+                onSelectRoi={setSelectedRoiId}
+                onUpdateRoi={(updated) =>
+                  setRois((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
+                }
+                onDeleteRoi={(id) => {
+                  setRois((prev) => prev.filter((r) => r.id !== id));
+                  if (selectedRoiId === id) setSelectedRoiId(null);
+                }}
+                onAutoScaleToRoi={handleScaleToRoi}
+              />
+            ) : null}
           </>
         ) : mode === "control" ? (
           <CameraControlPanel
