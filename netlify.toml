@@ -1,14 +1,10 @@
 # Monorepo Netlify configuration for https://www.diy-thermocam.net
-#
-# Current (Phase 2): builds the imported Gatsby 5 site in website/ (publish = "public").
-# Phase 5 switchover (Astro 5 + Starlight + Bun):
-#   command = "bun run build"
-#   publish = "dist"
+# Builds the unified Astro 5 + Starlight + Pagefind + Tailwind CSS v4 site in website/ with Bun.
 
 [build]
   base = "website"
-  command = "yarn run build"
-  publish = "public"
+  command = "bun run build"
+  publish = "dist"
   # Skip deploys when only firmware, desktop app, or unrelated hardware CAD changed.
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- website/ docs/ hardware/bom/"
 
@@ -29,6 +25,11 @@
 
 [[headers]]
   for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

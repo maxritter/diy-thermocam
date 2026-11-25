@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 36" fill="none" role="img" aria-label="DIY-Thermocam">
+  <g transform="translate(2 2)">
+    <path d="M4.5 10.5V6.5C4.5 5.395 5.395 4.5 6.5 4.5H10.5" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M21.5 4.5H25.5C26.605 4.5 27.5 5.395 27.5 6.5V10.5" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M27.5 21.5V25.5C27.5 26.605 26.605 27.5 25.5 27.5H21.5" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10.5 27.5H6.5C5.395 27.5 4.5 26.605 4.5 25.5V21.5" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="16" r="7.5" stroke="#171717" stroke-width="1.75"/>
+    <path d="M16 5.5V9.25M16 22.75V26.5M5.5 16H9.25M22.75 16H26.5" stroke="#171717" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="16" cy="16" r="4" fill="#d95f18" fill-opacity="0.22"/>
+    <circle cx="16" cy="16" r="2.25" fill="#d95f18"/>
+  </g>
+  <text x="44" y="24.5" fill="#171717" font-family="Geist, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="18.5" font-weight="650" letter-spacing="-0.03em">DIY-Thermocam</text>
+</svg>

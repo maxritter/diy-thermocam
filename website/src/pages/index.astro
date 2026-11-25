@@ -1,0 +1,617 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import { computeBomTotals, loadBomItems } from '../lib/bom';
+import { SITE } from '../lib/site';
+
+const bomItems = loadBomItems();
+const v30 = computeBomTotals(bomItems, 'v3.0');
+const v31 = computeBomTotals(bomItems, 'v3.1');
+
+const featuredThermal = [
+  { title: 'Microcontroller PCB', src: '/images/thermal/processor.jpg' },
+  { title: 'German Ravioli', src: '/images/thermal/pasta_squares.png' },
+  { title: 'Car Engine', src: '/images/thermal/car_engine.jpg' },
+  { title: 'House Insulation', src: '/images/thermal/houses_2.jpg' },
+  { title: 'Heater after Venting', src: '/images/thermal/heater_after.jpg' },
+  { title: 'Soldering Iron', src: '/images/thermal/soldering_iron.jpg' },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.name,
+    url: `${SITE.url}/`,
+    description: SITE.tagline,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'DIY-Thermocam V3 / V4 Open-Source Thermal Camera',
+    description:
+      'Open-source, radiometric FLIR Lepton long-wave infrared camera powered by Teensy 4.1 with KiCad hardware, parametric build123d enclosure, and cross-platform Tauri v2 desktop app.',
+    image: `${SITE.url}/images/device/inside.jpg`,
+    brand: { '@type': 'Brand', name: 'DIY-Thermocam' },
+    url: `${SITE.url}/`,
+    offers: {
+      '@type': 'Offer',
+      price: String(v30.requiredUsd),
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE.url}/docs/partlist/`,
+    },
+  },
+];
+---
+
+<MarketingLayout
+  title={SITE.name}
+  description="Build an open-source, radiometric FLIR Lepton thermal camera on Teensy 4.1. Verified V3.0 through-hole and zero-solder V4 PCBA hardware, USB Protocol v2 firmware, and a cross-platform desktop app."
+  canonicalPath="/"
+  jsonLd={jsonLd}
+>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <h1>Open-source radiometric thermal imaging</h1>
+        <p class="lead">
+          DIY-Thermocam combines a radiometric <strong>FLIR Lepton 3.5</strong> infrared sensor,
+          <strong>Teensy 4.1</strong>, open KiCad hardware, and a cross-platform desktop app under GPL-3.0.
+          Order turnkey PCBA for zero-solder assembly or hand-solder the classic V3.0 board.
+        </p>
+        <div class="cta-row">
+          <a href="/building-instructions/" class="btn-primary">Build your camera</a>
+          <a href="/docs/partlist/" class="btn-secondary">Interactive BOM (~${Math.round(v30.requiredUsd)})</a>
+          <a href="/docs/" class="btn-ghost">Read docs</a>
+        </div>
+        <dl class="spec-strip tabular">
+          <div>
+            <dt>Sensor</dt>
+            <dd>160×120 LWIR</dd>
+          </div>
+          <div>
+            <dt>Sensitivity</dt>
+            <dd>&lt; 50 mK NETD</dd>
+          </div>
+          <div>
+            <dt>Temp range</dt>
+            <dd>-10 to +450 °C</dd>
+          </div>
+          <div>
+            <dt>License</dt>
+            <dd>GPL-3.0</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="hero-visual">
+        <figure class="device-frame">
+          <img
+            src="/images/device/inside.jpg"
+            alt="Inside DIY-Thermocam V3 showing Teensy 4.1, FLIR Lepton 3.5 breakout, step-up regulator, and green 2-layer PCB"
+            width="1200"
+            height="900"
+            fetchpriority="high"
+          />
+          <figcaption>
+            <span>DIY-Thermocam V3 internal layout</span>
+            <span class="mono">89.4 × 68.4 mm · Teensy 4.1 + Lepton 3.5</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="thermal-rule" aria-hidden="true"></div>
+  </section>
+
+  <!-- Two ways to build: V4 Zero-Solder vs V3.0 Verified -->
+  <section class="band band-sunken">
+    <div class="container">
+      <div class="section-head">
+        <h2>Two paths to build, one open-source platform</h2>
+        <p>
+          Every schematic, Gerber, pick-and-place file, and parametric enclosure is published in one monorepo so you can manufacture through one-stop fabs or on your own workbench.
+        </p>
+      </div>
+
+      <div class="two-col">
+        <article class="panel">
+          <div class="panel-top">
+            <h3>DIY-Thermocam V4 (Zero-Solder Kit)</h3>
+            <span class="tag tag-amber">Prototype-pending</span>
+          </div>
+          <p>
+            Designed for screwdriver-only assembly with zero soldering iron required. Order a factory-populated PCBA and 2-piece 3D shell from Seeed Studio Fusion or JLCPCB, then snap in Teensy 4.1 (with pins), Lepton 3.5, display, and JST-PH LiPo.
+          </p>
+          <ul class="clean-list">
+            <li>Onboard USB-C + TI BQ24075 power-path charger + 5 V boost</li>
+            <li>Onboard slide power switch, tactile capture button, and SMD CR1220</li>
+            <li>3–4 worldwide vendor orders total; captive hex-nut 3D enclosure</li>
+          </ul>
+          <a href="/building-instructions/#diy-thermocam-v4-zero-solder-screwdriver-only-build-prototype-pending" class="text-link">
+            See V4 zero-solder assembly &rarr;
+          </a>
+        </article>
+
+        <article class="panel">
+          <div class="panel-top">
+            <h3>DIY-Thermocam V3.0 (Classic Through-Hole)</h3>
+            <span class="tag tag-pass">Verified baseline</span>
+          </div>
+          <p>
+            The proven hand-solderable baseline built by makers, schools, and labs worldwide. Uses a 2-layer through-hole PCB, Pololu U3V16F5 regulator, and 6-plate 3 mm laser-cut acrylic or 3D-printed shell.
+          </p>
+          <ul class="clean-list">
+            <li>1:1 KiCad 9/10 port verified against original V3.0 Gerbers</li>
+            <li>Complete 45-step illustrated assembly guide with real photos</li>
+            <li>~${v30.requiredUsd.toFixed(0)} full BOM incl. Lepton 3.5 (~${v31.requiredUsd.toFixed(0)} for V3.1 PCBA)</li>
+          </ul>
+          <a href="/docs/partlist/" class="text-link">
+            Compare V3.0 &amp; V3.1 in the interactive BOM &rarr;
+          </a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hardware, Firmware, Desktop App architecture -->
+  <section class="band">
+    <div class="container">
+      <div class="split-feature">
+        <div class="split-text">
+          <h2>Standalone 3.2" touchscreen camera</h2>
+          <p>
+            Capture full 14-bit radiometric <code>.DAT</code> frames and time-lapse sequences anywhere with 4–6 hours of LiPo battery life. Switch between 19 built-in color palettes, lock manual temperature ranges, highlight hot or cold thresholds, and drop up to 96 measurement points right on screen.
+          </p>
+          <p>
+            Open-source C++17 firmware builds cleanly with <code>arduino-cli</code> and Teensy core 1.62.0, using double-buffered Lepton VoSPI acquisition, DMA display transfers, and exFAT/FAT32 microSD storage.
+          </p>
+          <div class="link-row">
+            <a href="/device-features/" class="text-link">Full specifications &amp; FLIR E6 comparison &rarr;</a>
+            <a href="/docs/firmware/" class="text-link">Firmware guide &rarr;</a>
+          </div>
+        </div>
+        <div class="split-media">
+          <img
+            src="/images/device/gui.png"
+            alt="DIY-Thermocam 3.2 inch touchscreen menu screens showing Rainbow palette, temperature limits, and filter controls"
+            loading="lazy"
+          />
+        </div>
+      </div>
+
+      <div class="split-feature split-reverse">
+        <div class="split-text">
+          <h2>Cross-platform desktop app &amp; USB Protocol v2</h2>
+          <p>
+            Connect to macOS, Windows, or Linux over USB High-Speed for 60 fps WebGL2 live view, draggable range bars, and per-ROI emissivity corrections. Export directly to H.264 MP4, 16-bit Kelvin TIFF, or inspection reports without FFmpeg.
+          </p>
+          <p>
+            Binary <strong>USB Protocol v2</strong> replaces legacy blocking serial and MTP prompts with CRC-verified packets, direct microSD browsing, hardware shutter triggers, and built-in HalfKay firmware updates.
+          </p>
+          <div class="link-row">
+            <a href="/software/" class="text-link">Explore desktop software &rarr;</a>
+            <a href="/docs/protocol-v2/" class="text-link">Read USB Protocol v2 spec &rarr;</a>
+          </div>
+        </div>
+        <div class="split-media">
+          <img
+            src="/images/software/thermal_analysis_sw_2.png"
+            alt="Radiometric thermal analysis desktop workspace inspecting a thermal image with color scale and temperature readouts"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Authentic thermal captures -->
+  <section class="band band-sunken">
+    <div class="container">
+      <div class="section-head section-head-row">
+        <div>
+          <h2>Captured with DIY-Thermocam</h2>
+          <p>Real radiometric frames from building inspections, PCB debugging, HVAC balancing, and fieldwork.</p>
+        </div>
+        <a href="/thermal-images/" class="btn-secondary">View all 25 captures</a>
+      </div>
+
+      <div class="thermal-grid">
+        {featuredThermal.map((item) => (
+          <a href="/thermal-images/" class="thermal-tile">
+            <img src={item.src} alt={item.title} loading="lazy" />
+            <span>{item.title}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Editorial thermal banner CTA -->
+  <section class="band">
+    <div class="container">
+      <div class="cta-banner">
+        <img
+          src="/images/brand/hero-thermal-banner.png"
+          alt=""
+          aria-hidden="true"
+          class="cta-banner-bg"
+          loading="lazy"
+        />
+        <div class="cta-banner-scrim" aria-hidden="true"></div>
+        <div class="cta-banner-body">
+          <h2>Everything in one open-source repository</h2>
+          <p>
+            Browse the single-source documentation, inspect the KiCad PCB and parametric CAD files, or check live BOM pricing before placing your parts order.
+          </p>
+          <div class="cta-row">
+            <a href="/docs/" class="btn-primary">Open documentation</a>
+            <a href={SITE.repoUrl} target="_blank" rel="noopener noreferrer" class="btn-light">
+              View on GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</MarketingLayout>
+
+<style>
+  .container {
+    max-width: var(--tc-container);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .hero {
+    background: var(--tc-bg);
+  }
+  .hero-grid {
+    padding: 56px 24px 60px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 44px;
+    align-items: center;
+  }
+  .hero-copy h1 {
+    margin: 0;
+    font-size: clamp(2.35rem, 4.4vw, 3.5rem);
+    line-height: 1.05;
+    font-weight: 650;
+    letter-spacing: -0.036em;
+  }
+  .lead {
+    margin: 20px 0 0;
+    font-size: 1.08rem;
+    line-height: 1.6;
+    color: var(--tc-text-muted);
+    max-width: 54ch;
+  }
+  .lead strong {
+    color: var(--tc-text);
+    font-weight: 600;
+  }
+  .cta-row {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-light {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 140ms var(--tc-ease), border-color 140ms var(--tc-ease);
+  }
+  .btn-primary {
+    background: var(--tc-thermal);
+    color: var(--tc-text-on-thermal);
+    border: 1px solid var(--tc-thermal);
+  }
+  .btn-primary:hover {
+    background: var(--tc-thermal-hover);
+    border-color: var(--tc-thermal-hover);
+  }
+  .btn-secondary {
+    background: var(--tc-surface);
+    color: var(--tc-text);
+    border: 1px solid var(--tc-border-strong);
+  }
+  .btn-secondary:hover {
+    background: var(--tc-surface-2);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--tc-text-muted);
+    border: 1px solid var(--tc-border);
+  }
+  .btn-ghost:hover {
+    color: var(--tc-text);
+    background: var(--tc-surface-2);
+  }
+  .btn-light {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+  }
+  .btn-light:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .spec-strip {
+    margin: 34px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--tc-border);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .spec-strip dt {
+    font-size: 12px;
+    color: var(--tc-text-dim);
+  }
+  .spec-strip dd {
+    margin: 3px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tc-text);
+    font-family: var(--tc-font-mono);
+  }
+  .device-frame {
+    margin: 0;
+    border: 1px solid var(--tc-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--tc-surface);
+    box-shadow: var(--tc-shadow-window);
+  }
+  .device-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .device-frame figcaption {
+    padding: 11px 16px;
+    border-top: 1px solid var(--tc-border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--tc-text-muted);
+    background: var(--tc-bg-sunken);
+  }
+  .mono {
+    font-family: var(--tc-font-mono);
+    font-size: 12px;
+    color: var(--tc-text-dim);
+  }
+  .band {
+    padding: 68px 0;
+  }
+  .band-sunken {
+    background: var(--tc-bg-sunken);
+    border-top: 1px solid var(--tc-border);
+    border-bottom: 1px solid var(--tc-border);
+  }
+  .section-head {
+    max-width: 66ch;
+    margin-bottom: 32px;
+  }
+  .section-head-row {
+    max-width: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: clamp(1.65rem, 2.8vw, 2.2rem);
+    font-weight: 650;
+  }
+  .section-head p {
+    margin: 10px 0 0;
+    color: var(--tc-text-muted);
+    font-size: 1rem;
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .panel {
+    padding: 26px;
+    border: 1px solid var(--tc-border);
+    border-radius: 12px;
+    background: var(--tc-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .panel-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .panel h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 650;
+  }
+  .panel p {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--tc-text-muted);
+  }
+  .tag {
+    font-family: var(--tc-font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+  .tag-pass {
+    background: var(--tc-pass-soft);
+    color: var(--tc-pass);
+    border: 1px solid var(--tc-pass-line);
+  }
+  .tag-amber {
+    background: var(--tc-amber-soft);
+    color: var(--tc-amber);
+    border: 1px solid var(--tc-amber-line);
+  }
+  .clean-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14px;
+    color: var(--tc-text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .text-link {
+    margin-top: auto;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tc-accent);
+    text-decoration: none;
+  }
+  .text-link:hover {
+    text-decoration: underline;
+  }
+  .split-feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 44px;
+    align-items: center;
+  }
+  .split-feature + .split-feature {
+    margin-top: 68px;
+    padding-top: 68px;
+    border-top: 1px solid var(--tc-border);
+  }
+  .split-reverse .split-media {
+    order: -1;
+  }
+  .split-text h2 {
+    margin: 0 0 14px;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 650;
+  }
+  .split-text p {
+    margin: 0 0 14px;
+    color: var(--tc-text-muted);
+  }
+  .split-text code {
+    font-family: var(--tc-font-mono);
+    font-size: 0.88em;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background: var(--tc-surface-2);
+    color: var(--tc-text);
+  }
+  .link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 18px;
+  }
+  .split-media img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    border: 1px solid var(--tc-border);
+  }
+  .thermal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .thermal-tile {
+    border: 1px solid var(--tc-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--tc-surface);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .thermal-tile img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+  }
+  .thermal-tile span {
+    padding: 10px 14px;
+    font-size: 13.5px;
+    font-weight: 550;
+    color: var(--tc-text);
+  }
+  .cta-banner {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--tc-border);
+    background: #0b0e13;
+    color: #ffffff;
+  }
+  .cta-banner-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.52;
+  }
+  .cta-banner-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(10, 12, 16, 0.92) 0%, rgba(10, 12, 16, 0.65) 60%, rgba(10, 12, 16, 0.35) 100%);
+  }
+  .cta-banner-body {
+    position: relative;
+    z-index: 2;
+    padding: 48px 44px;
+    max-width: 620px;
+  }
+  .cta-banner-body h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(1.65rem, 2.8vw, 2.2rem);
+    font-weight: 650;
+  }
+  .cta-banner-body p {
+    margin: 12px 0 0;
+    color: #d0d6e0;
+    font-size: 1rem;
+  }
+  @media (max-width: 900px) {
+    .hero-grid,
+    .two-col,
+    .split-feature,
+    .thermal-grid {
+      grid-template-columns: 1fr;
+    }
+    .split-reverse .split-media {
+      order: 0;
+    }
+    .spec-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cta-banner-body {
+      padding: 32px 24px;
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import GalleryGrid, { type GalleryItem } from '../components/GalleryGrid.tsx';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import { buildBreadcrumbs } from '../lib/site';
+
+const devicePhotos: GalleryItem[] = [
+  {
+    title: 'Front View',
+    caption: '3.2-inch 320×240 resistive touchscreen mounted on a standard 1/4"-20 tripod.',
+    image: '/images/device/front.jpg',
+  },
+  {
+    title: 'Internal Electronics',
+    caption: 'Teensy 4.1, FLIR Lepton 3.5 on Breakout V2.0, Pololu 5 V boost, and CR1220 RTC holder.',
+    image: '/images/device/inside.jpg',
+  },
+  {
+    title: 'Back View',
+    caption: 'Centered FLIR Lepton LWIR aperture on the matte grey 3 mm laser-cut acrylic backplate.',
+    image: '/images/device/back.jpg',
+  },
+  {
+    title: 'Left Side',
+    caption: 'Side enclosure finger joints and hardware clearance profile.',
+    image: '/images/device/left.jpg',
+  },
+  {
+    title: 'Rear Open',
+    caption: 'Direct access to the Teensy Program button, microSD slot, and FLIR Lepton socket.',
+    image: '/images/device/open.jpg',
+  },
+  {
+    title: 'Right Side',
+    caption: 'Side-mounted rocker power switch and top momentary capture button.',
+    image: '/images/device/right.jpg',
+  },
+];
+
+const jsonLd = buildBreadcrumbs([
+  { name: 'Home', path: '/' },
+  { name: 'Device Images', path: '/device-images/' },
+]);
+---
+
+<MarketingLayout
+  title="Device Images"
+  description="High-resolution photographs of the assembled DIY-Thermocam V3 hardware, internal PCB layout, FLIR Lepton 3.5 sensor, and laser-cut enclosure."
+  canonicalPath="/device-images/"
+  jsonLd={jsonLd}
+>
+  <section class="page-wrap">
+    <header class="page-head">
+      <h1>Device images</h1>
+      <p>
+        Photographs of the assembled DIY-Thermocam V3 from every angle, including the internal Teensy 4.1 and FLIR Lepton 3.5 hardware stack. Click any photo to inspect full size.
+      </p>
+    </header>
+
+    <GalleryGrid client:load items={devicePhotos} aspect="4/3" />
+  </section>
+</MarketingLayout>
+
+<style>
+  .page-wrap {
+    max-width: var(--tc-container);
+    margin: 0 auto;
+    padding: 48px 24px 20px;
+  }
+  .page-head {
+    max-width: 66ch;
+    margin-bottom: 32px;
+  }
+  .page-head h1 {
+    margin: 0;
+    font-size: clamp(2rem, 3.6vw, 2.75rem);
+    font-weight: 650;
+  }
+  .page-head p {
+    margin: 12px 0 0;
+    font-size: 1.05rem;
+    color: var(--tc-text-muted);
+  }
+</style>

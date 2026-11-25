@@ -1,0 +1,109 @@
+/* DIY-Thermocam 2026 Design Tokens — shared across marketing site, Starlight /docs/, and Desktop App.
+   Flat neutral surfaces, Geist / Geist Mono, hairline borders, and calibrated thermal accents. */
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/geist-mono-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --tc-font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --tc-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tc-bg: #ffffff;
+  --tc-bg-sunken: #fafafa;
+  --tc-surface: #ffffff;
+  --tc-surface-2: #f3f3f4;
+  --tc-surface-3: #e8e9ec;
+  --tc-border: #e5e6e9;
+  --tc-border-strong: #b4b7be;
+
+  --tc-text: #141518;
+  --tc-text-muted: #4b4e57;
+  --tc-text-dim: #666a75;
+
+  /* Calibrated Ironbow Thermal Orange (WCAG AA >= 5.3:1 on #fff and with #fff ink) */
+  --tc-thermal: #b8470c;
+  --tc-thermal-hover: #9a3a08;
+  --tc-thermal-soft: rgb(184 71 12 / 9%);
+  --tc-thermal-line: rgb(184 71 12 / 30%);
+  --tc-text-on-thermal: #ffffff;
+
+  /* Precision instrument blue for technical links and docs navigation */
+  --tc-accent: #1d6ab5;
+  --tc-accent-hover: #165592;
+  --tc-accent-soft: rgb(29 106 181 / 8%);
+  --tc-accent-line: rgb(29 106 181 / 32%);
+  --tc-text-on-accent: #ffffff;
+
+  /* Semantic states (BOM & hardware status) */
+  --tc-pass: #1b7246;
+  --tc-pass-soft: rgb(27 114 70 / 10%);
+  --tc-pass-line: rgb(27 114 70 / 32%);
+  --tc-amber: #925c05;
+  --tc-amber-soft: rgb(247 178 59 / 14%);
+  --tc-amber-line: rgb(157 102 7 / 34%);
+  --tc-danger: #c6282e;
+  --tc-danger-soft: rgb(198 40 46 / 9%);
+  --tc-danger-line: rgb(198 40 46 / 30%);
+
+  --tc-shadow-sm: 0 1px 2px rgb(0 0 0 / 5%);
+  --tc-shadow-window: 0 16px 44px rgb(0 0 0 / 10%);
+  --tc-radius-sm: 6px;
+  --tc-radius-md: 10px;
+  --tc-radius-lg: 14px;
+  --tc-container: 1200px;
+  --tc-nav-h: 64px;
+  --tc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --tc-bg: #0a0c10;
+  --tc-bg-sunken: #050608;
+  --tc-surface: #10131a;
+  --tc-surface-2: #171b24;
+  --tc-surface-3: #202633;
+  --tc-border: #252b38;
+  --tc-border-strong: #4a5366;
+
+  --tc-text: #ededf0;
+  --tc-text-muted: #a2a8b4;
+  --tc-text-dim: #848b99;
+
+  --tc-thermal: #f5842e;
+  --tc-thermal-hover: #ff9c4f;
+  --tc-thermal-soft: rgb(245 132 46 / 12%);
+  --tc-thermal-line: rgb(245 132 46 / 35%);
+  --tc-text-on-thermal: #120903;
+
+  --tc-accent: #5da3e5;
+  --tc-accent-hover: #7cb6ed;
+  --tc-accent-soft: rgb(93 163 229 / 11%);
+  --tc-accent-line: rgb(93 163 229 / 34%);
+  --tc-text-on-accent: #071422;
+
+  --tc-pass: #6fd39f;
+  --tc-pass-soft: rgb(111 211 159 / 12%);
+  --tc-pass-line: rgb(111 211 159 / 35%);
+  --tc-amber: #f7b23b;
+  --tc-amber-soft: rgb(247 178 59 / 13%);
+  --tc-amber-line: rgb(247 178 59 / 34%);
+  --tc-danger: #ff6b72;
+  --tc-danger-soft: rgb(255 107 114 / 12%);
+  --tc-danger-line: rgb(255 107 114 / 32%);
+
+  --tc-shadow-sm: 0 1px 2px rgb(0 0 0 / 28%);
+  --tc-shadow-window: 0 16px 48px rgb(0 0 0 / 42%);
+}

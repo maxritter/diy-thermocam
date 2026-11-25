@@ -1,0 +1,80 @@
+---
+import GalleryGrid, { type GalleryItem } from '../components/GalleryGrid.tsx';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import { buildBreadcrumbs } from '../lib/site';
+
+const categories = ['Buildings & HVAC', 'Electronics', 'Everyday', 'Outdoors & People'];
+
+const thermalCaptures: GalleryItem[] = [
+  { title: 'German Ravioli', image: '/images/thermal/pasta_squares.png', category: 'Everyday' },
+  { title: 'Houses in the Neighbourhood', image: '/images/thermal/houses_2.jpg', category: 'Buildings & HVAC' },
+  { title: 'Pig behind a Fence', image: '/images/thermal/pig.jpg', category: 'Outdoors & People' },
+  { title: 'Laptop', image: '/images/thermal/laptop.jpg', category: 'Electronics' },
+  { title: 'Human Body', image: '/images/thermal/body.jpg', category: 'Outdoors & People' },
+  { title: 'Soldering Iron', image: '/images/thermal/soldering_iron.jpg', category: 'Electronics' },
+  { title: 'Milk', image: '/images/thermal/milk.jpg', category: 'Everyday' },
+  { title: 'Neighbourhood and Garden', image: '/images/thermal/houses_1.jpg', category: 'Buildings & HVAC' },
+  { title: 'Window Cold Airstream', image: '/images/thermal/cold_air.jpg', category: 'Buildings & HVAC' },
+  { title: 'Heater before Venting', image: '/images/thermal/heater_before.jpg', category: 'Buildings & HVAC' },
+  { title: 'Heater after Venting', image: '/images/thermal/heater_after.jpg', category: 'Buildings & HVAC' },
+  { title: 'Washbowl', image: '/images/thermal/water_faucet.jpg', category: 'Everyday' },
+  { title: 'Fridge', image: '/images/thermal/refrigerator.jpg', category: 'Everyday' },
+  { title: 'Microcontroller', image: '/images/thermal/processor.jpg', category: 'Electronics' },
+  { title: 'Three Lamps', image: '/images/thermal/lamp.jpg', category: 'Everyday' },
+  { title: 'Car Engine', image: '/images/thermal/car_engine.jpg', category: 'Outdoors & People' },
+  { title: 'Wall Adaptor', image: '/images/thermal/wall_adaptor.jpg', category: 'Electronics' },
+  { title: 'Human Face', image: '/images/thermal/human.jpg', category: 'Outdoors & People' },
+  { title: 'House Front', image: '/images/thermal/house_front.jpg', category: 'Buildings & HVAC' },
+  { title: 'Internet Router', image: '/images/thermal/fritz_box.jpg', category: 'Electronics' },
+  { title: 'Coffee', image: '/images/thermal/coffee.jpg', category: 'Everyday' },
+  { title: 'Attic Insulation', image: '/images/thermal/attic.jpg', category: 'Buildings & HVAC' },
+  { title: 'Row Houses', image: '/images/thermal/buildings.png', category: 'Buildings & HVAC' },
+  { title: 'Central Heating #1', image: '/images/thermal/heating_1.jpg', category: 'Buildings & HVAC' },
+  { title: 'Central Heating #2', image: '/images/thermal/heating_2.jpg', category: 'Buildings & HVAC' },
+];
+
+const jsonLd = buildBreadcrumbs([
+  { name: 'Home', path: '/' },
+  { name: 'Thermal Images', path: '/thermal-images/' },
+]);
+---
+
+<MarketingLayout
+  title="Thermal Images"
+  description="Gallery of 25 real radiometric thermal images captured with DIY-Thermocam across building diagnostics, PCB electronics, HVAC, and everyday scenes."
+  canonicalPath="/thermal-images/"
+  jsonLd={jsonLd}
+>
+  <section class="page-wrap">
+    <header class="page-head">
+      <h1>Thermal image gallery</h1>
+      <p>
+        25 authentic radiometric thermal captures taken with DIY-Thermocam across building heat-loss inspections, circuit board troubleshooting, and field scenes. Filter by category or click any frame to inspect full size.
+      </p>
+    </header>
+
+    <GalleryGrid client:load items={thermalCaptures} categories={categories} aspect="4/3" />
+  </section>
+</MarketingLayout>
+
+<style>
+  .page-wrap {
+    max-width: var(--tc-container);
+    margin: 0 auto;
+    padding: 48px 24px 20px;
+  }
+  .page-head {
+    max-width: 68ch;
+    margin-bottom: 32px;
+  }
+  .page-head h1 {
+    margin: 0;
+    font-size: clamp(2rem, 3.6vw, 2.75rem);
+    font-weight: 650;
+  }
+  .page-head p {
+    margin: 12px 0 0;
+    font-size: 1.05rem;
+    color: var(--tc-text-muted);
+  }
+</style>

@@ -1,0 +1,72 @@
+---
+import { SITE } from '../lib/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-20 border-t border-border bg-bg-sunken">
+  <div class="mx-auto max-w-[1200px] px-5 py-12 md:px-8">
+    <div class="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div>
+        <a
+          href="/"
+          class="inline-flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.03em] text-text no-underline"
+        >
+          <img src="/images/brand/logo-mark.svg" alt="" width="24" height="24" class="h-6 w-6 tc-footer-mark" />
+          <span>DIY-Thermocam</span>
+        </a>
+        <p class="mt-3 max-w-xs text-[13.5px] leading-relaxed text-text-muted">
+          Open-source radiometric thermal camera platform built on FLIR Lepton, Teensy 4.1, KiCad,
+          and Rust. Licensed under GPL-3.0.
+        </p>
+      </div>
+
+      <div>
+        <div class="text-[12.5px] font-semibold text-text">Build</div>
+        <ul class="mt-3 space-y-2 text-[13.5px] text-text-muted">
+          <li><a href="/building-instructions/" class="no-underline hover:text-text">Building Instructions</a></li>
+          <li><a href="/docs/partlist/" class="no-underline hover:text-text">Bill of Materials (BOM)</a></li>
+          <li><a href="/docs/hardware/" class="no-underline hover:text-text">Hardware &amp; Enclosures</a></li>
+          <li><a href="/device-features/" class="no-underline hover:text-text">Specifications</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-[12.5px] font-semibold text-text">Software &amp; Docs</div>
+        <ul class="mt-3 space-y-2 text-[13.5px] text-text-muted">
+          <li><a href="/software/" class="no-underline hover:text-text">Desktop App</a></li>
+          <li><a href="/docs/" class="no-underline hover:text-text">Documentation Home</a></li>
+          <li><a href="/docs/firmware/" class="no-underline hover:text-text">Firmware &amp; Flashing</a></li>
+          <li><a href="/docs/protocol-v2/" class="no-underline hover:text-text">USB Protocol v2</a></li>
+          <li><a href="/docs/raw-data/" class="no-underline hover:text-text">Raw .DAT Format</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-[12.5px] font-semibold text-text">Community</div>
+        <ul class="mt-3 space-y-2 text-[13.5px] text-text-muted">
+          <li><a href={SITE.repoUrl} target="_blank" rel="noopener noreferrer" class="no-underline hover:text-text">GitHub Repository</a></li>
+          <li><a href={SITE.releasesUrl} target="_blank" rel="noopener noreferrer" class="no-underline hover:text-text">Releases</a></li>
+          <li><a href={SITE.author.youtube} target="_blank" rel="noopener noreferrer" class="no-underline hover:text-text">YouTube Walkthroughs</a></li>
+          <li><a href={SITE.author.website} target="_blank" rel="noopener noreferrer" class="no-underline hover:text-text">Max Ritter</a></li>
+          <li><a href={SITE.author.linkedin} target="_blank" rel="noopener noreferrer" class="no-underline hover:text-text">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6 text-[12.5px] text-text-dim">
+      <span>Created by Max Ritter · Open-source hardware &amp; software (GPL-3.0) · © {year}</span>
+      <div class="flex items-center gap-4">
+        <a href="/thermal-images/" class="no-underline hover:text-text">Thermal Gallery</a>
+        <a href="/device-images/" class="no-underline hover:text-text">Hardware Gallery</a>
+        <a href="/sitemap-index.xml" class="no-underline hover:text-text">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  :global([data-theme="dark"]) .tc-footer-mark {
+    filter: brightness(0) invert(0.93);
+  }
+</style>

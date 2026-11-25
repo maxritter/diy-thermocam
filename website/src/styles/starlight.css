@@ -1,0 +1,161 @@
+/* Starlight /docs/* theme overrides — inherits DIY-Thermocam palette.css for exact parity with the marketing site. */
+@import "./palette.css";
+
+:root,
+:root[data-theme="light"] {
+  --sl-font: var(--tc-font-sans);
+  --sl-font-mono: var(--tc-font-mono);
+  --sl-color-white: #141518;
+  --sl-color-gray-1: #23262e;
+  --sl-color-gray-2: #4b4e57;
+  --sl-color-gray-3: #666a75;
+  --sl-color-gray-4: #9a9fa9;
+  --sl-color-gray-5: #e5e6e9;
+  --sl-color-gray-6: #f5f6f8;
+  --sl-color-gray-7: #fafafa;
+  --sl-color-black: #ffffff;
+
+  --sl-color-bg: var(--tc-bg);
+  --sl-color-bg-nav: var(--tc-bg);
+  --sl-color-bg-sidebar: var(--tc-bg-sunken);
+  --sl-color-bg-inline-code: var(--tc-surface-2);
+  --sl-color-hairline-light: var(--tc-border);
+  --sl-color-hairline-shade: var(--tc-border);
+  --sl-color-text: var(--tc-text-muted);
+  --sl-color-text-accent: var(--tc-accent);
+
+  --sl-color-accent-low: var(--tc-accent-soft);
+  --sl-color-accent: var(--tc-accent);
+  --sl-color-accent-high: var(--tc-accent-hover);
+
+  --sl-nav-height: 64px;
+  --sl-sidebar-width: 268px;
+  --sl-content-width: 50rem;
+}
+
+:root[data-theme="dark"] {
+  --sl-color-white: #ededf0;
+  --sl-color-gray-1: #d4d7df;
+  --sl-color-gray-2: #a2a8b4;
+  --sl-color-gray-3: #848b99;
+  --sl-color-gray-4: #4a5366;
+  --sl-color-gray-5: #252b38;
+  --sl-color-gray-6: #131720;
+  --sl-color-gray-7: #0a0c10;
+  --sl-color-black: #0a0c10;
+
+  --sl-color-bg: var(--tc-bg);
+  --sl-color-bg-nav: var(--tc-bg);
+  --sl-color-bg-sidebar: var(--tc-bg-sunken);
+  --sl-color-bg-inline-code: var(--tc-surface-2);
+  --sl-color-hairline-light: var(--tc-border);
+  --sl-color-hairline-shade: var(--tc-border);
+  --sl-color-text: var(--tc-text-muted);
+  --sl-color-text-accent: var(--tc-accent);
+
+  --sl-color-accent-low: var(--tc-accent-soft);
+  --sl-color-accent: var(--tc-accent);
+  --sl-color-accent-high: var(--tc-accent-hover);
+}
+
+/* Flat crisp QualityLayer-inspired docs typography and chrome */
+header.header {
+  border-bottom: 1px solid var(--tc-border);
+  box-shadow: none;
+}
+
+.site-title {
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  color: var(--tc-text) !important;
+  gap: 0.6rem;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4,
+h1#_top {
+  color: var(--tc-text);
+  letter-spacing: -0.028em;
+  font-weight: 650;
+}
+
+.sl-markdown-content strong {
+  color: var(--tc-text);
+  font-weight: 600;
+}
+
+.sl-markdown-content table {
+  display: table;
+  width: 100%;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+
+.sl-markdown-content th {
+  background: var(--tc-bg-sunken);
+  color: var(--tc-text);
+  font-weight: 600;
+  text-align: left;
+}
+
+.sl-markdown-content td,
+.sl-markdown-content th {
+  border: 1px solid var(--tc-border);
+  padding: 0.6rem 0.75rem;
+}
+
+.sl-markdown-content img {
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+}
+
+/* Hairline callouts instead of heavy one-sided border stripes */
+.starlight-aside {
+  border: 1px solid var(--tc-border) !important;
+  border-inline-start: 1px solid var(--tc-border) !important;
+  border-radius: 10px;
+  background: var(--tc-bg-sunken);
+}
+.starlight-aside--note {
+  background: var(--tc-accent-soft);
+  border-color: var(--tc-accent-line) !important;
+}
+.starlight-aside--caution {
+  background: var(--tc-amber-soft);
+  border-color: var(--tc-amber-line) !important;
+}
+.starlight-aside--tip {
+  background: var(--tc-pass-soft);
+  border-color: var(--tc-pass-line) !important;
+}
+
+.sl-markdown-content blockquote {
+  border: 1px solid var(--tc-border);
+  border-inline-start: 1px solid var(--tc-border);
+  border-radius: 10px;
+  background: var(--tc-bg-sunken);
+  padding: 0.9rem 1.15rem;
+}
+
+/* Sidebar active row */
+.sidebar-content a[aria-current="page"] {
+  background: var(--tc-accent-soft);
+  color: var(--tc-accent);
+  font-weight: 600;
+}
+
+/* Pagination cards */
+.pagination-links a {
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+/* Wide container for interactive BOM table on /docs/partlist/ */
+.bom-shell {
+  margin-top: 1.25rem;
+  font-family: var(--tc-font-sans);
+}

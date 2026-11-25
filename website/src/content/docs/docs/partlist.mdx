@@ -1,0 +1,25 @@
+---
+title: Bill of Materials (Partlist)
+description: Single-source interactive Bill of Materials for DIY-Thermocam V3.0 (through-hole) and V3.1 (USB-C PCBA), with live USD totals and verified supplier links.
+tableOfContents: false
+editUrl: https://github.com/maxritter/diy-thermocam/edit/master/hardware/bom/bom.csv
+---
+
+import BomExplorer from '../../../components/BomExplorer.tsx';
+import { computeBomTotals, loadBomCsvRaw, loadBomItems } from '../../../lib/bom';
+
+export const bomItems = loadBomItems();
+export const bomCsvRaw = loadBomCsvRaw();
+export const v30 = computeBomTotals(bomItems, 'v3.0');
+export const v31 = computeBomTotals(bomItems, 'v3.1');
+
+This table is generated directly at build time from [`hardware/bom/bom.csv`](https://github.com/maxritter/diy-thermocam/blob/master/hardware/bom/bom.csv). Switch between the verified **V3.0 through-hole build** ({v30.requiredRows} required parts, ~${v30.requiredUsd.toFixed(2)} incl. FLIR Lepton 3.5) and the prototype **V3.1 USB-C + TI BQ24075 PCBA revision** ({v31.requiredRows} required parts, ~${v31.requiredUsd.toFixed(2)} incl. Lepton 3.5).
+
+<BomExplorer client:load items={bomItems} csvRaw={bomCsvRaw} />
+
+## Ordering & Fabrication Notes
+
+- **FLIR Lepton sensor:** Both **Lepton 3.5** (`160×120`, recommended) and **Lepton 2.5** (`80×60`, optional budget fallback, EOL notice Sept 2027) fit the **Lepton Breakout Board V2.0**. Do not substitute PureThermal USB UVC boards — they lack the 2×10 SPI header.
+- **PCB & Enclosure fabrication:** Order bare boards or V3.1 turnkey PCBA from **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay** using the Gerber, Excellon, BOM, and CPL exports in [`hardware/pcb/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb). Laser-cut 3 mm acrylic or 3D-print / CNC the shell from [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure).
+- **Display options (BuyDisplay `ER-TFTM032-3`):** Select **Pin Header 4-Wire SPI**, **5V Power Supply**, **3.2-inch Resistive Touch Panel**, and **No Font Chip**.
+- **Battery polarity:** Always verify JST-PH 2-pin polarity (`+` / `-`) against the PCB silkscreen before plugging in a LiPo cell.
