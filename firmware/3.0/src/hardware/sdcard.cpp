@@ -50,6 +50,9 @@ uint32_t getSDFreeKB() {
 
 void sdNoteBytesWritten(uint32_t bytes) {
 	uint32_t kb = (bytes + 1023u) / 1024u;
+	uint32_t clusterKB = s_sd_mounted ? static_cast<uint32_t>(sd.sectorsPerCluster() >> 1) : 1u;
+	if (clusterKB == 0u) clusterKB = 1u;
+	kb = ((kb + clusterKB - 1u) / clusterKB) * clusterKB;
 	if (s_sd_free_kb > kb) s_sd_free_kb -= kb;
 	else s_sd_free_kb = 0;
 }

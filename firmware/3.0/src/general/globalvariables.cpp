@@ -171,3 +171,5 @@ volatile bool disableSPIIRQ;
 //Non-blocking ISR edge flags
 volatile bool touchIrqFlag = false;
 volatile bool buttonIrqFlag = false;
+//Post-menu touch lockout timestamp (millis(), wraparound-safe signed diff)
+volatile uint32_t touchLockoutUntilMs = 0;

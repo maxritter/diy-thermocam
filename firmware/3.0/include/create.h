@@ -23,6 +23,7 @@ void calculatePointPos(int16_t* xpos, int16_t* ypos, uint16_t pixelIndex);
 void clearTempPoints();
 void convertColors(bool small = false);
 void createThermalImg(bool small = false);
+void createThermalImgVideo(bool saveRawNow, char* dirName, uint32_t folderFrames);
 void gaussianFilter();
 void getHotColdColors(byte* red, byte* green, byte* blue);
 void getTouchPos(uint16_t* x, uint16_t* y);

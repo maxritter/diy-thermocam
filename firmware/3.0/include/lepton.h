@@ -10,6 +10,7 @@
 
 void lepton_begin();
 void lepton_end();
+void lepton_vospiResync();
 void lepton_reset();
 bool lepton_ffc(bool message = false, bool switch_gain = false);
 void lepton_ffcMode(bool automatic);

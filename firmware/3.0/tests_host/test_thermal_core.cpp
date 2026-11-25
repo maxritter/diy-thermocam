@@ -115,6 +115,26 @@ static void test_vospi_mapping_and_crc() {
 	assert(!vospi_packet_crc_ok(pkt));
 	pkt[50] ^= 0x01;
 
+	// Verify 256-entry LUT matches bitwise CRC-16/CCITT-XMODEM across all 256 byte values
+	auto ref_crc = [](const uint8_t p[164]) -> uint16_t {
+		uint16_t c = 0;
+		for (int i = 0; i < 164; ++i) {
+			uint8_t b = p[i];
+			if (i == 0) b &= 0x0Fu;
+			else if (i == 2 || i == 3) b = 0;
+			c ^= static_cast<uint16_t>(b) << 8;
+			for (int bit = 0; bit < 8; ++bit)
+				c = (c & 0x8000u) ? static_cast<uint16_t>((c << 1) ^ 0x1021u) : static_cast<uint16_t>(c << 1);
+		}
+		return c;
+	};
+	assert(vospi_crc16(pkt) == ref_crc(pkt));
+	for (int seed = 0; seed < 4; ++seed) {
+		uint8_t p2[164];
+		for (int i = 0; i < 164; ++i) p2[i] = static_cast<uint8_t>((i * 37 + seed * 73) & 0xFF);
+		assert(vospi_crc16(p2) == ref_crc(p2));
+	}
+
 	// Verify all 8 mapping combos write in-bounds and place pixels at expected corners
 	for (int is_l3 = 0; is_l3 <= 1; ++is_l3) {
 		for (int rv = 0; rv <= 1; ++rv) {

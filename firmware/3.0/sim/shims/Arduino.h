@@ -73,6 +73,8 @@ inline int analogRead(int) { return 0; }
 inline void pinMode(int, int) {}
 inline void noInterrupts() {}
 inline void interrupts() {}
+inline void attachInterrupt(int, void (*)(), int) {}
+inline void detachInterrupt(int) {}
 inline void yield() {}
 inline char* dtostrf(double val, signed char width, unsigned char prec, char* s) {
 	std::snprintf(s, 26, "%*.*f", (int)width, (int)prec, val);

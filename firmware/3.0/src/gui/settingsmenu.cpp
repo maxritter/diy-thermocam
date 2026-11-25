@@ -42,14 +42,17 @@ void secondMenu(bool firstStart)
 {
 	drawTitle((char *)"Second", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 70, 70, (char *)"-");
-	buttons_addButton(230, 60, 70, 70, (char *)"+");
-	buttons_addButton(20, 150, 280, 70, (char *)"Back");
+	buttons_setTextFont(bigFont);
+	buttons_addButton(12, 54, 72, 76, (char *)"-");
+	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
 	drawCenterElement(second());
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -57,28 +60,20 @@ void secondMenu(bool firstStart)
 			//Minus
 			if (pressedButton == 0)
 			{
-				if (second() >= 0)
-				{
-					if (second() > 0)
-						setTime(hour(), minute(), second() - 1, day(), month(),
-								year());
-					else if (second() == 0)
-						setTime(hour(), minute(), 59, day(), month(), year());
-					drawCenterElement(second());
-				}
+				if (second() > 0)
+					setTime(hour(), minute(), second() - 1, day(), month(), year());
+				else
+					setTime(hour(), minute(), 59, day(), month(), year());
+				drawCenterElement(second());
 			}
 			//Plus
 			else if (pressedButton == 1)
 			{
-				if (second() <= 59)
-				{
-					if (second() < 59)
-						setTime(hour(), minute(), second() + 1, day(), month(),
-								year());
-					else if (second() == 59)
-						setTime(hour(), minute(), 0, day(), month(), year());
-					drawCenterElement(second());
-				}
+				if (second() < 59)
+					setTime(hour(), minute(), second() + 1, day(), month(), year());
+				else
+					setTime(hour(), minute(), 0, day(), month(), year());
+				drawCenterElement(second());
 			}
 			//Back
 			else if (pressedButton == 2)
@@ -88,6 +83,7 @@ void secondMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -96,14 +92,17 @@ void minuteMenu(bool firstStart)
 {
 	drawTitle((char *)"Minute", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 70, 70, (char *)"-");
-	buttons_addButton(230, 60, 70, 70, (char *)"+");
-	buttons_addButton(20, 150, 280, 70, (char *)"Back");
+	buttons_setTextFont(bigFont);
+	buttons_addButton(12, 54, 72, 76, (char *)"-");
+	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
 	drawCenterElement(minute());
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -111,28 +110,20 @@ void minuteMenu(bool firstStart)
 			//Minus
 			if (pressedButton == 0)
 			{
-				if (minute() >= 0)
-				{
-					if (minute() > 0)
-						setTime(hour(), minute() - 1, second(), day(), month(),
-								year());
-					else if (minute() == 0)
-						setTime(hour(), 59, second(), day(), month(), year());
-					drawCenterElement(minute());
-				}
+				if (minute() > 0)
+					setTime(hour(), minute() - 1, second(), day(), month(), year());
+				else
+					setTime(hour(), 59, second(), day(), month(), year());
+				drawCenterElement(minute());
 			}
 			//Plus
 			else if (pressedButton == 1)
 			{
-				if (minute() <= 59)
-				{
-					if (minute() < 59)
-						setTime(hour(), minute() + 1, second(), day(), month(),
-								year());
-					else if (minute() == 59)
-						setTime(hour(), 0, second(), day(), month(), year());
-					drawCenterElement(minute());
-				}
+				if (minute() < 59)
+					setTime(hour(), minute() + 1, second(), day(), month(), year());
+				else
+					setTime(hour(), 0, second(), day(), month(), year());
+				drawCenterElement(minute());
 			}
 			//Back
 			else if (pressedButton == 2)
@@ -142,6 +133,7 @@ void minuteMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -150,14 +142,17 @@ void hourMenu(bool firstStart)
 {
 	drawTitle((char *)"Hour", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 70, 70, (char *)"-");
-	buttons_addButton(230, 60, 70, 70, (char *)"+");
-	buttons_addButton(20, 150, 280, 70, (char *)"Back");
+	buttons_setTextFont(bigFont);
+	buttons_addButton(12, 54, 72, 76, (char *)"-");
+	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
 	drawCenterElement(hour());
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -165,28 +160,20 @@ void hourMenu(bool firstStart)
 			//Minus
 			if (pressedButton == 0)
 			{
-				if (hour() >= 0)
-				{
-					if (hour() > 0)
-						setTime(hour() - 1, minute(), second(), day(), month(),
-								year());
-					else if (hour() == 0)
-						setTime(23, minute(), second(), day(), month(), year());
-					drawCenterElement(hour());
-				}
+				if (hour() > 0)
+					setTime(hour() - 1, minute(), second(), day(), month(), year());
+				else
+					setTime(23, minute(), second(), day(), month(), year());
+				drawCenterElement(hour());
 			}
 			//Plus
 			else if (pressedButton == 1)
 			{
-				if (hour() <= 23)
-				{
-					if (hour() < 23)
-						setTime(hour() + 1, minute(), second(), day(), month(),
-								year());
-					else if (hour() == 23)
-						setTime(0, minute(), second(), day(), month(), year());
-					drawCenterElement(hour());
-				}
+				if (hour() < 23)
+					setTime(hour() + 1, minute(), second(), day(), month(), year());
+				else
+					setTime(0, minute(), second(), day(), month(), year());
+				drawCenterElement(hour());
 			}
 			//Back
 			else if (pressedButton == 2)
@@ -196,6 +183,7 @@ void hourMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -204,14 +192,17 @@ void dayMenu(bool firstStart)
 {
 	drawTitle((char *)"Day", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 70, 70, (char *)"-");
-	buttons_addButton(230, 60, 70, 70, (char *)"+");
-	buttons_addButton(20, 150, 280, 70, (char *)"Back");
+	buttons_setTextFont(bigFont);
+	buttons_addButton(12, 54, 72, 76, (char *)"-");
+	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
 	drawCenterElement(day());
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch press
 		if (touch_touched() == true)
 		{
@@ -219,29 +210,20 @@ void dayMenu(bool firstStart)
 			//Minus
 			if (pressedButton == 0)
 			{
-				if (day() >= 1)
-				{
-					if (day() > 1)
-						setTime(hour(), minute(), second(), day() - 1, month(),
-								year());
-					else if (day() == 1)
-						setTime(hour(), minute(), second(), 31, month(),
-								year());
-					drawCenterElement(day());
-				}
+				if (day() > 1)
+					setTime(hour(), minute(), second(), day() - 1, month(), year());
+				else
+					setTime(hour(), minute(), second(), 31, month(), year());
+				drawCenterElement(day());
 			}
 			//Plus
 			else if (pressedButton == 1)
 			{
-				if (day() <= 31)
-				{
-					if (day() < 31)
-						setTime(hour(), minute(), second(), day() + 1, month(),
-								year());
-					else if (day() == 31)
-						setTime(hour(), minute(), second(), 1, month(), year());
-					drawCenterElement(day());
-				}
+				if (day() < 31)
+					setTime(hour(), minute(), second(), day() + 1, month(), year());
+				else
+					setTime(hour(), minute(), second(), 1, month(), year());
+				drawCenterElement(day());
 			}
 			//Back
 			else if (pressedButton == 2)
@@ -251,6 +233,7 @@ void dayMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -259,14 +242,17 @@ void monthMenu(bool firstStart)
 {
 	drawTitle((char *)"Month", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 70, 70, (char *)"-");
-	buttons_addButton(230, 60, 70, 70, (char *)"+");
-	buttons_addButton(20, 150, 280, 70, (char *)"Back");
+	buttons_setTextFont(bigFont);
+	buttons_addButton(12, 54, 72, 76, (char *)"-");
+	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
 	drawCenterElement(month());
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch press
 		if (touch_touched() == true)
 		{
@@ -274,28 +260,20 @@ void monthMenu(bool firstStart)
 			//Minus
 			if (pressedButton == 0)
 			{
-				if (month() >= 1)
-				{
-					if (month() > 1)
-						setTime(hour(), minute(), second(), day(), month() - 1,
-								year());
-					else if (month() == 1)
-						setTime(hour(), minute(), second(), day(), 12, year());
-					drawCenterElement(month());
-				}
+				if (month() > 1)
+					setTime(hour(), minute(), second(), day(), month() - 1, year());
+				else
+					setTime(hour(), minute(), second(), day(), 12, year());
+				drawCenterElement(month());
 			}
 			//Plus
 			else if (pressedButton == 1)
 			{
-				if (month() <= 12)
-				{
-					if (month() < 12)
-						setTime(hour(), minute(), second(), day(), month() + 1,
-								year());
-					else if (month() == 12)
-						setTime(hour(), minute(), second(), day(), 1, year());
-					drawCenterElement(month());
-				}
+				if (month() < 12)
+					setTime(hour(), minute(), second(), day(), month() + 1, year());
+				else
+					setTime(hour(), minute(), second(), day(), 1, year());
+				drawCenterElement(month());
 			}
 			//Back
 			else if (pressedButton == 2)
@@ -305,6 +283,7 @@ void monthMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -313,14 +292,17 @@ void yearMenu(bool firstStart)
 {
 	drawTitle((char *)"Year", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 70, 70, (char *)"-");
-	buttons_addButton(230, 60, 70, 70, (char *)"+");
-	buttons_addButton(20, 150, 280, 70, (char *)"Back");
+	buttons_setTextFont(bigFont);
+	buttons_addButton(12, 54, 72, 76, (char *)"-");
+	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
 	drawCenterElement(year());
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -328,10 +310,9 @@ void yearMenu(bool firstStart)
 			//Minus
 			if (pressedButton == 0)
 			{
-				if (year() > 2021)
+				if (year() > 2020)
 				{
-					setTime(hour(), minute(), second(), day(), month(),
-							year() - 1);
+					setTime(hour(), minute(), second(), day(), month(), year() - 1);
 					drawCenterElement(year());
 				}
 			}
@@ -340,8 +321,7 @@ void yearMenu(bool firstStart)
 			{
 				if (year() < 2099)
 				{
-					setTime(hour(), minute(), second(), day(), month(),
-							year() + 1);
+					setTime(hour(), minute(), second(), day(), month(), year() + 1);
 					drawCenterElement(year());
 				}
 			}
@@ -353,31 +333,37 @@ void yearMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
 /* Calibrate the battery gauge */
 void batteryGauge()
 {
-	//Title & Background
+	//Title & 2026 Surface Card
 	drawTitle((char *)"Battery Gauge", true);
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 46, 308, 162);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(12, 46, 308, 162);
 	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(UI_BG_DARK);
-	display_print((char *)"Do you want to calibrate the", CENTER, 75);
-	display_print((char *)"battery gauge? Fully charge the", CENTER, 95);
-	display_print((char *)"battery first (LED green/blue).", CENTER, 115);
-	//Draw the buttons
+	display_setBackColor(UI_SURFACE);
+	display_print((char *)"Calibrate battery gauge now?", CENTER, 68);
+	display_setColor(UI_TEXT_MUTED);
+	display_print((char *)"Fully charge the battery first", CENTER, 102);
+	display_print((char *)"until LED turns green / blue.", CENTER, 122);
+	//Draw bezel-safe buttons (No left, Yes right)
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(165, 160, 140, 55, (char *)"Yes");
-	buttons_addButton(15, 160, 140, 55, (char *)"No");
+	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
+	buttons_addButton(12, 178, 142, 46, (char *)"No");
 	buttons_drawButtons();
 	buttons_setTextFont(smallFont);
-	;
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//If touch pressed
 		if (touch_touched() == true)
 		{
@@ -400,6 +386,7 @@ void batteryGauge()
 				break;
 			}
 		}
+		delay(5);
 	}
 
 	hardwareMenu();
@@ -410,14 +397,17 @@ void dateMenu(bool firstStart)
 {
 	drawTitle((char *)"Date", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Day");
-	buttons_addButton(170, 60, 130, 70, (char *)"Month");
-	buttons_addButton(20, 150, 130, 70, (char *)"Year");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 62, (char *)"Day");
+	buttons_addButton(166, 46, 142, 62, (char *)"Month");
+	buttons_addButton(12, 118, 142, 62, (char *)"Year");
 	if (firstStart)
-		buttons_addButton(170, 150, 130, 70, (char *)"Save");
+		buttons_addButton(166, 192, 142, 34, (char *)"Save");
 	else
-		buttons_addButton(170, 150, 130, 70, (char *)"Back");
+		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
+	if (firstStart)
+		buttons_setActive(3);
 }
 
 /* Date Menu Handler */
@@ -425,6 +415,7 @@ void dateMenuHandler(bool firstStart)
 {
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -452,6 +443,7 @@ void dateMenuHandler(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -460,14 +452,17 @@ void timeMenu(bool firstStart)
 {
 	drawTitle((char *)"Time", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Hour");
-	buttons_addButton(170, 60, 130, 70, (char *)"Minute");
-	buttons_addButton(20, 150, 130, 70, (char *)"Second");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 62, (char *)"Hour");
+	buttons_addButton(166, 46, 142, 62, (char *)"Minute");
+	buttons_addButton(12, 118, 142, 62, (char *)"Second");
 	if (firstStart)
-		buttons_addButton(170, 150, 130, 70, (char *)"Save");
+		buttons_addButton(166, 192, 142, 34, (char *)"Save");
 	else
-		buttons_addButton(170, 150, 130, 70, (char *)"Back");
+		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
+	if (firstStart)
+		buttons_setActive(3);
 }
 
 /* Time Menu Handler */
@@ -475,6 +470,7 @@ void timeMenuHandler(bool firstStart)
 {
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -502,18 +498,20 @@ void timeMenuHandler(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
 /* General Menu */
 void generalMenu()
 {
-	drawTitle((char *)"Other Settings");
+	drawTitle((char *)"General Settings");
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Time");
-	buttons_addButton(170, 60, 130, 70, (char *)"Date");
-	buttons_addButton(20, 150, 130, 70, (char *)"BMP Conversion");
-	buttons_addButton(170, 150, 130, 70, (char *)"Back");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 62, (char *)"Time");
+	buttons_addButton(166, 46, 142, 62, (char *)"Date");
+	buttons_addButton(12, 118, 296, 62, (char *)"BMP Conversion");
+	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 }
 
@@ -522,6 +520,7 @@ void generalMenuHandler()
 {
 	while (true)
 	{
+		checkSerial();
 		if (touch_touched() == true)
 		{
 			int pressedButton = buttons_checkButtons();
@@ -553,6 +552,7 @@ void generalMenuHandler()
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -561,15 +561,16 @@ void convertImageMenu(bool firstStart)
 {
 	drawTitle((char *)"BMP Conversion", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Disabled");
-	buttons_addButton(170, 60, 130, 70, (char *)"Enabled");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 72, (char *)"Disabled");
+	buttons_addButton(166, 46, 142, 72, (char *)"Enabled");
 	if (firstStart)
 	{
-		buttons_addButton(20, 150, 280, 70, (char *)"Set");
+		buttons_addButton(166, 192, 142, 34, (char *)"Set");
 		convertEnabled = false;
 	}
 	else
-		buttons_addButton(20, 150, 280, 70, (char *)"Back");
+		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 	if (!convertEnabled)
 		buttons_setActive(0);
@@ -579,11 +580,12 @@ void convertImageMenu(bool firstStart)
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
 			int pressedButton = buttons_checkButtons();
-			//Diabled
+			//Disabled
 			if (pressedButton == 0)
 			{
 				if (convertEnabled)
@@ -615,30 +617,37 @@ void convertImageMenu(bool firstStart)
 				return;
 			}
 		}
+		delay(5);
 	}
 }
 
 /* Asks the user if he really wants to format */
 void formatStorage()
 {
-	//Title & Background
-	drawTitle((char *)"Storage");
+	//Title & 2026 Surface Card
+	drawTitle((char *)"Format SD Card");
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 46, 308, 162);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(12, 46, 308, 162);
 	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(UI_BG_DARK);
-	display_print((char *)"Do you really want to format?", CENTER, 66);
-	display_print((char *)"This will delete all images", CENTER, 105);
-	display_print((char *)"and videos on the internal storage.", CENTER, 125);
-	//Draw the buttons
+	display_setBackColor(UI_SURFACE);
+	display_print((char *)"Format the SD card now?", CENTER, 68);
+	display_setColor(UI_TEXT_MUTED);
+	display_print((char *)"This deletes ALL images and", CENTER, 102);
+	display_print((char *)"videos on the internal storage.", CENTER, 122);
+	//Draw bezel-safe buttons (No left, Yes right)
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(165, 160, 140, 55, (char *)"Yes");
-	buttons_addButton(15, 160, 140, 55, (char *)"No");
+	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
+	buttons_addButton(12, 178, 142, 46, (char *)"No");
 	buttons_drawButtons();
 	buttons_setTextFont(smallFont);
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//If touch pressed
 		if (touch_touched() == true)
 		{
@@ -664,6 +673,7 @@ void formatStorage()
 				break;
 			}
 		}
+		delay(5);
 	}
 
 	hardwareMenu();
@@ -675,9 +685,9 @@ void changeLeptonGain()
 	drawTitle((char *)"Lepton Gain");
 	buttons_deleteAllButtons();
 	buttons_setTextFont(smallFont);
-	buttons_addButton(20, 60, 130, 70, (char *)"-10C - +140C");
-	buttons_addButton(170, 60, 130, 70, (char *)"-10C - +450C");
-	buttons_addButton(20, 150, 280, 70, (char *)"Save");
+	buttons_addButton(12, 46, 142, 72, (char *)"-10C to +140C");
+	buttons_addButton(166, 46, 142, 72, (char *)"-10C to +450C");
+	buttons_addButton(166, 192, 142, 34, (char *)"Save");
 	buttons_drawButtons();
 	if (leptonGainMode == lepton_gain_high)
 		buttons_setActive(0);
@@ -686,6 +696,7 @@ void changeLeptonGain()
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -733,6 +744,7 @@ void changeLeptonGain()
 				return;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -797,9 +809,10 @@ void tempFormatMenu(bool firstStart)
 {
 	drawTitle((char *)"Temp. Format", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Celcius");
-	buttons_addButton(170, 60, 130, 70, (char *)"Fahrenheit");
-	buttons_addButton(20, 150, 280, 70, (char *)"Save");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 72, (char *)"Celsius (C)");
+	buttons_addButton(166, 46, 142, 72, (char *)"Fahrenheit (F)");
+	buttons_addButton(166, 192, 142, 34, (char *)"Save");
 	if (firstStart)
 	{
 		buttons_relabelButton(2, (char *)"Set", false);
@@ -813,11 +826,12 @@ void tempFormatMenu(bool firstStart)
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
 			int pressedButton = buttons_checkButtons();
-			//Celcius
+			//Celsius
 			if (pressedButton == 0)
 			{
 				if (tempFormat == tempFormat_fahrenheit)
@@ -851,18 +865,20 @@ void tempFormatMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
 /* Rotate display menu */
 void rotateDisplayMenu(bool firstStart)
 {
-	drawTitle((char *)"Disp. rotation", firstStart);
+	drawTitle((char *)"Disp. Rotation", firstStart);
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Rotation");
-	buttons_addButton(170, 60, 130, 70, (char *)"Hor. Flip");
-	buttons_addButton(20, 150, 130, 70, (char *)"Disabled");
-	buttons_addButton(170, 150, 130, 70, (char *)"Save");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 62, (char *)"Rotate 180");
+	buttons_addButton(166, 46, 142, 62, (char *)"Hor. Flip");
+	buttons_addButton(12, 118, 142, 62, (char *)"Normal");
+	buttons_addButton(166, 192, 142, 34, (char *)"Save");
 	if (firstStart)
 		buttons_relabelButton(3, (char *)"Set", false);
 	buttons_drawButtons();
@@ -875,6 +891,7 @@ void rotateDisplayMenu(bool firstStart)
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//touch pressed
 		if (touch_touched() == true)
 		{
@@ -927,29 +944,32 @@ void rotateDisplayMenu(bool firstStart)
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 
 /* Screen timeout menu */
 void screenTimeoutMenu()
 {
-	drawTitle((char *)"Screen timeout");
+	drawTitle((char *)"Screen Timeout");
 	buttons_deleteAllButtons();
-	buttons_addButton(20, 60, 130, 70, (char *)"Disabled");
-	buttons_addButton(170, 60, 130, 70, (char *)"5 Min.");
-	buttons_addButton(20, 150, 130, 70, (char *)"20 Min.");
-	buttons_addButton(170, 150, 130, 70, (char *)"Back");
+	buttons_setTextFont(smallFont);
+	buttons_addButton(12, 46, 142, 62, (char *)"Disabled");
+	buttons_addButton(166, 46, 142, 62, (char *)"5 Min.");
+	buttons_addButton(12, 118, 142, 62, (char *)"20 Min.");
+	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
 	//Set current one active
 	buttons_setActive(screenOffTime);
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//Touch pressed
 		if (touch_touched() == true)
 		{
 			int pressedButton = buttons_checkButtons();
-			//Set to new color
+			//Set to new timeout
 			if ((pressedButton == 0) || (pressedButton == 1) || (pressedButton == 2))
 			{
 				buttons_setInactive(screenOffTime);
@@ -968,6 +988,7 @@ void screenTimeoutMenu()
 				break;
 			}
 		}
+		delay(5);
 	}
 }
 

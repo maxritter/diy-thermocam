@@ -14,7 +14,8 @@ SRCS := \
 	../src/gui/livemode.cpp \
 	../src/gui/mainmenu.cpp \
 	../src/gui/settingsmenu.cpp \
-	../src/gui/videomenu.cpp
+	../src/gui/videomenu.cpp \
+	../src/gui/loadmenu.cpp
 
 TARGET := thermocam_sim
 

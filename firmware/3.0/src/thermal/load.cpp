@@ -30,6 +30,8 @@
 #include <buttons.h>
 #include <fonts.h>
 #include <sdcard.h>
+#include <connection.h>
+#include <lepton.h>
 #include <load.h>
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
@@ -887,10 +889,7 @@ void searchFiles()
 					//Display an error message
 					showFullMessage((char *)"Maximum number of files exceeded");
 					delay(1000);
-
-					//And return to the main menu
-					mainMenu();
-					return;
+					break;
 				}
 			}
 		}
@@ -1082,8 +1081,8 @@ void loadFind(char *filename, int *pos)
 	clearData();
 	//Search files
 	searchFiles();
-	//Fill screen
-	display_fillScr(200, 200, 200);
+	//Fill screen with active 2026 theme background
+	display_fillScr(UI_BG_DARK);
 	//Let the user choose a new file
 	chooseFile(filename);
 	//Copy the filename for a compare value
@@ -1127,10 +1126,28 @@ void loadDeAlloc()
 	free(secondStorage);
 }
 
-/* Interrupt handler for the load touch menu */
+static volatile bool s_loadTouchPending = false;
+
+/* Non-blocking ISR for load menu: only latches flag (never SPI/I2C in ISR!) */
 void loadTouchIRQ()
 {
-	//Get touch coordinates
+	s_loadTouchPending = true;
+}
+
+/* Atomically consume latched load touch IRQ flag */
+bool loadTouchTakePending()
+{
+	noInterrupts();
+	bool pending = s_loadTouchPending;
+	s_loadTouchPending = false;
+	interrupts();
+	return pending;
+}
+
+/* Main-loop touch decoder for load/gallery viewer */
+void loadTouchProcess()
+{
+	//Get touch coordinates safely in main-loop context
 	TS_Point p = touch_getPoint();
 	uint16_t x = p.x;
 	uint16_t y = p.y;
@@ -1168,19 +1185,14 @@ void loadTouchIRQ()
 void loadFiles()
 {
 redraw:
-	//Title & Background
-	mainMenuBackground();
-	mainMenuTitle((char *)"Load Menu");
-	//Draw the buttons
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(15, 47, 140, 120, (char *)"Images");
-	buttons_addButton(165, 47, 140, 120, (char *)"Videos");
-	buttons_addButton(15, 188, 140, 40, (char *)"Back");
-	buttons_drawButtons();
+	//Draw modern 2026 Gallery screen
+	drawLoadMenu();
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//If touch pressed
 		if (touch_touched() == true)
 		{
@@ -1201,6 +1213,7 @@ redraw:
 			if (pressedButton == 2)
 				return;
 		}
+		delay(5);
 	}
 
 	//Store the filename
@@ -1342,6 +1355,8 @@ redraw:
 	//Refresh SD space
 	refreshFreeSpace();
 
-	//Restore old touch handler
+	//Restore old touch handler & ensure Lepton VoSPI is cleanly armed
 	attachInterrupt(pin_touch_irq, touchIRQ, FALLING);
+	disableSPIIRQ = false;
+	lepton_startFrame();
 }

@@ -18,6 +18,7 @@
 
 /*########################## PUBLIC PROCEDURES ################################*/
 
+void drawLoadMenu();
 void convertImage(char* filename);
 bool convertPrompt();
 void convertVideo(char* dirname);

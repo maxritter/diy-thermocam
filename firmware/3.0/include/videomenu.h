@@ -18,8 +18,9 @@
 
 /*########################## PUBLIC PROCEDURES ################################*/
 
+void drawVideoModeMenu();
 void drawVideoRecordingOverlay(uint32_t framesCaptured, uint32_t elapsedSec);
-void videoCaptureInterval(int16_t* remainingTime, uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName);
+void videoCaptureInterval(uint32_t* nextCaptureMs, uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName);
 void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* buffer, char* dirName);
 void videoCapture();
 bool videoIntervalChooser();

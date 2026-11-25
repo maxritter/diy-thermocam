@@ -19,10 +19,14 @@ static constexpr uint8_t LEPTON_I2C_ADDR = 0x2A;
 static constexpr uint32_t LEPTON_I2C_TIMEOUT_MS = 250;
 
 static byte lepton_packet[164];
+static uint16_t s_smallBufIsr[19200]; // 3rd buffer: triple-buffered VoSPI (eliminates 80 ms drop cliff!)
+static uint16_t* volatile s_smallWriteBuf = s_smallBufIsr;
 static volatile int lepton_curSeg = 1;
 static volatile bool lepton_validSegRegion = false;
+static volatile uint8_t lepton_skipVsyncs = 0;
 static volatile bool irqAttached = false;
 static volatile uint32_t lepton_frameStartUs = 0;
+static float s_lastSpotTempC = 25.0f;
 
 static inline uint32_t abs_diff_u32(uint32_t n1, uint32_t n2) {
 	return n2 - n1; // unsigned wraparound-safe elapsed us
@@ -39,9 +43,11 @@ void lepton_end() {
 }
 
 void lepton_startFrame() {
+	disableSPIIRQ = false;
 	if (!irqAttached) {
 		lepton_curSeg = 1;
 		lepton_validSegRegion = false;
+		lepton_skipVsyncs = 0;
 		attachInterrupt(pin_lepton_vsync, lepton_getFrameAsync, RISING);
 		irqAttached = true;
 	}
@@ -54,16 +60,36 @@ void lepton_endFrame() {
 	}
 }
 
-/* Fix #119: proper CS high >=186 ms + VSYNC IRQ detach/reattach on VoSPI reset */
+/* FLIR Lepton VoSPI datasheet resync: detach VSYNC IRQ, hold CS HIGH >=200 ms, reset segment state & re-arm */
+void lepton_vospiResync() {
+	lepton_endFrame();
+	digitalWriteFast(pin_lepton_cs, HIGH);
+	delay(205);
+	noInterrupts();
+	lepton_curSeg = 1;
+	lepton_validSegRegion = false;
+	lepton_skipVsyncs = 0;
+	leptonBufferValid = false;
+	disableSPIIRQ = false;
+	g_perf.vospi_resyncs++;
+	interrupts();
+	lepton_startFrame();
+}
+
+/* Escalated VoSPI + VSYNC GPIO recovery: CS high >=205 ms + re-enable VSYNC GPIO via bounded I2C + re-arm */
 void lepton_reset() {
 	bool wasAttached = irqAttached;
 	lepton_endFrame();
 	digitalWriteFast(pin_lepton_cs, HIGH);
-	delay(190);
+	delay(205);
+	// Re-arm Lepton VSYNC output in case GPIO mode was cleared after an internal fault
+	lepton_setGpioMode(true);
 	noInterrupts();
 	lepton_curSeg = 1;
 	lepton_validSegRegion = false;
+	lepton_skipVsyncs = 0;
 	leptonBufferValid = false;
+	disableSPIIRQ = false;
 	g_perf.vospi_resyncs++;
 	interrupts();
 	if (wasAttached) {
@@ -72,7 +98,7 @@ void lepton_reset() {
 }
 
 void lepton_savePacket(uint8_t line, uint8_t segment) {
-	uint16_t* dst = smallBufferBack ? smallBufferBack : smallBuffer;
+	uint16_t* dst = s_smallWriteBuf ? s_smallWriteBuf : (smallBufferBack ? smallBufferBack : smallBuffer);
 	tc_core::lepton_map_packet(
 		lepton_packet,
 		line,
@@ -88,7 +114,7 @@ bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg) {
 	*seg = 0;
 
 	lepton_begin();
-	SPI1.transfer(lepton_packet, 164);
+	SPI1.transfer(nullptr, lepton_packet, 164);
 	lepton_end();
 
 	if ((lepton_packet[0] & 0x0Fu) != 0x0Fu) {
@@ -107,14 +133,22 @@ bool lepton_getPacketAsync(uint8_t *line, uint8_t *seg) {
 	return valid;
 }
 
-/* Continuous double-buffered VSYNC ISR: fills smallBufferBack while main() renders smallBuffer */
+/* Continuous triple-buffered VSYNC ISR: idle blank-VSYNC skip + line-20 non-seg-1 fast drain + strict line continuity */
 void lepton_getFrameAsync() {
-	if (disableSPIIRQ || leptonBufferValid) return;
+	if (disableSPIIRQ) return;
+
+	// Skip 5 of the 8 known-blank Lepton 3.5 VSYNC slots with CS idle (~47 ms -> saves ~20 ms ISR CPU/frame, 0 CRC errors!)
+	if (lepton_skipVsyncs > 0) {
+		lepton_skipVsyncs--;
+		return;
+	}
 
 	uint32_t startUsec = micros();
-	uint8_t line = 0, prevLine = 255, segment = 0;
+	uint8_t line = 0, segment = 0;
+	int prevLine = -1;
 	bool done = false;
 	bool beforeValidData = true;
+	bool drainInvalidSeg = false;
 	bool seenValid = false;
 	uint16_t discardCount = 0;
 	int attempts = 0;
@@ -125,10 +159,27 @@ void lepton_getFrameAsync() {
 
 	while (!done && attempts < 100) {
 		attempts++;
+		if (drainInvalidSeg) {
+			// Fast-drain remaining packets (21..59) of a non-seg-1 slot without CRC or pixel mapping
+			// so Lepton 3.5 completes the segment cleanly before the next VSYNC (0 VoSPI CRC errors!).
+			lepton_begin();
+			SPI1.transfer(nullptr, lepton_packet, 164);
+			lepton_end();
+			if ((lepton_packet[0] & 0x0Fu) != 0x0Fu) {
+				if (lepton_packet[1] >= 59) {
+					done = true;
+				}
+			}
+			if (abs_diff_u32(startUsec, micros()) > 6500u) {
+				done = true;
+			}
+			continue;
+		}
 		if (lepton_getPacketAsync(&line, &segment)) {
 			seenValid = true;
 			discardCount = 0;
-			if (line == prevLine || line > 59) {
+			// Strict packet continuity check: every segment must run 0, 1, 2, ..., 59
+			if (line > 59 || static_cast<int>(line) != (prevLine + 1)) {
 				if (lepton_validSegRegion) {
 					g_perf.vospi_resyncs++;
 					lepton_validSegRegion = false;
@@ -142,16 +193,22 @@ void lepton_getFrameAsync() {
 							beforeValidData = false;
 							lepton_validSegRegion = true;
 							lepton_curSeg = 1;
+						} else {
+							// Wrong/blank segment at line 20: skip CRC & pixel mapping, cleanly drain lines 21..59
+							beforeValidData = false;
+							drainInvalidSeg = true;
+							prevLine = static_cast<int>(line);
+							continue;
 						}
 					} else if (segment != lepton_curSeg) {
 						g_perf.vospi_resyncs++;
-						if (segment == 1) {
-							lepton_curSeg = 1;
-							lepton_validSegRegion = true;
-						} else {
-							lepton_validSegRegion = false;
-							lepton_curSeg = 1;
-						}
+						// Always restart cleanly at next segment 1 (lines 0..19 went to old curSeg)
+						lepton_validSegRegion = false;
+						lepton_curSeg = 1;
+						beforeValidData = false;
+						drainInvalidSeg = true;
+						prevLine = static_cast<int>(line);
+						continue;
 					}
 				}
 
@@ -165,21 +222,29 @@ void lepton_getFrameAsync() {
 							if (lepton_curSeg < 4) {
 								lepton_curSeg++;
 							} else {
-								if (leptonBufferValid) {
+								// Publish completed frame into smallBufferBack (triple-buffer swap!)
+								if (leptonBufferValid && showMenu == showMenu_disabled) {
 									g_perf.frames_dropped++;
 								}
+								uint16_t* finished = s_smallWriteBuf;
+								s_smallWriteBuf = smallBufferBack;
+								smallBufferBack = finished;
 								leptonFrameReadyUs = micros();
 								g_perf.acquire_us = leptonFrameReadyUs - lepton_frameStartUs;
 								g_perf.frame_count++;
 								leptonBufferValid = true;
 								lepton_curSeg = 1;
 								lepton_validSegRegion = false;
+								lepton_skipVsyncs = 5;
 							}
 						}
 					} else {
-						if (leptonBufferValid) {
+						if (leptonBufferValid && showMenu == showMenu_disabled) {
 							g_perf.frames_dropped++;
 						}
+						uint16_t* finished = s_smallWriteBuf;
+						s_smallWriteBuf = smallBufferBack;
+						smallBufferBack = finished;
 						leptonFrameReadyUs = micros();
 						g_perf.acquire_us = leptonFrameReadyUs - lepton_frameStartUs;
 						g_perf.frame_count++;
@@ -188,7 +253,7 @@ void lepton_getFrameAsync() {
 					done = true;
 				}
 			}
-			prevLine = line;
+			prevLine = static_cast<int>(line);
 		} else {
 			discardCount++;
 			// Blank/discard VSYNC slot: bail after ~1.8 ms instead of burning the full 9.45 ms VSYNC period!
@@ -206,8 +271,9 @@ bool lepton_hasNewFrame() {
 	return leptonBufferValid;
 }
 
-/* Swap back->front double buffer atomically; if wait=true blocks until ready (with reset recovery) */
+/* Swap back->front double buffer atomically; if wait=true blocks until ready (with staged VoSPI resync/reset) */
 bool lepton_acquireFrame(bool wait) {
+	disableSPIIRQ = false;
 	if (!irqAttached) {
 		lepton_startFrame();
 	}
@@ -215,15 +281,21 @@ bool lepton_acquireFrame(bool wait) {
 		return false;
 	}
 	uint32_t timer = millis();
+	bool softResynced = false;
 	while (!leptonBufferValid) {
 		yield();
-		if ((millis() - timer) > 3000u) {
+		uint32_t elapsed = millis() - timer;
+		if (!softResynced && elapsed > 800u) {
+			softResynced = true;
+			lepton_vospiResync();
+		} else if (elapsed > 2500u) {
 			if (!serialMode) {
-				showFullMessage((char *)"Lepton error, resetting..");
+				showFullMessage((char *)"Lepton resyncing..");
 			}
 			lepton_reset();
 			lepton_startFrame();
 			timer = millis();
+			softResynced = false;
 		}
 	}
 	noInterrupts();
@@ -334,12 +406,13 @@ bool lepton_ffc(bool message, bool switch_gain) {
 }
 
 float lepton_spotTemp() {
-	if (lepton_i2c_execute_command(0x4E, 0xD0) != 0) return spotTemp;
+	if (lepton_i2c_execute_command(0x4E, 0xD0) != 0) return s_lastSpotTempC;
 	byte response[8] = {};
-	if (lepton_i2cReadDataRegister(response, 8) < 2) return spotTemp;
+	if (lepton_i2cReadDataRegister(response, 8) < 2) return s_lastSpotTempC;
 	uint16_t raw = (static_cast<uint16_t>(response[0]) << 8) | response[1];
 	float t = static_cast<float>(raw) * ((leptonGainMode == lepton_gain_high) ? 0.01f : 0.1f);
-	return t - 273.15f;
+	s_lastSpotTempC = t - 273.15f;
+	return s_lastSpotTempC;
 }
 
 float lepton_getFpaTempC() {

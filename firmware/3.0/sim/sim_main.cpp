@@ -10,6 +10,7 @@
 #include <mainmenu.h>
 #include <settingsmenu.h>
 #include <videomenu.h>
+#include <loadmenu.h>
 #include <buttons.h>
 #include <temperature.h>
 #include <perf.h>
@@ -277,6 +278,16 @@ int main(int argc, char** argv) {
 	// 6. Crisp Monospace Pixel Font Sheet (Dark + Daylight Light)
 	render_font_sheet();
 	emit("06-font-sheet.png");
+
+	// 7. Modern 2026 Video Mode Screen (Dark, bezel-safe >=12px)
+	ui_setThemeMode(uiTheme_dark);
+	drawVideoModeMenu();
+	emit("07-video-mode.png");
+
+	// 8. Modern 2026 Gallery / Load Screen (Dark, bezel-safe >=12px)
+	ui_setThemeMode(uiTheme_dark);
+	drawLoadMenu();
+	emit("08-gallery.png");
 
 	return 0;
 }

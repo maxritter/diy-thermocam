@@ -62,17 +62,17 @@ void FT6206_Touchscreen::readData(uint16_t *x, uint16_t *y) {
 		touchY[i] |= i2cdat[0x06 + i * 6];
 		touchID[i] = i2cdat[0x05 + i * 6] >> 4;
 	}
-	*x = touchY[0];
-	*y = touchX[0];
-	*y = map(*y, 0, 240, 240, 0);
+	*x = (touchY[0] > 319) ? 319 : touchY[0];
+	uint16_t rawY = (touchX[0] > 239) ? 239 : touchX[0];
+	*y = 239 - rawY;
 }
 
 TS_Point FT6206_Touchscreen::getPoint(void) {
 	uint16_t x, y;
 	readData(&x, &y);
 	if (rotated) {
-		y = map(y, 0, 240, 240, 0);
-		x = map(x, 0, 320, 320, 0);
+		y = (y > 239) ? 0 : static_cast<uint16_t>(239 - y);
+		x = (x > 319) ? 0 : static_cast<uint16_t>(319 - x);
 	}
 	return TS_Point(x, y, 1);
 }

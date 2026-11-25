@@ -29,6 +29,10 @@
 #include <SD.h>
 #include <MTP_Teensy.h>
 #include <TimeLib.h>
+#include <sdcard.h>
+#include <lepton.h>
+#include <display.h>
+#include <fonts.h>
 
 /*################# DATA TYPES, CONSTANTS & MACRO DEFINITIONS #################*/
 
@@ -36,32 +40,26 @@
 #define CPU_RESTART_VAL 0x5FA0004
 #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
-const char *sd_str[] = {"sdio", "sd1"};
-const int cs[] = {BUILTIN_SDCARD, 10};
-const int nsd = sizeof(sd_str) / sizeof(const char *);
-SDClass sdx[nsd];
+// Single SdFs-backed SDClass for FAT16/FAT32/exFAT (>32 GB SDXC) MTP exposure
+static SDClass s_mtpSd;
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-void dateTime(uint16_t *date, uint16_t *time, uint8_t *ms10)
+static void mtpDateTime(uint16_t *date, uint16_t *time, uint8_t *ms10)
 {
 	*date = FS_DATE(year(), month(), day());
 	*time = FS_TIME(hour(), minute(), second());
 	*ms10 = second() & 1 ? 100 : 0;
 }
 
-void storage_configure()
+bool storage_configure()
 {
-	for (int ii = 0; ii < nsd; ii++)
+	if (s_mtpSd.sdfs.begin(SdioConfig(FIFO_SDIO)))
 	{
-		if (cs[ii] == BUILTIN_SDCARD)
-		{
-			if (sdx[ii].sdfs.begin(SdioConfig(FIFO_SDIO)))
-			{
-				MTP.addFilesystem(sdx[ii], sd_str[ii]);
-			}
-		}
+		MTP.addFilesystem(s_mtpSd, "Thermocam SD");
+		return true;
 	}
+	return false;
 }
 
 void enterMassStorage()
@@ -70,25 +68,59 @@ void enterMassStorage()
 	if ((EEPROM.read(eeprom_massStorage) == eeprom_setValue))
 	{
 		EEPROM.write(eeprom_massStorage, 0);
-		showFullMessage((char *)"USB File Transfer, touch to exit!");
-		storage_configure();
-		FsDateTime::callback = dateTime;
-		//Start the core's MTP responder after the card is added
+		showModalCard(
+			"USB FILE TRANSFER",
+			"MTP active on SD card (FAT/exFAT)",
+			"Win Explorer / Linux / macOS OpenMTP",
+			"Touch screen to exit to Live View");
+
+		if (!storage_configure())
+		{
+			showFullMessage((char *)"SD card not found!");
+			delay(1200);
+			ui_waitTouchReleaseAndLockout(250u);
+			return;
+		}
+		FsDateTime::setCallback(mtpDateTime);
+		//Start the core's MTP responder after the SdFs card is added
 		MTP.begin();
 
-		//Do MTP until user wants to exit via touch
+		//Ensure no residual touch from boot immediately exits MTP
+		uint32_t t0 = millis();
+		while (touch_touched() && (millis() - t0) < 500u)
+		{
+			MTP.loop();
+			delay(5);
+		}
+
+		//Serve MTP at full wire speed (fast digitalRead on touch IRQ avoids XPT2046 delay(20)!)
+		uint32_t lastHousekeepMs = millis();
 		while (true)
 		{
 			MTP.loop();
-			if (touch_touched() || !isUSBConnected())
-				break;
+			if (!digitalRead(pin_touch_irq))
+			{
+				if (touch_touched())
+					break;
+			}
+			uint32_t nowMs = millis();
+			if ((nowMs - lastHousekeepMs) >= 250u)
+			{
+				lastHousekeepMs = nowMs;
+				if (!isUSBConnected())
+					break;
+				if (touch_capacitive && touch_touched())
+					break;
+			}
 		}
 
-		showFullMessage((char *)"Exiting File Transfer mode..");
-		delay(1000);
-		while (touch_touched())
-			;
-		sd.begin(SdioConfig(FIFO_SDIO));
+		showFullMessage((char *)"Exiting USB File Transfer..");
+		MTP.reset();
+		delay(250);
+		s_mtpSd.sdfs.end();
+		ui_waitTouchReleaseAndLockout(250u);
+		disableSPIIRQ = false;
+		beginSD();
 	}
 }
 

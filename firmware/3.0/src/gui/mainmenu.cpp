@@ -81,7 +81,7 @@ void mainMenuTitle(char *title)
 void mainMenuSelection(char *selection)
 {
 	display_setColor(UI_SURFACE);
-	display_fillRect(66, 58, 256, 110);
+	display_fillRect(66, 56, 254, 110);
 	display_setBackColor(UI_SURFACE);
 	display_setColor(UI_ACCENT);
 	display_print(selection, CENTER, 77);
@@ -92,26 +92,34 @@ bool massStoragePrompt()
 {
 	//Title & Background
 	drawTitle((char *)"USB File Transfer");
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 46, 308, 166);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(12, 46, 308, 166);
 	display_setColor(UI_TEXT);
 	display_setFont(smallFont);
-	display_setBackColor(UI_BG_DARK);
-	display_print((char *)"Do you want to enter mass storage", CENTER, 65);
-	display_print((char *)"to transfer files to the PC?", CENTER, 85);
-	display_print((char *)"Do not use this for FW updates", CENTER, 105);
-	display_print((char *)"or for the USB serial connection.", CENTER, 125);
-	//Draw the buttons
+	display_setBackColor(UI_SURFACE);
+	display_print((char *)"Enter USB MTP file transfer mode", CENTER, 64);
+	display_print((char *)"to browse SD files on your PC?", CENTER, 84);
+	display_setColor(UI_TEXT_MUTED);
+	display_print((char *)"Supports Windows / Linux / OpenMTP", CENTER, 114);
+	display_print((char *)"Not for FW updates or live stream.", CENTER, 134);
+	//Draw bezel-safe buttons (No left, Yes right)
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(165, 160, 140, 55, (char *)"Yes");
-	buttons_addButton(15, 160, 140, 55, (char *)"No");
+	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
+	buttons_addButton(12, 178, 142, 46, (char *)"No");
 	buttons_drawButtons();
+	buttons_setActive(0);
 	buttons_setTextFont(smallFont);
-	//Wait for touch release
-	while (touch_touched())
-		;
+	//Wait for touch release (bounded)
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u)
+		delay(5);
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//If touch pressed
 		if (touch_touched() == true)
 		{
@@ -127,6 +135,7 @@ bool massStoragePrompt()
 				return false;
 			}
 		}
+		delay(5);
 	}
 }
 
@@ -1007,6 +1016,7 @@ bool tempLimits()
 	//Touch handler
 	while (true)
 	{
+		checkSerial();
 		//If touch pressed
 		if (touch_touched() == true)
 		{
@@ -1046,6 +1056,7 @@ bool tempLimits()
 			else if (pressedButton == 2)
 				return false;
 		}
+		delay(5);
 	}
 }
 
@@ -1622,9 +1633,9 @@ void mainMenu()
 	//Delete the old buttons
 	buttons_deleteAllButtons();
 
-	//Wait a short time
-	delay(500);
+	//Wait for finger release + settle + 250 ms lockout so < Live NEVER bounces back into menu!
+	ui_waitTouchReleaseAndLockout(250u);
 	Serial.clear();
-	showMenu = showMenu_disabled;
+	disableSPIIRQ = false;
 	lepton_startFrame();
 }

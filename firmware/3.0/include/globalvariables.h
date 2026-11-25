@@ -102,5 +102,6 @@ extern volatile uint32_t leptonFrameReadyUs;
 extern volatile bool disableSPIIRQ;
 extern volatile bool touchIrqFlag;
 extern volatile bool buttonIrqFlag;
+extern volatile uint32_t touchLockoutUntilMs;
 
 #endif /* GLOBALVARIABLES_H */

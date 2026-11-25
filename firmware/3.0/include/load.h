@@ -38,6 +38,8 @@ void loadFind(char* filename, int* pos);
 void loadRawData(char* filename);
 void loadSettings();
 void loadTouchIRQ();
+bool loadTouchTakePending();
+void loadTouchProcess();
 bool minuteChoose(bool* minutes, char* filename);
 bool monthChoose(bool* months, char* filename);
 void readTempPoints();

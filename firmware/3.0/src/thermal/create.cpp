@@ -152,20 +152,33 @@ void getTouchPos(uint16_t *x, uint16_t *y)
 	unsigned long ty = 0;
 	//Wait for touch press
 	while (!touch_touched())
-		;
-	//While touch pressed, iterate over readings
-	while (touch_touched() == true)
+		delay(5);
+	//While touch pressed, iterate over readings (clamped strictly to 0..319, 0..239)
+	uint32_t t0 = millis();
+	while (touch_touched() == true && (millis() - t0) < 2000u)
 	{
 		point = touch_getPoint();
 		if ((point.x >= 0) && (point.x <= 320) && (point.y >= 0) && (point.y <= 240))
 		{
-			tx += point.x;
-			ty += point.y;
+			uint16_t px = (point.x >= 320) ? 319 : static_cast<uint16_t>(point.x);
+			uint16_t py = (point.y >= 240) ? 239 : static_cast<uint16_t>(point.y);
+			tx += px;
+			ty += py;
 			iter++;
 		}
 	}
-	*x = tx / iter;
-	*y = ty / iter;
+	if (iter > 0)
+	{
+		*x = static_cast<uint16_t>(tx / iter);
+		*y = static_cast<uint16_t>(ty / iter);
+	}
+	else
+	{
+		*x = 160;
+		*y = 120;
+	}
+	if (*x > 319) *x = 319;
+	if (*y > 239) *y = 239;
 }
 
 /* Function to add or remove a measurement point */
@@ -238,9 +251,11 @@ redraw:
 	//Get touched coordinates
 	getTouchPos(&xpos, &ypos);
 
-	//Divide through 2 to match array size
+	//Divide through 2 to match 160x120 array size & clamp strictly in-bounds
 	xpos /= 2;
 	ypos /= 2;
+	if (xpos > 159) xpos = 159;
+	if (ypos > 119) ypos = 119;
 
 	//Remove point
 	if (remove)
@@ -248,13 +263,22 @@ redraw:
 		//Set marker to false
 		removed = false;
 
-		//Check for 10 pixels around the touch position
-		for (uint16_t x = xpos - 10; x <= xpos + 10; x++)
+		//Check for 10 pixels around the touch position (signed bounds prevent underflow!)
+		int xMin = static_cast<int>(xpos) - 10;
+		int xMax = static_cast<int>(xpos) + 10;
+		int yMin = static_cast<int>(ypos) - 10;
+		int yMax = static_cast<int>(ypos) + 10;
+		if (xMin < 0) xMin = 0;
+		if (xMax > 159) xMax = 159;
+		if (yMin < 0) yMin = 0;
+		if (yMax > 119) yMax = 119;
+
+		for (int x = xMin; x <= xMax; x++)
 		{
-			for (uint16_t y = ypos - 10; y <= ypos + 10; y++)
+			for (int y = yMin; y <= yMax; y++)
 			{
 				//Calculate index number
-				uint16_t index = x + (y * 160) + 1;
+				uint16_t index = static_cast<uint16_t>(x + (y * 160) + 1);
 				//If index is valid
 				if ((index >= 1) && (index <= 19200))
 				{
@@ -400,15 +424,12 @@ void refreshTempPoints()
 		//Check if point is active
 		if (index != 0)
 		{
-			//Index goes from 1 to max
+			//Index goes from 1 to max (bounds-checked against smallBuffer[19200])
 			index -= 1;
-
-			//Calculate x and y position
-			uint16_t xpos = index % 160;
-			uint16_t ypos = index / 160;
-
-			//Update value
-			tempPoints[i][1] = smallBuffer[xpos + (ypos * 160)];
+			if (index < tc_core::SMALL_PIXELS)
+			{
+				tempPoints[i][1] = smallBuffer[index];
+			}
 		}
 	}
 }
@@ -462,4 +483,38 @@ void createThermalImg(bool small)
 	//Convert lepton data to RGB565 colors
 	if (!videoSave)
 		convertColors(small);
+}
+
+/* Acquire, compute stats, save PRE-FILTER raw video .DAT (if requested), then filter/scale/colorize */
+void createThermalImgVideo(bool saveRawNow, char* dirName, uint32_t folderFrames)
+{
+	//Acquire triple-buffered Lepton frame
+	lepton_acquireFrame(true);
+
+	//Stats stage: spotmeter + temp points + fused min/max scan
+	uint32_t t_stats = micros();
+	getSpotTemp();
+	refreshTempPoints();
+	if (autoMode && !limitsLocked) {
+		limitValues();
+	} else if (minMaxPoints != minMaxPoints_disabled) {
+		refreshMinMax();
+	}
+	g_perf.stats_us = micros() - t_stats;
+
+	//Save raw .DAT frame BEFORE display filtering (100% consistent with stills, zero double-filtering!)
+	if (saveRawNow && dirName) {
+		saveRawData(false, dirName, folderFrames);
+	}
+
+	//Apply low-pass filter for live preview only
+	g_perf.filter_us = 0;
+	if (filterType == filterType_box)
+		boxFilter();
+	else if (filterType == filterType_gaussian)
+		gaussianFilter();
+
+	//Upscale & colorize for live preview
+	smallToBigBuffer();
+	convertColors(false);
 }

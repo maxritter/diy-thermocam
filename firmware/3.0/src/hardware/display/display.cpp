@@ -1019,11 +1019,10 @@ void display_printChar(byte c, int x, int y)
 				ch = pgm_read_byte(&cfont.font[temp + zz]);
 				for (i = 0; i < 8; i++)
 				{
-					display_setXY(x + i + (zz * 8), y + j, x + i + (zz * 8) + 1,
-								  y + j + 1);
-
 					if ((ch & (1 << (7 - i))) != 0)
 					{
+						display_setXY(x + i + (zz * 8), y + j, x + i + (zz * 8) + 1,
+									  y + j + 1);
 						display_setPixel((fch << 8) | fcl);
 					}
 				}
@@ -1556,9 +1555,16 @@ void display_writeScreen(unsigned short *pcolors)
 
 	const uint16_t *p = pcolors;
 	const uint16_t *end = pcolors + (ILI9341_TFTWIDTH * ILI9341_TFTHEIGHT);
+	uint32_t txStartUs = micros();
 	while (p < end)
 	{
-		while ((IMXRT_LPSPI4_S.SR & LPSPI_SR_TDF) == 0) {}
+		while ((IMXRT_LPSPI4_S.SR & LPSPI_SR_TDF) == 0)
+		{
+			if ((micros() - txStartUs) > 100000u)
+				break;
+		}
+		if ((IMXRT_LPSPI4_S.SR & LPSPI_SR_TDF) == 0)
+			break;
 		IMXRT_LPSPI4_S.TDR = *p++;
 	}
 	// Wait for TX FIFO & shift register to finish (bounded timeout)

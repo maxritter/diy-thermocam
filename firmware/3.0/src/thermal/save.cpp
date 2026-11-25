@@ -144,7 +144,7 @@ void imgSaveStart()
 	//Build save filename from the current time & date
 	createSDName(saveFilename);
 
-	//Mark create: "SAVING" badge is composited flicker-free in bigBuffer by displayInfos()
+	//Mark create: showImage() flushes clean bigBuffer, then draws SAVING card directly to LCD
 	imgSave = imgSave_create;
 }
 
@@ -174,49 +174,73 @@ void saveVideoFrame(char *filename)
 		}
 	}
 
-	//Write 160x120 BMP header + bulk buffered RGB565 pixels
-	sdFile.write((const uint8_t *)bmp_header_small, 66);
+	//Write 160x120 BMP header + bulk buffered RGB565 pixels (with full SD write/close checks)
+	bool ok = (sdFile.write((const uint8_t *)bmp_header_small, 66) == 66u);
 	size_t off = 0;
-	for (int i = 0; i < 19200; i++)
+	for (int i = 0; ok && i < 19200; i++)
 	{
 		uint16_t v = smallBuffer[i];
 		s_sdWriteBuf[off++] = v & 0xFFu;
 		s_sdWriteBuf[off++] = (v >> 8) & 0xFFu;
 		if (off == sizeof(s_sdWriteBuf)) {
-			sdFile.write(s_sdWriteBuf, off);
+			if (sdFile.write(s_sdWriteBuf, off) != off) ok = false;
 			off = 0;
 		}
 	}
-	if (off > 0) sdFile.write(s_sdWriteBuf, off);
-	sdFile.close();
-	sdNoteBytesWritten(66 + 38400);
+	if (ok && off > 0 && sdFile.write(s_sdWriteBuf, off) != off) ok = false;
+	if (!sdFile.close()) ok = false;
+	if (ok) {
+		sdNoteBytesWritten(66 + 38400);
+	} else if (!serialMode) {
+		showFullMessage((char *)"Error writing BMP!");
+		delay(1000);
+	}
 }
 
-/* Proccess video frames */
+/* Process video frames with modern 2026 themed progress card */
 void processVideoFrames(uint32_t framesCaptured, char *dirname)
 {
 	char buffer[48];
 	char filename[] = "000000.DAT";
 	uint32_t framesConverted = 0;
 
-	//Display title
-	display_fillScr(0x08A5);
-	display_setBackColor(0x08A5);
-	display_setFont(bigFont);
-	display_setColor(0xFB82);
-	display_print((char *)"Video conversion", CENTER, 30);
+	auto drawProgress = [&](uint32_t done) {
+		display_setColor(UI_SURFACE);
+		display_fillRoundRect(12, 46, 308, 196);
+		display_setColor(UI_BORDER);
+		display_drawRoundRect(12, 46, 308, 196);
+		display_setFont(smallFont);
+		display_setBackColor(UI_SURFACE);
+		display_setColor(UI_TEXT);
+		display_print((char *)"Converting .DAT -> .BMP frames", CENTER, 60);
+		display_setColor(UI_TEXT_MUTED);
+		snprintf(buffer, sizeof(buffer), "Folder: %s", dirname);
+		display_print(buffer, CENTER, 84);
 
-	//Display info
-	display_setFont(smallFont);
-	display_setColor(0xF7DF);
-	display_print((char *)"Converts all .DAT to .BMP frames", CENTER, 80);
-	display_print((char *)"Press button to abort the process", CENTER, 120);
+		// Progress bar (x=28..292, w=264)
+		display_setColor(UI_ELEVATED);
+		display_fillRoundRect(28, 114, 292, 134);
+		display_setColor(UI_BORDER);
+		display_drawRoundRect(28, 114, 292, 134);
+		if (framesCaptured > 0 && done > 0) {
+			uint32_t fillW = (done * 260u) / framesCaptured;
+			if (fillW > 260u) fillW = 260u;
+			if (fillW > 4u) {
+				display_setColor(UI_ACCENT);
+				display_fillRoundRect(30, 116, 30 + static_cast<int>(fillW), 132);
+			}
+		}
 
-	//Display content
-	sprintf(buffer, "Frames converted: %6lu / %6lu", framesConverted, framesCaptured);
-	display_print(buffer, CENTER, 160);
-	sprintf(buffer, "Folder name: %s", dirname);
-	display_print(buffer, CENTER, 200);
+		display_setColor(UI_ACCENT);
+		snprintf(buffer, sizeof(buffer), "%lu / %lu frames",
+			static_cast<unsigned long>(done), static_cast<unsigned long>(framesCaptured));
+		display_print(buffer, CENTER, 148);
+		display_setColor(UI_TEXT_MUTED);
+		display_print((char *)"Press top button to abort", CENTER, 174);
+	};
+
+	drawTitle((char *)"Video Conversion");
+	drawProgress(0);
 
 	//Switch to processing mode
 	videoSave = videoSave_processing;
@@ -255,14 +279,8 @@ void processVideoFrames(uint32_t framesCaptured, char *dirname)
 		strcpy(&filename[6], ".BMP");
 		saveVideoFrame(filename);
 
-		//Font color
-		display_setBackColor(0x08A5);
-		display_setFont(smallFont);
-		display_setColor(0xF7DF);
-
-		//Update screen content
-		sprintf(buffer, "Frames converted: %6lu / %6lu", framesConverted + 1, framesCaptured);
-		display_print(buffer, CENTER, 160);
+		//Update themed progress card
+		drawProgress(framesConverted + 1);
 	}
 
 	//All images converted!
@@ -314,9 +332,12 @@ void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 	}
 
 	size_t off = 0;
+	bool writeOk = true;
 	auto flush_buf = [&]() {
 		if (off > 0) {
-			sdFile.write(s_sdWriteBuf, off);
+			if (writeOk && sdFile.write(s_sdWriteBuf, off) != off) {
+				writeOk = false;
+			}
 			off = 0;
 		}
 	};
@@ -377,8 +398,18 @@ void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 	}
 
 	flush_buf();
-	sdFile.close();
-	sdNoteBytesWritten(totalBytes);
+	if (!sdFile.close()) writeOk = false;
+	if (writeOk) {
+		sdNoteBytesWritten(totalBytes);
+	} else {
+		if (!isImage && videoSave == videoSave_recording) {
+			videoSave = videoSave_processing; // abort video recording cleanly on SD write error
+		}
+		if (!serialMode) {
+			showFullMessage((char *)"Error writing SD card!");
+			delay(1000);
+		}
+	}
 	g_perf.sd_write_us = micros() - t0;
 }
 
@@ -395,8 +426,10 @@ void imgSaveEnd()
 	if (totalMB != 0)
 		sdInfo = String(freeMB) + "/" + String(totalMB) + " MB";
 
-	//Disable image save marker
+	//Disable image save marker & ensure Lepton capture stays armed
 	imgSave = imgSave_disabled;
+	disableSPIIRQ = false;
+	lepton_startFrame();
 }
 
 /* Saves the content of the screen buffer to the sd card (8 KB buffered 640x480 BMP) */
@@ -417,11 +450,11 @@ void saveBuffer(char *filename)
 		}
 	}
 
-	sdFile.write((const uint8_t *)bmp_header_large, 66);
+	bool ok = (sdFile.write((const uint8_t *)bmp_header_large, 66) == 66u);
 
 	// Pack 3 double-lines (3 * 2 * 1280 = 7680 B <= 8192 B) per bulk SD write!
 	size_t off = 0;
-	for (int16_t y = 239; y >= 0; y--)
+	for (int16_t y = 239; ok && y >= 0; y--)
 	{
 		const uint16_t* row = &bigBuffer[y * 320];
 		uint8_t* lineBuf = &s_sdWriteBuf[off];
@@ -439,12 +472,17 @@ void saveBuffer(char *filename)
 		memcpy(&s_sdWriteBuf[off + 1280], lineBuf, 1280);
 		off += 2560;
 		if (off >= 7680) {
-			sdFile.write(s_sdWriteBuf, off);
+			if (sdFile.write(s_sdWriteBuf, off) != off) ok = false;
 			off = 0;
 		}
 	}
-	if (off > 0) sdFile.write(s_sdWriteBuf, off);
-	sdFile.close();
-	sdNoteBytesWritten(614466u);
+	if (ok && off > 0 && sdFile.write(s_sdWriteBuf, off) != off) ok = false;
+	if (!sdFile.close()) ok = false;
+	if (ok) {
+		sdNoteBytesWritten(614466u);
+	} else if (!serialMode) {
+		showFullMessage((char *)"Error writing BMP!");
+		delay(1000);
+	}
 	g_perf.sd_write_us += (micros() - t0);
 }

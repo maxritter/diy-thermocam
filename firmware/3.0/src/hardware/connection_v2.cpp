@@ -346,7 +346,10 @@ static void tx_frame_raw(uint32_t frame_seq, uint64_t ts_us, float spot_c) {
 		Serial.send_now();
 		g_perf.usb_tx_us = micros() - t0;
 	} else {
-		s_v2.stream.mode = 0; // stalled mid-packet -> stop stream cleanly
+		s_v2.stream.mode = 0; // stalled mid-packet -> stop stream cleanly & notify host
+		g_perf.stream_fps_x100 = 0;
+		g_perf.frames_dropped++;
+		tx_error(MSG_GENERIC_ERROR_RESP, 0, ERR_IO, "stream tx stall");
 	}
 }
 
@@ -386,6 +389,9 @@ static void tx_frame_rendered(uint32_t frame_seq, uint64_t ts_us) {
 		g_perf.usb_tx_us = micros() - t0;
 	} else {
 		s_v2.stream.mode = 0;
+		g_perf.stream_fps_x100 = 0;
+		g_perf.frames_dropped++;
+		tx_error(MSG_GENERIC_ERROR_RESP, 0, ERR_IO, "stream tx stall");
 	}
 }
 
@@ -1170,10 +1176,13 @@ void serialConnectV2(bool headless) {
 	}
 
 	serialMode = true;
+	disableSPIIRQ = false;
 	lepton_startFrame();
 
 	uint32_t lastFramePushUs = micros();
 	uint32_t lastFpaPollMs = millis();
+	uint32_t lastGoodFrameMs = millis();
+	bool v2SoftResynced = false;
 	uint32_t dtrLowSinceMs = 0;
 
 	while (s_v2.running) {
@@ -1214,8 +1223,10 @@ void serialConnectV2(bool headless) {
 			if (!s_v2.running) break;
 		}
 
-		// 5. Process fresh double-buffered Lepton frame when ready
+		// 5. Process fresh double-buffered Lepton frame when ready (with stall recovery)
 		if (lepton_hasNewFrame()) {
+			lastGoodFrameMs = now_ms;
+			v2SoftResynced = false;
 			uint32_t loopT0 = micros();
 			lepton_acquireFrame(false);
 			uint32_t seq = g_perf.frame_count;
@@ -1270,6 +1281,17 @@ void serialConnectV2(bool headless) {
 			} else {
 				g_perf.perf_mode = PERF_MODE_SERIAL_IDLE;
 			}
+		} else if (checkDiagnostic(diag_lepton) && s_v2.ffc_state == 0) {
+			uint32_t stallMs = now_ms - lastGoodFrameMs;
+			if (!v2SoftResynced && stallMs >= 800u) {
+				v2SoftResynced = true;
+				lepton_vospiResync();
+			} else if (stallMs >= 2200u) {
+				lepton_reset();
+				lepton_startFrame();
+				lastGoodFrameMs = millis();
+				v2SoftResynced = false;
+			}
 		}
 	}
 
@@ -1277,12 +1299,12 @@ void serialConnectV2(bool headless) {
 	s_v2.stream.mode = 0;
 	g_perf.stream_fps_x100 = 0;
 	serialMode = false;
+	disableSPIIRQ = false;
 	if (!headless) {
 		enableScreenLight();
-		// Drain any leftover touch release
-		uint32_t t0 = millis();
-		while (touch_touched() && (millis() - t0) < 500u) {}
+		ui_waitTouchReleaseAndLockout(250u);
 	}
+	lepton_startFrame();
 }
 
 bool checkSerialV2OrV1(bool headless) {

@@ -39,68 +39,65 @@ boolean checkFirstStart()
 	return EEPROM.read(eeprom_firstStart) != eeprom_setValue;
 }
 
-/* Show welcome Screen for the first start procedure */
+/* Show welcome Screen for the first start procedure (2026 themed card) */
 void welcomeScreen()
 {
-	//Background & Title (2026 minimalist dark obsidian + thermal orange)
-	display_fillScr(UI_BG_DARK);
-	display_setBackColor(UI_BG_DARK);
-	display_setFont(smallFont);
-	display_printC("Welcome to the", CENTER, 20, UI_TEXT_MUTED);
-	display_setFont(bigFont);
-	display_printC("DIY-Thermocam V3", CENTER, 60, UI_ACCENT);
-
-	//Explanation
-	display_setFont(smallFont);
-	display_printC("This is the first time setup.", CENTER, 110, UI_TEXT);
-	display_printC("It will guide you through the", CENTER, 140, UI_TEXT);
-	display_printC("basic settings for your device.", CENTER, 170, UI_TEXT);
-	display_printC("-> Please touch screen <-", CENTER, 210, UI_ACCENT);
+	showModalCard(
+		"DIY-THERMOCAM V3",
+		"Welcome to first-time setup.",
+		"Guides you through basic settings.",
+		"Touch screen to continue");
 
 	//Wait for touch press
-	while (!touch_touched())
-		;
-
-	//Touch release again
-	while (touch_touched())
-		;
+	while (!touch_touched()) {
+		checkSerial();
+		delay(5);
+	}
+	//Wait for touch release (bounded)
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u)
+		delay(5);
 }
 
-/* Shows an info screen during the first start procedure */
+/* Shows an info screen during the first start procedure (2026 themed card) */
 void infoScreen(String *text, bool cont)
 {
-	//Background & Title
 	display_fillScr(UI_BG_DARK);
-	display_setBackColor(UI_BG_DARK);
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 12, 308, 228);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(12, 12, 308, 228);
+	display_setColor(UI_ACCENT);
+	display_fillRect(14, 14, 306, 17);
+
+	display_setBackColor(UI_SURFACE);
 	display_setFont(bigFont);
-	display_printC(text[0], CENTER, 20, UI_ACCENT);
+	display_printC(text[0], CENTER, 26, UI_ACCENT);
 
 	//Content
 	display_setFont(smallFont);
-	display_printC(text[1], CENTER, 55, UI_TEXT);
-	display_printC(text[2], CENTER, 80, UI_TEXT);
-	display_printC(text[3], CENTER, 105, UI_TEXT);
-	display_printC(text[4], CENTER, 130, UI_TEXT);
+	display_printC(text[1], CENTER, 58, UI_TEXT);
+	display_printC(text[2], CENTER, 78, UI_TEXT);
+	display_printC(text[3], CENTER, 98, UI_TEXT);
+	display_printC(text[4], CENTER, 118, UI_TEXT);
+	display_printC(text[5], CENTER, 142, UI_TEXT_MUTED);
+	display_printC(text[6], CENTER, 162, UI_TEXT_MUTED);
 
 	//Show hint to touch the screen
 	if (cont)
 	{
-		display_printC(text[5], CENTER, 155, UI_TEXT);
-		display_printC(text[6], CENTER, 180, UI_TEXT);
-		display_printC("-> Please touch screen <-", CENTER, 212, UI_ACCENT);
+		display_setColor(UI_BORDER);
+		display_drawHLine(28, 186, 264);
+		display_printC("Touch screen to continue", CENTER, 200, UI_ACCENT);
 		//Wait for touch press
-		while (!touch_touched())
-			;
-		//Touch release again
-		while (touch_touched())
-			;
-	}
-
-	//Show more information
-	else
-	{
-		display_printC(text[5], CENTER, 180);
-		display_printC(text[6], CENTER, 205);
+		while (!touch_touched()) {
+			checkSerial();
+			delay(5);
+		}
+		//Touch release again (bounded)
+		uint32_t t0 = millis();
+		while (touch_touched() && (millis() - t0) < 1000u)
+			delay(5);
 	}
 }
 
@@ -119,7 +116,7 @@ void timeDateScreen()
 	infoScreen(text);
 
 	//Reset values
-	setTime(12, 30, 30, 15, 6, 2021);
+	setTime(12, 30, 0, 1, 1, 2026);
 
 	//Adjust time
 	timeMenu(true);
@@ -138,7 +135,7 @@ void tempFormatScreen()
 	text[0] = "Set Temp. Format";
 	text[1] = "In the next screen, you can";
 	text[2] = "set the temperature format ";
-	text[3] = "for the temperature display_";
+	text[3] = "for the temperature display.";
 	text[4] = "Choose between Celsius or";
 	text[5] = "Fahrenheit, the conversion will";
 	text[6] = "be done automatically.";

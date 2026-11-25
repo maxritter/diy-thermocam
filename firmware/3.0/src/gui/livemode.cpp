@@ -221,20 +221,6 @@ void displayInfos()
 
 	showTemperatures();
 
-	// Flicker-free SAVING card composited in RAM
-	if (imgSave == imgSave_create && !serialMode)
-	{
-		int by = spotEnabled ? 62 : 104;
-		display_blendRect(94, by - 6, 132, 28, HUD_PILL_BG, 7);
-		display_setColor(UI_HUD_ACCENT);
-		display_drawRoundRect(94, by - 6, 226, by + 22);
-		display_setColor(UI_HUD_TEXT);
-		display_setFont(bigFont);
-		display_print((char *)"SAVING", CENTER, by);
-		display_setFont((uint8_t *)smallFont);
-		changeTextColor();
-	}
-
 	display_writeToImage = false;
 	g_perf.overlay_us = micros() - t0;
 }

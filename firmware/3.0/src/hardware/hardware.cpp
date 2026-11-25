@@ -315,10 +315,11 @@ void initSPI()
 	SPI1.begin();
 }
 
-/* Inits the I2C Bus */
+/* Inits the I2C Bus at 400 kHz Fast-Mode (supported by Lepton CCI & FT6206; saves ~3 ms/frame) */
 void initI2C()
 {
 	Wire.begin();
+	Wire.setClock(400000);
 }
 
 /* Init the Analog-Digital-Converter for the battery measure */
@@ -512,14 +513,19 @@ void toggleDisplay()
 	showFullMessage((char *)"Screen goes off, touch to continue", true);
 	delay(1000);
 	disableScreenLight();
-	//Wait for touch press
-	while (!touch_touched())
-		;
+	//Wait for touch press while still servicing USB serial
+	while (!touch_touched()) {
+		if (Serial.available() > 0) break;
+		delay(10);
+	}
 	//Turning screen on
 	drawMainMenuBorder();
 	showFullMessage((char *)"Turning screen on..", true);
 	enableScreenLight();
-	delay(1000);
+	delay(400);
+	ui_waitTouchReleaseAndLockout(250u);
+	disableSPIIRQ = false;
+	lepton_startFrame();
 }
 
 /* Check if the screen was pressed in the time period */

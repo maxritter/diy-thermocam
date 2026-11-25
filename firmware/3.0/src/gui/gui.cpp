@@ -145,15 +145,73 @@ void showFullMessage(char *message, bool small)
 	else
 	{
 		display_setColor(UI_SURFACE);
-		display_fillRoundRect(6, 6, 314, 234);
+		display_fillRoundRect(12, 12, 308, 228);
 		display_setColor(UI_BORDER);
-		display_drawRoundRect(6, 6, 314, 234);
+		display_drawRoundRect(12, 12, 308, 228);
+		display_setColor(UI_AMBER);
+		display_fillRect(14, 14, 306, 17);
 	}
 
 	display_setFont(smallFont);
 	display_setBackColor(UI_SURFACE);
 	display_setColor(UI_TEXT);
 	display_print(message, CENTER, 114);
+}
+
+/* Shows a unified 2026 multi-line modal card (title + body + footer hint) */
+void showModalCard(const char *title, const char *line1, const char *line2, const char *hint)
+{
+	display_fillScr(UI_BG);
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 24, 308, 216);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(12, 24, 308, 216);
+	display_setColor(UI_AMBER);
+	display_fillRect(14, 26, 306, 30);
+
+	display_setFont(bigFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_ACCENT);
+	display_print((char *)title, CENTER, 46);
+
+	display_setFont(smallFont);
+	display_setColor(UI_TEXT);
+	if (line1 && line1[0])
+		display_print((char *)line1, CENTER, 92);
+	if (line2 && line2[0])
+		display_print((char *)line2, CENTER, 116);
+
+	if (hint && hint[0])
+	{
+		display_setColor(UI_BORDER);
+		display_drawHLine(28, 160, 264);
+		display_setColor(UI_MUTED);
+		display_print((char *)hint, CENTER, 178);
+	}
+}
+
+/* Wait for finger release (1500 ms max) + 120 ms settle + arm post-menu touch lockout */
+void ui_waitTouchReleaseAndLockout(uint32_t lockoutMs)
+{
+	uint32_t t0 = millis();
+	while (touch_touched() && ((millis() - t0) < 1500u))
+	{
+		delay(5);
+	}
+	delay(120);
+	uint32_t t1 = millis();
+	while (touch_touched() && ((millis() - t1) < 300u))
+	{
+		delay(5);
+	}
+	noInterrupts();
+	touchIrqFlag = false;
+	showMenu = showMenu_disabled;
+	longTouch = false;
+	touchLockoutUntilMs = millis() + lockoutMs;
+	if (touchLockoutUntilMs == 0)
+		touchLockoutUntilMs = 1;
+	interrupts();
 }
 
 /* Shows a transient status toast in live mode */
@@ -174,14 +232,14 @@ void showTransMessage(char *msg)
 /* Draw a BigFont value in the center of a stepper menu */
 void drawCenterElement(int element)
 {
-	display_setColor(UI_BG);
-	display_fillRoundRect(102, 64, 218, 126);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(102, 64, 218, 126);
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(96, 54, 224, 130);
+	display_setColor(UI_ACCENT);
+	display_drawRoundRect(96, 54, 224, 130);
 	display_setFont(bigFont);
 	display_setColor(UI_ACCENT);
-	display_setBackColor(UI_BG);
-	display_printNumI(element, CENTER, 87, 2, '0');
+	display_setBackColor(UI_SURFACE);
+	display_printNumI(element, CENTER, 84, 2, '0');
 	display_setFont(smallFont);
 }
 
@@ -396,9 +454,15 @@ void showStatusScreen()
 	buttons_deleteAllButtons();
 	buttons_addButton(12, 192, 142, 34, (char *)"", 0x0010);
 	drawStatusScreen();
-	while (touch_touched()) {}
+	uint32_t t0 = millis();
+	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
+	uint32_t lastRefreshMs = millis();
 	while (true) {
 		checkSerial();
+		if ((millis() - lastRefreshMs) >= 500u) {
+			lastRefreshMs = millis();
+			drawStatusScreen();
+		}
 		if (touch_touched()) {
 			int btn = buttons_checkButtons(true);
 			if (btn == 0) return;

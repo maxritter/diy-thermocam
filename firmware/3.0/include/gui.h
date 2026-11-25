@@ -28,6 +28,8 @@ void showDiagnostic();
 void drawStatusScreen();
 void showStatusScreen();
 void showFullMessage(char* message, bool small = false);
+void showModalCard(const char* title, const char* line1, const char* line2 = nullptr, const char* hint = nullptr);
 void showTransMessage(char* msg);
+void ui_waitTouchReleaseAndLockout(uint32_t lockoutMs = 250u);
 
 #endif /* GUI_H */

@@ -26,6 +26,7 @@
 #include <create.h>
 #include <temperature.h>
 #include <display.h>
+#include <fonts.h>
 #include <colorschemes.h>
 #include <connection.h>
 #include <mainmenu.h>
@@ -39,9 +40,13 @@
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Non-blocking Touch ISR: only latches edge flag (no 1000 ms busy-wait in ISR!) */
+/* Non-blocking Touch ISR: only latches edge flag & honors post-menu lockout */
 void touchIRQ()
 {
+	if (touchLockoutUntilMs != 0 && static_cast<int32_t>(millis() - touchLockoutUntilMs) < 0)
+	{
+		return;
+	}
 	if ((!showMenu) && (!videoSave) && (!longTouch) && (!imgSave) && (!serialMode))
 	{
 		touchIrqFlag = true;
@@ -70,6 +75,18 @@ void buttonIRQ()
 /* Poll deferred touch / button presses in main loop without blocking IRQs */
 static void pollLiveInputs()
 {
+	if (touchLockoutUntilMs != 0)
+	{
+		if (static_cast<int32_t>(millis() - touchLockoutUntilMs) < 0)
+		{
+			touchIrqFlag = false;
+		}
+		else
+		{
+			touchLockoutUntilMs = 0;
+		}
+	}
+
 	if (touchIrqFlag)
 	{
 		touchIrqFlag = false;
@@ -221,8 +238,9 @@ void longTouchHandler()
 		}
 	}
 
-	//Disable lock limits menu
+	//Disable lock limits menu & prevent finger-lift bounce into main menu
 	longTouch = false;
+	ui_waitTouchReleaseAndLockout(250u);
 }
 
 /* Show the color bar on screen */
@@ -283,7 +301,7 @@ void showColorBar()
 	}
 
 	//Translucent dark backdrop behind tick labels for razor-sharp contrast
-	display_blendRect(264, yTop - 6, 31, barRows + 12, 0x08A5, 4);
+	display_blendRect(264, yTop - 6, 31, barRows + 12, UI_HUD_BG, 4);
 
 	//Set text color
 	changeTextColor();
@@ -534,13 +552,28 @@ void changeColorScheme(byte *pos)
 /* Show the thermal/visual/combined image on the screen */
 void showImage()
 {
-	//Draw thermal image on screen if created previously and not in menu nor in video save
-	if ((!imgSave) && (!showMenu) && (!videoSave))
+	//Draw clean thermal image on screen if not in menu nor in video save
+	if ((!showMenu) && (!videoSave))
 		displayBuffer();
 
-	//If the image has been created, set to save
-	if (imgSave == imgSave_create)
+	//If an image is being saved, draw SAVING card directly to LCD (never into bigBuffer/.BMP!)
+	if (imgSave == imgSave_create) {
+		if (!serialMode) {
+			display_writeToImage = false;
+			int by = spotEnabled ? 62 : 104;
+			display_setColor(UI_SURFACE);
+			display_fillRoundRect(94, by - 6, 226, by + 22);
+			display_setColor(UI_ACCENT);
+			display_drawRoundRect(94, by - 6, 226, by + 22);
+			display_setBackColor(UI_SURFACE);
+			display_setColor(UI_TEXT);
+			display_setFont(bigFont);
+			display_print((char *)"SAVING", CENTER, by);
+			display_setFont((uint8_t *)smallFont);
+			changeTextColor();
+		}
 		imgSave = imgSave_save;
+	}
 }
 
 /* Init procedure for the live mode */
@@ -567,38 +600,76 @@ void liveMode()
 	liveModeInit();
 
 	uint32_t lastFrameUs = micros();
+	uint32_t lastFrameMs = millis();
+	bool softResyncTried = false;
+
+	auto resetLiveWatchdog = [&]() {
+		disableSPIIRQ = false;
+		lepton_startFrame();
+		lastFrameMs = millis();
+		softResyncTried = false;
+	};
 
 	//Main Loop
 	while (true)
 	{
 		//Check for serial connection (non-blocking, <1 ms response!)
-		checkSerial();
+		if (Serial.available() > 0) {
+			checkSerial();
+			resetLiveWatchdog();
+		}
 
 		//Poll deferred touch/button edge flags
 		pollLiveInputs();
 
 		//Check for screen sleep
-		screenOffCheck();
+		if (screenOffCheck()) {
+			resetLiveWatchdog();
+		}
 
 		//If touch IRQ has been triggered, open menu
-		if (showMenu == showMenu_desired)
+		if (showMenu == showMenu_desired) {
 			mainMenu();
+			resetLiveWatchdog();
+		}
 
 		//Start the image save procedure
-		if (imgSave == imgSave_set)
+		if (imgSave == imgSave_set) {
 			imgSaveStart();
+			resetLiveWatchdog();
+		}
 
 		//Go into video mode
-		if (videoSave == videoSave_menu)
+		if (videoSave == videoSave_menu) {
 			videoMode();
+			resetLiveWatchdog();
+		}
 
 		//Long touch handler
-		if (longTouch)
+		if (longTouch) {
 			longTouchHandler();
+			resetLiveWatchdog();
+		}
 
-		//Wait for new double-buffered frame while continuously servicing USB!
-		if (!lepton_hasNewFrame())
+		//Wait for new double-buffered frame while continuously servicing USB + 500ms/2000ms VoSPI watchdog!
+		if (!lepton_hasNewFrame()) {
+			uint32_t stallMs = millis() - lastFrameMs;
+			if (!softResyncTried && stallMs >= 500u) {
+				// 500 ms live-view watchdog: FLIR datasheet VoSPI resync (CS high >=205 ms + re-arm)
+				softResyncTried = true;
+				lepton_vospiResync();
+			} else if (stallMs >= 2000u) {
+				// 2000 ms escalation: full Lepton VoSPI + VSYNC GPIO reset & re-arm
+				lepton_reset();
+				lepton_startFrame();
+				lastFrameMs = millis();
+				softResyncTried = false;
+			}
 			continue;
+		}
+
+		lastFrameMs = millis();
+		softResyncTried = false;
 
 		uint32_t loopStartUs = micros();
 
@@ -608,14 +679,17 @@ void liveMode()
 		//Composite ALL HUD overlays into bigBuffer in RAM (zero flicker!)
 		displayInfos();
 
-		//Push bigBuffer to ILI9341 via async LPSPI4 DMA (one atomic write!)
+		//Push bigBuffer to ILI9341 via LPSPI4 burst (one atomic write!)
 		showImage();
 
 		//Save the converted BMP image if requested
-		if (imgSave == imgSave_save)
+		if (imgSave == imgSave_save) {
 			imgSaveEnd();
+			resetLiveWatchdog();
+		}
 
 		uint32_t nowUs = micros();
+		(void)perf_uptime_us();
 		g_perf.loop_total_us = nowUs - loopStartUs;
 		perf_record_frame_period(PERF_MODE_LIVE, nowUs - lastFrameUs);
 		lastFrameUs = nowUs;

@@ -111,6 +111,7 @@ volatile uint32_t leptonFrameReadyUs = 0;
 volatile bool disableSPIIRQ = false;
 volatile bool touchIrqFlag = false;
 volatile bool buttonIrqFlag = false;
+volatile uint32_t touchLockoutUntilMs = 0;
 
 volatile bool touch_capacitive = false;
 
@@ -157,12 +158,21 @@ void setMassStorage() {}
 void initScreenOffTimer() {}
 bool formatCard() { return true; }
 void loadFiles() {}
+void loadRawData(char*) {}
+void displayRawData() {}
+void loadBMPImage(char*) {}
+void loadTouchIRQ() {}
+bool loadTouchTakePending() { return false; }
+void loadTouchProcess() {}
 void clearTempPoints() { std::memset(tempPoints, 0, sizeof(tempPoints)); }
 void tempPointFunction(bool) {}
 void showTemperatures() {}
 void createThermalImg(bool) {}
+void createThermalImgVideo(bool, char*, uint32_t) {}
 void convertColors(bool) {}
 void saveRawData(bool, char*, uint32_t) {}
+void saveBuffer(char*) {}
+void frameFilename(char*, uint32_t) {}
 void createSDName(char* filename, bool) { std::strcpy(filename, "20261125143208"); }
 bool beginSD() { return true; }
 uint32_t getSDSpace() { return sdFreeKB; }

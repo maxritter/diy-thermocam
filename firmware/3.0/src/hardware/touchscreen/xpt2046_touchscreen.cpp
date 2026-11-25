@@ -62,11 +62,17 @@ void isrPin(void)
 TS_Point XPT2046_Touchscreen::getPoint()
 {
 	update();
+	int16_t rx = xraw;
+	int16_t ry = yraw;
 	if (rotated) {
-		yraw = map(yraw, 0, 240, 240, 0);
-		xraw = map(xraw, 0, 320, 320, 0);
+		ry = 239 - ry;
+		rx = 319 - rx;
 	}
-	return TS_Point(xraw, yraw, zraw);
+	if (rx < 0) rx = 0;
+	if (rx > 319) rx = 319;
+	if (ry < 0) ry = 0;
+	if (ry > 239) ry = 239;
+	return TS_Point(rx, ry, zraw);
 }
 
 bool XPT2046_Touchscreen::touched()
