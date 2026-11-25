@@ -52,6 +52,7 @@ export interface DisplayPipeline {
   sharpen_amount: number;
   rotate_180: boolean;
   flip_horizontal: boolean;
+  histogram_eq: boolean;
   isotherm: IsothermConfig;
 }
 

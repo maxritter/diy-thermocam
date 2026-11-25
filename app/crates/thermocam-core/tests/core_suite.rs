@@ -618,4 +618,28 @@ fn circle_polygon_delta_rois_and_uhd_4k_resolutions() {
     assert_eq!(parsed_pal.rgb.len(), 256);
     assert_eq!(parsed_pal.rgb[0], [0, 0, 255]);
     assert_eq!(parsed_pal.rgb[255], [255, 127, 0]);
+
+    // Verify display-only clipped-CDF Histogram Equalization (HEQ / CLAHE)
+    let low_contrast: Vec<f32> = (0..256).map(|i| 0.40 + (i as f32 / 255.0) * 0.12).collect();
+    let eq = thermocam_core::imaging::apply_clipped_histogram_eq(&low_contrast);
+    assert_eq!(eq.len(), 256);
+    assert!(eq[255] - eq[0] > 0.70);
+
+    let heq_pipeline = DisplayPipeline {
+        histogram_eq: true,
+        ..DisplayPipeline::default()
+    };
+    let heq_rgb = thermocam_core::imaging::render_thermal_rgb(
+        &frame.pixels,
+        160,
+        120,
+        320,
+        240,
+        frame.min_raw,
+        frame.max_raw,
+        &parsed_pal,
+        rad,
+        &heq_pipeline,
+    );
+    assert_eq!(heq_rgb.len(), 320 * 240 * 3);
 }

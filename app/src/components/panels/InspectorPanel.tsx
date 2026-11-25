@@ -224,6 +224,15 @@ export function InspectorPanel({
 
           <div className="flex items-center justify-between pt-0.5">
             <StudioSwitch
+              checked={pipeline.histogram_eq}
+              onCheckedChange={(v) => onPipelineChange({ ...pipeline, histogram_eq: v })}
+              label="Histogram Eq (HEQ)"
+            />
+            <span className="font-mono-tech text-[10px] text-[var(--tc-text-dim)]">CLAHE</span>
+          </div>
+
+          <div className="flex items-center justify-between pt-0.5">
+            <StudioSwitch
               checked={pipeline.rotate_180}
               onCheckedChange={(v) => onPipelineChange({ ...pipeline, rotate_180: v })}
               label="Rotate 180°"

@@ -4,6 +4,7 @@ import {
   Camera,
   Circle,
   CircleDot,
+  Copy,
   Cpu,
   Crosshair,
   Flame,
@@ -188,6 +189,7 @@ export function App(): React.JSX.Element {
     sharpen_amount: 0.45,
     rotate_180: false,
     flip_horizontal: false,
+    histogram_eq: false,
     isotherm: { mode: "off", low_c: 40, high_c: 60, color: [0, 230, 160] },
   });
 
@@ -209,6 +211,9 @@ export function App(): React.JSX.Element {
 
   const [recording, setRecording] = useState(false);
   const [recordedCount, setRecordedCount] = useState(0);
+  const [timelapseActive, setTimelapseActive] = useState(false);
+  const [timelapseIntervalSec, setTimelapseIntervalSec] = useState(5);
+  const [timelapseCount, setTimelapseCount] = useState(0);
   const [hwButtonTrigger, setHwButtonTrigger] = useState(true);
   const [lastExportMsg, setLastExportMsg] = useState<string | null>(null);
   const [editorStatusMsg, setEditorStatusMsg] = useState<string | null>(null);
@@ -403,6 +408,34 @@ export function App(): React.JSX.Element {
       setStreaming(true);
     }
   };
+
+  const handleCopyThermalImage = async () => {
+    const canvas = document.querySelector<HTMLCanvasElement>('canvas[data-thermal-canvas="true"]');
+    if (!canvas) {
+      showToast("No active thermal canvas to copy");
+      return;
+    }
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (blob && typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        showToast("Copied thermal PNG image to clipboard");
+        return;
+      }
+      showToast("Clipboard image API unavailable in this browser context");
+    } catch {
+      showToast("Could not copy image to clipboard");
+    }
+  };
+
+  useEffect(() => {
+    if (!timelapseActive) return;
+    const id = setInterval(() => {
+      setTimelapseCount((c) => c + 1);
+      setRecordedCount((c) => c + 1);
+    }, timelapseIntervalSec * 1000);
+    return () => clearInterval(id);
+  }, [timelapseActive, timelapseIntervalSec]);
 
   const handleToggleRecording = async () => {
     const next = !recording;
@@ -655,6 +688,15 @@ export function App(): React.JSX.Element {
                   </button>
                   <button
                     type="button"
+                    onClick={() => void handleCopyThermalImage()}
+                    className="tc-btn h-[28px] w-[28px] p-0"
+                    title="Copy thermal image (PNG) to clipboard"
+                    aria-label="Copy thermal image to clipboard"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() =>
                       void handleExport("png", {
                         resolution: "full_hd1080p",
@@ -837,6 +879,23 @@ export function App(): React.JSX.Element {
               onPipelineChange={setPipeline}
               recording={recording}
               recordedCount={recordedCount}
+              timelapseActive={timelapseActive}
+              timelapseIntervalSec={timelapseIntervalSec}
+              timelapseCount={timelapseCount}
+              onTimelapseIntervalChange={setTimelapseIntervalSec}
+              onToggleTimelapse={() => {
+                const next = !timelapseActive;
+                setTimelapseActive(next);
+                if (next) {
+                  setTimelapseCount((c) => c + 1);
+                  setRecordedCount((c) => c + 1);
+                }
+                showToast(
+                  next
+                    ? `Time-lapse capture started (every ${timelapseIntervalSec}s)`
+                    : `Time-lapse capture stopped (${timelapseCount} frames)`,
+                );
+              }}
               hwButtonTrigger={hwButtonTrigger}
               onToggleHwButtonTrigger={setHwButtonTrigger}
               onToggleRecording={handleToggleRecording}

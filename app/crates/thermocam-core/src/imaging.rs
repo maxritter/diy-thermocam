@@ -35,6 +35,8 @@ pub struct DisplayPipeline {
     pub sharpen_amount: f32,
     pub rotate_180: bool,
     pub flip_horizontal: bool,
+    #[serde(default)]
+    pub histogram_eq: bool,
     pub isotherm: IsothermConfig,
 }
 
@@ -46,9 +48,55 @@ impl Default for DisplayPipeline {
             sharpen_amount: 0.45,
             rotate_180: false,
             flip_horizontal: false,
+            histogram_eq: false,
             isotherm: IsothermConfig::default(),
         }
     }
+}
+
+/// Display-only clipped-CDF histogram equalization (CLAHE-style plateau clip) that boosts
+/// subtle thermal contrast like Lepton AGC HEQ without altering raw 16-bit radiometry.
+#[must_use]
+pub fn apply_clipped_histogram_eq(norm: &[f32]) -> Vec<f32> {
+    if norm.is_empty() {
+        return Vec::new();
+    }
+    const BINS: usize = 256;
+    let mut hist = [0u32; BINS];
+    for &v in norm {
+        let idx = (v.clamp(0.0, 1.0) * 255.0).round() as usize;
+        hist[idx.min(BINS - 1)] += 1;
+    }
+    let clip_limit = ((norm.len() as f32 / BINS as f32) * 3.0).max(4.0) as u32;
+    let mut excess: u32 = 0;
+    for h in &mut hist {
+        if *h > clip_limit {
+            excess += *h - clip_limit;
+            *h = clip_limit;
+        }
+    }
+    let redist = excess / BINS as u32;
+    for h in &mut hist {
+        *h += redist;
+    }
+    let mut cdf = [0f32; BINS];
+    let mut running = 0u32;
+    for i in 0..BINS {
+        running += hist[i];
+        cdf[i] = running as f32;
+    }
+    let total = running.max(1) as f32;
+    let cdf_min = cdf.iter().copied().find(|&c| c > 0.0).unwrap_or(0.0);
+    let denom = (total - cdf_min).max(1.0);
+    norm.iter()
+        .map(|&v| {
+            let lin = v.clamp(0.0, 1.0);
+            let idx = (lin * 255.0).round() as usize;
+            let eq = ((cdf[idx.min(BINS - 1)] - cdf_min) / denom).clamp(0.0, 1.0);
+            // Blend 75% clipped HEQ + 25% linear to keep temperature ordering smooth
+            (eq * 0.75 + lin * 0.25).clamp(0.0, 1.0)
+        })
+        .collect()
 }
 
 #[must_use]
@@ -318,6 +366,15 @@ pub fn render_thermal_rgb(
     let lo = f32::from(min_raw);
     let span = f32::from(max_raw.saturating_sub(min_raw)).max(1.0);
     let mut norm: Vec<f32> = scalar.iter().map(|&v| ((v - lo) / span).clamp(0.0, 1.0)).collect();
+    let linear_for_iso = if pipeline.histogram_eq && pipeline.isotherm.mode != IsothermMode::Off {
+        Some(resample_scalar(&norm, sw, sh, dw, dh, pipeline.upscaler))
+    } else {
+        None
+    };
+
+    if pipeline.histogram_eq {
+        norm = apply_clipped_histogram_eq(&norm);
+    }
 
     if pipeline.upscaler == UpscaleMethod::EdgePreserve {
         norm = bilateral_denoise(&norm, sw, sh, 0.08);
@@ -330,10 +387,11 @@ pub fn render_thermal_rgb(
 
     let iso_active = pipeline.isotherm.mode != IsothermMode::Off;
     let mut rgb = Vec::with_capacity(dw * dh * 3);
-    for &t in &upscaled {
+    for (idx, &t) in upscaled.iter().enumerate() {
         let clamped = t.clamp(0.0, 1.0);
         if iso_active {
-            let approx_raw = (lo + clamped * span).round().clamp(0.0, 65_535.0) as u16;
+            let iso_t = linear_for_iso.as_ref().map_or(clamped, |lin| lin[idx].clamp(0.0, 1.0));
+            let approx_raw = (lo + iso_t * span).round().clamp(0.0, 65_535.0) as u16;
             let temp_c = raw_to_object_c(approx_raw, rad);
             if pipeline.isotherm.matches(temp_c) {
                 rgb.extend_from_slice(&pipeline.isotherm.color);

@@ -1,5 +1,6 @@
 import {
   CircleDot,
+  Clock,
   FileSpreadsheet,
   FileText,
   Film,
@@ -16,6 +17,11 @@ interface CaptureExportPanelProps {
   onPipelineChange: (p: DisplayPipeline) => void;
   recording: boolean;
   recordedCount: number;
+  timelapseActive: boolean;
+  timelapseIntervalSec: number;
+  timelapseCount: number;
+  onTimelapseIntervalChange: (sec: number) => void;
+  onToggleTimelapse: () => void;
   hwButtonTrigger: boolean;
   onToggleHwButtonTrigger: (enabled: boolean) => void;
   onToggleRecording: () => Promise<void>;
@@ -37,6 +43,11 @@ export function CaptureExportPanel({
   onPipelineChange,
   recording,
   recordedCount,
+  timelapseActive,
+  timelapseIntervalSec,
+  timelapseCount,
+  onTimelapseIntervalChange,
+  onToggleTimelapse,
   hwButtonTrigger,
   onToggleHwButtonTrigger,
   onToggleRecording,
@@ -186,6 +197,47 @@ export function CaptureExportPanel({
             {recording ? <Square className="h-3.5 w-3.5" /> : <CircleDot className="h-3.5 w-3.5" />}
             {recording ? "Stop Recording" : "Start Recording"}
           </button>
+        </div>
+
+        {/* Time-Lapse .DAT Sequence Capture */}
+        <div className="tc-card flex items-center justify-between gap-3 p-3.5">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-[13px] font-semibold">Time-Lapse Radiometric Capture</h3>
+              {timelapseActive ? (
+                <StudioBadge tone="amber">ACTIVE · {timelapseCount} frames</StudioBadge>
+              ) : (
+                <StudioBadge tone="neutral">{timelapseCount} captured</StudioBadge>
+              )}
+            </div>
+            <p className="mt-0.5 text-[11.5px] text-[var(--tc-text-muted)]">
+              Capture lossless `.DAT` snapshots on schedule — feeds directly into the Time Plotter
+              and Full HD H.264 MP4 exporter.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <select
+              value={timelapseIntervalSec}
+              disabled={timelapseActive}
+              onChange={(e) => onTimelapseIntervalChange(Number(e.target.value))}
+              className="tc-select w-[92px] font-mono-tech text-[12px]"
+              aria-label="Time-lapse interval"
+            >
+              <option value={1}>Every 1s</option>
+              <option value={2}>Every 2s</option>
+              <option value={5}>Every 5s</option>
+              <option value={10}>Every 10s</option>
+              <option value={30}>Every 30s</option>
+            </select>
+            <button
+              type="button"
+              onClick={onToggleTimelapse}
+              className={`tc-btn px-3 ${timelapseActive ? "tc-btn-danger" : ""}`}
+            >
+              <Clock className="h-3.5 w-3.5" />
+              {timelapseActive ? "Stop" : "Start Time-Lapse"}
+            </button>
+          </div>
         </div>
 
         {/* Format Export Grid */}

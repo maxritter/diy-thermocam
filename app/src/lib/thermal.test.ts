@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { DEFAULT_PALETTES, parseCustomPaletteText, samplePalette } from "./palettes";
 import {
+  applyClippedHistogramEq,
   compensateEmissivityC,
   computeHistogram256,
   computeTempGrid,
@@ -65,6 +66,12 @@ describe("DIY-Thermocam frontend thermal engine", () => {
     const hist = computeHistogram256(frame.pixels, frame.min_raw, frame.max_raw);
     const total = Array.from(hist).reduce((a, b) => a + b, 0);
     expect(total).toBe(19200);
+
+    const lowContrast = new Uint8Array(64);
+    for (let i = 0; i < 64; i++) lowContrast[i] = 100 + (i % 16);
+    const eq = applyClippedHistogramEq(lowContrast);
+    expect(eq.length).toBe(64);
+    expect(Math.max(...eq) - Math.min(...eq)).toBeGreaterThan(100);
   });
 
   test("binary FrameRaw packet decoding from Tauri Channel<InvokeResponseBody::Raw>", () => {

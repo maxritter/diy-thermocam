@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { samplePalette } from "@/lib/palettes";
-import { evaluateRoi, formatTemp, matchesIsotherm, rawToObjectC, unitSymbol } from "@/lib/thermal";
+import {
+  applyClippedHistogramEq,
+  evaluateRoi,
+  formatTemp,
+  matchesIsotherm,
+  rawToObjectC,
+  unitSymbol,
+} from "@/lib/thermal";
 import type {
   DisplayPipeline,
   Palette,
@@ -234,7 +241,7 @@ export function ThermalViewport({
     const cv = canvasRef.current;
     if (!cv) return;
     const span = Math.max(1, maxRaw - minRaw);
-    const normBytes = new Uint8Array(sensorW * sensorH);
+    const rawNormBytes = new Uint8Array(sensorW * sensorH);
     const splitCol = compareFrame ? Math.round(sensorW * splitRatio) : sensorW;
 
     for (let y = 0; y < sensorH; y++) {
@@ -245,9 +252,10 @@ export function ThermalViewport({
             ? (compareFrame.pixels[idx] ?? frame.pixels[idx])
             : frame.pixels[idx];
         const norm = Math.max(0, Math.min(1, (raw - minRaw) / span));
-        normBytes[idx] = Math.round(norm * 255);
+        rawNormBytes[idx] = Math.round(norm * 255);
       }
     }
+    const normBytes = pipeline.histogram_eq ? applyClippedHistogramEq(rawNormBytes) : rawNormBytes;
 
     const handles = glRef.current;
     if (handles) {
@@ -505,6 +513,12 @@ export function ThermalViewport({
             <span>USM {Math.round(pipeline.sharpen_amount * 100)}%</span>
           </>
         ) : null}
+        {pipeline.histogram_eq ? (
+          <>
+            <span className="text-white/35">·</span>
+            <span className="text-[var(--tc-accent)]">HEQ</span>
+          </>
+        ) : null}
         <span className="text-white/35">·</span>
         <span>ε={rad.emissivity.toFixed(2)}</span>
       </div>
@@ -519,6 +533,7 @@ export function ThermalViewport({
       >
         <canvas
           ref={canvasRef}
+          data-thermal-canvas="true"
           width={960}
           height={720}
           className="block h-full w-full rounded-[4px]"

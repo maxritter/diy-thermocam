@@ -1,5 +1,5 @@
-import { Contrast, Download, Grid3x3, Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { Check, Contrast, Copy, Download, Grid3x3, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { StudioSwitch } from "@/components/ui/Primitives";
 import { formatTemp, fromCelsius, sampleLineProfile, unitSymbol } from "@/lib/thermal";
 import type {
@@ -54,7 +54,9 @@ export function MeasurementsPanel({
     return Array.from(new Set(keys));
   }, [rois]);
 
-  const exportCsv = (): void => {
+  const [copiedCsv, setCopiedCsv] = useState(false);
+
+  const buildCsvText = (): string => {
     const headers = ["time_s", ...seriesKeys];
     const rows = history.map((pt) =>
       [
@@ -65,7 +67,11 @@ export function MeasurementsPanel({
         }),
       ].join(","),
     );
-    const csv = [headers.join(","), ...rows].join("\n");
+    return [headers.join(","), ...rows].join("\n");
+  };
+
+  const exportCsv = (): void => {
+    const csv = buildCsvText();
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -73,6 +79,28 @@ export function MeasurementsPanel({
     a.download = "thermocam_time_series.csv";
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const copyCsvToClipboard = async (): Promise<void> => {
+    const roiHeader = "roi,min,mean,max,std_dev,emissivity";
+    const roiRows = roiStats.map((st) =>
+      [
+        st.label,
+        fromCelsius(st.min_c, unit).toFixed(2),
+        fromCelsius(st.mean_c, unit).toFixed(2),
+        fromCelsius(st.max_c, unit).toFixed(2),
+        st.std_dev_c.toFixed(2),
+        st.effective_emissivity.toFixed(2),
+      ].join(","),
+    );
+    const payload = [roiHeader, ...roiRows, "", buildCsvText()].join("\n");
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopiedCsv(true);
+      setTimeout(() => setCopiedCsv(false), 2000);
+    } catch {
+      // Clipboard API unavailable in non-secure headless contexts
+    }
   };
 
   // Compute time-plotter SVG bounds
@@ -198,6 +226,18 @@ export function MeasurementsPanel({
             </p>
           </div>
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => void copyCsvToClipboard()}
+              className="tc-btn text-[12px]"
+            >
+              {copiedCsv ? (
+                <Check className="h-3.5 w-3.5 text-[var(--tc-pass)]" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              {copiedCsv ? "Copied CSV" : "Copy CSV"}
+            </button>
             <button type="button" onClick={exportCsv} className="tc-btn text-[12px]">
               <Download className="h-3.5 w-3.5" />
               Export CSV

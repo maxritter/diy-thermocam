@@ -449,6 +449,45 @@ export function computeHistogram256(
   return bins;
 }
 
+/**
+ * Display-only clipped-CDF histogram equalization (CLAHE-style plateau clip).
+ * Enhances local contrast on subtle scenes without touching raw 16-bit radiometry.
+ */
+export function applyClippedHistogramEq(normBytes: Uint8Array): Uint8Array {
+  const n = normBytes.length;
+  if (n === 0) return normBytes;
+  const hist = new Uint32Array(256);
+  for (let i = 0; i < n; i++) hist[normBytes[i]]++;
+
+  const clipLimit = Math.max(4, Math.floor((n / 256) * 3));
+  let excess = 0;
+  for (let i = 0; i < 256; i++) {
+    if (hist[i] > clipLimit) {
+      excess += hist[i] - clipLimit;
+      hist[i] = clipLimit;
+    }
+  }
+  const redist = Math.floor(excess / 256);
+  for (let i = 0; i < 256; i++) hist[i] += redist;
+
+  const cdf = new Float32Array(256);
+  let running = 0;
+  let cdfMin = -1;
+  for (let i = 0; i < 256; i++) {
+    running += hist[i];
+    cdf[i] = running;
+    if (cdfMin < 0 && running > 0) cdfMin = running;
+  }
+  const denom = Math.max(1, running - Math.max(0, cdfMin));
+  const out = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    const v = normBytes[i];
+    const eq = ((cdf[v] - Math.max(0, cdfMin)) / denom) * 255;
+    out[i] = Math.max(0, Math.min(255, Math.round(eq * 0.75 + v * 0.25)));
+  }
+  return out;
+}
+
 export function computeTempGrid(
   pixels: Uint16Array,
   width: number,
