@@ -38,6 +38,25 @@
 //Command, default send frame
 static byte sendCmd = FRAME_NORMAL;
 
+/*######################## STATIC FUNCTION BODIES #############################*/
+
+/* Wait up to 100ms until count bytes are available, the PC may split a payload */
+static bool serialWait(int count)
+{
+	long timer = millis();
+	while ((Serial.available() < count) && ((millis() - timer) < 100))
+		;
+	return Serial.available() >= count;
+}
+
+/* Read a 16-bit value, MSB first. Two reads in one expression have no fixed order */
+static uint16_t serialRead16()
+{
+	uint16_t msb = Serial.read();
+	uint16_t lsb = Serial.read();
+	return (msb << 8) | lsb;
+}
+
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
 /* Get integer out of a text string */
@@ -194,7 +213,7 @@ void sendFWVersion()
 void setLimits()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -234,7 +253,7 @@ void setLimits()
 void setTextColor()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -268,7 +287,7 @@ void setTextColor()
 void setColorScheme()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -302,7 +321,7 @@ void setColorScheme()
 void setTempFormat()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -334,7 +353,7 @@ void setTempFormat()
 void setShowSpot()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -366,7 +385,7 @@ void setShowSpot()
 void setShowColorbar()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -398,7 +417,7 @@ void setShowColorbar()
 void setMinMax()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -430,7 +449,7 @@ void setMinMax()
 void setShutterMode()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -458,7 +477,7 @@ void setShutterMode()
 void setFilterType()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -490,7 +509,7 @@ void setFilterType()
 void setRotation()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 1)
+	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -538,7 +557,7 @@ void sendDiagnostic()
 void setTempPoints()
 {
 	//If not enough data available, leave
-	if (Serial.available() < 384)
+	if (!serialWait(384))
 	{
 		Serial.write(CMD_INVALID);
 		return;
@@ -548,14 +567,14 @@ void setTempPoints()
 	for (byte i = 0; i < 96; i++)
 	{
 		//Read index
-		tempPoints[i][0] = (Serial.read() << 8) + Serial.read();
+		tempPoints[i][0] = serialRead16();
 
 		//Correct old not_set marker
 		if (tempPoints[i][0] == 65535)
 			tempPoints[i][0] = 0;
 
 		//Read value
-		tempPoints[i][1] = (Serial.read() << 8) + Serial.read();
+		tempPoints[i][1] = serialRead16();
 	}
 
 	//Send ACK
