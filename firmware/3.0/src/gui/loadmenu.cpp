@@ -391,7 +391,7 @@ void displayVideoFrame(uint32_t imgCount)
 
 /* Play a video from the internal storage */
 void playVideo(char* dirname, uint32_t imgCount) {
-	char buffer[14];
+	char buffer[32];
 	//Save the current frame number
 	uint32_t frameNumber = 0;
 

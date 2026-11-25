@@ -346,7 +346,7 @@ bool hotColdColorMenu()
 void hotColdChooserHandler()
 {
 	//Help variables
-	char margin[14];
+	char margin[20];
 
 	//Display level as temperature
 	if (!tempFormat)

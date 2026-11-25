@@ -58,50 +58,50 @@ void createSDName(char *filename, boolean folder)
 	char buffer[5];
 	//Year
 	itoa(year(), buffer, 10);
-	strncpy(&filename[0], buffer, 4);
+	memcpy(&filename[0], buffer, 4);
 	//Month
 	itoa(month(), buffer, 10);
 	if (month() < 10)
 	{
 		filename[4] = '0';
-		strncpy(&filename[5], buffer, 1);
+		filename[5] = buffer[0];
 	}
 	else
 	{
-		strncpy(&filename[4], buffer, 2);
+		memcpy(&filename[4], buffer, 2);
 	}
 	//Day
 	itoa(day(), buffer, 10);
 	if (day() < 10)
 	{
 		filename[6] = '0';
-		strncpy(&filename[7], buffer, 1);
+		filename[7] = buffer[0];
 	}
 	else
 	{
-		strncpy(&filename[6], buffer, 2);
+		memcpy(&filename[6], buffer, 2);
 	}
 	//Hour
 	itoa(hour(), buffer, 10);
 	if (hour() < 10)
 	{
 		filename[8] = '0';
-		strncpy(&filename[9], buffer, 1);
+		filename[9] = buffer[0];
 	}
 	else
 	{
-		strncpy(&filename[8], buffer, 2);
+		memcpy(&filename[8], buffer, 2);
 	}
 	//Minute
 	itoa(minute(), buffer, 10);
 	if (minute() < 10)
 	{
 		filename[10] = '0';
-		strncpy(&filename[11], buffer, 1);
+		filename[11] = buffer[0];
 	}
 	else
 	{
-		strncpy(&filename[10], buffer, 2);
+		memcpy(&filename[10], buffer, 2);
 	}
 	//Second
 	itoa(second(), buffer, 10);
@@ -109,14 +109,14 @@ void createSDName(char *filename, boolean folder)
 	{
 		filename[12] = '0';
 		if (!folder)
-			strncpy(&filename[13], buffer, 1);
+			filename[13] = buffer[0];
 		else
 			strcpy(&filename[13], buffer);
 	}
 	else
 	{
 		if (!folder)
-			strncpy(&filename[12], buffer, 2);
+			memcpy(&filename[12], buffer, 2);
 		else
 			strcpy(&filename[12], buffer);
 	}
@@ -198,7 +198,7 @@ void saveVideoFrame(char *filename)
 /* Proccess video frames */
 void processVideoFrames(uint32_t framesCaptured, char *dirname)
 {
-	char buffer[30];
+	char buffer[48];
 	char filename[] = "000000.DAT";
 	uint32_t framesConverted = 0;
 

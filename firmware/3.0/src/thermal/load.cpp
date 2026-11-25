@@ -435,7 +435,7 @@ bool yearChoose(char *filename)
 		}
 	}
 	//Copy the chosen yearStorage to the filename
-	strncpy(&filename[0], yearBuf, 4);
+	memcpy(&filename[0], yearBuf, 4);
 	return false;
 }
 
@@ -483,11 +483,11 @@ bool monthChoose(bool *months, char *filename)
 	if (atoi(monthBuf) < 10)
 	{
 		filename[4] = '0';
-		strncpy(&filename[5], monthBuf, 1);
+		filename[5] = monthBuf[0];
 	}
 	//Else copy those two digits
 	else
-		strncpy(&filename[4], monthBuf, 2);
+		memcpy(&filename[4], monthBuf, 2);
 	return false;
 }
 
@@ -532,10 +532,10 @@ bool dayChoose(bool *days, char *filename)
 	if (atoi(dayBuf) < 10)
 	{
 		filename[6] = '0';
-		strncpy(&filename[7], dayBuf, 1);
+		filename[7] = dayBuf[0];
 	}
 	else
-		strncpy(&filename[6], dayBuf, 2);
+		memcpy(&filename[6], dayBuf, 2);
 	return false;
 }
 
@@ -580,10 +580,10 @@ bool hourChoose(bool *hours, char *filename)
 	if (atoi(hourBuf) < 10)
 	{
 		filename[8] = '0';
-		strncpy(&filename[9], hourBuf, 1);
+		filename[9] = hourBuf[0];
 	}
 	else
-		strncpy(&filename[8], hourBuf, 2);
+		memcpy(&filename[8], hourBuf, 2);
 	return false;
 }
 
@@ -629,10 +629,10 @@ bool minuteChoose(bool *minutes, char *filename)
 	if (atoi(minuteBuf) < 10)
 	{
 		filename[10] = '0';
-		strncpy(&filename[11], minuteBuf, 1);
+		filename[11] = minuteBuf[0];
 	}
 	else
-		strncpy(&filename[10], minuteBuf, 2);
+		memcpy(&filename[10], minuteBuf, 2);
 	return false;
 }
 
@@ -678,10 +678,10 @@ bool secondChoose(bool *seconds, char *filename)
 	if (atoi(secondBuf) < 10)
 	{
 		filename[12] = '0';
-		strncpy(&filename[13], secondBuf, 1);
+		filename[13] = secondBuf[0];
 	}
 	else
-		strncpy(&filename[12], secondBuf, 2);
+		memcpy(&filename[12], secondBuf, 2);
 	return false;
 }
 
@@ -691,12 +691,18 @@ void copyIntoBuffers(char *filename)
 	//Save filename into the buffer
 	sdFile.getName(filename, 19);
 	//Extract the time and date components into extra buffer
-	strncpy(yearBuf, &filename[0], 4);
-	strncpy(monthBuf, &filename[4], 2);
-	strncpy(dayBuf, &filename[6], 2);
-	strncpy(hourBuf, &filename[8], 2);
-	strncpy(minuteBuf, &filename[10], 2);
-	strncpy(secondBuf, &filename[12], 2);
+	memcpy(yearBuf, &filename[0], 4);
+	yearBuf[4] = '\0';
+	memcpy(monthBuf, &filename[4], 2);
+	monthBuf[2] = '\0';
+	memcpy(dayBuf, &filename[6], 2);
+	dayBuf[2] = '\0';
+	memcpy(hourBuf, &filename[8], 2);
+	hourBuf[2] = '\0';
+	memcpy(minuteBuf, &filename[10], 2);
+	minuteBuf[2] = '\0';
+	memcpy(secondBuf, &filename[12], 2);
+	secondBuf[2] = '\0';
 }
 
 /* Check if the file is a valid one */
@@ -1082,7 +1088,7 @@ void loadFind(char *filename, int *pos)
 	chooseFile(filename);
 	//Copy the filename for a compare value
 	char compare[20];
-	strncpy(compare, filename, 20);
+	snprintf(compare, sizeof(compare), "%s", filename);
 	//Find the new file position
 	findFile(filename, false, true, pos, compare);
 }
