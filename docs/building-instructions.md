@@ -8,7 +8,7 @@ You can build a DIY-Thermocam in two ways: the **V4 Zero-Solder Kit** *(prototyp
 
 DIY-Thermocam V4 eliminates soldering irons, loose jumper wires, coin cells, and trace cutting. Every power regulator, USB-C port, charger IC (`BQ24074`), 5 V synchronous boost (`TPS61022`), 3.3 V RTC LDO (`XC6206`), active reverse-polarity MOSFET chain, slide switch, tactile shutter button, USB D+/D- pogo pins, and female header socket arrives pre-soldered from the PCB fab. You plug in off-the-shelf modules and fasten the 3D-printed shell with `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws.
 
-> **Prototype status:** V4 PCB (`hardware/pcb/kicad-v4.0/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are `PROTOTYPE-PENDING` until physical bring-up is completed. For a field-proven build today, follow the verified V3.0 guide below.
+> **Prototype status:** V4 PCB (`hardware/pcb/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are `PROTOTYPE-PENDING` until physical bring-up is completed. For a field-proven build today, follow the verified V3.0 guide below.
 
 ### Minimal Worldwide Ordering Flow (4 Orders Total)
 

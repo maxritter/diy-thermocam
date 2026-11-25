@@ -5,7 +5,7 @@ Compiles the **real DIY-Thermocam Firmware 4.0.0 C++ UI, fonts, HUD, menus, and 
 ## Build & Export All Screens
 
 ```sh
-cd firmware/3.0/sim
+cd firmware/sim
 make screenshots
 ```
 

@@ -290,8 +290,8 @@ def write_cpls(raw_pos_csv: Path, fab_dir: Path, stem: str, rev: str = "", pad_m
             w.writerow([ref, f"{px:.4f}", f"{py:.4f}", side, f"{rot:.2f}"])
 
 
-def export_revision(pcb_root: Path, rev: str, skip_render: bool = False) -> None:
-    proj_dir = pcb_root / f"kicad-{rev}"
+def export_revision(pcb_root: Path, rev: str = "v4.0", skip_render: bool = False) -> None:
+    proj_dir = pcb_root
     stem = f"diy-thermocam-{rev}"
     sch_path = proj_dir / f"{stem}.kicad_sch"
     pcb_path = proj_dir / f"{stem}.kicad_pcb"
@@ -408,17 +408,15 @@ def export_revision(pcb_root: Path, rev: str, skip_render: bool = False) -> None
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export KiCad 10 fabrication packages for DIY-Thermocam.")
-    parser.add_argument("--rev", choices=["v3.0", "v4.0", "all"], default="all", help="PCB revision to export")
+    parser.add_argument("--rev", choices=["v4.0", "all"], default="v4.0", help="PCB revision to export")
     parser.add_argument("--skip-render", action="store_true", help="Skip 3D PNG raytrace rendering")
     args = parser.parse_args()
 
     pcb_root = Path(__file__).resolve().parent.parent
-    revs = ["v3.0", "v4.0"] if args.rev == "all" else [args.rev]
-    for rev in revs:
-        if not (pcb_root / f"kicad-{rev}" / f"diy-thermocam-{rev}.kicad_pcb").exists():
-            print(f"Skipping {rev} (not yet created)")
-            continue
-        export_revision(pcb_root, rev, skip_render=args.skip_render)
+    rev = "v4.0"
+    if not (pcb_root / f"diy-thermocam-{rev}.kicad_pcb").exists():
+        raise FileNotFoundError(f"Missing {pcb_root / f'diy-thermocam-{rev}.kicad_pcb'}")
+    export_revision(pcb_root, rev, skip_render=args.skip_render)
     return 0
 
 

@@ -11,10 +11,10 @@ Guidance for Claude Code in `diy-thermocam`. Canonical repository instructions l
 
 ```sh
 # Firmware compile (Teensy 4.1, core 1.62.0)
-cd firmware/3.0 && arduino-cli compile
+cd firmware && arduino-cli compile
 
 # Hardware regression suite (against a flashed V3 camera)
-cd firmware/3.0/test && pytest --baseline baseline-3.0.4.json
+cd firmware/test && pytest --baseline baseline-3.0.4.json
 
 # BOM validation (when hardware/bom/validate_bom.py is present)
 python3 hardware/bom/validate_bom.py

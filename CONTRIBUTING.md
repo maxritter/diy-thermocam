@@ -4,18 +4,17 @@ Thank you for contributing to DIY-Thermocam! All contributions are licensed unde
 
 ## Monorepo Layout
 
-- `firmware/3.0/` — Teensy 4.1 C++ firmware (`arduino-cli`) and hardware regression suite (`firmware/3.0/test/`)
-- `app/` — Cross-platform Tauri v2 desktop application (in progress)
+- `firmware/` — Teensy 4.1 C++ firmware (`arduino-cli`) and hardware regression suite (`firmware/test/`)
+- `app/` — Cross-platform Tauri v2 desktop application
 - `hardware/` — PCB (`hardware/pcb/`), enclosure (`hardware/enclosure/`), and Bill of Materials (`hardware/bom/`)
 - `docs/` — Technical documentation and specifications (single source of truth for GitHub and the website)
 - `website/` — Official site (`https://www.diy-thermocam.net`)
-- `software/` — Legacy desktop tools (maintained until the new desktop app reaches full parity)
 
 ## Local Setup & Verification
 
 ### Firmware
 1. Install [Arduino CLI](https://arduino.github.io/arduino-cli/).
-2. Compile from `firmware/3.0/`:
+2. Compile from `firmware/`:
    ```sh
    arduino-cli compile
    ```

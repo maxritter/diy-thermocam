@@ -2,7 +2,7 @@
 
 Incorporates all GPT-6.2 Astra Stage 1 2D findings (#182/#184) & Max #186 polish:
   - ENC-2D-P1-1: 3.20 mm nominal face slot width (t + 0.20 mm fit allowance matching
-    legacy-v3.0/enclosure.svg) so 2.8-3.2 mm cast acrylic assembles smoothly without cracking.
+    original V3.0 acrylic design) so 2.8-3.2 mm cast acrylic assembles smoothly without cracking.
   - ENC-2D-P1-2: Exact 39.20 mm standoff cavity depth (20 + 1.6 + 11 + 1.6 + 5) -> 0.00 mm bow!
   - ENC-2D-P1-3: Rotated tripod bolt circle (30/150/270 deg, R=8.2 mm, Z=29.8) -> >=2.6 mm
     bolt-to-center web and >=3.8 mm web clear of V4 USB-C!

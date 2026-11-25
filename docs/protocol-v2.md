@@ -1,6 +1,6 @@
 # DIY-Thermocam USB Protocol v2.0 Specification
 
-> **Status:** Authoritative wire specification for DIY-Thermocam firmware (`firmware/3.0/src/core/tc_proto_v2.*`, C++17) and the desktop application (`app/crates/thermocam-core`, Rust).
+> **Status:** Authoritative wire specification for DIY-Thermocam firmware (`firmware/src/core/tc_proto_v2.*`, C++17) and the desktop application (`app/crates/thermocam-core`, Rust).
 > **Protocol Version:** `2.0` (`proto_major = 2`, `proto_minor = 0`).
 > **License:** GPL-3.0.
 
@@ -531,7 +531,7 @@ Sent whenever a request cannot be mapped to a dedicated response ID (e.g., `ERR_
 
 ## 5. Golden Byte Test Vectors
 
-Both `firmware/3.0/tests_host/` (C++17) and `app/crates/thermocam-core` (Rust) MUST include unit tests verifying bit-exact encoding, decoding, and resynchronization against every vector below.
+Both `firmware/tests_host/` (C++17) and `app/crates/thermocam-core` (Rust) MUST include unit tests verifying bit-exact encoding, decoding, and resynchronization against every vector below.
 
 ### 5.1 Checksum Reference Checks
 - `crc8_smbus(b"123456789") == 0xF4`
@@ -600,7 +600,7 @@ Both `firmware/3.0/tests_host/` (C++17) and `app/crates/thermocam-core` (Rust) M
 
 ### 6.1 Explicit Wire Serialization (No Unaligned Struct Casts)
 - **Never** cast raw byte buffers directly to C++ `struct` pointers (`reinterpret_cast<const Header*>(buf)`) or use `#[repr(C, packed)]` pointer dereferences in Rust. Unaligned accesses and compiler padding differences cause subtle bugs and UB.
-- **C++17 (`firmware/3.0/src/core/tc_proto_v2.*`):**
+- **C++17 (`firmware/src/core/tc_proto_v2.*`):**
   - Keep `tc_proto_v2.h/.cpp` 100% free of `<Arduino.h>` (`<cstdint>`, `<cstddef>`, `<cstring>` only) so the identical file compiles under both GCC 15.2 (Teensy 4.1) and host `clang++`/`g++` CI tests.
   - Use tiny `inline` little-endian `read_u16_le` / `write_u16_le` / `read_u32_le` / `write_u32_le` / `read_u64_le` / `write_u64_le` / `read_f32_le` / `write_f32_le` helpers (`memcpy` into scalar + shift on big-endian if ever ported).
   - For zero-copy `FRAME_RAW` TX on Teensy 4.1 (little-endian Cortex-M7): compute streaming `crc32` across `(header[16], meta[64], pixel_buf[w*h*2], points[n*6])` and issue 3–4 bulk `Serial.write()` calls + 4-byte `crc32` + `Serial.send_now()`. Zero dynamic allocation and zero extra 38 KB copy buffer.

@@ -4,7 +4,7 @@
     {
       "label": "Website: Dev Server (Astro)",
       "type": "shell",
-      "command": "bun run dev",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && bun run dev",
       "options": {
         "cwd": "${workspaceFolder}/website"
       },
@@ -50,7 +50,7 @@
     {
       "label": "App: Tauri Dev",
       "type": "shell",
-      "command": "bunx tauri dev",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && bun run tauri dev",
       "options": {
         "cwd": "${workspaceFolder}/app"
       },
@@ -106,7 +106,7 @@
       "type": "shell",
       "command": "arduino-cli compile --warnings all",
       "options": {
-        "cwd": "${workspaceFolder}/firmware/3.0"
+        "cwd": "${workspaceFolder}/firmware"
       },
       "group": {
         "kind": "build",
@@ -119,7 +119,7 @@
       "type": "shell",
       "command": "arduino-cli upload -p ${input:serialPort}",
       "options": {
-        "cwd": "${workspaceFolder}/firmware/3.0"
+        "cwd": "${workspaceFolder}/firmware"
       },
       "group": "build",
       "problemMatcher": []
@@ -129,7 +129,7 @@
       "type": "shell",
       "command": "make test",
       "options": {
-        "cwd": "${workspaceFolder}/firmware/3.0/tests_host"
+        "cwd": "${workspaceFolder}/firmware/tests_host"
       },
       "group": "test",
       "problemMatcher": ["$gcc"]
@@ -139,7 +139,7 @@
       "type": "shell",
       "command": "make screenshots",
       "options": {
-        "cwd": "${workspaceFolder}/firmware/3.0/sim"
+        "cwd": "${workspaceFolder}/firmware/sim"
       },
       "group": "build",
       "problemMatcher": ["$gcc"]
@@ -149,7 +149,7 @@
       "type": "shell",
       "command": "uv run --with pytest --with pyserial pytest -v test_v2_protocol.py test_v2_sd_rad.py test_v2_stream_perf.py --port ${input:serialPort}",
       "options": {
-        "cwd": "${workspaceFolder}/firmware/3.0/test"
+        "cwd": "${workspaceFolder}/firmware/test"
       },
       "group": "test",
       "problemMatcher": []
@@ -162,17 +162,10 @@
       "problemMatcher": []
     },
     {
-      "label": "Hardware: Export PCB Fab Packages",
+      "label": "Hardware: Export PCB Fab Package",
       "type": "shell",
-      "command": "python3 hardware/pcb/scripts/export_fab.py --rev all",
+      "command": "python3 hardware/pcb/scripts/export_fab.py",
       "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "Hardware: Verify V3 KiCad Port",
-      "type": "shell",
-      "command": "python3 hardware/pcb/scripts/verify_v3_port.py",
-      "group": "test",
       "problemMatcher": []
     },
     {

@@ -1,6 +1,6 @@
 """Single source of truth for DIY-Thermocam V3.0 / V4.0 enclosure dimensions.
 
-All XY coordinates are anchored directly to `hardware/pcb/eagle-v3.0/pcb.brd`
+All XY coordinates are anchored directly to `hardware/pcb/diy-thermocam-v4.0.kicad_pcb`
 in the canonical camera frame (viewed from the Display / Front side):
   - X in [0, 89.4] mm: left edge (display 2x20 header) -> right edge (power switch)
   - Y in [0, 68.4] mm: bottom edge (USB / tripod) -> top edge (button / LED / microSD)
@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+import re
 import xml.etree.ElementTree as ET
 
 
@@ -67,7 +68,7 @@ class EnclosureParams:
     description: str
     is_zero_solder: bool = False
 
-    # --- Verified PCB geometry (from hardware/pcb/eagle-v3.0/pcb.brd) ---
+    # --- Verified PCB geometry (from hardware/pcb/diy-thermocam-v4.0.kicad_pcb) ---
     pcb_w: float = 89.40
     pcb_h: float = 68.40
     pcb_t: float = 1.60
@@ -342,6 +343,47 @@ def get_preset(variant: str) -> EnclosureParams:
     if variant not in PRESETS:
         raise KeyError(f"Unknown variant {variant!r}; expected one of {sorted(PRESETS)}")
     return PRESETS[variant]
+
+
+def parse_kicad_pcb_metrics(pcb_path: Path) -> dict[str, object]:
+    """Parse board outline, mounting/Lepton holes, and V4.0 mechanical datums from KiCad PCB."""
+    txt = pcb_path.read_text(encoding="utf-8")
+    dim_xs: list[float] = []
+    dim_ys: list[float] = []
+    for m in re.finditer(
+        r'\(gr_line\s+\(start\s+([-\d.]+)\s+([-\d.]+)\)\s+\(end\s+([-\d.]+)\s+([-\d.]+)\)[\s\S]*?\(layer\s+"Edge\.Cuts"\)',
+        txt,
+    ):
+        x1, y1, x2, y2 = (float(g) for g in m.groups())
+        dim_xs.extend([x1, x2])
+        dim_ys.extend([-y1, -y2])
+
+    mounting_holes: list[tuple[float, float]] = []
+    lepton_holes: list[tuple[float, float]] = []
+    refs: dict[str, tuple[float, float]] = {}
+    for m in re.finditer(
+        r'\(footprint\s+"([^"]+)"[\s\S]*?\(at\s+([-\d.]+)\s+([-\d.]+)[\s\S]*?\(property\s+"Reference"\s+"([^"]+)"',
+        txt,
+    ):
+        fp, xs, ys, ref = m.groups()
+        pt = (round(float(xs), 4), round(-float(ys), 4))
+        refs[ref] = pt
+        if "MountingHole_2.8mm_M2.5" in fp:
+            mounting_holes.append(pt)
+        elif "MountingHole_2.1mm_M2" in fp:
+            lepton_holes.append(pt)
+
+    return {
+        "pcb_w": round(max(dim_xs) - min(dim_xs), 4),
+        "pcb_h": round(max(dim_ys) - min(dim_ys), 4),
+        "mounting_holes": sorted(mounting_holes),
+        "lepton_holes": sorted(lepton_holes),
+        "usb_pos": refs["J3"],
+        "switch_pos": refs["SW1"],
+        "button_pos": refs["SW2"],
+        "prog_pos": refs["SW3"],
+        "chg_led_pos": refs["D2"],
+    }
 
 
 def parse_eagle_brd_metrics(brd_path: Path) -> dict[str, object]:

@@ -1,7 +1,0 @@
-pyserial
-numpy
-pygame
-pygbutton
-scipy
-scikit-image
-opencv-python

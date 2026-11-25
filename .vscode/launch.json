@@ -2,7 +2,42 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "App: Debug Tauri Desktop (Rust + Vite)",
+      "name": "Run Desktop App (Tauri Dev)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && bun run tauri dev",
+      "cwd": "${workspaceFolder}/app"
+    },
+    {
+      "name": "Run Website Dev Server (Astro)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && bun run dev -- --open",
+      "cwd": "${workspaceFolder}/website"
+    },
+    {
+      "name": "Compile & Flash Firmware 4.0 (Teensy)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && arduino-cli compile && arduino-cli upload",
+      "cwd": "${workspaceFolder}/firmware"
+    },
+    {
+      "name": "Run Firmware 4.0 UI Simulator",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && make screenshots",
+      "cwd": "${workspaceFolder}/firmware/sim"
+    },
+    {
+      "name": "Run Real-Camera V2 Hardware Tests",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "unset NODE_OPTIONS && export PATH=\"$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH\" && uv run --with pyserial --with pytest pytest test_v2_*.py",
+      "cwd": "${workspaceFolder}/firmware/test"
+    },
+    {
+      "name": "Debug Rust Backend (requires CodeLLDB)",
       "type": "lldb",
       "request": "launch",
       "cargo": {
@@ -21,60 +56,6 @@
       "cwd": "${workspaceFolder}/app",
       "preLaunchTask": "App: Frontend Dev (Vite)",
       "args": []
-    },
-    {
-      "name": "App: Attach to Running Tauri Process",
-      "type": "lldb",
-      "request": "attach",
-      "program": "${workspaceFolder}/app/target/debug/diy-thermocam"
-    },
-    {
-      "name": "App: Debug Real Camera E2E",
-      "type": "lldb",
-      "request": "launch",
-      "cargo": {
-        "args": [
-          "build",
-          "--manifest-path",
-          "${workspaceFolder}/app/Cargo.toml",
-          "-p",
-          "thermocam-core",
-          "--example",
-          "real_camera_e2e"
-        ],
-        "filter": {
-          "name": "real_camera_e2e",
-          "kind": "example"
-        }
-      },
-      "cwd": "${workspaceFolder}/app",
-      "args": ["${input:serialPort}"]
-    },
-    {
-      "name": "Firmware: Debug Host Unit Tests",
-      "type": "lldb",
-      "request": "launch",
-      "program": "${workspaceFolder}/firmware/3.0/tests_host/run_tests",
-      "cwd": "${workspaceFolder}/firmware/3.0/tests_host",
-      "preLaunchTask": "Firmware: Host Unit Tests",
-      "args": []
-    },
-    {
-      "name": "Firmware: Debug UI Simulator",
-      "type": "lldb",
-      "request": "launch",
-      "program": "${workspaceFolder}/firmware/3.0/sim/thermocam_sim",
-      "cwd": "${workspaceFolder}/firmware/3.0/sim",
-      "preLaunchTask": "Firmware: UI Simulator Screenshots",
-      "args": ["--screenshot-all", "out"]
-    }
-  ],
-  "inputs": [
-    {
-      "id": "serialPort",
-      "type": "promptString",
-      "description": "DIY-Thermocam V3 serial port (e.g. /dev/cu.usbmodem93126801, /dev/ttyACM0, COM4)",
-      "default": "/dev/cu.usbmodem93126801"
     }
   ]
 }

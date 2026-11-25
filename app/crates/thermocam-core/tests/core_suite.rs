@@ -715,7 +715,6 @@ fn real_v3_dat_and_protocol_v2_stream_fixtures() {
     let fixtures_dir = manifest_dir
         .join("../../..")
         .join("firmware")
-        .join("3.0")
         .join("test")
         .join("fixtures");
 

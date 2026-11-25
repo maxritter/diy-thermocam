@@ -33,8 +33,8 @@ jobs:
               - '.github/workflows/ci.yml'
             app:
               - 'app/**'
-              - 'firmware/3.0/src/general/colorschemes.cpp'
-              - 'firmware/3.0/test/fixtures/**'
+              - 'firmware/src/general/colorschemes.cpp'
+              - 'firmware/test/fixtures/**'
               - 'docs/protocol-v2.md'
               - '.github/workflows/ci.yml'
             website:
@@ -86,10 +86,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.arduino-dir.outputs.path }}
-          key: arduino15-${{ runner.os }}-${{ hashFiles('firmware/3.0/sketch.yaml') }}
+          key: arduino15-${{ runner.os }}-${{ hashFiles('firmware/sketch.yaml') }}
 
       - name: Compile firmware (zero warnings)
-        working-directory: firmware/3.0
+        working-directory: firmware
         shell: bash
         run: arduino-cli compile --warnings all
 
@@ -107,13 +107,13 @@ jobs:
           sudo apt-get install -y clang g++ make zlib1g-dev
 
       - name: Run C++17 host unit tests
-        working-directory: firmware/3.0/tests_host
+        working-directory: firmware/tests_host
         run: |
           make clean
           make test
 
       - name: Build UI simulator & generate screenshots
-        working-directory: firmware/3.0/sim
+        working-directory: firmware/sim
         run: |
           make clean
           make screenshots
@@ -125,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: firmware-ui-simulator-screenshots
-          path: firmware/3.0/sim/out/*.png
+          path: firmware/sim/out/*.png
           retention-days: 14
 
   app-ci:
@@ -213,7 +213,7 @@ jobs:
         run: python3 hardware/bom/validate_bom.py
 
   hardware-pcb:
-    name: Hardware PCB KiCad ERC/DRC & V3 port verification
+    name: Hardware PCB KiCad ERC/DRC
     needs: changes
     if: needs.changes.outputs.pcb == 'true'
     runs-on: ubuntu-latest
@@ -222,32 +222,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install gerbv for Gerber raster verification
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends gerbv python3
-
-      - name: Verify KiCad V3.0 port & run ERC/DRC on V3.0 / V4.0
+      - name: Run KiCad ERC/DRC on hardware/pcb/
         env:
           KICAD_CLI: /usr/bin/kicad-cli
-          GERBV: /usr/bin/gerbv
         run: |
-          if [ -f hardware/pcb/scripts/verify_v3_port.py ]; then
-            python3 hardware/pcb/scripts/verify_v3_port.py
-          else
-            echo "::notice::hardware/pcb/scripts/verify_v3_port.py not present yet; skipping."
-          fi
-
-          for board in hardware/pcb/kicad-v3.0/diy-thermocam-v3.0 hardware/pcb/kicad-v4.0/diy-thermocam-v4.0; do
-            if [ -f "${board}.kicad_sch" ]; then
-              echo "Running ERC on ${board}.kicad_sch"
-              kicad-cli sch erc --severity-error --exit-code-violations --output /tmp/erc.json --format json "${board}.kicad_sch"
-            fi
-            if [ -f "${board}.kicad_pcb" ]; then
-              echo "Running DRC on ${board}.kicad_pcb"
-              kicad-cli pcb drc --severity-error --exit-code-violations --output /tmp/drc.json --format json "${board}.kicad_pcb"
-            fi
-          done
+          board="hardware/pcb/diy-thermocam-v4.0"
+          echo "Running ERC on ${board}.kicad_sch"
+          kicad-cli sch erc --severity-error --exit-code-violations --output /tmp/erc.json --format json "${board}.kicad_sch"
+          echo "Running DRC on ${board}.kicad_pcb"
+          kicad-cli pcb drc --refill-zones --severity-error --exit-code-violations --output /tmp/drc.json --format json "${board}.kicad_pcb"
 
   hardware-enclosure:
     name: Hardware Enclosure CAD (build123d) geometry tests

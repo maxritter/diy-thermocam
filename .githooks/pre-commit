@@ -107,10 +107,10 @@ if has_match '^hardware/bom/'; then
   python3 hardware/bom/validate_bom.py
 fi
 
-# 7. Firmware C++17 host unit tests (firmware/3.0/)
-if has_match '^firmware/3\.0/(src/core/|tests_host/|include/)'; then
+# 7. Firmware C++17 host unit tests (firmware/)
+if has_match '^firmware/(src/core/|tests_host/|include/)'; then
   echo "[pre-commit] Running firmware C++17 host unit tests..."
-  (cd firmware/3.0/tests_host && make test)
+  (cd firmware/tests_host && make test)
 fi
 
 echo "[pre-commit] All checks passed!"

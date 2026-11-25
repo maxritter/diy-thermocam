@@ -34,8 +34,8 @@
   },
   "C_Cpp.default.cppStandard": "c++17",
   "C_Cpp.default.includePath": [
-    "${workspaceFolder}/firmware/3.0/include",
-    "${workspaceFolder}/firmware/3.0/src/core"
+    "${workspaceFolder}/firmware/include",
+    "${workspaceFolder}/firmware/src/core"
   ],
   "files.associations": {
     "*.ino": "cpp",

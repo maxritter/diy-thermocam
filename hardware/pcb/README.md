@@ -1,46 +1,12 @@
-# DIY-Thermocam — PCB
+# DIY-Thermocam — PCB (KiCad 10)
 
-Native **KiCad 10** hardware projects and turnkey fabrication pipelines for DIY-Thermocam, keeping the legacy **Autodesk Eagle V3.0** files intact as the untouched baseline.
+Native **KiCad 10** hardware project and turnkey fabrication pipeline for the **DIY-Thermocam V4.0 Zero-Solder PCBA** directly in `hardware/pcb/`. (The proven legacy **V3.0** Eagle 9.6.2 baseline remains preserved forever in git history at tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/pcb).)
 
-| Revision | Status | Assembly Effort | Folder |
-|---|---|---|---|
-| **V3.0 (KiCad 10 1:1 Port)** | **Proven & Buildable Today** (verified 1:1 vs Eagle V3.0) | Through-hole hand soldering + Teensy VUSB cut | [`kicad-v3.0/`](kicad-v3.0/) |
-| **V3.0 (Legacy Eagle Baseline)** | **Frozen Reference** (100% untouched) | Original Eagle 9.6.2 sources & Gerbers | [`eagle-v3.0/`](eagle-v3.0/) |
-| **V4.0 (Zero-Solder PCBA)** | **`PROTOTYPE-PENDING`** (unproven until physically manufactured & verified by Max) | **Zero hand soldering** — factory PCBA + screwdriver-only snap-in assembly | [`kicad-v4.0/`](kicad-v4.0/) |
-
-> **Physical Prototype Gate:** **V4.0 (`kicad-v4.0/`) is strictly `PROTOTYPE-PENDING`** until Max manufactures, assembles, and verifies a physical unit (including USB-C charging/data, pogo-pin D+/D- alignment on Teensy 4.1, onboard 5V boost thermals, and mechanical enclosure fit). **V3.0 (`kicad-v3.0/` / `eagle-v3.0/`) remains the proven default buildable board** until physical V4.0 bring-up succeeds.
+> **Physical Prototype Gate:** **V4.0 (`hardware/pcb/`) is strictly `PROTOTYPE-PENDING`** until Max manufactures, assembles, and verifies a physical unit (including USB-C charging/data, pogo-pin D+/D- alignment on Teensy 4.1, onboard 5V boost thermals, and mechanical enclosure fit). **V3.0 (tag `3.0.4`) remains the proven default buildable board** until physical V4.0 bring-up succeeds.
 
 ---
 
-## 1. Verified 1:1 KiCad 10 V3.0 Port (`kicad-v3.0/`)
-
-Exact 1:1 port of [`eagle-v3.0/pcb.sch`](eagle-v3.0/pcb.sch) and [`eagle-v3.0/pcb.brd`](eagle-v3.0/pcb.brd) into native KiCad 10 S-expression files (`89.4 × 68.4 mm`, 2-layer, 1.6 mm FR4, all 21 components, all 30 active electrical nets, exact pad/track/via/drill coordinates).
-
-### Automated Verification (`scripts/verify_v3_port.py`)
-
-Run anytime to re-verify 1:1 fidelity against the frozen Eagle baseline:
-
-```bash
-python3 hardware/pcb/scripts/verify_v3_port.py
-```
-
-Latest verification results ([`kicad-v3.0/verification-report.json`](kicad-v3.0/verification-report.json)):
-
-- **Schematic ERC (`kicad-cli sch erc`):** `0 errors, 0 warnings`
-- **PCB DRC (`kicad-cli pcb drc`):** `0 errors, 0 unconnected items` (Eagle-original silkscreen/mounting-via warnings preserved intentionally for 1:1 copper/outline parity)
-- **Netlist Parity (PCB & Schematic vs Eagle `<signals>`):** `21/21 parts, 30/30 active nets (100% exact match)`
-- **Excellon Drills (vs `eagle-v3.0/gerber.zip`):** `182/182 hits matched, max XY error = 0.0000 mm, max diameter error = 0.0000 mm`
-- **600 DPI `gerbv` Layer XOR:** `Edge_Cuts = 0.000% diff (100.00% IoU)`, `F_Cu = 98.07% IoU`, `B_Cu = 92.61% IoU` (copper tracks/pads identical; minor delta is KiCad vs Eagle polygon pour beveling on the floating V3.0 `N$2`/`N$3` zones)
-
-### V3.0 KiCad 10 Renders
-
-| Display Side (`F.Cu`) | Lepton / Component Side (`B.Cu`) |
-|---|---|
-| ![V3.0 Top](kicad-v3.0/fab/diy-thermocam-v3.0-top.png) | ![V3.0 Bottom](kicad-v3.0/fab/diy-thermocam-v3.0-bottom.png) |
-
----
-
-## 2. DIY-Thermocam V4.0 — Zero-Solder PCBA (`kicad-v4.0/`, `PROTOTYPE-PENDING`)
+## 1. DIY-Thermocam V4.0 — Zero-Solder PCBA (`PROTOTYPE-PENDING`)
 
 **V4.0** keeps the exact `89.4 × 68.4 mm` outline, mounting-hole grid, and Display / Lepton / Teensy module positions while eliminating **100% of hand soldering** and fixing every V3.0 hardware pain point:
 
@@ -54,7 +20,7 @@ V4.0 intentionally keeps **Teensy 4.1 (pre-pinned)**, **FLIR Lepton Breakout V2.
 
 ### Key V4.0 Engineering Upgrades (Audited & Cost-Optimized)
 
-- **Exact V3.0 Module Header Parity (Automated `0.00 mm` XY + Net Assertion):** `J1` (BuyDisplay 2×20 on `F.Cu`), `J2` (FLIR Lepton 2×10 on `B.Cu`), and `J5`/`J6`/`J7` (Teensy 4.1 on `B.Cu`) are automatically verified against `kicad-v3.0` (`47/47` connected pads at `0.00 mm` XY error, with `J1.36/37/40` cleared for FT6206 safety).
+- **Exact V3.0 Module Header Parity (`0.00 mm` XY + Net Match):** `J1` (BuyDisplay 2×20 on `F.Cu`), `J2` (FLIR Lepton 2×10 on `B.Cu`), and `J5`/`J6`/`J7` (Teensy 4.1 on `B.Cu`) match the proven V3.0 pinout at `0.00 mm` XY error, with `J1.36/37/40` cleared for FT6206 safety.
 - **Board-Edge USB-C + ESD (`J3`, `D1`, `R7`, `R8`):** `TYPE-C-31-M-12` (`C165948`) at Eagle `(45.80, 0.0)` with datasheet `0.8 mm` board-edge overhang (`Y = -3.35 mm` center) on `B.Cu`, 2× `5.1 kΩ` CC sink pull-downs, and `USBLC6-2SC6` (`C7519`) TVS ESD array.
 - **Zero-Solder Teensy 4.1 USB D+/D- (`P1`, `P2`) — Matched Differential Pair:** Teensy `VUSB` is left open on the V4.0 socket (Teensy is powered via `5V` on `VIN`; do not plug a second USB cable directly into Teensy's onboard micro-USB while USB-C is connected — or cut Teensy's `VUSB–VIN` jumper pad). Two `12.0 mm` free / `11.0 mm` working-height SMD spring pogo pins (`YTC1P-8535-01`, `C5221289`, matched to `8.5 mm` sockets + `2.54 mm` Teensy shroud = `11.04 mm` gap) sit at `XenGi/teensy.pretty` `Teensy41` coordinates (`P1 D+` at `(65.63, -2.15)` GND side, `P2 D-` at `(68.17, -2.15)` VIN side) routed as a length-matched pair (`0.00 mm` skew). **Pre-Order Prototype Check:** PJRC does not publish an official mechanical drawing for Teensy 4.1 underside `D+`/`D-` pads — **spot-check `P1`/`P2` XY and polarity against a physical Teensy 4.1 with calipers and continuity meter before ordering PCBA.** Also note that pre-pinned Teensy 4.1 boards only populate the outer 48 pins; solder a 1×5 pin header onto Teensy's inner `VBAT`/`PROG` pads to engage `J7`.
 - **TI `BQ24074RGTR` Dynamic Power-Path Charger (`U3`, `C54313`):** Pin-compatible VQFN-16 regulating `VSYS` to `4.4 V` (`< TPS61022` `4.8 V` cold-start `VIN(max)` for guaranteed USB-only cold-start!), `0.3 mm` thermal vias on pad 17 (JLCPCB 2-layer spec), `EN2` pulled to regulated `VSYS` via `10 kΩ` `R22` (never 28V-tolerant `VBUS`), `1.3 A` input limit (`R11 = 1.2 kΩ` ≥ TI `1.1 kΩ` min), `890 mA` charge current (`R10 = 1.0 kΩ`), `90 mA` (`10.1%`) termination (`R23 = 3.0 kΩ` Basic `C4211` on `ITERM`), `R9 = 10 kΩ` `TS`, `R14 = 47 kΩ` `~6.3 h` safety timer, tight local `10 µF` decoupling (`C1`–`C3`), and single Basic Red `~CHG` LED (`D2` at `(5.75, -66.40)`).
@@ -70,19 +36,19 @@ V4.0 intentionally keeps **Teensy 4.1 (pre-pinned)**, **FLIR Lepton Breakout V2.
 
 | Display Side (`F.Cu`) | Lepton / PCBA Side (`B.Cu`) |
 |---|---|
-| ![V4.0 Top](kicad-v4.0/fab/diy-thermocam-v4.0-top.png) | ![V4.0 Bottom](kicad-v4.0/fab/diy-thermocam-v4.0-bottom.png) |
+| ![V4.0 Top](fab/diy-thermocam-v4.0-top.png) | ![V4.0 Bottom](fab/diy-thermocam-v4.0-bottom.png) |
 
 ---
 
-## 3. Turnkey Fabrication Pipeline (`scripts/export_fab.py`)
+## 2. Turnkey Fabrication Pipeline (`scripts/export_fab.py`)
 
-Regenerate complete manufacturing packages for V3.0 and V4.0 in one command (requires KiCad 10):
+Regenerate the complete V4.0 manufacturing package in one command (requires KiCad 10):
 
 ```bash
-python3 hardware/pcb/scripts/export_fab.py --rev all
+python3 hardware/pcb/scripts/export_fab.py
 ```
 
-Outputs under `kicad-<rev>/fab/`:
+Outputs under `hardware/pcb/fab/`:
 - `diy-thermocam-<rev>-gerbers.zip` — Standard 2-layer Gerbers (`F_Cu`, `B_Cu`, `F_Mask`, `B_Mask`, `F_Silkscreen`, `B_Silkscreen`, `F_Paste`, `B_Paste`, `Edge_Cuts`) + Excellon `.drl` drills
 - `diy-thermocam-<rev>-bom-{jlcpcb,seeed,pcbway}.csv` — Joined PCBA BOMs with LCSC / MPN columns
 - `diy-thermocam-<rev>-cpl-{jlcpcb,seeed}.csv` — Pick-and-place centroid files

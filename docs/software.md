@@ -20,9 +20,9 @@ Switch directly between **Standard** mode (clean live viewing, quick snapshots, 
 
 ## Legacy Windows & Python Tools (V3.0 Archive)
 
-The original tools remain available for legacy Windows workflows and V1/V2/V3.0 `.DAT` files:
+The original tools remain archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software) for legacy Windows workflows and V1/V2/V3.0 `.DAT` files:
 
-- **ThermoVision by Joe-C (Windows):** Third-party radiometric analysis software supporting DIY-Thermocam `.DAT` drag-and-drop editing and conversion. More details on [Joe-C's project page](http://joe-c.de/pages/projekte/thermovision.php) and in [`software/thermal_analysis_software`](https://github.com/maxritter/diy-thermocam/tree/master/software/thermal_analysis_software).
-- **Thermal Live Viewer (Python):** Standalone cross-platform viewer for legacy v1 USB serial live streaming (`software/thermal_live_viewer/`).
-- **Thermal Data Viewer (Windows):** Batch converter for legacy `.DAT` folders to JPG/BMP/PNG/AVI (`software/thermal_data_viewer/`).
-- **Video Converter (Windows):** Merges saved frame sequences into video files (`software/video_converter/`).
+- **ThermoVision by Joe-C (Windows):** Third-party radiometric analysis software supporting DIY-Thermocam `.DAT` drag-and-drop editing and conversion. More details on [Joe-C's project page](http://joe-c.de/pages/projekte/thermovision.php) and in [tag `3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software/thermal_analysis_software).
+- **Thermal Live Viewer (Python):** Standalone cross-platform viewer for legacy v1 USB serial live streaming (archived at tag `3.0.4`).
+- **Thermal Data Viewer (Windows):** Batch converter for legacy `.DAT` folders to JPG/BMP/PNG/AVI (archived at tag `3.0.4`).
+- **Video Converter (Windows):** Merges saved frame sequences into video files (archived at tag `3.0.4`).

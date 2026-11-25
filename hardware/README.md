@@ -1,7 +1,7 @@
 # DIY-Thermocam Hardware
 
-Hardware design files and Bill of Materials for the DIY-Thermocam V3 open-source thermal imager.
+Hardware design files and Bill of Materials for the DIY-Thermocam open-source thermal imager.
 
-- **[PCB (`pcb/`)](pcb/README.md)** — Verified V3.0 Eagle design files and Gerbers (`pcb/eagle-v3.0/`), with KiCad 9/10 port and manufacturing outputs planned under `pcb/`.
-- **[Enclosure (`enclosure/`)](enclosure/README.md)** — Verified V3.0 laser-cut enclosure (`enclosure/legacy-v3.0/`), with parametric 2D/3D CAD planned under `enclosure/`.
+- **[PCB (`pcb/`)](pcb/README.md)** — Native KiCad 10 V4.0 zero-solder PCBA sources, Gerbers, BOM/CPL exports, and 3D STEP model (`pcb/fab/`). Legacy V3.0 Eagle files are preserved in git history at tag `3.0.4`.
+- **[Enclosure (`enclosure/`)](enclosure/README.md)** — Parametric `build123d` CAD (`enclosure/cad/`), 2D laser-cut SVG/DXF and 3D/CNC STEP/STL/3MF exports (`enclosure/exports/`), and renders (`enclosure/renders/`).
 - **[Bill of Materials (`bom/`)](bom/)** — Single-source parts list, supplier links, and validation schema.

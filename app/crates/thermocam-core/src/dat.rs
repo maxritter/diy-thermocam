@@ -1,5 +1,5 @@
 //! Lossless V1/V2/V3 `.DAT` reader/writer (all 4 valid sizes + legacy 192-grid point heuristic)
-//! and `.thermo.json` non-destructive sidecar format (`firmware/3.0/src/thermal/save.cpp` & `load.cpp`).
+//! and `.thermo.json` non-destructive sidecar format (`firmware/src/thermal/save.cpp` & `load.cpp`).
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -239,7 +239,7 @@ impl ThermalDat {
     }
 }
 
-/// Exact firmware `readTempPoints()` heuristic (`firmware/3.0/src/thermal/load.cpp:192-262`).
+/// Exact firmware `readTempPoints()` heuristic (`firmware/src/thermal/load.cpp:192-262`).
 fn parse_temp_points(block: &[u8], width: u16) -> Vec<DatTempPoint> {
     let mut arr = [0u16; 192];
     for (i, chunk) in block.as_chunks::<2>().0.iter().take(192).enumerate() {

@@ -13,7 +13,7 @@ from build123d import Box, Location, Plane, RectangleRounded, Solid, extrude
 from thermocam_case.export import default_enclosure_root, export_all
 from thermocam_case.keepout import build_keepouts
 from thermocam_case.laser_case import build_laser_enclosure
-from thermocam_case.params import PRESETS, get_preset, parse_eagle_brd_metrics
+from thermocam_case.params import PRESETS, get_preset, parse_kicad_pcb_metrics
 from thermocam_case.printable_case import (
     _shell_envelope,
     build_printable_enclosure,
@@ -21,7 +21,7 @@ from thermocam_case.printable_case import (
 )
 
 ENCLOSURE_ROOT = default_enclosure_root()
-EAGLE_BRD_PATH = ENCLOSURE_ROOT.parent / "pcb" / "eagle-v3.0" / "pcb.brd"
+KICAD_PCB_PATH = ENCLOSURE_ROOT.parent / "pcb" / "diy-thermocam-v4.0.kicad_pcb"
 
 
 def _inter_vol(a: Solid, b: Solid) -> float:
@@ -37,20 +37,31 @@ def _assert_watertight(solid: Solid, label: str, min_vol: float = 40.0) -> None:
     assert len(shells) >= 1 and all(sh.is_valid for sh in shells)
 
 
-def test_params_match_real_eagle_pcb_xml() -> None:
-    metrics = parse_eagle_brd_metrics(EAGLE_BRD_PATH)
-    p = get_preset("v3_0")
-    assert abs(float(metrics["pcb_w"]) - p.pcb_w) <= 0.01
-    assert abs(float(metrics["pcb_h"]) - p.pcb_h) <= 0.01
-    assert sorted(p.mounting_holes) == metrics["mounting_holes"]
-    assert sorted(p.lepton_breakout_holes) == metrics["lepton_holes"]
-    teensy_x, _ = metrics["teensy_pos"]  # type: ignore[misc]
-    assert abs(teensy_x - p.usb.center_x) <= 0.01
-    # Fable/Astra P0-1: real ER-TFTM032-3 carrier PCB dimensions
-    assert (p.display_pcb_w, p.display_pcb_h) == (89.40, 64.90)
-    # Exact 39.20 mm standoff stack closure
-    assert p.internal_depth == pytest.approx(39.20, abs=0.01)
-    assert p.laser_internal_depth == pytest.approx(39.20, abs=0.01)
+def test_params_match_real_kicad_pcb() -> None:
+    metrics = parse_kicad_pcb_metrics(KICAD_PCB_PATH)
+    for variant in ("v3_0", "v4_0"):
+        p = get_preset(variant)
+        assert abs(float(metrics["pcb_w"]) - p.pcb_w) <= 0.01
+        assert abs(float(metrics["pcb_h"]) - p.pcb_h) <= 0.01
+        assert sorted(p.mounting_holes) == metrics["mounting_holes"]
+        assert sorted(p.lepton_breakout_holes) == metrics["lepton_holes"]
+        # Fable/Astra P0-1: real ER-TFTM032-3 carrier PCB dimensions
+        assert (p.display_pcb_w, p.display_pcb_h) == (89.40, 64.90)
+        # Exact 39.20 mm standoff stack closure
+        assert p.internal_depth == pytest.approx(39.20, abs=0.01)
+        assert p.laser_internal_depth == pytest.approx(39.20, abs=0.01)
+
+    p4 = get_preset("v4_0")
+    usb_x, _ = metrics["usb_pos"]  # type: ignore[misc]
+    _, sw_y = metrics["switch_pos"]  # type: ignore[misc]
+    btn_x, _ = metrics["button_pos"]  # type: ignore[misc]
+    prog_x, prog_y = metrics["prog_pos"]  # type: ignore[misc]
+    led_x, led_y = metrics["chg_led_pos"]  # type: ignore[misc]
+    assert abs(usb_x - p4.usb.center_x) <= 0.01
+    assert abs(sw_y - p4.switch_y) <= 0.01
+    assert abs(btn_x - p4.button_x) <= 0.01
+    assert (prog_x, prog_y) == (p4.teensy_prog_x, p4.teensy_prog_y)
+    assert (led_x, led_y) == p4.back_face_led_holes[0]
 
 
 def test_v4_locked_pcb_coordinates_and_audit_specs() -> None:

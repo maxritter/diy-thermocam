@@ -1,10 +1,10 @@
 # Firmware Agent Guide
 
-Applies to `firmware/3.0/` (Teensy 4.1 + FLIR Lepton 3.5 / 2.5 thermal imager).
+Applies to `firmware/` (Teensy 4.1 + FLIR Lepton 3.5 / 2.5 thermal imager).
 
 ## Commands
 
-Run build/upload from `firmware/3.0/`:
+Run build/upload from `firmware/`:
 
 ```sh
 arduino-cli compile                 # uses sketch.yaml (Teensy 4.1, 450 MHz, -O3, core 1.62.0)
@@ -12,7 +12,7 @@ arduino-cli board list              # locate serial port
 arduino-cli upload -p <port>        # requires camera switched on; opens Teensy Loader
 ```
 
-Hardware regression suite (run from `firmware/3.0/test/` against a flashed camera):
+Hardware regression suite (run from `firmware/test/` against a flashed camera):
 
 ```sh
 pip install -r requirements.txt
@@ -22,7 +22,7 @@ pytest --manual -s                      # includes interactive touch/button test
 ```
 
 - `sketch.yaml` is the single source of build settings (`teensy:avr` `1.62.0`, `usb=serialmtp`, `speed=450`, `opt=o3std`). Core 1.62.0 bundles ADC, Bounce, EEPROM, Metro, SD, SdFat, SPI, Time, Wire, and `MTP_Teensy.h`. Only `include/` is listed as a local library dir.
-- `3.0.ino` exists solely because `arduino-cli` requires a sketch file matching the folder name.
+- `firmware.ino` exists solely because `arduino-cli` requires a sketch file matching the folder name.
 - `discovery teensy:teensy-discovery not installed` is expected and harmless in profile mode.
 
 ## Architecture

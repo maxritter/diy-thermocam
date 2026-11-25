@@ -38,9 +38,9 @@ DIY-Thermocam is a complete open-source thermal camera platform: native KiCad 10
 
 | Subsystem | Path | What you get |
 | --- | --- | --- |
-| **Firmware 4.0** | [`firmware/3.0/`](firmware/3.0/) | Teensy 4.1 C++17 firmware (`arduino-cli`, Teensy core 1.62.0), binary USB Protocol v2, double-buffered VoSPI, direct SD access, host unit tests, and virtual camera simulator |
+| **Firmware 4.0** | [`firmware/`](firmware/) | Teensy 4.1 C++17 firmware (`arduino-cli`, Teensy core 1.62.0), binary USB Protocol v2, double-buffered VoSPI, direct SD access, host unit tests, and virtual camera simulator |
 | **Desktop Studio** | [`app/`](app/) | Cross-platform Tauri v2 + Rust + React 19 + WebGL2 app for macOS, Windows, and Linux (`Standard \| Pro` modes, H.264 MP4, 16-bit Kelvin TIFF, SD browser, HalfKay updater) |
-| **KiCad 10 PCBs** | [`hardware/pcb/`](hardware/pcb/) | Verified 1:1 KiCad 10 port of proven V3.0 (plus untouched Eagle baseline) and zero-solder V4.0 PCBA with Gerbers, BOMs, CPLs, and 3D STEP exports |
+| **KiCad 10 PCB** | [`hardware/pcb/`](hardware/pcb/) | Zero-solder V4.0 KiCad 10 PCBA with Gerbers, BOMs, CPLs, and 3D STEP exports (legacy V3.0 Eagle baseline preserved at git tag `3.0.4`) |
 | **Parametric CAD** | [`hardware/enclosure/`](hardware/enclosure/) | `build123d` support-free 3D/CNC shells (`STEP`, `STL`, `3MF`) and improved 3 mm laser acrylic (`SVG`, `DXF`) clearing both Lepton 3.5 (71° DFOV) and Lepton 3.1R (119° DFOV) |
 | **Bill of Materials** | [`hardware/bom/`](hardware/bom/) | Single-source [`bom.csv`](hardware/bom/bom.csv) synced 1:1 with all 31 verified V4.0 LCSC SKUs, schema validator, and interactive cost calculator |
 | **Documentation & Site** | [`docs/`](docs/) · [`website/`](website/) | Single-source manuals, USB Protocol v2 & `.DAT` specs, and Astro 5 + Starlight website for [www.diy-thermocam.net](https://www.diy-thermocam.net) |
@@ -83,7 +83,7 @@ DIY-Thermocam Studio replaces the fragmented legacy Windows utilities and Python
 
 <h2 id="hardware-v30-vs-v40">Hardware: V3.0 Classic vs. V4.0 Zero-Solder</h2>
 
-> **Prototype Gate:** **V4.0 (`hardware/pcb/kicad-v4.0/` and `hardware/enclosure/exports/3d-v4.0/`) is strictly `PROTOTYPE-PENDING`** until a physical board and enclosure are manufactured, assembled, and verified by Max. **V3.0 remains the proven default buildable board today.**
+> **Prototype Gate:** **V4.0 (`hardware/pcb/` and `hardware/enclosure/exports/3d-v4.0/`) is strictly `PROTOTYPE-PENDING`** until a physical board and enclosure are manufactured, assembled, and verified by Max. **V3.0 (preserved at git tag `3.0.4`) remains the proven default buildable board today.**
 
 | Feature | V3.0 Classic (Proven Default) | V4.0 Zero-Solder (`PROTOTYPE-PENDING`) |
 | --- | --- | --- |
@@ -109,11 +109,11 @@ Each subsystem builds and verifies independently with one command:
 
 ```bash
 # 1. Firmware (Teensy 4.1 via arduino-cli + Teensy core 1.62.0)
-cd firmware/3.0 && arduino-cli compile
+cd firmware && arduino-cli compile
 
 # 2. Firmware host unit tests & virtual camera simulator
-make -C firmware/3.0/tests_host test
-make -C firmware/3.0/sim
+make -C firmware/tests_host test
+make -C firmware/sim
 
 # 3. Desktop Studio (Rust + Tauri v2 + React 19)
 cd app && cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run lint && bun run typecheck && bun test && bun run build
@@ -124,11 +124,12 @@ cd website && bun run lint && bun run check && bun run build && bun scripts/veri
 # 5. Bill of Materials validation
 python3 hardware/bom/validate_bom.py
 
-# 6. KiCad 10 PCB 1:1 parity & V4.0 ERC/DRC
-python3 hardware/pcb/scripts/verify_v3_port.py
+# 6. KiCad 10 PCB ERC/DRC
+kicad-cli sch erc --severity-error --exit-code-violations hardware/pcb/diy-thermocam-v4.0.kicad_sch
+kicad-cli pcb drc --refill-zones --severity-error --exit-code-violations hardware/pcb/diy-thermocam-v4.0.kicad_pcb
 
 # 7. Parametric build123d enclosure tests (15/15 geometry & optical checks)
-cd hardware/enclosure/cad && uv run --python 3.12 pytest
+cd hardware/enclosure/cad && uv run --extra dev --python 3.12 pytest
 ```
 
 <details>
@@ -147,7 +148,7 @@ Recommended VS Code extensions are listed in [`.vscode/extensions.json`](.vscode
 <details>
 <summary><b>Legacy V3.0 desktop tools</b></summary>
 
-The original Windows tools (`ThermoVision`, `Thermal Data Viewer`, `Video Converter`) and Python v1 `Thermal Live Viewer` remain under [`software/`](software/) for V1/V2/V3.0 compatibility. All `.DAT` files remain 100% compatible between legacy tools and DIY-Thermocam Studio.
+The original Windows tools (`ThermoVision`, `Thermal Data Viewer`, `Video Converter`) and Python v1 `Thermal Live Viewer` remain preserved in git history at tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software) for V1/V2/V3.0 compatibility. All `.DAT` files remain 100% compatible between legacy tools and DIY-Thermocam Studio.
 
 </details>
 

@@ -16,7 +16,7 @@ Your settings are saved before the run and restored afterwards.
 
 ## Run
 
-Python 3.10 or newer. From `firmware/3.0/test`:
+Python 3.10 or newer. From `firmware/test`:
 
 ```sh
 pip install -r requirements.txt

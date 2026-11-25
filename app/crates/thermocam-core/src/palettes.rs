@@ -1,4 +1,4 @@
-//! Single-source firmware palettes (generated at build time from `firmware/3.0/src/general/colorschemes.cpp`)
+//! Single-source firmware palettes (generated at build time from `firmware/src/general/colorschemes.cpp`)
 //! plus perceptually uniform 2026 palettes (`Inferno`, `Viridis`, `Magma`, `Plasma`, `Turbo`) and custom 256-px import.
 
 use serde::{Deserialize, Serialize};

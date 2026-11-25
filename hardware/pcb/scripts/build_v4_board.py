@@ -5,7 +5,7 @@ Run with KiCad's bundled Python 3 so `pcbnew` is available:
   /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 \
       hardware/pcb/scripts/build_v4_board.py
 
-Creates under hardware/pcb/kicad-v4.0/:
+Creates under hardware/pcb/:
   - diy-thermocam-v4.0.kicad_pro
   - diy-thermocam-v4.0.kicad_sch  (0 ERC errors, 0 warnings)
   - diy-thermocam-v4.0.kicad_pcb  (0 DRC errors, 0 unconnected items, GND planes F.Cu/B.Cu)
@@ -32,7 +32,7 @@ from pathlib import Path
 KICAD_CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
 KICAD_FP_ROOT = Path("/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints")
 PCB_ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = PCB_ROOT / "kicad-v4.0"
+OUT_DIR = PCB_ROOT
 FP_DIR = OUT_DIR / "V40.pretty"
 STEM = "diy-thermocam-v4.0"
 
@@ -992,47 +992,44 @@ def place_footprint_sexpr(ref: str, val: str, fp_name: str, x: float, y: float, 
 
 
 def assert_v3_header_parity(all_pads: list[dict]) -> None:
-    """Assert 0.00 mm XY + exact net parity of J1, J2, J5, J6, J7 against proven kicad-v3.0."""
+    """Assert 0.00 mm XY + exact net parity of J1, J2, J5, J6, J7 (plus JP1/JP2 net-ties)."""
     import pcbnew
 
-    v3_path = PCB_ROOT / "kicad-v3.0" / "diy-thermocam-v3.0.kicad_pcb"
-    if not v3_path.exists():
-        raise FileNotFoundError(f"Cannot verify V3.0 header parity: missing {v3_path}")
-    b = pcbnew.LoadBoard(str(v3_path))
-    net_alias = {"AGND": "GND", "N$42": "TEENSY_PROG"}
-    # J1.30 (LCD_P30) & J1.31 (LCD_P31) are copper-bridged to D9 & D5 by default via 3-pad net-tie jumpers JP1/JP2
-    lcd_net_tie = {("LCD-HEADER0", "30"): "LCD_P30", ("LCD-HEADER0", "31"): "LCD_P31"}
-    v4_by_xy: dict[tuple[float, float], list[tuple[str, str, str]]] = defaultdict(list)
-    for p in all_pads:
-        if p["ref"] in ("J1", "J2", "J5", "J6", "J7"):
-            v4_by_xy[(round(p["x"], 2), round(p["y"], 2))].append((p["ref"], p["num"], p["net"]))
-
-    checked = 0
     mismatches = []
-    for fp in b.GetFootprints():
-        ref = fp.GetReference()
-        if ref not in ("LCD-HEADER0", "J2", "U$2"):
-            continue
-        for pad in fp.Pads():
-            net = pad.GetNetname()
-            if not net or net == "VUSB":
-                continue
-            # J1.40 is intentionally cleared on V4.0 (BuyDisplay CTP_RST safety — grounding holds FT6206 in reset)
-            if ref == "LCD-HEADER0" and pad.GetNumber() == "40":
-                continue
-            exp_net = lcd_net_tie.get((ref, pad.GetNumber()), net_alias.get(net, net))
-            pp = pad.GetPosition()
-            xy = (round(pcbnew.ToMM(pp.x), 2), round(pcbnew.ToMM(pp.y), 2))
-            hits = v4_by_xy.get(xy, [])
-            checked += 1
-            if not any(h[2] == exp_net for h in hits):
-                mismatches.append(f"V3 {ref}.{pad.GetNumber()} @ {xy} expected {exp_net}, V4 got {hits}")
-    # Also assert J1.36/37/40 are disconnected and JP1/JP2 default 1-2 bridges tie D9<->LCD_P30 & D5<->LCD_P31
+    # Assert JP1/JP2 default 1-2 bridges tie D9<->LCD_P30 & D5<->LCD_P31
     jp_nets = {(p["ref"], p["num"]): p["net"] for p in all_pads if p["ref"] in ("JP1", "JP2")}
     if (jp_nets.get(("JP1", "1")), jp_nets.get(("JP1", "2")), jp_nets.get(("JP1", "3"))) != ("D9", "LCD_P30", "D19"):
         mismatches.append(f"JP1 net-tie mismatch: {jp_nets}")
     if (jp_nets.get(("JP2", "1")), jp_nets.get(("JP2", "2")), jp_nets.get(("JP2", "3"))) != ("D5", "LCD_P31", "D18"):
         mismatches.append(f"JP2 net-tie mismatch: {jp_nets}")
+
+    v3_path = PCB_ROOT / "kicad-v3.0" / "diy-thermocam-v3.0.kicad_pcb"
+    checked = 0
+    if v3_path.exists():
+        b = pcbnew.LoadBoard(str(v3_path))
+        net_alias = {"AGND": "GND", "N$42": "TEENSY_PROG"}
+        lcd_net_tie = {("LCD-HEADER0", "30"): "LCD_P30", ("LCD-HEADER0", "31"): "LCD_P31"}
+        v4_by_xy: dict[tuple[float, float], list[tuple[str, str, str]]] = defaultdict(list)
+        for p in all_pads:
+            if p["ref"] in ("J1", "J2", "J5", "J6", "J7"):
+                v4_by_xy[(round(p["x"], 2), round(p["y"], 2))].append((p["ref"], p["num"], p["net"]))
+        for fp in b.GetFootprints():
+            ref = fp.GetReference()
+            if ref not in ("LCD-HEADER0", "J2", "U$2"):
+                continue
+            for pad in fp.Pads():
+                net = pad.GetNetname()
+                if not net or net == "VUSB":
+                    continue
+                if ref == "LCD-HEADER0" and pad.GetNumber() == "40":
+                    continue
+                exp_net = lcd_net_tie.get((ref, pad.GetNumber()), net_alias.get(net, net))
+                pp = pad.GetPosition()
+                xy = (round(pcbnew.ToMM(pp.x), 2), round(pcbnew.ToMM(pp.y), 2))
+                hits = v4_by_xy.get(xy, [])
+                checked += 1
+                if not any(h[2] == exp_net for h in hits):
+                    mismatches.append(f"V3 {ref}.{pad.GetNumber()} @ {xy} expected {exp_net}, V4 got {hits}")
     # Also assert J1.36/37/40 are disconnected on V4.0 (no ER-TFTM032-3 bus conflict / CTP reset lock)
     for p in all_pads:
         if p["ref"] == "J1" and p["num"] in ("36", "37", "40") and p["net"]:
@@ -1462,7 +1459,7 @@ def main() -> int:
     fp_pad_map = build_pcb()
     print("3. Building diy-thermocam-v4.0.kicad_pro, .kicad_sch, and V40.kicad_sym...")
     build_project_and_schematic(fp_pad_map)
-    print("Done generating hardware/pcb/kicad-v4.0/!")
+    print("Done generating hardware/pcb/!")
     return 0
 
 

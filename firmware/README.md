@@ -18,7 +18,7 @@ The firmware builds with [Arduino CLI](https://arduino.github.io/arduino-cli/), 
 
 ## 2. Build
 
-Open a terminal in the `firmware/3.0` folder and run:
+Open a terminal in the `firmware` folder and run:
 
 ```sh
 arduino-cli compile

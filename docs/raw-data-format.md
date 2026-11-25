@@ -2,7 +2,7 @@
 
 Every still image and video / time-lapse frame saved by DIY-Thermocam stores full 14-bit radiometric sensor data in a binary `.DAT` file. The layout is **100% compatible across DIY-Thermocam V1, V2, and V3** as well as the 2026 Desktop App and legacy Windows tools (`ThermoVision`, `Thermal Data Viewer`).
 
-Reference firmware writer: [`firmware/3.0/src/thermal/save.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/src/thermal/save.cpp).
+Reference firmware writer: [`firmware/src/thermal/save.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/thermal/save.cpp).
 
 ## Valid File Sizes
 
@@ -42,7 +42,7 @@ On radiometric FLIR Lepton 2.5 / 3.5 sensors in TLinear high-gain mode, typical 
 
 ## Color Scheme Indices
 
-Defined in [`firmware/3.0/include/globaldefines.h`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/include/globaldefines.h) and [`firmware/3.0/src/general/colorschemes.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/3.0/src/general/colorschemes.cpp):
+Defined in [`firmware/include/globaldefines.h`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/include/globaldefines.h) and [`firmware/src/general/colorschemes.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/general/colorschemes.cpp):
 
 | ID | Name | ID | Name | ID | Name |
 |---:|---|---:|---|---:|---|

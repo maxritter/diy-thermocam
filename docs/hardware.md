@@ -53,7 +53,7 @@ Board outline: **89.4 × 68.4 mm**, **1.6 mm FR-4**, **2-layer**, 1 oz copper, H
 
 Enclosure sources live in [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure):
 
-- **Legacy V3.0 Acrylic (verified):** 6-plate 3 mm laser-cut acrylic (`hardware/enclosure/legacy-v3.0/enclosure.svg`). Open in Inkscape or send to any laser-cutting shop using 3 mm matte acrylic (e.g. Acryl GS Grey).
+- **Legacy V3.0 Acrylic (verified):** 6-plate 3 mm laser-cut acrylic (archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/enclosure)). Open in Inkscape or send to any laser-cutting shop using 3 mm matte acrylic (e.g. Acryl GS Grey).
 - **2026 Parametric `build123d` CAD (`PROTOTYPE-PENDING`):** Generates both an improved 6-plate laser-cut kit (**SVG / DXF**) and a **screwdriver-only 3D-printable / CNC shell** (**STEP / STL / 3MF**) using `4× M2.5×6` front + `4× M2.5×8` back DIN 965 countersunk screws, a blind-roofed `1/4"-20` metal hex-nut tripod pocket (max tripod stud `≤ 8.0 mm`, no heat-set iron needed), guided shutter plunger and captive slide-switch actuator, an insulating `battery_cradle` + `battery_lid` for a slim `≤5.0 mm` `505060` 2000 mAh LiPo, a widened `13.4→20.2 mm` cone clearing both **Lepton 3.5** (`71° DFOV`) and **Lepton 3.1R** (`95° HFOV / 119° DFOV`) with zero vignetting, support-free microSD chute, Teensy Prog pinhole, and a flush top-open dovetail lens cap.
 - **Community 3D-printed 3.0b:** Originally contributed by [helmarw/DIY-Thermocam](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) and incorporated into the 2026 parametric design.
 

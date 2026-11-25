@@ -151,7 +151,7 @@ export default function BomExplorer({ items, csvRaw }: Props) {
               valueSpec:
                 revision === 'v4.0'
                   ? '3mm Laser-Cut Cast Acrylic 6-Plate Kit (exports/laser/ v4.0)'
-                  : '3mm Laser-Cut Cast Acrylic 6-Plate Kit (exports/laser/ or legacy-v3.0)',
+                  : '3mm Laser-Cut Cast Acrylic 6-Plate Kit (exports/laser/ v3.0)',
               unitPriceUsd: 12.0,
             };
           }

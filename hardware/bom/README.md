@@ -22,14 +22,14 @@ Both revisions share the core plug-in modules (Teensy 4.1, FLIR Lepton 3.5 or op
 ## How to Order
 
 ### 1. Turnkey PCBA (V4.0 Zero-Solder, `PROTOTYPE-PENDING`)
-All 31 LCSC part numbers in `bom.csv` (`hw_rev == "v4.0"` with `lcsc_part`) match [`hardware/pcb/kicad-v4.0/fab/diy-thermocam-v4.0-bom-jlcpcb.csv`](../pcb/kicad-v4.0/fab/diy-thermocam-v4.0-bom-jlcpcb.csv) 1:1:
+All 31 LCSC part numbers in `bom.csv` (`hw_rev == "v4.0"` with `lcsc_part`) match [`hardware/pcb/fab/diy-thermocam-v4.0-bom-jlcpcb.csv`](../pcb/fab/diy-thermocam-v4.0-bom-jlcpcb.csv) 1:1:
 - **JLCPCB / JLC PCBA**: Upload `diy-thermocam-v4.0-gerbers.zip`, `diy-thermocam-v4.0-bom-jlcpcb.csv`, and `diy-thermocam-v4.0-cpl-jlcpcb.csv`. Sixteen SMD parts use **Basic** parts (no feeder fee, including `XC6206P332MR-G` `C5446`, `AO3401A`/`AO3400A`, `R23 3.0k` `C4211`, and all passives/LED/PROG switch); fifteen components (ICs, USB-C, JST-PH, switches, pogo pins, and THT sockets) are **Extended**.
 - **Seeed Studio Fusion / PCBWay**: Upload `diy-thermocam-v4.0-bom-seeed.csv` (or `pcbway.csv`) and `diy-thermocam-v4.0-cpl-seeed.csv`.
 - **Battery (V4.0 3D enclosure cradle)**: Use a UL/IEC 62133 certified protected **`505060` (5.0 × 50 × 60 mm, ≤5.0 mm nominal)** 3.7 V 2000 mAh LiPo wired to standard Adafruit/SparkFun JST-PH polarity (verify `+`/`-` against `J4` silkscreen).
 - **Fasteners**: `4× M2.5×6` front + `4× M2.5×8` back DIN 965 / ISO 10642 countersunk screws, `4× M2.5×5`, `4× M2.5×11`, `4× M2.5×20` standoffs, `4× 1.8 mm` nylon spacer washers (V4.0 battery cradle), and a standard metal `1/4"-20` hex nut (max tripod stud ≤ 8.0 mm).
 
 ### 2. DIY Hand-Soldering (Proven V3.0 Baseline)
-- **Bare PCB**: Order 5 boards (89.4×68.4 mm, 2-layer, 1.6 mm FR4, 1 oz copper) from JLCPCB, Seeed Fusion, or PCBWay (~$2/board before shipping) using `hardware/pcb/kicad-v3.0/fab/diy-thermocam-v3.0-gerbers.zip`.
+- **Bare PCB**: Order 5 boards (89.4×68.4 mm, 2-layer, 1.6 mm FR4, 1 oz copper) from JLCPCB, Seeed Fusion, or PCBWay (~$2/board before shipping) using the proven V3.0 Gerbers archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/pcb).
 - **Sensors**: Order FLIR Lepton 3.5 (`500-0771-01`) or optional wide-angle Lepton 3.1R (`500-0758-03`) + Lepton Breakout Board V2.0 (`250-0577-00`) from GroupGets, Mouser, or DigiKey. Do **not** buy a PureThermal USB UVC board — it lacks the 2×10 SPI header.
 - **Display**: Order `ER-TFTM032-3` from BuyDisplay configured as **4-Wire SPI, 5V Power Supply, 3.2" Resistive Touch (XPT2046), Pin Header, No Font Chip**.
 
@@ -44,7 +44,7 @@ If you **already own a V3 camera** and will reuse your **FLIR Lepton 3.5**, **Le
 
 | Package | Exact Files to Upload | Manufacturing Specs |
 | :--- | :--- | :--- |
-| **V4.0 Zero-Solder PCBA** | `hardware/pcb/kicad-v4.0/fab/diy-thermocam-v4.0-gerbers.zip`<br>`diy-thermocam-v4.0-bom-{jlcpcb,pcbway,seeed}.csv`<br>`diy-thermocam-v4.0-cpl-{jlcpcb,seeed}.csv` | 2-layer, `89.4 × 68.4 mm`, `1.6 mm` FR-4, `1 oz` copper, ENIG or Lead-Free HASL, Matte Green or Black soldermask. Populate all 31 LCSC SKUs (**Bottom-side SMD + THT sockets** `J2`/`J5`/`J6`/`J7`; include Top-side `J1` Display socket or hand-solder `J1` to keep assembly single-sided). |
+| **V4.0 Zero-Solder PCBA** | `hardware/pcb/fab/diy-thermocam-v4.0-gerbers.zip`<br>`diy-thermocam-v4.0-bom-{jlcpcb,pcbway,seeed}.csv`<br>`diy-thermocam-v4.0-cpl-{jlcpcb,seeed}.csv` | 2-layer, `89.4 × 68.4 mm`, `1.6 mm` FR-4, `1 oz` copper, ENIG or Lead-Free HASL, Matte Green or Black soldermask. Populate all 31 LCSC SKUs (**Bottom-side SMD + THT sockets** `J2`/`J5`/`J6`/`J7`; include Top-side `J1` Display socket or hand-solder `J1` to keep assembly single-sided). |
 | **V4.0 3D Enclosure (7 parts)** | All 7 `.step` files in `hardware/enclosure/exports/3d-v4.0/`:<br>`front_shell`, `back_shell`, `lens_cap`, `capture_button`, `slide_switch_cap`, `battery_cradle`, `battery_lid` | **MJF PA12 Nylon (Dyed Black)** or **SLS PA12** recommended (optional bright orange accent for `lens_cap`, `capture_button`, `slide_switch_cap`). All parts are also 100% support-free for home FDM PETG printing via `diy-thermocam-v4.0-print-plate.3mf`. |
 | **V4.0 2D Laser Acrylic** | `hardware/enclosure/exports/laser/diy-thermocam-v4.0-laser-sheet.svg` (or `.dxf`) | **3.0 mm cast acrylic** (`Acryl GS`, e.g. matte black or satin grey; ~225 × 205 mm sheet). Red `#CC0000` `CUT` layer = through-cut; Blue `#0066FF` `ENGRAVE` layer = optional exterior back-plate branding (toggle off for $0). |
 
