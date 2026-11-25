@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-25 10:27",
+  "firmware_version": 304,
+  "host": "macOS-27.2.1-arm64-arm-64bit-Mach-O",
+  "metrics": {
+    "shutter_s": 0.115,
+    "save_image_s": 0.282,
+    "raw_fps": 8.775,
+    "color_fps": 8.775,
+    "display_fps": 4.387,
+    "command_latency_s": 0.114
+  }
+}
