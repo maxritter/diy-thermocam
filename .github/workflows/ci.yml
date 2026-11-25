@@ -1,0 +1,264 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - overhaul-2026
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changed subsystems
+    runs-on: ubuntu-latest
+    outputs:
+      firmware: ${{ steps.filter.outputs.firmware }}
+      app: ${{ steps.filter.outputs.app }}
+      website: ${{ steps.filter.outputs.website }}
+      bom: ${{ steps.filter.outputs.bom }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            firmware:
+              - 'firmware/**'
+              - '.github/workflows/ci.yml'
+            app:
+              - 'app/**'
+              - 'firmware/3.0/src/general/colorschemes.cpp'
+              - 'docs/protocol-v2.md'
+              - '.github/workflows/ci.yml'
+            website:
+              - 'website/**'
+              - 'docs/**'
+              - 'hardware/bom/**'
+              - 'netlify.toml'
+              - '.github/workflows/ci.yml'
+            bom:
+              - 'hardware/bom/**'
+              - '.github/workflows/ci.yml'
+
+  firmware-build:
+    name: Firmware compile (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.firmware == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: latest
+
+      - name: Determine Arduino data dir
+        id: arduino-dir
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            echo "path=$HOME/Library/Arduino15" >> "$GITHUB_OUTPUT"
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            echo "path=$LOCALAPPDATA/Arduino15" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=$HOME/.arduino15" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cache Teensy core & toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.arduino-dir.outputs.path }}
+          key: arduino15-${{ runner.os }}-${{ hashFiles('firmware/3.0/sketch.yaml') }}
+
+      - name: Compile firmware
+        working-directory: firmware/3.0
+        shell: bash
+        run: arduino-cli compile
+
+  firmware-host-tests:
+    name: Firmware host unit tests
+    needs: changes
+    if: needs.changes.outputs.firmware == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run host C++17 unit tests (when present)
+        shell: bash
+        run: |
+          if [ ! -d firmware/3.0/tests_host ]; then
+            echo "::notice::firmware/3.0/tests_host not present yet (added in Phase 3); skipping."
+            exit 0
+          fi
+          cd firmware/3.0/tests_host
+          if [ -f CMakeLists.txt ]; then
+            cmake -B build -DCMAKE_BUILD_TYPE=Debug
+            cmake --build build --parallel
+            ctest --test-dir build --output-on-failure
+          elif [ -f Makefile ]; then
+            make test
+          elif [ -f run_tests.sh ]; then
+            bash run_tests.sh
+          else
+            echo "::error::firmware/3.0/tests_host exists but has no recognized test entrypoint."
+            exit 1
+          fi
+
+  bom-validate:
+    name: BOM schema & integrity check
+    needs: changes
+    if: needs.changes.outputs.bom == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate hardware/bom/bom.csv (when present)
+        shell: bash
+        run: |
+          if [ ! -f hardware/bom/validate_bom.py ]; then
+            echo "::notice::hardware/bom/validate_bom.py not present yet; skipping."
+            exit 0
+          fi
+          python3 hardware/bom/validate_bom.py
+
+  app-ci:
+    name: Desktop app (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if desktop app exists
+        id: app-exists
+        shell: bash
+        run: |
+          if [ -f app/package.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::app/package.json not present yet (added in Phase 4); skipping."
+          fi
+
+      - name: Install Linux Tauri dependencies
+        if: steps.app-exists.outputs.present == 'true' && runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libudev-dev libhidapi-dev
+
+      - name: Setup Bun
+        if: steps.app-exists.outputs.present == 'true'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Rust
+        if: steps.app-exists.outputs.present == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Frontend install, check & tests
+        if: steps.app-exists.outputs.present == 'true'
+        working-directory: app
+        shell: bash
+        run: |
+          bun install --frozen-lockfile
+          bun run check
+          bun test
+
+      - name: Rust clippy & unit tests
+        if: steps.app-exists.outputs.present == 'true'
+        working-directory: app
+        shell: bash
+        run: |
+          if [ -f Cargo.toml ]; then
+            cargo clippy --workspace --all-targets -- -D warnings
+            cargo test --workspace
+          elif [ -f src-tauri/Cargo.toml ]; then
+            cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+            cargo test --manifest-path src-tauri/Cargo.toml
+          fi
+
+  website-ci:
+    name: Website build & route check
+    needs: changes
+    if: needs.changes.outputs.website == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect website stack
+        id: stack
+        shell: bash
+        run: |
+          if [ -f website/astro.config.mjs ] || [ -f website/astro.config.ts ]; then
+            echo "kind=astro" >> "$GITHUB_OUTPUT"
+          else
+            echo "kind=legacy-gatsby" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Bun (Astro 5)
+        if: steps.stack.outputs.kind == 'astro'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build & verify Astro 5 website
+        if: steps.stack.outputs.kind == 'astro'
+        working-directory: website
+        shell: bash
+        run: |
+          bun install --frozen-lockfile
+          bun run check
+          bun run build
+          for route in \
+            "index.html" \
+            "building-instructions/index.html" \
+            "device-features/index.html" \
+            "device-images/index.html" \
+            "software/index.html" \
+            "thermal-images/index.html" \
+            "docs/index.html" \
+            "docs/manual/index.html" \
+            "docs/hardware/index.html" \
+            "docs/partlist/index.html" \
+            "docs/firmware/index.html" \
+            "docs/raw-data/index.html" \
+            "docs/serial/index.html"; do
+            test -f "dist/$route" || { echo "Missing required legacy route: $route"; exit 1; }
+          done
+
+      - name: Verify imported legacy website integrity (pre-Phase 5)
+        if: steps.stack.outputs.kind == 'legacy-gatsby'
+        shell: bash
+        run: |
+          test -f website/package.json
+          test -f netlify.toml
+          for page in \
+            website/src/pages/index.md \
+            website/src/pages/building-instructions.md \
+            website/src/pages/device-features.md \
+            website/src/pages/device-images.md \
+            website/src/pages/software.md \
+            website/src/pages/thermal-images.md \
+            website/src/pages/docs/index.md \
+            website/src/pages/docs/manual/index.md \
+            website/src/pages/docs/hardware/index.md \
+            website/src/pages/docs/partlist/index.md \
+            website/src/pages/docs/firmware/index.md \
+            website/src/pages/docs/raw-data/index.md \
+            website/src/pages/docs/serial/index.md; do
+            test -f "$page" || { echo "Missing legacy page source: $page"; exit 1; }
+          done
+          img_count=$(find website/static/images -type f | wc -l | tr -d ' ')
+          echo "Verified $img_count static images in website/static/images"
+          test "$img_count" -ge 93
