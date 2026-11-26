@@ -97,7 +97,10 @@ void displayTempMode()
 {
 	const char* label;
 	word dotCol = UI_HUD_ACCENT;
-	if (limitsLocked) {
+	if (serialMode) {
+		label = "USB PC";
+		dotCol = UI_HUD_CYAN;
+	} else if (limitsLocked) {
 		label = "LOCK";
 		dotCol = UI_HUD_ERR;
 	} else if (autoMode) {

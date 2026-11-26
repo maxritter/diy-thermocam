@@ -40,9 +40,6 @@
 #define CPU_RESTART_VAL 0x5FA0004
 #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
-// Single SdFs-backed SDClass for FAT16/FAT32/exFAT (>32 GB SDXC) MTP exposure
-static SDClass s_mtpSd;
-
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
 static void mtpDateTime(uint16_t *date, uint16_t *time, uint8_t *ms10)
@@ -54,9 +51,9 @@ static void mtpDateTime(uint16_t *date, uint16_t *time, uint8_t *ms10)
 
 bool storage_configure()
 {
-	if (s_mtpSd.sdfs.begin(SdioConfig(FIFO_SDIO)))
+	if (SD.begin(BUILTIN_SDCARD))
 	{
-		MTP.addFilesystem(s_mtpSd, "Thermocam SD");
+		MTP.addFilesystem(SD, "Thermocam SD");
 		return true;
 	}
 	return false;
@@ -74,6 +71,9 @@ void enterMassStorage()
 			"Win Explorer / Linux / macOS OpenMTP",
 			"Touch screen to exit to Live View");
 
+		//Start the core's MTP responder, then mount SD via SD.begin(BUILTIN_SDCARD)
+		//so SDClass sets cardPreviouslyPresent & cdPin_ for MTP mediaPresent()/totalSize()
+		MTP.begin();
 		if (!storage_configure())
 		{
 			showFullMessage((char *)"SD card not found!");
@@ -82,8 +82,6 @@ void enterMassStorage()
 			return;
 		}
 		FsDateTime::setCallback(mtpDateTime);
-		//Start the core's MTP responder after the SdFs card is added
-		MTP.begin();
 
 		//Ensure no residual touch from boot immediately exits MTP
 		uint32_t t0 = millis();
@@ -117,7 +115,7 @@ void enterMassStorage()
 		showFullMessage((char *)"Exiting USB File Transfer..");
 		MTP.reset();
 		delay(250);
-		s_mtpSd.sdfs.end();
+		SD.sdfs.end();
 		ui_waitTouchReleaseAndLockout(250u);
 		disableSPIIRQ = false;
 		beginSD();
