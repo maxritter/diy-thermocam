@@ -11,8 +11,10 @@ run-name: ${{ github.event_name == 'push' && format('Release {0}', github.ref_na
 #
 # Signing:
 # - macOS: Developer ID and notarization. Secrets APPLE_CERTIFICATE (base64 .p12), APPLE_CERTIFICATE_PASSWORD,
-#   ASC_PRIVATE_KEY (.p8 text), ASC_KEY_ID and ASC_ISSUER_ID, the same names QualityLayer uses. A tag release
-#   refuses to ship an unsigned Mac app; a dry run without them builds unsigned.
+#   ASC_PRIVATE_KEY (.p8 text), ASC_KEY_ID and ASC_ISSUER_ID, the same names QualityLayer uses. Without them a
+#   tag release skips the Mac build and stops at a draft: scripts/release-mac.sh then builds, signs and
+#   notarizes the Mac app on a Mac with the Developer ID in its keychain, adds it and publishes. A dry run
+#   without them builds the Mac app unsigned.
 # - Windows: Azure Artifact Signing through GitHub's OIDC sign-in (no stored password). Secrets AZURE_CLIENT_ID,
 #   AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID; variables AZURE_SIGNING_ENDPOINT, _ACCOUNT, _PROFILE. The
 #   federated credential trusts the `release` environment of this repository only.
@@ -40,7 +42,14 @@ jobs:
       contents: read
     outputs:
       version: ${{ steps.version.outputs.version }}
+      mac_signing: ${{ steps.signing.outputs.mac }}
     steps:
+      - name: Mac signing secrets present
+        id: signing
+        env:
+          HAVE: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.APPLE_CERTIFICATE_PASSWORD != '' && secrets.ASC_PRIVATE_KEY != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' }}
+        run: echo "mac=$HAVE" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Every version agrees with the tag
@@ -121,12 +130,14 @@ jobs:
   macos:
     name: Studio for macOS
     needs: preflight
+    # A tag release without the signing secrets leaves the Mac app to scripts/release-mac.sh.
+    if: github.event_name != 'push' || needs.preflight.outputs.mac_signing == 'true'
     runs-on: macos-15
     environment: release
     permissions:
       contents: read
     env:
-      HAVE_SIGNING: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.APPLE_CERTIFICATE_PASSWORD != '' && secrets.ASC_PRIVATE_KEY != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' }}
+      HAVE_SIGNING: ${{ needs.preflight.outputs.mac_signing }}
       IDENTITY: 'Developer ID Application: Maximilian Ritter (T9RHL46525)'
       APP: app/target/universal-apple-darwin/release/bundle/macos/DIY-Thermocam Studio.app
       DMG: out/DIY-Thermocam-Studio-macOS.dmg
@@ -140,12 +151,6 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: app -> target
-
-      - name: A release needs the signing secrets
-        if: env.RELEASE == 'true' && env.HAVE_SIGNING != 'true'
-        run: |
-          echo "::error::A release must be signed and notarized: set APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, ASC_PRIVATE_KEY, ASC_KEY_ID and ASC_ISSUER_ID."
-          exit 1
 
       - name: Signing keychain and notarization key
         if: env.HAVE_SIGNING == 'true'
@@ -378,7 +383,11 @@ jobs:
   publish:
     name: Publish the release
     needs: [preflight, firmware, macos, windows, linux]
-    if: github.event_name == 'push'
+    if: >-
+      github.event_name == 'push' && !cancelled() &&
+      needs.preflight.result == 'success' && needs.firmware.result == 'success' &&
+      needs.windows.result == 'success' && needs.linux.result == 'success' &&
+      (needs.macos.result == 'success' || needs.macos.result == 'skipped')
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -387,6 +396,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       VERSION: ${{ needs.preflight.outputs.version }}
+      MAC_IN_CI: ${{ needs.preflight.outputs.mac_signing }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -398,9 +408,11 @@ jobs:
       - name: Every expected file, with checksums
         working-directory: assets
         run: |
-          expected="firmware.hex DIY-Thermocam-Studio-macOS.dmg DIY-Thermocam-Studio-Windows.exe DIY-Thermocam-Studio-Linux.AppImage DIY-Thermocam-Studio-Linux.deb"
+          expected="firmware.hex DIY-Thermocam-Studio-Windows.exe DIY-Thermocam-Studio-Linux.AppImage DIY-Thermocam-Studio-Linux.deb"
+          [ "$MAC_IN_CI" = true ] && expected="$expected DIY-Thermocam-Studio-macOS.dmg"
           for f in $expected; do test -s "$f" || { echo "::error::$f is missing"; exit 1; }; done
-          [ "$(find . -type f | wc -l)" = 5 ] || { find . -type f; echo "::error::unexpected files"; exit 1; }
+          # shellcheck disable=SC2086
+          [ "$(find . -type f | wc -l)" = "$(set -- $expected; echo $#)" ] || { find . -type f; echo "::error::unexpected files"; exit 1; }
           # shellcheck disable=SC2086
           sha256sum -- $expected > SHA256SUMS.txt
           cat SHA256SUMS.txt
@@ -427,4 +439,9 @@ jobs:
           (cd check && sha256sum --check SHA256SUMS.txt)
 
       - name: Publish
+        if: needs.preflight.outputs.mac_signing == 'true'
         run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
+
+      - name: Mac app still to add
+        if: needs.preflight.outputs.mac_signing != 'true'
+        run: echo "::notice::$GITHUB_REF_NAME is a draft without the Mac app. On a Mac with the Developer ID, run scripts/release-mac.sh $GITHUB_REF_NAME to add it and publish."

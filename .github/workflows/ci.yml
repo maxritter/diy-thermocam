@@ -6,6 +6,8 @@ on:
       - master
       - overhaul-2026
   pull_request:
+  # A manual run checks every subsystem, whatever changed.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -16,12 +18,12 @@ jobs:
     name: Detect changed subsystems
     runs-on: ubuntu-latest
     outputs:
-      firmware: ${{ steps.filter.outputs.firmware }}
-      app: ${{ steps.filter.outputs.app }}
-      website: ${{ steps.filter.outputs.website }}
-      bom: ${{ steps.filter.outputs.bom }}
-      pcb: ${{ steps.filter.outputs.pcb }}
-      enclosure: ${{ steps.filter.outputs.enclosure }}
+      firmware: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.firmware == 'true' }}
+      app: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.app == 'true' }}
+      website: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.website == 'true' }}
+      bom: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.bom == 'true' }}
+      pcb: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.pcb == 'true' }}
+      enclosure: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.enclosure == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
