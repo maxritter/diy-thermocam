@@ -34,7 +34,7 @@ const isCurrent = (href: string) => currentPath === href || (href !== '/' && cur
     {NAV_LINKS.map((link) => (
       <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>{link.label}</a>
     ))}
-    <a href="/software/#download">Download Studio</a>
+    <a href="/software/#download">Download Studio and firmware</a>
     <a href={SITE.repoUrl}>GitHub</a>
   </nav>
 </header>

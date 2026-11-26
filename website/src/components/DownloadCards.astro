@@ -1,0 +1,77 @@
+---
+/* The download page's two downloads, each with a picture of what it is: Studio on the computer, the firmware on
+   the camera. The home page keeps the compact DownloadList. */
+import { DOWNLOADS, SITE } from '../lib/site';
+import Icon from './Icon.astro';
+---
+
+<div class="cards">
+  <article class="card studio">
+    <figure class="pic">
+      <img src="/images/studio/web/studio-live.webp" alt="Studio showing the camera's live image with the hottest spot marked and the palette panel" width="1600" height="1305" loading="lazy" decoding="async" />
+      <span class="tag label">For your computer</span>
+    </figure>
+    <div class="body">
+      <h3>Studio</h3>
+      <p>The live image, measuring, recording and every capture on your computer. It also installs the camera's firmware.</p>
+      <div class="rows">
+        {DOWNLOADS.map((d) => (
+          <a class="row" href={d.href}>
+            <Icon name={d.icon} class="os" />
+            <span><b>{d.name}</b><small>{d.detail}</small></span>
+            <span class="go"><Icon name="download" />Download</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </article>
+
+  <article class="card fw">
+    <figure class="pic">
+      <img src="/images/firmware/live-hud.png" alt="The camera's screen: a live thermal image of a board with the hottest and coldest spot, the centre reading and the scale" width="640" height="480" loading="lazy" decoding="async" />
+      <span class="tag label">For the camera</span>
+    </figure>
+    <div class="body">
+      <h3>Firmware 4.0</h3>
+      <p>For V3 and V4 cameras with a Teensy 4.1. Install it from Studio: <b>Camera › Update firmware…</b></p>
+      <div class="rows">
+        <a class="row" href={SITE.firmwareFile}>
+          <Icon name="chip" class="os" />
+          <span><b>firmware.hex</b><small>V3 and V4 · Teensy 4.1</small></span>
+          <span class="go"><Icon name="download" />Download</span>
+        </a>
+      </div>
+    </div>
+  </article>
+</div>
+
+<style>
+  .cards { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+  .card { display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--surface); }
+  .pic { position: relative; margin: 0; height: 300px; overflow: hidden; background: #0d0d0e; border-bottom: 1px solid var(--border); }
+  .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+  .fw .pic img { object-fit: contain; image-rendering: pixelated; padding: 6%; }
+  .tag { position: absolute; left: 12px; top: 12px; padding: 5px 8px; background: var(--hot); color: var(--on-accent); }
+  .body { display: flex; flex-direction: column; gap: 12px; padding: 22px 22px 22px; flex: 1; }
+  .body h3 { font-size: 30px; line-height: 1.05; }
+  .body p { margin: 0; color: var(--muted); font-size: 14.5px; max-width: 52ch; }
+  .body p b { color: var(--text); font-weight: 600; }
+  .rows { margin-top: auto; display: grid; border: 1px solid var(--border); }
+  .row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; color: var(--text); text-decoration: none; background: var(--bg); }
+  .row + .row { border-top: 1px solid var(--border); }
+  .row:hover { background: var(--surface-2); color: var(--text); }
+  .row :global(.os svg) { width: 22px; height: 22px; display: block; }
+  .row b { display: block; font-weight: 600; font-size: 14.5px; }
+  .row small { color: var(--dim); font-size: 12.5px; }
+  .go { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font: 500 12px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .go :global(svg) { width: 15px; height: 15px; display: block; }
+  @media (max-width: 900px) {
+    .cards { grid-template-columns: 1fr; }
+    .pic { height: auto; aspect-ratio: 16 / 10; }
+  }
+  @media (max-width: 480px) {
+    .body { padding: 18px 16px; }
+    .row { grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
+    .go { font-size: 11px; }
+  }
+</style>

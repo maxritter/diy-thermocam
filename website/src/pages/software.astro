@@ -1,5 +1,5 @@
 ---
-import DownloadList from '../components/DownloadList.astro';
+import DownloadCards from '../components/DownloadCards.astro';
 import AppShot from '../components/AppShot.astro';
 import Icon from '../components/Icon.astro';
 import { EXAMPLES } from '../data/examples';
@@ -143,20 +143,23 @@ const jsonLd = [
   </section>
 
   <section id="download" class="section">
-    <div class="wrap dl">
-      <div>
+    <div class="wrap">
+      <div class="section-head">
         <h2 class="big">Download</h2>
-        <p>Studio and the camera firmware are free. V3 cameras run them today. V4 is experimental and not yet tested on a real camera.</p>
+        <p>Studio and the camera firmware are free for non-commercial use. V3 cameras run them today. V4 is experimental and not yet tested on a real camera.</p>
+      </div>
+      <DownloadCards />
+      <div class="req-row">
         <table class="req">
+          <caption class="label">Studio runs on</caption>
           <tbody>
             <tr><th scope="row">macOS</th><td>12 or later, Apple silicon and Intel</td></tr>
             <tr><th scope="row">Windows</th><td>10 or 11, 64-bit</td></tr>
-            <tr><th scope="row">Linux</th><td>x86-64 or ARM64. Install PJRC's <a href="https://www.pjrc.com/teensy/00-teensy.rules">udev rules</a> once for USB access.</td></tr>
+            <tr><th scope="row">Linux</th><td>x86-64. Install PJRC's <a href="https://www.pjrc.com/teensy/00-teensy.rules">udev rules</a> once for USB access.</td></tr>
           </tbody>
         </table>
         <p class="small"><a href={SITE.releasesUrl}>All releases and checksums</a></p>
       </div>
-      <DownloadList />
     </div>
   </section>
 
@@ -205,10 +208,10 @@ const jsonLd = [
   .two h3 { margin-top: 14px; font-size: 20px; letter-spacing: -0.01em; }
   .two p { margin: 8px 0 0; color: var(--muted); font-size: 15.5px; max-width: 48ch; }
 
-  .dl { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: start; }
-  .dl > div > p { margin: 14px 0 0; color: var(--muted); font-size: 16px; max-width: 46ch; }
-  .dl .small { font-size: 14px; }
-  .req { margin-top: 20px; border-collapse: collapse; font-size: 14px; width: 100%; }
+  .req-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; margin-top: 28px; }
+  .req-row .small { margin: 0; font-size: 14px; }
+  .req { border-collapse: collapse; font-size: 14px; width: min(100%, 640px); }
+  .req caption { text-align: left; color: var(--muted); padding-bottom: 8px; }
   .req th, .req td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
   .req th { font-weight: 500; width: 86px; color: var(--text); }
   .req td { color: var(--muted); }
@@ -216,7 +219,7 @@ const jsonLd = [
   .dev { padding-block: 48px 64px; }
 
   @media (max-width: 1000px) {
-    .feat-grid, .dl { grid-template-columns: 1fr; gap: 28px; }
+    .feat-grid { grid-template-columns: 1fr; gap: 28px; }
     .flip .feat-grid { grid-template-columns: 1fr; }
     .flip .txt { order: 0; }
   }
