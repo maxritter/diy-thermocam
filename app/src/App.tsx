@@ -2,19 +2,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type CameraState, isDemoPort } from "@/app/CameraChip";
 import { PAGES, type PageId, Shell } from "@/app/Shell";
 import type { ShortcutId } from "@/app/shortcuts";
-import { ColorbarHistogram } from "@/components/ColorbarHistogram";
 import { AlarmsPanel } from "@/components/panels/AlarmsPanel";
-import { CameraControlPanel } from "@/components/panels/CameraControlPanel";
 import { CaptureExportPanel } from "@/components/panels/CaptureExportPanel";
-import { EditorPanel } from "@/components/panels/EditorPanel";
-import { SdBrowserPanel } from "@/components/panels/SdBrowserPanel";
-import { UpdaterPanel } from "@/components/panels/UpdaterPanel";
-import { ThermalViewport } from "@/components/ThermalViewport";
-import { backend } from "@/lib/backend";
+import { backend, type SessionLogSample } from "@/lib/backend";
+import { type ColorRange, shownRange } from "@/lib/colorRange";
 import { frameStore } from "@/lib/frameStore";
-import { DEFAULT_MATERIALS, DEFAULT_PALETTES } from "@/lib/palettes";
+import { DEFAULT_PALETTES } from "@/lib/palettes";
+import { rowValue } from "@/lib/regions";
+import { useSensorMaterial } from "@/lib/sensorMaterial";
+import { liveSeries } from "@/lib/series";
 import { folderLabel, readStoredSettings, resolveTheme, type StudioSettings } from "@/lib/settings";
-import { evaluateRoi, generateDemoFrame, rawToObjectC, roiContrastRange } from "@/lib/thermal";
+import { evaluateRoi, rawToObjectC, roiContrastRange } from "@/lib/thermal";
 import type {
   AlarmEvent,
   DeviceConfig,
@@ -22,20 +20,20 @@ import type {
   DisplayPipeline,
   ExportResolution,
   HelloResp,
-  MaterialPreset,
   Palette,
   PerfTelemetry,
   RadiometryParams,
   RadParams,
   Roi,
   RoiTool,
-  SdListing,
   SerialPortInfo,
   TempSwitchRule,
   ThermalFrame,
 } from "@/lib/types";
-import { CameraPage } from "@/pages/camera/CameraPage";
+import { CameraPage, CameraSync } from "@/pages/camera/CameraPage";
 import { CapturesPage } from "@/pages/captures/CapturesPage";
+import { ChartDrawer } from "@/pages/live/ChartDrawer";
+import { readRecentPalettes, rememberPalette } from "@/pages/live/ImageTab";
 import { type InspectorTab, LivePage, type ViewState } from "@/pages/live/LivePage";
 
 const DEMO_PORT = "sim://demo-lepton35";
@@ -86,16 +84,11 @@ export function App(): React.JSX.Element {
 
   const [palettes, setPalettes] = useState<Palette[]>(DEFAULT_PALETTES);
   const [paletteId, setPaletteId] = useState(() => readStoredSettings().last_palette);
-  const [materials, setMaterials] = useState<MaterialPreset[]>(DEFAULT_MATERIALS);
 
-  const [editorFrame, setEditorFrame] = useState<ThermalFrame>(() => generateDemoFrame(9));
-  const [baselineFrame] = useState<ThermalFrame>(() => generateDemoFrame(24));
-  const [editorSourceName, setEditorSourceName] = useState<string | null>(null);
-  const [compareEnabled, setCompareEnabled] = useState(false);
-  const [compareSplit, setCompareSplit] = useState(0.5);
-
-  const [autoRange, setAutoRange] = useState(true);
-  const [manualRange, setManualRange] = useState<[number, number]>([29000, 33800]);
+  const [colorRange, setColorRange] = useState<ColorRange>({ mode: "auto" });
+  const [materialId, setMaterialId] = useState<string | null>(null);
+  const [chartsOpen, setChartsOpen] = useState(false);
+  const [recentPalettes, setRecentPalettes] = useState<string[]>(readRecentPalettes);
   const [rad, setRad] = useState<RadiometryParams>({
     cal_offset: -273.15,
     cal_slope: 0.01,
@@ -130,14 +123,12 @@ export function App(): React.JSX.Element {
   const [timelapseDir, setTimelapseDir] = useState<string | null>(null);
   const [hwButtonTrigger, setHwButtonTrigger] = useState(true);
   const [lastExportMsg, setLastExportMsg] = useState<string | null>(null);
-  const [editorStatusMsg, setEditorStatusMsg] = useState<string | null>(null);
-  const [sdStatusMsg, setSdStatusMsg] = useState<string | null>(null);
-  const [sdListing, setSdListing] = useState<SdListing | null>(null);
 
-  const [deviceConfig, setDeviceConfig] = useState<DeviceConfig | null>(null);
-  const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
-  const [perfTelemetry, setPerfTelemetry] = useState<PerfTelemetry | null>(null);
-  const [radParams, setRadParams] = useState<RadParams | null>(null);
+  // The Camera page reads these itself; T34 removes them with the old panels.
+  const [, setDeviceConfig] = useState<DeviceConfig | null>(null);
+  const [, setDiagnostics] = useState<Diagnostics | null>(null);
+  const [, setPerfTelemetry] = useState<PerfTelemetry | null>(null);
+  const [, setRadParams] = useState<RadParams | null>(null);
 
   const [alarmRules, setAlarmRules] = useState<TempSwitchRule[]>([]);
   const [alarmEvents, setAlarmEvents] = useState<AlarmEvent[]>([]);
@@ -150,6 +141,8 @@ export function App(): React.JSX.Element {
   const unit = settings.unit;
 
   const startMsRef = useRef<number>(Date.now());
+  /** Chart samples waiting for the once-a-second session log append. */
+  const logBatchRef = useRef<SessionLogSample[]>([]);
   const recordingRef = useRef<boolean>(recording);
   recordingRef.current = recording;
   const recordedRef = useRef(0);
@@ -160,8 +153,14 @@ export function App(): React.JSX.Element {
   const timelapseIndexRef = useRef<number>(0);
   const roisRef = useRef<Roi[]>(rois);
   roisRef.current = rois;
-  const radRef = useRef<RadiometryParams>(rad);
-  radRef.current = rad;
+  // Every reading undoes what the camera's sensor holds (null = factory) before Live's material.
+  const sensorMaterial = useSensorMaterial();
+  const liveRad = useMemo<RadiometryParams>(
+    () => ({ ...rad, sensor_material: sensorMaterial }),
+    [rad, sensorMaterial],
+  );
+  const radRef = useRef<RadiometryParams>(liveRad);
+  radRef.current = liveRad;
   const alarmRulesRef = useRef<TempSwitchRule[]>(alarmRules);
   alarmRulesRef.current = alarmRules;
   const batteryRef = useRef<number | null>(null);
@@ -213,6 +212,7 @@ export function App(): React.JSX.Element {
   const selectPalette = useCallback(
     (id: string) => {
       setPaletteId(id);
+      setRecentPalettes((list) => rememberPalette(list, id));
       updateSettings({ last_palette: id });
     },
     [updateSettings],
@@ -231,14 +231,6 @@ export function App(): React.JSX.Element {
     if (diagRes.status === "fulfilled") setDiagnostics(diagRes.value);
     if (perfRes.status === "fulfilled") setPerfTelemetry(perfRes.value);
     if (radRes.status === "fulfilled") setRadParams(radRes.value);
-  }, []);
-
-  const refreshSdListing = useCallback(async () => {
-    try {
-      setSdListing(await backend.sdList("/"));
-    } catch {
-      setSdListing(null);
-    }
   }, []);
 
   /** Runs outside React for every frame: the store, the series and the alarms. */
@@ -266,24 +258,30 @@ export function App(): React.JSX.Element {
     }
 
     const nowMs = Date.now();
+    // The chart's lines: Hottest, Coldest and each region's row value; differences stay out.
     const values: Record<string, number> = {
-      "Frame Max": rawToObjectC(fr.max_raw, currentRad),
-      "Frame Min": rawToObjectC(fr.min_raw, currentRad),
+      hottest: rawToObjectC(fr.max_raw, currentRad),
+      coldest: rawToObjectC(fr.min_raw, currentRad),
     };
     const statsById = new Map<string, ReturnType<typeof evaluateRoi>>();
     for (const r of roisRef.current) {
       const st = evaluateRoi(r, fr.pixels, fr.width, fr.height, currentRad);
-      values[r.label] = st.mean_c;
       statsById.set(r.id, st);
+      const v = r.geometry.kind === "delta" ? null : rowValue(r.geometry.kind, st);
+      if (v !== null && st.pixel_count > 0) values[r.id] = v;
     }
-    frameStore.appendSeries({ tSec: (nowMs - startMsRef.current) / 1000, values });
+    const tMs = nowMs - startMsRef.current;
+    liveSeries.append(tMs, values);
+    for (const [region_id, value_c] of Object.entries(values)) {
+      logBatchRef.current.push({ t_ms: tMs, region_id, value_c });
+    }
 
     let rulesChanged = false;
     const nextRules = alarmRulesRef.current.map((rule) => {
       if (!rule.enabled) return rule;
       const measured = rule.target_roi_id
-        ? (statsById.get(rule.target_roi_id)?.max_c ?? values["Frame Max"])
-        : values["Frame Max"];
+        ? (statsById.get(rule.target_roi_id)?.max_c ?? values.hottest)
+        : values.hottest;
       const hit =
         rule.condition === "above" ? measured >= rule.threshold_c : measured <= rule.threshold_c;
       if (!hit) return rule;
@@ -317,6 +315,14 @@ export function App(): React.JSX.Element {
   const manualSimChoiceRef = useRef<boolean>(false);
   const connectingRef = useRef<boolean>(false);
 
+  /** A new chart session: the chart starts empty and the session log starts a new file. */
+  const startChartSession = useCallback(() => {
+    startMsRef.current = Date.now();
+    logBatchRef.current = [];
+    liveSeries.clear();
+    void backend.sessionLogStart().catch(() => {});
+  }, []);
+
   const connectAndStream = useCallback(
     async (port: string, announce = false): Promise<HelloResp> => {
       connectingRef.current = true;
@@ -325,9 +331,10 @@ export function App(): React.JSX.Element {
         const h = await backend.connect(port);
         setSelectedPort(port);
         setHello(h);
+        startChartSession();
         await backend.startStream(handleIncomingFrame);
         setStreaming(true);
-        void Promise.allSettled([refreshCameraTelemetry(), refreshSdListing()]);
+        void refreshCameraTelemetry();
         if (announce) {
           showToast(isDemoPort(port) ? "Connected to the demo camera" : "Thermocam connected");
         }
@@ -337,22 +344,18 @@ export function App(): React.JSX.Element {
         setConnecting(false);
       }
     },
-    [handleIncomingFrame, refreshCameraTelemetry, refreshSdListing, showToast],
+    [handleIncomingFrame, refreshCameraTelemetry, showToast, startChartSession],
   );
 
-  // Boot: palettes, materials and ports; a real Thermocam wins over the demo camera.
+  // Boot: palettes and ports; a real Thermocam wins over the demo camera. Live's material
+  // list is the artifact's (palettes.ts), not the backend's older names.
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const [pList, mList, portList] = await Promise.all([
-          backend.getPalettes(),
-          backend.getMaterialPresets(),
-          backend.listPorts(),
-        ]);
+        const [pList, portList] = await Promise.all([backend.getPalettes(), backend.listPorts()]);
         if (!active) return;
         if (pList.length > 0) setPalettes(pList);
-        if (mList.length > 0) setMaterials(mList);
         setPorts(portList);
 
         const realCamera = portList.find((p) => p.is_teensy && !isDemoPort(p.port_name));
@@ -449,6 +452,37 @@ export function App(): React.JSX.Element {
     };
   }, [showToast]);
 
+  // Chart samples go to the session log on disk once a second.
+  const flushSessionLog = useCallback(async () => {
+    const batch = logBatchRef.current;
+    if (batch.length === 0) return;
+    logBatchRef.current = [];
+    await backend.sessionLogAppend(batch).catch(() => {});
+  }, []);
+  useEffect(() => {
+    const id = setInterval(() => void flushSessionLog(), 1000);
+    return () => clearInterval(id);
+  }, [flushSessionLog]);
+
+  const saveSessionCsv = async () => {
+    await flushSessionLog();
+    try {
+      const saved = await backend.sessionLogExport(null);
+      if (saved) showToast(`Saved ${saved}`);
+    } catch (err) {
+      showToast(`Couldn’t save the CSV: ${errorText(err)}`);
+    }
+  };
+
+  const copyText = async (text: string, what: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(`${what} copied`);
+    } catch {
+      showToast("Couldn’t copy");
+    }
+  };
+
   // The frame counter while recording, once a second, not per frame.
   useEffect(() => {
     if (!recording) return;
@@ -490,8 +524,7 @@ export function App(): React.JSX.Element {
   const fitRangeToRoi = (roi: Roi, fr: ThermalFrame) => {
     const range = roiContrastRange(roi, fr.pixels, fr.width, fr.height, 0.06);
     if (range) {
-      setAutoRange(false);
-      setManualRange(range);
+      setColorRange({ mode: "manual", lo: range[0], hi: range[1] });
       showToast(`Color scale fitted to ${roi.label}`);
     }
   };
@@ -565,15 +598,16 @@ export function App(): React.JSX.Element {
     }
   };
 
-  const exportMedia = async (format: string, opts: ExportOptions, source: "live" | "editor") => {
-    const fr = source === "editor" ? editorFrame : frameStore.getFrame();
+  const exportMedia = async (format: string, opts: ExportOptions) => {
+    const fr = frameStore.getFrame();
     if (!fr) return;
+    const [minRaw, maxRaw] = shownRange(colorRange, fr);
     try {
       const saved = await backend.exportMedia({
         format,
         palette_id: activePalette.id,
-        min_raw: autoRange ? fr.min_raw : manualRange[0],
-        max_raw: autoRange ? fr.max_raw : manualRange[1],
+        min_raw: minRaw,
+        max_raw: maxRaw,
         rad,
         pipeline,
         rois,
@@ -589,7 +623,6 @@ export function App(): React.JSX.Element {
       });
       const msg = `Exported ${format.toUpperCase()}: ${saved}`;
       setLastExportMsg(msg);
-      setEditorStatusMsg(msg);
       showToast(msg);
     } catch (err) {
       showToast(`Couldn’t export: ${errorText(err)}`);
@@ -597,17 +630,13 @@ export function App(): React.JSX.Element {
   };
 
   const snapshot = () =>
-    void exportMedia(
-      "png",
-      {
-        resolution: "full_hd1080p",
-        showColorbar: true,
-        showHud: true,
-        title: "Snapshot",
-        notes: "",
-      },
-      "live",
-    );
+    void exportMedia("png", {
+      resolution: "full_hd1080p",
+      showColorbar: true,
+      showHud: true,
+      title: "Snapshot",
+      notes: "",
+    });
 
   const importPalette = async (name: string, text: string) => {
     const pal = await backend.importCustomPalette(name, text, false);
@@ -626,11 +655,6 @@ export function App(): React.JSX.Element {
     } catch (err) {
       showToast(`Couldn’t use that folder: ${errorText(err)}`);
     }
-  };
-
-  const setAuto = (auto: boolean, fr: ThermalFrame | null) => {
-    if (!auto && autoRange && fr) setManualRange([fr.min_raw, fr.max_raw]);
-    setAutoRange(auto);
   };
 
   const onShortcut = (id: ShortcutId) => {
@@ -666,7 +690,7 @@ export function App(): React.JSX.Element {
         void copyImage();
         break;
       case "auto-range":
-        setAutoRange(true);
+        setColorRange({ mode: "auto" });
         break;
       case "toggle-panel":
         setPanelHidden((v) => !v);
@@ -680,15 +704,7 @@ export function App(): React.JSX.Element {
       case "zoom-fit":
         setZoom(1);
         break;
-      case "delete-region":
-        if (selectedRoiId) {
-          setRois((prev) => prev.filter((r) => r.id !== selectedRoiId));
-          setSelectedRoiId(null);
-        }
-        break;
-      case "cancel":
-        setActiveTool("select");
-        break;
+      // Delete and Esc belong to the viewer, which knows what is selected or being drawn.
       default:
         break;
     }
@@ -704,7 +720,7 @@ export function App(): React.JSX.Element {
 
   const view: ViewState = {
     palette: activePalette,
-    rad,
+    rad: liveRad,
     pipeline,
     unit,
     rois,
@@ -716,13 +732,9 @@ export function App(): React.JSX.Element {
     gridCols,
     gridRows,
     zoom,
-    autoRange,
-    manualRange,
+    range: colorRange,
     engineeringDetails: settings.engineering_details,
   };
-
-  const editorMin = autoRange ? editorFrame.min_raw : manualRange[0];
-  const editorMax = autoRange ? editorFrame.max_raw : manualRange[1];
 
   return (
     <>
@@ -747,12 +759,17 @@ export function App(): React.JSX.Element {
       >
         {page === "live" ? (
           <LivePage
+            store={frameStore}
             view={view}
             palettes={palettes}
-            materials={materials}
+            recentPaletteIds={recentPalettes}
             onSelectPalette={selectPalette}
             onImportPalette={importPalette}
-            onRadChange={setRad}
+            materialId={materialId}
+            onMaterialChange={(m) => {
+              setMaterialId(m.id);
+              setRad((r) => ({ ...r, emissivity: m.emissivity, reflected_temp_c: m.reflected_c }));
+            }}
             onPipelineChange={setPipeline}
             onUnitChange={(u) => updateSettings({ unit: u })}
             onRoisChange={setRois}
@@ -760,22 +777,32 @@ export function App(): React.JSX.Element {
             onToolChange={setActiveTool}
             onToggleHotCold={() => setShowHotCold((v) => !v)}
             onToggleLoupe={() => setShowLoupe((v) => !v)}
-            onToggleGrid={setShowGridOverlay}
-            onGridSizeChange={([c, r]) => {
-              setGridCols(c);
-              setGridRows(r);
+            onGridChange={(show, size) => {
+              setShowGridOverlay(show);
+              if (size) {
+                setGridCols(size[0]);
+                setGridRows(size[1]);
+              }
             }}
             onZoomChange={setZoom}
-            onAutoRangeChange={setAuto}
-            onManualRangeChange={(lo, hi) => {
-              setAutoRange(false);
-              setManualRange([lo, hi]);
-            }}
+            onRangeChange={setColorRange}
             onFitRangeToRoi={fitRangeToRoi}
-            onClearHistory={() => {
-              startMsRef.current = Date.now();
-              frameStore.clearSeries();
-            }}
+            chartsOpen={chartsOpen}
+            onChartsOpenChange={setChartsOpen}
+            drawer={
+              <ChartDrawer
+                store={frameStore}
+                series={liveSeries}
+                rois={rois}
+                rad={liveRad}
+                unit={unit}
+                height={settings.drawer_height}
+                onHeightChange={(h) => updateSettings({ drawer_height: h })}
+                onClear={startChartSession}
+                onSaveCsv={() => void saveSessionCsv()}
+                onCopy={(text, what) => void copyText(text, what)}
+              />
+            }
             streaming={streaming}
             demo={cameraState === "demo"}
             recording={recording}
@@ -837,177 +864,46 @@ export function App(): React.JSX.Element {
                 hwButtonTrigger={hwButtonTrigger}
                 onToggleHwButtonTrigger={setHwButtonTrigger}
                 onToggleRecording={toggleRecording}
-                onExport={(format, opts) => exportMedia(format, opts, "live")}
+                onExport={(format, opts) => exportMedia(format, opts)}
                 lastExportMsg={lastExportMsg}
               />
             }
           />
         ) : page === "captures" ? (
           <CapturesPage
-            opened={editorSourceName !== null}
-            openedName={editorSourceName}
-            onBack={() => setEditorSourceName(null)}
-            onOpenFile={async () => {
-              try {
-                const loaded = await backend.loadLocalDat();
-                setEditorSourceName(loaded.path);
-                setEditorFrame(loaded.frame);
-              } catch (err) {
-                showToast(`Couldn’t open the file: ${errorText(err)}`);
-              }
-            }}
-            library={
-              <SdBrowserPanel
-                listing={sdListing}
-                palette={activePalette}
-                onRefresh={refreshSdListing}
-                onOpenInEditor={async (name) => {
-                  const loaded = await backend.sdReadFrame(name);
-                  setEditorSourceName(name);
-                  setEditorFrame(loaded);
-                }}
-                onDownload={async (name) => {
-                  const dest = await backend.sdDownload(name);
-                  const msg = `Copied ${name} to ${dest}`;
-                  setSdStatusMsg(msg);
-                  showToast(msg);
-                }}
-                onDelete={async (name) => {
-                  await backend.sdDelete(name);
-                  await refreshSdListing();
-                  const msg = `Deleted ${name} from the camera’s card`;
-                  setSdStatusMsg(msg);
-                  showToast(msg);
-                }}
-                onExportSequenceMp4={() =>
-                  exportMedia(
-                    "mp4",
-                    {
-                      resolution: "full_hd1080p",
-                      showColorbar: true,
-                      showHud: true,
-                      title: "SD Sequence",
-                      notes: "",
-                    },
-                    "editor",
-                  )
-                }
-                statusMsg={sdStatusMsg}
-              />
-            }
-            editor={
-              <div className="flex h-full min-h-0 flex-col">
-                <div className="flex min-h-[340px] flex-1 gap-2.5 p-3 pb-0">
-                  <ThermalViewport
-                    frame={editorFrame}
-                    compareFrame={compareEnabled ? baselineFrame : null}
-                    splitRatio={compareSplit}
-                    palette={activePalette}
-                    minRaw={editorMin}
-                    maxRaw={editorMax}
-                    rad={rad}
-                    pipeline={pipeline}
-                    unit={unit}
-                    rois={rois}
-                    selectedRoiId={selectedRoiId}
-                    activeTool={activeTool}
-                    showHotCold={showHotCold}
-                    showLoupe={showLoupe}
-                    showGridOverlay={showGridOverlay}
-                    minimalHud={!settings.engineering_details}
-                    gridCols={gridCols}
-                    gridRows={gridRows}
-                    zoom={zoom}
-                    onSelectRoi={setSelectedRoiId}
-                    onAddRoi={(r) => {
-                      setRois((prev) => [...prev, r]);
-                      setSelectedRoiId(r.id);
-                    }}
-                  />
-                  <ColorbarHistogram
-                    frame={editorFrame}
-                    palette={activePalette}
-                    minRaw={editorMin}
-                    maxRaw={editorMax}
-                    autoScale={autoRange}
-                    rad={rad}
-                    unit={unit}
-                    isotherm={pipeline.isotherm}
-                    showHistogram
-                    onToggleAutoScale={(auto) => setAuto(auto, editorFrame)}
-                    onRangeChange={(lo, hi) => {
-                      setAutoRange(false);
-                      setManualRange([lo, hi]);
-                    }}
-                  />
-                </div>
-                <div className="shrink-0">
-                  <EditorPanel
-                    sourceLabel={editorSourceName ?? ""}
-                    frame={editorFrame}
-                    compareEnabled={compareEnabled}
-                    compareSplit={compareSplit}
-                    onToggleCompare={setCompareEnabled}
-                    onCompareSplitChange={setCompareSplit}
-                    onLoadLocalDat={async () => {
-                      const loaded = await backend.loadLocalDat();
-                      setEditorSourceName(loaded.path);
-                      setEditorFrame(loaded.frame);
-                    }}
-                    onSaveSidecar={async (title, notes) => {
-                      try {
-                        const sidecarPath = await backend.saveSidecar(editorSourceName ?? "", {
-                          schema_version: 1,
-                          palette_id: activePalette.id,
-                          radiometry: rad,
-                          pipeline,
-                          rois,
-                          title,
-                          notes,
-                        });
-                        const msg = `Edits saved: ${sidecarPath}`;
-                        setEditorStatusMsg(msg);
-                        showToast(msg);
-                      } catch (err) {
-                        showToast(`Couldn’t save the edits: ${errorText(err)}`);
-                      }
-                    }}
-                    onExport={(format, opts) => exportMedia(format, opts, "editor")}
-                    statusMsg={editorStatusMsg}
-                  />
-                </div>
-              </div>
-            }
+            camera={{ state: cameraState, connectionId: hello ? selectedPort : null }}
+            capturesDir={capturesDir}
+            palettes={palettes}
+            paletteId={activePalette.id}
+            recentPaletteIds={recentPalettes}
+            onImportPalette={importPalette}
+            unit={unit}
+            onUnitChange={(u) => updateSettings({ unit: u })}
+            engineeringDetails={settings.engineering_details}
+            notify={showToast}
           />
         ) : (
           <CameraPage
-            controls={
-              <CameraControlPanel
-                config={deviceConfig}
-                diagnostics={diagnostics}
-                perf={perfTelemetry}
-                radParams={radParams}
-                onRefreshTelemetry={refreshCameraTelemetry}
-                onTriggerFfc={async (force) => {
-                  await backend.triggerFfc(force);
-                  showToast("Calibrated");
-                }}
-                onSaveConfig={async (cfg, persist) => {
-                  const updated = await backend.setConfig(cfg, persist);
-                  setDeviceConfig(updated);
-                  showToast(persist ? "Saved on the camera" : "Sent to the camera");
-                }}
-                onSaveRadParams={async (params) => {
-                  const updated = await backend.setRadParams(params);
-                  setRadParams(updated);
-                  showToast("Radiometry values sent to the camera");
-                }}
-              />
-            }
-            updater={<UpdaterPanel connectedPort={selectedPort} />}
+            state={cameraState}
+            port={hello ? selectedPort : null}
+            hello={hello}
+            unit={unit}
+            buttonAction={settings.button_action}
+            onButtonActionChange={(a) => updateSettings({ button_action: a })}
+            materialOnCamera={settings.material_on_camera}
+            onMaterialOnCameraChange={(on) => updateSettings({ material_on_camera: on })}
+            liveMaterial={{ emissivity: rad.emissivity, reflected_c: rad.reflected_temp_c }}
+            onDisconnect={() => void disconnect()}
+            onUseDemo={() => void choosePort(DEMO_PORT)}
+            onReconnect={(p) => connectAndStream(p, false).then(() => undefined)}
           />
         )}
       </Shell>
+      <CameraSync
+        connectionId={hello ? selectedPort : null}
+        switchOn={settings.material_on_camera}
+        material={{ emissivity: rad.emissivity, reflected_c: rad.reflected_temp_c }}
+      />
       {toast ? (
         <div className="st-toast" role="status">
           {toast}

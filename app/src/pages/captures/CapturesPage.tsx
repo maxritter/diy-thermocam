@@ -1,46 +1,85 @@
-import { ChevronLeft, FolderOpen } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState } from "react";
+import type { CameraState } from "@/app/CameraChip";
+import { type CaptureItem, capturesApi } from "@/lib/api/captures";
+import type { Palette, TempUnit } from "@/lib/types";
+import { type CapturesApi, Library, type LibraryEntry, type Tab } from "./Library";
+import { OpenedCapture } from "./OpenedCapture";
+import { RecordingPlayer } from "./RecordingPlayer";
+import "./captures.css";
 
 export interface CapturesPageProps {
-  /** An opened capture shows in the viewer; otherwise the camera's card is listed. */
-  opened: boolean;
-  openedName: string | null;
-  onBack: () => void;
-  onOpenFile: () => void;
-  /** The old SD card browser, until slice 6 replaces it. */
-  library: ReactNode;
-  /** The old editor: viewer, color scale and its panel, until slice 7 replaces it. */
-  editor: ReactNode;
+  /** The Rust calls; tests pass a stub. */
+  api?: CapturesApi;
+  camera: { state: CameraState; connectionId: string | null };
+  capturesDir: string | null;
+  palettes: Palette[];
+  /** The last palette used: card pictures and captures without edits start in it. */
+  paletteId: string;
+  recentPaletteIds: string[];
+  onImportPalette?: (name: string, text: string) => Promise<void>;
+  unit: TempUnit;
+  onUnitChange?: (unit: TempUnit) => void;
+  engineeringDetails: boolean;
+  /** A short message at the bottom of the window. */
+  notify: (msg: string) => void;
+  locale?: string;
+  now?: () => Date;
 }
 
-export function CapturesPage({
-  opened,
-  openedName,
-  onBack,
-  onOpenFile,
-  library,
-  editor,
-}: CapturesPageProps): React.JSX.Element {
+/**
+ * Captures (captures.html): the library of the camera's card and this computer, and an opened
+ * capture or recording in the Live viewer.
+ */
+export function CapturesPage(props: CapturesPageProps): React.JSX.Element {
+  const api = props.api ?? capturesApi;
+  const [tab, setTab] = useState<Tab>("camera");
+  const [opened, setOpened] = useState<{ item: CaptureItem; entries: LibraryEntry[] } | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  if (opened) {
+    const shared = {
+      api,
+      item: opened.item,
+      entries: opened.entries,
+      candidates: opened.entries,
+      onBack: () => {
+        setOpened(null);
+        setReloadKey((n) => n + 1);
+      },
+      onOpen: (item: CaptureItem) => setOpened({ item, entries: opened.entries }),
+      palettes: props.palettes,
+      paletteId: props.paletteId,
+      recentPaletteIds: props.recentPaletteIds,
+      onImportPalette:
+        props.onImportPalette ??
+        (async () => props.notify("Palettes are imported in Live, under All palettes.")),
+      unit: props.unit,
+      onUnitChange: props.onUnitChange,
+      engineeringDetails: props.engineeringDetails,
+      notify: props.notify,
+      locale: props.locale,
+    };
+    return opened.item.kind === "recording" ? (
+      <RecordingPlayer key={opened.item.id} {...shared} />
+    ) : (
+      <OpenedCapture key={opened.item.id} {...shared} />
+    );
+  }
+
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex h-[52px] shrink-0 items-center justify-between gap-3 border-b border-[var(--tc-line)] px-5">
-        {opened ? (
-          <div className="flex min-w-0 items-center gap-2.5">
-            <button className="tc-btn tc-btn-ghost" type="button" onClick={onBack}>
-              <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-              Captures
-            </button>
-            <span className="truncate font-semibold">{openedName}</span>
-          </div>
-        ) : (
-          <span className="font-semibold">Camera</span>
-        )}
-        <button className="tc-btn" type="button" onClick={onOpenFile}>
-          <FolderOpen size={16} strokeWidth={1.75} aria-hidden="true" />
-          Open file…
-        </button>
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden">{opened ? editor : library}</div>
-    </div>
+    <Library
+      api={api}
+      camera={props.camera}
+      capturesDir={props.capturesDir}
+      paletteId={props.paletteId}
+      tab={tab}
+      onTabChange={setTab}
+      onOpen={(item, entries) => setOpened({ item, entries })}
+      notify={props.notify}
+      locale={props.locale}
+      now={props.now}
+      reloadKey={reloadKey}
+      unit={props.unit}
+    />
   );
 }

@@ -8,7 +8,8 @@ use tauri::{Manager, State};
 
 use thermocam_core::atomic_file::write_atomic;
 use thermocam_core::captures::{
-    check_writable, default_captures_dir, trash_targets, write_snapshot,
+    check_writable, default_captures_dir, list_captures, trash_targets, write_snapshot,
+    LocalCapture,
 };
 use thermocam_core::picture::{render_png, PictureFrame, RenderSpec};
 use thermocam_core::sidecar::SIDECAR_EXTENSION;
@@ -51,6 +52,16 @@ pub fn cmd_set_captures_dir(app: tauri::AppHandle, path: String) -> CmdResult<St
     check_writable(&dir)?;
     store_captures_dir(&app, &dir)?;
     Ok(dir.to_string_lossy().into_owned())
+}
+
+/// The Captures folder's entries for "On this computer":
+/// `[{name, path, kind: "snapshot"|"recording"|"other", size, frames|null, mtime_ms}]`.
+#[tauri::command]
+pub async fn cmd_captures_list(app: tauri::AppHandle) -> CmdResult<Vec<LocalCapture>> {
+    let dir = captures_dir(&app)?;
+    tauri::async_runtime::spawn_blocking(move || Ok(list_captures(&dir)?))
+        .await
+        .map_err(|e| CmdError::other(e.to_string()))?
 }
 
 #[derive(Serialize)]

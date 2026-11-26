@@ -1,0 +1,652 @@
+/* Camera page (studio-redesign artifact: camera.html, its rules in studio.css › Camera page,
+   firmware steps and empty state). Class names are prefixed `cm-` so they never meet the shell's. */
+
+.cm-page {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.cm-cam {
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  align-content: start;
+}
+
+.cm-col {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.cm-panel {
+  border: 1px solid var(--tc-border);
+  border-radius: 12px;
+  background: var(--tc-surface);
+}
+
+.cm-panel-h {
+  padding: 16px 18px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cm-panel-h h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 620;
+}
+
+.cm-kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0;
+  margin: 0;
+  padding: 4px 18px 8px;
+}
+
+.cm-kv dt,
+.cm-kv dd {
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--tc-line);
+  font-size: 13px;
+}
+
+.cm-kv dt {
+  color: var(--tc-text-muted);
+}
+
+.cm-kv dd {
+  text-align: right;
+  font-weight: 500;
+}
+
+.cm-kv dt:nth-last-of-type(1),
+.cm-kv dd:last-of-type {
+  border-bottom: 0;
+}
+
+.cm-kv.nowrap dd {
+  white-space: nowrap;
+}
+
+.cm-kv dd.pass {
+  color: var(--tc-pass);
+}
+
+.cm-kv dd.fail {
+  color: var(--tc-danger);
+}
+
+.cm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  background: var(--tc-surface-2);
+  color: var(--tc-text-muted);
+  border: 1px solid var(--tc-border);
+}
+
+.cm-badge.pass {
+  background: var(--tc-pass-soft);
+  color: var(--tc-pass);
+  border-color: transparent;
+}
+
+.cm-badge.amber {
+  background: var(--tc-amber-soft);
+  color: var(--tc-amber-ink);
+  border-color: var(--tc-amber-line);
+}
+
+.cm-badge .st-status-dot {
+  width: 6px;
+  height: 6px;
+  box-shadow: none;
+}
+
+.cm-meter {
+  display: inline-block;
+  width: 64px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tc-surface-3);
+  overflow: hidden;
+}
+
+.cm-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tc-pass);
+}
+
+.cm-actions {
+  display: flex;
+  gap: 8px;
+  padding: 4px 18px 16px;
+}
+
+.cm-help {
+  display: grid;
+  gap: 8px;
+  padding: 2px 18px 16px;
+  font-size: 13px;
+  justify-items: start;
+}
+
+.cm-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--tc-accent);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cm-link:hover {
+  text-decoration: underline;
+}
+
+.cm-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--tc-text-muted);
+  line-height: 1.45;
+}
+
+.cm-sec-h {
+  padding: 14px 18px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tc-text-muted);
+  border-top: 1px solid var(--tc-line);
+}
+
+.cm-sec-h:first-child {
+  border-top: 0;
+}
+
+.cm-set-list {
+  display: grid;
+}
+
+.cm-set {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 24px;
+  align-items: center;
+  padding: 13px 18px;
+  border-top: 1px solid var(--tc-line);
+}
+
+.cm-set:first-child {
+  border-top: 0;
+}
+
+.cm-set .n {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cm-set .d {
+  grid-column: 1;
+  font-size: 12px;
+  color: var(--tc-text-muted);
+}
+
+.cm-set .err {
+  grid-column: 1;
+  font-size: 12px;
+  color: var(--tc-danger);
+}
+
+.cm-set > .ctl {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.cm-set .st-switch input:disabled,
+.cm-set .st-switch input:disabled + .track {
+  cursor: not-allowed;
+}
+
+.cm-set .st-switch:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cm-set .st-seg button:disabled {
+  cursor: not-allowed;
+}
+
+.cm-set .st-seg:has(button:disabled) {
+  opacity: 0.6;
+}
+
+details.cm-more {
+  border-top: 1px solid var(--tc-line);
+}
+
+details.cm-more > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+details.cm-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.cm-more > summary .aside {
+  font-weight: 400;
+  color: var(--tc-text-muted);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+details.cm-more > summary svg {
+  transition: transform 120ms;
+  color: var(--tc-text-muted);
+}
+
+details.cm-more[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+details.cm-more > summary:focus-visible {
+  outline: 2px solid var(--tc-accent);
+  outline-offset: 2px;
+}
+
+details.cm-more.boxed {
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+}
+
+details.cm-more.boxed > summary {
+  padding: 10px 12px;
+}
+
+.cm-link:focus-visible {
+  outline: 2px solid var(--tc-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Diagnostics (camera.html#diagnostics) ---------- */
+
+.cm-diag-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 18px 4px;
+}
+
+.cm-timing {
+  padding: 2px 18px 12px;
+  display: grid;
+  gap: 7px;
+  font-size: 12.5px;
+}
+
+.cm-timing > div {
+  display: grid;
+  grid-template-columns: 140px 1fr 64px;
+  gap: 10px;
+  align-items: center;
+}
+
+.cm-timing .mono {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cm-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid var(--tc-line);
+}
+
+.cm-two > div + div {
+  border-left: 1px solid var(--tc-line);
+}
+
+.cm-two .cm-kv {
+  padding-top: 0;
+}
+
+.cm-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Progress bars, steps, notes (camera.html#firmware) ---------- */
+
+.cm-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tc-surface-3);
+  overflow: hidden;
+}
+
+.cm-bar i {
+  display: block;
+  height: 100%;
+  background: var(--tc-accent);
+  border-radius: 999px;
+}
+
+.cm-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.cm-steps li {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.cm-steps .ic {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--tc-border-strong);
+  color: var(--tc-text-dim);
+}
+
+.cm-steps .done .ic {
+  background: var(--tc-pass);
+  border-color: var(--tc-pass);
+  color: var(--tc-bg);
+}
+
+.cm-steps .now .ic {
+  border-color: var(--tc-accent);
+  color: var(--tc-accent);
+}
+
+.cm-steps .warn .ic {
+  border-color: var(--tc-amber-ink);
+  color: var(--tc-amber-ink);
+}
+
+.cm-steps .stop .ic {
+  border-color: var(--tc-danger);
+  color: var(--tc-danger);
+}
+
+.cm-steps .todo {
+  color: var(--tc-text-muted);
+}
+
+.cm-steps .mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+}
+
+.cm-spin {
+  animation: cm-spin 900ms linear infinite;
+}
+
+@keyframes cm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-spin {
+    animation: none;
+  }
+}
+
+.cm-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+}
+
+.cm-note.amber {
+  background: var(--tc-amber-soft);
+  color: var(--tc-amber-ink);
+  border: 1px solid var(--tc-amber-line);
+}
+
+.cm-note-ic {
+  margin-top: 2px;
+  flex: none;
+}
+
+.cm-file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-surface-2);
+}
+
+.cm-file-row.bad {
+  border-color: var(--tc-danger-line);
+}
+
+.cm-file-row .fi {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--tc-surface);
+  border: 1px solid var(--tc-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tc-text-muted);
+}
+
+.cm-file-row .info {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.cm-file-row .t {
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-file-row .m {
+  font-size: 12px;
+  color: var(--tc-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cm-file-row .m.ok {
+  color: var(--tc-pass);
+}
+
+.cm-file-row .m.bad {
+  color: var(--tc-danger);
+}
+
+.cm-dialog .cm-kv {
+  padding: 0;
+}
+
+.cm-dialog .dlg-f.end {
+  justify-content: flex-end;
+}
+
+.cm-row-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.cm-adv {
+  padding: 0 12px 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.cm-field {
+  display: grid;
+  gap: 6px;
+}
+
+.cm-field > span {
+  font-size: 12px;
+  color: var(--tc-text-muted);
+}
+
+.cm-field .err {
+  font-size: 12px;
+  color: var(--tc-danger);
+}
+
+.cm-codebox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 6px 6px 12px;
+  border-radius: 8px;
+  background: var(--tc-surface-2);
+  color: var(--tc-text);
+  border: 1px solid var(--tc-border);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.cm-codebox > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-input {
+  height: var(--control-h);
+  width: 100%;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--tc-border);
+  background: var(--tc-surface);
+  color: var(--tc-text);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.cm-input.mono {
+  font-family: var(--font-mono);
+}
+
+.cm-input:focus {
+  border-color: var(--tc-accent);
+}
+
+.cm-setrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+}
+
+.cm-setrow .lbl {
+  font-size: 13px;
+  color: var(--tc-text);
+}
+
+.cm-done-ic {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--tc-pass-soft);
+  color: var(--tc-pass);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cm-details-text {
+  margin: 0;
+  padding: 0 12px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--tc-text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- No camera (camera.html#no-camera) ---------- */
+
+.cm-empty {
+  width: 640px;
+  max-width: 100%;
+  padding: 28px;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.cm-empty .t {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cm-empty .d {
+  color: var(--tc-text-muted);
+}
+
+.cm-empty .acts {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}

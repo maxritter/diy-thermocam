@@ -1,14 +1,28 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isTypingTarget } from "@/app/shortcuts";
+import { type ColorRange, shownRange } from "@/lib/colorRange";
+import type { FrameStore } from "@/lib/frameStore";
 import { samplePalette } from "@/lib/palettes";
 import {
+  type DrawTool,
+  type FrameSize,
+  geometryFromDrag,
+  type Handle,
+  hitTest,
+  moveGeometry,
+  nextColorIndex,
+  nextRegionName,
+  type Pt,
+  polygonStep,
+  resizeGeometry,
+  toPixel,
+} from "@/lib/regions";
+import {
   createViewportScratch,
-  evaluateRoi,
-  formatTemp,
   matchesIsotherm,
   objectCToRaw,
   prepareDisplay16Bit,
   rawToObjectC,
-  unitSymbol,
   type ViewportScratch,
 } from "@/lib/thermal";
 import type {
@@ -16,40 +30,69 @@ import type {
   Palette,
   RadiometryParams,
   Roi,
+  RoiGeometry,
   RoiTool,
   TempUnit,
   ThermalFrame,
 } from "@/lib/types";
+import { HoverLayer } from "./viewport/HoverLayer";
+import { RegionLayer } from "./viewport/RegionLayer";
 
-const LOUPE_CELLS = Array.from({ length: 49 }, (_, idx) => {
-  const dx = (idx % 7) - 3;
-  const dy = Math.floor(idx / 7) - 3;
-  return { key: `lp_${dx}_${dy}`, dx, dy, isCenter: dx === 0 && dy === 0 };
-});
-
-interface ThermalViewportProps {
-  frame: ThermalFrame;
+export interface ThermalViewportProps {
+  /** Where frames come from; the viewer draws every frame pushed into it. */
+  store: FrameStore;
   compareFrame?: ThermalFrame | null;
   splitRatio?: number;
   palette: Palette;
-  minRaw: number;
-  maxRaw: number;
+  range: ColorRange;
   rad: RadiometryParams;
   pipeline: DisplayPipeline;
   unit: TempUnit;
   rois: Roi[];
   selectedRoiId: string | null;
-  activeTool: RoiTool;
+  /** Regions whose alarm is firing. */
+  alertIds?: ReadonlySet<string>;
+  tool: RoiTool;
   showHotCold: boolean;
-  showLoupe: boolean;
-  showGridOverlay: boolean;
-  minimalHud?: boolean;
+  showGrid: boolean;
   gridCols: number;
   gridRows: number;
   zoom: number;
+  /** Accessible name of the image. */
+  label?: string;
+  style?: CSSProperties;
+  onRoisChange: (update: (rois: Roi[]) => Roi[]) => void;
   onSelectRoi: (id: string | null) => void;
-  onAddRoi: (roi: Roi) => void;
-  onHoverPixel?: (info: { x: number; y: number; raw: number; tempC: number } | null) => void;
+  onToolChange: (tool: RoiTool) => void;
+}
+
+type Gesture =
+  | { kind: "draw"; tool: DrawTool; a: Pt; b: Pt }
+  | { kind: "move"; id: string; start: Pt; orig: RoiGeometry; cur: RoiGeometry }
+  | { kind: "resize"; id: string; handle: Handle; orig: RoiGeometry; cur: RoiGeometry };
+
+/** Screen pixels within which a pointer grabs a handle or a thin shape. */
+const GRAB_PX = 7;
+
+let regionSeq = 0;
+
+const RESIZE_CURSORS: Record<string, string> = {
+  nw: "nwse-resize",
+  se: "nwse-resize",
+  ne: "nesw-resize",
+  sw: "nesw-resize",
+  n: "ns-resize",
+  s: "ns-resize",
+  e: "ew-resize",
+  w: "ew-resize",
+};
+
+function sizeOf(frame: ThermalFrame | null): FrameSize {
+  return frame ? { width: frame.width, height: frame.height } : { width: 160, height: 120 };
+}
+
+function overlayOpen(): boolean {
+  return Boolean(document.querySelector("[role=dialog], [role=menu]"));
 }
 
 const VERT_SRC = `#version 300 es
@@ -199,7 +242,13 @@ interface WebGlHandles {
 }
 
 function initWebGl2(canvas: HTMLCanvasElement): WebGlHandles | null {
-  const gl = canvas.getContext("webgl2", { preserveDrawingBuffer: true, antialias: false });
+  // No preserveDrawingBuffer: pictures are rendered in Rust, never read back from the screen.
+  let gl: WebGL2RenderingContext | null = null;
+  try {
+    gl = canvas.getContext("webgl2", { antialias: false });
+  } catch {
+    gl = null;
+  }
   if (!gl) return null;
   const compile = (type: number, src: string): WebGLShader | null => {
     const sh = gl.createShader(type);
@@ -289,44 +338,72 @@ function initWebGl2(canvas: HTMLCanvasElement): WebGlHandles | null {
   };
 }
 
+function uploadR16(
+  gl: WebGL2RenderingContext,
+  unit: number,
+  tex: WebGLTexture,
+  realloc: boolean,
+  w: number,
+  h: number,
+  data: Uint16Array,
+): void {
+  gl.activeTexture(unit);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  if (realloc) {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16UI, w, h, 0, gl.RED_INTEGER, gl.UNSIGNED_SHORT, data);
+  } else {
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RED_INTEGER, gl.UNSIGNED_SHORT, data);
+  }
+}
+
+interface PaintInputs {
+  palette: Palette;
+  lutBytes: Uint8Array;
+  range: ColorRange;
+  rad: RadiometryParams;
+  pipeline: DisplayPipeline;
+  compareFrame: ThermalFrame | null;
+  splitRatio: number;
+}
+
+/**
+ * The thermal image. It draws every frame straight from the store, outside React; regions sit
+ * in their own layer and the pointer's work (drawing, the polygon's open edge) in another.
+ */
 export function ThermalViewport({
-  frame,
-  compareFrame,
+  store,
+  compareFrame = null,
   splitRatio = 0.5,
   palette,
-  minRaw,
-  maxRaw,
+  range,
   rad,
   pipeline,
   unit,
   rois,
   selectedRoiId,
-  activeTool,
+  alertIds,
+  tool,
   showHotCold,
-  showLoupe,
-  showGridOverlay,
-  minimalHud = false,
+  showGrid,
   gridCols,
   gridRows,
   zoom,
+  label = "Live thermal image",
+  style,
+  onRoisChange,
   onSelectRoi,
-  onAddRoi,
-  onHoverPixel,
+  onToolChange,
 }: ThermalViewportProps): React.JSX.Element {
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const glRef = useRef<WebGlHandles | null>(null);
+  const ctx2dRef = useRef<{ off: HTMLCanvasElement; img: ImageData } | null>(null);
   const scratchRef = useRef<ViewportScratch>(createViewportScratch(160 * 120));
   const [canvasSize, setCanvasSize] = useState<[number, number]>([960, 720]);
-  const [backendMode, setBackendMode] = useState<"WebGL2" | "Canvas2D">("WebGL2");
-  const [hover, setHover] = useState<{ x: number; y: number; raw: number; tempC: number } | null>(
-    null,
-  );
-  const [dragStart, setDragStart] = useState<[number, number] | null>(null);
-  const [dragCur, setDragCur] = useState<[number, number] | null>(null);
-  const [polyDraft, setPolyDraft] = useState<[number, number][]>([]);
-
-  const sensorW = frame.width;
-  const sensorH = frame.height;
+  const [size, setSize] = useState<FrameSize>(() => sizeOf(store.getFrame()));
+  const [gesture, setGesture] = useState<Gesture | null>(null);
+  const [draft, setDraft] = useState<Pt[]>([]);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
 
   const lutBytes = useMemo(() => {
     const out = new Uint8Array(256 * 4);
@@ -340,7 +417,23 @@ export function ThermalViewport({
     return out;
   }, [palette]);
 
-  // DPR-aware canvas backing store sizing via ResizeObserver
+  // Everything the per-frame painter and the event handlers read, without re-subscribing.
+  const paintRef = useRef<PaintInputs>({
+    palette,
+    lutBytes,
+    range,
+    rad,
+    pipeline,
+    compareFrame,
+    splitRatio,
+  });
+  paintRef.current = { palette, lutBytes, range, rad, pipeline, compareFrame, splitRatio };
+  const live = useRef({ rois, selectedRoiId, tool, gesture, draft, size, rad });
+  live.current = { rois, selectedRoiId, tool, gesture, draft, size, rad };
+  const handlers = useRef({ onRoisChange, onSelectRoi, onToolChange });
+  handlers.current = { onRoisChange, onSelectRoi, onToolChange };
+
+  // DPR-aware canvas backing store, resized only when the element's size changes.
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv) return;
@@ -362,28 +455,18 @@ export function ThermalViewport({
     const cv = canvasRef.current;
     if (!cv) return;
     const init = () => {
-      const handles = initWebGl2(cv);
-      if (handles) {
-        glRef.current = handles;
-        setBackendMode("WebGL2");
-      } else {
-        glRef.current = null;
-        setBackendMode("Canvas2D");
-      }
+      glRef.current = initWebGl2(cv);
     };
     init();
     const onLost = (e: Event) => {
       e.preventDefault();
       glRef.current = null;
     };
-    const onRestored = () => {
-      init();
-    };
     cv.addEventListener("webglcontextlost", onLost);
-    cv.addEventListener("webglcontextrestored", onRestored);
+    cv.addEventListener("webglcontextrestored", init);
     return () => {
       cv.removeEventListener("webglcontextlost", onLost);
-      cv.removeEventListener("webglcontextrestored", onRestored);
+      cv.removeEventListener("webglcontextrestored", init);
       const h = glRef.current;
       if (h) {
         h.gl.deleteTexture(h.dispTex);
@@ -396,24 +479,31 @@ export function ThermalViewport({
     };
   }, []);
 
-  useEffect(() => {
+  /** Draws one frame with the current palette, range and pipeline. */
+  const paint = useCallback((frame: ThermalFrame | null): boolean => {
     const cv = canvasRef.current;
-    if (!cv) return;
-    if (cv.width !== canvasSize[0] || cv.height !== canvasSize[1]) {
-      cv.width = canvasSize[0];
-      cv.height = canvasSize[1];
-    }
-    const splitCol = compareFrame ? Math.round(sensorW * splitRatio) : sensorW;
+    if (!cv || !frame) return false;
+    const {
+      lutBytes: lut,
+      range: rng,
+      rad: r,
+      pipeline: pipe,
+      compareFrame: cmp,
+    } = paintRef.current;
+    const sensorW = frame.width;
+    const sensorH = frame.height;
+    const [minRaw, maxRaw] = shownRange(rng, frame);
+    const splitCol = cmp ? Math.round(sensorW * paintRef.current.splitRatio) : sensorW;
     const scratch = scratchRef.current;
     prepareDisplay16Bit(
       frame.pixels,
-      compareFrame ? compareFrame.pixels : null,
+      cmp ? cmp.pixels : null,
       splitCol,
       sensorW,
       sensorH,
       minRaw,
       maxRaw,
-      pipeline,
+      pipe,
       scratch,
     );
 
@@ -424,697 +514,431 @@ export function ThermalViewport({
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL2RenderingContext.useProgram is not a React hook
       gl.useProgram(program);
       gl.pixelStorei(gl.UNPACK_ALIGNMENT, 2);
-
-      const needAlloc = handles.texW !== sensorW || handles.texH !== sensorH;
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, dispTex);
-      if (needAlloc) {
-        gl.texImage2D(
-          gl.TEXTURE_2D,
-          0,
-          gl.R16UI,
-          sensorW,
-          sensorH,
-          0,
-          gl.RED_INTEGER,
-          gl.UNSIGNED_SHORT,
-          scratch.disp16,
-        );
-      } else {
-        gl.texSubImage2D(
-          gl.TEXTURE_2D,
-          0,
-          0,
-          0,
-          sensorW,
-          sensorH,
-          gl.RED_INTEGER,
-          gl.UNSIGNED_SHORT,
-          scratch.disp16,
-        );
-      }
-
-      gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, rawTex);
-      if (needAlloc) {
-        gl.texImage2D(
-          gl.TEXTURE_2D,
-          0,
-          gl.R16UI,
-          sensorW,
-          sensorH,
-          0,
-          gl.RED_INTEGER,
-          gl.UNSIGNED_SHORT,
-          scratch.raw16,
-        );
-        handles.texW = sensorW;
-        handles.texH = sensorH;
-      } else {
-        gl.texSubImage2D(
-          gl.TEXTURE_2D,
-          0,
-          0,
-          0,
-          sensorW,
-          sensorH,
-          gl.RED_INTEGER,
-          gl.UNSIGNED_SHORT,
-          scratch.raw16,
-        );
-      }
-
-      if (handles.lutUploaded !== lutBytes) {
+      const realloc = handles.texW !== sensorW || handles.texH !== sensorH;
+      uploadR16(gl, gl.TEXTURE0, dispTex, realloc, sensorW, sensorH, scratch.disp16);
+      uploadR16(gl, gl.TEXTURE1, rawTex, realloc, sensorW, sensorH, scratch.raw16);
+      handles.texW = sensorW;
+      handles.texH = sensorH;
+      if (handles.lutUploaded !== lut) {
         gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, lutTex);
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RGBA, gl.UNSIGNED_BYTE, lutBytes);
-        handles.lutUploaded = lutBytes;
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RGBA, gl.UNSIGNED_BYTE, lut);
+        handles.lutUploaded = lut;
       }
-
       gl.uniform2f(u.u_texSize, sensorW, sensorH);
       const modeNum =
-        pipeline.upscaler === "nearest"
+        pipe.upscaler === "nearest"
           ? 0
-          : pipeline.upscaler === "bicubic"
+          : pipe.upscaler === "bicubic"
             ? 1
-            : pipeline.upscaler === "lanczos3"
+            : pipe.upscaler === "lanczos3"
               ? 2
               : 3;
       gl.uniform1i(u.u_mode, modeNum);
-      gl.uniform2f(u.u_flipRot, pipeline.rotate_180 ? 1 : 0, pipeline.flip_horizontal ? 1 : 0);
-
+      gl.uniform2f(u.u_flipRot, pipe.rotate_180 ? 1 : 0, pipe.flip_horizontal ? 1 : 0);
       const rawSpan = Math.max(1, maxRaw - minRaw);
+      const iso = pipe.isotherm;
       const isoModeNum =
-        pipeline.isotherm.mode === "off"
-          ? 0
-          : pipeline.isotherm.mode === "above"
-            ? 1
-            : pipeline.isotherm.mode === "below"
-              ? 2
-              : 3;
+        iso.mode === "off" ? 0 : iso.mode === "above" ? 1 : iso.mode === "below" ? 2 : 3;
       gl.uniform1i(u.u_isoMode, isoModeNum);
-      gl.uniform1f(u.u_isoLow, (objectCToRaw(pipeline.isotherm.low_c, rad) - minRaw) / rawSpan);
-      gl.uniform1f(u.u_isoHigh, (objectCToRaw(pipeline.isotherm.high_c, rad) - minRaw) / rawSpan);
-      gl.uniform3f(
-        u.u_isoColor,
-        pipeline.isotherm.color[0] / 255,
-        pipeline.isotherm.color[1] / 255,
-        pipeline.isotherm.color[2] / 255,
-      );
+      gl.uniform1f(u.u_isoLow, (objectCToRaw(iso.low_c, r) - minRaw) / rawSpan);
+      gl.uniform1f(u.u_isoHigh, (objectCToRaw(iso.high_c, r) - minRaw) / rawSpan);
+      gl.uniform3f(u.u_isoColor, iso.color[0] / 255, iso.color[1] / 255, iso.color[2] / 255);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      return;
+      return true;
     }
 
-    const ctx = cv.getContext("2d");
-    if (!ctx) return;
-    const off = document.createElement("canvas");
-    off.width = sensorW;
-    off.height = sensorH;
-    const octx = off.getContext("2d");
-    if (!octx) return;
-    const imgData = octx.createImageData(sensorW, sensorH);
-    const minC = rawToObjectC(minRaw, rad);
-    const maxC = rawToObjectC(maxRaw, rad);
+    // Canvas2D fallback, for systems without WebGL2.
+    let ctx: CanvasRenderingContext2D | null = null;
+    try {
+      ctx = cv.getContext("2d");
+    } catch {
+      ctx = null;
+    }
+    if (!ctx) return false;
+    let off = ctx2dRef.current;
+    if (!off || off.img.width !== sensorW || off.img.height !== sensorH) {
+      const canvas = document.createElement("canvas");
+      canvas.width = sensorW;
+      canvas.height = sensorH;
+      const octx = canvas.getContext("2d");
+      if (!octx) return false;
+      off = { off: canvas, img: octx.createImageData(sensorW, sensorH) };
+      ctx2dRef.current = off;
+    }
+    const octx = off.off.getContext("2d");
+    if (!octx) return false;
+    const data = off.img.data;
+    const minC = rawToObjectC(minRaw, r);
+    const maxC = rawToObjectC(maxRaw, r);
     for (let i = 0; i < scratch.disp16.length; i++) {
       const n = Math.min(255, scratch.disp16[i] >> 8);
-      // Isotherm tested against linear raw16 (before HEQ)
       const tempC = minC + (scratch.raw16[i] / 65535) * (maxC - minC);
-      let r = lutBytes[n * 4];
-      let g = lutBytes[n * 4 + 1];
-      let b = lutBytes[n * 4 + 2];
-      if (matchesIsotherm(pipeline.isotherm, tempC)) {
-        [r, g, b] = pipeline.isotherm.color;
-      }
-      imgData.data[i * 4] = r;
-      imgData.data[i * 4 + 1] = g;
-      imgData.data[i * 4 + 2] = b;
-      imgData.data[i * 4 + 3] = 255;
+      let cr = lut[n * 4];
+      let cg = lut[n * 4 + 1];
+      let cb = lut[n * 4 + 2];
+      if (matchesIsotherm(pipe.isotherm, tempC)) [cr, cg, cb] = pipe.isotherm.color;
+      data[i * 4] = cr;
+      data[i * 4 + 1] = cg;
+      data[i * 4 + 2] = cb;
+      data[i * 4 + 3] = 255;
     }
-    octx.putImageData(imgData, 0, 0);
-    ctx.imageSmoothingEnabled = pipeline.upscaler !== "nearest";
+    octx.putImageData(off.img, 0, 0);
+    ctx.imageSmoothingEnabled = pipe.upscaler !== "nearest";
     ctx.imageSmoothingQuality = "high";
+    ctx.save();
     ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.drawImage(off, 0, 0, cv.width, cv.height);
-  }, [
-    frame,
-    compareFrame,
-    splitRatio,
-    lutBytes,
-    minRaw,
-    maxRaw,
-    pipeline,
-    rad,
-    sensorW,
-    sensorH,
-    canvasSize,
-  ]);
-
-  const roiStatsMap = useMemo(() => {
-    const map = new Map<string, ReturnType<typeof evaluateRoi>>();
-    for (const r of rois) {
-      map.set(r.id, evaluateRoi(r, frame.pixels, sensorW, sensorH, rad));
+    if (pipe.rotate_180) {
+      ctx.translate(cv.width, cv.height);
+      ctx.scale(-1, -1);
     }
-    return map;
-  }, [rois, frame, sensorW, sensorH, rad]);
+    if (pipe.flip_horizontal) {
+      ctx.translate(cv.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(off.off, 0, 0, cv.width, cv.height);
+    ctx.restore();
+    return true;
+  }, []);
 
-  const toSensorCoords = useCallback(
-    (e: React.MouseEvent<SVGSVGElement>): [number, number] => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const nx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const ny = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-      return [
-        Math.min(sensorW - 1, Math.floor(nx * sensorW)),
-        Math.min(sensorH - 1, Math.floor(ny * sensorH)),
-      ];
-    },
-    [sensorW, sensorH],
-  );
+  // Every frame from the store, coalesced to the display's refresh, without React.
+  useEffect(() => {
+    let raf: number | null = null;
+    const raq =
+      typeof requestAnimationFrame === "function"
+        ? requestAnimationFrame
+        : (fn: FrameRequestCallback) =>
+            setTimeout(() => fn(performance.now()), 16) as unknown as number;
+    const caf =
+      typeof cancelAnimationFrame === "function"
+        ? cancelAnimationFrame
+        : (id: number) => clearTimeout(id as unknown as ReturnType<typeof setTimeout>);
+    const unsubscribe = store.subscribeFrame(() => {
+      if (raf !== null) return;
+      raf = raq(() => {
+        raf = null;
+        const fr = store.getFrame();
+        if (!fr) return;
+        const s = live.current.size;
+        if (fr.width !== s.width || fr.height !== s.height) setSize(sizeOf(fr));
+        if (paint(fr)) store.markDrawn();
+      });
+    });
+    return () => {
+      unsubscribe();
+      if (raf !== null) caf(raf);
+    };
+  }, [store, paint]);
 
-  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>): void => {
-    const [sx, sy] = toSensorCoords(e);
-    const raw = frame.pixels[sy * sensorW + sx];
-    const info = { x: sx, y: sy, raw, tempC: rawToObjectC(raw, rad) };
-    setHover(info);
-    onHoverPixel?.(info);
-    if (dragStart) setDragCur([sx, sy]);
+  // Redraw the current frame when what it is drawn with changes.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: these are the inputs paint() reads through its ref.
+  useEffect(() => {
+    const cv = canvasRef.current;
+    if (cv && (cv.width !== canvasSize[0] || cv.height !== canvasSize[1])) {
+      cv.width = canvasSize[0];
+      cv.height = canvasSize[1];
+    }
+    paint(store.getFrame());
+  }, [store, paint, canvasSize, lutBytes, range, rad, pipeline, compareFrame, splitRatio]);
+
+  // ---------- Pointer work ----------
+
+  const toSensor = (e: { clientX: number; clientY: number }): { p: Pt; tol: number } => {
+    const el = surfaceRef.current;
+    const { width: W, height: H } = live.current.size;
+    if (!el) return { p: [0, 0], tol: 1 };
+    const rect = el.getBoundingClientRect();
+    const rw = rect.width || W;
+    const rh = rect.height || H;
+    const fx = ((e.clientX - rect.left) / rw) * W;
+    const fy = ((e.clientY - rect.top) / rh) * H;
+    const x = Number.isFinite(fx) ? Math.max(0, Math.min(W, fx)) : 0;
+    const y = Number.isFinite(fy) ? Math.max(0, Math.min(H, fy)) : 0;
+    return { p: [x, y], tol: Math.max(0.75, (GRAB_PX * W) / rw) };
   };
 
-  const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>): void => {
-    const [sx, sy] = toSensorCoords(e);
-    if (activeTool === "select") {
-      onSelectRoi(null);
-      return;
-    }
-    if (activeTool === "spot" || activeTool === "spot3") {
-      onAddRoi({
-        id: `spot_${Date.now()}`,
-        label: `SP${rois.length + 1}`,
-        geometry: {
-          kind: "spot",
-          x: sx,
-          y: sy,
-          kernel: activeTool === "spot3" ? 3 : 1,
-          show_raw: false,
-        },
+  const startGesture = useCallback((g: Gesture | null) => {
+    live.current.gesture = g;
+    setGesture(g);
+  }, []);
+
+  const setDraftPoints = useCallback((pts: Pt[]) => {
+    live.current.draft = pts;
+    setDraft(pts);
+  }, []);
+
+  const addRegion = (geometry: RoiGeometry) => {
+    regionSeq += 1;
+    const id = `${geometry.kind}_${Date.now().toString(36)}_${regionSeq}`;
+    handlers.current.onRoisChange((prev) => [
+      ...prev,
+      {
+        id,
+        label: nextRegionName(geometry.kind, prev),
+        color: nextColorIndex(prev),
+        geometry,
         emissivity_override: null,
         reflected_temp_override_c: null,
         visible: true,
+      },
+    ]);
+    handlers.current.onSelectRoi(id);
+    handlers.current.onToolChange("select");
+  };
+
+  const updateHover = (p: Pt) => {
+    const fr = store.getFrame();
+    if (!fr) return;
+    const [x, y] = toPixel(p, { width: fr.width, height: fr.height });
+    const raw = fr.pixels[y * fr.width + x];
+    store.setHover({ x, y, raw, tempC: rawToObjectC(raw, live.current.rad) });
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    const target = e.target instanceof Element ? e.target : null;
+    if (target?.closest("input, button")) return;
+    const { p, tol } = toSensor(e);
+    const { rois: list, selectedRoiId: sel, tool: t, size: sz } = live.current;
+
+    const labelId = target?.closest("[data-region-label]")?.getAttribute("data-region-label");
+    const labelled = labelId ? list.find((r) => r.id === labelId) : undefined;
+    if (labelled) {
+      handlers.current.onSelectRoi(labelled.id);
+      startGesture({
+        kind: "move",
+        id: labelled.id,
+        start: p,
+        orig: labelled.geometry,
+        cur: labelled.geometry,
       });
       return;
     }
-    if (activeTool === "polygon") {
-      setPolyDraft((prev) => [...prev, [sx, sy]]);
+
+    if (t === "select") {
+      const hit = hitTest(list, p, tol, sel);
+      if (!hit) {
+        handlers.current.onSelectRoi(null);
+        return;
+      }
+      const roi = list.find((r) => r.id === hit.roiId);
+      if (!roi) return;
+      handlers.current.onSelectRoi(roi.id);
+      startGesture(
+        hit.part === "handle"
+          ? {
+              kind: "resize",
+              id: roi.id,
+              handle: hit.handle,
+              orig: roi.geometry,
+              cur: roi.geometry,
+            }
+          : { kind: "move", id: roi.id, start: p, orig: roi.geometry, cur: roi.geometry },
+      );
       return;
     }
-    setDragStart([sx, sy]);
-    setDragCur([sx, sy]);
-  };
-
-  const handleDoubleClick = (): void => {
-    if (activeTool === "polygon" && polyDraft.length >= 3) {
-      onAddRoi({
-        id: `poly_${Date.now()}`,
-        label: `POLY${rois.length + 1}`,
-        geometry: { kind: "polygon", points: polyDraft },
-        emissivity_override: null,
-        reflected_temp_override_c: null,
-        visible: true,
-      });
-      setPolyDraft([]);
+    if (t === "polygon") {
+      const step = polygonStep(live.current.draft, { type: "click", pt: p }, tol, sz);
+      setDraftPoints(step.draft);
+      if (step.done) addRegion({ kind: "polygon", points: step.done });
+      return;
     }
+    if (t === "spot" || t === "spot3") {
+      const g = geometryFromDrag(t, p, p, sz);
+      if (g) addRegion(g);
+      return;
+    }
+    startGesture({ kind: "draw", tool: t, a: p, b: p });
   };
 
-  const handleMouseUp = (): void => {
-    if (!dragStart || !dragCur) return;
-    const [x0, y0] = dragStart;
-    const [x1, y1] = dragCur;
-    const dist = Math.hypot(x1 - x0, y1 - y0);
-    if (dist >= 3) {
-      const id = `${activeTool}_${Date.now()}`;
-      if (activeTool === "box") {
-        onAddRoi({
-          id,
-          label: `BX${rois.length + 1}`,
-          geometry: {
-            kind: "box",
-            x: Math.min(x0, x1),
-            y: Math.min(y0, y1),
-            w: Math.max(2, Math.abs(x1 - x0)),
-            h: Math.max(2, Math.abs(y1 - y0)),
-          },
-          emissivity_override: null,
-          reflected_temp_override_c: null,
-          visible: true,
-        });
-      } else if (activeTool === "circle") {
-        onAddRoi({
-          id,
-          label: `CR${rois.length + 1}`,
-          geometry: { kind: "circle", cx: x0, cy: y0, radius: Math.max(3, Math.round(dist)) },
-          emissivity_override: null,
-          reflected_temp_override_c: null,
-          visible: true,
-        });
-      } else if (activeTool === "line") {
-        onAddRoi({
-          id,
-          label: `LN${rois.length + 1}`,
-          geometry: { kind: "line", x0, y0, x1, y1 },
-          emissivity_override: null,
-          reflected_temp_override_c: null,
-          visible: true,
-        });
-      } else if (activeTool === "delta") {
-        onAddRoi({
-          id,
-          label: `ΔT${rois.length + 1}`,
-          geometry: { kind: "delta", x0, y0, x1, y1 },
-          emissivity_override: null,
-          reflected_temp_override_c: null,
-          visible: true,
-        });
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const { p, tol } = toSensor(e);
+    updateHover(p);
+    const g = live.current.gesture;
+    const sz = live.current.size;
+    // Capture only once a drag really moves, so a double-click still reaches the label it hit.
+    if (g && e.buttons !== 0 && !e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.setPointerCapture?.(e.pointerId);
+      } catch {
+        // Capture is a convenience; drags still work inside the image without it.
       }
     }
-    setDragStart(null);
-    setDragCur(null);
+    if (g?.kind === "draw") {
+      startGesture({ ...g, b: p });
+      return;
+    }
+    if (g?.kind === "move") {
+      startGesture({ ...g, cur: moveGeometry(g.orig, p[0] - g.start[0], p[1] - g.start[1], sz) });
+      return;
+    }
+    if (g?.kind === "resize") {
+      startGesture({ ...g, cur: resizeGeometry(g.orig, g.handle, p, sz) });
+      return;
+    }
+    // No gesture: the cursor says what a press would do.
+    const el = surfaceRef.current;
+    if (!el) return;
+    let cursor = live.current.tool === "select" ? "default" : "crosshair";
+    if (live.current.tool === "select") {
+      const hit = hitTest(live.current.rois, p, tol, live.current.selectedRoiId);
+      if (hit?.part === "body") cursor = "move";
+      else if (hit?.part === "handle")
+        cursor = hit.handle.kind === "box" ? (RESIZE_CURSORS[hit.handle.h] ?? "move") : "grab";
+    }
+    if (el.style.cursor !== cursor) el.style.cursor = cursor;
   };
 
-  const loupeCenter = hover ?? {
-    x: frame.max_x,
-    y: frame.max_y,
-    raw: frame.max_raw,
-    tempC: rawToObjectC(frame.max_raw, rad),
+  const finishGesture = (e: React.PointerEvent<HTMLDivElement>) => {
+    const g = live.current.gesture;
+    try {
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+    } catch {
+      // Released already.
+    }
+    if (!g) return;
+    startGesture(null);
+    if (g.kind === "draw") {
+      const { p } = toSensor(e);
+      const geom = geometryFromDrag(g.tool, g.a, p, live.current.size);
+      if (geom) addRegion(geom);
+      return;
+    }
+    if (JSON.stringify(g.cur) !== JSON.stringify(g.orig)) {
+      handlers.current.onRoisChange((prev) =>
+        prev.map((r) => (r.id === g.id ? { ...r, geometry: g.cur } : r)),
+      );
+    }
   };
+
+  const onDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target instanceof Element ? e.target : null;
+    if (target?.closest("input, button, [data-region-label]")) return;
+    const { p, tol } = toSensor(e);
+    const { tool: t, rois: list, selectedRoiId: sel, size: sz } = live.current;
+    if (t === "polygon") {
+      const step = polygonStep(live.current.draft, { type: "dblclick" }, tol, sz);
+      setDraftPoints(step.draft);
+      if (step.done) addRegion({ kind: "polygon", points: step.done });
+      return;
+    }
+    if (t === "select") {
+      const hit = hitTest(list, p, tol, sel);
+      if (hit?.part === "body") setRenamingId(hit.roiId);
+    }
+  };
+
+  // Delete removes the selected region; Esc cancels drawing, then the tool, then the selection.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.isComposing || isTypingTarget(e.target) || overlayOpen()) return;
+      if (e.altKey || e.metaKey || e.ctrlKey) return;
+      const cur = live.current;
+      if (e.key === "Escape") {
+        if (cur.draft.length > 0 || cur.gesture) {
+          setDraftPoints([]);
+          startGesture(null);
+        } else if (cur.tool !== "select") {
+          handlers.current.onToolChange("select");
+        } else if (cur.selectedRoiId) {
+          handlers.current.onSelectRoi(null);
+        } else {
+          return;
+        }
+        e.preventDefault();
+        return;
+      }
+      if ((e.key === "Delete" || e.key === "Backspace") && cur.selectedRoiId) {
+        const id = cur.selectedRoiId;
+        handlers.current.onRoisChange((prev) => prev.filter((r) => r.id !== id));
+        handlers.current.onSelectRoi(null);
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setDraftPoints, startGesture]);
+
+  // A polygon in progress is dropped when another tool is picked.
+  useEffect(() => {
+    if (tool !== "polygon" && live.current.draft.length > 0) setDraftPoints([]);
+  }, [tool, setDraftPoints]);
+
+  const shownRois = useMemo(() => {
+    if (!gesture || gesture.kind === "draw") return rois;
+    return rois.map((r) => (r.id === gesture.id ? { ...r, geometry: gesture.cur } : r));
+  }, [rois, gesture]);
+
+  const preview =
+    gesture?.kind === "draw" ? geometryFromDrag(gesture.tool, gesture.a, gesture.b, size) : null;
+
+  const onRename = useCallback((id: string, name: string | null) => {
+    setRenamingId(null);
+    const next = name?.trim();
+    if (next) {
+      handlers.current.onRoisChange((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, label: next } : r)),
+      );
+    }
+  }, []);
 
   return (
-    <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-canvas-bg)]">
-      {/* Top-left telemetry pill */}
-      <div className="pointer-events-none absolute top-2.5 left-2.5 z-10 flex items-center gap-2 rounded-[6px] border border-white/12 bg-black/72 px-2.5 py-1 font-mono-tech text-[11px] text-[#ededed] backdrop-blur-xs">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--tc-pass)]" />
-        <span>
-          {sensorW}×{sensorH}
-        </span>
-        {minimalHud ? (
-          <>
-            <span className="text-white/35">·</span>
-            <span>{palette.label}</span>
-          </>
-        ) : (
-          <>
-            <span className="text-white/35">·</span>
-            <span>{backendMode}</span>
-            <span className="text-white/35">·</span>
-            <span>{pipeline.upscaler.replace("_", " ")}</span>
-            {pipeline.sharpen_amount > 0 ? (
-              <>
-                <span className="text-white/35">·</span>
-                <span>USM {Math.round(pipeline.sharpen_amount * 100)}%</span>
-              </>
-            ) : null}
-            {pipeline.histogram_eq ? (
-              <>
-                <span className="text-white/35">·</span>
-                <span className="text-[var(--tc-accent)]">HEQ</span>
-              </>
-            ) : null}
-            <span className="text-white/35">·</span>
-            <span>ε={rad.emissivity.toFixed(2)}</span>
-          </>
-        )}
-      </div>
-
-      {/* Main 4:3 thermal stage */}
-      <div
-        className="relative aspect-[4/3] max-h-full max-w-full transition-transform duration-150"
-        style={{
-          width: "min(100%, calc((100vh - 210px) * 1.3333))",
-          transform: `scale(${zoom})`,
-        }}
-      >
-        <canvas
-          ref={canvasRef}
-          data-thermal-canvas="true"
-          width={canvasSize[0]}
-          height={canvasSize[1]}
-          className="block h-full w-full rounded-[4px]"
-        />
-
+    <div
+      ref={surfaceRef}
+      className="st-img"
+      data-viewport-surface=""
+      style={{ ...style, transform: zoom !== 1 ? `scale(${zoom})` : undefined }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={finishGesture}
+      onPointerCancel={finishGesture}
+      onPointerLeave={() => {
+        if (!live.current.gesture) store.setHover(null);
+      }}
+      onDoubleClick={onDoubleClick}
+    >
+      <canvas
+        ref={canvasRef}
+        data-thermal-canvas="true"
+        width={canvasSize[0]}
+        height={canvasSize[1]}
+        role="img"
+        aria-label={label}
+      />
+      {compareFrame ? (
         <svg
-          viewBox={`0 0 ${sensorW} ${sensorH}`}
-          className="absolute inset-0 h-full w-full select-none"
-          style={{ cursor: activeTool === "select" ? "crosshair" : "cell" }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => {
-            setHover(null);
-            onHoverPixel?.(null);
-          }}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onDoubleClick={handleDoubleClick}
+          className="st-ov"
+          viewBox={`0 0 ${size.width} ${size.height}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
         >
-          {compareFrame ? (
-            <line
-              x1={sensorW * splitRatio}
-              y1={0}
-              x2={sensorW * splitRatio}
-              y2={sensorH}
-              stroke="#ffffff"
-              strokeWidth={0.6}
-              strokeDasharray="2 1.5"
-            />
-          ) : null}
-
-          {showGridOverlay
-            ? Array.from({ length: gridRows * gridCols }, (_, idx) => {
-                const r = Math.floor(idx / gridCols);
-                const c = idx % gridCols;
-                const gx = Math.floor(((c * 2 + 1) * sensorW) / (gridCols * 2));
-                const gy = Math.floor(((r * 2 + 1) * sensorH) / (gridRows * 2));
-                const tc = rawToObjectC(frame.pixels[gy * sensorW + gx], rad);
-                return { key: `gp_${gx}_${gy}`, gx, gy, tc };
-              }).map((pt) => (
-                <g key={pt.key}>
-                  <circle
-                    cx={pt.gx}
-                    cy={pt.gy}
-                    r={1.1}
-                    fill="#ffffff"
-                    stroke="#000"
-                    strokeWidth={0.3}
-                  />
-                  <text
-                    x={pt.gx + 2}
-                    y={pt.gy + 1.4}
-                    fill="#ffffff"
-                    stroke="#000000"
-                    strokeWidth={0.45}
-                    paintOrder="stroke"
-                    fontSize={3.6}
-                    fontFamily="var(--font-mono)"
-                  >
-                    {formatTemp(pt.tc, unit, 1)}
-                  </text>
-                </g>
-              ))
-            : null}
-
-          {showHotCold ? (
-            <g className="pointer-events-none">
-              <g transform={`translate(${frame.max_x}, ${frame.max_y})`}>
-                <path d="M-3,0 H3 M0,-3 V3" stroke="#ff5733" strokeWidth={0.65} />
-                <polygon points="0,-5 -2,-2.2 2,-2.2" fill="#ff5733" />
-                <text
-                  x={3.6}
-                  y={-2}
-                  fill="#ffd2c4"
-                  stroke="#000"
-                  strokeWidth={0.65}
-                  paintOrder="stroke"
-                  fontSize={3.8}
-                  fontFamily="var(--font-mono)"
-                >
-                  MAX {formatTemp(rawToObjectC(frame.max_raw, rad), unit, 1)}
-                </text>
-              </g>
-              <g transform={`translate(${frame.min_x}, ${frame.min_y})`}>
-                <path d="M-3,0 H3 M0,-3 V3" stroke="#5da3e5" strokeWidth={0.65} />
-                <polygon points="0,5 -2,2.2 2,2.2" fill="#5da3e5" />
-                <text
-                  x={3.6}
-                  y={4.5}
-                  fill="#cde6ff"
-                  stroke="#000"
-                  strokeWidth={0.65}
-                  paintOrder="stroke"
-                  fontSize={3.8}
-                  fontFamily="var(--font-mono)"
-                >
-                  MIN {formatTemp(rawToObjectC(frame.min_raw, rad), unit, 1)}
-                </text>
-              </g>
-            </g>
-          ) : null}
-
-          {rois
-            .filter((r) => r.visible)
-            .map((roi) => {
-              const st = roiStatsMap.get(roi.id);
-              const isSelected = roi.id === selectedRoiId;
-              const stroke = isSelected ? "#f7b23b" : "#ffffff";
-              const g = roi.geometry;
-              if (g.kind === "spot") {
-                const label = st
-                  ? `${roi.label} ${formatTemp(st.mean_c, unit, 1)}${g.show_raw ? ` [${Math.round(st.mean_raw)}]` : ""}`
-                  : roi.label;
-                return (
-                  <g
-                    key={roi.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRoi(roi.id);
-                    }}
-                  >
-                    <circle
-                      cx={g.x}
-                      cy={g.y}
-                      r={g.kernel >= 3 ? 2.6 : 1.6}
-                      fill="none"
-                      stroke={stroke}
-                      strokeWidth={0.65}
-                    />
-                    <path
-                      d={`M${g.x - 4},${g.y} H${g.x - 1.4} M${g.x + 1.4},${g.y} H${g.x + 4} M${g.x},${g.y - 4} V${g.y - 1.4} M${g.x},${g.y + 1.4} V${g.y + 4}`}
-                      stroke={stroke}
-                      strokeWidth={0.55}
-                    />
-                    <text
-                      x={g.x + 4.8}
-                      y={g.y + 5.2}
-                      fill={stroke}
-                      stroke="#000000"
-                      strokeWidth={0.75}
-                      paintOrder="stroke"
-                      fontSize={4}
-                      fontFamily="var(--font-mono)"
-                    >
-                      {label}
-                    </text>
-                  </g>
-                );
-              }
-              if (g.kind === "box") {
-                return (
-                  <g
-                    key={roi.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRoi(roi.id);
-                    }}
-                  >
-                    <rect
-                      x={g.x}
-                      y={g.y}
-                      width={g.w}
-                      height={g.h}
-                      fill="rgb(93 163 229 / 10%)"
-                      stroke={isSelected ? "#f7b23b" : "#5da3e5"}
-                      strokeWidth={0.7}
-                    />
-                    <text
-                      x={g.x}
-                      y={Math.max(4, g.y - 1.8)}
-                      fill="#edf4fb"
-                      stroke="#000"
-                      strokeWidth={0.75}
-                      paintOrder="stroke"
-                      fontSize={3.9}
-                      fontFamily="var(--font-mono)"
-                    >
-                      {roi.label} {st ? `${formatTemp(st.max_c, unit, 1)} max` : ""}
-                    </text>
-                  </g>
-                );
-              }
-              if (g.kind === "circle") {
-                return (
-                  <g
-                    key={roi.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRoi(roi.id);
-                    }}
-                  >
-                    <circle
-                      cx={g.cx}
-                      cy={g.cy}
-                      r={g.radius}
-                      fill="rgb(111 211 159 / 10%)"
-                      stroke={isSelected ? "#f7b23b" : "#6fd39f"}
-                      strokeWidth={0.7}
-                    />
-                    <text
-                      x={g.cx - g.radius}
-                      y={Math.max(4, g.cy - g.radius - 1.5)}
-                      fill="#e6fff2"
-                      stroke="#000"
-                      strokeWidth={0.75}
-                      paintOrder="stroke"
-                      fontSize={3.9}
-                      fontFamily="var(--font-mono)"
-                    >
-                      {roi.label} {st ? `${formatTemp(st.mean_c, unit, 1)} avg` : ""}
-                    </text>
-                  </g>
-                );
-              }
-              if (g.kind === "polygon") {
-                const pts = g.points.map(([px, py]) => `${px},${py}`).join(" ");
-                return (
-                  <g
-                    key={roi.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRoi(roi.id);
-                    }}
-                  >
-                    <polygon
-                      points={pts}
-                      fill="rgb(111 211 159 / 12%)"
-                      stroke={isSelected ? "#f7b23b" : "#6fd39f"}
-                      strokeWidth={0.7}
-                    />
-                  </g>
-                );
-              }
-              if (g.kind === "line" || g.kind === "delta") {
-                const isDelta = g.kind === "delta";
-                return (
-                  <g
-                    key={roi.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRoi(roi.id);
-                    }}
-                  >
-                    <line
-                      x1={g.x0}
-                      y1={g.y0}
-                      x2={g.x1}
-                      y2={g.y1}
-                      stroke={isSelected ? "#ffffff" : "#f7b23b"}
-                      strokeWidth={0.75}
-                      strokeDasharray={isDelta ? "2 1.2" : undefined}
-                    />
-                    <circle cx={g.x0} cy={g.y0} r={1.3} fill="#f7b23b" />
-                    <circle cx={g.x1} cy={g.y1} r={1.3} fill="#f7b23b" />
-                    <text
-                      x={(g.x0 + g.x1) / 2}
-                      y={Math.max(4, (g.y0 + g.y1) / 2 - 2)}
-                      fill="#fde5b4"
-                      stroke="#000"
-                      strokeWidth={0.75}
-                      paintOrder="stroke"
-                      fontSize={3.9}
-                      fontFamily="var(--font-mono)"
-                    >
-                      {roi.label}{" "}
-                      {isDelta && st?.delta_c !== null && st?.delta_c !== undefined
-                        ? `${st.delta_c >= 0 ? "+" : ""}${st.delta_c.toFixed(1)} ${unitSymbol(unit)}`
-                        : st
-                          ? `${formatTemp(st.max_c, unit, 1)} pk`
-                          : ""}
-                    </text>
-                  </g>
-                );
-              }
-              return null;
-            })}
-
-          {dragStart && dragCur ? (
-            activeTool === "box" ? (
-              <rect
-                x={Math.min(dragStart[0], dragCur[0])}
-                y={Math.min(dragStart[1], dragCur[1])}
-                width={Math.abs(dragCur[0] - dragStart[0])}
-                height={Math.abs(dragCur[1] - dragStart[1])}
-                fill="rgb(247 178 59 / 12%)"
-                stroke="#f7b23b"
-                strokeWidth={0.7}
-                strokeDasharray="2 1"
-              />
-            ) : activeTool === "circle" ? (
-              <circle
-                cx={dragStart[0]}
-                cy={dragStart[1]}
-                r={Math.hypot(dragCur[0] - dragStart[0], dragCur[1] - dragStart[1])}
-                fill="rgb(247 178 59 / 12%)"
-                stroke="#f7b23b"
-                strokeWidth={0.7}
-                strokeDasharray="2 1"
-              />
-            ) : (
-              <line
-                x1={dragStart[0]}
-                y1={dragStart[1]}
-                x2={dragCur[0]}
-                y2={dragCur[1]}
-                stroke="#f7b23b"
-                strokeWidth={0.75}
-                strokeDasharray="2 1"
-              />
-            )
-          ) : null}
-
-          {polyDraft.length > 0 ? (
-            <polyline
-              points={polyDraft.map(([px, py]) => `${px},${py}`).join(" ")}
-              fill="none"
-              stroke="#6fd39f"
-              strokeWidth={0.75}
-              strokeDasharray="1.5 1"
-            />
-          ) : null}
+          <line
+            className="w dash"
+            x1={size.width * splitRatio}
+            y1={0}
+            x2={size.width * splitRatio}
+            y2={size.height}
+          />
         </svg>
-      </div>
-
-      {/* Zoomed 7×7 Pixel-Grid Loupe */}
-      {showLoupe ? (
-        <div className="pointer-events-none absolute right-2.5 bottom-2.5 z-10 w-[166px] rounded-[8px] border border-white/15 bg-black/82 p-2 text-[#ededed] backdrop-blur-xs">
-          <div className="mb-1.5 flex items-center justify-between font-mono-tech text-[10.5px]">
-            <span className="text-white/65">
-              LOUPE ({loupeCenter.x},{loupeCenter.y})
-            </span>
-            <span className="font-semibold text-[var(--tc-thermal)]">
-              {formatTemp(loupeCenter.tempC, unit, 2)}
-            </span>
-          </div>
-          <div className="grid grid-cols-7 gap-[1px] bg-white/15 p-[1px]">
-            {LOUPE_CELLS.map((cell) => {
-              const px = Math.max(0, Math.min(sensorW - 1, loupeCenter.x + cell.dx));
-              const py = Math.max(0, Math.min(sensorH - 1, loupeCenter.y + cell.dy));
-              const raw = frame.pixels[py * sensorW + px];
-              const norm = Math.max(0, Math.min(1, (raw - minRaw) / Math.max(1, maxRaw - minRaw)));
-              const [r, g, b] = samplePalette(palette, norm);
-              return (
-                <div
-                  key={cell.key}
-                  className="h-[19px] w-[19px]"
-                  style={{
-                    backgroundColor: `rgb(${r},${g},${b})`,
-                    outline: cell.isCenter ? "1.5px solid #ffffff" : undefined,
-                    zIndex: cell.isCenter ? 2 : 1,
-                  }}
-                />
-              );
-            })}
-          </div>
-          <div className="mt-1 flex items-center justify-between font-mono-tech text-[10px] text-white/60">
-            <span>RAW {loupeCenter.raw}</span>
-            <span>7×7 sensor grid</span>
-          </div>
-        </div>
       ) : null}
+      <RegionLayer
+        store={store}
+        size={size}
+        rois={shownRois}
+        selectedRoiId={selectedRoiId}
+        alertIds={alertIds}
+        rad={rad}
+        unit={unit}
+        showHotCold={showHotCold}
+        showGrid={showGrid}
+        gridCols={gridCols}
+        gridRows={gridRows}
+        renamingId={renamingId}
+        onStartRename={setRenamingId}
+        onRename={onRename}
+      />
+      <HoverLayer store={store} size={size} preview={preview} polygonDraft={draft} />
     </div>
   );
 }

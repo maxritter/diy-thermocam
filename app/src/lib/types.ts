@@ -32,11 +32,20 @@ export interface MaterialPreset {
   emissivity: number;
 }
 
+/** A surface's emissivity and the reflected (usually room) temperature in front of it. */
+export interface Material {
+  emissivity: number;
+  reflected_c: number;
+}
+
 export interface RadiometryParams {
   cal_offset: number;
   cal_slope: number;
+  /** The wanted material: Live's, or a region's own. */
   emissivity: number;
   reflected_temp_c: number;
+  /** What the camera's sensor holds; null or emissivity 1 is factory (no correction). */
+  sensor_material?: Material | null;
 }
 
 export interface IsothermConfig {
@@ -70,6 +79,10 @@ export interface Roi {
   geometry: RoiGeometry;
   emissivity_override: number | null;
   reflected_temp_override_c: number | null;
+  /** The region's own material from the list; null with an override means Custom. */
+  material_id?: string | null;
+  /** Index into the region colors, fixed when the region is drawn. */
+  color?: number;
   visible: boolean;
 }
 

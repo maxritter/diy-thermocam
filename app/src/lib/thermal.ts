@@ -2,6 +2,7 @@ import { DEFAULT_MATERIALS } from "./palettes";
 import type {
   IsothermConfig,
   LineSample,
+  Material,
   MaterialPreset,
   RadiometryParams,
   Roi,
@@ -37,6 +38,17 @@ export function fromCelsius(tempC: number, unit: TempUnit): number {
   }
 }
 
+export function toCelsius(value: number, unit: TempUnit): number {
+  switch (unit) {
+    case "celsius":
+      return value;
+    case "fahrenheit":
+      return ((value - 32) * 5) / 9;
+    case "kelvin":
+      return value - KELVIN_OFFSET;
+  }
+}
+
 export function formatTemp(tempC: number, unit: TempUnit, decimals = 1): string {
   return `${fromCelsius(tempC, unit).toFixed(decimals)} ${unitSymbol(unit)}`;
 }
@@ -51,7 +63,8 @@ export function rawToApparentC(raw: number, calOffset: number, calSlope: number)
   return raw * calSlope + calOffset;
 }
 
-export function compensateEmissivityC(
+/** Stefan–Boltzmann correction of an apparent temperature. Only `readingC` uses it. */
+function compensateEmissivityC(
   apparentC: number,
   emissivity: number,
   reflectedTempC: number,
@@ -65,23 +78,83 @@ export function compensateEmissivityC(
   return radObj ** 0.25 - KELVIN_OFFSET;
 }
 
-export function rawToObjectC(raw: number, rad: RadiometryParams): number {
-  const app = rawToApparentC(raw, rad.cal_offset, rad.cal_slope);
-  return compensateEmissivityC(app, rad.emissivity, rad.reflected_temp_c);
+/** The inverse: the apparent temperature a surface at `objectC` shows. */
+function uncompensateEmissivityC(
+  objectC: number,
+  emissivity: number,
+  reflectedTempC: number,
+): number {
+  const eps = Math.max(0.05, Math.min(1.0, emissivity));
+  if (Math.abs(eps - 1.0) < 1e-6) return objectC;
+  const tObjK = Math.max(1.0, objectC + KELVIN_OFFSET);
+  const tReflK = Math.max(1.0, reflectedTempC + KELVIN_OFFSET);
+  return (eps * tObjK ** 4 + (1 - eps) * tReflK ** 4) ** 0.25 - KELVIN_OFFSET;
 }
 
-/** Exact inverse of `rawToObjectC` so WebGL2 raw-temperature isotherm thresholds match Rust `imaging.rs` at any emissivity. */
+export interface Calibration {
+  cal_offset: number;
+  cal_slope: number;
+}
+
+const isFactory = (m: Material | null | undefined): m is null | undefined =>
+  !m || Math.abs(m.emissivity - 1) < 1e-6;
+
+function sameMaterial(a: Material, b: Material): boolean {
+  return (
+    (isFactory(a) && isFactory(b)) ||
+    (Math.abs(a.emissivity - b.emissivity) < 1e-6 && Math.abs(a.reflected_c - b.reflected_c) < 1e-6)
+  );
+}
+
+/**
+ * Every temperature Studio shows: undo the material the camera's sensor already applied
+ * (skipped at factory values), then apply the wanted one. When both are the same, the camera's
+ * reading passes through unchanged, so no reading is corrected twice. Twin of Rust's
+ * `radiometry::reading_c`; both pass `crates/thermocam-core/tests/fixtures/readings.json`.
+ */
+export function readingC(
+  raw: number,
+  cal: Calibration,
+  sensorMaterial: Material | null | undefined,
+  want: Material,
+): number {
+  const reported = rawToApparentC(raw, cal.cal_offset, cal.cal_slope);
+  if (isFactory(sensorMaterial)) {
+    return compensateEmissivityC(reported, want.emissivity, want.reflected_c);
+  }
+  if (sameMaterial(sensorMaterial, want)) return reported;
+  const apparent = uncompensateEmissivityC(
+    reported,
+    sensorMaterial.emissivity,
+    sensorMaterial.reflected_c,
+  );
+  return compensateEmissivityC(apparent, want.emissivity, want.reflected_c);
+}
+
+function wantedMaterial(rad: RadiometryParams): Material {
+  return { emissivity: rad.emissivity, reflected_c: rad.reflected_temp_c };
+}
+
+/** A pixel's temperature with the image's (or a region's) material. */
+export function rawToObjectC(raw: number, rad: RadiometryParams): number {
+  return readingC(raw, rad, rad.sensor_material, wantedMaterial(rad));
+}
+
+/** Exact inverse of `rawToObjectC`, so isotherm and range thresholds match the readings. */
 export function objectCToRaw(tempC: number, rad: RadiometryParams): number {
-  const eps = Math.max(0.05, Math.min(1.0, rad.emissivity));
-  let apparentC = tempC;
-  if (Math.abs(eps - 1.0) >= 1e-6) {
-    const tObjK = Math.max(1.0, tempC + KELVIN_OFFSET);
-    const tReflK = Math.max(1.0, rad.reflected_temp_c + KELVIN_OFFSET);
-    const tAppK = (eps * tObjK ** 4 + (1 - eps) * tReflK ** 4) ** 0.25;
-    apparentC = tAppK - KELVIN_OFFSET;
+  const want = wantedMaterial(rad);
+  const sensor = rad.sensor_material;
+  let reportedC: number;
+  if (isFactory(sensor)) {
+    reportedC = uncompensateEmissivityC(tempC, want.emissivity, want.reflected_c);
+  } else if (sameMaterial(sensor, want)) {
+    reportedC = tempC;
+  } else {
+    const apparent = uncompensateEmissivityC(tempC, want.emissivity, want.reflected_c);
+    reportedC = compensateEmissivityC(apparent, sensor.emissivity, sensor.reflected_c);
   }
   const slope = Math.abs(rad.cal_slope) > 1e-9 ? rad.cal_slope : 0.01;
-  return (apparentC - rad.cal_offset) / slope;
+  return (reportedC - rad.cal_offset) / slope;
 }
 
 export function matchesIsotherm(iso: IsothermConfig, tempC: number): boolean {

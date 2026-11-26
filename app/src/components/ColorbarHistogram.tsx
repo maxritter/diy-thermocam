@@ -1,187 +1,196 @@
 import { useMemo, useRef } from "react";
+import {
+  type ColorRange,
+  dragRange,
+  type RangeDrag,
+  rangeAfterDoubleClick,
+  rangeAfterDragStart,
+  scaleTicks,
+  shownRange,
+} from "@/lib/colorRange";
+import type { FrameStore } from "@/lib/frameStore";
 import { paletteGradientCss } from "@/lib/palettes";
-import { computeHistogram256, formatTemp, rawToObjectC } from "@/lib/thermal";
-import type {
-  IsothermConfig,
-  Palette,
-  RadiometryParams,
-  TempUnit,
-  ThermalFrame,
-} from "@/lib/types";
-
-const HIST_BUCKETS = Array.from({ length: 64 }, (_, i) => ({
-  id: `hb_${i * 4}`,
-  offset: i * 4,
-  x: i * 2,
-}));
+import { formatTemp, fromCelsius, objectCToRaw, rawToObjectC, toCelsius } from "@/lib/thermal";
+import type { Palette, RadiometryParams, TempUnit } from "@/lib/types";
+import { useSampledFrame } from "@/lib/useFrame";
 
 interface ColorbarHistogramProps {
-  frame: ThermalFrame;
+  store: FrameStore;
   palette: Palette;
-  minRaw: number;
-  maxRaw: number;
-  autoScale: boolean;
+  range: ColorRange;
+  onRangeChange: (range: ColorRange) => void;
   rad: RadiometryParams;
   unit: TempUnit;
-  isotherm: IsothermConfig;
-  showHistogram?: boolean;
-  onRangeChange: (minRaw: number, maxRaw: number) => void;
-  onToggleAutoScale: (auto: boolean) => void;
+  /** Clicking an end's unit switches °C and °F. */
+  onUnitChange?: (unit: TempUnit) => void;
+  /** Boost contrast is on: the scale is no longer even. */
+  boosted?: boolean;
 }
 
+const BINS = 48;
+
+/** A vertical histogram path beside the bar, cold at the bottom (studio.js renderHist). */
+function histogramPath(pixels: Uint16Array, lo: number, hi: number): string {
+  const counts = new Array<number>(BINS).fill(0);
+  const span = Math.max(1, hi - lo);
+  for (let i = 0; i < pixels.length; i++) {
+    const b = Math.floor(((pixels[i] - lo) / span) * BINS);
+    if (b >= 0 && b < BINS) counts[b]++;
+  }
+  let mx = 0;
+  for (const c of counts) mx = Math.max(mx, Math.sqrt(c));
+  if (mx === 0) return "";
+  let d = "M18 100";
+  for (let j = 0; j < BINS; j++) {
+    const y = 100 - (j / BINS) * 100;
+    const w = (Math.sqrt(counts[j]) / mx) * 17;
+    d += ` L${(18 - w).toFixed(2)} ${y.toFixed(2)} L${(18 - w).toFixed(2)} ${(y - 100 / BINS).toFixed(2)}`;
+  }
+  return `${d} L18 0 Z`;
+}
+
+/**
+ * The color scale beside the image (live.html#live-view): Auto, the histogram, the bar with
+ * its two handles and round ticks. Drag a handle to set one end, drag the bar to shift both,
+ * double-click to go back to Auto.
+ */
 export function ColorbarHistogram({
-  frame,
+  store,
   palette,
-  minRaw,
-  maxRaw,
-  autoScale,
+  range,
+  onRangeChange,
   rad,
   unit,
-  isotherm,
-  showHistogram = true,
-  onRangeChange,
-  onToggleAutoScale,
+  onUnitChange,
+  boosted = false,
 }: ColorbarHistogramProps): React.JSX.Element {
-  const barRef = useRef<HTMLDivElement | null>(null);
-  const dragMode = useRef<"min" | "max" | "pan" | null>(null);
-  const dragStartY = useRef(0);
-  const dragStartRange = useRef<[number, number]>([minRaw, maxRaw]);
+  const frame = useSampledFrame(store);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const live = useRef({ range, frame, onRangeChange });
+  live.current = { range, frame, onRangeChange };
 
-  const bins = useMemo(
-    () => computeHistogram256(frame.pixels, frame.min_raw, frame.max_raw),
-    [frame.pixels, frame.min_raw, frame.max_raw],
+  const [lo, hi] = frame
+    ? shownRange(range, frame)
+    : range.mode === "manual"
+      ? [range.lo, range.hi]
+      : [0, 0];
+  const loC = rawToObjectC(lo, rad);
+  const hiC = rawToObjectC(hi, rad);
+  const gradient = useMemo(() => paletteGradientCss(palette, "to top"), [palette]);
+  const hist = useMemo(
+    () => (frame && hi > lo ? histogramPath(frame.pixels, lo, hi) : ""),
+    [frame, lo, hi],
   );
-  const maxBin = useMemo(() => {
-    let m = 1;
-    for (let i = 0; i < bins.length; i++) if (bins[i] > m) m = bins[i];
-    return m;
-  }, [bins]);
+  const ticks =
+    hi > lo
+      ? scaleTicks(
+          fromCelsius(loC, unit),
+          fromCelsius(hiC, unit),
+          (v) => (hi - objectCToRaw(toCelsius(v, unit), rad)) / (hi - lo),
+        )
+      : [];
 
-  const minC = rawToObjectC(minRaw, rad);
-  const maxC = rawToObjectC(maxRaw, rad);
-  const ticks = [1, 0.75, 0.5, 0.25, 0];
-
-  const startDrag = (mode: "min" | "max" | "pan", e: React.MouseEvent): void => {
+  const startDrag = (kind: RangeDrag, e: React.PointerEvent<HTMLElement>) => {
+    if (e.button !== 0) return;
+    const fr = live.current.frame;
+    if (!fr) return;
     e.preventDefault();
-    dragMode.current = mode;
-    dragStartY.current = e.clientY;
-    dragStartRange.current = [minRaw, maxRaw];
-    onToggleAutoScale(false);
-
-    const onMove = (ev: MouseEvent): void => {
-      const rect = barRef.current?.getBoundingClientRect();
-      if (!rect || !dragMode.current) return;
-      const dyFrac = (dragStartY.current - ev.clientY) / Math.max(40, rect.height);
-      const [sMin, sMax] = dragStartRange.current;
-      const span = Math.max(50, sMax - sMin);
-      const deltaRaw = Math.round(dyFrac * span * 1.4);
-
-      if (dragMode.current === "max") {
-        onRangeChange(sMin, Math.max(sMin + 20, Math.min(65000, sMax + deltaRaw)));
-      } else if (dragMode.current === "min") {
-        onRangeChange(Math.max(100, Math.min(sMax - 20, sMin + deltaRaw)), sMax);
-      } else {
-        const nextMin = Math.max(100, Math.min(65000 - span, sMin + deltaRaw));
-        onRangeChange(nextMin, nextMin + span);
-      }
+    e.stopPropagation();
+    const next = rangeAfterDragStart(live.current.range, shownRange(live.current.range, fr));
+    if (next.mode !== "manual") return;
+    const start: [number, number] = [next.lo, next.hi];
+    const startY = e.clientY;
+    const height = Math.max(40, trackRef.current?.getBoundingClientRect().height ?? 0);
+    if (next !== live.current.range) live.current.onRangeChange(next);
+    let raf: number | null = null;
+    let pending: [number, number] | null = null;
+    const flush = () => {
+      raf = null;
+      if (pending) live.current.onRangeChange({ mode: "manual", lo: pending[0], hi: pending[1] });
     };
-
-    const onUp = (): void => {
-      dragMode.current = null;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+    const onMove = (ev: PointerEvent) => {
+      pending = dragRange(kind, start, (startY - ev.clientY) / height);
+      if (raf === null) raf = requestAnimationFrame(flush);
     };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      if (raf !== null) cancelAnimationFrame(raf);
+      flush();
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   };
 
+  const toggleAuto = () => {
+    if (range.mode === "auto") {
+      if (frame) onRangeChange(rangeAfterDragStart(range, shownRange(range, frame)));
+    } else {
+      onRangeChange(rangeAfterDoubleClick());
+    }
+  };
+
+  const otherUnit: TempUnit = unit === "fahrenheit" ? "celsius" : "fahrenheit";
+  const endLabel = (c: number, cls: string) => (
+    <button
+      className={`end ${cls}`}
+      type="button"
+      title={otherUnit === "fahrenheit" ? "Show °F" : "Show °C"}
+      onClick={() => onUnitChange?.(otherUnit)}
+    >
+      {Number.isFinite(c) && hi > lo ? formatTemp(c, unit) : ""}
+    </button>
+  );
+
   return (
-    <div className="flex h-full w-[116px] shrink-0 flex-col gap-2 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] p-2">
-      <div className="flex items-center justify-between">
-        <span className="tc-section-label">Scale</span>
-        <button
-          type="button"
-          onClick={() => onToggleAutoScale(!autoScale)}
-          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition-colors cursor-pointer ${
-            autoScale
-              ? "bg-[var(--tc-accent-soft)] text-[var(--tc-accent)]"
-              : "bg-[var(--tc-amber-soft)] text-[var(--tc-amber-ink)]"
-          }`}
-          title="Click to toggle Auto / Manual level & span"
-        >
-          {autoScale ? "Auto" : "Lock"}
-        </button>
-      </div>
-
-      {/* Draggable Colorbar + Ticks */}
-      <div className="relative flex flex-1 min-h-[180px] gap-1.5">
+    <div className="st-cbar">
+      <button
+        className="auto"
+        type="button"
+        aria-pressed={range.mode === "auto"}
+        title="The scale follows the image"
+        onClick={toggleAuto}
+      >
+        Auto
+      </button>
+      <span />
+      <div className="track" ref={trackRef}>
+        {endLabel(hiC, "top")}
+        <svg className="hist" viewBox="0 0 18 100" preserveAspectRatio="none" aria-hidden="true">
+          {hist ? <path d={hist} /> : null}
+        </svg>
         <div
-          ref={barRef}
-          onMouseDown={(e) => startDrag("pan", e)}
-          onDoubleClick={() => onToggleAutoScale(true)}
-          className="relative w-6 shrink-0 cursor-ns-resize rounded border border-[var(--tc-border-strong)]"
-          style={{ background: paletteGradientCss(palette, "to top") }}
-          title="Drag middle to pan level, top/bottom handles to set span, double-click for Auto"
-        >
-          {/* Max handle */}
-          <div
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              startDrag("max", e);
-            }}
-            className="absolute -top-1.5 -right-1 -left-1 h-3 cursor-n-resize rounded-sm border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] shadow-sm"
-            title="Drag to adjust upper limit"
-          />
-          {/* Min handle */}
-          <div
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              startDrag("min", e);
-            }}
-            className="absolute -right-1 -bottom-1.5 -left-1 h-3 cursor-s-resize rounded-sm border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] shadow-sm"
-            title="Drag to adjust lower limit"
-          />
-        </div>
-
-        {/* Temperature Ticks */}
-        <div className="flex flex-1 flex-col justify-between py-0.5 text-[10.5px] font-mono-tech text-[var(--tc-text-muted)]">
-          {ticks.map((f) => (
-            <div key={f} className="leading-none">
-              {formatTemp(minC + f * (maxC - minC), unit, 1)}
-            </div>
-          ))}
-        </div>
+          className="grad"
+          style={{ background: gradient }}
+          onPointerDown={(e) => startDrag("pan", e)}
+          onDoubleClick={() => onRangeChange(rangeAfterDoubleClick())}
+          title="Drag to shift the range, double-click for Auto"
+        />
+        <button
+          className="handle top"
+          type="button"
+          aria-label="Drag to fix the highest shown temperature"
+          onPointerDown={(e) => startDrag("max", e)}
+          onDoubleClick={() => onRangeChange(rangeAfterDoubleClick())}
+        />
+        <button
+          className="handle bot"
+          type="button"
+          aria-label="Drag to fix the lowest shown temperature"
+          onPointerDown={(e) => startDrag("min", e)}
+          onDoubleClick={() => onRangeChange(rangeAfterDoubleClick())}
+        />
+        {ticks.map((t) => (
+          <span key={t.value} className="tick" style={{ top: `${t.frac * 100}%` }}>
+            {t.value}
+          </span>
+        ))}
+        {endLabel(loC, "bot")}
       </div>
-
-      {/* Live 256-bin Histogram */}
-      {showHistogram ? (
-        <div className="flex flex-col gap-1 border-t border-[var(--tc-line)] pt-2">
-          <div className="flex items-center justify-between text-[10px] text-[var(--tc-text-dim)]">
-            <span>HISTOGRAM</span>
-            <span className="font-mono-tech">
-              {isotherm.mode !== "off" ? `ISO:${isotherm.mode.slice(0, 3).toUpperCase()}` : "256b"}
-            </span>
-          </div>
-          <svg viewBox="0 0 128 42" className="h-[44px] w-full rounded bg-[var(--tc-surface-2)]">
-            {HIST_BUCKETS.map((b) => {
-              const sum =
-                bins[b.offset] + bins[b.offset + 1] + bins[b.offset + 2] + bins[b.offset + 3];
-              const h = Math.max(1, (sum / (maxBin * 4)) * 38);
-              return (
-                <rect
-                  key={b.id}
-                  x={b.x}
-                  y={42 - h}
-                  width={1.6}
-                  height={h}
-                  fill="var(--tc-accent)"
-                  opacity={0.85}
-                />
-              );
-            })}
-          </svg>
-        </div>
-      ) : null}
+      <span />
+      {boosted ? <span className="mark">Contrast boosted</span> : <span />}
     </div>
   );
 }

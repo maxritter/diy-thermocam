@@ -3,7 +3,6 @@ import goldenFrameVectors from "../../fixtures/frame_raw_golden.json";
 import { DEFAULT_PALETTES, parseCustomPaletteText, samplePalette } from "./palettes";
 import {
   applyClippedHistogramEq,
-  compensateEmissivityC,
   computeHistogram256,
   computeTempGrid,
   createViewportScratch,
@@ -15,6 +14,7 @@ import {
   objectCToRaw,
   prepareDisplay16Bit,
   rawToObjectC,
+  readingC,
   roiContrastRange,
   sampleLineProfile,
 } from "./thermal";
@@ -29,8 +29,11 @@ describe("DIY-Thermocam frontend thermal engine", () => {
   };
 
   test("Stefan-Boltzmann emissivity compensation & unit formatting", () => {
-    expect(Math.abs(compensateEmissivityC(50.0, 1.0, 22.0) - 50.0)).toBeLessThan(1e-4);
-    const corrected = compensateEmissivityC(50.0, 0.5, 22.0);
+    // 32315 counts read 50.0 °C apparent at 0.01 K per count.
+    const cal = { cal_offset: -273.15, cal_slope: 0.01 };
+    const blackbody = { emissivity: 1.0, reflected_c: 22.0 };
+    expect(Math.abs(readingC(32315, cal, null, blackbody) - 50.0)).toBeLessThan(1e-4);
+    const corrected = readingC(32315, cal, null, { emissivity: 0.5, reflected_c: 22.0 });
     expect(corrected).toBeGreaterThan(70.0);
     expect(corrected).toBeLessThan(85.0);
     expect(formatTemp(25.0, "celsius", 1)).toBe("25.0 °C");

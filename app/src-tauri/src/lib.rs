@@ -57,6 +57,7 @@ pub fn build_app() -> tauri::Builder<tauri::Wry> {
             settings::cmd_settings_save,
             captures::cmd_captures_dir,
             captures::cmd_set_captures_dir,
+            captures::cmd_captures_list,
             captures::cmd_snapshot,
             captures::cmd_trash,
             pictures::cmd_render_png,

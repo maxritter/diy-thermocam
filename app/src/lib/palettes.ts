@@ -152,7 +152,7 @@ export const DEFAULT_PALETTES: Palette[] = [
   },
   {
     id: "whiteHot",
-    label: "White Hot",
+    label: "White hot",
     category: "Firmware",
     firmware_id: 17,
     rgb: lerpRamp(
@@ -165,7 +165,7 @@ export const DEFAULT_PALETTES: Palette[] = [
   },
   {
     id: "blackHot",
-    label: "Black Hot",
+    label: "Black hot",
     category: "Firmware",
     firmware_id: 1,
     rgb: lerpRamp(
@@ -191,33 +191,33 @@ export const DEFAULT_PALETTES: Palette[] = [
   },
 ];
 
+/** The Material list in Live's Measure tab, in the artifact's words and order. */
 export const DEFAULT_MATERIALS: MaterialPreset[] = [
-  { id: "blackbody", name: "Blackbody Reference", category: "Reference", emissivity: 1.0 },
-  { id: "skin", name: "Human Skin", category: "Biological", emissivity: 0.98 },
+  { id: "skin", name: "Human skin", category: "Biological", emissivity: 0.98 },
   {
     id: "electrical_tape",
-    name: "Black Electrical Tape (3M)",
+    name: "Black electrical tape",
     category: "Electronics",
     emissivity: 0.96,
   },
-  { id: "matte_pcb", name: "PCB Solder Mask (FR-4)", category: "Electronics", emissivity: 0.91 },
-  { id: "ic_epoxy", name: "IC Plastic Package (Epoxy)", category: "Electronics", emissivity: 0.94 },
-  { id: "water", name: "Water / Ice", category: "Building", emissivity: 0.96 },
-  { id: "brick", name: "Brick / Concrete / Plaster", category: "Building", emissivity: 0.93 },
-  { id: "wood", name: "Wood / Paper / Cardboard", category: "Building", emissivity: 0.9 },
-  { id: "paint_matte", name: "Matte Paint", category: "Coatings", emissivity: 0.94 },
-  { id: "anodized_al", name: "Anodized Aluminum (Black)", category: "Metals", emissivity: 0.84 },
-  { id: "oxidized_steel", name: "Oxidized Steel / Iron", category: "Metals", emissivity: 0.79 },
-  { id: "oxidized_cu", name: "Oxidized Copper", category: "Metals", emissivity: 0.65 },
-  {
-    id: "solder_joint",
-    name: "Solder Joint (Sn/Ag/Cu)",
-    category: "Electronics",
-    emissivity: 0.35,
-  },
-  { id: "brushed_al", name: "Brushed Aluminum", category: "Metals", emissivity: 0.22 },
-  { id: "polished_cu", name: "Polished Copper / Brass", category: "Metals", emissivity: 0.08 },
+  { id: "water", name: "Water or ice", category: "Building", emissivity: 0.96 },
+  { id: "ic_epoxy", name: "IC package (epoxy)", category: "Electronics", emissivity: 0.94 },
+  { id: "paint_matte", name: "Matte paint", category: "Coatings", emissivity: 0.94 },
+  { id: "brick", name: "Brick, concrete, plaster", category: "Building", emissivity: 0.93 },
+  { id: "matte_pcb", name: "PCB solder mask", category: "Electronics", emissivity: 0.91 },
+  { id: "wood", name: "Wood, paper, cardboard", category: "Building", emissivity: 0.9 },
+  { id: "anodized_al", name: "Anodized aluminium, black", category: "Metals", emissivity: 0.84 },
+  { id: "oxidized_steel", name: "Oxidized steel", category: "Metals", emissivity: 0.79 },
+  { id: "oxidized_cu", name: "Oxidized copper", category: "Metals", emissivity: 0.65 },
+  { id: "solder_joint", name: "Solder joint", category: "Electronics", emissivity: 0.35 },
+  { id: "brushed_al", name: "Brushed aluminium", category: "Metals", emissivity: 0.22 },
+  { id: "polished_cu", name: "Polished copper or brass", category: "Metals", emissivity: 0.08 },
 ];
+
+/** "Matte paint · 0.94", as the Material list shows it. */
+export function materialLabel(m: MaterialPreset): string {
+  return `${m.name} · ${m.emissivity.toFixed(2)}`;
+}
 
 export function samplePalette(palette: Palette, t: number): [number, number, number] {
   const n = palette.rgb.length;

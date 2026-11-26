@@ -2,7 +2,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use thermocam_core::captures::{
-    check_writable, default_captures_dir, unique_path, write_snapshot, CaptureErrorKind, LocalStamp,
+    check_writable, default_captures_dir, list_captures, unique_path, write_snapshot,
+    CaptureErrorKind, LocalStamp,
 };
 use thermocam_core::dat::{ThermalDat, LEPTON3_BIG_SIZE};
 use thermocam_core::protocol::transport::generate_demo_frame;
@@ -103,6 +104,51 @@ fn default_folder_is_pictures_thermocam_with_a_home_fallback() {
         Some(PathBuf::from("/home/someone/Pictures/Thermocam"))
     );
     assert_eq!(default_captures_dir(None, None), None);
+}
+
+#[test]
+fn the_captures_folder_lists_snapshots_recordings_and_other_files() {
+    let dir = tempfile::tempdir().unwrap();
+    let root = dir.path();
+    let frame = generate_demo_frame(1, 160, 120);
+    let snap = write_snapshot(root, &frame, stamp()).unwrap();
+    // PNG on snapshot, edits and a set-aside edits file belong to the capture, not the list.
+    fs::write(root.join("20261126102014.png"), b"png").unwrap();
+    fs::write(root.join("20261126102014.thermo.json"), b"{}").unwrap();
+    fs::write(root.join("20261126102014.thermo.json.bad"), b"x").unwrap();
+    fs::write(root.join(".DS_Store"), b"x").unwrap();
+    let rec = root.join("20261126103000");
+    fs::create_dir(&rec).unwrap();
+    for i in 0..3 {
+        fs::write(rec.join(format!("{i:06}.DAT")), vec![0u8; 100]).unwrap();
+    }
+    fs::write(rec.join("recording.json"), b"{}").unwrap();
+    fs::create_dir(root.join("empty folder")).unwrap();
+    fs::write(root.join("notes.txt"), b"hello").unwrap();
+
+    let mut list = list_captures(root).unwrap();
+    list.sort_by(|a, b| a.name.cmp(&b.name));
+    let summary: Vec<_> = list
+        .iter()
+        .map(|c| (c.name.as_str(), c.kind.as_str(), c.frames, c.size))
+        .collect();
+    assert_eq!(
+        summary,
+        vec![
+            ("20261126102014.DAT", "snapshot", None, 38_805),
+            ("20261126103000", "recording", Some(3), 300),
+            ("empty folder", "other", None, 0),
+            ("notes.txt", "other", None, 5),
+        ]
+    );
+    assert_eq!(list[0].path, snap.to_string_lossy());
+    assert!(list.iter().all(|c| c.mtime_ms > 0));
+}
+
+#[test]
+fn listing_a_missing_folder_is_an_error() {
+    let dir = tempfile::tempdir().unwrap();
+    assert!(list_captures(&dir.path().join("nope")).is_err());
 }
 
 #[test]

@@ -193,6 +193,125 @@ pub fn trash_targets(
         .collect()
 }
 
+/// What an entry of the Captures folder is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LocalCaptureKind {
+    /// A single `.DAT` file.
+    Snapshot,
+    /// A folder of `.DAT` frames (Studio's recordings and time-lapses, copied camera videos).
+    Recording,
+    /// Anything else, listed under "Other files".
+    Other,
+}
+
+impl LocalCaptureKind {
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Snapshot => "snapshot",
+            Self::Recording => "recording",
+            Self::Other => "other",
+        }
+    }
+}
+
+/// One entry of the Captures folder for the library's "On this computer" tab.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct LocalCapture {
+    pub name: String,
+    pub path: String,
+    pub kind: LocalCaptureKind,
+    /// Bytes of the file, or of a recording's frames.
+    pub size: u64,
+    /// Frames in a recording folder.
+    pub frames: Option<u32>,
+    pub mtime_ms: u64,
+}
+
+fn has_ext(name: &str, ext: &str) -> bool {
+    name.len() > ext.len() && name[name.len() - ext.len()..].eq_ignore_ascii_case(ext)
+}
+
+fn mtime_ms(meta: &fs::Metadata) -> u64 {
+    meta.modified()
+        .ok()
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map_or(0, |d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
+}
+
+/// The entries of `dir` (one level). Edits (`.thermo.json`, `.thermo.json.bad`), a snapshot's
+/// PNG beside its `.DAT`, and hidden files belong to their capture and are left out.
+pub fn list_captures(dir: &Path) -> io::Result<Vec<LocalCapture>> {
+    let mut names = std::collections::HashSet::new();
+    let mut entries = Vec::new();
+    for entry in fs::read_dir(dir)?.flatten() {
+        let Some(name) = entry.file_name().to_str().map(str::to_string) else {
+            continue;
+        };
+        names.insert(name.to_ascii_lowercase());
+        entries.push((name, entry));
+    }
+    let mut out = Vec::new();
+    for (name, entry) in entries {
+        if name.starts_with('.')
+            || has_ext(&name, ".thermo.json")
+            || has_ext(&name, ".thermo.json.bad")
+        {
+            continue;
+        }
+        if has_ext(&name, ".png") {
+            let stem = &name[..name.len() - 4];
+            if names.contains(&format!("{stem}.dat").to_ascii_lowercase()) {
+                continue;
+            }
+        }
+        let Ok(meta) = entry.metadata() else { continue };
+        let path = entry.path().to_string_lossy().into_owned();
+        if meta.is_dir() {
+            let mut frames = 0u32;
+            let mut size = 0u64;
+            for f in fs::read_dir(entry.path())?.flatten() {
+                let is_frame = f.file_name().to_str().is_some_and(|n| has_ext(n, ".dat"));
+                if let (true, Ok(m)) = (is_frame, f.metadata()) {
+                    if m.is_file() {
+                        frames += 1;
+                        size += m.len();
+                    }
+                }
+            }
+            let kind = if frames > 0 {
+                LocalCaptureKind::Recording
+            } else {
+                LocalCaptureKind::Other
+            };
+            out.push(LocalCapture {
+                name,
+                path,
+                kind,
+                size,
+                frames: (frames > 0).then_some(frames),
+                mtime_ms: mtime_ms(&meta),
+            });
+        } else if meta.is_file() {
+            let kind = if has_ext(&name, ".dat") {
+                LocalCaptureKind::Snapshot
+            } else {
+                LocalCaptureKind::Other
+            };
+            out.push(LocalCapture {
+                name,
+                path,
+                kind,
+                size: meta.len(),
+                frames: None,
+                mtime_ms: mtime_ms(&meta),
+            });
+        }
+    }
+    Ok(out)
+}
+
 /// Save `frame` as `YYYYMMDDHHMMSS.DAT` (V4 layout, 38,805 bytes for 160 × 120) in `dir`.
 pub fn write_snapshot(
     dir: &Path,

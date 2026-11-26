@@ -60,6 +60,16 @@ async function invokeOr<T>(
 
 const DEFAULT_CAPTURES_DIR = "~/Pictures/Thermocam";
 
+/** One chart sample in the session log: `t_ms,region_id,value_c`. */
+export interface SessionLogSample {
+  t_ms: number;
+  region_id: string;
+  value_c: number;
+}
+
+/** The session log in the browser preview, and until the Rust commands exist. */
+let memorySessionLog: SessionLogSample[] = [];
+
 let simTimer: ReturnType<typeof setInterval> | null = null;
 let simSeq = 1;
 let simConfig: DeviceConfig = {
@@ -595,6 +605,45 @@ export const backend = {
       recorded_count: args.index + 1,
       saved_path: args.outputDir ? `${args.outputDir}/${fname}` : null,
     };
+  },
+
+  /** Starts a new session log for the chart (`cmd_session_log_start`); in memory in the browser. */
+  async sessionLogStart(): Promise<void> {
+    await invokeOr<unknown>("cmd_session_log_start", undefined, () => {
+      memorySessionLog = [];
+    });
+  },
+
+  /** Adds about a second of chart samples to the session log (`cmd_session_log_append`). */
+  async sessionLogAppend(batch: SessionLogSample[]): Promise<void> {
+    if (batch.length === 0) return;
+    await invokeOr<void>("cmd_session_log_append", { batch }, () => {
+      memorySessionLog.push(...batch);
+    });
+  },
+
+  /**
+   * Writes the whole session log as CSV (`cmd_session_log_export`); without `outPath` Rust asks
+   * where with a Save dialog. The browser downloads the samples kept in memory. Returns the
+   * path, or null when nothing was saved.
+   */
+  async sessionLogExport(outPath: string | null = null): Promise<string | null> {
+    return invokeOr<string | null>("cmd_session_log_export", outPath ? { outPath } : {}, () => {
+      const lines = ["t_ms,region_id,value_c"];
+      for (const s of memorySessionLog) lines.push(`${s.t_ms},${s.region_id},${s.value_c}`);
+      const name = "thermocam-session.csv";
+      try {
+        const url = URL.createObjectURL(new Blob([`${lines.join("\n")}\n`], { type: "text/csv" }));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch {
+        return null;
+      }
+      return name;
+    });
   },
 
   async onCameraDisconnected(cb: (reason: string) => void): Promise<() => void> {

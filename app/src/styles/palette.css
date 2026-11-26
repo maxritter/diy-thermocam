@@ -38,6 +38,13 @@
   --tc-raised: #ffffff;
   --tc-accent-ink: #1a649f;
   --switch-off-line: #8a8a8a;
+  /* Region and chart series (live.html#measuring): darker in light theme so lines keep 3:1. */
+  --s-max: #c2410c;
+  --s-min: #64748b;
+  --s-1: #2076c5;
+  --s-2: #a16207;
+  --s-3: #7c3aed;
+  --s-4: #1e7a4c;
   --shadow-pop: 0 12px 32px rgb(0 0 0 / 14%), 0 2px 6px rgb(0 0 0 / 8%);
   --scrim: rgb(23 23 23 / 34%);
   --control-h: 32px;
@@ -81,6 +88,12 @@
   --tc-raised: #26282d;
   --tc-accent-ink: #79b5ec;
   --switch-off-line: #747884;
+  --s-max: #ff7a33;
+  --s-min: #a1a4ad;
+  --s-1: #5da3e5;
+  --s-2: #f7b23b;
+  --s-3: #c4a1ff;
+  --s-4: #6fd39f;
   --shadow-pop: 0 16px 40px rgb(0 0 0 / 55%), 0 2px 8px rgb(0 0 0 / 40%);
   --scrim: rgb(0 0 0 / 55%);
 }
