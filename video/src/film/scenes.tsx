@@ -255,21 +255,24 @@ export function Assemble() {
   )
 }
 
-/** The populated underside of the V4 board (KiCad 3D view), its parts named as the voice says it is ready. */
+/** The populated underside of the V4 board (KiCad 3D view, hardware/pcb/fab/diy-thermocam-v4.0-bottom.png
+ *  cropped to the board), its parts named as the voice says it is ready. */
 function BoardCard({ t, out }: { t: number; out: number }) {
   const o = Math.min(ramp(t, 0, 0.6), 1 - ramp(t, out - 0.2, out + 0.4, INOUT))
   if (o <= 0) return null
   const W = 1000
-  const k = W / 1196
+  const IW = 1230 // the crop's size
+  const IH = 932
+  const k = W / IW
   const tilt = ramp(t, 0, out, (x) => x)
-  const tags: [number, number, string, number][] = [
-    [584, 758, 'USB-C', word('board-1', 'fully') - 0.1],
-    [1032, 193, '5 V boost', word('board-1', 'assembled')],
-    [301, 493, 'Teensy socket', word('board-1', 'No') - 0.1],
-    [627, 433, 'Lepton socket', word('board-1', 'soldering')],
+  const tags: [number, number, string, number, 'l' | 'r'][] = [
+    [930, 850, 'USB-C', word('board-1', 'fully') - 0.1, 'l'],
+    [1062, 200, '5 V boost', word('board-1', 'assembled'), 'r'],
+    [327, 500, 'Teensy socket', word('board-1', 'No') - 0.1, 'r'],
+    [653, 440, 'Lepton socket', word('board-1', 'soldering'), 'r'],
   ]
   return (
-    <div style={{ position: 'absolute', left: (1920 - W) / 2, top: 230, width: W, height: 915 * k, opacity: o, perspective: 2600 }}>
+    <div style={{ position: 'absolute', left: (1920 - W) / 2, top: 230, width: W, height: IH * k, opacity: o, perspective: 2600 }}>
       <div
         style={{
           position: 'absolute',
@@ -278,14 +281,14 @@ function BoardCard({ t, out }: { t: number; out: number }) {
           transformOrigin: '50% 60%',
         }}
       >
-        <Img src={staticFile('film/v4.0-board-bottom.png')} style={{ width: W, height: 915 * k, borderRadius: 10, boxShadow: '0 60px 90px -40px rgba(20,22,26,0.55)' }} />
-        {tags.map(([x, y, label, at]) => {
+        <Img src={staticFile('film/v4.0-board-bottom.png')} style={{ width: W, height: IH * k, filter: 'drop-shadow(0 40px 40px rgba(20,22,26,0.35))' }} />
+        {tags.map(([x, y, label, at, side]) => {
           const a = ramp(t, at, at + 0.4, POP)
           if (a <= 0) return null
           return (
             <div key={label} style={{ position: 'absolute', left: x * k, top: y * k, opacity: Math.min(1, a) }}>
               <div style={{ position: 'absolute', left: -9, top: -9, width: 18, height: 18, borderRadius: 9, background: C.amber, boxShadow: '0 0 0 6px rgba(243,109,33,0.25)', scale: String(a) }} />
-              <div style={{ position: 'absolute', left: 22, top: -30 }}>
+              <div style={{ position: 'absolute', top: -30, ...(side === 'l' ? { right: 22 } : { left: 22 }) }}>
                 <Pill>{label}</Pill>
               </div>
             </div>
