@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "license": "GPL-3.0",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "description": "Official website and documentation for DIY-Thermocam (Astro 5 + Starlight + Pagefind + Tailwind CSS v4)",
   "scripts": {
     "dev": "astro dev",

@@ -8,7 +8,7 @@
 		(title "DIY-Thermocam V4.0 Lepton carrier")
 		(date "2026-11-26")
 		(rev "4.0")
-		(company "DIY-Thermocam (GPL-3.0)")
+		(company "DIY-Thermocam (CC BY-NC-SA 4.0)")
 	)
 	(lib_symbols
 		(symbol "V40:C_0603_2"

@@ -1,6 +1,6 @@
 # Desktop App and Software
 
-**DIY-Thermocam Desktop Studio** is an open-source app for **macOS, Windows, and Linux**. It shows the live image, measures temperatures, saves and edits full-temperature captures, exports pictures and video, reads the camera's microSD card, and updates the firmware.
+**DIY-Thermocam Desktop Studio** is a free app for **macOS, Windows, and Linux**. It shows the live image, measures temperatures, saves and edits full-temperature captures, exports pictures and video, reads the camera's microSD card, and updates the firmware.
 
 ![Live view of a breaker panel with a box on the hot breaker, a line across the row, the color scale and the charts below](/images/studio/studio-live-pro.png)
 

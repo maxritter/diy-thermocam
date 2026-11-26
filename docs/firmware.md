@@ -1,6 +1,6 @@
 # Firmware and Flashing
 
-DIY-Thermocam Firmware 4.0 is open-source C++17 code for **DIY-Thermocam V3 and V4** (**Teensy 4.1**). It runs at **450 MHz** by default to cut enclosure heat and lower CPU power draw by ~36% compared to 600 MHz. Source code lives in [`firmware/`](https://github.com/maxritter/diy-thermocam/tree/master/firmware).
+DIY-Thermocam Firmware 4.0 is open-source C++17 code (GPL v3.0) for **DIY-Thermocam V3 and V4** (**Teensy 4.1**). It runs at **450 MHz** by default to cut enclosure heat and lower CPU power draw by ~36% compared to 600 MHz. Source code lives in [`firmware/`](https://github.com/maxritter/diy-thermocam/tree/master/firmware).
 
 > **Hardware compatibility:** Firmware 4.0 supports **DIY-Thermocam V3 and V4 (Teensy 4.1)** only. Owners of **DIY-Thermocam V1 or V2 (Teensy 3.2 / 3.6)** must continue using [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). Radiometric `.DAT` files remain 100% compatible across all hardware revisions.
 

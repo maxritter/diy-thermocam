@@ -1,6 +1,6 @@
 # Hardware and Fabrication
 
-The board, schematic, BOM and enclosure files are in [`hardware/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware) under GPL-3.0. Order the two assembled boards from JLCPCB, Seeed Studio Fusion or PCBWay. Print the shell or have the acrylic case laser-cut, yourself or through a service.
+The board, schematic, BOM and enclosure files are in [`hardware/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware) under [CC BY-NC-SA 4.0](https://github.com/maxritter/diy-thermocam/blob/master/hardware/LICENSE): build and change them for non-commercial use; selling boards, kits or cameras needs permission. Order the two assembled boards from JLCPCB, Seeed Studio Fusion or PCBWay. Print the shell or have the acrylic case laser-cut, yourself or through a service.
 
 ## V4 hardware
 

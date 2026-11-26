@@ -1,6 +1,6 @@
 # Contributing to DIY-Thermocam
 
-Contributions are welcome. All contributions are licensed under the [GNU General Public License v3.0](LICENSE).
+Contributions are welcome. A contribution is licensed under the license of the folder it changes: CC BY-NC-SA 4.0 for `hardware/` and `docs/`, PolyForm Noncommercial 1.0.0 for `app/`, `website/` and `video/`, and GPL v3.0 for `firmware/` (see [LICENSE](LICENSE)). By contributing, you also allow Max Ritter to offer your contribution under a commercial license.
 
 ## Repository Layout
 

@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "thermocam-case"
 version = "4.0.0"
 description = "Parametric build123d enclosure CAD for the DIY-Thermocam V4.0 (3D-printed shell + laser-cut acrylic)"
-license = { text = "GPL-3.0-only" }
+license = { text = "CC-BY-NC-SA-4.0" }
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "build123d>=0.13.0",
