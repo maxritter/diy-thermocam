@@ -359,6 +359,13 @@ function seedSidecar(name: string): ThermoSidecar {
 }
 simSidecars.set("camera:/20261125101500.DAT", seedSidecar("PCB load"));
 
+/** As Rust's `edits_file_for`: `X.DAT` → `X.thermo.json`, a recording `X` → `X.rec.thermo.json`. */
+function editsFileName(capture: string): string {
+  return /\.dat$/i.test(capture)
+    ? `${capture.replace(/\.dat$/i, "")}.thermo.json`
+    : `${capture}.rec.thermo.json`;
+}
+
 /** A simulated capture's frame: the demo camera's real sample captures, by `seq`. */
 function simFrameFor(seq: number): ThermalFrame {
   return demoCaptureFrame(seq);
@@ -620,7 +627,7 @@ export const capturesApi = {
     } else if (simQuarantine.has(key)) {
       simQuarantine.delete(key);
       const name = ref.kind === "local" ? baseName(ref.path) : baseName(ref.sd_path);
-      res = { sidecar: null, quarantined: `${name.replace(/\.dat$/i, "")}.thermo.json.bad` };
+      res = { sidecar: null, quarantined: `${editsFileName(name)}.bad` };
     } else {
       const s = simSidecars.get(key);
       res = { sidecar: s ? structuredClone(s) : null, quarantined: null };
@@ -639,8 +646,7 @@ export const capturesApi = {
     setAsideNotShown.delete(refKey(ref));
     if (isTauriRuntime()) return invoke<string>("cmd_sidecar_save", { capture: ref, sidecar });
     simSidecars.set(refKey(ref), structuredClone(sidecar));
-    const name = ref.kind === "local" ? ref.path : ref.sd_path;
-    return `${name.replace(/\.dat$/i, "")}.thermo.json`;
+    return editsFileName(ref.kind === "local" ? ref.path : ref.sd_path);
   },
 
   /** Reset to original: deletes the edits file. */

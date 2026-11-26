@@ -131,7 +131,10 @@ let held: number | null = null;
  */
 export function demoSceneFrame(seq: number, live = true): ThermalFrame | null {
   if (!loaded) {
-    if (typeof fetch === "function" && typeof window !== "undefined") void loadDemoScenes();
+    // In a browser only: component tests (Bun with a DOM) keep the generated scene, so they
+    // never depend on whether a dev server happens to be running.
+    const inBrowser = typeof window !== "undefined" && !("Bun" in globalThis);
+    if (inBrowser && typeof fetch === "function") void loadDemoScenes();
     return null;
   }
   return sceneFrame(loaded, seq, live ? held : null);

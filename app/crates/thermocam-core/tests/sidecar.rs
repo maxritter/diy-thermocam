@@ -4,8 +4,33 @@ use std::path::PathBuf;
 use thermocam_core::radiometry::Material;
 use thermocam_core::roi::RoiGeometry;
 use thermocam_core::sidecar::{
-    load_sidecar, reset_sidecar, save_sidecar, sidecar_path, CaptureRef, ThermoSidecar,
+    edits_file_for, load_sidecar, reset_sidecar, save_sidecar, sidecar_path, CaptureRef,
+    ThermoSidecar,
 };
+
+#[test]
+fn a_snapshot_keeps_its_edits_name_and_a_recording_gets_its_own() {
+    let dir = PathBuf::from("/captures");
+    // A snapshot's edits keep the name Studio always used, so earlier edits still open.
+    assert_eq!(
+        edits_file_for(&dir.join("20261126101500.DAT")),
+        dir.join("20261126101500.thermo.json")
+    );
+    assert_eq!(
+        edits_file_for(&dir.join("x.dat")),
+        dir.join("x.thermo.json")
+    );
+    // A recording folder of the same second: its own file, so trashing or resetting one
+    // never touches the other's edits.
+    assert_eq!(
+        edits_file_for(&dir.join("20261126101500")),
+        dir.join("20261126101500.rec.thermo.json")
+    );
+    assert_eq!(
+        edits_file_for(&dir.join("trip.2026")),
+        dir.join("trip.2026.rec.thermo.json")
+    );
+}
 
 fn fixture(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -207,11 +232,12 @@ fn locations_for_local_and_camera_captures() {
         serial: "0011223344556677".into(),
         sd_path: "/20261126101500".into(),
     };
+    // A video folder's edits never share the name of a photo from the same second.
     assert_eq!(
         sidecar_path(&video, &edits).unwrap(),
         edits
             .join("0011223344556677")
-            .join("20261126101500.thermo.json")
+            .join("20261126101500.rec.thermo.json")
     );
 }
 

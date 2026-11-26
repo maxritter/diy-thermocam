@@ -486,7 +486,8 @@ pub async fn cmd_sd_delete(state: State<'_, AppState>, path: String) -> Result<(
 }
 
 /// Copies a file from the card. `to_captures` puts it in the Captures folder under its own name
-/// (confined there, whatever name the device listed); otherwise a Save dialog asks where.
+/// (confined there, whatever name the device listed), never over an existing file: a second
+/// copy becomes `X-2.DAT`. Otherwise a Save dialog asks where.
 #[tauri::command]
 pub async fn cmd_sd_download(
     app: tauri::AppHandle,
@@ -495,24 +496,36 @@ pub async fn cmd_sd_download(
     to_captures: Option<bool>,
 ) -> Result<String, String> {
     let file_name = path.trim_start_matches('/').to_string();
-    let target = match to_captures {
-        Some(true) => {
-            let root = crate::captures::captures_dir(&app).map_err(|e| e.detail)?;
-            thermocam_core::paths::card_file_target(&root, &path).map_err(|e| e.to_string())?
-        }
-        _ => rfd::AsyncFileDialog::new()
+    let to_captures = to_captures == Some(true);
+    let target = if to_captures {
+        let root = crate::captures::captures_dir(&app).map_err(|e| e.detail)?;
+        thermocam_core::paths::card_file_target(&root, &path).map_err(|e| e.to_string())?
+    } else {
+        rfd::AsyncFileDialog::new()
             .set_file_name(&file_name)
             .save_file()
             .await
             .ok_or("cancelled")?
             .path()
-            .to_path_buf(),
+            .to_path_buf()
     };
     let client_arc = Arc::clone(&state.client);
     tauri::async_runtime::spawn_blocking(move || {
         let bytes = read_card_file(&LiveCard(&client_arc), &path).map_err(|e| e.to_string())?;
-        fs::write(&target, bytes).map_err(|e| e.to_string())?;
-        Ok(target.to_string_lossy().into_owned())
+        if !to_captures {
+            // The person chose this file in the Save dialog, which asked before replacing.
+            fs::write(&target, bytes).map_err(|e| e.to_string())?;
+            return Ok(target.to_string_lossy().into_owned());
+        }
+        let dir = target.parent().ok_or("no folder")?;
+        let stem = target
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("capture");
+        let ext = target.extension().and_then(|s| s.to_str()).unwrap_or("DAT");
+        let written = thermocam_core::captures::write_new_file(dir, stem, ext, &bytes)
+            .map_err(|e| e.to_string())?;
+        Ok(written.to_string_lossy().into_owned())
     })
     .await
     .map_err(|e| e.to_string())?
@@ -564,7 +577,7 @@ pub fn cmd_load_dat_file(
     };
     let bytes = fs::read(&file_path).map_err(|e| e.to_string())?;
     let dat = ThermalDat::from_bytes(&bytes).map_err(|e| e.to_string())?;
-    let sidecar_path = file_path.with_extension("thermo.json");
+    let sidecar_path = thermocam_core::sidecar::edits_file_for(&file_path);
     let sidecar = fs::read_to_string(&sidecar_path)
         .ok()
         .and_then(|s| serde_json::from_str(&s).ok());

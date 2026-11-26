@@ -229,8 +229,10 @@ pub struct LocalCapture {
     pub mtime_ms: u64,
 }
 
+/// Compares bytes, so a name with non-ASCII characters never splits inside one.
 fn has_ext(name: &str, ext: &str) -> bool {
-    name.len() > ext.len() && name[name.len() - ext.len()..].eq_ignore_ascii_case(ext)
+    let (n, e) = (name.as_bytes(), ext.as_bytes());
+    n.len() > e.len() && n[n.len() - e.len()..].eq_ignore_ascii_case(e)
 }
 
 fn mtime_ms(meta: &fs::Metadata) -> u64 {
@@ -271,7 +273,10 @@ pub fn list_captures(dir: &Path) -> io::Result<Vec<LocalCapture>> {
         if meta.is_dir() {
             let mut frames = 0u32;
             let mut size = 0u64;
-            for f in fs::read_dir(entry.path())?.flatten() {
+            // A folder Studio may not read (another app's library) is listed as another file,
+            // never failing the whole list.
+            let inner = fs::read_dir(entry.path()).into_iter().flatten().flatten();
+            for f in inner {
                 let is_frame = f.file_name().to_str().is_some_and(|n| has_ext(n, ".dat"));
                 if let (true, Ok(m)) = (is_frame, f.metadata()) {
                     if m.is_file() {

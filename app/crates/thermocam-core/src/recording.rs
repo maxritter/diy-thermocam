@@ -86,7 +86,9 @@ pub struct RecordingIndex {
 
 /// True for a file name ending in `.DAT` (any case).
 pub fn is_dat_name(name: &str) -> bool {
-    name.len() > 4 && name[name.len() - 4..].eq_ignore_ascii_case(".dat")
+    // Bytes, so a name with non-ASCII characters never splits inside one.
+    let n = name.as_bytes();
+    n.len() > 4 && n[n.len() - 4..].eq_ignore_ascii_case(b".dat")
 }
 
 fn open_error(kind: &str, detail: impl Into<String>) -> RecordError {

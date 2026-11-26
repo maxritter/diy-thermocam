@@ -12,7 +12,7 @@ use thermocam_core::captures::{
     LocalCapture,
 };
 use thermocam_core::picture::{render_png, PictureFrame, RenderSpec};
-use thermocam_core::sidecar::SIDECAR_EXTENSION;
+use thermocam_core::sidecar::edits_file_for;
 
 use crate::error::{CmdError, CmdResult};
 use crate::platform::local_now;
@@ -153,7 +153,7 @@ pub async fn cmd_trash(app: tauri::AppHandle, paths: Vec<String>) -> CmdResult<T
                 }
             };
             let mut items = vec![target.clone()];
-            let sidecar = target.with_extension(SIDECAR_EXTENSION);
+            let sidecar = edits_file_for(&target);
             if sidecar != target && sidecar.exists() {
                 items.push(sidecar);
             }

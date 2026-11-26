@@ -199,6 +199,24 @@ pub enum CaptureRef {
 
 /// `<capture>.thermo.json` beside a local capture; `edits_root/<serial>/<sd_path>.thermo.json`
 /// for a camera capture, confined to `edits_root`.
+/// The edits file beside a capture: `X.DAT` keeps `X.thermo.json` (as Studio always named it);
+/// a recording folder `X` gets `X.rec.thermo.json`, so a snapshot and a recording started in
+/// the same second never share edits.
+#[must_use]
+pub fn edits_file_for(capture: &Path) -> PathBuf {
+    let is_dat = capture
+        .file_name()
+        .and_then(|n| n.to_str())
+        .is_some_and(crate::recording::is_dat_name);
+    if is_dat {
+        return capture.with_extension(SIDECAR_EXTENSION);
+    }
+    let mut name = capture.file_name().unwrap_or_default().to_os_string();
+    name.push(".rec.");
+    name.push(SIDECAR_EXTENSION);
+    capture.with_file_name(name)
+}
+
 pub fn sidecar_path(capture: &CaptureRef, edits_root: &Path) -> Result<PathBuf, PathError> {
     match capture {
         CaptureRef::Local { path } => {
@@ -209,7 +227,7 @@ pub fn sidecar_path(capture: &CaptureRef, edits_root: &Path) -> Result<PathBuf, 
             if !p.is_absolute() || p.file_name().is_none() {
                 return Err(PathError::NotRelative(path.clone()));
             }
-            Ok(p.with_extension(SIDECAR_EXTENSION))
+            Ok(edits_file_for(&p))
         }
         CaptureRef::Camera { serial, sd_path } => {
             if serial.contains('/') {
@@ -217,7 +235,7 @@ pub fn sidecar_path(capture: &CaptureRef, edits_root: &Path) -> Result<PathBuf, 
             }
             let camera_root = confine(edits_root, serial)?;
             let file = confine(&camera_root, sd_path)?;
-            Ok(file.with_extension(SIDECAR_EXTENSION))
+            Ok(edits_file_for(&file))
         }
     }
 }
