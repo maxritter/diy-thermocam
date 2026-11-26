@@ -45,6 +45,9 @@ struct SimRuntime {
 	std::function<void(uint32_t)> on_tick;
 
 	SimDisplayStats stats = {};
+	std::string last_saved_bmp_name;
+	std::vector<uint16_t> last_saved_bmp_pixels;
+	uint32_t save_buffer_calls = 0;
 
 	void reset(uint32_t start_ms = 1000u) {
 		now_ms = start_ms;
@@ -59,6 +62,9 @@ struct SimRuntime {
 		sim_mcu_temp_c = 42.3f;
 		on_tick = nullptr;
 		stats = {};
+		last_saved_bmp_name.clear();
+		last_saved_bmp_pixels.clear();
+		save_buffer_calls = 0;
 	}
 
 	void setWatchdog(uint32_t duration_ms) {

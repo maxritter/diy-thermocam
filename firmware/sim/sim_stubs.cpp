@@ -446,7 +446,16 @@ void convertColors(bool small) {
 		static_cast<uint16_t>(colorElements), hotColdMode_disabled, 0, 0);
 }
 void saveRawData(bool, char*, uint32_t) {}
-void saveBuffer(char*) {}
+void saveBuffer(char* filename) {
+	if (!filename) return;
+	sd.chdir("/");
+	std::strcpy(&filename[14], ".BMP");
+	std::string p = std::string("/") + filename;
+	s_fs[p] = SimFsEntry{false, std::vector<uint8_t>(614466u, 0u)};
+	g_sim.last_saved_bmp_name = filename;
+	g_sim.last_saved_bmp_pixels.assign(bigBuffer, bigBuffer + (320u * 240u));
+	g_sim.save_buffer_calls++;
+}
 void frameFilename(char* filename, uint32_t count) {
 	std::snprintf(filename, 11, "%06lu.DAT", static_cast<unsigned long>(count));
 }

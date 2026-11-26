@@ -248,6 +248,7 @@ void convertImage(char* filename) {
 	}
 
 	//Check if the image is already there
+	sd.chdir("/");
 	strcpy(&filename[14], ".BMP");
 	bool exists = sd.exists(filename);
 
@@ -268,7 +269,12 @@ void convertImage(char* filename) {
 	//Show convert message
 	showFullMessage((char*) "Converting image to BMP..");
 
-	//Save image
+	//Re-render clean thermal image for this exact .DAT (no Gallery HUD buttons in BMP)
+	strcpy(&filename[14], ".DAT");
+	loadRawData(filename);
+	renderRawDataToBuffer();
+
+	//Save image (saveBuffer sets .BMP extension and writes 640x480 bitmap)
 	saveBuffer(filename);
 
 	//Show finish message
@@ -279,15 +285,15 @@ void convertImage(char* filename) {
 
 /* Convert a raw video lately to BMP frames */
 void convertVideo(char* dirname) {
+	//Delete the ending for a video before entering folder
+	dirname[14] = '\0';
+
 	//Go into the folder
 	sd.chdir("/");
 	sd.chdir(dirname);
 
 	uint32_t frames = getVideoFrameNumber();
 	char filename[] = "000000.BMP";
-
-	//Delete the ending for a video
-	dirname[14] = '\0';
 
 	//Get the frame name of the first frame
 	frameFilename(filename, 0);
@@ -297,12 +303,15 @@ void convertVideo(char* dirname) {
 	if (exists) {
 		showFullMessage((char*) "Video is already converted");
 		delay(500);
+		sd.chdir("/");
 		return;
 	}
 
 	//If the user does not want to convert the video, return
-	if (!convertPrompt())
+	if (!convertPrompt()) {
+		sd.chdir("/");
 		return;
+	}
 
 	//Show convert message
 	showFullMessage((char*) "Converting video to BMP..");

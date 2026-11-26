@@ -562,6 +562,55 @@ static void test_video_recording_interval_flow() {
 	check(sim_sd_cwd() == "/", "interval_cwd_root", "expected SD CWD restored to '/'");
 }
 
+// 19. Gallery Convert to BMP: must re-render the exact .DAT cleanly (ZERO Gallery HUD pills burned into BMP!),
+//     write matching .BMP filename, and block duplicate conversion on a second tap.
+static void test_gallery_convert_image_clean_bmp_no_hud_and_repeat() {
+	reset_ui_state();
+	sim_sd_add_dat_image("20261125120000.DAT", 28500u);
+	sim_sd_add_dat_image("20261125120005.DAT", 31500u);
+	g_sim.setWatchdog(12000u);
+
+	// Precompute expected clean bigBuffer under loadSettings() (same state as inside loadFiles())
+	loadSettings();
+	loadRawData(const_cast<char*>("20261125120005.DAT"));
+	renderRawDataToBuffer();
+	std::vector<uint16_t> expected_clean(bigBuffer, bigBuffer + (320u * 240u));
+	// Also verify displayGUI() actually modifies bigBuffer (so the comparison below is non-vacuous!)
+	displayGUI(2, const_cast<char*>("25.11.26 12:00:05"));
+	std::vector<uint16_t> with_gallery_hud(bigBuffer, bigBuffer + (320u * 240u));
+	check(with_gallery_hud != expected_clean,
+		"convert_hud_differs_from_clean",
+		"sanity check failed: displayGUI() did not modify bigBuffer");
+
+	// Reset stats and run full Gallery -> Images -> Convert -> Yes -> Convert again (already converted) -> < Back
+	g_sim.stats = {};
+	g_sim.scheduleTap(1100u, 83, 114, 40u);   // Images card (opens 20261125120005.DAT with Gallery HUD in bigBuffer)
+	g_sim.scheduleTap(1800u, 50, 217, 40u);   // Convert pill (12..88, 206..228 -> inside loadTouch_convert 10..140, 160..230)
+	g_sim.scheduleTap(2300u, 237, 201, 40u);  // Confirm dialog "Yes" button (166..308, 184..218)
+	// After 1000ms "Image converted" banner, openImage reloads; tap Convert a second time -> "Image is already converted"
+	g_sim.scheduleTap(4200u, 50, 217, 40u);   // Convert again -> must NOT call saveBuffer a second time!
+	g_sim.scheduleTap(5500u, 268, 217, 40u);  // < Back -> exit Gallery
+
+	loadFiles();
+
+	check(g_sim.save_buffer_calls == 1u,
+		"convert_called_once",
+		"expected exactly 1 saveBuffer call (second Convert must detect existing BMP), got " +
+			std::to_string(g_sim.save_buffer_calls));
+	check(g_sim.last_saved_bmp_name == "20261125120005.BMP",
+		"convert_matching_bmp_name",
+		"expected saved BMP name 20261125120005.BMP, got " + g_sim.last_saved_bmp_name);
+	check(sim_sd_exists("/20261125120005.BMP"),
+		"convert_bmp_exists_on_sd",
+		"expected /20261125120005.BMP to exist on virtual SD");
+	check(g_sim.last_saved_bmp_pixels == expected_clean,
+		"convert_bmp_clean_no_gallery_hud",
+		"saved BMP pixels differed from clean renderRawDataToBuffer() (Gallery HUD buttons leaked into BMP!)");
+	check(sim_sd_cwd() == "/",
+		"convert_cwd_root",
+		"expected SD CWD '/' after convertImage, got " + sim_sd_cwd());
+}
+
 int main() {
 	run_test("gallery_menu_idle_and_back", test_gallery_menu_idle_and_back);
 	run_test("gallery_images_no_infinite_refresh_xpt2046", test_gallery_images_no_infinite_refresh_xpt2046);
@@ -581,6 +630,7 @@ int main() {
 	run_test("all_settings_submenus_and_bleed_through", test_all_settings_submenus_and_bleed_through);
 	run_test("video_recording_normal_and_cwd_restore", test_video_recording_normal_and_cwd_restore);
 	run_test("video_recording_interval_flow", test_video_recording_interval_flow);
+	run_test("gallery_convert_image_clean_bmp_no_hud_and_repeat", test_gallery_convert_image_clean_bmp_no_hud_and_repeat);
 
 	std::printf("\nSimulator UI test summary: %d passed, %d failed\n", g_passed, g_failed);
 	return (g_failed == 0) ? 0 : 1;

@@ -68,7 +68,7 @@ void enterMassStorage()
 		showModalCard(
 			"USB FILE TRANSFER",
 			"MTP active on SD card (FAT/exFAT)",
-			"Win Explorer / Linux / macOS OpenMTP",
+			"Win Explorer / Linux / macOS MTP",
 			"Touch screen to exit to Live View");
 
 		//Start the core's MTP responder, then mount SD via SD.begin(BUILTIN_SDCARD)
