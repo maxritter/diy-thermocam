@@ -8,6 +8,10 @@
   # Skip deploys when only firmware, desktop app, or unrelated hardware CAD changed.
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- website/ docs/ hardware/bom/"
 
+# Astro 5 needs Node 18.20.8 or newer; this overrides the NODE_VERSION left in the dashboard from the Gatsby site.
+[build.environment]
+  NODE_VERSION = "22"
+
 [[redirects]]
   from = "/images/icon.png"
   to = "/images/website/icon.png"
