@@ -21,7 +21,7 @@ jobs:
     name: Verify external BOM supplier URLs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate BOM schema & live supplier links
         run: |
