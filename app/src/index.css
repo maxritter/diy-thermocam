@@ -875,7 +875,22 @@
   }
 
   .st-tag.pt {
-    transform: translate(-50%, calc(-100% - 16px));
+    --tx: -50%;
+    --ty: calc(-100% - 16px);
+    transform: translate(var(--tx), var(--ty));
+  }
+
+  /* Near an edge the label turns inwards so the image's frame never cuts it off. */
+  .st-tag.pt.edge-l {
+    --tx: -10px;
+  }
+
+  .st-tag.pt.edge-r {
+    --tx: calc(-100% + 10px);
+  }
+
+  .st-tag.pt.edge-t {
+    --ty: 16px;
   }
 
   .st-tag.below {

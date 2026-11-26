@@ -12,6 +12,18 @@ import { evaluateRoi, formatTemp, rawToObjectC, unitSymbol } from "@/lib/thermal
 import type { RadiometryParams, Roi, RoiStats, TempUnit } from "@/lib/types";
 import { useSampledFrame } from "@/lib/useFrame";
 
+/**
+ * Classes for a hottest or coldest label: centred above its mark, but turned inwards near an
+ * edge of the image so the image's frame never cuts it off.
+ */
+export function pointTagPlacement(x: number, y: number, w: number, h: number): string {
+  const cls = ["pt"];
+  if (x < w * 0.12) cls.push("edge-l");
+  else if (x > w * 0.88) cls.push("edge-r");
+  if (y < h * 0.15) cls.push("edge-t");
+  return cls.join(" ");
+}
+
 /** "Δ 14.7 °C": a difference, with a minus sign only when it is negative. */
 export function formatDifference(deltaC: number, unit: TempUnit): string {
   const scaled = unit === "fahrenheit" ? (deltaC * 9) / 5 : deltaC;
@@ -241,14 +253,14 @@ export const RegionLayer = memo(function RegionLayer({
         {marks ? (
           <>
             <span
-              className="st-tag pt"
+              className={`st-tag ${pointTagPlacement(marks.hot.x, marks.hot.y, W, H)}`}
               style={{ left: pct(marks.hot.x, W), top: pct(marks.hot.y, H) }}
             >
               <span className="st-tri hot" />
               {formatTemp(marks.hot.c, unit)}
             </span>
             <span
-              className="st-tag pt"
+              className={`st-tag ${pointTagPlacement(marks.cold.x, marks.cold.y, W, H)}`}
               style={{ left: pct(marks.cold.x, W), top: pct(marks.cold.y, H) }}
             >
               <span className="st-tri cold" />
