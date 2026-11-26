@@ -1,1 +1,0 @@
-The factory-assembled V4 board needs no soldering. Plug in the Teensy, Lepton sensor, battery, and display, place them in the 3D-printed or laser-cut enclosure, and tighten eight screws.

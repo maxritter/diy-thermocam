@@ -1,1 +1,0 @@
-Hardware, CAD, firmware, and Studio are open source under GPL 3.0 at diy-thermocam.net.

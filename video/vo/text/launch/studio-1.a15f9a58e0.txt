@@ -1,1 +1,0 @@
-DIY-Thermocam Studio unifies Standard and Pro modes on the desktop, with per-region emissivity, 1080p and 4K Lanczos-3 upscaling, and built-in MP4 export without FFmpeg.

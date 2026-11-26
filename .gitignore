@@ -14,3 +14,18 @@ dist/
 .astro/
 target/
 release-artifacts/
+# KiCad per-user and temporary files
+*.kicad_prl
+*-backups/
+*.lck
+fp-info-cache
+
+# Internal working files: agent instructions, plans, design drafts, editor and tool settings
+AGENTS.md
+CLAUDE.md
+docs/plans/
+docs/artifacts/
+.impeccable/
+.vscode/
+# Launch-video production project (voice-over, music, media budget)
+video/
