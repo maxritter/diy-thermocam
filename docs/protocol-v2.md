@@ -2,7 +2,7 @@
 
 Binary USB protocol used by Firmware 4.0 ([`firmware/src/core/tc_proto_v2.*`](https://github.com/maxritter/diy-thermocam/tree/master/firmware/src/core)) and Desktop Studio ([`app/crates/thermocam-core`](https://github.com/maxritter/diy-thermocam/tree/master/app/crates/thermocam-core)). All multi-byte integers and IEEE 754 floats are **little-endian (LE)**.
 
-## At a Glance
+## At a glance
 
 - **Transport:** USB 2.0 High-Speed CDC ACM (VID `0x16C0`, PID `0x0483` or `0x04D5`). Open at `115200 8N1`, no flow control, **DTR = 1**.
 - **Never open at 134 baud** during normal use—Teensyduino treats 134 baud as a HalfKay bootloader reboot trigger.
@@ -25,7 +25,7 @@ Host                                      Camera (Teensy 4.1)
 
 ---
 
-## Packet Frame and Checksums
+## Packet frame and checksums
 
 ```text
  0      4     5      6       7        8     10            12            16              16+N
@@ -49,14 +49,14 @@ Host                                      Camera (Teensy 4.1)
 | `10` | `u16` | `status_or_sub` | `StatusCode` in responses (`0x0000 = OK`); `0` in requests, streams, and events. |
 | `12` | `u32` | `payload_len` | `0 .. 163840` (`MAX_PAYLOAD_LEN`). |
 
-### Checksums and Resync
+### Checksums and resync
 
 - **`hdr_crc8` (CRC-8/SMBUS):** poly `0x07`, init `0x00`, no reflection, xorout `0x00` (`"123456789"` → `0xF4`). Lets the parser reject false `"TC2\0"` bytes inside pixel streams immediately.
 - **`crc32` (IEEE 802.3):** poly `0x04C11DB7` (reflected `0xEDB88320`), init/xorout `0xFFFFFFFF`, reflected (`"123456789"` → `0xCBF43926`). Matches Python `zlib.crc32` and Rust `crc32fast`.
 - **Resync rule:** If `version`, `payload_len`, or `hdr_crc8` fails after reading 16 header bytes, shift `header[1..16]` left by 1 byte and rescan those 15 bytes for `"TC2\0"` before reading new bytes. Abort an incomplete payload after `500 ms` idle.
 - **Backpressure:** Control responses and events take priority over stream frames. If USB TX cannot accept a frame within `15 ms`, the camera drops it whole before starting TX (never truncates mid-packet) and increments `dropped_frames`.
 
-### Status Codes (`status_or_sub`)
+### Status codes (`status_or_sub`)
 
 When `status_or_sub != 0`, `FLAG_ERROR (0x02)` is set and the payload is empty or a UTF-8 diagnostic string (`<= 128 B`).
 
@@ -76,7 +76,7 @@ When `status_or_sub != 0`, `FLAG_ERROR (0x02)` is set and the payload is empty o
 
 ---
 
-## Message Catalog
+## Message catalog
 
 Control requests `0x01..0x3F` map to responses `req | 0x40`. SD requests `0xE0..0xE5` map to responses `req | 0x08`.
 
@@ -106,7 +106,7 @@ Control requests `0x01..0x3F` map to responses `req | 0x40`. SD requests `0xE0..
 
 ---
 
-## Payload Layouts
+## Payload layouts
 
 ### Lifecycle (`0x01–0x03`, `0x41–0x43`)
 
@@ -161,7 +161,7 @@ Control requests `0x01..0x3F` map to responses `req | 0x40`. SD requests `0xE0..
 
 ---
 
-### Configuration, Control & Radiometry (`0x11–0x1B`, `0x51–0x5B`)
+### Configuration, control and radiometry (`0x11–0x1B`, `0x51–0x5B`)
 
 **`DeviceConfig` (32 B)** — returned by `GET_CONFIG_RESP (0x51)` and `SET_CONFIG_RESP (0x52)`. `SET_CONFIG_REQ (0x12)` is 36 B: `0: persist: u8 (0=RAM, 1=EEPROM)`, `1..3: reserved`, `4..35: DeviceConfig`. Validation is atomic.
 
@@ -202,7 +202,7 @@ Control requests `0x01..0x3F` map to responses `req | 0x40`. SD requests `0xE0..
 
 ---
 
-### Async Events (`0xC0–0xC5`, Camera → Host)
+### Async events (`0xC0–0xC5`, Camera → Host)
 
 | ID | Event | Size | Payload (LE) |
 |---:|---|---:|---|
@@ -215,7 +215,7 @@ Control requests `0x01..0x3F` map to responses `req | 0x40`. SD requests `0xE0..
 
 ---
 
-### SD Filesystem (`0xE0–0xED`)
+### SD file system (`0xE0–0xED`)
 
 Paths are UTF-8, root-relative (`1..128 B`, starting with `'/'`, no trailing `'/'` except `"/"`). Any path with `..`, `\`, or NUL is rejected with `ERR_FORBIDDEN`.
 
@@ -230,7 +230,7 @@ Paths are UTF-8, root-relative (`1..128 B`, starting with `'/'`, no trailing `'/
 
 ---
 
-### Bootloader & Generic Errors (`0xF0–0xF1`, `0xFF`)
+### Bootloader and generic errors (`0xF0–0xF1`, `0xFF`)
 
 - **`ENTER_BOOTLOADER_REQ (0xF0)` (4 B) → `ENTER_BOOTLOADER_RESP (0xF1)` (0 B):**
   - Request `0..3: magic: u32` must be **`0xB00710AD`** (`AD 10 07 B0`), else `ERR_BAD_MAGIC`.

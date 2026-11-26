@@ -1,6 +1,7 @@
 ---
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { SITE } from '../lib/site';
 import '../styles/global.css';
 
@@ -84,6 +85,7 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       <slot />
     </main>
     <Footer />
+    <Lightbox />
     <script>
       import '../scripts/site.ts';
     </script>

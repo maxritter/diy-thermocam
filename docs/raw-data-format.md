@@ -4,7 +4,7 @@ Every still image and video or time-lapse frame saved by DIY-Thermocam stores 14
 
 Reference firmware writer: [`firmware/src/thermal/save.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/thermal/save.cpp).
 
-## Valid File Sizes
+## Valid file sizes
 
 Identify the sensor geometry and optional temperature-point block directly from file length:
 
@@ -13,7 +13,7 @@ Identify the sensor geometry and optional temperature-point block directly from 
 | **FLIR Lepton 2.x** (`2.5`) | `80 × 60` (`4,800` px) | `9,621` bytes | `10,005` bytes |
 | **FLIR Lepton 3.x** (`3.1R` / `3.5`) | `160 × 120` (`19,200` px) | `38,421` bytes | `38,805` bytes |
 
-## Binary Field Layout
+## Binary field layout
 
 | Offset (Lepton 3.x) | Offset (Lepton 2.x) | Size (B) | Endianness / Type | Field | Description |
 | ---: | ---: | ---: | --- | --- | --- |
@@ -30,7 +30,7 @@ Identify the sensor geometry and optional temperature-point block directly from 
 | `38,417` | `9,617` | `4` | Little-endian `f32` | **Calibration slope** | Linear slope for raw-to-temperature conversion (IEEE 754 float, LSB first). |
 | `38,421` | `9,621` | `384` *(opt.)* | `96 × (u16 BE, u16 BE)` | **Temperature points** | Up to 96 user-placed points: 2-byte 1-based pixel index (`0` = unused, `1` = `(0,0)`, `19200` = `(159,119)`) followed by 2-byte raw count. |
 
-## Raw-to-Temperature Conversion
+## Raw values to temperatures
 
 Convert any 14-bit raw pixel value to absolute temperature using the stored calibration slope and offset:
 
@@ -40,7 +40,7 @@ absTemp = rawValue * calibrationSlope + calibrationOffset
 
 On radiometric FLIR Lepton 2.5 and 3.5 sensors in TLinear high-gain mode, typical values are `calibrationSlope = 0.01` K/count and `calibrationOffset = -273.15` °C. A raw count of `30000` then equals `26.85 °C`.
 
-## Color Scheme Indices
+## Color scheme indices
 
 Defined in [`firmware/include/globaldefines.h`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/include/globaldefines.h) and [`firmware/src/general/colorschemes.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/general/colorschemes.cpp):
 
@@ -54,6 +54,6 @@ Defined in [`firmware/include/globaldefines.h`](https://github.com/maxritter/diy
 | `5` | Double-Rainbow | `12` | Medical | | |
 | `6` | Gray-Red | `13` | Rainbow | | |
 
-## Non-Destructive Sidecar Metadata (`.thermo.json`)
+## Sidecar metadata (`.thermo.json`)
 
 Desktop Studio leaves the `.DAT` byte layout untouched so edited captures stay readable on the camera itself. Desktop annotations (ROIs, per-ROI emissivity and reflected temperature overrides, isotherms, and report notes) save beside the capture in `<filename>.thermo.json`.

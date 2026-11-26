@@ -17,6 +17,7 @@ export default defineConfig({
       components: {
         SiteTitle: './src/components/starlight/SiteTitle.astro',
         ThemeSelect: './src/components/starlight/ThemeSelect.astro',
+        Footer: './src/components/starlight/Footer.astro',
       },
       favicon: '/favicon.svg',
       social: [

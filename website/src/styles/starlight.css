@@ -52,6 +52,8 @@
 body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 img { max-width: 100%; height: auto; }
 ::selection { background: rgb(240 138 36 / 30%); }
+:root { accent-color: var(--accent); caret-color: var(--accent); scrollbar-color: var(--border-strong) transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Header */
 header.header { border-bottom: 1px solid var(--border); box-shadow: none; background: var(--bg); padding-inline: 20px; }
@@ -90,6 +92,14 @@ h1#_top { font-size: 36px; line-height: 1.12; letter-spacing: -0.03em; font-weig
 .sl-markdown-content th { background: transparent; color: var(--dim); font-weight: 500; font-size: 13px; text-align: left; border-bottom: 1px solid var(--border); }
 .sl-markdown-content td, .sl-markdown-content th { border: 0; border-bottom: 1px solid var(--border); padding: 10px 12px 10px 0; vertical-align: top; }
 .sl-markdown-content img { border: 1px solid var(--border); border-radius: 10px; }
+
+/* A Markdown table of pictures is a captioned row of screenshots, not a data table. */
+.sl-markdown-content table:has(td img) { table-layout: fixed; margin-block: 1.5rem 0.5rem; }
+.sl-markdown-content table:has(td img) :is(th, td) { border-bottom: 0; text-align: left !important; padding: 0 14px 0 0; }
+.sl-markdown-content table:has(td img) :is(th, td):last-child { padding-inline-end: 0; }
+.sl-markdown-content table:has(td img) th { padding-bottom: 8px; font-size: 13px; color: var(--muted); vertical-align: bottom; }
+.sl-markdown-content table:has(td img) td { padding-bottom: 18px; }
+.sl-markdown-content table:has(td img) img { display: block; width: 100%; margin: 0; }
 .sl-markdown-content blockquote { border: 1px solid var(--border); border-radius: 10px; background: var(--bg-2); padding: 12px 14px; color: var(--muted); font-size: 14px; }
 .sl-markdown-content blockquote p { color: var(--muted); }
 .sl-markdown-content hr { border-color: var(--border); }

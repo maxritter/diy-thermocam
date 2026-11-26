@@ -4,11 +4,11 @@ DIY-Thermocam Firmware 4.0 is open-source C++17 code for **DIY-Thermocam V3 and 
 
 > **Hardware compatibility:** Firmware 4.0 supports **DIY-Thermocam V3 and V4 (Teensy 4.1)** only. Owners of **DIY-Thermocam V1 or V2 (Teensy 3.2 / 3.6)** must continue using [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). Radiometric `.DAT` files remain 100% compatible across all hardware revisions.
 
-| Live View HUD | Main Menu (Dark) | Gallery | System Status |
-| :---: | :---: | :---: | :---: |
+| Live view | Main menu | Gallery | System status |
+| --- | --- | --- | --- |
 | ![Live HUD](/images/firmware/live-hud.png) | ![Main Menu](/images/firmware/main-menu-dark.png) | ![Gallery](/images/firmware/gallery.png) | ![System Status](/images/firmware/status-screen.png) |
 
-## Prerequisites and OS Support
+## What you need
 
 Flashing prebuilt `.hex` releases and compiling from source both work on **Windows**, **macOS**, and **Linux**.
 
@@ -31,16 +31,16 @@ sudo cp 00-teensy.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
-## Flashing Prebuilt Firmware
+## Installing a release
 
-### Option 1: DIY-Thermocam Desktop Studio (Recommended)
+### With Studio (recommended)
 
 1. Connect the camera over USB and switch it on.
 2. Open **DIY-Thermocam Desktop Studio**, switch to **Pro** mode (`Shift+P`), and open the **Updater** tab.
 3. Click **Load .hex File…** to pick `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases) (optionally paste the release SHA-256 digest).
 4. Click **Enter Bootloader & Flash Firmware**. Desktop Studio checks the SHA-256 hash, enters the HalfKay bootloader over USB (including from Firmware 3.0.x via the 134-baud trigger), flashes the image, and reboots the camera.
 
-### Option 2: PJRC Teensy Loader (First Flash on a Blank Teensy)
+### With Teensy Loader (first install on a blank Teensy)
 
 1. Download `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases).
 2. Download and open [Teensy Loader](https://www.pjrc.com/teensy/loader.html) on Windows, macOS, or Linux.
@@ -52,7 +52,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 The camera reboots automatically and displays the DIY-Thermocam boot screen.
 
-## Building from Source with Arduino CLI
+## Building from source
 
 The firmware compiles with [Arduino CLI](https://github.com/arduino/arduino-cli) and [Teensy core 1.62.0](https://github.com/PaulStoffregen/cores), pinned in `firmware/sketch.yaml`. Arduino IDE, Teensyduino, and PlatformIO are not required.
 
@@ -68,7 +68,7 @@ arduino-cli board list
 arduino-cli upload -p <port>
 ```
 
-## Architecture and Testing
+## How the firmware works
 
 - **Triple-buffered VoSPI acquisition:** FLIR Lepton frames stream over `SPI1` in the background while the main loop renders into `bigBuffer`, pushes atomic frames over `SPI0`, and serves [USB Protocol v2](/docs/protocol-v2/).
 - **Fixed-point LUT pipeline:** Precomputed 256-entry RGB565 tables (19 color schemes) and integer spatial filters sustain the Lepton's **8.77 fps** native frame rate.

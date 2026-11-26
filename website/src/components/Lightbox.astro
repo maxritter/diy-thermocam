@@ -1,0 +1,152 @@
+---
+/* Opens a picture in place instead of leaving the page. Picks up links to images that wrap a
+   picture (gallery, build guide) and the plain images in docs. Arrow keys step through the page's
+   pictures; Esc, the close button or a click outside closes it. Without JavaScript the links
+   still open the file. */
+import { ICONS } from '../lib/icons';
+---
+
+<dialog class="lb" aria-label="Picture" tabindex="-1">
+  <figure>
+    <figcaption><span class="cap"></span><span class="count"></span></figcaption>
+  </figure>
+  <button class="lb-btn close" type="button" aria-label="Close" set:html={ICONS.close} />
+  <button class="lb-btn prev" type="button" aria-label="Previous picture" set:html={ICONS.chevron} />
+  <button class="lb-btn next" type="button" aria-label="Next picture" set:html={ICONS.chevron} />
+</dialog>
+
+<script>
+  const IMG = /\.(jpe?g|png|webp|avif|svg)(\?.*)?$/i;
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lb');
+
+  interface Item { src: string; alt: string; cap: string; el: HTMLElement }
+
+  function items(): Item[] {
+    const out: Item[] = [];
+    const seen = new Set<Element>();
+    for (const el of document.querySelectorAll<HTMLElement>('main a[href], main .sl-markdown-content img:not(.not-content img)')) {
+      if (el.closest('dialog.lb')) continue;
+      if (el instanceof HTMLAnchorElement) {
+        const img = el.querySelector('img');
+        if (!img || !IMG.test(el.getAttribute('href') ?? '') || el.hasAttribute('download')) continue;
+        seen.add(img);
+        out.push({ src: el.href, alt: img.alt, cap: caption(el, img), el });
+      } else if (el instanceof HTMLImageElement && !seen.has(el) && !el.closest('a')) {
+        out.push({ src: el.currentSrc || el.src, alt: el.alt, cap: caption(el, el), el });
+      }
+    }
+    return out;
+  }
+
+  function caption(host: HTMLElement, img: HTMLImageElement): string {
+    if (host.dataset.caption) return host.dataset.caption;
+    const text = host.closest('figure')?.querySelector('figcaption')?.textContent?.replace(/\s+/g, ' ').trim();
+    return text || img.alt || '';
+  }
+
+  if (dialog) {
+    const img = document.createElement('img');
+    dialog.querySelector('figure')?.prepend(img);
+    const cap = dialog.querySelector('.cap') as HTMLElement;
+    const count = dialog.querySelector('.count') as HTMLElement;
+    const prev = dialog.querySelector('.prev') as HTMLButtonElement;
+    const next = dialog.querySelector('.next') as HTMLButtonElement;
+    let list: Item[] = [];
+    let at = 0;
+
+    const show = (i: number) => {
+      at = (i + list.length) % list.length;
+      const it = list[at];
+      img.src = it.src;
+      img.alt = it.alt;
+      cap.textContent = it.cap;
+      count.textContent = list.length > 1 ? `${at + 1} / ${list.length}` : '';
+      prev.hidden = next.hidden = list.length < 2;
+    };
+
+    const open = (el: HTMLElement) => {
+      list = items();
+      const i = list.findIndex((it) => it.el === el);
+      if (i < 0) return false;
+      show(i);
+      dialog.showModal();
+      dialog.focus();
+      return true;
+    };
+
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const t = e.target as HTMLElement;
+      const host = t.closest<HTMLElement>('a[href]') ?? (t instanceof HTMLImageElement && !t.closest('.not-content') ? t : null);
+      if (!host || host.closest('dialog.lb')) return;
+      if (open(host)) e.preventDefault();
+    });
+
+    prev.addEventListener('click', () => show(at - 1));
+    next.addEventListener('click', () => show(at + 1));
+    dialog.querySelector('.close')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog || e.target === img || (e.target as HTMLElement).tagName === 'FIGURE') dialog.close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(at - 1);
+      else if (e.key === 'ArrowRight') show(at + 1);
+    });
+    dialog.addEventListener('close', () => {
+      const el = list[at]?.el;
+      img.removeAttribute('src');
+      el?.focus({ preventScroll: true });
+    });
+  }
+</script>
+
+<style is:global>
+  main .sl-markdown-content img:not(a img, .not-content img) { cursor: zoom-in; }
+  main a:has(> img)[href$=".jpg"],
+  main a:has(> img)[href$=".png"] { cursor: zoom-in; }
+
+  dialog.lb {
+    width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0;
+    border: 0; background: transparent; color: #ededed; overflow: hidden;
+  }
+  dialog.lb::backdrop { background: rgb(8 8 9 / 88%); backdrop-filter: blur(6px); }
+  dialog.lb[open] { display: block; }
+  dialog.lb:focus { outline: none; }
+  dialog.lb figure {
+    position: absolute; inset: 0; margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto;
+    justify-items: center; align-items: center; gap: 14px; padding: 56px 80px 24px; box-sizing: border-box;
+  }
+  /* Fill the space, small screenshots included; contain keeps the whole picture in view. */
+  dialog.lb img {
+    width: 100%; height: 100%; max-width: 1600px; object-fit: contain; border: 0; border-radius: 0;
+    filter: drop-shadow(0 24px 40px rgb(0 0 0 / 55%)); cursor: zoom-out;
+  }
+  dialog.lb figcaption { display: flex; gap: 14px; align-items: baseline; font: 14px/1.45 var(--font-sans); color: #d4d4d4; max-width: 72ch; text-align: center; }
+  dialog.lb .count { font: 12px var(--font-mono); color: #8f8f8f; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  dialog.lb .lb-btn {
+    position: absolute; display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+    border-radius: 999px; border: 1px solid rgb(255 255 255 / 14%); background: rgb(24 24 27 / 72%);
+    color: #ededed; cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  dialog.lb .lb-btn:hover { background: rgb(39 39 42 / 90%); border-color: rgb(255 255 255 / 28%); }
+  dialog.lb .lb-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  dialog.lb .lb-btn svg { width: 18px; height: 18px; display: block; }
+  dialog.lb .close { top: 16px; right: 16px; }
+  dialog.lb .prev, dialog.lb .next { top: 50%; translate: 0 -50%; }
+  dialog.lb .prev { left: 20px; }
+  dialog.lb .prev svg { rotate: 180deg; }
+  dialog.lb .next { right: 20px; }
+  dialog.lb .lb-btn[hidden] { display: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.lb[open] img { animation: lb-in 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+    dialog.lb[open]::backdrop { animation: lb-fade 0.18s ease-out; }
+  }
+  @keyframes lb-in { from { opacity: 0; scale: 0.97; } }
+  @keyframes lb-fade { from { opacity: 0; } }
+
+  @media (max-width: 700px) {
+    dialog.lb figure { padding: 56px 12px 72px; }
+    dialog.lb .prev, dialog.lb .next { top: auto; bottom: 16px; translate: none; }
+  }
+</style>

@@ -1,6 +1,6 @@
 # Hardware and Fabrication
 
-All PCB, schematic, BOM, and enclosure files live in [`hardware/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware) under **GPL-3.0**. Order the factory-assembled board from **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay**, and print or laser-cut the enclosure yourself or order it from the same services.
+The board, schematic, BOM and enclosure files are in [`hardware/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware) under GPL-3.0. Order the assembled board from JLCPCB, Seeed Studio Fusion or PCBWay. Print the shell or have the acrylic case laser-cut, yourself or through a service.
 
 ## V4 hardware
 
@@ -14,7 +14,7 @@ All PCB, schematic, BOM, and enclosure files live in [`hardware/`](https://githu
 
 The full V4.0 schematic is in [`hardware/pcb/fab/diy-thermocam-v4.0-schematic.pdf`](https://github.com/maxritter/diy-thermocam/blob/master/hardware/pcb/fab/diy-thermocam-v4.0-schematic.pdf).
 
-## Teensy 4.1 Pinmap
+## Teensy 4.1 pin map
 
 | Teensy 4.1 Pin | DIY-Thermocam Function |
 | --- | --- |
@@ -44,26 +44,29 @@ Board outline: **89.4 × 68.4 mm**, **1.6 mm FR-4**, **2-layer**, 1 oz copper, L
 - **Power, USB and controls:** USB-C, TI `BQ24074` charger, TI `TPS61022` boost, reverse-polarity protection, `XC6206` RTC supply, SMD switches.
 - **Assembly:** no soldering. The fab fits every part; you plug in the Teensy 4.1, Lepton, display and `505060` LiPo.
 
-### Ordering the PCBA
+### Ordering the assembled board
 
 1. Review the interactive [Bill of Materials](/docs/partlist/).
 2. Download the package for your fab from [`hardware/pcb/fab/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb/fab): `jlcpcb/`, `seeed/`, or `pcbway/`, each with a Gerber zip, BOM, and CPL file.
 3. Upload the package to **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay**.
 
-## Enclosures (Laser-Cut Acrylic and 3D/CNC Shell)
+## Shell and case
 
-![DIY-Thermocam V4.0 3D-printable and CNC enclosure CAD renders](/images/build-v4/v4-3d-enclosure-hero.png)
+Two enclosures come from one parametric [build123d](https://github.com/gumyr/build123d) model in [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure). Both hold the same board stack, so the hardware list and most build steps are shared.
 
-![DIY-Thermocam V4.0 6-plate 3 mm laser-cut acrylic enclosure and cutting sheet](/images/build-v4/v4-laser-enclosure-preview.png)
+| Printed shell | Laser-cut acrylic case |
+| --- | --- |
+| ![The printed shell from the back, lens cap open](/images/v4/hero-back.jpg) | ![The laser-cut acrylic case from the front](/images/v4/laser-hero.jpg) |
+| ![Every part of the printed build laid out](/images/v4/kit.jpg) | ![Every part of the acrylic build laid out](/images/v4/laser-kit.jpg) |
 
-Enclosure sources and exports live in [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure):
+- **Printed shell:** a sliding lens cap, capture button, switch slider and a captive 1/4"-20 tripod nut. Each part comes as STEP, STL and 3MF, plus a print plate with every part at the quantity one camera needs.
+- **Acrylic case:** six interlocking plates of 3 mm black cast acrylic, with the button and switch keys cut from the same sheet (`SVG` or `DXF`, 213 × 195 mm). It also needs a few small printed parts: the battery cradle, its lid and spacers, the tripod mount, two display spacers and the microSD chute.
 
-- **V4.0 parametric [build123d](https://github.com/gumyr/build123d) CAD:** Generates a screwdriver-only 3D-printed shell (`STEP`, `STL`, `3MF`) and a 6-plate 3 mm acrylic case (`SVG`, `DXF`) on one M2.5 standoff stack. Includes a `1/4"-20` tripod pocket (max stud `≤ 8.0 mm`), insulating `505060` battery cradle, dovetail lens cap, and wide `13.4→20.2 mm` lens cone clearing Lepton 3.5 (`71°`) and 3.1R (`119°`). See the enclosure README for fastener order numbers.
-- **Community 3.0b Enclosure:** Originally contributed by [helmarw/DIY-Thermocam](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b), inspiring ergonomic details of the parametric shell.
+The [build guide](/building-instructions/) shows every step for both, and the [parts list](/docs/partlist/) has the files each print or laser-cutting service needs.
 
-### Recommended 3D Printing Settings
+### Printing the shell
 
-- **Material:** PETG (recommended) or matte PLA with dark interior walls to reduce reflections.
-- **Layer height:** 0.2 mm, 3–4 walls, 20–25% gyroid infill.
-- **Supports:** None required when printed in the exported `Z = 0` orientation.
-- **Cloud fabrication:** Upload the `.step` or `.stl` exports to **JLCPCB 3D**, **Seeed Studio Fusion**, or **PCBWay** (MJF PA12 Nylon or CNC aluminum).
+- **From a print service (recommended):** order MJF PA12, dyed black. At JLC3DP, upload the one service-plate file; it holds each part once, with the four cradle spacers joined by break-off tabs. Snip the tabs and file the nubs flush.
+- **At home:** PETG, 0.4 mm nozzle, 0.2 mm layers, 3–4 walls. Print `back_shell` with supports touching the build plate only: the lens-cap track is a 28 × 58 mm bridge. The other parts print without supports in the orientation of the plate file.
+
+The parametric shell takes ergonomic ideas from the community [3.0b enclosure](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b) by helmarw.

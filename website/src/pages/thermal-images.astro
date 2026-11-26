@@ -28,7 +28,7 @@ const jsonLd = buildBreadcrumbs([
     <div class="wrap grid">
       {EXAMPLES.map((e) => (
         <figure>
-          <a href={`/images/examples/${e.id}.jpg`}><img src={`/images/examples/${e.id}.jpg`} alt={`Example thermal image: ${e.title.toLowerCase()}, ${e.range}, ${e.palette} palette`} width={EXAMPLE_W} height={EXAMPLE_H} loading="lazy" /></a>
+          <a href={`/images/examples/${e.id}.jpg`} data-caption={`${e.title}: ${e.note}`}><img src={`/images/examples/${e.id}.jpg`} alt={`Example thermal image: ${e.title.toLowerCase()}, ${e.range}, ${e.palette} palette`} width={EXAMPLE_W} height={EXAMPLE_H} loading="lazy" /></a>
           <figcaption>
             <div class="t"><b>{e.title}</b><span class="meta">{e.palette} · {e.range}</span></div>
             <p>{e.note}</p>
