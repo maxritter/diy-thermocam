@@ -9,11 +9,15 @@ import Icon from './Icon.astro';
   <article class="card studio">
     <figure class="pic">
       <img src="/images/studio/web/studio-live.webp" alt="Studio showing the camera's live image with the hottest spot marked and the palette panel" width="1600" height="1305" loading="lazy" decoding="async" />
-      <span class="tag label">For your computer</span>
     </figure>
     <div class="body">
       <h3>Studio</h3>
-      <p>The live image, measuring, recording and every capture on your computer. It also installs the camera's firmware.</p>
+      <p>The camera's live image on your computer, for macOS, Windows and Linux.</p>
+      <ul class="points">
+        <li><span>Measure with boxes, spots and lines, each with its own emissivity.</span></li>
+        <li><span>Record, take snapshots and export MP4, GIF or TIFF.</span></li>
+        <li><span>Keep every capture from this computer and the camera's card in one library, and update the firmware.</span></li>
+      </ul>
       <div class="rows">
         {DOWNLOADS.map((d) => (
           <a class="row" href={d.href}>
@@ -29,16 +33,30 @@ import Icon from './Icon.astro';
   <article class="card fw">
     <figure class="pic">
       <img src="/images/firmware/live-hud.png" alt="The camera's screen: a live thermal image of a board with the hottest and coldest spot, the centre reading and the scale" width="640" height="480" loading="lazy" decoding="async" />
-      <span class="tag label">For the camera</span>
     </figure>
     <div class="body">
       <h3>Firmware 4.0</h3>
-      <p>For V3 and V4 cameras with a Teensy 4.1. Install it from Studio: <b>Camera › Update firmware…</b></p>
+      <p>For V3 and V4 cameras with a Teensy 4.1. Studio installs it over USB-C, so you don't need Teensy Loader.</p>
+      <ol class="steps">
+        <li><span>Download <b>firmware.hex</b> below.</span></li>
+        <li><span>Connect the camera with a USB-C data cable.</span></li>
+        <li><span>In Studio, open <b>Camera › Update firmware…</b>, choose the file and click <b>Install</b>.</span></li>
+      </ol>
       <div class="rows">
         <a class="row" href={SITE.firmwareFile}>
           <Icon name="chip" class="os" />
           <span><b>firmware.hex</b><small>V3 and V4 · Teensy 4.1</small></span>
           <span class="go"><Icon name="download" />Download</span>
+        </a>
+        <a class="row" href={`${SITE.releasesUrl}/tag/2.4.8`}>
+          <Icon name="chip" class="os" />
+          <span><b>Firmware 2.4.8</b><small>V1 and V2 · Teensy 3.2 and 3.6</small></span>
+          <span class="go"><Icon name="arrowUpRight" />Open</span>
+        </a>
+        <a class="row" href="/docs/firmware/">
+          <Icon name="file" class="os" />
+          <span><b>Build it yourself</b><small>Arduino CLI · source in firmware/</small></span>
+          <span class="go"><Icon name="chevron" />Guide</span>
         </a>
       </div>
     </div>
@@ -49,9 +67,14 @@ import Icon from './Icon.astro';
   .cards { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
   .card { display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--surface); }
   .pic { position: relative; margin: 0; height: 300px; overflow: hidden; background: #0d0d0e; border-bottom: 1px solid var(--border); }
-  .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+  .pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 30% 55%; }
   .fw .pic img { object-fit: contain; image-rendering: pixelated; padding: 6%; }
-  .tag { position: absolute; left: 12px; top: 12px; padding: 5px 8px; background: var(--hot); color: var(--on-accent); }
+  .steps, .points { list-style: none; counter-reset: step; margin: 2px 0 6px; padding: 0; display: grid; gap: 10px; }
+  .steps li, .points li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; color: var(--muted); font-size: 14px; line-height: 1.5; }
+  .steps li { counter-increment: step; }
+  .steps li::before { content: counter(step); display: grid; place-items: center; width: 22px; height: 22px; background: var(--hot); color: var(--on-accent); font: 500 12px/1 var(--font-mono); }
+  .points li::before { content: ""; width: 8px; height: 8px; margin: 7px 0 0 7px; background: var(--hot); }
+  .steps b { color: var(--text); font-weight: 600; }
   .body { display: flex; flex-direction: column; gap: 12px; padding: 22px 22px 22px; flex: 1; }
   .body h3 { font-size: 30px; line-height: 1.05; }
   .body p { margin: 0; color: var(--muted); font-size: 14.5px; max-width: 52ch; }
