@@ -60,49 +60,6 @@ const PaletteMeta& paletteMeta(byte idx)
 	return kPalettes[(idx < colorSchemeTotal) ? idx : (colorSchemeTotal - 1)];
 }
 
-/* Draw sleek 28px non-touch top header bar (keeps touch targets away from bezel corners). */
-void drawModernHeader(const char* title, const char* rightBadge = nullptr)
-{
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 28);
-	display_setColor(UI_ACCENT);
-	display_drawHLine(0, 28, 320);
-
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print(const_cast<char *>(title), 12, 8);
-
-	if (rightBadge && rightBadge[0])
-	{
-		int rx = 308 - static_cast<int>(strlen(rightBadge)) * 8;
-		display_setColor(UI_TEXT_MUTED);
-		display_print(const_cast<char *>(rightBadge), rx, 8);
-	}
-}
-
-/* Draw bezel-safe bottom pill button (>=12px side margin, >=14px bottom margin). */
-struct PillRect {
-	int x;
-	int y;
-	int w;
-	int h;
-};
-
-void drawBottomPill(const PillRect& r, const char* lbl, bool accent = false)
-{
-	display_setColor(accent ? UI_ACCENT : UI_SURFACE);
-	display_fillRoundRect(r.x, r.y, r.x + r.w, r.y + r.h);
-	display_setColor(accent ? UI_ACCENT : UI_BORDER);
-	display_drawRoundRect(r.x, r.y, r.x + r.w, r.y + r.h);
-	display_setFont(smallFont);
-	display_setBackColor(accent ? UI_ACCENT : UI_SURFACE);
-	display_setColor(accent ? UI_ACCENT_FG : UI_TEXT);
-	int tx = r.x + (r.w - static_cast<int>(strlen(lbl)) * 8) / 2;
-	int ty = r.y + (r.h - 12) / 2;
-	display_print(const_cast<char *>(lbl), tx, ty);
-}
-
 void drawTileIcon(int cx, int cy, byte iconId)
 {
 	display_setColor(UI_TEXT);
@@ -261,67 +218,68 @@ void drawPaletteRow(byte slot, byte idx, bool isSel)
 
 } // namespace
 
-/* Draw full-bleed modern submenu canvas. */
+/* Draw full-bleed modern submenu canvas (unified 28px header bar). */
 void mainMenuBackground()
 {
-	display_fillScr(UI_BG_DARK);
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 34);
-	display_setColor(UI_ACCENT);
-	display_drawHLine(0, 34, 320);
-	display_setColor(UI_BORDER);
-	display_drawHLine(12, 184, 296);
+	ui_beginScreen("");
 }
 
-/* Draw selection carousel chrome (< / > / < Back / OK, bezel-safe >=12px margins). */
+/* Draw selection carousel chrome (< / > + bottom-left < Back / bottom-right OK). */
 void drawSelectionMenu()
 {
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 46, 42, 74, (char *)"<", 0, true);
-	buttons_addButton(266, 46, 42, 74, (char *)">", 0, true);
-	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_addButton(95, 134, 130, 36, (char *)"OK");
-	buttons_drawButtons();
+	buttons_addButton(12,  66,  46,  80, (char *)"<", 0, true);
+	buttons_addButton(262, 66,  46,  80, (char *)">", 0, true);
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 2: < Back
+	buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 3: OK
+	buttons_drawButton(0);
+	buttons_drawButton(1);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
+	ui_drawPill(166, 192, 142, 34, "OK",     uiPill_primary);
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(68, 66, 252, 146);
 	display_setColor(UI_ACCENT);
-	display_drawRoundRect(64, 54, 256, 112);
+	display_drawRoundRect(68, 66, 252, 146);
 }
 
-/* Draw the submenu header title. */
+/* Draw the submenu header title inside the unified 28px top bar. */
 void mainMenuTitle(char *title)
 {
-	display_setFont(bigFont);
+	display_setFont(smallFont);
 	display_setBackColor(UI_SURFACE);
 	display_setColor(UI_TEXT);
-	display_print(title, CENTER, 10);
+	display_print(title, 12, 8);
 }
 
 /* Draw the centered value inside a selection carousel card. */
 void mainMenuSelection(char *selection)
 {
 	display_setColor(UI_SURFACE);
-	display_fillRect(66, 56, 254, 110);
+	display_fillRect(72, 70, 248, 142);
+	display_setFont(bigFont);
 	display_setBackColor(UI_SURFACE);
 	display_setColor(UI_ACCENT);
-	display_print(selection, CENTER, 77);
+	display_print(selection, CENTER, 98);
+	display_setFont(smallFont);
 }
 
 /* Confirm entering USB MTP file transfer mode. */
 bool massStoragePrompt()
 {
 	return ui_confirmDialog(
-		"USB File Transfer",
+		"USB FILE TRANSFER",
 		"Enter USB MTP file transfer mode?",
-		"Supports Windows / Linux / OpenMTP",
+		"Windows / Linux / macOS MTP",
 		"Not for FW updates or live stream.",
-		true);
+		true,
+		false);
 }
 
 /* Draw 1-tap 3x3 Display & Theme Toggle Grid with bezel-safe bottom Back / Live pills. */
 void drawLiveDispGrid()
 {
-	display_fillScr(UI_BG_DARK);
-	drawModernHeader("DISPLAY & HUD", ui_themeName(uiThemeMode));
+	ui_beginScreen("DISPLAY & HUD", ui_themeName(uiThemeMode));
 
 	buttons_deleteAllButtons();
 	buttons_addButton(12, 192, 142, 34, (char *)"", 0x0010); // 0: < Back
@@ -372,8 +330,8 @@ void drawLiveDispGrid()
 	}
 
 	buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 10: < Live
-	drawBottomPill({12,  192, 142, 34}, "< Back", false);
-	drawBottomPill({166, 192, 142, 34}, "< Live", true);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
+	ui_drawPill(166, 192, 142, 34, "< Live", uiPill_primary);
 }
 
 /* Interactive 1-tap Live Display & Theme toggle screen. */
@@ -411,11 +369,10 @@ bool liveDispMenu()
 /* Draw one page (4 palettes) of the visual palette picker with bezel-safe footer. */
 void drawColorMenuPage(byte page, byte selected)
 {
-	display_fillScr(UI_BG_DARK);
 	char hdr[32];
 	const byte totalPages = (colorSchemeTotal + 3) / 4;
 	snprintf(hdr, sizeof(hdr), "COLOR PALETTE  %u/%u", static_cast<unsigned>(page + 1), static_cast<unsigned>(totalPages));
-	drawModernHeader(hdr);
+	ui_beginScreen(hdr);
 
 	buttons_deleteAllButtons();
 	buttons_addButton(12,  192, 78,  34, (char *)"", 0x0010); // 0: < Back
@@ -430,10 +387,10 @@ void drawColorMenuPage(byte page, byte selected)
 		drawPaletteRow(slot, idx, idx == selected);
 	}
 
-	drawBottomPill({12,  192, 78,  34}, "< Back", false);
-	drawBottomPill({96,  192, 44,  34}, "<",      false);
-	drawBottomPill({146, 192, 112, 34}, "Apply",  true);
-	drawBottomPill({264, 192, 44,  34}, ">",      false);
+	ui_drawPill(12,  192, 78,  34, "< Back", uiPill_secondary);
+	ui_drawPill(96,  192, 44,  34, "<",      uiPill_secondary);
+	ui_drawPill(146, 192, 112, 34, "Apply",  uiPill_primary);
+	ui_drawPill(264, 192, 44,  34, ">",      uiPill_secondary);
 }
 
 /* Interactive visual palette picker with live firmware LUT gradient previews. */
@@ -499,8 +456,7 @@ void drawMainMenu(byte pos)
 		{216, 112, "Theme",    13, false}
 	};
 
-	display_fillScr(UI_BG_DARK);
-	drawModernHeader((pos == 0) ? "MAIN MENU  1/2" : "MAIN MENU  2/2", ui_themeName(uiThemeMode));
+	ui_beginScreen((pos == 0) ? "MAIN MENU  1/2" : "MAIN MENU  2/2", ui_themeName(uiThemeMode));
 
 	buttons_deleteAllButtons();
 	const TileSpec* tiles = (pos == 0) ? kPage0 : kPage1;
@@ -510,10 +466,10 @@ void drawMainMenu(byte pos)
 		drawModernMenuTile(tiles[i]);
 	}
 
-	buttons_addButton(12,  190, 142, 36, (char *)"", 0x0010); // 6: < Live
-	buttons_addButton(166, 190, 142, 36, (char *)"", 0x0010); // 7: More > / < Page 1
-	drawBottomPill({12,  190, 142, 36}, "< Live", true);
-	drawBottomPill({166, 190, 142, 36}, (pos == 0) ? "More >" : "< Page 1", false);
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 6: < Live
+	buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 7: More > / < Page 1
+	ui_drawPill(12,  192, 142, 34, "< Live", uiPill_primary);
+	ui_drawPill(166, 192, 142, 34, (pos == 0) ? "More >" : "< Page 1", uiPill_secondary);
 }
 
 /* Dispatch the selected tile on page 0 or page 1. Returns true to exit back to Live Mode. */

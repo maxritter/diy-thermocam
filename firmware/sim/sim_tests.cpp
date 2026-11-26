@@ -358,21 +358,21 @@ static void test_temp_limits_manual_no_idle_spam() {
 
 	// tempLimits(): Manual is (166, 46, 142, 120) -> (237, 106)
 	g_sim.scheduleTap(1200u, 237, 106, 40u);
-	// tempLimitsPresets(): default pos=0 ("New"), OK is (95, 134, 130, 36) -> (160, 152)
-	g_sim.scheduleTap(1700u, 160, 152, 40u);
+	// tempLimitsPresets(): default pos=0 ("New"), unified bottom-right OK is (166, 192, 142, 34) -> (237, 209)
+	g_sim.scheduleTap(1700u, 237, 209, 40u);
 	// Now inside tempLimitsManualHandler()! Sit idle from t=2600..4600 (2 seconds) -> must have ZERO draw ops!
 	// t=4800: tap Min button (12, 48, 56, 120) -> (40, 108)
 	g_sim.scheduleTap(4800u, 40, 108, 40u);
 	// t=5200: tap "+" (252, 48, 56, 120) -> (280, 108) to raise min by 1C
 	g_sim.scheduleTap(5200u, 280, 108, 40u);
-	// t=5600: tap "Back" (166, 192, 142, 34) -> (237, 209) to leave minChange mode
+	// t=5600: tap "Done" (166, 192, 142, 34) -> (237, 209) to leave minChange mode
 	g_sim.scheduleTap(5600u, 237, 209, 40u);
 	// t=6000: tap "OK" (237, 209) -> enters tempLimitsPresetSaveMenu (default pos=1 Preset 1)
 	g_sim.scheduleTap(6000u, 237, 209, 40u);
-	// t=6500: tap "<" (12, 46, 42, 74) -> (33, 83) to pick Temporary (pos=0)
-	g_sim.scheduleTap(6500u, 33, 83, 40u);
-	// t=7000: tap "OK" (160, 152) -> saves and exits
-	g_sim.scheduleTap(7000u, 160, 152, 40u);
+	// t=6500: tap "<" (12, 66, 46, 80) -> (35, 106) to pick Temporary (pos=0)
+	g_sim.scheduleTap(6500u, 35, 106, 40u);
+	// t=7000: tap unified bottom-right "OK" (237, 209) -> saves and exits
+	g_sim.scheduleTap(7000u, 237, 209, 40u);
 
 	bool ok = tempLimits();
 	check(ok, "temp_limits_manual_saved", "expected tempLimits() manual flow to return true");
@@ -390,9 +390,9 @@ static void test_hot_cold_menu_flow() {
 
 	// hotColdMenu(): Hot=(12,46,92,122)->(58,107)
 	g_sim.scheduleTap(1200u, 58, 107, 40u);
-	// hotColdColorMenu(): ">"=(266,46,42,74)->(287,83), OK=(160,152)
-	g_sim.scheduleTap(1700u, 287, 83, 40u);
-	g_sim.scheduleTap(2200u, 160, 152, 40u);
+	// hotColdColorMenu(): ">"=(262,66,46,80)->(285,106), unified bottom-right OK=(237,209)
+	g_sim.scheduleTap(1700u, 285, 106, 40u);
+	g_sim.scheduleTap(2200u, 237, 209, 40u);
 	// hotColdChooserHandler(): "+"=(252,48,56,120)->(280,108), OK=(166,192,142,34)->(237,209)
 	g_sim.scheduleTap(2700u, 280, 108, 40u);
 	g_sim.scheduleTap(3200u, 237, 209, 40u);
@@ -441,32 +441,32 @@ static void test_all_settings_submenus_and_bleed_through() {
 	g_sim.scheduleTap(5600u, 83, 208, 40u);  // < Back to Date
 	g_sim.scheduleTap(6000u, 83, 209, 40u);  // < Back to General
 	g_sim.scheduleTap(6400u, 160, 149, 40u); // BMP Conversion
-	g_sim.scheduleTap(6800u, 237, 82, 40u);  // Enabled
-	g_sim.scheduleTap(7200u, 83, 209, 40u);  // < Back to General
+	g_sim.scheduleTap(6800u, 237, 106, 40u); // Enabled
+	g_sim.scheduleTap(7200u, 237, 209, 40u); // Save -> General
 	g_sim.scheduleTap(7600u, 83, 209, 40u);  // < Back to Settings
 	// 2) Hardware -> Battery Gauge (No) -> Lepton Gain (Low + Save) -> Format SD (No) -> USB MTP (No) -> <Back
 	g_sim.scheduleTap(8000u, 237, 77, 40u);  // Hardware
 	g_sim.scheduleTap(8400u, 83, 77, 40u);   // Battery Gauge
-	g_sim.scheduleTap(8800u, 83, 201, 40u);  // No
+	g_sim.scheduleTap(8800u, 83, 209, 40u);  // No (unified y=192..226)
 	g_sim.scheduleTap(9200u, 237, 77, 40u);  // Lepton Gain
-	g_sim.scheduleTap(9600u, 237, 82, 40u);  // Low gain (-10C..+450C)
+	g_sim.scheduleTap(9600u, 237, 106, 40u); // Low gain (-10C..+450C)
 	g_sim.scheduleTap(10000u, 237, 209, 40u);// Save
 	g_sim.scheduleTap(10400u, 83, 149, 40u); // Format SD
-	g_sim.scheduleTap(10800u, 83, 201, 40u); // No
+	g_sim.scheduleTap(10800u, 83, 209, 40u); // No
 	g_sim.scheduleTap(11200u, 237, 149, 40u);// USB MTP
-	g_sim.scheduleTap(11600u, 83, 201, 40u); // No
+	g_sim.scheduleTap(11600u, 83, 209, 40u); // No
 	g_sim.scheduleTap(12000u, 83, 209, 40u); // < Back to Settings
-	// 3) Display -> Temp Format (F + Save) -> Disp Rotation (Rotate 180 + Save) -> Screen Timeout (5 Min + <Back) -> Theme (Light + <Back) -> <Back
+	// 3) Display -> Temp Format (F + Save) -> Disp Rotation (Rotate 180 + Save) -> Screen Timeout (5 Min + Save) -> Theme (Light + <Back) -> <Back
 	g_sim.scheduleTap(12400u, 83, 149, 40u); // Display
 	g_sim.scheduleTap(12800u, 83, 77, 40u);  // Temp Format
-	g_sim.scheduleTap(13200u, 237, 82, 40u); // Fahrenheit
+	g_sim.scheduleTap(13200u, 237, 106, 40u);// Fahrenheit
 	g_sim.scheduleTap(13600u, 237, 209, 40u);// Save
 	g_sim.scheduleTap(14000u, 237, 77, 40u); // Disp Rotation
 	g_sim.scheduleTap(14400u, 83, 77, 40u);  // Rotate 180
 	g_sim.scheduleTap(14800u, 237, 209, 40u);// Save
 	g_sim.scheduleTap(15200u, 83, 149, 40u); // Screen Timeout
 	g_sim.scheduleTap(15600u, 237, 77, 40u); // 5 Min
-	g_sim.scheduleTap(16000u, 83, 209, 40u); // < Back to Display
+	g_sim.scheduleTap(16000u, 237, 209, 40u);// Save -> Display
 	g_sim.scheduleTap(16400u, 237, 149, 40u);// Theme
 	g_sim.scheduleTap(16800u, 160, 114, 40u);// Light
 	g_sim.scheduleTap(17200u, 83, 209, 40u); // < Back to Display
@@ -549,10 +549,10 @@ static void test_video_recording_interval_flow() {
 
 	// Tap Interval card (166, 38, 142, 136) -> (237, 106)
 	g_sim.scheduleTap(1200u, 237, 106, 40u);
-	// Interval chooser: ">"=(287,83) -> 5s, "<"=(33,83) -> 1s, OK=(160,152)
-	g_sim.scheduleTap(1600u, 287, 83, 40u);
-	g_sim.scheduleTap(2000u, 33, 83, 40u);
-	g_sim.scheduleTap(2400u, 160, 152, 40u);
+	// Interval chooser: ">"=(285,106) -> 5s, "<"=(35,106) -> 1s, unified bottom-right OK=(237,209)
+	g_sim.scheduleTap(1600u, 285, 106, 40u);
+	g_sim.scheduleTap(2000u, 35, 106, 40u);
+	g_sim.scheduleTap(2400u, 237, 209, 40u);
 
 	videoMode();
 
@@ -611,6 +611,28 @@ static void test_gallery_convert_image_clean_bmp_no_hud_and_repeat() {
 		"expected SD CWD '/' after convertImage, got " + sim_sd_cwd());
 }
 
+// 20. Unified Settings bottom bar: tapping < Back on option pickers discards unsaved changes; Save commits.
+static void test_settings_back_cancels_without_saving() {
+	reset_ui_state();
+	g_sim.setWatchdog(8000u);
+	convertEnabled = false;
+	tempFormat = tempFormat_celcius;
+
+	// Enter BMP Conversion -> toggle Enabled (237, 106) -> tap < Back (83, 209) -> must remain false!
+	g_sim.scheduleTap(1200u, 237, 106, 40u); // Enabled
+	g_sim.scheduleTap(1700u, 83,  209, 40u); // < Back (cancel!)
+	convertImageMenu(false);
+	check(convertEnabled == false, "bmp_back_cancels", "expected < Back to discard unsaved BMP Conversion toggle");
+
+	// Enter Temp Format -> toggle Fahrenheit (237, 106) -> tap < Back (83, 209) -> must remain Celsius!
+	g_sim.reset(1000u);
+	g_sim.setWatchdog(8000u);
+	g_sim.scheduleTap(1200u, 237, 106, 40u); // Fahrenheit
+	g_sim.scheduleTap(1700u, 83,  209, 40u); // < Back (cancel!)
+	tempFormatMenu(false);
+	check(tempFormat == tempFormat_celcius, "temp_format_back_cancels", "expected < Back to discard unsaved Temp Format toggle");
+}
+
 int main() {
 	run_test("gallery_menu_idle_and_back", test_gallery_menu_idle_and_back);
 	run_test("gallery_images_no_infinite_refresh_xpt2046", test_gallery_images_no_infinite_refresh_xpt2046);
@@ -631,6 +653,7 @@ int main() {
 	run_test("video_recording_normal_and_cwd_restore", test_video_recording_normal_and_cwd_restore);
 	run_test("video_recording_interval_flow", test_video_recording_interval_flow);
 	run_test("gallery_convert_image_clean_bmp_no_hud_and_repeat", test_gallery_convert_image_clean_bmp_no_hud_and_repeat);
+	run_test("settings_back_cancels_without_saving", test_settings_back_cancels_without_saving);
 
 	std::printf("\nSimulator UI test summary: %d passed, %d failed\n", g_passed, g_failed);
 	return (g_failed == 0) ? 0 : 1;

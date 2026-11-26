@@ -410,30 +410,15 @@ void videoCapture() {
 
 /* Draw sleek 2026 Video Mode selection screen (Dark / Light / High-Contrast, bezel-safe >=12px) */
 void drawVideoModeMenu() {
-	display_fillScr(UI_BG_DARK);
-
-	// Top 28px non-touch header bar
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 28);
-	display_setColor(UI_ACCENT);
-	display_drawHLine(0, 28, 320);
-
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print((char*)"VIDEO RECORDING", 12, 8);
-
 	char sdBadge[20];
 	snprintf(sdBadge, sizeof(sdBadge), "%lu MB FREE", static_cast<unsigned long>(getSDFreeKB() / 1024u));
-	int rx = 308 - static_cast<int>(strlen(sdBadge)) * 8;
-	display_setColor(UI_TEXT_MUTED);
-	display_print(sdBadge, rx, 8);
+	ui_beginScreen("VIDEO RECORDING", sdBadge);
 
 	// Invisible hit targets matching our custom-drawn cards & bottom pills
 	buttons_deleteAllButtons();
 	buttons_addButton(12,  38,  142, 136, (char*)"", 0x0010); // 0: Normal
 	buttons_addButton(166, 38,  142, 136, (char*)"", 0x0010); // 1: Interval
-	buttons_addButton(12,  190, 142, 36,  (char*)"", 0x0010); // 2: < Back / Live
+	buttons_addButton(12,  192, 142, 34,  (char*)"", 0x0010); // 2: < Back / Live
 
 	// Left card: Normal real-time video (~8.8 FPS RAW)
 	display_setColor(UI_SURFACE);
@@ -478,20 +463,13 @@ void drawVideoModeMenu() {
 	display_setColor(UI_TEXT_MUTED);
 	display_print((char*)"Time-Lapse", 197, 144);
 
-	// Bezel-safe bottom < Back pill (12px left, 14px bottom margin)
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 190, 154, 226);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 190, 154, 226);
-	display_setBackColor(UI_SURFACE);
-	display_setFont(smallFont);
-	display_setColor(UI_TEXT);
-	display_print((char*)"< Back", 59, 202);
+	// Bezel-safe bottom < Back pill (standard y=192, h=34)
+	ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
 
 	// Subtle hint on bottom right
 	display_setBackColor(UI_BG_DARK);
 	display_setColor(UI_TEXT_MUTED);
-	display_print((char*)"Btn: Stop REC", 184, 202);
+	display_print((char*)"Btn: Stop REC", 184, 203);
 }
 
 /* Video mode, choose interval or normal */

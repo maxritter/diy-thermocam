@@ -41,14 +41,16 @@ struct StepperSpec {
 
 void runNumericStepper(const StepperSpec& spec)
 {
-	drawTitle(const_cast<char *>(spec.title), spec.firstStart);
+	ui_beginScreen(spec.title, spec.firstStart ? "SETUP" : nullptr, spec.firstStart);
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char *)"-");
-	buttons_addButton(236, 54, 72, 76, (char *)"+");
+	buttons_addButton(12,  66,  72,  80, (char *)"-");
+	buttons_addButton(236, 66,  72,  80, (char *)"+");
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 2: < Back
+	buttons_drawButton(0);
+	buttons_drawButton(1);
 	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
-	buttons_drawButtons();
+	ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
 	drawCenterElement(spec.readVal());
 	ui_waitTouchRelease();
 
@@ -80,21 +82,28 @@ void runNumericStepper(const StepperSpec& spec)
 	}
 }
 
-void drawThreeTileSubmenu(const char* title, const char* b0, const char* b1, const char* b2, bool firstStart)
+void drawThreeTileSubmenu(const char* title, const char* b0, const char* v0,
+                          const char* b1, const char* v1,
+                          const char* b2, const char* v2, bool firstStart)
 {
-	drawTitle(const_cast<char *>(title), firstStart);
+	ui_beginScreen(title, firstStart ? "SETUP" : nullptr, firstStart);
 	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 62, const_cast<char *>(b0));
-	buttons_addButton(166, 46, 142, 62, const_cast<char *>(b1));
-	buttons_addButton(12, 118, 142, 62, const_cast<char *>(b2));
+	buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  118, 142, 62, (char *)"", 0x0010);
+	ui_drawCard(12,  46,  142, 62, b0, v0, false);
+	ui_drawCard(166, 46,  142, 62, b1, v1, false);
+	ui_drawCard(12,  118, 142, 62, b2, v2, false);
 	if (firstStart)
-		buttons_addButton(166, 192, 142, 34, (char *)"Save");
+	{
+		buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010);
+		ui_drawPill(166, 192, 142, 34, "Save", uiPill_primary);
+	}
 	else
-		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
-	if (firstStart)
-		buttons_setActive(3);
+	{
+		buttons_addButton(12, 192, 142, 34, (char *)"", 0x0010);
+		ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
+	}
 }
 
 void runThreeTileHandler(bool firstStart, void (*redraw)(bool), void (*act0)(bool), void (*act1)(bool), void (*act2)(bool))
@@ -106,7 +115,7 @@ void runThreeTileHandler(bool firstStart, void (*redraw)(bool), void (*act0)(boo
 			redraw(firstStart);
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed == 0) act0(firstStart);
 			else if (pressed == 1) act1(firstStart);
 			else if (pressed == 2) act2(firstStart);
@@ -120,41 +129,61 @@ void runThreeTileHandler(bool firstStart, void (*redraw)(bool), void (*act0)(boo
 	}
 }
 
-/* Shared two-option binary toggle menu (Disabled/Enabled, C/F, High/Low Gain). */
-bool runBinaryOptionMenu(const char* title, const char* opt0, const char* opt1, const char* doneLbl,
-                         bool initialState, bool doneOnRight, bool firstStart)
+/* Shared two-option binary toggle menu (Disabled/Enabled, C/F, High/Low Gain).
+   Unified bottom bar: < Back (left, cancels) + Save (right, commits) when !firstStart. */
+bool runBinaryOptionMenu(const char* title, const char* opt0, const char* sub0,
+                         const char* opt1, const char* sub1,
+                         bool initialState, bool firstStart)
 {
-	drawTitle(const_cast<char *>(title), firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 72, const_cast<char *>(opt0));
-	buttons_addButton(166, 46, 142, 72, const_cast<char *>(opt1));
-	buttons_addButton(doneOnRight ? 166 : 12, 192, 142, 34, const_cast<char *>(doneLbl));
-	buttons_drawButtons();
-
 	bool state = initialState;
-	buttons_setActive(state ? 1 : 0);
+	auto redraw = [&]() {
+		ui_beginScreen(title, firstStart ? "SETUP" : nullptr, firstStart);
+		buttons_deleteAllButtons();
+		buttons_addButton(12,  46,  142, 120, (char *)"", 0x0010); // 0: opt0
+		buttons_addButton(166, 46,  142, 120, (char *)"", 0x0010); // 1: opt1
+		ui_drawCard(12,  46, 142, 120, opt0, sub0, !state);
+		ui_drawCard(166, 46, 142, 120, opt1, sub1,  state);
+		if (firstStart)
+		{
+			buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 2: Set
+			ui_drawPill(166, 192, 142, 34, "Set", uiPill_primary);
+		}
+		else
+		{
+			buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 2: < Back (cancel)
+			buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 3: Save (commit)
+			ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
+			ui_drawPill(166, 192, 142, 34, "Save",   uiPill_primary);
+		}
+	};
+
+	redraw();
 	ui_waitTouchRelease();
 
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			redraw();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed == 0 && state)
 			{
 				state = false;
-				buttons_setActive(0);
-				buttons_setInactive(1);
+				ui_drawCard(12,  46, 142, 120, opt0, sub0, true);
+				ui_drawCard(166, 46, 142, 120, opt1, sub1, false);
 			}
 			else if (pressed == 1 && !state)
 			{
 				state = true;
-				buttons_setActive(1);
-				buttons_setInactive(0);
+				ui_drawCard(12,  46, 142, 120, opt0, sub0, false);
+				ui_drawCard(166, 46, 142, 120, opt1, sub1, true);
 			}
 			else if (pressed == 2)
+			{
+				return firstStart ? state : initialState;
+			}
+			else if (!firstStart && pressed == 3)
 			{
 				return state;
 			}
@@ -173,18 +202,18 @@ void setYr(int v)   { setTime(hour(), minute(), second(), day(), month(), v); }
 } // namespace
 
 /* Time & Date field steppers */
-void secondMenu(bool firstStart) { runNumericStepper({"Second", 0, 59, true, firstStart, []() { return second(); }, setSec, timeMenu}); }
-void minuteMenu(bool firstStart) { runNumericStepper({"Minute", 0, 59, true, firstStart, []() { return minute(); }, setMin, timeMenu}); }
-void hourMenu(bool firstStart)   { runNumericStepper({"Hour",   0, 23, true, firstStart, []() { return hour(); },   setHr,  timeMenu}); }
-void dayMenu(bool firstStart)    { runNumericStepper({"Day",    1, 31, true, firstStart, []() { return day(); },    setDy,  dateMenu}); }
-void monthMenu(bool firstStart)  { runNumericStepper({"Month",  1, 12, true, firstStart, []() { return month(); },  setMon, dateMenu}); }
-void yearMenu(bool firstStart)   { runNumericStepper({"Year", 2020, 2099, false, firstStart, []() { return year(); }, setYr, dateMenu}); }
+void secondMenu(bool firstStart) { runNumericStepper({"SET SECOND", 0, 59, true, firstStart, []() { return second(); }, setSec, timeMenu}); }
+void minuteMenu(bool firstStart) { runNumericStepper({"SET MINUTE", 0, 59, true, firstStart, []() { return minute(); }, setMin, timeMenu}); }
+void hourMenu(bool firstStart)   { runNumericStepper({"SET HOUR",   0, 23, true, firstStart, []() { return hour(); },   setHr,  timeMenu}); }
+void dayMenu(bool firstStart)    { runNumericStepper({"SET DAY",    1, 31, true, firstStart, []() { return day(); },    setDy,  dateMenu}); }
+void monthMenu(bool firstStart)  { runNumericStepper({"SET MONTH",  1, 12, true, firstStart, []() { return month(); },  setMon, dateMenu}); }
+void yearMenu(bool firstStart)   { runNumericStepper({"SET YEAR", 2020, 2099, false, firstStart, []() { return year(); }, setYr, dateMenu}); }
 
 /* Calibrate the battery voltage gauge against a full charge. */
 void batteryGauge()
 {
-	if (ui_confirmDialog("Battery Gauge", "Calibrate battery gauge now?",
-		"Fully charge the battery first", "until LED turns green / blue."))
+	if (ui_confirmDialog("BATTERY GAUGE", "Calibrate battery gauge now?",
+		"Fully charge the battery first", "until LED turns green / blue.", true, false))
 	{
 		checkBattery(false, true);
 		showFullMessage((char *)"Battery gauge calibrated", true);
@@ -194,22 +223,42 @@ void batteryGauge()
 }
 
 /* Date & Time hub menus */
-void dateMenu(bool firstStart)        { drawThreeTileSubmenu("Date", "Day", "Month", "Year", firstStart); }
+void dateMenu(bool firstStart)
+{
+	char d[8], m[8], y[8];
+	snprintf(d, sizeof(d), "%02d", day());
+	snprintf(m, sizeof(m), "%02d", month());
+	snprintf(y, sizeof(y), "%04d", year());
+	drawThreeTileSubmenu("DATE", "Day", d, "Month", m, "Year", y, firstStart);
+}
 void dateMenuHandler(bool firstStart) { runThreeTileHandler(firstStart, dateMenu, dayMenu, monthMenu, yearMenu); }
-void timeMenu(bool firstStart)        { drawThreeTileSubmenu("Time", "Hour", "Minute", "Second", firstStart); }
+
+void timeMenu(bool firstStart)
+{
+	char h[8], m[8], s[8];
+	snprintf(h, sizeof(h), "%02d", hour());
+	snprintf(m, sizeof(m), "%02d", minute());
+	snprintf(s, sizeof(s), "%02d", second());
+	drawThreeTileSubmenu("TIME", "Hour", h, "Minute", m, "Second", s, firstStart);
+}
 void timeMenuHandler(bool firstStart) { runThreeTileHandler(firstStart, timeMenu, hourMenu, minuteMenu, secondMenu); }
 
 /* General Settings menu */
 void generalMenu()
 {
-	drawTitle((char *)"General Settings");
+	char tBuf[12], dBuf[12];
+	snprintf(tBuf, sizeof(tBuf), "%02d:%02d", hour(), minute());
+	snprintf(dBuf, sizeof(dBuf), "%02d.%02d.%02d", day(), month(), year() % 100);
+	ui_beginScreen("GENERAL SETTINGS");
 	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 62, (char *)"Time");
-	buttons_addButton(166, 46, 142, 62, (char *)"Date");
-	buttons_addButton(12, 118, 296, 62, (char *)"BMP Conversion");
-	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
+	buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  118, 296, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010);
+	ui_drawCard(12,  46,  142, 62, "Time", tBuf, false);
+	ui_drawCard(166, 46,  142, 62, "Date", dBuf, false);
+	ui_drawWideCard(12, 118, 296, 62, "BMP Conversion", convertEnabled ? "ON" : "OFF", convertEnabled);
+	ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
 }
 
 void generalMenuHandler()
@@ -221,7 +270,7 @@ void generalMenuHandler()
 			generalMenu();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed == 0) { timeMenu(); timeMenuHandler(); }
 			else if (pressed == 1) { dateMenu(); dateMenuHandler(); }
 			else if (pressed == 2) convertImageMenu();
@@ -236,9 +285,8 @@ void convertImageMenu(bool firstStart)
 {
 	if (firstStart) convertEnabled = false;
 	convertEnabled = runBinaryOptionMenu(
-		"BMP Conversion", "Disabled", "Enabled",
-		firstStart ? "Set" : "< Back",
-		convertEnabled, firstStart, firstStart);
+		"BMP CONVERSION", "Disabled", "RAW .DAT only", "Enabled", ".DAT + .BMP",
+		convertEnabled, firstStart);
 	EEPROM.write(eeprom_convertEnabled, convertEnabled);
 	if (!firstStart) generalMenu();
 }
@@ -246,8 +294,8 @@ void convertImageMenu(bool firstStart)
 /* Confirm and format the internal SD card (FAT32 / exFAT). */
 void formatStorage()
 {
-	if (ui_confirmDialog("Format SD Card", "Format the SD card now?",
-		"This deletes ALL images and", "videos on the internal storage."))
+	if (ui_confirmDialog("FORMAT SD CARD", "Format the SD card now?",
+		"This deletes ALL images and", "videos on the internal storage.", false, true))
 	{
 		showFullMessage((char *)"Format storage..", true);
 		if (!formatCard())
@@ -268,29 +316,36 @@ void formatStorage()
 /* Switch FLIR Lepton high-gain (-10..+140 C) vs low-gain (-10..+450 C) radiometric mode. */
 void changeLeptonGain()
 {
+	bool prevLow = (leptonGainMode == lepton_gain_low);
 	bool isLow = runBinaryOptionMenu(
-		"Lepton Gain", "-10C to +140C", "-10C to +450C", "Save",
-		leptonGainMode == lepton_gain_low, true, false);
-	leptonGainMode = isLow ? lepton_gain_low : lepton_gain_high;
-	if (leptonGainMode == lepton_gain_low) lepton_setLowGain();
-	else lepton_setHighGain();
-	EEPROM.write(eeprom_lepton_gain, leptonGainMode);
-	lepton_ffc(true, true);
+		"LEPTON GAIN", "High Gain", "-10 to +140C", "Low Gain", "-10 to +450C",
+		prevLow, false);
+	if (isLow != prevLow)
+	{
+		leptonGainMode = isLow ? lepton_gain_low : lepton_gain_high;
+		if (leptonGainMode == lepton_gain_low) lepton_setLowGain();
+		else lepton_setHighGain();
+		EEPROM.write(eeprom_lepton_gain, leptonGainMode);
+		lepton_ffc(true, true);
+	}
 	hardwareMenu();
 }
 
 /* Hardware Settings menu */
 void hardwareMenu()
 {
-	drawTitle((char *)"Hardware Settings");
+	ui_beginScreen("HARDWARE SETTINGS");
 	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12,  46,  142, 62, (char *)"Battery Gauge");
-	buttons_addButton(166, 46,  142, 62, (char *)"Lepton Gain");
-	buttons_addButton(12,  118, 142, 62, (char *)"Format SD");
-	buttons_addButton(166, 118, 142, 62, (char *)"USB MTP");
-	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
+	buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  118, 142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 118, 142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010);
+	ui_drawCard(12,  46,  142, 62, "Battery Gauge", "Calibrate", false);
+	ui_drawCard(166, 46,  142, 62, "Lepton Gain", (leptonGainMode == lepton_gain_low) ? "Low 450C" : "High 140C", false);
+	ui_drawCard(12,  118, 142, 62, "Format SD", "Erase All", false);
+	ui_drawCard(166, 118, 142, 62, "USB MTP", "File Xfer", false);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
 }
 
 void hardwareMenuHandler()
@@ -302,7 +357,7 @@ void hardwareMenuHandler()
 			hardwareMenu();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed == 0) batteryGauge();
 			else if (pressed == 1) changeLeptonGain();
 			else if (pressed == 2) formatStorage();
@@ -318,9 +373,8 @@ void tempFormatMenu(bool firstStart)
 {
 	if (firstStart) tempFormat = tempFormat_celcius;
 	bool isF = runBinaryOptionMenu(
-		"Temp. Format", "Celsius (C)", "Fahrenheit (F)",
-		firstStart ? "Set" : "Save",
-		tempFormat == tempFormat_fahrenheit, true, firstStart);
+		"TEMP. FORMAT", "Celsius", "Metric (C)", "Fahrenheit", "Imperial (F)",
+		tempFormat == tempFormat_fahrenheit, firstStart);
 	tempFormat = isF ? tempFormat_fahrenheit : tempFormat_celcius;
 	EEPROM.write(eeprom_tempFormat, tempFormat);
 	if (!firstStart) displayMenu();
@@ -329,34 +383,61 @@ void tempFormatMenu(bool firstStart)
 /* Configure 180-degree display rotation or horizontal mirror flip. */
 void rotateDisplayMenu(bool firstStart)
 {
-	drawTitle((char *)"Disp. Rotation", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 62, (char *)"Rotate 180");
-	buttons_addButton(166, 46, 142, 62, (char *)"Hor. Flip");
-	buttons_addButton(12, 118, 142, 62, (char *)"Normal");
-	buttons_addButton(166, 192, 142, 34, firstStart ? (char *)"Set" : (char *)"Save");
-	buttons_drawButtons();
-
+	const bool origVert = rotationVert;
+	const bool origHorz = rotationHorizont;
 	int activeIdx = rotationVert ? 0 : (rotationHorizont ? 1 : 2);
-	buttons_setActive(activeIdx);
+
+	auto drawCards = [&]() {
+		ui_drawCard(12,  46,  142, 62, "Rotate 180", "Upside Down", activeIdx == 0);
+		ui_drawCard(166, 46,  142, 62, "Hor. Flip",  "Mirror",      activeIdx == 1);
+		ui_drawCard(12,  118, 142, 62, "Normal",     "Standard",    activeIdx == 2);
+	};
+	auto redraw = [&]() {
+		ui_beginScreen("DISP. ROTATION", firstStart ? "SETUP" : nullptr, firstStart);
+		buttons_deleteAllButtons();
+		buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010); // 0: Rotate 180
+		buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010); // 1: Hor. Flip
+		buttons_addButton(12,  118, 142, 62, (char *)"", 0x0010); // 2: Normal
+		drawCards();
+		if (firstStart)
+		{
+			buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 3: Set
+			ui_drawPill(166, 192, 142, 34, "Set", uiPill_primary);
+		}
+		else
+		{
+			buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 3: < Back (cancel)
+			buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 4: Save
+			ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
+			ui_drawPill(166, 192, 142, 34, "Save",   uiPill_primary);
+		}
+	};
+
+	redraw();
 	ui_waitTouchRelease();
 
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			redraw();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed >= 0 && pressed <= 2 && pressed != activeIdx)
 			{
-				buttons_setInactive(activeIdx);
 				activeIdx = pressed;
-				buttons_setActive(activeIdx);
 				rotationVert = (activeIdx == 0);
 				rotationHorizont = (activeIdx == 1);
+				drawCards();
 			}
-			else if (pressed == 3)
+			else if (!firstStart && pressed == 3)
+			{
+				rotationVert = origVert;
+				rotationHorizont = origHorz;
+				displayMenu();
+				return;
+			}
+			else if ((firstStart && pressed == 3) || (!firstStart && pressed == 4))
 			{
 				EEPROM.write(eeprom_rotationVert, rotationVert);
 				EEPROM.write(eeprom_rotationHorizont, rotationHorizont);
@@ -373,31 +454,48 @@ void rotateDisplayMenu(bool firstStart)
 /* Configure automatic display backlight sleep timeout. */
 void screenTimeoutMenu()
 {
-	drawTitle((char *)"Screen Timeout");
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 62, (char *)"Disabled");
-	buttons_addButton(166, 46, 142, 62, (char *)"5 Min.");
-	buttons_addButton(12, 118, 142, 62, (char *)"20 Min.");
-	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
-	buttons_setActive(screenOffTime);
+	byte sel = screenOffTime;
+	auto drawCards = [&]() {
+		ui_drawCard(12,  46,  142, 62, "Disabled", "Always On",  sel == screenOffTime_disabled);
+		ui_drawCard(166, 46,  142, 62, "5 Min.",   "Power Save", sel == screenOffTime_5min);
+		ui_drawCard(12,  118, 142, 62, "20 Min.",  "Long Idle",  sel == screenOffTime_20min);
+	};
+	auto redraw = [&]() {
+		ui_beginScreen("SCREEN TIMEOUT");
+		buttons_deleteAllButtons();
+		buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010); // 0: Disabled
+		buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010); // 1: 5 Min
+		buttons_addButton(12,  118, 142, 62, (char *)"", 0x0010); // 2: 20 Min
+		buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 3: < Back
+		buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 4: Save
+		drawCards();
+		ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
+		ui_drawPill(166, 192, 142, 34, "Save",   uiPill_primary);
+	};
+
+	redraw();
 	ui_waitTouchRelease();
 
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			redraw();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
-			if (pressed >= 0 && pressed <= 2)
+			int pressed = buttons_checkButtons(true);
+			if (pressed >= 0 && pressed <= 2 && sel != static_cast<byte>(pressed))
 			{
-				buttons_setInactive(screenOffTime);
-				screenOffTime = static_cast<byte>(pressed);
-				buttons_setActive(screenOffTime);
+				sel = static_cast<byte>(pressed);
+				drawCards();
 			}
 			else if (pressed == 3)
 			{
+				displayMenu();
+				return;
+			}
+			else if (pressed == 4)
+			{
+				screenOffTime = sel;
 				EEPROM.write(eeprom_screenOffTime, screenOffTime);
 				initScreenOffTimer();
 				displayMenu();
@@ -411,15 +509,16 @@ void screenTimeoutMenu()
 /* Draw dedicated 2026 Theme Selector screen (Dark / Daylight Light / High-Contrast). */
 void drawThemeMenu()
 {
-	drawTitle((char *)"UI Theme");
+	ui_beginScreen("UI THEME", ui_themeName(uiThemeMode));
 	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12,  46,  296, 40, (char *)"Dark  (Obsidian + Amber)");
-	buttons_addButton(12,  94,  296, 40, (char *)"Light  (Daylight Outdoor)");
-	buttons_addButton(12,  142, 296, 40, (char *)"High-Contrast  (Glove/Sun)");
-	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
-	buttons_setActive(uiThemeMode);
+	buttons_addButton(12, 44,  296, 42, (char *)"", 0x0010);
+	buttons_addButton(12, 92,  296, 42, (char *)"", 0x0010);
+	buttons_addButton(12, 140, 296, 42, (char *)"", 0x0010);
+	buttons_addButton(12, 192, 142, 34, (char *)"", 0x0010);
+	ui_drawWideCard(12, 44,  296, 42, "Dark",          "Obsidian",  uiThemeMode == uiTheme_dark);
+	ui_drawWideCard(12, 92,  296, 42, "Light",         "Daylight",  uiThemeMode == uiTheme_light);
+	ui_drawWideCard(12, 140, 296, 42, "High-Contrast", "Glove/Sun", uiThemeMode == uiTheme_highContrast);
+	ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
 }
 
 /* Interactive Theme Selector (persisted immediately to EEPROM). */
@@ -452,17 +551,21 @@ void themeMenu()
 /* Display Settings menu */
 void displayMenu()
 {
-	drawTitle((char *)"Display Settings");
+	const char* rotSub = rotationVert ? "180 deg" : (rotationHorizont ? "H-Flip" : "Normal");
+	const char* tmoSub = (screenOffTime == screenOffTime_5min) ? "5 Min."
+	                   : ((screenOffTime == screenOffTime_20min) ? "20 Min." : "Off");
+	ui_beginScreen("DISPLAY SETTINGS");
 	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	static char themeLbl[24];
-	snprintf(themeLbl, sizeof(themeLbl), "Theme: %s", ui_themeName(uiThemeMode));
-	buttons_addButton(12,  46,  142, 62, (char *)"Temp. format");
-	buttons_addButton(166, 46,  142, 62, (char *)"Disp. rotation");
-	buttons_addButton(12,  118, 142, 62, (char *)"Screen timeout");
-	buttons_addButton(166, 118, 142, 62, themeLbl);
-	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
+	buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  118, 142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 118, 142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010);
+	ui_drawCard(12,  46,  142, 62, "Temp. Format", (tempFormat == tempFormat_fahrenheit) ? "Fahrenheit" : "Celsius", false);
+	ui_drawCard(166, 46,  142, 62, "Disp. Rotation", rotSub, false);
+	ui_drawCard(12,  118, 142, 62, "Screen Timeout", tmoSub, false);
+	ui_drawCard(166, 118, 142, 62, "UI Theme", ui_themeName(uiThemeMode), false);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
 }
 
 void displayMenuHandler()
@@ -474,7 +577,7 @@ void displayMenuHandler()
 			displayMenu();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed == 0) tempFormatMenu();
 			else if (pressed == 1) rotateDisplayMenu();
 			else if (pressed == 2) screenTimeoutMenu();
@@ -488,17 +591,18 @@ void displayMenuHandler()
 /* Top-level Settings menu */
 void settingsMenu()
 {
-	drawTitle((char *)"Settings");
+	ui_beginScreen("SETTINGS", ui_themeName(uiThemeMode));
 	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	static char themeLbl[24];
-	snprintf(themeLbl, sizeof(themeLbl), "Theme: %s", ui_themeName(uiThemeMode));
-	buttons_addButton(12,  46,  142, 62, (char *)"General");
-	buttons_addButton(166, 46,  142, 62, (char *)"Hardware");
-	buttons_addButton(12,  118, 142, 62, (char *)"Display");
-	buttons_addButton(166, 118, 142, 62, themeLbl);
-	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
+	buttons_addButton(12,  46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 46,  142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  118, 142, 62, (char *)"", 0x0010);
+	buttons_addButton(166, 118, 142, 62, (char *)"", 0x0010);
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010);
+	ui_drawCard(12,  46,  142, 62, "General",  "Time / BMP",  false);
+	ui_drawCard(166, 46,  142, 62, "Hardware", "Gain / MTP",  false);
+	ui_drawCard(12,  118, 142, 62, "Display",  "Units / Rot", false);
+	ui_drawCard(166, 118, 142, 62, "UI Theme", ui_themeName(uiThemeMode), false);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
 }
 
 void settingsMenuHandler()
@@ -510,7 +614,7 @@ void settingsMenuHandler()
 			settingsMenu();
 		if (touch_touched())
 		{
-			int pressed = buttons_checkButtons();
+			int pressed = buttons_checkButtons(true);
 			if (pressed == 0) { generalMenu(); generalMenuHandler(); }
 			else if (pressed == 1) { hardwareMenu(); hardwareMenuHandler(); }
 			else if (pressed == 2) { displayMenu(); displayMenuHandler(); }

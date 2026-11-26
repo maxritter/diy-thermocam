@@ -34,30 +34,15 @@
 
 /* Draw sleek 2026 Gallery (Load Menu) screen (Dark / Light / High-Contrast, bezel-safe >=12px) */
 void drawLoadMenu() {
-	display_fillScr(UI_BG_DARK);
-
-	// Top 28px non-touch header bar
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 28);
-	display_setColor(UI_ACCENT);
-	display_drawHLine(0, 28, 320);
-
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print((char*)"GALLERY", 12, 8);
-
 	char sdBadge[20];
 	snprintf(sdBadge, sizeof(sdBadge), "%lu MB FREE", static_cast<unsigned long>(getSDFreeKB() / 1024u));
-	int rx = 308 - static_cast<int>(strlen(sdBadge)) * 8;
-	display_setColor(UI_TEXT_MUTED);
-	display_print(sdBadge, rx, 8);
+	ui_beginScreen("GALLERY", sdBadge);
 
 	// Invisible hit targets matching our custom-drawn cards & bezel-safe < Back pill
 	buttons_deleteAllButtons();
 	buttons_addButton(12,  38,  142, 136, (char*)"", 0x0010); // 0: Images
 	buttons_addButton(166, 38,  142, 136, (char*)"", 0x0010); // 1: Videos
-	buttons_addButton(12,  190, 142, 36,  (char*)"", 0x0010); // 2: < Back
+	buttons_addButton(12,  192, 142, 34,  (char*)"", 0x0010); // 2: < Back
 
 	// Left card: Images (photo frame vector icon)
 	display_setColor(UI_SURFACE);
@@ -102,19 +87,12 @@ void drawLoadMenu() {
 	display_setColor(UI_TEXT_MUTED);
 	display_print((char*)"Recorded Clips", 181, 144);
 
-	// Bezel-safe bottom < Back pill (12px left, 14px bottom margin)
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 190, 154, 226);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 190, 154, 226);
-	display_setBackColor(UI_SURFACE);
-	display_setFont(smallFont);
-	display_setColor(UI_TEXT);
-	display_print((char*)"< Back", 59, 202);
+	// Bezel-safe bottom < Back pill (standard y=192, h=34)
+	ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
 
 	display_setBackColor(UI_BG_DARK);
 	display_setColor(UI_TEXT_MUTED);
-	display_print((char*)"SD Card Media", 184, 202);
+	display_print((char*)"SD Card Media", 184, 203);
 }
 
 /* Composite the load/video HUD pills directly into bigBuffer in RAM (zero flicker!) */
@@ -205,8 +183,8 @@ static void removeVideoFolderFiles(char* dirname) {
 
 /* Confirm and delete a recorded video folder and all of its frames. */
 void deleteVideo(char* dirname) {
-	if (!ui_confirmDialog("Delete Video", "Delete this recorded video?",
-		"This removes all .DAT / .BMP", "frames in this recording folder.")) {
+	if (!ui_confirmDialog("DELETE VIDEO", "Delete this recorded video?",
+		"This removes all .DAT / .BMP", "frames in this recording folder.", false, true)) {
 		return;
 	}
 	showFullMessage((char*) "Delete video..");
@@ -217,8 +195,8 @@ void deleteVideo(char* dirname) {
 
 /* Confirm and delete a thermal image and any companion .BMP/.JPG files. */
 void deleteImage(char* filename) {
-	if (!ui_confirmDialog("Delete Image", "Delete this thermal image?",
-		"This also removes any matching", ".BMP or .JPG companion file.")) {
+	if (!ui_confirmDialog("DELETE IMAGE", "Delete this thermal image?",
+		"This also removes any matching", ".BMP or .JPG companion file.", false, true)) {
 		return;
 	}
 	showFullMessage((char*) "Delete image..");
@@ -233,8 +211,8 @@ void deleteImage(char* filename) {
 
 /* Confirm converting raw .DAT image/video data into 640x480 .BMP bitmaps. */
 bool convertPrompt() {
-	return ui_confirmDialog("Convert to BMP", "Convert raw thermal data?",
-		"Creates 640x480 .BMP bitmap(s)", "alongside the original .DAT.", true);
+	return ui_confirmDialog("CONVERT TO BMP", "Convert raw thermal data?",
+		"Creates 640x480 .BMP bitmap(s)", "alongside the original .DAT.", true, false);
 }
 
 /* Convert a raw image lately to BMP */
@@ -530,18 +508,18 @@ showFrame:
 
 /* Shows a menu where the user can choose the time & date items for the image */
 int loadMenu(char* title, int* array, int length) {
-	//Draw the title on screen
-	drawTitle(title);
-	//Draw bezel-safe 2026 stepper buttons
+	ui_beginScreen(title);
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char*) "-");
-	buttons_addButton(236, 54, 72, 76, (char*) "+");
+	buttons_addButton(12,  66,  72,  80, (char*) "-");
+	buttons_addButton(236, 66,  72,  80, (char*) "+");
+	buttons_addButton(12,  192, 142, 34, (char*) "", 0x0010); // 2: < Back
+	buttons_addButton(166, 192, 142, 34, (char*) "", 0x0010); // 3: Choose
+	buttons_drawButton(0);
+	buttons_drawButton(1);
 	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char*) "< Back");
-	buttons_addButton(166, 190, 142, 36, (char*) "Choose");
-	buttons_drawButtons();
-	buttons_setActive(3);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
+	ui_drawPill(166, 192, 142, 34, "Choose", uiPill_primary);
 	int currentPos = 0;
 	//Display the first element for the array
 	drawCenterElement(array[currentPos]);

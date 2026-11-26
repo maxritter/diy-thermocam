@@ -200,34 +200,168 @@ void ui_waitTouchRelease(uint32_t maxMs)
 	}
 }
 
-/* Shared 2026 Yes/No confirmation modal with bezel-safe bottom buttons */
-bool ui_confirmDialog(const char* title, const char* headline, const char* line1, const char* line2, bool highlightYes)
+/* Unified 28px non-touch top header bar shared by every menu, settings screen, and modal */
+void ui_beginScreen(const char* title, const char* rightBadge, bool accentBadge)
 {
-	drawTitle((char *)title, true);
+	display_fillScr(UI_BG);
 	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 46, 308, 162);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 46, 308, 162);
+	display_fillRect(0, 0, 319, 28);
+	display_setColor(UI_AMBER);
+	display_drawHLine(0, 28, 320);
+
+	display_setFont(smallFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	if (title && title[0])
+		display_print(const_cast<char *>(title), 12, 8);
+
+	if (rightBadge && rightBadge[0])
+	{
+		int rx = 308 - static_cast<int>(strlen(rightBadge)) * 8;
+		display_setColor(accentBadge ? UI_AMBER : UI_MUTED);
+		display_print(const_cast<char *>(rightBadge), rx, 8);
+	}
+}
+
+/* Unified bezel-safe bottom action pill (standard geometry: y=192, h=34) */
+void ui_drawPill(int x, int y, int w, int h, const char* label, UiPillStyle style)
+{
+	uint16_t fill = UI_SURFACE;
+	uint16_t border = UI_BORDER;
+	uint16_t ink = UI_TEXT;
+	if (style == uiPill_primary)
+	{
+		fill = UI_ACCENT;
+		border = UI_ACCENT;
+		ink = UI_ACCENT_FG;
+	}
+	else if (style == uiPill_danger)
+	{
+		fill = UI_ERR;
+		border = UI_ERR;
+		ink = 0xFFFF;
+	}
+	display_setColor(fill);
+	display_fillRoundRect(x, y, x + w, y + h);
+	display_setColor(border);
+	display_drawRoundRect(x, y, x + w, y + h);
+	display_setFont(smallFont);
+	display_setBackColor(fill);
+	display_setColor(ink);
+	if (label && label[0])
+	{
+		int tx = x + (w - static_cast<int>(strlen(label)) * 8) / 2;
+		int ty = y + (h - 12) / 2;
+		display_print(const_cast<char *>(label), tx, ty);
+	}
+}
+
+/* Unified titled card with optional live status/value pill subtitle */
+void ui_drawCard(int x, int y, int w, int h, const char* title, const char* subtitle, bool active)
+{
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(x, y, x + w, y + h);
+	display_setColor(active ? UI_ACCENT : UI_BORDER);
+	display_drawRoundRect(x, y, x + w, y + h);
+
+	display_setFont(smallFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+
+	if (subtitle && subtitle[0])
+	{
+		int titleY = (h >= 90) ? (y + h / 2 - 22) : (y + 11);
+		int tx = x + (w - static_cast<int>(strlen(title)) * 8) / 2;
+		display_print(const_cast<char *>(title), tx, titleY);
+
+		int pad = (w >= 120) ? 14 : 6;
+		int pillY0 = (h >= 90) ? (y + h / 2 + 2) : (y + h - 27);
+		int pillY1 = pillY0 + 18;
+		uint16_t pillBg = active ? UI_ACCENT : UI_ELEVATED;
+		uint16_t pillFg = active ? UI_ACCENT_FG : UI_MUTED;
+		display_setColor(pillBg);
+		display_fillRoundRect(x + pad, pillY0, x + w - pad, pillY1);
+		display_setBackColor(pillBg);
+		display_setColor(pillFg);
+		int sx = x + (w - static_cast<int>(strlen(subtitle)) * 8) / 2;
+		display_print(const_cast<char *>(subtitle), sx, pillY0 + 3);
+	}
+	else if (title && title[0])
+	{
+		int tx = x + (w - static_cast<int>(strlen(title)) * 8) / 2;
+		int ty = y + (h - 12) / 2;
+		display_print(const_cast<char *>(title), tx, ty);
+	}
+}
+
+/* Unified full-width list card (left title + active dot + right status badge pill) */
+void ui_drawWideCard(int x, int y, int w, int h, const char* title, const char* badge, bool active)
+{
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(x, y, x + w, y + h);
+	display_setColor(active ? UI_ACCENT : UI_BORDER);
+	display_drawRoundRect(x, y, x + w, y + h);
+
+	int textY = y + (h - 12) / 2;
+	if (active)
+	{
+		display_setColor(UI_ACCENT);
+		display_fillCircle(x + 14, y + h / 2, 4);
+	}
+	display_setFont(smallFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(active ? UI_TEXT : UI_TEXT);
+	if (title && title[0])
+		display_print(const_cast<char *>(title), active ? (x + 26) : (x + 14), textY);
+
+	if (badge && badge[0])
+	{
+		int bw = static_cast<int>(strlen(badge)) * 8 + 16;
+		int bx0 = x + w - 10 - bw;
+		int bx1 = x + w - 10;
+		int by0 = y + (h - 20) / 2;
+		int by1 = by0 + 20;
+		uint16_t pillBg = active ? UI_ACCENT : UI_ELEVATED;
+		uint16_t pillFg = active ? UI_ACCENT_FG : UI_MUTED;
+		display_setColor(pillBg);
+		display_fillRoundRect(bx0, by0, bx1, by1);
+		display_setBackColor(pillBg);
+		display_setColor(pillFg);
+		display_print(const_cast<char *>(badge), bx0 + 8, by0 + 4);
+	}
+}
+
+/* Shared 2026 Yes/No confirmation modal with unified 28px header and standard bottom bar */
+bool ui_confirmDialog(const char* title, const char* headline, const char* line1, const char* line2, bool highlightYes, bool destructive)
+{
+	ui_beginScreen(title, destructive ? "CONFIRM" : nullptr, destructive);
+
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 38, 308, 180);
+	display_setColor(destructive ? UI_ERR : UI_BORDER);
+	display_drawRoundRect(12, 38, 308, 180);
+	display_setColor(destructive ? UI_ERR : UI_AMBER);
+	display_fillRect(14, 40, 306, 43);
 
 	display_setFont(smallFont);
 	display_setBackColor(UI_SURFACE);
 	display_setColor(UI_TEXT);
 	if (headline && headline[0])
-		display_print((char *)headline, CENTER, 68);
+		display_print(const_cast<char *>(headline), CENTER, 68);
 	display_setColor(UI_MUTED);
 	if (line1 && line1[0])
-		display_print((char *)line1, CENTER, 102);
+		display_print(const_cast<char *>(line1), CENTER, 106);
 	if (line2 && line2[0])
-		display_print((char *)line2, CENTER, 122);
+		display_print(const_cast<char *>(line2), CENTER, 128);
 
 	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
-	buttons_addButton(12, 178, 142, 46, (char *)"No");
-	buttons_drawButtons();
-	if (highlightYes)
-		buttons_setActive(0);
-	buttons_setTextFont(smallFont);
+	buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 0: Yes (always right)
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 1: No  (always left)
+
+	UiPillStyle yesStyle = destructive ? uiPill_danger : uiPill_primary;
+	ui_drawPill(12,  192, 142, 34, "No",  uiPill_secondary);
+	ui_drawPill(166, 192, 142, 34, "Yes", yesStyle);
+	(void)highlightYes;
 
 	ui_waitTouchRelease(1000u);
 	while (true)
@@ -278,13 +412,13 @@ void showTransMessage(char *msg)
 void drawCenterElement(int element)
 {
 	display_setColor(UI_SURFACE);
-	display_fillRoundRect(96, 54, 224, 130);
+	display_fillRoundRect(96, 66, 224, 146);
 	display_setColor(UI_ACCENT);
-	display_drawRoundRect(96, 54, 224, 130);
+	display_drawRoundRect(96, 66, 224, 146);
 	display_setFont(bigFont);
 	display_setColor(UI_ACCENT);
 	display_setBackColor(UI_SURFACE);
-	display_printNumI(element, CENTER, 84, 2, '0');
+	display_printNumI(element, CENTER, 98, 2, '0');
 	display_setFont(smallFont);
 }
 
@@ -294,36 +428,16 @@ void drawMainMenuBorder()
 	display_fillScr(UI_BG);
 }
 
-/* Draw a sleek full-bleed 2026 submenu title header */
+/* Draw a sleek full-bleed 2026 submenu title header (unified 28px bar) */
 void drawTitle(char *name, bool firstStart)
 {
-	(void)firstStart;
-	display_fillScr(UI_BG);
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 34);
-	display_setColor(UI_AMBER);
-	display_drawHLine(0, 34, 320);
-
-	display_setFont(bigFont);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print(name, CENTER, 10);
-	display_setFont(smallFont);
+	ui_beginScreen(name, firstStart ? "SETUP" : nullptr, firstStart);
 }
 
 /* Shows the hardware self-diagnostics screen */
 void showDiagnostic()
 {
-	display_fillScr(UI_BG);
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 40);
-	display_setColor(UI_AMBER);
-	display_drawHLine(0, 40, 320);
-
-	display_setFont(bigFont);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print((char *)"Self-Diagnostic", CENTER, 12);
+	ui_beginScreen("SELF-DIAGNOSTIC", "POST");
 
 	display_setFont(smallFont);
 	display_setBackColor(UI_BG);
@@ -332,23 +446,13 @@ void showDiagnostic()
 	const byte bits[5]   = {diag_display, diag_touch, diag_bat, diag_lepton, diag_sd};
 	for (int i = 0; i < 5; ++i)
 	{
-		int y = 56 + i * 30;
-		display_setColor(UI_TEXT);
-		display_print((char *)names[i], 42, y);
-		if (checkDiagnostic(bits[i]))
-		{
-			display_setColor(UI_OK);
-			display_print((char *)"OK    ", 224, y);
-		}
-		else
-		{
-			display_setColor(UI_ERR);
-			display_print((char *)"FAILED", 224, y);
-		}
+		int y = 44 + i * 28;
+		ui_drawWideCard(12, y, 296, 24, names[i], checkDiagnostic(bits[i]) ? "OK" : "FAIL", checkDiagnostic(bits[i]));
 	}
 
+	display_setBackColor(UI_BG);
 	display_setColor(UI_MUTED);
-	display_print((char *)"Touch screen to continue", CENTER, 216);
+	display_print((char *)"Touch screen to continue", CENTER, 206);
 
 	while (!touch_touched()) {
 		checkSerial();
@@ -416,20 +520,7 @@ void drawStatusScreen()
 	const bool prevWrite = display_writeToImage;
 	display_writeToImage = true;
 
-	display_fillScr(UI_BG);
-
-	// Non-touch top header bar (28px)
-	display_setColor(UI_SURFACE);
-	display_fillRect(0, 0, 319, 28);
-	display_setColor(UI_AMBER);
-	display_drawHLine(0, 28, 320);
-
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print((char *)"SYSTEM STATUS", 12, 8);
-	display_setColor(UI_AMBER);
-	display_print((char *)"FW 4.0.0", 244, 8);
+	ui_beginScreen("SYSTEM STATUS", "FW 4.0.0", true);
 
 	auto drawMetricCard = [](int x, int y, int w, int h, const char* label, const char* val, uint16_t valColor) {
 		display_setColor(UI_SURFACE);
@@ -487,13 +578,7 @@ void drawStatusScreen()
 	display_print(buf, 12, 170);
 
 	// Bezel-safe bottom inset < Back pill (142x34, 12px left / 14px bottom margin)
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 192, 154, 226);
-	display_setColor(UI_AMBER);
-	display_drawRoundRect(12, 192, 154, 226);
-	display_setBackColor(UI_SURFACE);
-	display_setColor(UI_TEXT);
-	display_print((char *)"< Back", 59, 203);
+	ui_drawPill(12, 192, 142, 34, "< Back", uiPill_secondary);
 
 	display_writeToImage = prevWrite;
 	displayBuffer();

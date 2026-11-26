@@ -126,7 +126,7 @@ void drawManualLimitLabels()
 
 void enterLimitEditMode(bool& editFlag)
 {
-	buttons_relabelButton(1, (char *)"Back", true);
+	ui_drawPill(166, 192, 142, 34, "Done", uiPill_primary);
 	buttons_relabelButton(2, (char *)"-", true);
 	buttons_relabelButton(3, (char *)"+", true);
 	editFlag = true;
@@ -134,7 +134,7 @@ void enterLimitEditMode(bool& editFlag)
 
 void leaveLimitEditMode(bool& minChange, bool& maxChange)
 {
-	buttons_relabelButton(1, (char *)"OK", true);
+	ui_drawPill(166, 192, 142, 34, "OK", uiPill_primary);
 	buttons_relabelButton(2, (char *)"Min", true);
 	buttons_relabelButton(3, (char *)"Max", true);
 	minChange = false;
@@ -186,15 +186,25 @@ bool tempPointsMenu()
 {
 	while (true)
 	{
-		mainMenuBackground();
-		mainMenuTitle((char *)"Temp. points");
+		uint8_t ptCount = 0;
+		for (byte i = 0; i < 96; ++i) {
+			if (tempPoints[i][0] != 0) ptCount++;
+		}
+		char cntBadge[16];
+		snprintf(cntBadge, sizeof(cntBadge), "%u ACTIVE", static_cast<unsigned>(ptCount));
+		char clrSub[12];
+		snprintf(clrSub, sizeof(clrSub), "%u Pts", static_cast<unsigned>(ptCount));
+
+		ui_beginScreen("TEMP. POINTS", cntBadge);
 		buttons_deleteAllButtons();
-		buttons_setTextFont(smallFont);
-		buttons_addButton(12, 46, 92, 122, (char *)"Add");
-		buttons_addButton(114, 46, 92, 122, (char *)"Remove");
-		buttons_addButton(216, 46, 92, 122, (char *)"Clear");
-		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-		buttons_drawButtons();
+		buttons_addButton(12,  46,  92,  122, (char *)"", 0x0010);
+		buttons_addButton(114, 46,  92,  122, (char *)"", 0x0010);
+		buttons_addButton(216, 46,  92,  122, (char *)"", 0x0010);
+		buttons_addButton(12,  192, 142, 34,  (char *)"", 0x0010);
+		ui_drawCard(12,  46, 92, 122, "Add",    "Tap Img", false);
+		ui_drawCard(114, 46, 92, 122, "Remove", "Tap Pt",  false);
+		ui_drawCard(216, 46, 92, 122, "Clear",  clrSub,    ptCount > 0);
+		ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
 		ui_waitTouchRelease();
 
 		bool needRedraw = false;
@@ -232,7 +242,7 @@ void hotColdColorMenuString(int pos)
 bool hotColdColorMenu()
 {
 	int initial = (hotColdMode == hotColdMode_hot) ? 2 : ((hotColdMode == hotColdMode_cold) ? 4 : 0);
-	int chosen = runCarouselSelector("Select color", initial, 5, hotColdColorMenuString);
+	int chosen = runCarouselSelector("SELECT COLOR", initial, 5, hotColdColorMenuString);
 	if (chosen < 0) return false;
 	hotColdColor = static_cast<byte>(chosen);
 	EEPROM.write(eeprom_hotColdColor, hotColdColor);
@@ -276,15 +286,17 @@ void hotColdChooserHandler()
 /* Select the temperature threshold in hot/cold isotherm mode. */
 void hotColdChooser()
 {
-	mainMenuBackground();
-	mainMenuTitle((char *)"Set Limit");
+	ui_beginScreen("SET ISOTHERM LIMIT");
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 192, 142, 34, (char *)"Reset");
-	buttons_addButton(166, 192, 142, 34, (char *)"OK");
-	buttons_addButton(12, 48, 56, 120, (char *)"-");
-	buttons_addButton(252, 48, 56, 120, (char *)"+");
-	buttons_drawButtons();
+	buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 0: Reset
+	buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 1: OK
+	buttons_addButton(12,  48,  56,  120, (char *)"-");
+	buttons_addButton(252, 48,  56,  120, (char *)"+");
+	buttons_drawButton(2);
+	buttons_drawButton(3);
+	ui_drawPill(12,  192, 142, 34, "Reset", uiPill_secondary);
+	ui_drawPill(166, 192, 142, 34, "OK",    uiPill_primary);
 
 	display_setColor(UI_BORDER);
 	display_drawRect(79, 47, 241, 169);
@@ -309,15 +321,18 @@ bool hotColdMenu()
 {
 	while (true)
 	{
-		mainMenuBackground();
-		mainMenuTitle((char *)"Hot / Cold");
+		const char* modeBadge = (hotColdMode == hotColdMode_hot) ? "HOT"
+		                      : ((hotColdMode == hotColdMode_cold) ? "COLD" : "OFF");
+		ui_beginScreen("ISOTHERM", modeBadge);
 		buttons_deleteAllButtons();
-		buttons_setTextFont(smallFont);
-		buttons_addButton(12, 46, 92, 122, (char *)"Hot");
-		buttons_addButton(114, 46, 92, 122, (char *)"Cold");
-		buttons_addButton(216, 46, 92, 122, (char *)"Disabled");
-		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-		buttons_drawButtons();
+		buttons_addButton(12,  46,  92,  122, (char *)"", 0x0010);
+		buttons_addButton(114, 46,  92,  122, (char *)"", 0x0010);
+		buttons_addButton(216, 46,  92,  122, (char *)"", 0x0010);
+		buttons_addButton(12,  192, 142, 34,  (char *)"", 0x0010);
+		ui_drawCard(12,  46, 92, 122, "Hot",      "Above", hotColdMode == hotColdMode_hot);
+		ui_drawCard(114, 46, 92, 122, "Cold",     "Below", hotColdMode == hotColdMode_cold);
+		ui_drawCard(216, 46, 92, 122, "Disabled", "Off",   hotColdMode == hotColdMode_disabled);
+		ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
 		ui_waitTouchRelease();
 
 		bool needRedraw = false;
@@ -365,7 +380,7 @@ void tempLimitsPresetSaveString(int pos)
 /* Menu to save the current manual temperature limits to a preset slot. */
 bool tempLimitsPresetSaveMenu()
 {
-	int chosen = runCarouselSelector("Select Preset", 1, 4, tempLimitsPresetSaveString);
+	int chosen = runCarouselSelector("SAVE PRESET", 1, 4, tempLimitsPresetSaveString);
 	if (chosen < 0) return false;
 	savePresetSlot(static_cast<byte>(chosen));
 	return true;
@@ -386,7 +401,7 @@ bool tempLimitsManualHandler()
 		{
 			int pressed = (minChange || maxChange)
 				? buttons_checkButtons(true, true)
-				: buttons_checkButtons();
+				: buttons_checkButtons(true);
 			if (pressed < 0) { delay(5); continue; }
 
 			if (pressed == 0)
@@ -418,15 +433,17 @@ void tempLimitsManual()
 {
 	while (true)
 	{
-		mainMenuBackground();
-		mainMenuTitle((char *)"Temp. Limits");
+		ui_beginScreen("MANUAL LIMITS");
 		buttons_deleteAllButtons();
 		buttons_setTextFont(bigFont);
-		buttons_addButton(12, 192, 142, 34, (char *)"Reset");
-		buttons_addButton(166, 192, 142, 34, (char *)"OK");
-		buttons_addButton(12, 48, 56, 120, (char *)"Min");
-		buttons_addButton(252, 48, 56, 120, (char *)"Max");
-		buttons_drawButtons();
+		buttons_addButton(12,  192, 142, 34, (char *)"", 0x0010); // 0: Reset
+		buttons_addButton(166, 192, 142, 34, (char *)"", 0x0010); // 1: OK / Done
+		buttons_addButton(12,  48,  56,  120, (char *)"Min");
+		buttons_addButton(252, 48,  56,  120, (char *)"Max");
+		buttons_drawButton(2);
+		buttons_drawButton(3);
+		ui_drawPill(12,  192, 142, 34, "Reset", uiPill_secondary);
+		ui_drawPill(166, 192, 142, 34, "OK",    uiPill_primary);
 
 		autoMode = true;
 		createThermalImg(true);
@@ -451,7 +468,7 @@ void tempLimitsPresetsString(int pos)
 /* Menu to create new manual limits or load a saved preset (1..3). */
 bool tempLimitsPresets()
 {
-	int chosen = runCarouselSelector("Choose Preset", 0, 4, tempLimitsPresetsString);
+	int chosen = runCarouselSelector("CHOOSE PRESET", 0, 4, tempLimitsPresetsString);
 	if (chosen < 0) return false;
 	if (chosen == 0)
 	{
@@ -464,14 +481,14 @@ bool tempLimitsPresets()
 /* Temperature Limit mode selector (Auto vs Manual). */
 bool tempLimits()
 {
-	mainMenuBackground();
-	mainMenuTitle((char *)"Temp. Limits");
+	ui_beginScreen("TEMP. RANGE", autoMode ? "AUTO" : "MANUAL");
 	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 46, 142, 120, (char *)"Auto");
-	buttons_addButton(166, 46, 142, 120, (char *)"Manual");
-	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
+	buttons_addButton(12,  46,  142, 120, (char *)"", 0x0010);
+	buttons_addButton(166, 46,  142, 120, (char *)"", 0x0010);
+	buttons_addButton(12,  192, 142, 34,  (char *)"", 0x0010);
+	ui_drawCard(12,  46, 142, 120, "Auto",   "Dynamic", autoMode);
+	ui_drawCard(166, 46, 142, 120, "Manual", "Locked",  !autoMode);
+	ui_drawPill(12,  192, 142, 34, "< Back", uiPill_secondary);
 	ui_waitTouchRelease();
 
 	while (true)
