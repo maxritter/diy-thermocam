@@ -692,6 +692,25 @@ pub fn render_thermal_rgb_with_scratch(
         });
 }
 
+/// Map each sensor pixel straight to its palette colour (no filtering or scaling), so the
+/// coldest pixel at `min_raw` is the palette's first colour and `max_raw` its last.
+#[must_use]
+pub fn render_palette_rgb(
+    pixels: &[u16],
+    min_raw: u16,
+    max_raw: u16,
+    palette: &Palette,
+) -> Vec<u8> {
+    let lo = f32::from(min_raw);
+    let span = f32::from(max_raw.saturating_sub(min_raw)).max(1.0);
+    let mut out = Vec::with_capacity(pixels.len() * 3);
+    for &px in pixels {
+        let t = ((f32::from(px) - lo) / span).clamp(0.0, 1.0);
+        out.extend_from_slice(&palette.sample(t));
+    }
+    out
+}
+
 #[allow(clippy::too_many_arguments)]
 #[must_use]
 pub fn render_thermal_rgb(

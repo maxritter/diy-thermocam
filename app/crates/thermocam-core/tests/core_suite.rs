@@ -882,7 +882,7 @@ fn streaming_mp4_gif_pagination_temporal_heq_and_utc_metadata() {
     let mut client = ProtocolClient::new(sim);
     client.hello().unwrap();
     let entries = client.list_dir_all("/").unwrap();
-    assert_eq!(entries.len(), 138); // 3 default + 135 added
+    assert_eq!(entries.len(), 139); // 3 stills + 1 seeded video folder + 135 added
     client.send_ping_nowait(123_456).unwrap();
     let pong_pkts = client
         .poll_packets(std::time::Duration::from_millis(50))

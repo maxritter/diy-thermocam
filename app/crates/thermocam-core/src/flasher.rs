@@ -41,6 +41,8 @@ pub enum FlashError {
     ChecksumMismatch { expected: String, actual: String },
     #[error("HalfKay HID device (16C0:0478) not found after waiting")]
     DeviceNotFound,
+    #[error("no permission to open the HalfKay HID device: {0}")]
+    PermissionDenied(String),
     #[error("HID I/O error: {0}")]
     HidIo(String),
     #[error("serial 134-baud trigger failed: {0}")]
@@ -219,7 +221,7 @@ impl RealHalfKayDevice {
         let api = hidapi::HidApi::new().map_err(|e| FlashError::HidIo(e.to_string()))?;
         let dev = api
             .open(HALFKAY_VID, HALFKAY_PID)
-            .map_err(|_| FlashError::DeviceNotFound)?;
+            .map_err(|e| classify_hid_open_error(&e.to_string()))?;
         Ok(Self { dev })
     }
 
@@ -229,6 +231,17 @@ impl RealHalfKayDevice {
         poll_interval: Duration,
     ) -> Result<Self, FlashError> {
         wait_for_device(timeout, poll_interval, Self::open)
+    }
+}
+
+/// An `hidapi` open failure: a permission problem (Linux udev, Windows access) or simply absent.
+#[must_use]
+pub fn classify_hid_open_error(message: &str) -> FlashError {
+    let lower = message.to_ascii_lowercase();
+    if lower.contains("permission denied") || lower.contains("access is denied") {
+        FlashError::PermissionDenied(message.to_string())
+    } else {
+        FlashError::DeviceNotFound
     }
 }
 
@@ -366,6 +379,151 @@ where
     let reboot = build_halfkay_reboot_packet();
     write_with_retry(device, &reboot, opts.max_attempts, opts.block_retry_delay)?;
     Ok(())
+}
+
+/// One `flash-progress` event, serialised as `{ "stage": "...", ... }`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "stage", rename_all = "snake_case")]
+pub enum FlashEvent {
+    Verified {
+        sha256: String,
+    },
+    WaitingBootloader,
+    /// The camera has not switched to update mode within the wait (10 s in Studio).
+    WaitingTimeout,
+    Flashing {
+        done: usize,
+        total: usize,
+    },
+    Rebooted {
+        sha256: String,
+    },
+    Error {
+        kind: FlashFailureKind,
+        detail: String,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FlashFailureKind {
+    /// The update device appeared but may not be opened.
+    Permission,
+    /// Writing a block failed part-way.
+    Write,
+    /// The camera never switched to update mode.
+    NotFound,
+    /// The chosen file is not a valid Teensy 4.1 firmware (or its checksum is wrong).
+    BadFile,
+}
+
+/// `{ kind, detail }` rejection of a firmware update.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct FlashFailure {
+    pub kind: FlashFailureKind,
+    pub detail: String,
+}
+
+impl From<FlashError> for FlashFailure {
+    fn from(e: FlashError) -> Self {
+        let kind = match &e {
+            FlashError::HexParse(_)
+            | FlashError::TruncatedHex
+            | FlashError::AddressOutOfBounds(_)
+            | FlashError::InvalidBootHeader
+            | FlashError::InvalidImage
+            | FlashError::ChecksumMismatch { .. } => FlashFailureKind::BadFile,
+            FlashError::DeviceNotFound | FlashError::SerialTrigger(_) => FlashFailureKind::NotFound,
+            FlashError::PermissionDenied(_) => FlashFailureKind::Permission,
+            FlashError::HidIo(_) => FlashFailureKind::Write,
+        };
+        Self {
+            kind,
+            detail: e.to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FlashUpdateOptions {
+    /// How long to wait for the camera to switch to update mode.
+    pub wait_timeout: Duration,
+    pub poll_interval: Duration,
+    pub flash: FlashOptions,
+}
+
+impl Default for FlashUpdateOptions {
+    fn default() -> Self {
+        Self {
+            wait_timeout: Duration::from_secs(10),
+            poll_interval: Duration::from_millis(100),
+            flash: FlashOptions::default(),
+        }
+    }
+}
+
+/// The whole update: verify the file (before touching anything), run `before_wait` (ask the
+/// camera to reboot into update mode), wait for the update device, flash, reboot.
+/// Every stage is reported through `emit`; a failure is emitted as `stage: "error"` and returned.
+pub fn run_flash_update<D, O, B, E>(
+    hex_text: &str,
+    expected_sha256: Option<&str>,
+    opts: FlashUpdateOptions,
+    before_wait: B,
+    mut open_device: O,
+    mut emit: E,
+) -> Result<String, FlashFailure>
+where
+    D: HalfKayDevice,
+    O: FnMut() -> Result<D, FlashError>,
+    B: FnOnce(),
+    E: FnMut(FlashEvent),
+{
+    let fail = |emit: &mut E, f: FlashFailure| -> FlashFailure {
+        emit(FlashEvent::Error {
+            kind: f.kind,
+            detail: f.detail.clone(),
+        });
+        f
+    };
+    let img = match parse_teensy41_hex(hex_text, expected_sha256) {
+        Ok(img) => img,
+        Err(e) => return Err(fail(&mut emit, e.into())),
+    };
+    emit(FlashEvent::Verified {
+        sha256: img.sha256_hex.clone(),
+    });
+    before_wait();
+    emit(FlashEvent::WaitingBootloader);
+
+    let deadline = Instant::now() + opts.wait_timeout;
+    let mut device = loop {
+        match open_device() {
+            Ok(d) => break d,
+            Err(e @ (FlashError::DeviceNotFound | FlashError::PermissionDenied(_))) => {
+                let now = Instant::now();
+                if now >= deadline {
+                    if matches!(e, FlashError::DeviceNotFound) {
+                        emit(FlashEvent::WaitingTimeout);
+                    }
+                    return Err(fail(&mut emit, e.into()));
+                }
+                thread::sleep(opts.poll_interval.min(deadline - now));
+            }
+            Err(other) => return Err(fail(&mut emit, other.into())),
+        }
+    };
+
+    let flashed = flash_firmware_with_options(&mut device, &img, opts.flash, |done, total| {
+        emit(FlashEvent::Flashing { done, total });
+    });
+    if let Err(e) = flashed {
+        return Err(fail(&mut emit, e.into()));
+    }
+    emit(FlashEvent::Rebooted {
+        sha256: img.sha256_hex.clone(),
+    });
+    Ok(img.sha256_hex)
 }
 
 /// Legacy v3.0.x bootloader trigger: open CDC serial at 134 baud (8N1) and close it.

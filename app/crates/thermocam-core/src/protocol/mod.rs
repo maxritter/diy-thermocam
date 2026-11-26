@@ -242,6 +242,67 @@ pub enum ProtocolError {
     UnsupportedFlags(u8),
 }
 
+/// Why opening a camera failed, in the terms the connection help explains.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ConnectErrorKind {
+    /// Another program holds the port.
+    Busy,
+    /// The user may not open the port (Linux `dialout`/udev).
+    Permission,
+    /// The port is gone.
+    NotFound,
+    /// The port opened but the device did not speak Protocol v2.
+    Protocol,
+    Other,
+}
+
+/// `{ kind, detail }` rejection of `cmd_connect`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ConnectError {
+    pub kind: ConnectErrorKind,
+    pub detail: String,
+}
+
+impl From<&ProtocolError> for ConnectError {
+    fn from(e: &ProtocolError) -> Self {
+        Self {
+            kind: classify_connect_error(e),
+            detail: e.to_string(),
+        }
+    }
+}
+
+/// Classify a connect failure by its `io::ErrorKind` first and the known OS strings second.
+#[must_use]
+pub fn classify_connect_error(err: &ProtocolError) -> ConnectErrorKind {
+    use std::io::ErrorKind as K;
+    let ProtocolError::Io(io) = err else {
+        return ConnectErrorKind::Protocol;
+    };
+    match io.kind() {
+        // Windows reports a COM port held by another program as "Access is denied".
+        K::PermissionDenied if cfg!(windows) => return ConnectErrorKind::Busy,
+        K::PermissionDenied => return ConnectErrorKind::Permission,
+        K::ResourceBusy | K::AddrInUse => return ConnectErrorKind::Busy,
+        K::NotFound => return ConnectErrorKind::NotFound,
+        _ => {}
+    }
+    let text = io.to_string().to_ascii_lowercase();
+    if text.contains("device or resource busy")
+        || text.contains("unable to acquire exclusive lock")
+        || text.contains("resource busy")
+    {
+        ConnectErrorKind::Busy
+    } else if text.contains("permission denied") {
+        ConnectErrorKind::Permission
+    } else if text.contains("no such file or directory") || text.contains("cannot find the file") {
+        ConnectErrorKind::NotFound
+    } else {
+        ConnectErrorKind::Other
+    }
+}
+
 /// Decoded 16-byte Protocol v2 header.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PacketHeader {

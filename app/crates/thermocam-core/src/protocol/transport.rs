@@ -99,6 +99,17 @@ pub trait Transport: Send {
     }
 }
 
+/// Convert a `serialport` error to `io::Error`, keeping its `io::ErrorKind` and description.
+#[must_use]
+pub fn serialport_error_to_io(e: serialport::Error) -> io::Error {
+    let kind = match e.kind() {
+        serialport::ErrorKind::Io(k) => k,
+        serialport::ErrorKind::InvalidInput => io::ErrorKind::InvalidInput,
+        serialport::ErrorKind::NoDevice | serialport::ErrorKind::Unknown => io::ErrorKind::Other,
+    };
+    io::Error::new(kind, e.description)
+}
+
 /// Real USB CDC ACM serial transport using `serialport`.
 pub struct SerialTransport {
     port: Box<dyn serialport::SerialPort>,
@@ -111,7 +122,7 @@ impl SerialTransport {
         let mut port = serialport::new(port_name, 115_200)
             .timeout(initial_timeout)
             .open()
-            .map_err(|e| ProtocolError::Io(io::Error::other(e.to_string())))?;
+            .map_err(|e| ProtocolError::Io(serialport_error_to_io(e)))?;
         let _ = port.write_data_terminal_ready(true);
         let _ = port.clear(serialport::ClearBuffer::All);
         Ok(Self {
@@ -173,6 +184,51 @@ impl Transport for MockTransport {
     }
 }
 
+/// Largest `FS_READ` length one request asks for. Every request is bounded, so the client lock
+/// is held for one short round trip and no `FS_READ_DATA` arrives after it is released.
+pub const MAX_READ_CHUNK: u32 = 32_768;
+
+/// Name of the camera-style video folder seeded on the demo camera's card.
+pub const DEMO_VIDEO_FOLDER: &str = "20261126101500";
+/// Number of `NNNNNN.DAT` frames in [`DEMO_VIDEO_FOLDER`].
+pub const DEMO_VIDEO_FRAMES: u32 = 60;
+const DEMO_VIDEO_FIRST_SEQ: u32 = 1_000;
+
+/// Frame `index` of the demo camera's seeded video folder.
+#[must_use]
+pub fn demo_video_frame(index: u32) -> FrameRaw {
+    generate_demo_frame(DEMO_VIDEO_FIRST_SEQ + index, 160, 120)
+}
+
+/// Contents of a simulated card file.
+enum SdData {
+    Bytes(Vec<u8>),
+    /// A demo video frame, rendered as a `.DAT` when read (keeps the simulator light).
+    DemoVideoFrame(u32),
+}
+
+impl SdData {
+    fn len(&self) -> usize {
+        match self {
+            Self::Bytes(b) => b.len(),
+            Self::DemoVideoFrame(_) => crate::dat::LEPTON3_BIG_SIZE,
+        }
+    }
+
+    fn bytes(&self) -> std::borrow::Cow<'_, [u8]> {
+        match self {
+            Self::Bytes(b) => std::borrow::Cow::Borrowed(b),
+            Self::DemoVideoFrame(i) => std::borrow::Cow::Owned(
+                crate::dat::ThermalDat::from_frame(&demo_video_frame(*i), 10, 0).to_bytes(),
+            ),
+        }
+    }
+}
+
+fn sd_norm(path: &str) -> &str {
+    path.trim_matches('/')
+}
+
 /// Realistic offline DIY-Thermocam V3 Protocol v2 simulator generating animated radiometric scenes.
 pub struct SimulatorTransport {
     parser: StreamParser,
@@ -184,7 +240,10 @@ pub struct SimulatorTransport {
     last_frame_at: Instant,
     frame_seq: u32,
     start: Instant,
-    sd_files: Vec<(String, Vec<u8>)>,
+    /// Card files by full path without the leading `/` (`DIR/NAME.DAT`).
+    sd_files: Vec<(String, SdData)>,
+    /// Folders that exist even when empty.
+    sd_dirs: Vec<String>,
 }
 
 impl Default for SimulatorTransport {
@@ -202,6 +261,17 @@ impl SimulatorTransport {
         let d0 = crate::dat::ThermalDat::from_frame(&f0, 10, 0).to_bytes();
         let d1 = crate::dat::ThermalDat::from_frame(&f1, 13, 0).to_bytes();
         let d2 = crate::dat::ThermalDat::from_frame(&f2, 11, 0).to_bytes();
+        let mut sd_files = vec![
+            ("20261125101500.DAT".to_string(), SdData::Bytes(d0)),
+            ("20261125102030.DAT".to_string(), SdData::Bytes(d1)),
+            ("20261125102845.DAT".to_string(), SdData::Bytes(d2)),
+        ];
+        for i in 0..DEMO_VIDEO_FRAMES {
+            sd_files.push((
+                format!("{DEMO_VIDEO_FOLDER}/{i:06}.DAT"),
+                SdData::DemoVideoFrame(i),
+            ));
+        }
         Self {
             parser: StreamParser::new(),
             out_buf: VecDeque::new(),
@@ -212,17 +282,87 @@ impl SimulatorTransport {
             last_frame_at: Instant::now(),
             frame_seq: 0,
             start: Instant::now(),
-            sd_files: vec![
-                ("20261125101500.DAT".to_string(), d0),
-                ("20261125102030.DAT".to_string(), d1),
-                ("20261125102845.DAT".to_string(), d2),
-            ],
+            sd_files,
+            sd_dirs: Vec::new(),
         }
     }
 
-    /// Add an extra virtual SD file (used by tests verifying >64-file `FS_LIST` pagination).
+    /// Add an extra virtual SD file; `name` may include folders (`DIR/000000.DAT`).
     pub fn add_sd_file(&mut self, name: String, data: Vec<u8>) {
-        self.sd_files.push((name, data));
+        let name = sd_norm(&name).to_string();
+        self.sd_files.push((name, SdData::Bytes(data)));
+    }
+
+    /// Add a (possibly empty) virtual SD folder; `name` may be nested (`A/B`).
+    pub fn add_sd_dir(&mut self, name: String) {
+        let name = sd_norm(&name).to_string();
+        if !name.is_empty() && !self.sd_dirs.contains(&name) {
+            self.sd_dirs.push(name);
+        }
+    }
+
+    fn sd_file(&self, path: &str) -> Option<&SdData> {
+        let name = sd_norm(path);
+        self.sd_files
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, d)| d)
+    }
+
+    fn sd_is_dir(&self, path: &str) -> bool {
+        let name = sd_norm(path);
+        if name.is_empty() {
+            return true;
+        }
+        let prefix = format!("{name}/");
+        self.sd_dirs
+            .iter()
+            .any(|d| d == name || d.starts_with(&prefix))
+            || self.sd_files.iter().any(|(n, _)| n.starts_with(&prefix))
+    }
+
+    /// Direct children of `dir`: files first, then folders, like a FAT directory walk.
+    fn sd_list(&self, dir: &str) -> Vec<FsEntry> {
+        let dir = sd_norm(dir);
+        let prefix = if dir.is_empty() {
+            String::new()
+        } else {
+            format!("{dir}/")
+        };
+        let mut files = Vec::new();
+        let mut dirs: Vec<String> = Vec::new();
+        let mut note_dir = |rest: &str| {
+            let first = rest.split('/').next().unwrap_or(rest).to_string();
+            if !first.is_empty() && !dirs.contains(&first) {
+                dirs.push(first);
+            }
+        };
+        for (name, data) in &self.sd_files {
+            if let Some(rest) = name.strip_prefix(&prefix) {
+                if rest.contains('/') {
+                    note_dir(rest);
+                } else {
+                    files.push(FsEntry {
+                        name: rest.to_string(),
+                        size: data.len() as u32,
+                        mtime_epoch: 1_764_065_700,
+                        is_dir: false,
+                    });
+                }
+            }
+        }
+        for d in &self.sd_dirs {
+            if let Some(rest) = d.strip_prefix(&prefix) {
+                note_dir(rest);
+            }
+        }
+        files.extend(dirs.into_iter().map(|name| FsEntry {
+            name,
+            size: 0,
+            mtime_epoch: 1_764_065_700,
+            is_dir: true,
+        }));
+        files
     }
 
     pub fn push_next_frame(&mut self) {
@@ -413,7 +553,7 @@ impl SimulatorTransport {
                     fs_type: 3,
                     total_kb: 31_268_864,
                     free_kb: 28_412_000,
-                    root_entry_count: self.sd_files.len() as u32,
+                    root_entry_count: self.sd_list("").len() as u32,
                 };
                 Some((MsgType::FsInfoResp, 0, 0, info.to_bytes().to_vec()))
             }
@@ -433,44 +573,63 @@ impl SimulatorTransport {
                 } else {
                     64
                 };
-                let start = cursor.min(self.sd_files.len());
-                let end = (start + max_entries).min(self.sd_files.len());
-                let next_cursor = if end >= self.sd_files.len() {
-                    u32::MAX
+                let path_len = if pkt.payload.len() >= 8 {
+                    usize::from(u16::from_le_bytes([pkt.payload[6], pkt.payload[7]]))
                 } else {
-                    end as u32
+                    0
                 };
-                let list = FsListResp {
-                    next_cursor,
-                    entries: self.sd_files[start..end]
-                        .iter()
-                        .map(|(n, d)| FsEntry {
-                            name: n.clone(),
-                            size: d.len() as u32,
-                            mtime_epoch: 1_764_065_700,
-                            is_dir: false,
-                        })
-                        .collect(),
-                };
-                Some((MsgType::FsListResp, 0, 0, list.to_bytes()))
+                let dir = String::from_utf8_lossy(
+                    &pkt.payload[8.min(pkt.payload.len())..(8 + path_len).min(pkt.payload.len())],
+                )
+                .into_owned();
+                if !self.sd_is_dir(&dir) {
+                    Some((
+                        MsgType::FsListResp,
+                        flags::ERROR,
+                        StatusCode::ErrNotFound as u16,
+                        Vec::new(),
+                    ))
+                } else {
+                    let all = self.sd_list(&dir);
+                    let start = cursor.min(all.len());
+                    let end = (start + max_entries).min(all.len());
+                    let next_cursor = if end >= all.len() {
+                        u32::MAX
+                    } else {
+                        end as u32
+                    };
+                    let list = FsListResp {
+                        next_cursor,
+                        entries: all[start..end].to_vec(),
+                    };
+                    Some((MsgType::FsListResp, 0, 0, list.to_bytes()))
+                }
             }
             MsgType::FsStatReq if pkt.payload.len() >= 4 => {
                 let compute_crc32 = (pkt.payload[0] & 0x01) != 0;
                 let path_len = u16::from_le_bytes([pkt.payload[2], pkt.payload[3]]) as usize;
                 let path =
                     String::from_utf8_lossy(&pkt.payload[4..(4 + path_len).min(pkt.payload.len())]);
-                let name = path.trim_start_matches('/');
-                if let Some((_, data)) = self.sd_files.iter().find(|(n, _)| n == name) {
+                if let Some(data) = self.sd_file(&path) {
                     let stat = FsStatResp {
                         size: data.len() as u32,
                         mtime_epoch: 1_764_065_700,
                         crc32: if compute_crc32 {
-                            super::crc::crc32_ieee(data)
+                            super::crc::crc32_ieee(&data.bytes())
                         } else {
                             0
                         },
                         is_dir: false,
                         crc32_valid: compute_crc32,
+                    };
+                    Some((MsgType::FsStatResp, 0, 0, stat.to_bytes().to_vec()))
+                } else if self.sd_is_dir(&path) {
+                    let stat = FsStatResp {
+                        size: 0,
+                        mtime_epoch: 1_764_065_700,
+                        crc32: 0,
+                        is_dir: true,
+                        crc32_valid: false,
                     };
                     Some((MsgType::FsStatResp, 0, 0, stat.to_bytes().to_vec()))
                 } else {
@@ -505,53 +664,70 @@ impl SimulatorTransport {
                 let path = String::from_utf8_lossy(
                     &pkt.payload[12..(12 + path_len).min(pkt.payload.len())],
                 );
-                let name = path.trim_start_matches('/');
-                if let Some((_, data)) = self.sd_files.iter().find(|(n, _)| n == name) {
-                    let start = req_offset.min(data.len());
-                    let end = if req_len == 0 {
-                        data.len()
-                    } else {
-                        start.saturating_add(req_len).min(data.len())
-                    };
-                    let mut pos = start;
-                    loop {
-                        let take = (end - pos).min(chunk_sz);
-                        let eof = pos + take >= end;
-                        let mut p = Vec::with_capacity(8 + take);
-                        p.extend_from_slice(&(pos as u32).to_le_bytes());
-                        p.extend_from_slice(&(take as u16).to_le_bytes());
-                        p.push(u8::from(eof));
-                        p.push(0);
-                        p.extend_from_slice(&data[pos..pos + take]);
-                        let pkt_flags = if eof { 0 } else { flags::MORE_CHUNKS };
-                        if let Ok(bytes) =
-                            Packet::encode(MsgType::FsReadData, pkt_flags, seq, 0, &p)
-                        {
-                            self.out_buf.extend(bytes);
+                let data = self.sd_file(&path).map(SdData::bytes);
+                match data {
+                    Some(data) if req_offset > data.len() => Some((
+                        MsgType::FsReadData,
+                        flags::ERROR,
+                        StatusCode::ErrInvalidArg as u16,
+                        Vec::new(),
+                    )),
+                    Some(data) => {
+                        // Firmware semantics: `eof` marks the end of the file, a clear
+                        // MORE_CHUNKS flag marks the end of this request's range.
+                        let start = req_offset;
+                        let end = if req_len == 0 {
+                            data.len()
+                        } else {
+                            start.saturating_add(req_len).min(data.len())
+                        };
+                        let mut encoded = Vec::new();
+                        let mut pos = start;
+                        loop {
+                            let take = (end - pos).min(chunk_sz);
+                            let done = pos + take >= end;
+                            let eof = pos + take >= data.len();
+                            let mut p = Vec::with_capacity(8 + take);
+                            p.extend_from_slice(&(pos as u32).to_le_bytes());
+                            p.extend_from_slice(&(take as u16).to_le_bytes());
+                            p.push(u8::from(eof));
+                            p.push(0);
+                            p.extend_from_slice(&data[pos..pos + take]);
+                            let pkt_flags = if done { 0 } else { flags::MORE_CHUNKS };
+                            if let Ok(bytes) =
+                                Packet::encode(MsgType::FsReadData, pkt_flags, seq, 0, &p)
+                            {
+                                encoded.extend(bytes);
+                            }
+                            pos += take;
+                            if done {
+                                break;
+                            }
                         }
-                        pos += take;
-                        if eof {
-                            break;
-                        }
+                        self.out_buf.extend(encoded);
+                        None
                     }
-                    None
-                } else {
-                    Some((
+                    None => Some((
                         MsgType::FsReadData,
                         flags::ERROR,
                         StatusCode::ErrNotFound as u16,
                         Vec::new(),
-                    ))
+                    )),
                 }
             }
             MsgType::FsDeleteReq if pkt.payload.len() >= 4 => {
                 let path_len = u16::from_le_bytes([pkt.payload[2], pkt.payload[3]]) as usize;
                 let path =
                     String::from_utf8_lossy(&pkt.payload[4..(4 + path_len).min(pkt.payload.len())]);
-                let name = path.trim_start_matches('/');
-                let before = self.sd_files.len();
-                self.sd_files.retain(|(n, _)| n != name);
-                if self.sd_files.len() < before {
+                let name = sd_norm(&path).to_string();
+                let prefix = format!("{name}/");
+                let before = self.sd_files.len() + self.sd_dirs.len();
+                // Like the firmware, deleting a folder removes everything inside it.
+                self.sd_files
+                    .retain(|(n, _)| *n != name && !n.starts_with(&prefix));
+                self.sd_dirs
+                    .retain(|d| *d != name && !d.starts_with(&prefix));
+                if !name.is_empty() && self.sd_files.len() + self.sd_dirs.len() < before {
                     Some((MsgType::FsDeleteResp, 0, 0, Vec::new()))
                 } else {
                     Some((
@@ -806,6 +982,18 @@ impl<T: Transport> ProtocolClient<T> {
         Ok(())
     }
 
+    /// One `FS_LIST` page of up to `max_entries` entries starting at `cursor`.
+    pub fn list_dir_page(
+        &mut self,
+        path: &str,
+        cursor: u32,
+        max_entries: u16,
+    ) -> Result<FsListResp, ProtocolError> {
+        let req = FsListResp::encode_req(cursor, max_entries, path);
+        let pkt = self.request(MsgType::FsListReq, &req, Duration::from_millis(3000))?;
+        FsListResp::from_bytes(&pkt.payload)
+    }
+
     /// Paginate `FS_LIST` all the way until `next_cursor == 0xFFFFFFFF` (no 64-file cap).
     pub fn list_dir_all(&mut self, path: &str) -> Result<Vec<FsEntry>, ProtocolError> {
         const PAGE_SIZE: u16 = 64;
@@ -813,9 +1001,7 @@ impl<T: Transport> ProtocolClient<T> {
         let mut cursor: u32 = 0;
         let mut all = Vec::new();
         for _ in 0..MAX_PAGES {
-            let req = FsListResp::encode_req(cursor, PAGE_SIZE, path);
-            let pkt = self.request(MsgType::FsListReq, &req, Duration::from_millis(3000))?;
-            let page = FsListResp::from_bytes(&pkt.payload)?;
+            let page = self.list_dir_page(path, cursor, PAGE_SIZE)?;
             let got_any = !page.entries.is_empty();
             all.extend(page.entries);
             if page.next_cursor == u32::MAX || page.next_cursor == cursor || !got_any {
@@ -900,20 +1086,44 @@ impl<T: Transport> ProtocolClient<T> {
         Ok(out)
     }
 
-    pub fn read_file_bytes(&mut self, path: &str) -> Result<Vec<u8>, ProtocolError> {
+    /// Read `len` bytes (clamped to `1..=MAX_READ_CHUNK`, never "to the end") at `offset`.
+    /// Returns the data and whether it reached the end of the file. One bounded round trip.
+    pub fn read_file_chunk(
+        &mut self,
+        path: &str,
+        offset: u32,
+        len: u32,
+    ) -> Result<(Vec<u8>, bool), ProtocolError> {
+        let len = len.clamp(1, MAX_READ_CHUNK);
         let seq = self.alloc_seq();
-        let req = FsReadChunk::encode_req(0, 0, 8192, path);
+        let req = FsReadChunk::encode_req(offset, len, 8192, path);
         let bytes = Packet::encode(MsgType::FsReadReq, 0, seq, 0, &req)?;
         self.transport.write_all(&bytes)?;
         self.transport.flush()?;
 
-        let mut out = Vec::new();
+        let mut out = Vec::with_capacity(len as usize);
+        let mut eof = false;
         loop {
             let pkt = self.recv_response_for_seq(seq, Duration::from_millis(3000))?;
             let more = (pkt.header.flags & flags::MORE_CHUNKS) != 0;
             let chunk = FsReadChunk::from_bytes(&pkt.payload)?;
             out.extend_from_slice(&chunk.data);
-            if chunk.eof || !more {
+            eof |= chunk.eof;
+            if !more {
+                break;
+            }
+        }
+        Ok((out, eof))
+    }
+
+    /// Read a whole file as a sequence of bounded chunk requests.
+    pub fn read_file_bytes(&mut self, path: &str) -> Result<Vec<u8>, ProtocolError> {
+        let mut out = Vec::new();
+        loop {
+            let (chunk, eof) = self.read_file_chunk(path, out.len() as u32, MAX_READ_CHUNK)?;
+            let empty = chunk.is_empty();
+            out.extend_from_slice(&chunk);
+            if eof || empty {
                 break;
             }
         }

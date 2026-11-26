@@ -94,6 +94,22 @@ pub fn evaluate_roi(
             .unwrap_or(global.reflected_temp_c),
         ..global
     };
+    evaluate_roi_with(roi, pixels, width, height, params.emissivity, |raw| {
+        raw_to_object_c(raw, params)
+    })
+}
+
+/// [`evaluate_roi`] with the raw-to-°C conversion supplied by the caller (the single-correction
+/// reading for recordings). `effective_emissivity` is reported as given.
+#[must_use]
+pub fn evaluate_roi_with<F: Fn(u16) -> f32>(
+    roi: &Roi,
+    pixels: &[u16],
+    width: u16,
+    height: u16,
+    effective_emissivity: f32,
+    to_c: F,
+) -> RoiStats {
     let coords = collect_roi_coords(&roi.geometry, width, height);
     let w = usize::from(width);
     let mut min_raw = u16::MAX;
@@ -114,7 +130,7 @@ pub fn evaluate_roi(
             max_xy = [x, y];
         }
         sum_raw += f64::from(raw);
-        temps.push(raw_to_object_c(raw, params));
+        temps.push(to_c(raw));
     }
 
     let n = coords.len();
@@ -140,21 +156,13 @@ pub fn evaluate_roi(
     } else {
         0.0
     };
-    let min_c = if n > 0 {
-        raw_to_object_c(min_raw, params)
-    } else {
-        0.0
-    };
-    let max_c = if n > 0 {
-        raw_to_object_c(max_raw, params)
-    } else {
-        0.0
-    };
+    let min_c = if n > 0 { to_c(min_raw) } else { 0.0 };
+    let max_c = if n > 0 { to_c(max_raw) } else { 0.0 };
     let delta_c = match roi.geometry {
         RoiGeometry::Delta { x0, y0, x1, y1 } => {
             let p0 = pixels[usize::from(y0.min(height - 1)) * w + usize::from(x0.min(width - 1))];
             let p1 = pixels[usize::from(y1.min(height - 1)) * w + usize::from(x1.min(width - 1))];
-            Some(raw_to_object_c(p1, params) - raw_to_object_c(p0, params))
+            Some(to_c(p1) - to_c(p0))
         }
         _ => None,
     };
@@ -173,7 +181,7 @@ pub fn evaluate_roi(
         delta_c,
         min_xy,
         max_xy,
-        effective_emissivity: params.emissivity,
+        effective_emissivity,
     }
 }
 

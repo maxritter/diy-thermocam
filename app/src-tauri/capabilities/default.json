@@ -6,6 +6,15 @@
   "permissions": [
     "core:default",
     "core:event:default",
-    "core:window:default"
+    "core:window:default",
+    "opener:allow-reveal-item-in-dir",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://github.com/maxritter/diy-thermocam/*" },
+        { "url": "https://www.diy-thermocam.net/*" }
+      ]
+    },
+    "notification:default"
   ]
 }

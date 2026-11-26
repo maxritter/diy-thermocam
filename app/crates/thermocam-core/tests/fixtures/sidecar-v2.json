@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "palette_id": "rainbow",
+  "range": { "mode": "manual", "min_c": 21.5, "max_c": 48.25 },
+  "material": { "emissivity": 0.94, "reflected_c": 23.0 },
+  "sensor_material": null,
+  "regions": [
+    {
+      "id": "r1",
+      "name": "MCU",
+      "geometry": { "kind": "box", "x": 50, "y": 46, "w": 24, "h": 18 },
+      "material": null,
+      "visible": true
+    },
+    {
+      "id": "r2",
+      "name": "Inductor",
+      "geometry": { "kind": "circle", "cx": 108.5, "cy": 41.0, "radius": 7.5 },
+      "material": { "emissivity": 0.8, "reflected_c": 22.0 },
+      "visible": true
+    },
+    {
+      "id": "r3",
+      "name": "Spot 1",
+      "geometry": { "kind": "spot", "x": 80, "y": 60, "kernel": 3, "show_raw": false },
+      "material": null,
+      "visible": false
+    },
+    {
+      "id": "r4",
+      "name": "Trace",
+      "geometry": { "kind": "polygon", "points": [[60.0, 40.0], [100.0, 40.0], [100.5, 52.5], [60.0, 52.0]] },
+      "material": null,
+      "visible": true
+    },
+    {
+      "id": "r5",
+      "name": "Profile",
+      "geometry": { "kind": "line", "x0": 10, "y0": 60, "x1": 150, "y1": 60 },
+      "material": null,
+      "visible": true
+    },
+    {
+      "id": "r6",
+      "name": "MCU vs board",
+      "geometry": { "kind": "delta", "x0": 61, "y0": 57, "x1": 20, "y1": 100 },
+      "material": null,
+      "visible": true
+    }
+  ],
+  "notes": { "name": "Board under load", "text": "Fan off, 5 minutes after power-on." }
+}

@@ -1,0 +1,71 @@
+{
+  "description": "Shared test vectors for the single-correction reading (Rust radiometry::reading_c and its TypeScript twin in app/src/lib/thermal.ts). A reading undoes the sensor's material (skipped at factory, emissivity 1) and applies the wanted material; when both are the same it passes through unchanged. Temperatures in degrees C; apparent = raw * cal_slope + cal_offset.",
+  "vectors": [
+    {
+      "id": "a1",
+      "case": "(a) factory sensor plus Live emissivity 0.95 gives today's reading",
+      "raw": 31500,
+      "cal_offset": -273.15,
+      "cal_slope": 0.01,
+      "sensor_material": null,
+      "want": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "expected_c": 42.7958,
+      "tolerance_c": 0.001
+    },
+    {
+      "id": "a2",
+      "case": "(a) factory sensor near room temperature",
+      "raw": 29815,
+      "cal_offset": -273.15,
+      "cal_slope": 0.01,
+      "sensor_material": null,
+      "want": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "expected_c": 25.1554,
+      "tolerance_c": 0.001
+    },
+    {
+      "id": "a3",
+      "case": "(a) factory sensor in the low-gain range (0.1 K per count)",
+      "raw": 3500,
+      "cal_offset": -273.15,
+      "cal_slope": 0.1,
+      "sensor_material": null,
+      "want": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "expected_c": 79.1045,
+      "tolerance_c": 0.001
+    },
+    {
+      "id": "a4",
+      "case": "(a) a sensor holding emissivity 1 counts as factory",
+      "raw": 31500,
+      "cal_offset": -273.15,
+      "cal_slope": 0.01,
+      "sensor_material": { "emissivity": 1.0, "reflected_c": 30.0 },
+      "want": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "expected_c": 42.7958,
+      "tolerance_c": 0.001
+    },
+    {
+      "id": "b1",
+      "case": "(b) sensor 0.95 plus Live 0.95 passes the reading through unchanged",
+      "raw": 31500,
+      "cal_offset": -273.15,
+      "cal_slope": 0.01,
+      "sensor_material": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "want": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "expected_c": 41.85,
+      "tolerance_c": 0.001
+    },
+    {
+      "id": "c1",
+      "case": "(c) sensor 0.95 plus a region at 0.80 equals factory sensor plus 0.80 (raw 31500) within 0.05 C",
+      "raw": 31595,
+      "cal_offset": -273.15,
+      "cal_slope": 0.01,
+      "sensor_material": { "emissivity": 0.95, "reflected_c": 22.0 },
+      "want": { "emissivity": 0.8, "reflected_c": 22.0 },
+      "expected_c": 46.269,
+      "tolerance_c": 0.05
+    }
+  ]
+}

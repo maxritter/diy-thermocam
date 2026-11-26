@@ -294,51 +294,8 @@ fn parse_temp_points(block: &[u8], width: u16) -> Vec<DatTempPoint> {
     out
 }
 
-/// Non-destructive `.thermo.json` sidecar storing ROIs, per-ROI emissivity, annotations, and export preset.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ThermoSidecar {
-    pub schema_version: u32,
-    pub palette_id: String,
-    pub global_emissivity: f32,
-    pub reflected_temp_c: f32,
-    pub range_mode: String,
-    pub manual_min_c: Option<f32>,
-    pub manual_max_c: Option<f32>,
-    pub upscaler: String,
-    pub sharpen_amount: f32,
-    pub notes: String,
-    pub rois: Vec<crate::roi::Roi>,
-    pub annotations: Vec<Annotation>,
-    pub export_preset: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Annotation {
-    pub id: String,
-    pub x: f32,
-    pub y: f32,
-    pub text: String,
-}
-
-impl Default for ThermoSidecar {
-    fn default() -> Self {
-        Self {
-            schema_version: 1,
-            palette_id: "ironblack".into(),
-            global_emissivity: 0.95,
-            reflected_temp_c: 22.0,
-            range_mode: "auto".into(),
-            manual_min_c: None,
-            manual_max_c: None,
-            upscaler: "edge_preserve".into(),
-            sharpen_amount: 0.45,
-            notes: String::new(),
-            rois: Vec::new(),
-            annotations: Vec::new(),
-            export_preset: "1080p".into(),
-        }
-    }
-}
+/// The `.thermo.json` sidecar now lives in [`crate::sidecar`]; re-exported for older callers.
+pub use crate::sidecar::ThermoSidecar;
 
 /// Sequence `manifest.json` written alongside lossless `.DAT` frame sequences.
 #[derive(Debug, Clone, Serialize, Deserialize)]

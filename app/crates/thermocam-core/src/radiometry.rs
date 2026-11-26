@@ -53,6 +53,40 @@ impl TempUnit {
     }
 }
 
+/// A surface's emissivity and the reflected (background) temperature in °C.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Material {
+    pub emissivity: f32,
+    pub reflected_c: f32,
+}
+
+impl Material {
+    /// The sensor's factory setting: a blackbody, which applies no correction.
+    pub const FACTORY: Self = Self {
+        emissivity: 1.0,
+        reflected_c: 22.0,
+    };
+    /// Studio's default material for the image (`App.tsx` default before the redesign).
+    pub const STUDIO_DEFAULT: Self = Self {
+        emissivity: 0.95,
+        reflected_c: 22.0,
+    };
+
+    /// True when this material applies no correction (ε = 1).
+    #[must_use]
+    pub fn is_blackbody(self) -> bool {
+        (self.emissivity - 1.0).abs() < 1e-6
+    }
+
+    /// True when both materials correct identically.
+    #[must_use]
+    pub fn same_as(self, other: Self) -> bool {
+        (self.is_blackbody() && other.is_blackbody())
+            || ((self.emissivity - other.emissivity).abs() < 1e-6
+                && (self.reflected_c - other.reflected_c).abs() < 1e-6)
+    }
+}
+
 /// Global/per-ROI radiometric compensation parameters.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct RadiometryParams {
@@ -112,6 +146,55 @@ pub fn compensate_emissivity_c(apparent_c: f32, emissivity: f32, reflected_temp_
         return (1.0 - KELVIN_OFFSET) as f32;
     }
     (rad_obj.powf(0.25) - KELVIN_OFFSET) as f32
+}
+
+/// Inverse of [`compensate_emissivity_c`]: the apparent temperature a surface of `object_c`
+/// with `emissivity` shows in front of `reflected_temp_c`.
+#[must_use]
+pub fn uncompensate_emissivity_c(object_c: f32, emissivity: f32, reflected_temp_c: f32) -> f32 {
+    let eps = f64::from(emissivity.clamp(0.05, 1.0));
+    if (eps - 1.0).abs() < 1e-6 {
+        return object_c;
+    }
+    let t_obj_k = (f64::from(object_c) + KELVIN_OFFSET).max(1.0);
+    let t_refl_k = (f64::from(reflected_temp_c) + KELVIN_OFFSET).max(1.0);
+    let rad_app = eps * t_obj_k.powi(4) + (1.0 - eps) * t_refl_k.powi(4);
+    (rad_app.powf(0.25) - KELVIN_OFFSET) as f32
+}
+
+/// A frame's raw-count calibration (`apparent °C = raw × cal_slope + cal_offset`).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Calibration {
+    pub cal_offset: f32,
+    pub cal_slope: f32,
+}
+
+/// The one correction every reading goes through.
+///
+/// The sensor may already have corrected the counts for `sensor_material` (written to the camera
+/// with "Use Studio's material on the camera's screen"). The reading undoes that correction
+/// (skipped at factory, ε = 1), then applies `want` (the image's or the region's material).
+/// When both are the same, the sensor's reading passes through unchanged. No reading is ever
+/// corrected twice. With a factory sensor this equals [`raw_to_object_c`] bit for bit.
+#[must_use]
+pub fn reading_c(
+    raw: u16,
+    cal: Calibration,
+    sensor_material: Option<Material>,
+    want: Material,
+) -> f32 {
+    let reported = raw_to_apparent_c(raw, cal.cal_offset, cal.cal_slope);
+    match sensor_material {
+        Some(sensor) if !sensor.is_blackbody() => {
+            if sensor.same_as(want) {
+                return reported;
+            }
+            let apparent =
+                uncompensate_emissivity_c(reported, sensor.emissivity, sensor.reflected_c);
+            compensate_emissivity_c(apparent, want.emissivity, want.reflected_c)
+        }
+        _ => compensate_emissivity_c(reported, want.emissivity, want.reflected_c),
+    }
 }
 
 /// Convert raw pixel value to compensated object temperature in °C.
