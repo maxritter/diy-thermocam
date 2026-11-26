@@ -1,0 +1,14 @@
+# Generated or paid media: rebuilt by the film:* scripts (see README), kept out of git
+node_modules/
+out/
+work/
+public/sim/
+public/vo/
+public/audio/
+public/shots
+vo/words/
+vo/text/
+vo/receipts/
+media-budget.json
+sim/film
+.DS_Store

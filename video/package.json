@@ -1,0 +1,36 @@
+{
+  "name": "diy-thermocam-v4-film",
+  "private": true,
+  "description": "Remotion source for the DIY-Thermocam V4 launch film",
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio",
+    "check": "tsc --noEmit",
+    "film:frames": "make -C sim frames",
+    "film:shots": "sh scripts/render-shots.sh",
+    "film:points": "sh scripts/render-shots.sh --points",
+    "film:takes": "uv run scripts/vo-takes.py film --takes 4",
+    "film:vo": "node scripts/vo.mjs film",
+    "film:music": "bun scripts/film-music.ts",
+    "film:sfx": "python3 scripts/film-sfx.py",
+    "film:captions": "bun scripts/film-captions.ts",
+    "film:render": "remotion render DiyThermocamFilm out/render/film.mp4 --codec=h264 --crf=16 --color-space=bt709 --audio-codec=aac && node scripts/master.mjs out/render/film.mp4 out/diy-thermocam-v4-film.mp4 && bun scripts/film-captions.ts && sh scripts/film-web.sh"
+  },
+  "dependencies": {
+    "@remotion/captions": "4.0.532",
+    "@remotion/cli": "4.0.532",
+    "@remotion/fonts": "4.0.532",
+    "@remotion/media": "4.0.532",
+    "@remotion/transitions": "4.0.532",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "zod": "4.6.6"
+  }
+}
