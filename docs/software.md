@@ -2,7 +2,7 @@
 
 **DIY-Thermocam Desktop Studio** is an open-source app for **macOS, Windows, and Linux**. It shows the live image, measures temperatures, saves and edits full-temperature captures, exports pictures and video, reads the camera's microSD card, and updates the firmware.
 
-![Live view with regions and the color scale](/images/studio/studio-live-pro.png)
+![Live view with four measuring regions, the color scale and the chart below](/images/studio/studio-live-pro.png)
 
 ## Supported systems
 
@@ -20,7 +20,7 @@ Built with [Tauri v2](https://github.com/tauri-apps/tauri), Rust (`thermocam-cor
 
 | Live | An opened capture | Captures library |
 | --- | --- | --- |
-| ![Studio Live view with the image, the color scale and the readings below](/images/studio/studio-live-standard.png) | ![Desktop Studio offline .DAT radiometric editor](/images/studio/studio-editor.png) | ![Desktop Studio microSD browser at 9.2 MB/s](/images/studio/studio-sd-browser.png) |
+| ![Studio Live view with the thermal image, the color scale and the palettes beside it](/images/studio/studio-live-standard.png) | ![A saved snapshot opened in Captures, with a measuring box and its readings](/images/studio/studio-editor.png) | ![The Captures library listing the pictures on the camera's card](/images/studio/studio-sd-browser.png) |
 
 Studio has three places, chosen in the header: **Live**, **Captures** and **Camera**. There are no modes to switch: every tool is always one click away.
 
