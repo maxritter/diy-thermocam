@@ -150,6 +150,13 @@
     padding: 0 12px 0 14px;
     border-bottom: 1px solid var(--tc-border);
     background: var(--tc-head);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* macOS unified title bar: the window buttons sit at the left of this header. */
+  .st-hdr-mac {
+    padding-left: 92px;
   }
 
   .st-brand {

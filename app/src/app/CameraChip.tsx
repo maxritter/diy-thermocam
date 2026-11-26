@@ -38,6 +38,11 @@ const LABELS: Record<CameraState, string> = {
   none: "No camera",
 };
 
+/** The camera's name for the window title, or null while none is connected. */
+export function cameraTitle(state: CameraState): string | null {
+  return state === "camera" || state === "demo" ? LABELS[state] : null;
+}
+
 const DOTS: Record<CameraState, string> = {
   camera: "st-status-dot",
   demo: "st-status-dot demo",

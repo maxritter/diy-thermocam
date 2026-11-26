@@ -7,6 +7,9 @@
     "core:default",
     "core:event:default",
     "core:window:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-internal-toggle-maximize",
+    "core:window:allow-set-title",
     "opener:allow-reveal-item-in-dir",
     {
       "identifier": "opener:allow-open-url",

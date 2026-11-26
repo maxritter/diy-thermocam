@@ -4,11 +4,12 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { isTauriRuntime } from "@/lib/backend";
 import type { StudioSettings } from "@/lib/settings";
-import { CameraChip, type CameraChipProps } from "./CameraChip";
+import { CameraChip, type CameraChipProps, cameraTitle } from "./CameraChip";
 import { GearMenu } from "./GearMenu";
 import { ShortcutSheet } from "./ShortcutSheet";
-import { isTypingTarget, matchShortcut, type ShortcutId } from "./shortcuts";
+import { isMacPlatform, isTypingTarget, matchShortcut, type ShortcutId } from "./shortcuts";
 import { PanelWidthContext, type PanelWidthValue } from "./ui/SidePanel";
+import { applyWindowTitle, windowTitle } from "./windowTitle";
 
 export type PageId = "live" | "captures" | "camera";
 
@@ -157,6 +158,12 @@ export function Shell({
   }, []);
 
   const current = PAGES.find((p) => p.id === page) ?? PAGES[0];
+  const cameraName = cameraTitle(camera.state);
+  useEffect(() => {
+    void applyWindowTitle(windowTitle(current.label, cameraName));
+  }, [current.label, cameraName]);
+  // On a Mac the window buttons sit inside this header (titleBarStyle "Overlay").
+  const macTitleBar = isTauriRuntime() && isMacPlatform();
   const panelWidth = settings.panel_width;
   const panel = useMemo<PanelWidthValue>(
     () => ({ width: panelWidth, onChange: (w) => handlers.current.onSettings({ panel_width: w }) }),
@@ -165,8 +172,8 @@ export function Shell({
 
   return (
     <div className="st-shell">
-      <header className="st-hdr">
-        <div className="st-brand">
+      <header className={macTitleBar ? "st-hdr st-hdr-mac" : "st-hdr"} data-tauri-drag-region>
+        <div className="st-brand" data-tauri-drag-region>
           <BrandMark size={22} />
           DIY-Thermocam Studio
         </div>
