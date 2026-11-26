@@ -60,7 +60,9 @@ function props(api: Api, over: Partial<OpenedCaptureProps> = {}): OpenedCaptureP
     engineeringDetails: false,
     notify: () => {},
     locale: "en-GB",
-    saveDelayMs: 40,
+    // Short enough to keep the tests quick, long enough that a slow CI machine pausing between
+    // two clicks of one test does not save in between (Linux container run, 26 Nov).
+    saveDelayMs: 300,
     ...over,
   };
 }

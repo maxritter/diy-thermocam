@@ -71,6 +71,14 @@ fn a_read_only_folder_is_reported_as_read_only() {
     let ro = dir.path().join("ro");
     fs::create_dir(&ro).unwrap();
     fs::set_permissions(&ro, fs::Permissions::from_mode(0o555)).unwrap();
+    // Root ignores directory permissions (a container running as root): nothing to prove there.
+    let probe = ro.join(".probe");
+    if fs::write(&probe, b"x").is_ok() {
+        let _ = fs::remove_file(&probe);
+        fs::set_permissions(&ro, fs::Permissions::from_mode(0o755)).unwrap();
+        eprintln!("skipped: this user can write into a read-only folder (running as root)");
+        return;
+    }
     let frame = generate_demo_frame(1, 160, 120);
     let err = write_snapshot(&ro, &frame, stamp()).unwrap_err();
     let check = check_writable(&ro).unwrap_err();
