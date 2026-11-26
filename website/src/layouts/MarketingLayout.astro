@@ -34,11 +34,12 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <link rel="icon" type="image/png" href="/images/brand/favicon.png" />
     <link rel="apple-touch-icon" href="/images/brand/favicon.png" />
 
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f2ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
 
-    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-pixel-square.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:type" content={ogType} />
@@ -72,6 +73,13 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
           /* keep light */
         }
         document.documentElement.dataset.theme = theme;
+        /* Scroll motion waits for motion.ts; if it never runs, show everything after 2.5 s. */
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('motion');
+          setTimeout(() => {
+            if (!window.__motionReady) document.documentElement.classList.remove('motion');
+          }, 2500);
+        }
       })();
     </script>
 
@@ -88,6 +96,7 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <Lightbox />
     <script>
       import '../scripts/site.ts';
+      import '../scripts/motion.ts';
     </script>
   </body>
 </html>

@@ -1,0 +1,33 @@
+---
+/* A Studio screenshot in a plain desktop window frame. The shots come from Studio's own interface without the
+   operating system's title bar, so the frame supplies one. Links to the full-size PNG for the picture viewer. */
+interface Props {
+  name: 'live' | 'measure' | 'editor' | 'library' | 'palettes';
+  alt: string;
+  caption?: string;
+  eager?: boolean;
+}
+
+const { name, alt, caption, eager = false } = Astro.props;
+---
+
+<figure class="appwin">
+  <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>DIY-Thermocam Studio</span></div>
+  <a href={`/images/studio/studio-${name}.png`} data-caption={caption ?? alt}>
+    <img src={`/images/studio/web/studio-${name}.webp`} alt={alt} width="1600" height="1305" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+  </a>
+</figure>
+
+<style>
+  .appwin { margin: 0; border: 1px solid var(--border-strong); background: #0d0d0e; box-shadow: var(--shadow-window); overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; background: #19191b; border-bottom: 1px solid #2a2a2d; }
+  .bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3a3e; }
+  .bar span { margin-left: 10px; font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: #8a8a90; }
+  .appwin a { display: block; cursor: zoom-in; }
+  .appwin img { display: block; width: 100%; height: auto; }
+  @media (max-width: 600px) {
+    .bar { height: 22px; gap: 5px; padding: 0 9px; }
+    .bar i { width: 7px; height: 7px; }
+    .bar span { display: none; }
+  }
+</style>

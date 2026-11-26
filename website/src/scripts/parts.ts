@@ -118,26 +118,75 @@ if (form && orders && totalEl && plusEl && statusEl) {
       groups[shop].rows.push(entry);
     };
 
-    /* Board fab: the board and the files with their upload step. */
+    /* Board fab: two assembled boards (main board and Lepton carrier) and the bare FR4 battery
+       boards, each with its files and upload step. */
+    const quote = '<span class="p">Quote<small>at checkout</small></span>';
     add(fab.name, {
-      html: `<div class="prow">${thumb({ img: '/images/v4/pcb-modules.png', fit: true })}<span><b>V4 board, assembled</b><span class="d">${esc(fab.note)} ${esc(fab.min)}</span><span class="links"><a href="${fab.url}">${esc(fab.name)}</a></span></span><span></span><span class="p">Quote<small>at checkout</small></span></div>`,
+      html: `<div class="prow">${thumb({ img: '/images/v4/pcb-modules.png', fit: true })}<span><b>V4 main board, assembled</b><span class="d">${esc(fab.note)} ${esc(fab.min)}</span><span class="links"><a href="${fab.url}">${esc(fab.name)}</a></span></span><span></span>${quote}</div>`,
     });
-    let files =
-      fileRow(`${fab.dir}${F}gerbers.zip`, fab.up[0]) +
-      fileRow(`${fab.dir}${F}bom.csv`, fab.up[1]) +
-      fileRow(`${fab.dir}${F}cpl.csv`, fab.up[2]);
-    if (fab.drawings) {
-      files +=
-        fileRow(`hardware/pcb/fab/${F}assembly-bottom.pdf`, 'Assembly drawings') +
-        fileRow(`hardware/pcb/fab/${F}assembly-top.pdf`, 'Assembly drawings');
-    }
-    const settings = [
-      '2 layers, 89.4 × 68.4 mm, 1.6 mm FR-4, 1 oz copper, lead-free HASL or ENIG, any colour',
-      'Assembly on both sides: everything on the bottom, the display socket J1 on top',
-      `Before you pay, compare the placement preview with <a href="${GH}hardware/pcb/fab/${F}assembly-bottom.pdf">the bottom assembly drawing</a>: pin 1 of U2, U3, U4, D1, D2, Q1 and Q2 must line up.`,
-    ];
+    add(fab.name, {
+      html: `<div class="prow">${thumb({ img: '/images/v4/pcb-lepton.png', fit: true })}<span><b>Lepton carrier, assembled</b><span class="d">A second, small board in the same order. The Lepton snaps into its socket, and its header plugs into the main board.</span>${fab.carrierWarn ? `<span class="warn">${esc(fab.carrierWarn)}</span>` : ''}</span><span></span>${quote}</div>`,
+    });
+    add(fab.name, {
+      html: `<div class="prow">${thumb({ img: '/images/v4/fr4-battery.png', fit: true })}<span><b>Battery floor and lid, bare FR4</b><span class="d">A 0.6 mm floor and a 0.4 mm lid that hold the battery, for both cases. Any PCB maker; at JLCPCB five of each cost about $2.</span></span><span></span>${quote}</div>`,
+    });
+    const boardFiles = (prefix: string, drawings: string) =>
+      fileRow(`${fab.dir}${prefix}${fab.gerbers}`, fab.up[0]) +
+      fileRow(`${fab.dir}${prefix}bom.csv`, fab.up[1]) +
+      fileRow(`${fab.dir}${prefix}cpl.csv`, fab.up[2]) +
+      (fab.drawings
+        ? fileRow(`hardware/pcb/fab/${drawings}assembly-bottom.pdf`, 'Assembly drawings') +
+          fileRow(`hardware/pcb/fab/${drawings}assembly-top.pdf`, 'Assembly drawings')
+        : '');
+    const FR4 = 'hardware/enclosure/exports/fr4/';
+    const jlc = st.fab === 'jlc';
+    const std = jlc ? ' (at JLCPCB: Standard assembly)' : '';
+    /* JLCPCB's Gerbers hold each board in a break-off frame (two-sided assembly needs 70 × 70 mm). */
+    const panel = jlc
+      ? [
+          'Delivery format: <i>Panel by Customer</i>, 1 design, 1 × 1, no edge rails: the frame is in the file. Keep the CPL as it is; its coordinates match the board in the frame.',
+          'Turn on production-file confirmation, so you approve the placement before assembly starts.',
+        ]
+      : [];
+    const SEAT_REMARK =
+      'Seat the through-hole sockets and headers (J1, J5, J6 on the main board; J101 on the carrier) flush and square before soldering.';
+    const Y101_REMARK = 'Y101 (SiT1602, no stored footprint): pin 1 is next to the silkscreen dot.';
+    const list = (items: string[]) =>
+      `<ul class="settings">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`;
     groups[fab.name].extra =
-      `<div class="files"><b class="h">Files to upload</b>${files}<ul class="settings">${settings.map((s) => `<li>${s}</li>`).join('')}</ul></div>`;
+      `<div class="files"><b class="h">Main board: files to upload</b>${boardFiles(F, F)}${list([
+        '2 layers, 89.4 × 68.4 mm, 1.6 mm FR-4, 1 oz copper, lead-free HASL or ENIG, any colour',
+        `Assembly on both sides${std}: everything on the bottom, the display socket J1 on top`,
+        ...panel,
+        ...(jlc ? [`Add this remark: <q>${esc(SEAT_REMARK)}</q>`] : []),
+        `Before you pay, compare the placement preview with <a href="${GH}hardware/pcb/fab/${F}assembly-bottom.pdf">the bottom assembly drawing</a>: pin 1 of U2, U3, U4, D1, D2, Q1 and Q2 must line up.`,
+        ...(jlc
+          ? [
+              'The boards arrive in their frames: snap each out by bending the frame, never the board or the USB-C connector and switches, then file the tab stubs flush.',
+            ]
+          : []),
+      ])}` +
+      `<b class="h sub">Lepton carrier: files to upload</b>${boardFiles(`${F}lepton-`, `${F}lepton-`)}${list(
+        [
+          '2 layers, 29.2 × 47.0 mm, 1.6 mm FR-4, 1 oz copper, lead-free HASL or ENIG, any colour',
+          `Assembly on both sides${std}: everything on the bottom, the 2 × 10 header J101 on top`,
+          ...panel,
+          ...(jlc
+            ? [`Add these remarks: <q>${esc(SEAT_REMARK)}</q> <q>${esc(Y101_REMARK)}</q>`]
+            : []),
+          `Before you pay, compare the placement preview with <a href="${GH}hardware/pcb/fab/${F}lepton-assembly-bottom.pdf">the carrier's bottom drawing</a>: check U101, U102, U103 and Y101, and that the Lepton socket J102 has its floor hole over the small silkscreen circle.`,
+          ...(jlc
+            ? [
+                'JLCPCB has no stored footprint for the 25 MHz clock Y101 yet: at confirmation, its pin-1 mark must sit next to the silkscreen dot beside it.',
+              ]
+            : []),
+        ],
+      )}` +
+      `<b class="h sub">Battery floor and lid: files to upload</b>${fileRow(`${FR4}${F}battery_floor-gerbers.zip`, 'Gerber step, 0.6 mm thick')}${fileRow(`${FR4}${F}battery_lid-gerbers.zip`, 'Gerber step, 0.4 mm thick')}${list(
+        [
+          'Bare boards, no assembly: FR-4, no copper, black solder mask, at the thickness above. The minimum order of five covers five cameras.',
+        ],
+      )}</div>`;
 
     /* The shell: who makes it, what to order there, the price and the files. */
     const PRINTED = 'hardware/enclosure/exports/3d-printed/';
@@ -178,35 +227,16 @@ if (form && orders && totalEl && plusEl && statusEl) {
         .join('');
       return `<p class="pf-note">${esc(note)}</p><div class="pfs">${rows}</div>`;
     };
-    /* Services get the four C-spacers as one part on break-off tabs, so every quantity stays 1. */
-    const forService = (parts: PrintPart[]) =>
-      parts.map((pp) =>
-        pp.file === 'cradle_spacer' ? { ...pp, file: 'cradle_spacer_set', qty: 1 } : pp,
-      );
-    const TABS =
-      'The four C-spacers come joined on break-off tabs: snip them off and file the nubs flush.';
-    /* JLC3DP splits one combined file into its parts; other services want one file per part. */
-    const serviceFiles = (
-      m: Maker,
-      plate: string,
-      zip: string,
-      parts: PrintPart[],
-      count: number,
-    ) =>
+    /* Print services want one part per file; the zip holds every part once as STEP and STL,
+       plus ORDER.txt with the quantities. */
+    const serviceFiles = (m: Maker, zip: string, parts: PrintPart[], count: number) =>
       filesBox(
         'Files to upload',
-        (m.id === 'jlc3dp'
-          ? fileRow(
-              plate,
-              `JLC3DP. One file: it splits into ${count} named parts, each quantity 1.`,
-            )
-          : '') +
-          fileRow(
-            zip,
-            `${m.name}${m.id === 'jlc3dp' ? ', or any other service' : ''}. Unzip, then upload the step folder (or stl, not both).`,
-            m.id === 'jlc3dp' ? 'Or upload' : 'Upload at',
-          ) +
-          partFiles(forService(parts), `Or single files. ${TABS}`) +
+        fileRow(
+          zip,
+          `${m.name}. Unzip, then upload the ${count} files in step/ (or stl/, not both) and set each quantity as in ORDER.txt.`,
+        ) +
+          partFiles(parts, 'Or single files:') +
           `<b class="h sub">Choose on the order form</b><ul class="settings">${(
             m.order ?? [
               'MJF or SLS PA12 nylon, black (dyed). That is the matte black in the pictures.',
@@ -222,7 +252,7 @@ if (form && orders && totalEl && plusEl && statusEl) {
       const m = maker(st.pmaker, 'print');
       shellRow(
         m,
-        m.own ? 'Shell, every part on one plate' : 'Shell, 8 parts',
+        m.own ? 'Shell, every part on one plate' : 'Shell, 8 printed pieces',
         '/images/v4/view-kit-thumb.jpg',
         m.est?.shell,
         m.own
@@ -234,13 +264,7 @@ if (form && orders && totalEl && plusEl && statusEl) {
                 'Open in',
               ) + partFiles(SHELL_PARTS, 'Or print single parts:'),
             )
-          : serviceFiles(
-              m,
-              `${PRINTED}${F}service-plate.3mf`,
-              `${PRINTED}${F}shell-print-files.zip`,
-              SHELL_PARTS,
-              8,
-            ),
+          : serviceFiles(m, `${PRINTED}${F}shell-print-files.zip`, SHELL_PARTS, 7),
       );
     } else {
       const m = maker(st.lmaker, 'laser');
@@ -254,7 +278,7 @@ if (form && orders && totalEl && plusEl && statusEl) {
           m.own ? 'File to cut' : 'File to upload',
           fileRow(
             sheet,
-            `${m.own ? 'your laser' : m.name}. Red lines cut, blue lines engrave the logo (optional). The sheet is 213 × 195 mm.`,
+            `${m.own ? 'your laser' : m.name}. Blue hairlines cut, red ones engrave the logo (optional), as Formulor asks; other services may want other colours. The parts take 213.1 × 195.6 mm. The file allows for a 0.35 mm kerf. The four keys (a spare of each) hang on 0.8 mm bridges.`,
             m.own ? 'Open in' : 'Upload at',
           ),
         ),
@@ -262,7 +286,7 @@ if (form && orders && totalEl && plusEl && statusEl) {
       const s = maker(st.smaker, 'print');
       shellRow(
         s,
-        '10 small printed parts',
+        '7 small printed pieces',
         '/images/v4/laser-kit.jpg',
         s.est?.small,
         s.own
@@ -274,13 +298,7 @@ if (form && orders && totalEl && plusEl && statusEl) {
                 'Open in',
               ) + partFiles(ACRYLIC_PRINT_PARTS, 'Or print single parts:'),
             )
-          : serviceFiles(
-              s,
-              `${LASER}${F}laser-service-plate.3mf`,
-              `${LASER}${F}acrylic-files.zip`,
-              ACRYLIC_PRINT_PARTS,
-              7,
-            ),
+          : serviceFiles(s, `${LASER}${F}acrylic-files.zip`, ACRYLIC_PRINT_PARTS, 5),
       );
     }
 

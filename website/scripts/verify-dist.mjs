@@ -35,11 +35,10 @@ const REQUIRED_ASSETS = [
   'images/brand/logo-dark.svg',
   'images/brand/favicon.png',
   'images/brand/hero-thermal-banner.png',
-  'images/build-v4/v4-cad-assembly.png',
-  'images/build-v4/v4-step-1-unbox-pcba.png',
-  'images/build-v4/v4-step-2-plug-modules.png',
-  'images/build-v4/v4-step-3-enclosure-screws.png',
   'images/thermal/real-v3-1080p-capture.png',
+  'images/v4/pcb-modules.png',
+  'images/v4/pcb-lepton.png',
+  'images/v4/fr4-battery.png',
 ];
 
 const errors = [];
@@ -70,7 +69,7 @@ if (legacyImgCount < 93) {
 
 // Verify the parts list ships its parts in the HTML, before any script runs
 const partlistHtml = readFileSync(join(DIST, 'docs/partlist/index.html'), 'utf8');
-for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', '505060', 'PPPC102LJBN-RC']) {
+for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', 'Adafruit 258', 'C585422']) {
   if (!partlistHtml.includes(needle)) {
     errors.push(`Missing part in /docs/partlist/: ${needle}`);
   }

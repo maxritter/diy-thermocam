@@ -15,8 +15,10 @@ const renders = [
   { src: '/images/v4/laser-exploded.jpg', w: 1600, h: 1067, cap: 'Acrylic case, exploded', bg: 'photo' },
   { src: '/images/v4/laser-sheet.jpg', w: 1600, h: 1067, cap: 'The acrylic plates as they come off the sheet', bg: 'photo' },
   { src: '/images/v4/laser-kit.jpg', w: 1600, h: 1200, cap: 'Everything for the acrylic build', bg: 'photo' },
-  { src: '/images/v4/pcb-modules.png', w: 1200, h: 924, cap: 'Board, module side: Teensy, Lepton and battery sockets', bg: 'cad' },
-  { src: '/images/v4/pcb-display.png', w: 1200, h: 924, cap: 'Board, display side: the 2 × 20 display socket', bg: 'cad' },
+  { src: '/images/v4/pcb-modules.png', w: 1200, h: 924, cap: 'Main board, module side: Teensy sockets, J2 for the Lepton carrier, battery plug', bg: 'cad' },
+  { src: '/images/v4/pcb-display.png', w: 1200, h: 924, cap: 'Main board, display side: the 2 × 20 display socket', bg: 'cad' },
+  { src: '/images/v4/pcb-carrier-socket.png', w: 1200, h: 924, cap: 'Lepton carrier: the socket the Lepton snaps into, and its supplies', bg: 'cad' },
+  { src: '/images/v4/pcb-carrier-header.png', w: 1200, h: 924, cap: 'Lepton carrier, other side: the 2 × 10 header that plugs into J2', bg: 'cad' },
 ];
 
 const jsonLd = buildBreadcrumbs([
@@ -27,14 +29,14 @@ const jsonLd = buildBreadcrumbs([
 
 <MarketingLayout
   title="Board and shell"
-  description="Renders of the DIY-Thermocam V4 board from KiCad and of the printed and laser-cut shells from build123d."
+  description="Renders of the DIY-Thermocam V4 main board and Lepton carrier from KiCad and of the printed and laser-cut shells from build123d."
   canonicalPath="/device-images/"
   jsonLd={jsonLd}
 >
   <section class="page-head">
     <div class="wrap">
       <h1>Board and shell</h1>
-      <p>Renders from the KiCad board and the build123d shell. Both are open: change them and order your own.</p>
+      <p>Renders from the KiCad boards and the build123d shell. All are open: change them and order your own.</p>
       <div class="status"><V4Status /></div>
     </div>
   </section>

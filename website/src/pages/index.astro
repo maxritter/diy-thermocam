@@ -36,18 +36,18 @@ const jsonLd = [
   <section id="camera" class="hero">
     <div class="wrap">
       <div class="hero-grid">
-        <div>
-          <V4Status compact />
-          <h1>Build your own <span class="hot">thermal camera</span></h1>
-          <p class="lead">
-            A handheld radiometric camera with a FLIR Lepton 3.5 and a Teensy 4.1. The board arrives fully
+        <div class="hero-copy">
+          <div data-reveal><V4Status compact /></div>
+          <h1 data-reveal style="--i:1">Build your own <span class="hl">thermal camera</span></h1>
+          <p class="lead" data-reveal style="--i:2">
+            A handheld radiometric camera with a FLIR Lepton 3.5 and a Teensy 4.1. Both boards arrive fully
             assembled: plug in four modules and close the case with eight screws. No soldering.
           </p>
-          <div class="cta">
+          <div class="cta" data-reveal style="--i:3">
             <a class="btn btn-primary" data-os-download href="/software/#download"><Icon name="download" /><span>Download Studio</span></a>
             <a class="btn btn-ghost" href="/docs/partlist/"><Icon name="list" /><span>See the parts list</span></a>
           </div>
-          <div class="hero-dl" role="group" aria-label="Studio and firmware downloads">
+          <div class="hero-dl" role="group" aria-label="Studio and firmware downloads" data-reveal style="--i:4">
             <span class="dl-label">Studio</span>
             <div class="dl-chips">
               {DOWNLOADS.map((d) => (
@@ -60,11 +60,12 @@ const jsonLd = [
             </div>
           </div>
         </div>
-        <div class="hero-views">
+        <div class="hero-views" data-reveal style="--i:2">
           <figure class="hero-shot">
             {views.map((v, i) => (
               <img id={`v-${v.id}`} role="tabpanel" aria-labelledby={`vt-${v.id}`} src={v.src} alt={v.alt} width="1600" height={v.h} hidden={i !== 0} fetchpriority={i === 0 ? 'high' : undefined} loading={i === 0 ? 'eager' : 'lazy'} />
             ))}
+            <span class="vf" aria-hidden="true"></span>
           </figure>
           <div class="thumbs" role="tablist" aria-label="Camera views">
             {views.map((v, i) => (
@@ -77,50 +78,67 @@ const jsonLd = [
         </div>
       </div>
       <dl class="specs">
-        <div class="spec"><dt><Icon name="sensor" class="spec-ic" />Sensor</dt><dd>FLIR Lepton 3.5</dd></div>
-        <div class="spec"><dt><Icon name="grid" class="spec-ic" />Resolution</dt><dd class="num">160 × 120 px</dd></div>
-        <div class="spec"><dt><Icon name="thermometer" class="spec-ic" />Range</dt><dd class="num">−10 to 450 °C</dd></div>
-        <div class="spec"><dt><Icon name="battery" class="spec-ic" />Battery</dt><dd class="num">2000 mAh, USB-C</dd></div>
-        <div class="spec"><dt><Icon name="award" class="spec-ic" />Licence</dt><dd>GPL-3.0</dd></div>
+        <div class="spec" data-reveal style="--i:0"><dt><Icon name="sensor" class="spec-ic" />Sensor</dt><dd data-scramble>FLIR Lepton 3.5</dd></div>
+        <div class="spec" data-reveal style="--i:1"><dt><Icon name="grid" class="spec-ic" />Resolution</dt><dd class="num" data-scramble>160 × 120 px</dd></div>
+        <div class="spec" data-reveal style="--i:2"><dt><Icon name="thermometer" class="spec-ic" />Range</dt><dd class="num" data-scramble>−10 to 450 °C</dd></div>
+        <div class="spec" data-reveal style="--i:3"><dt><Icon name="battery" class="spec-ic" />Battery</dt><dd class="num" data-scramble>1200 mAh, USB-C</dd></div>
+        <div class="spec" data-reveal style="--i:4"><dt><Icon name="award" class="spec-ic" />Licence</dt><dd data-scramble>GPL-3.0</dd></div>
       </dl>
+    </div>
+  </section>
+
+  <section class="stage" data-stage aria-labelledby="stage-h">
+    <div class="stage-pin">
+      <div class="wrap stage-grid">
+        <div class="stage-copy">
+          <h2 id="stage-h" class="stage-text" data-chars>Every pixel is a <span class="hl">temperature</span>.</h2>
+          <p class="stage-sub">
+            The Lepton 3.5 measures 160 × 120 points, almost nine times a second. Every picture keeps all 19,200
+            readings, so you can measure it again later in Studio.
+          </p>
+        </div>
+        <figure class="stage-shot">
+          <img src="/images/examples/house.jpg" alt="A house front in winter in the Ironblack palette: heat escapes around every window frame and under the eaves" width="1470" height="1024" loading="lazy" />
+        </figure>
+      </div>
     </div>
   </section>
 
   <section id="build" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2 class="big">Four steps from parts to pictures</h2>
-        <p>
-          You need a PH1 and a 2 mm flat screwdriver, tweezers and a USB-C cable. The
+        <h2 class="big" data-reveal>Four steps from parts to pictures</h2>
+        <p data-reveal style="--i:1">
+          You need a PH1 and a 2 mm flat screwdriver, 4 and 5 mm nut drivers, fine tweezers and a USB-C cable. The
           parts list sorts everything else into one order per shop, and says who can print or cut the shell.
         </p>
       </div>
       <div class="track-wrap">
-        <div class="track-rail ironbow" aria-hidden="true"></div>
+        <div class="track-rail" data-scrub aria-hidden="true"></div>
         <ol class="track">
-          <li class="step">
+          <li class="step" data-reveal style="--i:0">
             <div class="disc">1</div>
             <h3>Order the parts</h3>
-            <p>The assembled board from a fab, the electronics from DigiKey or Mouser.</p>
-            <figure class="photo"><img src="/images/v4/exploded.jpg" alt="Exploded render of every part: front shell, display, board with modules, battery, back shell" width="1333" height="1600" loading="lazy" /></figure>
+            <p>The two assembled boards from a fab, the electronics from DigiKey or Mouser.</p>
+            <figure class="photo" data-wipe style="--i:1"><img src="/images/v4/exploded.jpg" alt="Exploded render of every part: front shell, display, board with modules, battery, back shell" width="1333" height="1600" loading="lazy" /></figure>
           </li>
-          <li class="step">
+          <li class="step" data-reveal style="--i:1">
             <div class="disc">2</div>
             <h3>Plug in the modules</h3>
             <p>Push the Teensy and the Lepton into their sockets.</p>
-            <figure class="line"><img src="/images/v4/steps/shell-03.jpg" alt="Line drawing: the Lepton on its breakout in orange, lowered onto its screws on the board" width="1118" height="1000" loading="lazy" /></figure>
+            <figure class="line" data-wipe style="--i:2"><img src="/images/v4/steps/shell-02.jpg" alt="Line drawing: the Lepton on its carrier in orange, lowered onto its screws on the board" width="1118" height="1000" loading="lazy" /></figure>
           </li>
-          <li class="step">
+          <li class="step" data-reveal style="--i:2">
             <div class="disc">3</div>
             <h3>Close the shell</h3>
             <p>Stack board, battery and display on standoffs, then close the shell.</p>
-            <figure class="line"><img src="/images/v4/steps/shell-11.jpg" alt="Line drawing: the front shell and its four screws in orange" width="1118" height="1000" loading="lazy" /></figure>
+            <figure class="line" data-wipe style="--i:3"><img src="/images/v4/steps/shell-12.jpg" alt="Line drawing: the front shell and its four screws in orange" width="1118" height="1000" loading="lazy" /></figure>
           </li>
-          <li class="step">
+          <li class="step" data-reveal style="--i:3">
             <div class="disc">4</div>
             <h3>Connect Studio</h3>
             <p>Studio installs the firmware over USB-C and shows the live image.</p>
-            <figure class="dark"><img src="/images/examples/pcb.jpg" alt="A Studio export of a circuit board under load, with the hottest point marked" width="1470" height="1024" loading="lazy" /></figure>
+            <figure class="dark" data-wipe style="--i:4"><img src="/images/examples/pcb.jpg" alt="A Studio export of a circuit board under load, with the hottest point marked" width="1470" height="1024" loading="lazy" /></figure>
           </li>
         </ol>
       </div>
@@ -134,17 +152,17 @@ const jsonLd = [
   <section id="studio" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2 class="big">Studio, the desktop app</h2>
-        <p>Connect the camera over USB to see the live image, measure any point and save radiometric captures.</p>
+        <h2 class="big" data-reveal>Studio, the desktop app</h2>
+        <p data-reveal style="--i:1">Connect the camera over USB to see the live image, measure any point and save radiometric captures.</p>
       </div>
-      <StudioTabs />
+      <div data-reveal style="--i:2"><StudioTabs /></div>
 
       <div id="download" class="dl">
-        <div>
+        <div data-reveal>
           <h3>Download Studio and firmware</h3>
           <p>Free and open source. Studio installs the firmware over USB-C, so you don't need Teensy Loader. V3 cameras run the same firmware and Studio today.</p>
         </div>
-        <DownloadList />
+        <div data-reveal style="--i:1"><DownloadList /></div>
       </div>
     </div>
   </section>
@@ -152,14 +170,16 @@ const jsonLd = [
   <section id="gallery" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2 class="big">What it sees</h2>
-        <p>Every capture keeps the temperature of each pixel, so you can measure again later. These are example scenes, rendered the way Studio exports them.</p>
+        <h2 class="big" data-reveal>What it sees</h2>
+        <p data-reveal style="--i:1">Every capture keeps the temperature of each pixel, so you can measure again later. These are example scenes, rendered the way Studio exports them.</p>
       </div>
       <div class="gallery">
         {EXAMPLES.slice(0, 5).map((e, i) => (
-          <figure class={i < 2 ? 'g-wide' : 'g-third'}>
-            <img src={`/images/examples/${e.id}.jpg`} alt={`Example thermal image: ${e.title.toLowerCase()}, ${e.range}`} width={EXAMPLE_W} height={EXAMPLE_H} loading="lazy" />
-            <figcaption><b>{e.title}</b><span>{e.note}</span></figcaption>
+          <figure class={i < 2 ? 'g-wide' : 'g-third'} data-reveal style={`--i:${i % 3}`}>
+            <div class="g-img">
+              <img src={`/images/examples/${e.id}.jpg`} alt={`Example thermal image: ${e.title.toLowerCase()}, ${e.range}`} width={EXAMPLE_W} height={EXAMPLE_H} loading="lazy" />
+            </div>
+            <figcaption><b>{e.title}</b><span class="g-range num">{e.range} · {e.palette}</span><span>{e.note}</span></figcaption>
           </figure>
         ))}
       </div>
@@ -170,98 +190,133 @@ const jsonLd = [
   <section id="files" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2 class="big">Every file is in the repository</h2>
-        <p>Change the board, print a different shell or fork the firmware. GPL-3.0.</p>
+        <h2 class="big" data-reveal>Every file is in the repository</h2>
+        <p data-reveal style="--i:1">Change the board, print a different shell or fork the firmware. GPL-3.0.</p>
       </div>
       <div class="files">
-        <div class="file"><Icon name="chip" class="fic" /><h3>Board</h3><p>KiCad project, Gerbers, and BOM and placement files for JLCPCB, Seeed and PCBWay.</p><a href={`${SITE.repoUrl}/tree/master/hardware/pcb`}>hardware/pcb</a></div>
-        <div class="file"><Icon name="box" class="fic" /><h3>Shell</h3><p>build123d source with STEP, STL and 3MF exports. Prints without supports.</p><a href={`${SITE.repoUrl}/tree/master/hardware/enclosure`}>hardware/enclosure</a></div>
-        <div class="file"><Icon name="camera" class="fic" /><h3>Firmware</h3><p>C++17 for Teensy 4.1. Builds with arduino-cli.</p><a href={`${SITE.repoUrl}/tree/master/firmware`}>firmware</a></div>
-        <div class="file"><Icon name="file" class="fic" /><h3>Studio</h3><p>Tauri and Rust with a React interface. Reads every .DAT capture.</p><a href={`${SITE.repoUrl}/tree/master/app`}>app</a></div>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/pcb`} data-reveal style="--i:0"><Icon name="chip" class="fic" /><h3>Board</h3><p>KiCad project, Gerbers, and BOM and placement files for JLCPCB, Seeed and PCBWay.</p><span class="path">hardware/pcb <Icon name="arrowUpRight" class="pic" /></span></a>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/enclosure`} data-reveal style="--i:1"><Icon name="box" class="fic" /><h3>Shell</h3><p>build123d source with STEP, STL and 3MF exports, plus the laser-cut acrylic case.</p><span class="path">hardware/enclosure <Icon name="arrowUpRight" class="pic" /></span></a>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/firmware`} data-reveal style="--i:2"><Icon name="camera" class="fic" /><h3>Firmware</h3><p>C++17 for Teensy 4.1. Builds with arduino-cli.</p><span class="path">firmware <Icon name="arrowUpRight" class="pic" /></span></a>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/app`} data-reveal style="--i:3"><Icon name="file" class="fic" /><h3>Studio</h3><p>Tauri and Rust with a React interface. Reads every .DAT capture.</p><span class="path">app <Icon name="arrowUpRight" class="pic" /></span></a>
       </div>
     </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .hero { padding-block: 56px 64px; }
-  .hero-grid { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 56px; align-items: center; }
-  .hero h1 { font-size: clamp(40px, 5vw, 60px); line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
-  .hero h1 .hot { color: var(--hot); }
-  .lead { margin: 20px 0 0; font-size: 18px; line-height: 1.55; color: var(--muted); max-width: 46ch; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .hero { padding-block: 64px 0; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 64px; align-items: center; }
+  .hero h1 { font-size: clamp(44px, 5.1vw, 70px); line-height: 1.12; }
+  .hero h1 .hl { white-space: nowrap; }
+  .lead { margin: 26px 0 0; font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 50ch; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
   .cta .btn :global(.ic) { display: inline-flex; }
 
-  .hero-dl { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 14px; align-items: center; }
-  .dl-label { font-size: 13px; color: var(--dim); font-weight: 500; }
+  .hero-dl { margin-top: 28px; padding-top: 20px; border-top: 1px dashed var(--border-strong); display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 16px; align-items: center; }
+  .dl-label { font: 500 11.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); }
   .dl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .dl-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-2); color: var(--muted); font: 500 13px/1 var(--font-sans); text-decoration: none; transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease; }
-  .dl-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text); }
+  .dl-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; padding: 0 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-2); color: var(--muted); font: 400 13px/1 var(--font-mono); text-decoration: none; transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease; }
+  .dl-chip:hover { background: var(--surface-2); border-color: var(--hot); color: var(--text); }
   .dl-chip :global(.chip-ic), .dl-chip :global(.chip-ext) { display: inline-flex; flex: none; }
   .dl-chip :global(.chip-ic svg) { width: 14px; height: 14px; display: block; color: var(--dim); }
   .dl-chip :global(.chip-ext svg) { width: 13px; height: 13px; display: block; color: var(--dim); }
-  .dl-chip:hover :global(.chip-ic svg), .dl-chip:hover :global(.chip-ext svg) { color: var(--text); }
+  .dl-chip:hover :global(.chip-ic svg), .dl-chip:hover :global(.chip-ext svg) { color: var(--hot); }
 
-  .hero-shot { margin: 0; position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--cad); box-shadow: var(--shadow-window); border: 1px solid var(--border); }
+  /* The product shot framed like the camera's own viewfinder: four hot corners. */
+  .hero-shot { margin: 0; position: relative; overflow: hidden; background: var(--cad); box-shadow: var(--shadow-window); }
   .hero-shot img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .vf { position: absolute; inset: 14px; pointer-events: none; --c: var(--hot); --l: 22px; --t: 2px;
+    background:
+      linear-gradient(var(--c), var(--c)) top left / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) top left / var(--t) var(--l) no-repeat,
+      linear-gradient(var(--c), var(--c)) top right / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) top right / var(--t) var(--l) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom left / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom left / var(--t) var(--l) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom right / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom right / var(--t) var(--l) no-repeat; }
 
   .thumbs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
-  .thumb { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 0; border: 0; background: none; color: var(--dim); font: 500 12.5px/1.2 var(--font-sans); text-align: center; cursor: pointer; }
-  .thumb:focus-visible { border-radius: var(--radius); }
-  .thumb-img { display: block; width: 100%; aspect-ratio: 3 / 2; border-radius: var(--radius); overflow: hidden; background: var(--cad); border: 1.5px solid var(--border); opacity: 0.72; transition: opacity 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+  .thumb { display: flex; flex-direction: column; align-items: stretch; gap: 7px; padding: 0; border: 0; background: none; color: var(--dim); font: 500 11px/1.2 var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; text-align: left; cursor: pointer; }
+  .thumb-img { display: block; width: 100%; aspect-ratio: 3 / 2; overflow: hidden; background: var(--cad); outline: 1px solid var(--border); outline-offset: -1px; opacity: 0.62; filter: grayscale(0.7); transition: opacity 160ms ease, filter 160ms ease, outline-color 160ms ease; }
   .thumb-img img { width: 100%; height: 100%; object-fit: cover; }
   .thumb:hover { color: var(--text); }
-  .thumb:hover .thumb-img { opacity: 1; border-color: var(--border-strong); }
+  .thumb:hover .thumb-img { opacity: 1; filter: none; }
   .thumb[aria-selected='true'] { color: var(--text); }
-  .thumb[aria-selected='true'] .thumb-img { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-  .thumb-label { display: block; }
+  .thumb[aria-selected='true'] .thumb-img { opacity: 1; filter: none; outline: 2px solid var(--hot); outline-offset: -2px; }
 
-  .specs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--border); margin: 56px 0 0; }
-  .spec { padding: 18px 20px 0 0; }
+  .specs { display: grid; grid-template-columns: 1fr 1fr 1.05fr 1.25fr 0.8fr; border-block: 1px solid var(--border); margin: 72px 0 0; }
+  .spec { padding: 20px 20px 22px 0; }
   .spec + .spec { padding-left: 20px; border-left: 1px solid var(--border); }
-  .spec dt { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--dim); }
-  .spec :global(.spec-ic) { display: inline-flex; flex: none; color: var(--muted); }
-  .spec :global(.spec-ic svg) { width: 16px; height: 16px; display: block; }
-  .spec dd { margin: 6px 0 0; font-size: 15px; font-weight: 500; color: var(--text); }
+  .spec dt { display: flex; align-items: center; gap: 7px; font: 500 11.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); }
+  .spec :global(.spec-ic) { display: inline-flex; flex: none; color: var(--hot); }
+  .spec :global(.spec-ic svg) { width: 15px; height: 15px; display: block; }
+  .spec dd { margin: 12px 0 0; font: 400 25px/1.1 var(--font-pixel); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: clip; }
+
+  /* Scroll stage: pinned while the sentence lights up and the picture settles into place. */
+  .stage { position: relative; }
+  .stage.live { height: 220vh; }
+  .stage-pin { padding-block: 112px; }
+  .stage.live .stage-pin { position: sticky; top: 0; height: 100vh; display: grid; align-items: center; padding-block: 60px 24px; }
+  .stage-grid { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: 64px; align-items: center; }
+  .stage-text { font-size: clamp(38px, 4.6vw, 64px); line-height: 1.08; }
+  .stage-text :global(.w) { white-space: nowrap; }
+  .stage.live .stage-text :global(.ch) { opacity: 0.16; transition: opacity 180ms linear; }
+  .stage.live .stage-text :global(.ch.on) { opacity: 1; }
+  .stage.live .stage-text .hl { background: transparent; color: var(--text); transition: background-color 240ms ease, color 240ms ease; }
+  .stage.live .stage-text .hl:global(.on) { background: var(--hot); color: var(--on-accent); }
+  .stage-sub { margin: 26px 0 0; color: var(--muted); max-width: 46ch; }
+  .stage.live .stage-sub { opacity: 0; transform: translateY(10px); transition: opacity 500ms var(--ease-out), transform 600ms var(--ease-out); }
+  .stage.live.done .stage-sub { opacity: 1; transform: none; }
+  .stage-shot { position: relative; margin: 0; background: #0b0b0c; aspect-ratio: 1470 / 1024; overflow: hidden; }
+  .stage-shot img { width: 100%; height: 100%; display: block; }
+  .stage.live .stage-shot { transform: scale(calc(0.9 + 0.1 * var(--p, 1))); opacity: calc(0.35 + 0.65 * var(--p, 1)); transform-origin: 70% 50%; }
 
   .track-wrap { position: relative; }
-  .track { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; list-style: none; margin: 0; padding: 0; }
-  .track-rail { position: absolute; left: 22px; right: 22px; top: 21px; }
-  .step { position: relative; display: flex; flex-direction: column; }
-  .disc { position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font-weight: 600; font-size: 15px; }
-  .step h3 { margin-top: 18px; font-size: 18px; letter-spacing: -0.01em; }
-  .step p { margin: 6px 0 16px; color: var(--muted); font-size: 15px; }
-  .step figure { margin: auto 0 0; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--cad); aspect-ratio: 4 / 3; display: grid; place-items: center; }
+  .track { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
+  .track-rail { position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 1; background: var(--ironbow); transform-origin: left; transform: scaleX(var(--p, 1)); }
+  .step { position: relative; display: flex; flex-direction: column; padding: 28px 22px 22px; border-right: 1px solid var(--border); border-top: 1px solid var(--border); }
+  .disc { font: 400 56px/0.9 var(--font-pixel); color: var(--hot); }
+  .step h3 { margin-top: 22px; font-size: 26px; line-height: 1.1; }
+  .step p { margin: 8px 0 20px; color: var(--muted); font-size: 14.5px; }
+  .step figure { position: relative; margin: auto 0 0; overflow: hidden; background: var(--cad); aspect-ratio: 4 / 3; display: grid; place-items: center; }
   .step figure img { width: 100%; height: 100%; object-fit: contain; }
   .step figure.dark { background: #0b0b0c; }
   .step figure.line { background: #ffffff; }
   .step figure.photo img { object-fit: cover; }
   .step figure.dark img { object-fit: cover; object-position: 40% center; }
-  .after-track { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; color: var(--muted); font-size: 15px; }
+  .after-track { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: center; color: var(--muted); font-size: 14.5px; }
 
-  .dl { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 40px; align-items: start; scroll-margin-top: 80px; }
-  .dl h3 { font-size: 22px; letter-spacing: -0.02em; }
-  .dl p { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
+  .dl { margin-top: 72px; display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 48px; align-items: start; scroll-margin-top: 80px; }
+  .dl h3 { font-size: 30px; line-height: 1.1; }
+  .dl p { margin: 12px 0 0; color: var(--muted); font-size: 14.5px; }
 
-  .gallery { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 20px; }
+  .gallery { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 36px 20px; }
   .gallery figure { margin: 0; }
-  .gallery img { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #0b0b0c; }
-  .gallery figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); }
-  .gallery figcaption b { display: block; color: var(--text); font-weight: 600; font-size: 15px; }
+  .g-img { position: relative; overflow: hidden; background: #0b0b0c; cursor: crosshair; }
+  .gallery img { width: 100%; transition: transform 700ms var(--ease-out); }
+  .g-img:hover img { transform: scale(1.025); }
+  .gallery figcaption { margin-top: 12px; font-size: 14px; color: var(--muted); display: grid; gap: 3px; }
+  .gallery figcaption b { color: var(--text); font: 400 24px/1.15 var(--font-pixel); margin-bottom: 2px; }
+  .g-range { color: var(--accent); font: 500 11.5px/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
   .g-wide { grid-column: span 6; }
   .g-third { grid-column: span 4; }
 
-  .files { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border); }
-  .file { padding: 22px 22px 4px 0; }
-  .file + .file { padding-left: 22px; border-left: 1px solid var(--border); }
-  .file :global(.fic) { color: var(--dim); display: block; }
+  .files { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--border); }
+  .file { display: flex; flex-direction: column; padding: 26px 24px 22px; color: var(--text); text-decoration: none; transition: background-color 180ms ease; }
+  .file + .file { border-left: 1px solid var(--border); }
+  .file:hover { background: var(--bg-2); color: var(--text); }
+  .file :global(.fic) { color: var(--hot); display: block; }
   .file :global(.fic svg) { width: 22px; height: 22px; display: block; }
-  .file h3 { margin-top: 14px; font-size: 16px; }
-  .file p { margin: 6px 0 12px; color: var(--muted); font-size: 14px; }
-  .file a { font-size: 14px; font-weight: 500; text-decoration: none; }
+  .file h3 { margin-top: 22px; font-size: 26px; line-height: 1.1; }
+  .file p { margin: 8px 0 20px; color: var(--muted); font-size: 14px; }
+  .path { margin-top: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 13.5px; }
+  .path :global(.pic svg) { width: 14px; height: 14px; display: block; transition: transform 180ms var(--ease-out); }
+  .file:hover .path :global(.pic svg) { transform: translate(2px, -2px); }
 
   @media (prefers-reduced-motion: reduce) {
-    .dl-chip, .thumb-img { transition: none; }
+    .dl-chip, .thumb-img, .gallery img, .file, .path :global(.pic svg) { transition: none; }
+    .g-img:hover img { transform: none; }
   }
   @media (max-width: 900px) {
     .dl-chip { min-height: 44px; padding: 0 14px; font-size: 14px; }
@@ -271,26 +326,43 @@ const jsonLd = [
     .hero-dl { grid-template-columns: 1fr; gap: 6px; }
   }
   @media (max-width: 1000px) {
-    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
-    .specs { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 18px; }
+    .hero-grid, .stage-grid { grid-template-columns: 1fr; gap: 36px; }
+    /* One column: the camera comes straight after the headline, before the copy. */
+    .hero-grid { gap: 0; }
+    .hero-copy { display: contents; }
+    .hero-copy > :nth-child(1) { order: 1; }
+    .hero h1 { order: 2; }
+    .hero-views { order: 3; margin-top: 28px; }
+    .lead { order: 4; }
+    .cta { order: 5; }
+    .hero-dl { order: 6; }
+    .stage.live { height: 180vh; }
+    .stage.live .stage-pin { padding-block: 64px 16px; align-items: center; }
+    .stage-grid { gap: 22px; }
+    .stage-sub { margin-top: 16px; }
+    .stage.live .stage-sub { opacity: 1; transform: none; }
+    .specs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .spec:nth-child(4) { padding-left: 0; border-left: 0; }
-    .track { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 40px; }
-    .track-rail { display: none; }
+    .track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .dl { grid-template-columns: 1fr; gap: 20px; }
     .files { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .file:nth-child(3) { padding-left: 0; border-left: 0; }
+    .file:nth-child(3) { border-left: 0; }
+    .file:nth-child(n + 3) { border-top: 1px solid var(--border); }
   }
   @media (max-width: 600px) {
-    .hero { padding-block: 36px 48px; }
-    .specs { margin-top: 40px; }
+    .hero { padding-top: 28px; }
+    .hero h1 { font-size: clamp(38px, 11.4vw, 52px); }
+    .hero-dl { display: none; }
+    .specs { margin-top: 44px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .spec dd { font-size: 20px; white-space: normal; }
+    .stage-text { font-size: clamp(34px, 10.5vw, 46px); }
     .thumbs { gap: 6px; }
     .thumb-label { font-size: 11.5px; }
-    .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .spec, .spec + .spec { padding-left: 0; border-left: 0; padding-right: 12px; }
     .track { grid-template-columns: 1fr; }
     .g-wide, .g-third { grid-column: span 12; }
     .files { grid-template-columns: 1fr; }
-    .file + .file { padding-left: 0; border-left: 0; border-top: 1px solid var(--border); }
+    .file + .file { border-left: 0; border-top: 1px solid var(--border); }
     .cta .btn { width: 100%; }
-          }
+  }
 </style>

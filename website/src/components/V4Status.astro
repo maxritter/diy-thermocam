@@ -29,15 +29,15 @@ const { compact = false } = Astro.props;
 }
 
 <style>
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #f0a020; box-shadow: 0 0 0 3px var(--amber-soft); flex: none; }
-  .v4-pill { display: flex; width: fit-content; max-width: 100%; align-items: center; gap: 10px; margin: 0 0 22px; padding: 6px 12px 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-2); color: var(--muted); font-size: 13.5px; line-height: 1.4; }
+  .dot { width: 8px; height: 8px; background: #f0a020; box-shadow: 0 0 0 3px var(--amber-soft); flex: none; }
+  .v4-pill { display: flex; width: fit-content; max-width: 100%; align-items: center; gap: 10px; margin: 0 0 22px; padding: 6px 12px 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-2); color: var(--muted); font-size: 13px; line-height: 1.4; }
   .v4-pill b { color: var(--text); font-weight: 600; }
-  .v4-note { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--amber-soft); font-size: 14.5px; color: var(--muted); }
+  .v4-note { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--amber-soft); font-size: 14.5px; color: var(--muted); }
   .v4-note .dot { margin-top: 7px; }
   .v4-note b { color: var(--text); font-weight: 600; }
   .v4-note .body { margin: 4px 0 0; }
   @media (max-width: 600px) {
-    .v4-pill { border-radius: 10px; align-items: flex-start; }
+    .v4-pill { border-radius: var(--radius); align-items: flex-start; }
     .v4-pill .dot { margin-top: 5px; }
   }
 </style>

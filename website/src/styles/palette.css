@@ -1,6 +1,7 @@
-/* DIY-Thermocam design tokens, shared by the site, Starlight /docs/ and Studio.
-   QualityLayer's grounds (neutral, hairlines, one blue for actions) plus one identity motif:
-   the Ironbow scale the camera draws on screen. */
+/* DIY-Thermocam design tokens, shared by the site and Starlight /docs/.
+   A thermal camera you build yourself: a charcoal ground like a switched-off LCD (warm paper in light),
+   Geist Pixel for the words the camera would draw, Geist Mono for copy, and heat for emphasis:
+   the Ironbow scale the camera draws on screen, with its hot end as the one action colour. */
 
 @font-face {
   font-family: "Geist";
@@ -16,55 +17,76 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Geist Pixel";
+  src: url("/fonts/geist-pixel-square.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Pixel Line";
+  src: url("/fonts/geist-pixel-line.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
 :root,
 :root[data-theme="light"] {
   color-scheme: light;
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --bg: #ffffff;
-  --bg-2: #fafafa;
-  --surface: #ffffff;
-  --surface-2: #f4f4f5;
-  --border: #e6e6e6;
-  --border-strong: #cfcfd2;
-  --text: #171717;
-  --muted: #4d4d4d;
-  --dim: #6b6b6b;
-  --accent: #2076c5;
-  --accent-hover: #1a649f;
-  --accent-soft: rgb(32 118 197 / 8%);
-  --on-accent: #ffffff;
-  --amber-ink: #925c05;
-  --amber-soft: rgb(247 178 59 / 14%);
-  --hot: #e0661d;
-  --cad: #f4f6f8;
-  --shadow-window: 0 16px 48px rgb(0 0 0 / 10%);
+  --font-pixel: "Geist Pixel", "Geist Mono", ui-monospace, monospace;
+  --font-scan: "Geist Pixel Line", "Geist Pixel", "Geist Mono", ui-monospace, monospace;
+  --bg: #f4f2ec;
+  --bg-2: #eeebe3;
+  --surface: #faf9f5;
+  --surface-2: #e7e3d9;
+  --border: #dad5c9;
+  --border-strong: #bfb8a8;
+  --text: #171512;
+  --muted: #4a453e;
+  --dim: #69635a;
+  --accent: #b5460b;
+  --accent-hover: #963907;
+  --accent-soft: rgb(240 122 34 / 11%);
+  --on-accent: #170c04;
+  --hot: #f07a22;
+  --hot-hover: #f48d3f;
+  --cold: #3b237a;
+  --amber-ink: #8a5300;
+  --amber-soft: rgb(247 178 59 / 16%);
+  --cad: #eceeef;
+  --shadow-window: 0 18px 50px -12px rgb(40 24 8 / 18%);
   --ironbow: linear-gradient(90deg, #14163f 0%, #3b237a 18%, #8a2a7c 38%, #d2484a 58%, #f08a24 76%, #f9c74f 90%, #fff4c9 100%);
-  --radius: 8px;
-  --radius-lg: 12px;
-  --wrap: 1200px;
+  --radius: 3px;
+  --radius-lg: 4px;
+  --wrap: 1240px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0a0a0a;
-  --bg-2: #0f0f10;
-  --surface: #111112;
-  --surface-2: #19191b;
-  --border: #2e2e2e;
-  --border-strong: #454549;
-  --text: #ededed;
-  --muted: #a1a1a1;
-  --dim: #8f8f8f;
-  --accent: #5da3e5;
-  --accent-hover: #79b5ec;
-  --accent-soft: rgb(93 163 229 / 12%);
-  --on-accent: #06121f;
+  --bg: #121110;
+  --bg-2: #161514;
+  --surface: #1a1917;
+  --surface-2: #23211e;
+  --border: #2e2b27;
+  --border-strong: #46413b;
+  --text: #edebe6;
+  --muted: #aaa59c;
+  --dim: #8c867d;
+  --accent: #ff8f45;
+  --accent-hover: #ffa86b;
+  --accent-soft: rgb(255 122 31 / 13%);
+  --on-accent: #170c04;
+  --hot: #ff7a1f;
+  --hot-hover: #ff9447;
+  --cold: #8f7ae0;
   --amber-ink: #f7b23b;
   --amber-soft: rgb(247 178 59 / 12%);
-  --hot: #f59a45;
   --cad: #e9edf1;
-  --shadow-window: 0 16px 48px rgb(0 0 0 / 35%);
+  --shadow-window: 0 24px 60px -16px rgb(0 0 0 / 60%);
 }
 
 /* Older components still read the --tc-* names. */
@@ -82,10 +104,10 @@
   --tc-text-muted: var(--muted);
   --tc-text-dim: var(--dim);
   --tc-thermal: var(--hot);
-  --tc-thermal-hover: var(--hot);
+  --tc-thermal-hover: var(--hot-hover);
   --tc-thermal-soft: var(--amber-soft);
   --tc-thermal-line: var(--border-strong);
-  --tc-text-on-thermal: #ffffff;
+  --tc-text-on-thermal: var(--on-accent);
   --tc-accent: var(--accent);
   --tc-accent-hover: var(--accent-hover);
   --tc-accent-soft: var(--accent-soft);
@@ -96,8 +118,8 @@
   --tc-amber-line: var(--border-strong);
   --tc-shadow-sm: 0 1px 2px rgb(0 0 0 / 6%);
   --tc-shadow-window: var(--shadow-window);
-  --tc-radius-sm: 6px;
-  --tc-radius-md: 10px;
+  --tc-radius-sm: 3px;
+  --tc-radius-md: 4px;
   --tc-radius-lg: var(--radius-lg);
   --tc-container: var(--wrap);
 }

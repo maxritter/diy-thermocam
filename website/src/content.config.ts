@@ -27,7 +27,7 @@ const REPO_DOCS: RepoDocSpec[] = [
     sourceFile: 'hardware.md',
     title: 'Board and shell',
     description:
-      'The DIY-Thermocam V4 board, pin map, fab options, and the printed and laser-cut shells.',
+      'The DIY-Thermocam V4 main board and Lepton carrier, pin map, fab options, and the printed and laser-cut shells.',
   },
   {
     id: 'docs/firmware',

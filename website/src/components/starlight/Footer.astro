@@ -1,8 +1,32 @@
 ---
-/* Starlight's footer, plus the picture viewer for every docs page and the build guide. */
+/* Starlight's footer, plus the picture viewer for every docs page and the build guide,
+   and the heat line under the header that shows how far you have read. */
 import Default from '@astrojs/starlight/components/Footer.astro';
 import Lightbox from '../Lightbox.astro';
 ---
 
 <Default><slot /></Default>
 <Lightbox />
+
+<script>
+  const header = document.querySelector<HTMLElement>('header.header');
+  if (header && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let ticking = false;
+    const paint = () => {
+      ticking = false;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      header.style.setProperty('--read', (max > 0 ? scrollY / max : 0).toFixed(4));
+    };
+    addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(paint);
+        }
+      },
+      { passive: true },
+    );
+    paint();
+  }
+</script>

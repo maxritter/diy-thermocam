@@ -1,5 +1,5 @@
 ---
-import { MAKERS, PARTS } from '../data/parts';
+import { FAB, MAKERS, PARTS } from '../data/parts';
 import V4Status from './V4Status.astro';
 
 const printers = MAKERS.filter((m) => m.kind === 'print');
@@ -15,7 +15,6 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
       <legend>I already have</legend>
       <label class="opt"><input type="checkbox" name="own" value="teensy" /><span>Teensy 4.1</span></label>
       <label class="opt"><input type="checkbox" name="own" value="lepton" /><span>FLIR Lepton</span></label>
-      <label class="opt"><input type="checkbox" name="own" value="breakout" /><span>Lepton Breakout Board V2.0</span></label>
       <label class="opt"><input type="checkbox" name="own" value="display" /><span>3.2" display ER-TFTM032-3</span></label>
       <label class="opt"><input type="checkbox" name="own" value="sd" /><span>microSD card</span></label>
       <label class="opt"><input type="checkbox" name="own" value="cable" /><span>USB-C cable</span></label>
@@ -32,14 +31,14 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
     </fieldset>
     <fieldset>
       <legend>Board made by</legend>
-      <label class="opt"><input type="radio" name="fab" value="jlc" checked /><span>JLCPCB<small>Recommended, every part in its own stock</small></span></label>
+      <label class="opt"><input type="radio" name="fab" value="jlc" checked /><span>JLCPCB<small>Recommended. Pre-order one part, the Lepton socket</small></span></label>
       <label class="opt"><input type="radio" name="fab" value="seeed" /><span>Seeed Fusion</span></label>
       <label class="opt"><input type="radio" name="fab" value="pcbway" /><span>PCBWay</span></label>
     </fieldset>
     <fieldset>
       <legend>Shell</legend>
       <label class="opt"><input type="radio" name="shell" value="print" checked /><span>3D-printed shell<small>Sliding lens cap, captive tripod nut</small></span></label>
-      <label class="opt"><input type="radio" name="shell" value="laser" /><span>Laser-cut acrylic case<small>One 3 mm sheet, plus 10 small printed parts</small></span></label>
+      <label class="opt"><input type="radio" name="shell" value="laser" /><span>Laser-cut acrylic case<small>One 3 mm sheet, plus 7 small printed pieces</small></span></label>
     </fieldset>
     <fieldset data-kind="print">
       <legend>Printed by</legend>
@@ -77,6 +76,8 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
     <div class="status" id="copy-status" role="status"></div>
     <div id="orders">
       <ul class="ssr">
+        <li>V4 main board and Lepton carrier, assembled by JLCPCB, Seeed Fusion or PCBWay. At JLCPCB: {FAB.jlc.carrierWarn}</li>
+        <li>Battery floor (0.6 mm) and lid (0.4 mm): bare FR4 boards from any PCB maker</li>
         {PARTS.map((p) => (
           <li>{p.need ? `${p.need}× ` : ''}{p.name}: {p.d}</li>
         ))}
@@ -97,38 +98,38 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
   :root:has(#configurator) .sl-container { max-width: 66rem; }
   #orders { container-type: inline-size; }
   .cfg-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 4px; }
-  .cfg { position: sticky; top: calc(var(--sl-nav-height) + 20px); max-height: calc(100vh - var(--sl-nav-height) - 40px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-2); padding: 18px; display: grid; gap: 22px; }
+  .cfg { position: sticky; top: calc(var(--sl-nav-height) + 20px); max-height: calc(100vh - var(--sl-nav-height) - 40px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); padding: 18px; display: grid; gap: 22px; }
   .cfg fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; }
   .cfg fieldset[hidden] { display: none; }
   .cfg .fnote { margin: 4px 10px 0; font-size: 12.5px; line-height: 1.45; color: var(--dim); }
   .cfg legend { font-weight: 600; font-size: 14px; margin-bottom: 6px; padding: 0; color: var(--text); }
-  .opt { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px 10px; border: 1px solid transparent; border-radius: 8px; cursor: pointer; font-size: 14px; min-height: 40px; color: var(--text); }
+  .opt { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px 10px; border: 1px solid transparent; border-radius: var(--radius); cursor: pointer; font-size: 14px; min-height: 40px; color: var(--text); }
   .opt:hover { background: var(--surface-2); }
   .opt:has(input:checked) { background: var(--surface); border-color: var(--border-strong); }
   .opt input { margin: 2px 0 0; accent-color: var(--accent); width: 16px; height: 16px; }
   .opt small { display: block; color: var(--dim); font-size: 12.5px; margin-top: 1px; }
 
-  .sum { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
-  .sum .big { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); font-variant-numeric: tabular-nums; }
+  .sum { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; padding: 16px 18px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+  .sum .big { font: 400 34px/1.05 var(--font-pixel); color: var(--text); font-variant-numeric: tabular-nums; }
   .sum .lbl { font-size: 13px; color: var(--dim); }
   .sum .plus { font-size: 14px; color: var(--muted); }
   .sum .acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .status { font-size: 13px; color: var(--muted); min-height: 1em; margin-top: 6px; }
-  .cur { display: inline-flex; padding: 3px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg-2); }
+  .cur { display: inline-flex; padding: 3px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-2); }
   .cur label { position: relative; }
   .cur input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-  .cur span { display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .cur span { display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: var(--radius); font-size: 13px; font-weight: 500; color: var(--muted); }
   .cur input:checked + span { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--border-strong); }
   .cur input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-  .shop { margin-top: 18px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .shop { margin-top: 18px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
   .shop-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--bg-2); }
   .shop-h h3 { margin: 0; font-size: 16px; color: var(--text); }
   .shop-h .n { font-size: 13px; color: var(--dim); }
   .shop-h .st { margin-left: auto; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
   .prow { display: grid; grid-template-columns: 56px minmax(0, 1fr) 150px 96px; gap: 14px; align-items: center; padding: 12px 16px; }
   .prow + .prow { border-top: 1px solid var(--border); }
-  .thumb { width: 56px; height: 56px; border-radius: 8px; border: 1px solid var(--border); background: var(--cad); overflow: hidden; display: grid; place-items: center; color: #4b4f57; }
+  .thumb { width: 56px; height: 56px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--cad); overflow: hidden; display: grid; place-items: center; color: #4b4f57; }
   .thumb img { width: 100%; height: 100%; object-fit: cover; }
   .thumb.fit img { object-fit: contain; padding: 4px; background: #fff; }
   .thumb svg { width: 26px; height: 26px; }
@@ -138,21 +139,21 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
   .prow .links { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 13px; }
   .prow .links a { text-decoration: none; color: var(--accent); }
   .prow .links a:hover { text-decoration: underline; }
-  .prow select { width: 100%; height: 34px; border: 1px solid var(--border-strong); border-radius: 7px; background: var(--surface); color: var(--text); font: 13px var(--font-sans); padding: 0 8px; }
+  .prow select { width: 100%; height: 34px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); font: 13px var(--font-sans); padding: 0 8px; }
   .prow .p { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--text); }
   .prow .p small { display: block; color: var(--dim); font-size: 12px; }
-  .pending { display: inline-block; font-size: 12px; color: var(--amber-ink); background: var(--amber-soft); border-radius: 5px; padding: 1px 6px; }
+  .pending { display: inline-block; font-size: 12px; color: var(--amber-ink); background: var(--amber-soft); border-radius: var(--radius); padding: 1px 6px; }
 
   .files { padding: 14px 16px 16px; border-top: 1px solid var(--border); background: var(--bg-2); }
   .files b.h { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
-  .file { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-top: 6px; }
+  .file { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin-top: 6px; }
   .file code { background: none; border: 0; padding: 0; font-size: 12.5px; overflow-wrap: anywhere; color: var(--text); }
   .file small { display: block; color: var(--dim); font-size: 12.5px; }
   .file a { font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; color: var(--accent); }
   .files b.h.sub { margin-top: 14px; }
   .pf-note { margin: 10px 0 6px; font-size: 13px; color: var(--muted); }
   .pfs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .pf { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+  .pf { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
   #orders .pf code { background: none; border: 0; padding: 0; font-size: 12.5px; color: var(--text); overflow-wrap: anywhere; }
   .pf .q { font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
   .pf .fl { display: inline-flex; gap: 8px; }
@@ -162,7 +163,7 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
   .settings { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
   .settings li { margin: 3px 0; color: var(--muted); }
   .ssr { margin: 18px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
-  .empty { margin-top: 18px; padding: 28px; border: 1px dashed var(--border-strong); border-radius: 12px; text-align: center; color: var(--muted); }
+  .empty { margin-top: 18px; padding: 28px; border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); text-align: center; color: var(--muted); }
 
   @media (max-width: 1100px) {
     .cfg-grid { grid-template-columns: 1fr; }

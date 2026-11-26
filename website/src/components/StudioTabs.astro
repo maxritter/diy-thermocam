@@ -1,11 +1,13 @@
 ---
-/* Rendered from example scenes the way Studio draws them. The Studio redesign build replaces these with
-   screenshots from a real camera; swap them back to /images/studio/*.png then. */
+/* Real Studio screenshots, taken from Studio's interface with the demo camera playing the sample captures. */
+import AppShot from './AppShot.astro';
+
 const tabs = [
-  { id: 'live', label: 'Live view', img: '/images/examples/pcb.jpg', w: 1470, h: 1024, alt: 'A circuit board under load with the hottest and coldest points and a scale bar', cap: 'The live image with the hottest, coldest and centre points marked, and the scale beside it.' },
-  { id: 'measure', label: 'Measure', img: '/images/studio-features/measure.jpg', w: 1280, h: 1260, alt: 'A breaker panel with a box around the hot breaker and a line profile across the row', cap: 'Boxes, spots and lines, with a temperature profile along the line.' },
-  { id: 'isotherm', label: 'Isotherms', img: '/images/studio-features/isotherm.jpg', w: 1120, h: 840, alt: 'A house front with everything above 6 °C marked green', cap: 'Mark everything above a temperature: here, where the house loses heat.' },
-  { id: 'palettes', label: 'Palettes', img: '/images/studio-features/palettes.jpg', w: 1452, h: 1092, alt: 'The same house in four palettes', cap: 'The camera’s 19 palettes and five more for print and science.' },
+  { id: 'live', label: 'Live', shot: 'live' as const, alt: 'Studio Live view: a circuit board under load in Inferno, a box on the hot chip and a spot on the regulator, with the palette panel beside it', cap: 'The live image with a box on the hottest chip, the scale and histogram beside it, and every palette one click away.' },
+  { id: 'measure', label: 'Measure', shot: 'measure' as const, alt: 'Studio measuring a breaker panel: a box on the hot breaker, a line across the row, and charts of the readings over time and along the line', cap: 'Boxes, spots and lines on the image, a temperature profile along the line and a chart of every reading over time.' },
+  { id: 'editor', label: 'Captures', shot: 'editor' as const, alt: 'A saved capture of a solar panel opened in Studio in Rainbow, a box on the hot cell and its readings in the Measure tab', cap: 'Open a saved capture and measure it again: here the hot cell of a solar panel, in Rainbow.' },
+  { id: 'library', label: 'Library', shot: 'library' as const, alt: 'Studio’s Captures library in grid view with eight thermal pictures, each showing its hottest temperature', cap: 'Every capture on this computer and on the camera’s card, in one library.' },
+  { id: 'palettes', label: 'Palettes', shot: 'palettes' as const, alt: 'A house front in winter in Ironblack, with Studio’s palette grid open beside it', cap: 'The camera’s palettes plus Inferno, Magma, Plasma, Viridis and Turbo.' },
 ];
 ---
 
@@ -18,7 +20,7 @@ const tabs = [
   <div>
     {tabs.map((t, i) => (
       <div id={`p-${t.id}`} role="tabpanel" aria-labelledby={`t-${t.id}`} hidden={i !== 0}>
-        <div class="window"><img src={t.img} alt={t.alt} width={t.w} height={t.h} loading={i === 0 ? 'eager' : 'lazy'} /></div>
+        <div class="window"><AppShot name={t.shot} alt={t.alt} caption={t.cap} eager={i === 0} /></div>
         <p class="panel-cap">{t.cap}</p>
       </div>
     ))}
@@ -27,14 +29,16 @@ const tabs = [
 
 <style>
   .studio-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 10px; width: max-content; max-width: 100%; background: var(--bg-2); }
-  .tabs [role='tab'] { height: 36px; padding: 0 14px; border: 0; border-radius: 7px; background: none; color: var(--muted); font: 500 14px var(--font-sans); cursor: pointer; }
-  .tabs [role='tab'][aria-selected='true'] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 0 0 1px var(--border); }
-  .window { max-width: 920px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-window); background: #0b0b0c; }
-  .window img { width: 100%; aspect-ratio: 16 / 10; object-fit: contain; }
-  .panel-cap { max-width: 920px; margin: 14px 0 0; color: var(--muted); font-size: 15px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--border); width: max-content; max-width: 100%; }
+  .tabs [role='tab'] { height: 40px; padding: 0 16px; border: 0; border-radius: 0; background: none; color: var(--muted); font: 500 12px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: background-color 140ms ease, color 140ms ease; }
+  .tabs [role='tab'] + [role='tab'] { border-left: 1px solid var(--border); }
+  .tabs [role='tab']:hover { color: var(--text); background: var(--bg-2); }
+  .tabs [role='tab'][aria-selected='true'] { background: var(--hot); color: var(--on-accent); }
+  .window { max-width: 100%; }
+  .panel-cap { max-width: 920px; margin: 14px 0 0; color: var(--muted); font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) { .tabs [role='tab'] { transition: none; } }
   @media (max-width: 600px) {
     .tabs { width: 100%; }
-    .tabs [role='tab'] { flex: 1; padding: 0 8px; height: 44px; }
+    .tabs [role='tab'] { flex: 1 1 auto; padding: 0 6px; height: 44px; font-size: 10.5px; letter-spacing: 0.04em; white-space: nowrap; }
   }
 </style>

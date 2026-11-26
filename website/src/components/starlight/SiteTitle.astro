@@ -18,11 +18,11 @@ const inDocs = path.startsWith('/docs/') || path.startsWith('/building-instructi
 
 <style>
   .dt { display: flex; align-items: center; gap: 20px; min-width: 0; }
-  .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font: 600 14px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
   .brand:hover { color: var(--text); }
   .tabs-top { display: flex; gap: 2px; }
-  .tabs-top a { color: var(--muted); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; }
-  .tabs-top a[aria-current='page'] { color: var(--accent); }
+  .tabs-top a { color: var(--muted); text-decoration: none; font: 500 12.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; padding: 9px 10px; border-radius: var(--radius); }
+  .tabs-top a[aria-current='page'] { color: var(--text); box-shadow: inset 0 -2px 0 var(--hot); border-radius: 0; }
   .tabs-top a:hover { color: var(--text); }
   @media (max-width: 860px) { .tabs-top { display: none; } }
 </style>

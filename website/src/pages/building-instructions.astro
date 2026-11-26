@@ -18,7 +18,11 @@ const toHtml = (list: Token[]) =>
   marked
     .parser(Object.assign(list, { links: tokens.links }))
     .replaceAll('src="../website/public/images/', 'src="/images/')
-    .replaceAll('href="https://www.diy-thermocam.net/', 'href="/');
+    .replaceAll('href="https://www.diy-thermocam.net/', 'href="/')
+    /* Links to other repo files (written for GitHub, relative to docs/) point at GitHub on the site. */
+    .replace(/href="\.\.\/(?!website\/public\/)([^"]+)"/g, (_, p: string) =>
+      `href="https://github.com/maxritter/diy-thermocam/${p.endsWith('/') ? 'tree' : 'blob'}/master/${p}"`,
+    );
 
 interface Img { src: string; alt: string; w: number; h: number }
 interface Step { n: number; title: string; slug: string; html: string; img?: Img; studio: boolean }
@@ -106,10 +110,13 @@ flush();
 
 const railLabel: Record<string, string> = {
   'Lepton screws': 'Screws',
-  'Back shell': 'Shell',
   'Rear standoffs': 'Rear',
+  'Tripod nut and slider': 'Tripod',
+  'Capture button': 'Button',
+  'Battery and board': 'Board',
   'Middle standoffs': 'Middle',
-  'C-spacers': 'Spacers',
+  'Cradle and floor': 'Cradle',
+  'microSD card': 'Card',
   'Front shell': 'Front',
   'Lens cap': 'Cap',
 };
@@ -130,15 +137,19 @@ const howTo = {
   tool: [
     { '@type': 'HowToTool', name: 'PH1 Phillips screwdriver' },
     { '@type': 'HowToTool', name: '2 mm flat screwdriver' },
-    { '@type': 'HowToTool', name: 'Tweezers' },
+    { '@type': 'HowToTool', name: '4 mm nut driver' },
+    { '@type': 'HowToTool', name: '5 mm nut driver, at most 7.5 mm across' },
+    { '@type': 'HowToTool', name: 'Fine tweezers' },
   ],
   supply: [
-    { '@type': 'HowToSupply', name: 'DIY-Thermocam V4 board, assembled' },
+    { '@type': 'HowToSupply', name: 'DIY-Thermocam V4 main board, assembled' },
+    { '@type': 'HowToSupply', name: 'DIY-Thermocam V4 Lepton carrier, assembled' },
+    { '@type': 'HowToSupply', name: 'FR4 battery floor and lid' },
+    { '@type': 'HowToSupply', name: 'Medium-strength threadlocker' },
     { '@type': 'HowToSupply', name: 'Teensy 4.1' },
     { '@type': 'HowToSupply', name: 'FLIR Lepton 3.5' },
-    { '@type': 'HowToSupply', name: 'Lepton Breakout Board V2.0' },
     { '@type': 'HowToSupply', name: '3.2-inch SPI touch display ER-TFTM032-3' },
-    { '@type': 'HowToSupply', name: 'LiPo 505060, 2000 mAh' },
+    { '@type': 'HowToSupply', name: 'LiPo, Adafruit 258, 1200 mAh' },
   ],
   step: steps.map((s) => ({
     '@type': 'HowToStep',
@@ -164,7 +175,7 @@ const mac = DOWNLOADS[0];
 >
   <p class="dlead">{lead}</p>
   <div class="meta not-content">
-    <span class="chip"><Icon name="screwdriver" />PH1 and 2 mm flat screwdrivers</span>
+    <span class="chip"><Icon name="screwdriver" />PH1 and 2 mm flat screwdrivers, 4 and 5 mm nut drivers</span>
     <span class="chip">No soldering</span>
     <span class="chip">{steps.length} steps</span>
   </div>
@@ -230,7 +241,7 @@ const mac = DOWNLOADS[0];
 
 <style>
   .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; color: var(--muted); background: var(--surface); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 4px 10px; line-height: 1.35; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--muted); background: var(--surface); }
   .chip :global(svg) { width: 14px; height: 14px; display: block; }
 
   .rail { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); margin: 28px 0 8px; position: relative; }
@@ -239,7 +250,7 @@ const mac = DOWNLOADS[0];
   .rail a:hover { color: var(--text); }
   .rail .l { max-width: 100%; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rail a:last-child .l { overflow: visible; }
-  .rail .d { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font-weight: 600; font-size: 14px; }
+  .rail .d { width: 32px; height: 32px; border-radius: var(--radius); display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font-weight: 600; font-size: 14px; }
 
   .parts :global(table) { width: 100%; }
   .parts :global(td em) { display: block; color: var(--dim); font-size: 13px; font-style: normal; }
@@ -251,27 +262,27 @@ const mac = DOWNLOADS[0];
   .stepblock { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.5fr); gap: 24px; align-items: start; margin-top: 40px; padding-top: 40px; border-top: 1px solid var(--border); }
   .stepblock.wide { grid-template-columns: minmax(0, 1fr); }
   .stephead { display: flex; align-items: center; gap: 12px; }
-  .stephead .d { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--border-strong); font-weight: 600; flex: none; color: var(--text); }
+  .stephead .d { width: 34px; height: 34px; border-radius: var(--radius); display: grid; place-items: center; background: var(--hot); font: 600 14px/1 var(--font-mono); flex: none; color: var(--on-accent); }
   .stephead h2, .stephead h3 { margin: 0 !important; }
   .steptext { margin-top: 10px; max-width: 64ch; }
   .steptext :global(p) { color: var(--muted); }
   /* Line-art renders: white ground on purpose, the orange marks the parts you add in this step. */
-  .art { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #ffffff; }
+  .art { margin: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: #ffffff; }
   .art a { display: block; cursor: zoom-in; }
   .art a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .art img { display: block; width: 100%; height: auto; border: 0; border-radius: 0; }
-  .shot { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #0b0b0c; box-shadow: var(--shadow-window); }
+  .shot { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: #0b0b0c; box-shadow: var(--shadow-window); }
   .shot img { width: 100%; border: 0; border-radius: 0; }
   .dlrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 
   .acrylic { margin-top: 72px; }
-  .acrylic-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-2); }
+  .acrylic-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); }
   .acrylic-head h2 { margin: 0 !important; }
-  .acrylic-head img { width: 100%; height: auto; border-radius: 8px; }
+  .acrylic-head img { width: 100%; height: auto; border-radius: var(--radius); }
   .minirail { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-  .minirail a { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 10px 0 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font-size: 13px; text-decoration: none; }
+  .minirail a { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 10px 0 4px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 13px; text-decoration: none; }
   .minirail a:hover { border-color: var(--border-strong); color: var(--accent); }
-  .minirail .d { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-2); font-weight: 600; font-size: 12px; }
+  .minirail .d { width: 24px; height: 24px; border-radius: var(--radius); display: grid; place-items: center; background: var(--bg-2); font-weight: 600; font-size: 12px; }
   .outro { margin-top: 32px; }
 
   @media (max-width: 1000px) {

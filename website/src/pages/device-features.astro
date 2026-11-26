@@ -13,7 +13,7 @@ const specs = [
   ['layers', 'Frame rate', '8.7 fps'],
   ['display', 'Display', '3.2", 320 × 240, resistive touch'],
   ['sd', 'Storage', 'microSD, FAT32 or exFAT'],
-  ['battery', 'Battery', '2000 mAh LiPo, charges over USB-C'],
+  ['battery', 'Battery', '1200 mAh LiPo (or 2000 mAh), charges over USB-C'],
   ['chip', 'Processor', 'Teensy 4.1, ARM Cortex-M7 at 450 MHz'],
   ['file', 'Files', '14-bit radiometric .DAT, plus BMP from the camera'],
   ['open', 'Licence', 'GPL-3.0: board, shell, firmware and Studio'],
@@ -111,13 +111,13 @@ const jsonLd = buildBreadcrumbs([
   .cam-shot img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
   .specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--border); }
   .specs > div { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-content: start; column-gap: 12px; padding: 18px 20px 18px 0; border-bottom: 1px solid var(--border); }
-  .specs :global(.sic) { grid-row: span 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; background: var(--surface-2); color: var(--muted); }
+  .specs :global(.sic) { grid-row: span 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: var(--radius); background: var(--surface-2); color: var(--muted); }
   .specs :global(.sic svg) { width: 19px; height: 19px; display: block; }
   .specs dt { font-size: 13px; color: var(--dim); }
   .specs dd { margin: 4px 0 0; font-size: 15px; font-weight: 500; }
   .screens { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   .screens figure { margin: 0; }
-  .screens img { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #000; }
+  .screens img { width: 100%; border-radius: var(--radius-lg); border: 1px solid var(--border); background: #000; }
   .screens figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
   .tablewrap { overflow-x: auto; }
   .cmp { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; table-layout: fixed; }

@@ -20,7 +20,7 @@ const { part } = Astro.props;
 
 {part === 'intro' && (<>
 <p class="dlead">
-  DIY-Thermocam is a handheld thermal camera you put together from an assembled board, four modules and a printed shell.
+  DIY-Thermocam is a handheld thermal camera you put together from two assembled boards, four modules and a printed or laser-cut shell.
   These guides go from ordering parts to your first measurement.
 </p>
 
@@ -30,9 +30,9 @@ const { part } = Astro.props;
 {part === 'start' && (<>
 <ol class="path not-content">
   <li><a href="/docs/partlist/"><span class="pic"><img src="/images/v4/exploded.jpg" alt="" width="1333" height="1600" /></span><b>1 Order</b><small>Pick what you own, get one list per shop</small></a></li>
-  <li><a href="/building-instructions/"><span class="pic line"><img src="/images/v4/steps/shell-03.jpg" alt="" width="1118" height="1000" /></span><b>2 Build</b><small>No soldering: plug in, screw together</small></a></li>
+  <li><a href="/building-instructions/"><span class="pic line"><img src="/images/v4/steps/shell-02.jpg" alt="" width="1118" height="1000" /></span><b>2 Build</b><small>No soldering: plug in, screw together</small></a></li>
   <li><a href="/software/#download"><span class="pic dark"><img src="/images/examples/pcb.jpg" alt="" width="1470" height="1024" /></span><b>3 Install Studio</b><small>It installs the firmware over USB-C</small></a></li>
-  <li><a href="/docs/manual/"><span class="pic dark"><img src="/images/studio-features/measure.jpg" alt="" width="1280" height="1260" /></span><b>4 Measure</b><small>On the camera or live on your computer</small></a></li>
+  <li><a href="/docs/manual/"><span class="pic dark"><img src="/images/studio/web/studio-measure.webp" alt="" width="1600" height="1305" /></span><b>4 Measure</b><small>On the camera or live on your computer</small></a></li>
 </ol>
 
 <div class="note not-content"><Icon name="info" /><span>Studio installs firmware over USB-C. You only need Teensy Loader if Studio can't reach the Teensy.</span></div>
@@ -50,21 +50,21 @@ const { part } = Astro.props;
   .path { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
   .path::before { content: ''; position: absolute; left: 10%; right: 10%; top: 0; height: 3px; border-radius: 99px; background: var(--ironbow); }
   .path li { margin: 0; padding-top: 14px; }
-  .path a { display: grid; gap: 4px; text-decoration: none; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 8px 12px; background: var(--surface); height: 100%; }
+  .path a { display: grid; gap: 4px; text-decoration: none; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 8px 8px 12px; background: var(--surface); height: 100%; }
   .path a:hover { border-color: var(--border-strong); color: var(--text); }
-  .path .pic { display: block; aspect-ratio: 4 / 3; border-radius: 7px; overflow: hidden; background: var(--cad); margin-bottom: 6px; }
+  .path .pic { display: block; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; background: var(--cad); margin-bottom: 6px; }
   .path .pic.dark { background: #0b0b0c; }
   .path .pic.line { background: #fff; }
   .path .pic img { width: 100%; height: 100%; object-fit: cover; border: 0; border-radius: 0; }
   .path .pic.line img { object-fit: contain; }
   .path .pic.dark img { object-position: left top; }
-  .path b { font-size: 14px; padding-inline: 4px; }
+  .path b { font: 400 20px/1.2 var(--font-pixel); padding-inline: 4px; }
   .path small { color: var(--muted); font-size: 13px; padding-inline: 4px; line-height: 1.4; }
   .note { margin-top: 20px; }
   .guides { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
   .guides li { margin: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
   .guides a { display: inline-flex; align-items: center; gap: 10px; font-weight: 500; text-decoration: none; color: var(--accent); }
-  .guides :global(.gic) { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; background: var(--surface-2); color: var(--muted); flex: none; }
+  .guides :global(.gic) { width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--radius); background: var(--surface-2); color: var(--muted); flex: none; }
   .guides :global(.gic svg) { width: 16px; height: 16px; display: block; }
   .guides span { color: var(--muted); font-size: 14px; }
   @media (max-width: 860px) {

@@ -122,37 +122,6 @@ export const PARTS: Part[] = [
     ],
   },
   {
-    id: 'breakout',
-    own: 'breakout',
-    name: 'Lepton Breakout Board V2.0',
-    d: 'Teledyne FLIR 250-0577-00. Not the PureThermal board.',
-    img: '/images/parts/s-breakout.jpg',
-    shops: [
-      {
-        s: 'DigiKey',
-        dist: 'digikey',
-        us: 66,
-        eu: 58.59,
-        u: digikey('flir-lepton/250-0577-00/10385179'),
-      },
-      { s: 'Mouser', dist: 'mouser', us: 66, eu: 56.81, u: mouser('250-0577-00') },
-    ],
-  },
-  {
-    id: 'adapter',
-    name: 'Right-angle 2×10 female header',
-    d: 'Sullins PPPC102LJBN-RC. Pushes onto the breakout; its legs go into J2.',
-    icon: 'header',
-    shops: [
-      {
-        s: 'DigiKey',
-        dist: 'digikey',
-        eu: 1.4,
-        u: digikey('sullins-connector-solutions/PPPC102LJBN-RC/776021'),
-      },
-    ],
-  },
-  {
     id: 'display',
     own: 'display',
     name: '3.2" touch display',
@@ -170,34 +139,29 @@ export const PARTS: Part[] = [
   },
   {
     id: 'lipo',
-    name: 'LiPo 505060, 2000 mAh',
-    d: 'Protected, 5.0 × 50 × 60 mm, JST-PH plug. Check + and − against the board.',
+    name: 'LiPo, Adafruit 258, 1200 mAh',
+    d: 'Protected, 5 × 34 × 62 mm, JST-PH plug. About 2.5–3.5 hours of use. Two printed battery spacers hold it in the middle of the cradle.',
     img: '/images/parts/s-lipo.jpg',
-    usNote:
-      "ampul.eu ships from Czechia. Amazon's 2000 mAh cells are 10 mm thick and don't fit; the slim Adafruit cell does, with 1200 mAh.",
     shops: [
       {
-        s: 'ampul.eu',
-        alt: '505060, 2000 mAh',
-        warn: "ampul.eu doesn't list the plug: confirm JST-PH before you order.",
-        eu: 7.29,
-        u: same('https://ampul.eu/en/li-po-batteries/4394-li-pol-battery-2000mah-37v-505060'),
-      },
-      {
         s: 'Adafruit',
-        alt: 'Slim 1200 mAh',
-        n: 'LiPo, slim, 1200 mAh',
-        d: 'Adafruit 258: protected, 5 × 34 × 62 mm, JST-PH. Fits the cradle; about 40 % less runtime.',
         us: 9.95,
         u: same('https://www.adafruit.com/product/258'),
       },
       {
         s: 'DigiKey',
-        alt: 'Slim, at DigiKey',
-        n: 'LiPo, slim, 1200 mAh',
-        d: 'Adafruit 258: protected, 5 × 34 × 62 mm, JST-PH. Fits the cradle; about 40 % less runtime.',
+        dist: 'digikey',
         us: 9.95,
         u: digikey('adafruit-industries-llc/258/5054544'),
+      },
+      {
+        s: 'ampul.eu',
+        alt: 'More runtime: 505060, 2000 mAh',
+        n: 'LiPo 505060, 2000 mAh',
+        d: 'Protected, 5.0 × 50 × 60 mm, at most 5.0 mm thick. About 4–6 hours of use. Fits the cradle without the battery spacers.',
+        warn: "ampul.eu doesn't list the plug, lead length or polarity: confirm a JST-PH plug, at least 50 mm of lead, and its + and − against the board before you order.",
+        eu: 7.29,
+        u: same('https://ampul.eu/en/li-po-batteries/4394-li-pol-battery-2000mah-37v-505060'),
       },
     ],
   },
@@ -247,7 +211,8 @@ export const PARTS: Part[] = [
     need: 4,
     name: 'Hex standoff M2.5 × 20, female/female',
     d: 'Brass, nickel-plated, SW 5 · 005.02.205',
-    icon: 'screw',
+    img: '/images/parts/s-so20.jpg',
+    fit: true,
     shops: [
       {
         s: 'ettinger.de',
@@ -309,7 +274,7 @@ export const PARTS: Part[] = [
     pack: true,
     need: 4,
     name: 'Screw M2 × 18, cheese head, slotted',
-    d: 'Holds the Lepton breakout · 001.14.177',
+    d: 'Holds the Lepton carrier · 001.14.177',
     img: '/images/parts/s-m2x18.jpg',
     shops: [
       {
@@ -365,20 +330,20 @@ export const PARTS: Part[] = [
     ],
   },
   {
-    id: 'csk8',
+    id: 'csk6',
     pack: true,
     need: 4,
     shell: ['print'],
-    name: 'Countersunk screw M2.5 × 8',
-    d: 'A2, Phillips PH1, back · 001.12.238',
+    name: 'Countersunk screw M2.5 × 6',
+    d: 'A2, Phillips PH1, back · 001.12.228',
     img: '/images/parts/s-csk.jpg',
     shops: [
       {
         s: 'ettinger.de',
-        eu: 3.8,
+        eu: 2.4,
         u: ettinger(
-          'senkkopfschraube-iso7046-m2-5x8-stahl-rostfrei-a2-blank-phillips',
-          '001.12.238',
+          'senkkopfschraube-iso7046-m2-5x6-stahl-rostfrei-a2-blank-phillips',
+          '001.12.228',
         ),
       },
     ],
@@ -441,6 +406,15 @@ export const PARTS: Part[] = [
     ],
   },
   {
+    id: 'threadlocker',
+    name: 'Threadlocker, medium strength',
+    d: 'Removable, such as Loctite 243. A small drop on each Lepton screw tip.',
+    icon: 'screw',
+    anyIn: ['us', 'eu'],
+    anyD: 'Medium-strength, removable, such as Loctite 243. A small drop on each Lepton screw tip.',
+    shops: [],
+  },
+  {
     id: 'nut1420',
     name: 'Hex nut 1/4"-20 UNC',
     d: 'Zinc-plated steel, 7/16" across flats, 5.5 mm tall. Sold singly.',
@@ -465,6 +439,10 @@ export interface Fab {
   dir: string;
   min: string;
   note: string;
+  /** The Gerber zip's name after `diy-thermocam-v4.0-` (and `lepton-`); JLCPCB gets panels. */
+  gerbers: string;
+  /** Something to do before ordering the Lepton carrier from this fab. */
+  carrierWarn?: string;
   drawings?: boolean;
   up: [string, string, string];
 }
@@ -474,14 +452,18 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
     name: 'JLCPCB',
     url: 'https://jlcpcb.com/',
     dir: 'hardware/pcb/fab/jlcpcb/',
+    gerbers: 'panel-gerbers.zip',
     min: 'Assembly starts at 2 boards.',
-    note: "Every part is in JLCPCB's own stock.",
+    note: 'Both boards use Standard (two-sided) assembly.',
+    carrierWarn:
+      "Every part comes from JLCPCB's own stock except the Lepton socket J102 (Molex 105028-1001, C585422). JLCPCB usually has none, so pre-order it in the parts manager first; the minimum is 9.",
     up: ['Gerber step', 'Assembly: BOM', 'Assembly: CPL'],
   },
   seeed: {
     name: 'Seeed Fusion',
     url: 'https://www.seeedstudio.com/fusion_pcb.html',
     dir: 'hardware/pcb/fab/seeed/',
+    gerbers: 'gerbers.zip',
     min: 'Takes about 4 weeks.',
     note: 'Seeed buys the parts; the BOM links each one on LCSC. Also upload both assembly drawings.',
     drawings: true,
@@ -491,6 +473,7 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
     name: 'PCBWay',
     url: 'https://www.pcbway.com/pcb-assembly.html',
     dir: 'hardware/pcb/fab/pcbway/',
+    gerbers: 'gerbers.zip',
     min: '',
     note: 'PCBWay buys the parts; the notes column lists each LCSC number. Answer "no" to Chinese substitutes.',
     up: ['Gerber file', 'Assembly: BOM', 'Assembly: placement'],
@@ -500,10 +483,10 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
 /* Who makes the shell. Researched 26 November 2026 on each service's own pages.
    No service publishes a price for an uploaded part except JLC3DP, which charges MJF PA12 by weight
    ($0.275 per gram, at least $1 per part). Its estimates below use the STL volumes in
-   hardware/enclosure/exports at 1.01 g/cm³: the shell is 77 cm³ in 8 parts, the acrylic case's
-   printed parts 9 cm³ in 7 parts (the four C-spacers are one part on break-off tabs). The others price the files on upload.
+   hardware/enclosure/exports at 1.01 g/cm³: the shell is 76.2 cm³ in 8 pieces, the acrylic case's
+   printed parts 8.2 cm³ in 7 pieces, each under the $1 minimum. The others price the files on upload.
    Seeed's laser service is left out: its sheets stop at 20 × 20 cm and 2.55 mm acrylic, and the case
-   sheet is 213 × 195 mm with slots for 2.8–3.2 mm. */
+   sheet is 213.1 × 195.6 mm with slots for 2.8–3.2 mm. */
 /* The printed parts, one file per part as the services want them (JLC3DP takes 10 files per upload,
    Craftcloud any number; both want one part per file). Folders are under hardware/enclosure/exports/. */
 export interface PrintPart {
@@ -518,13 +501,11 @@ export const SHELL_PARTS: PrintPart[] = [
   { file: 'capture_button', qty: 1, dir: '3d-printed' },
   { file: 'slide_switch_cap', qty: 1, dir: '3d-printed' },
   { file: 'battery_cradle', qty: 1, dir: '3d-printed' },
-  { file: 'battery_lid', qty: 1, dir: '3d-printed' },
-  { file: 'cradle_spacer', qty: 4, dir: '3d-printed' },
+  { file: 'battery_spacer', qty: 2, dir: '3d-printed' },
 ];
 export const ACRYLIC_PRINT_PARTS: PrintPart[] = [
   { file: 'battery_cradle', qty: 1, dir: '3d-printed' },
-  { file: 'battery_lid', qty: 1, dir: '3d-printed' },
-  { file: 'cradle_spacer', qty: 4, dir: '3d-printed' },
+  { file: 'battery_spacer', qty: 2, dir: '3d-printed' },
   { file: 'tripod_mount', qty: 1, dir: 'laser-cut' },
   { file: 'display_spacer', qty: 2, dir: 'laser-cut' },
   { file: 'sd_chute', qty: 1, dir: 'laser-cut' },
@@ -574,8 +555,8 @@ export const MAKERS: Maker[] = [
       "Not SLA resin, even on discount: JLC3DP's Imagine Black is made for miniatures, and its Black Resin softens at 58–65 °C, which a camera in a hot car can reach.",
     ],
     est: {
-      shell: 25.66,
-      small: 7.08,
+      shell: 25.43,
+      small: 7,
       basis: '$0.275 per gram, at least $1 per part, before dyeing and shipping',
     },
   },
@@ -623,7 +604,7 @@ export const MAKERS: Maker[] = [
     name: 'Formulor',
     url: 'https://www.formulor.de/en/',
     short: 'Berlin, ships in Europe',
-    how: 'Acrylic GS black, opaque, 3 mm. No minimum order.',
+    how: 'Acrylic GS black, opaque, 3 mm, sheet format P2 (384 × 384 mm). No minimum order.',
     where: 'Ships from Germany: €5.90 within Germany, free from €50.',
     file: 'svg',
   },

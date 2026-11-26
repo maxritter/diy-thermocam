@@ -1,5 +1,6 @@
 ---
 import DownloadList from '../components/DownloadList.astro';
+import AppShot from '../components/AppShot.astro';
 import Icon from '../components/Icon.astro';
 import { EXAMPLES } from '../data/examples';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
@@ -11,8 +12,8 @@ const features = [
     icon: 'palette' as const,
     title: 'See it live',
     body: 'Plug in the camera and Studio finds it. The live image runs at the Lepton’s full 8.7 frames a second, with a fixed or automatic temperature range.',
-    points: ['The camera’s 19 palettes, plus Inferno, Viridis, Magma, Plasma, Turbo and your own', 'Hottest, coldest and centre point marked as you move', 'Standard view for quick work; Shift+P opens the Pro tools'],
-    img: '/images/studio-features/palettes.jpg', w: 1452, h: 1092, alt: 'The same house front in four palettes: Ironblack, Rainbow, Arctic and White-Hot',
+    points: ['The camera’s 19 palettes, plus Inferno, Viridis, Magma, Plasma, Turbo and your own', 'Hottest, coldest and centre point marked as you move', 'Every tool one click away: no modes to switch'],
+    shot: 'palettes' as const, alt: 'Studio Live view of a house front in winter in Ironblack, with the palette grid, colour scale and image options beside it',
   },
   {
     id: 'measure',
@@ -20,7 +21,7 @@ const features = [
     title: 'Measure anything',
     body: 'Place points and areas on the image and read their temperatures live, or on a saved capture.',
     points: ['Spots of 1 or 3 × 3 pixels, boxes, circles and polygons', 'Line profiles and the difference between two points', 'Emissivity per area, reflected temperature, and presets for skin, circuit boards, brick and metals'],
-    img: '/images/studio-features/measure.jpg', w: 1280, h: 1260, alt: 'A breaker panel with a box around the hot breaker, a line across the row and the temperature profile along it',
+    shot: 'measure' as const, alt: 'Studio measuring a breaker panel: a box on the hot breaker, a line across the row, and charts of the readings over time and along the line',
   },
   {
     id: 'watch',
@@ -28,7 +29,7 @@ const features = [
     title: 'Find what stands out',
     body: 'Mark every pixel above or below a temperature, and let Studio watch a reading over time.',
     points: ['Isotherms you drag to the temperature you care about', 'A live histogram of the whole frame', 'A plot over time, and alarms that start a capture or a recording when a value crosses a limit'],
-    img: '/images/studio-features/isotherm.jpg', w: 1120, h: 840, alt: 'A house front in grey with every surface above 6 °C marked green: windows and the edge of the roof',
+    shot: 'live' as const, alt: 'Studio Live view of a circuit board under load: a box on the hot chip, a spot on the regulator, and the histogram beside the colour scale',
   },
   {
     id: 'export',
@@ -54,7 +55,7 @@ const jsonLd = [
     operatingSystem: 'macOS, Windows, Linux',
     applicationCategory: 'MultimediaApplication',
     license: 'https://www.gnu.org/licenses/gpl-3.0.html',
-    screenshot: `${SITE.url}/images/studio-features/measure.jpg`,
+    screenshot: `${SITE.url}/images/studio/studio-measure.png`,
     featureList: features.map((f) => f.title),
     url: `${SITE.url}/software/`,
     downloadUrl: SITE.releasesUrl,
@@ -99,7 +100,7 @@ const jsonLd = [
           <p>{f.body}</p>
           <ul class="points">{f.points.map((p) => <li>{p}</li>)}</ul>
         </div>
-        <figure><img src={f.img} alt={f.alt} width={f.w} height={f.h} loading="lazy" /></figure>
+        {f.shot ? <AppShot name={f.shot} alt={f.alt} /> : <figure><img src={f.img} alt={f.alt} width={f.w} height={f.h} loading="lazy" /></figure>}
       </div>
     </section>
   ))}
@@ -109,6 +110,10 @@ const jsonLd = [
       <div class="section-head">
         <h2 class="big">Open saved captures</h2>
         <p>Studio opens the .DAT files any DIY-Thermocam saves. Change the palette, measure again and export. Your notes and areas go into a .thermo.json file next to the capture, so the .DAT stays readable on the camera.</p>
+      </div>
+      <div class="shots">
+        <AppShot name="library" alt="Studio’s Captures library in grid view with eight thermal pictures, each showing its hottest temperature" />
+        <AppShot name="editor" alt="A saved capture of a solar panel opened in Studio in Rainbow, a box on the hot cell and its readings in the Measure tab" />
       </div>
       <div class="try">
         <div><b>Try it without a camera</b><span>Download an example and open it in Studio’s editor.</span></div>
@@ -163,19 +168,21 @@ const jsonLd = [
 </MarketingLayout>
 
 <style>
+  .shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 28px; }
+  @media (max-width: 760px) { .shots { grid-template-columns: 1fr; } }
   .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
   .facts { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 18px 0 0; padding: 0; color: var(--muted); font-size: 14px; }
   .facts li { display: inline-flex; align-items: center; gap: 10px; }
   .facts .os { display: inline-flex; gap: 8px; color: var(--dim); }
   .facts .os :global(svg) { width: 16px; height: 16px; display: block; }
   .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
-  .jump a { font-size: 13.5px; text-decoration: none; color: var(--muted); padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+  .jump a { font-size: 13.5px; text-decoration: none; color: var(--muted); padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
   .jump a:hover { color: var(--text); border-color: var(--border-strong); }
 
   .feat-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 56px; align-items: center; }
   .flip .feat-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
   .flip .txt { order: 2; }
-  .txt :global(.fic) { width: 44px; height: 44px; display: grid; place-items: center; margin-bottom: 18px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+  .txt :global(.fic) { width: 44px; height: 44px; display: grid; place-items: center; margin-bottom: 18px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
   .txt :global(.fic svg) { width: 22px; height: 22px; display: block; }
   .txt p { margin: 14px 0 0; color: var(--muted); font-size: 17px; max-width: 46ch; }
   .points { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
