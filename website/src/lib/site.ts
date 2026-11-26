@@ -26,6 +26,21 @@ export const NAV_LINKS = [
   { label: 'Docs', href: '/docs/' },
 ] as const;
 
+/* The launch film, served from this site under a fixed name so a new cut replaces the file and every link
+   (README included) keeps working. `seconds` comes from ffprobe on the published file. */
+export const FILM = {
+  title: 'DIY-Thermocam V4, the film',
+  src: '/film/diy-thermocam-v4.mp4',
+  captions: '/film/diy-thermocam-v4.vtt',
+  poster: '/film/diy-thermocam-v4.jpg',
+  seconds: 0,
+} as const;
+
+export function filmLength(seconds: number = FILM.seconds): string {
+  const s = Math.round(seconds);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
 const DL_BASE = 'https://github.com/maxritter/diy-thermocam/releases/latest/download/';
 
 /* Studio installers. The release workflow has to upload files under these names. */

@@ -1,11 +1,12 @@
 ---
 import DownloadList from '../components/DownloadList.astro';
+import FilmButton from '../components/FilmButton.astro';
 import Icon from '../components/Icon.astro';
 import StudioTabs from '../components/StudioTabs.astro';
 import V4Status from '../components/V4Status.astro';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import { EXAMPLE_H, EXAMPLE_W, EXAMPLES } from '../data/examples';
-import { DOWNLOADS, SITE } from '../lib/site';
+import { DOWNLOADS, FILM, SITE } from '../lib/site';
 
 const views = [
   { id: 'front', label: 'Front', src: '/images/v4/view-front.jpg', h: 1066, alt: 'DIY-Thermocam V4 in its printed shell, the 3.2-inch display showing a live thermal image with spot temperatures' },
@@ -45,9 +46,10 @@ const jsonLd = [
           </p>
           <div class="cta" data-reveal style="--i:3">
             <a class="btn btn-primary" data-os-download href="/software/#download"><Icon name="download" /><span>Download Studio</span></a>
-            <a class="btn btn-ghost" href="/docs/partlist/"><Icon name="list" /><span>See the parts list</span></a>
+            {FILM.seconds > 0 ? <FilmButton /> : null}
+            <a class="btn btn-ghost cta-parts" href="/docs/partlist/"><Icon name="list" /><span>See the parts list</span></a>
           </div>
-          <div class="hero-dl" role="group" aria-label="Studio and firmware downloads" data-reveal style="--i:4">
+          <div class="hero-dl" role="group" aria-label="Studio, firmware and parts" data-reveal style="--i:4">
             <span class="dl-label">Studio</span>
             <div class="dl-chips">
               {DOWNLOADS.map((d) => (
@@ -57,6 +59,10 @@ const jsonLd = [
             <span class="dl-label">Firmware</span>
             <div class="dl-chips">
               <a class="dl-chip" href={SITE.firmwareUrl}><Icon name="chip" class="chip-ic" /><span>V3 &amp; V4 · latest release</span><Icon name="arrowUpRight" class="chip-ext" /></a>
+            </div>
+            <span class="dl-label">Parts</span>
+            <div class="dl-chips">
+              <a class="dl-chip" href="/docs/partlist/"><Icon name="list" class="chip-ic" /><span>Shops for your country, with prices</span></a>
             </div>
           </div>
         </div>
@@ -82,7 +88,7 @@ const jsonLd = [
         <div class="spec" data-reveal style="--i:1"><dt><Icon name="grid" class="spec-ic" />Resolution</dt><dd class="num" data-scramble>160 × 120 px</dd></div>
         <div class="spec" data-reveal style="--i:2"><dt><Icon name="thermometer" class="spec-ic" />Range</dt><dd class="num" data-scramble>−10 to 450 °C</dd></div>
         <div class="spec" data-reveal style="--i:3"><dt><Icon name="battery" class="spec-ic" />Battery</dt><dd class="num" data-scramble>1200 mAh, USB-C</dd></div>
-        <div class="spec" data-reveal style="--i:4"><dt><Icon name="award" class="spec-ic" />Licence</dt><dd data-scramble>GPL-3.0</dd></div>
+        <div class="spec" data-reveal style="--i:4"><dt><Icon name="award" class="spec-ic" />Licence</dt><dd data-scramble>Non-commercial</dd></div>
       </dl>
     </div>
   </section>
@@ -160,7 +166,7 @@ const jsonLd = [
       <div id="download" class="dl">
         <div data-reveal>
           <h3>Download Studio and firmware</h3>
-          <p>Free and open source. Studio installs the firmware over USB-C, so you don't need Teensy Loader. V3 cameras run the same firmware and Studio today.</p>
+          <p>Free for non-commercial use. Studio installs the firmware over USB-C, so you don't need Teensy Loader. V3 cameras run the same firmware and Studio today.</p>
         </div>
         <div data-reveal style="--i:1"><DownloadList /></div>
       </div>
@@ -191,7 +197,7 @@ const jsonLd = [
     <div class="wrap">
       <div class="section-head">
         <h2 class="big" data-reveal>Every file is in the repository</h2>
-        <p data-reveal style="--i:1">Change the board, print a different shell or fork the firmware. GPL-3.0.</p>
+        <p data-reveal style="--i:1">Change the board, print a different shell or fork the firmware. Free for non-commercial use.</p>
       </div>
       <div class="files">
         <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/pcb`} data-reveal style="--i:0"><Icon name="chip" class="fic" /><h3>Board</h3><p>KiCad project, Gerbers, and BOM and placement files for JLCPCB, Seeed and PCBWay.</p><span class="path">hardware/pcb <Icon name="arrowUpRight" class="pic" /></span></a>
@@ -211,6 +217,8 @@ const jsonLd = [
   .lead { margin: 26px 0 0; font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 50ch; }
   .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
   .cta .btn :global(.ic) { display: inline-flex; }
+  /* On wider screens the parts list is a row under the downloads; on phones, where that block is hidden, a button. */
+  .cta .cta-parts { display: none; }
 
   .hero-dl { margin-top: 28px; padding-top: 20px; border-top: 1px dashed var(--border-strong); display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 16px; align-items: center; }
   .dl-label { font: 500 11.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); }
@@ -353,6 +361,7 @@ const jsonLd = [
     .hero { padding-top: 28px; }
     .hero h1 { font-size: clamp(38px, 11.4vw, 52px); }
     .hero-dl { display: none; }
+    .cta .cta-parts { display: inline-flex; }
     .specs { margin-top: 44px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .spec dd { font-size: 20px; white-space: normal; }
     .stage-text { font-size: clamp(34px, 10.5vw, 46px); }

@@ -54,7 +54,7 @@ const jsonLd = [
     name: 'DIY-Thermocam Studio',
     operatingSystem: 'macOS, Windows, Linux',
     applicationCategory: 'MultimediaApplication',
-    license: 'https://www.gnu.org/licenses/gpl-3.0.html',
+    license: 'https://polyformproject.org/licenses/noncommercial/1.0.0/',
     screenshot: `${SITE.url}/images/studio/studio-measure.png`,
     featureList: features.map((f) => f.title),
     url: `${SITE.url}/software/`,
@@ -81,7 +81,7 @@ const jsonLd = [
       <ul class="facts">
         <li><span class="os" aria-hidden="true"><Icon name="apple" /><Icon name="windows" /><Icon name="linux" /></span>macOS, Windows and Linux</li>
         <li>Works with V3 and V4 cameras</li>
-        <li>Free, GPL-3.0</li>
+        <li>Free for non-commercial use</li>
       </ul>
       <nav class="jump" aria-label="On this page">
         {features.map((f) => <a href={`#${f.id}`}>{f.title}</a>)}

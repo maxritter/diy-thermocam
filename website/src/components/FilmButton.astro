@@ -1,0 +1,53 @@
+---
+/* "Watch the film" with its length, as on qualitylayer.dev. The film plays in a dialog on the page, with
+   captions; without JavaScript the button is a plain link to the MP4. */
+import { FILM, filmLength } from '../lib/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const length = filmLength();
+---
+
+<a class:list={['btn btn-ghost film-open', className]} href={FILM.src} aria-label={`Watch the film, ${length}`}>
+  <Icon name="play" /><span>Watch the film</span><span class="dur">{length}</span>
+</a>
+
+<dialog class="film-dlg" aria-label={FILM.title}>
+  <button class="film-close" type="button" aria-label="Close the film"><Icon name="close" /></button>
+  <video controls playsinline preload="none" poster={FILM.poster} width="1920" height="1080">
+    <source src={FILM.src} type="video/mp4" />
+    <track kind="captions" src={FILM.captions} srclang="en" label="English" />
+  </video>
+</dialog>
+
+<script>
+  for (const open of document.querySelectorAll<HTMLAnchorElement>('a.film-open')) {
+    const dialog = open.nextElementSibling as HTMLDialogElement | null;
+    const video = dialog?.querySelector('video');
+    if (!dialog || !video) continue;
+    open.addEventListener('click', (e) => {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      dialog.showModal();
+      video.play().catch(() => {});
+    });
+    dialog.querySelector('.film-close')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => video.pause());
+  }
+</script>
+
+<style>
+  .dur { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .film-dlg { width: min(1200px, 94vw); max-width: none; padding: 0; border: 1px solid var(--border-strong); background: #000; overflow: visible; }
+  .film-dlg::backdrop { background: rgb(0 0 0 / 0.82); }
+  .film-dlg video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }
+  .film-close { position: absolute; top: -44px; right: 0; width: 36px; height: 36px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; }
+  .film-close :global(svg) { width: 22px; height: 22px; display: block; }
+  .film-close:focus-visible { outline: 2px solid var(--hot); }
+</style>

@@ -4,13 +4,13 @@
 
 <h1>DIY-Thermocam<br><sub>Build your own thermal camera</sub></h1>
 
-**An open-source thermal camera that knows the temperature of every pixel.**<br>
+**A thermal camera that knows the temperature of every pixel. Every file to build it is public.**<br>
 Two ready-made boards, a FLIR Lepton and a printed case, put together with screwdrivers. No soldering.
 
 <a href="https://github.com/maxritter/diy-thermocam/releases"><img src="https://img.shields.io/github/v/release/maxritter/diy-thermocam?sort=semver&amp;style=for-the-badge&amp;label=latest&amp;color=e8661a&amp;labelColor=30363d" alt="Latest release"></a>
 <a href="https://github.com/maxritter/diy-thermocam/releases"><img src="https://img.shields.io/github/downloads/maxritter/diy-thermocam/total?style=for-the-badge&amp;color=e8661a&amp;labelColor=30363d" alt="Downloads"></a>
 <a href="https://github.com/maxritter/diy-thermocam"><img src="https://img.shields.io/github/stars/maxritter/diy-thermocam?style=for-the-badge&amp;color=e8661a&amp;labelColor=30363d" alt="Stars"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-e8661a?style=for-the-badge&amp;labelColor=30363d" alt="License: GPL-3.0"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-non--commercial-e8661a?style=for-the-badge&amp;labelColor=30363d" alt="License: non-commercial"></a>
 
 <p>
   <a href="#build-one">Build</a> •
@@ -123,6 +123,16 @@ Turn on the pre-commit hook with `git config core.hooksPath .githooks`. Measured
 
 ## License
 
-GPL-3.0 ([LICENSE](LICENSE)). Created by [Max Ritter](https://maxritter.net) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
+You may build DIY-Thermocam for yourself, study it, change it and share your changes, for personal, educational and other non-commercial use. Selling boards, kits, cameras or the software needs a commercial license.
+
+| Part | License |
+| --- | --- |
+| Hardware and documentation | CC BY-NC-SA 4.0 |
+| DIY-Thermocam Studio and the website | PolyForm Noncommercial 1.0.0 |
+| Firmware | GPL v3.0 |
+
+The DIY-Thermocam name and logo are trademarks ([TRADEMARKS.md](TRADEMARKS.md)). Releases up to v4.0.0 keep the GPL terms they shipped with. Details: [LICENSE](LICENSE).
+
+Created by [Max Ritter](https://maxritter.net) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
 Thanks to [Joe-C](http://joe-c.de/pages/projekte/thermovision.php) for ThermoVision, a Windows viewer for `.DAT` files, and to [helmarw](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b), whose community enclosure inspired details of the printed shell.
