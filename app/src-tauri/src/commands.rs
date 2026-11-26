@@ -13,7 +13,10 @@ use tauri::{Emitter, State};
 
 use crate::card::LiveCard;
 use crate::recorder::{on_camera_lost, record_frame, RecorderHandles};
-use crate::state::{release_client, stop_stream_and_join, ActiveTransport, AppState};
+use crate::state::{
+    release_client, spawn_keepalive, stop_stream_and_join, ActiveTransport, AppState,
+    KEEPALIVE_INTERVAL,
+};
 use thermocam_core::card::{list_card_dir, read_card_file};
 
 use thermocam_core::dat::{ThermalDat, ThermoSidecar};
@@ -101,6 +104,12 @@ pub async fn cmd_connect(
         };
         let hello = active.hello().map_err(|e| ConnectError::from(&e))?;
         *client_arc.lock().map_err(|e| other(e.to_string()))? = Some(active);
+        spawn_keepalive(
+            Arc::clone(&client_arc),
+            Arc::clone(&streaming),
+            Arc::clone(&stream_gen),
+            KEEPALIVE_INTERVAL,
+        );
         if let Ok(mut s) = serial_slot.lock() {
             *s = Some(format!("{:016x}", hello.teensy_uid));
         }
@@ -292,6 +301,7 @@ pub async fn cmd_stop_stream(state: State<'_, AppState>) -> Result<(), String> {
                 });
             }
         }
+        spawn_keepalive(client_arc, streaming, stream_gen, KEEPALIVE_INTERVAL);
         Ok(())
     })
     .await

@@ -197,6 +197,46 @@ pub fn release_client(slot: &Mutex<Option<ActiveTransport>>) -> bool {
     }
 }
 
+/// How often the keep-alive pings an idle camera; the firmware ends a session after 5 s of
+/// silence (`DEFAULT_HEARTBEAT_MS` in `firmware/src/core/tc_proto_v2.h`).
+pub const KEEPALIVE_INTERVAL: Duration = Duration::from_millis(1500);
+
+/// Keeps the camera's session open while Studio is connected but not streaming (Live paused,
+/// another page, between connect and the first stream). The stream loop pings while it runs;
+/// without this, a pause longer than 5 s ended the session and Studio showed the camera as
+/// lost while still holding its port. Stops when a new stream generation starts, when
+/// streaming resumes, or when the client is released. Packets that arrive meanwhile (pongs)
+/// are drained so they do not pile up.
+pub fn spawn_keepalive(
+    client: Arc<Mutex<Option<ActiveTransport>>>,
+    streaming: Arc<AtomicBool>,
+    stream_gen: Arc<AtomicU64>,
+    interval: Duration,
+) -> thread::JoinHandle<()> {
+    let my_gen = stream_gen.load(Ordering::SeqCst);
+    thread::spawn(move || {
+        let started = std::time::Instant::now();
+        let step = Duration::from_millis(10).min(interval);
+        let mut waited = Duration::ZERO;
+        loop {
+            if stream_gen.load(Ordering::SeqCst) != my_gen || streaming.load(Ordering::SeqCst) {
+                return;
+            }
+            if waited >= interval {
+                waited = Duration::ZERO;
+                let Ok(mut guard) = client.lock() else { return };
+                let Some(c) = guard.as_mut() else { return };
+                let _ = c.send_ping_nowait(started.elapsed().as_micros() as u64);
+                let _ = c.poll_packets(Duration::from_millis(1));
+            } else if client.lock().map(|g| g.is_none()).unwrap_or(true) {
+                return;
+            }
+            thread::sleep(step);
+            waited += step;
+        }
+    })
+}
+
 pub fn resolve_palette(state: &AppState, id: &str) -> Result<Palette, String> {
     if let Ok(p) = find_palette(id) {
         return Ok(p);
@@ -223,6 +263,41 @@ mod tests {
         let slot = Mutex::new(Some(sim_client()));
         assert!(release_client(&slot));
         assert!(slot.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn keepalive_stops_when_the_stream_starts_again() {
+        let client = Arc::new(Mutex::new(Some(sim_client())));
+        let streaming = Arc::new(AtomicBool::new(false));
+        let gen = Arc::new(AtomicU64::new(7));
+        let handle = spawn_keepalive(
+            Arc::clone(&client),
+            Arc::clone(&streaming),
+            Arc::clone(&gen),
+            Duration::from_millis(20),
+        );
+        thread::sleep(Duration::from_millis(80));
+        assert!(!handle.is_finished(), "pings while connected and idle");
+        gen.fetch_add(1, Ordering::SeqCst);
+        thread::sleep(Duration::from_millis(80));
+        assert!(
+            handle.is_finished(),
+            "a new stream generation ends the keep-alive"
+        );
+    }
+
+    #[test]
+    fn keepalive_stops_when_the_client_is_released() {
+        let client = Arc::new(Mutex::new(Some(sim_client())));
+        let handle = spawn_keepalive(
+            Arc::clone(&client),
+            Arc::new(AtomicBool::new(false)),
+            Arc::new(AtomicU64::new(0)),
+            Duration::from_millis(20),
+        );
+        release_client(&client);
+        thread::sleep(Duration::from_millis(80));
+        assert!(handle.is_finished());
     }
 
     #[test]

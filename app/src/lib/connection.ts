@@ -3,7 +3,8 @@
  *
  * - Nothing starts by itself except a real Thermocam: the port poll (every 2 s) connects one
  *   when its port appears. The demo camera starts only when a person chooses it.
- * - An unplug keeps the last image ("lost") and reconnects when the port comes back.
+ * - An unplug keeps the last image ("lost") and reconnects when the port comes back; a
+ *   dropped session whose port stayed is retried every few polls.
  * - A port that is busy or refused shows its card with Try again; the poll does not keep
  *   knocking on the same port, only on one that left and came back.
  */
@@ -28,7 +29,12 @@ export interface Machine {
   known: readonly string[];
   /** A camera waits in update mode (HalfKay on USB, no serial port). */
   updateMode: boolean;
+  /** Polls since a lost camera's port, still present, was last tried. */
+  lostPolls: number;
 }
+
+/** A lost camera whose port stays present is retried after this many polls (about 6 s). */
+export const LOST_RETRY_POLLS = 3;
 
 export type ConnEvent =
   /** The poll: Thermocam serial ports present now, and whether HalfKay is on USB. */
@@ -54,7 +60,7 @@ export type Effect =
   | { type: "notify"; text: string };
 
 export function initialConnection(): Machine {
-  return { state: { name: "none" }, known: [], updateMode: false };
+  return { state: { name: "none" }, known: [], updateMode: false, lostPolls: 0 };
 }
 
 export function kindOf(port: string): ConnKind {
@@ -83,11 +89,21 @@ export function step(m: Machine, ev: ConnEvent): { machine: Machine; effects: Ef
         ...m,
         known: ev.ports,
         updateMode: ev.updateMode && ev.ports.length === 0,
+        lostPolls: 0,
       };
       // A refused camera that was unplugged takes its card with it.
       if (s.name === "error" && !ev.ports.includes(s.port)) next.state = { name: "none" };
       const target = appeared[0];
-      if (target === undefined) return { machine: next, effects: [] };
+      if (target === undefined) {
+        // The session ended but the port stayed (the camera restarted, a heartbeat ran out):
+        // the port never appears again, so try it again every few polls.
+        if (s.name === "lost" && s.kind === "camera" && ev.ports.includes(s.port)) {
+          const polls = m.lostPolls + 1;
+          if (polls >= LOST_RETRY_POLLS) return connecting(next, s.port, true);
+          return { machine: { ...next, lostPolls: polls }, effects: [] };
+        }
+        return { machine: next, effects: [] };
+      }
       switch (s.name) {
         case "none":
         case "error":

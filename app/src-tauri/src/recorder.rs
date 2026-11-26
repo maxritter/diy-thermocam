@@ -107,6 +107,14 @@ pub fn start_recording(
     if state.client.lock()?.is_none() {
         return Err(CmdError::not_connected());
     }
+    // Frames reach the writer only from the stream loop: without a running stream a recording
+    // would leave an empty folder behind (a dropped session, or Live paused).
+    if !state.streaming.load(std::sync::atomic::Ordering::SeqCst) {
+        return Err(CmdError::new(
+            "not_streaming",
+            "Live isn't receiving frames from the camera.",
+        ));
+    }
     let mut slot = state.recording.lock()?;
     if slot.is_some() {
         return Err(CmdError::new(

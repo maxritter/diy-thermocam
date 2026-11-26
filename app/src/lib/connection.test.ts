@@ -188,6 +188,49 @@ describe("connection rules", () => {
     expect(m.state).toEqual({ name: "lost", port: CAM, kind: "camera" });
   });
 
+  test("a lost camera whose port never left is retried every few polls", () => {
+    // The session ended (the camera restarted, or a pause outlived its heartbeat) while the
+    // USB port stayed: the port never "appears" again, so the poll retries it instead.
+    const { trace } = run([
+      ports([CAM]),
+      { type: "connected", port: CAM },
+      { type: "unplugged" },
+      ports([CAM]),
+      ports([CAM]),
+      ports([CAM]),
+      { type: "failed", port: CAM, kind: "protocol", detail: "no answer" },
+      ports([CAM]),
+      ports([CAM]),
+      ports([CAM]),
+    ]);
+    expect(trace.map((t) => t.state)).toEqual([
+      `connecting:${CAM}`,
+      `streaming:${CAM}`,
+      `lost:${CAM}`,
+      `lost:${CAM}`,
+      `lost:${CAM}`,
+      `connecting:${CAM}`,
+      `lost:${CAM}`,
+      `lost:${CAM}`,
+      `lost:${CAM}`,
+      `connecting:${CAM}`,
+    ]);
+    expect(trace[5].effects).toEqual([{ type: "connect", port: CAM }]);
+  });
+
+  test("a lost demo camera waits for its replug, not the poll", () => {
+    const { m } = run([
+      { type: "demo" },
+      { type: "connected", port: DEMO_PORT },
+      { type: "unplugged" },
+      ports([]),
+      ports([]),
+      ports([]),
+      ports([]),
+    ]);
+    expect(m.state.name).toBe("lost");
+  });
+
   test("Disconnect stops, and the poll does not reconnect the same camera", () => {
     const { m, trace } = run([
       ports([CAM]),

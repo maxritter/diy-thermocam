@@ -747,7 +747,8 @@ export function App(): React.JSX.Element {
         if (hasImage) void actions.snapshot();
         break;
       case "record":
-        if (recorder.mode !== "idle" || (hasImage && streaming)) void actions.recorder.toggle();
+        if (recorder.mode !== "idle" || (hasImage && streaming && connection !== "lost"))
+          void actions.recorder.toggle();
         break;
       case "pause":
         if (recorder.mode !== "recording" && connection !== "lost" && hasImage) {
