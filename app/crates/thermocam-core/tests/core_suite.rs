@@ -1083,3 +1083,89 @@ fn cross_language_frame_raw_golden_layout() {
         );
     }
 }
+
+#[test]
+fn update_mode_is_seen_on_the_hid_bus_without_opening_a_device() {
+    use thermocam_core::flasher::{
+        update_mode_present, FlashError, HidBus, HALFKAY_PID, HALFKAY_VID,
+    };
+
+    // A camera waiting in update mode: the HalfKay device is on the bus.
+    let halfkay = MockHalfKayDevice::default();
+    assert!(update_mode_present(&halfkay));
+    assert!(halfkay.packets.is_empty(), "nothing is written to it");
+
+    let empty: Vec<(u16, u16)> = Vec::new();
+    assert!(!update_mode_present(&empty));
+    // The camera's normal serial port (16C0:0483) and a mouse are not update mode.
+    let normal = vec![(0x16C0, 0x0483), (0x046D, 0xC52B)];
+    assert!(!update_mode_present(&normal));
+    let waiting = vec![(0x046D, 0xC52B), (HALFKAY_VID, HALFKAY_PID)];
+    assert!(update_mode_present(&waiting));
+
+    // A bus that cannot be listed reads as "not in update mode".
+    struct Broken;
+    impl HidBus for Broken {
+        fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError> {
+            Err(FlashError::HidIo("no HID access".into()))
+        }
+    }
+    assert!(!update_mode_present(&Broken));
+}
+
+#[test]
+fn mock_transport_io_error_mid_stream_emits_camera_disconnected() {
+    use thermocam_core::protocol::stream::{StreamStep, StreamWatch, CAMERA_DISCONNECTED_EVENT};
+    use thermocam_core::protocol::transport::MockTransport;
+    use thermocam_core::protocol::Packet;
+
+    // Three frames arrive, then the cable comes loose: every read fails from then on.
+    let mut mock = MockTransport::default();
+    for seq in 1..=3u16 {
+        let frame = generate_demo_frame(u32::from(seq), 80, 60);
+        mock.push_rx(&Packet::encode(MsgType::FrameRaw, 0, seq, 0, &frame.to_bytes()).unwrap());
+    }
+    mock.read_error_when_empty = Some(std::io::ErrorKind::BrokenPipe);
+    let mut client = ProtocolClient::new(mock);
+
+    // The stream loop as the app runs it: frames go on, a lost camera emits one event.
+    let mut watch = StreamWatch::default();
+    let mut frames = 0;
+    let mut events: Vec<(&str, serde_json::Value)> = Vec::new();
+    for _ in 0..20 {
+        let polled = client.poll_packets(std::time::Duration::from_millis(5));
+        match watch.observe(polled) {
+            StreamStep::Packets(pkts) => {
+                frames += pkts
+                    .iter()
+                    .filter(|p| p.msg_type().ok() == Some(MsgType::FrameRaw))
+                    .count();
+            }
+            StreamStep::Retry => {}
+            StreamStep::Disconnected(d) => {
+                events.push((CAMERA_DISCONNECTED_EVENT, serde_json::to_value(&d).unwrap()));
+                break;
+            }
+        }
+    }
+
+    assert_eq!(frames, 3, "every frame before the error is delivered");
+    assert_eq!(events.len(), 1, "exactly one disconnect event");
+    assert_eq!(events[0].0, "camera-disconnected");
+    let reason = events[0].1["reason"].as_str().unwrap();
+    assert!(
+        reason.contains("I/O error"),
+        "reason names the I/O error: {reason}"
+    );
+
+    // A single hiccup is not an unplug; the count starts again after a good read.
+    let mut watch = StreamWatch::default();
+    let io = || -> Result<Vec<Packet>, String> { Err("I/O error: timed out".into()) };
+    assert!(matches!(watch.observe(io()), StreamStep::Retry));
+    let good: Result<Vec<Packet>, String> = Ok(Vec::new());
+    assert!(matches!(watch.observe(good), StreamStep::Packets(_)));
+    for _ in 0..4 {
+        assert!(matches!(watch.observe(io()), StreamStep::Retry));
+    }
+    assert!(matches!(watch.observe(io()), StreamStep::Disconnected(_)));
+}

@@ -1,42 +1,66 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type CameraState, isDemoPort } from "@/app/CameraChip";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { isDemoPort } from "@/app/CameraChip";
+import { ExportDialog, type ExportTab, type RecordingRef } from "@/app/ExportDialog";
 import { PAGES, type PageId, Shell } from "@/app/Shell";
 import type { ShortcutId } from "@/app/shortcuts";
-import { AlarmsPanel } from "@/components/panels/AlarmsPanel";
-import { CaptureExportPanel } from "@/components/panels/CaptureExportPanel";
+import { currentPlatform, Toasts, toasts } from "@/app/Toasts";
+import {
+  type AlarmRule,
+  alarmBanner,
+  alarmMessage,
+  alarmSentence,
+  alarmValue,
+  createAlarmEngine,
+  reconcileRegions,
+  TARGET_COLDEST,
+  TARGET_HOTTEST,
+} from "@/lib/alarms";
+import type { CaptureItem } from "@/lib/api/captures";
+import { capturesApi } from "@/lib/api/captures";
 import { backend, type SessionLogSample } from "@/lib/backend";
-import { type ColorRange, shownRange } from "@/lib/colorRange";
+import { handleCameraEvent } from "@/lib/cameraEvents";
+import type { ColorRange } from "@/lib/colorRange";
+import { chipState, connectedPort, createConnection, liveConnection } from "@/lib/connection";
 import { frameStore } from "@/lib/frameStore";
+import { ensureNotifyPermission, systemNotify } from "@/lib/notify";
 import { DEFAULT_PALETTES } from "@/lib/palettes";
+import { perf } from "@/lib/perf";
 import { rowValue } from "@/lib/regions";
-import { useSensorMaterial } from "@/lib/sensorMaterial";
+import { getSensorMaterial, useSensorMaterial } from "@/lib/sensorMaterial";
 import { liveSeries } from "@/lib/series";
 import { folderLabel, readStoredSettings, resolveTheme, type StudioSettings } from "@/lib/settings";
 import { evaluateRoi, rawToObjectC, roiContrastRange } from "@/lib/thermal";
 import type {
-  AlarmEvent,
   DeviceConfig,
   Diagnostics,
   DisplayPipeline,
-  ExportResolution,
   HelloResp,
   Palette,
   PerfTelemetry,
   RadiometryParams,
   RadParams,
+  RenderSpec,
   Roi,
   RoiTool,
   SerialPortInfo,
-  TempSwitchRule,
   ThermalFrame,
 } from "@/lib/types";
 import { CameraPage, CameraSync } from "@/pages/camera/CameraPage";
+import {
+  onFirmwareFileChosen,
+  reopenFirmwareFile,
+  useFirmwareFlow,
+} from "@/pages/camera/FirmwareDialog";
 import { CapturesPage } from "@/pages/captures/CapturesPage";
+import { regionFromRoi } from "@/pages/captures/edits";
+import { type AlarmLogEntry, AlarmsTab, firingSummary } from "@/pages/live/AlarmsTab";
 import { ChartDrawer } from "@/pages/live/ChartDrawer";
+import { ConnectionNotice } from "@/pages/live/ConnectionNotice";
+import { createCaptureActions } from "@/pages/live/captureActions";
 import { readRecentPalettes, rememberPalette } from "@/pages/live/ImageTab";
 import { type InspectorTab, LivePage, type ViewState } from "@/pages/live/LivePage";
-
-const DEMO_PORT = "sim://demo-lepton35";
+import { NoCamera } from "@/pages/live/NoCamera";
+import { useRecorder } from "@/pages/live/RecordingBar";
 
 const TOOL_SHORTCUTS: Partial<Record<ShortcutId, RoiTool>> = {
   "tool-select": "select",
@@ -60,25 +84,35 @@ function errorText(err: unknown): string {
   return String(err);
 }
 
-type ExportOptions = {
-  resolution: ExportResolution;
-  showColorbar: boolean;
-  showHud: boolean;
-  title: string;
-  notes: string;
-};
+async function writeClipboardPng(bytes: ArrayBuffer): Promise<void> {
+  if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
+    throw { kind: "other", detail: "this system doesn’t allow copying pictures" };
+  }
+  const blob = new Blob([bytes], { type: "image/png" });
+  await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+}
+
+interface AlarmView {
+  firing: ReadonlySet<string>;
+  values: Record<string, number>;
+  key: string;
+}
+
+const NO_ALARMS: AlarmView = { firing: new Set(), values: {}, key: "" };
 
 export function App(): React.JSX.Element {
+  perf.panelRendered("app");
   const [settings, setSettings] = useState<StudioSettings>(readStoredSettings);
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const [page, setPage] = useState<PageId>(initialPage);
+  const pageRef = useRef(page);
+  pageRef.current = page;
   const [capturesDir, setCapturesDir] = useState<string | null>(null);
+  const [openRequest, setOpenRequest] = useState<{ item: CaptureItem; at: number } | null>(null);
 
   const [ports, setPorts] = useState<SerialPortInfo[]>([]);
-  const [selectedPort, setSelectedPort] = useState(DEMO_PORT);
   const [hello, setHello] = useState<HelloResp | null>(null);
-  const [connecting, setConnecting] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [batteryPct, setBatteryPct] = useState<number | null>(null);
 
@@ -115,42 +149,34 @@ export function App(): React.JSX.Element {
   const [gridRows, setGridRows] = useState(3);
   const [zoom, setZoom] = useState(1);
 
-  const [recording, setRecording] = useState(false);
-  const [recordedCount, setRecordedCount] = useState(0);
-  const [timelapseActive, setTimelapseActive] = useState(false);
-  const [timelapseIntervalSec, setTimelapseIntervalSec] = useState(5);
-  const [timelapseCount, setTimelapseCount] = useState(0);
-  const [timelapseDir, setTimelapseDir] = useState<string | null>(null);
-  const [hwButtonTrigger, setHwButtonTrigger] = useState(true);
-  const [lastExportMsg, setLastExportMsg] = useState<string | null>(null);
-
   // The Camera page reads these itself; T34 removes them with the old panels.
   const [, setDeviceConfig] = useState<DeviceConfig | null>(null);
   const [, setDiagnostics] = useState<Diagnostics | null>(null);
   const [, setPerfTelemetry] = useState<PerfTelemetry | null>(null);
   const [, setRadParams] = useState<RadParams | null>(null);
 
-  const [alarmRules, setAlarmRules] = useState<TempSwitchRule[]>([]);
-  const [alarmEvents, setAlarmEvents] = useState<AlarmEvent[]>([]);
-  const [toast, setToast] = useState<string | null>(null);
+  const [alarmRules, setAlarmRules] = useState<AlarmRule[]>([]);
+  const [alarmLog, setAlarmLog] = useState<AlarmLogEntry[]>([]);
+  const [alarmView, setAlarmView] = useState<AlarmView>(NO_ALARMS);
 
   const [panelHidden, setPanelHidden] = useState(false);
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("image");
   const [exportOpen, setExportOpen] = useState(false);
+  const [exportTab, setExportTab] = useState<ExportTab | undefined>(undefined);
+  const [exportFrom, setExportFrom] = useState<"video" | "timelapse" | undefined>(undefined);
+  const [lastVideo, setLastVideo] = useState<RecordingRef | null>(null);
+  const [lastTimelapse, setLastTimelapse] = useState<RecordingRef | null>(null);
 
   const unit = settings.unit;
+  const platform = useMemo(() => currentPlatform(), []);
 
   const startMsRef = useRef<number>(Date.now());
   /** Chart samples waiting for the once-a-second session log append. */
   const logBatchRef = useRef<SessionLogSample[]>([]);
-  const recordingRef = useRef<boolean>(recording);
-  recordingRef.current = recording;
-  const recordedRef = useRef(0);
   const paletteIdRef = useRef<string>(paletteId);
   paletteIdRef.current = paletteId;
-  const timelapseDirRef = useRef<string | null>(timelapseDir);
-  timelapseDirRef.current = timelapseDir;
-  const timelapseIndexRef = useRef<number>(0);
+  const colorRangeRef = useRef<ColorRange>(colorRange);
+  colorRangeRef.current = colorRange;
   const roisRef = useRef<Roi[]>(rois);
   roisRef.current = rois;
   // Every reading undoes what the camera's sensor holds (null = factory) before Live's material.
@@ -161,9 +187,18 @@ export function App(): React.JSX.Element {
   );
   const radRef = useRef<RadiometryParams>(liveRad);
   radRef.current = liveRad;
-  const alarmRulesRef = useRef<TempSwitchRule[]>(alarmRules);
+  const pipelineRef = useRef(pipeline);
+  pipelineRef.current = pipeline;
+  const palettesRef = useRef(palettes);
+  palettesRef.current = palettes;
+  const alarmRulesRef = useRef<AlarmRule[]>(alarmRules);
   alarmRulesRef.current = alarmRules;
   const batteryRef = useRef<number | null>(null);
+  const engineRef = useRef(createAlarmEngine());
+
+  const notify = useCallback((text: string) => {
+    toasts.show({ tone: "info", text });
+  }, []);
 
   // ---------- Settings ----------
 
@@ -204,10 +239,11 @@ export function App(): React.JSX.Element {
     return () => mq.removeEventListener("change", apply);
   }, [settings.theme]);
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 3200);
-  }, []);
+  // Finish update reopens the firmware file chosen last.
+  useEffect(() => {
+    onFirmwareFileChosen((path) => updateSettings({ last_firmware_path: path }));
+    return () => onFirmwareFileChosen(null);
+  }, [updateSettings]);
 
   const selectPalette = useCallback(
     (id: string) => {
@@ -217,6 +253,111 @@ export function App(): React.JSX.Element {
     },
     [updateSettings],
   );
+
+  const changeCapturesFolder = useCallback(async () => {
+    const dir = await backend.pickDirectory();
+    if (!dir) return;
+    try {
+      const saved = await backend.setCapturesDir(dir);
+      setCapturesDir(saved);
+      updateSettings({ captures_dir: saved });
+      toasts.show({ tone: "ok", text: `Captures go to ${folderLabel(saved)}` });
+    } catch (err) {
+      toasts.show({ tone: "error", text: `Couldn’t use that folder: ${errorText(err)}` });
+    }
+  }, [updateSettings]);
+  const changeFolderRef = useRef(changeCapturesFolder);
+  changeFolderRef.current = changeCapturesFolder;
+
+  // ---------- Snapshot, Copy image, Record ----------
+
+  /** How Live draws the image now, for pictures Rust renders. */
+  const liveSpec = useCallback((): RenderSpec => {
+    const r = radRef.current;
+    const range = colorRangeRef.current;
+    const material = { emissivity: r.emissivity, reflected_c: r.reflected_temp_c };
+    const palette =
+      palettesRef.current.find((p) => p.id === paletteIdRef.current) ?? palettesRef.current[0];
+    return {
+      palette_id: palette.id,
+      range:
+        range.mode === "manual"
+          ? { mode: "manual", min_c: rawToObjectC(range.lo, r), max_c: rawToObjectC(range.hi, r) }
+          : { mode: "auto", min_c: null, max_c: null },
+      material,
+      sensor_material: r.sensor_material ?? null,
+      overlays: {
+        regions: roisRef.current.filter((x) => x.visible).map((x) => regionFromRoi(x, material)),
+        colorbar: true,
+        hud: false,
+        unit: settingsRef.current.unit,
+      },
+      scale: 4,
+    };
+  }, []);
+
+  const [actions] = useState(() =>
+    createCaptureActions({
+      api: {
+        snapshot: (png) => backend.snapshot(png),
+        renderPng: (source, spec, opts) => backend.renderPng(source, spec, opts),
+        reveal: (path) => capturesApi.revealInFolder(path),
+        writeClipboardPng,
+        recordStart: (opts) => backend.recordStart(opts),
+        recordStop: () => backend.recordStop(),
+        recordStatus: () => backend.recordStatus(),
+      },
+      toasts,
+      spec: () => liveSpecRef.current(),
+      pngOnSnapshot: () => settingsRef.current.png_on_snapshot,
+      chooseFolder: () => void changeFolderRef.current(),
+      exportVideo: () => {
+        setExportTab("video");
+        setExportOpen(true);
+      },
+      sensorMaterial: () => getSensorMaterial(),
+      platform: currentPlatform(),
+    }),
+  );
+  const liveSpecRef = useRef(liveSpec);
+  liveSpecRef.current = liveSpec;
+  const recorder = useRecorder(actions.recorder);
+
+  // Rust sends `recording-stopped` after every stop (the button, an unplug, the disk).
+  useEffect(() => {
+    let off: (() => void) | null = null;
+    let active = true;
+    void backend
+      .onRecordingStopped((info) => {
+        const st = actions.recorder.get();
+        const timelapse = st.mode === "timelapse" || (st.mode === "starting" && st.timelapse);
+        const ref = { path: info.path, frames: info.frames, duration_ms: info.duration_ms };
+        if (info.frames > 0) {
+          if (timelapse) setLastTimelapse(ref);
+          else setLastVideo(ref);
+        }
+        setExportFrom(timelapse ? "timelapse" : "video");
+        actions.recorder.stopped(info);
+      })
+      .then((fn) => {
+        if (active) off = fn;
+        else fn();
+      });
+    // A recording that kept running while the page reloaded.
+    void actions.recorder.poll();
+    return () => {
+      active = false;
+      off?.();
+    };
+  }, [actions]);
+
+  // The bar's frame count, once a second while recording, not per frame.
+  const recording = recorder.mode === "recording" || recorder.mode === "timelapse";
+  useEffect(() => {
+    if (!recording) return;
+    const id = setInterval(() => void actions.recorder.poll(), 1000);
+    return () => clearInterval(id);
+  }, [recording, actions]);
 
   // ---------- Camera ----------
 
@@ -233,10 +374,43 @@ export function App(): React.JSX.Element {
     if (radRes.status === "fulfilled") setRadParams(radRes.value);
   }, []);
 
+  const runAlarm = useCallback(
+    (rule: AlarmRule, valueC: number, atMs: number) => {
+      const u = settingsRef.current.unit;
+      setAlarmLog((log) => [
+        {
+          id: `${atMs}_${rule.id}`,
+          at: atMs,
+          text: alarmSentence(rule, u),
+          value: alarmValue(rule, valueC, u),
+        },
+        ...log.slice(0, 49),
+      ]);
+      if (rule.action === "notify") {
+        void systemNotify(alarmMessage(rule, u), `${alarmValue(rule, valueC, u)} now`);
+      } else if (rule.action === "snapshot") {
+        void actions.snapshot();
+      } else if (rule.action === "record" && actions.recorder.get().mode === "idle") {
+        void actions.recorder.startVideo();
+      }
+      if (pageRef.current !== "live") {
+        toasts.show({
+          tone: "alarm",
+          text: alarmMessage(rule, u),
+          key: `alarm-${rule.id}`,
+          actions: [{ label: "Go to Live", onClick: () => setPage("live") }],
+        });
+      }
+    },
+    [actions],
+  );
+  const runAlarmRef = useRef(runAlarm);
+  runAlarmRef.current = runAlarm;
+
   /** Runs outside React for every frame: the store, the series and the alarms. */
   const handleIncomingFrame = useCallback((fr: ThermalFrame) => {
     frameStore.push(fr);
-    if (recordingRef.current) recordedRef.current++;
+    perf.frameArrived(fr.frame_seq);
 
     const bat = fr.bat_pct >= 0 && !fr.usb_power ? fr.bat_pct : null;
     if (bat !== batteryRef.current) {
@@ -260,15 +434,17 @@ export function App(): React.JSX.Element {
     const nowMs = Date.now();
     // The chart's lines: Hottest, Coldest and each region's row value; differences stay out.
     const values: Record<string, number> = {
-      hottest: rawToObjectC(fr.max_raw, currentRad),
-      coldest: rawToObjectC(fr.min_raw, currentRad),
+      [TARGET_HOTTEST]: rawToObjectC(fr.max_raw, currentRad),
+      [TARGET_COLDEST]: rawToObjectC(fr.min_raw, currentRad),
     };
-    const statsById = new Map<string, ReturnType<typeof evaluateRoi>>();
+    const readings: Record<string, number> = { ...values };
     for (const r of roisRef.current) {
       const st = evaluateRoi(r, fr.pixels, fr.width, fr.height, currentRad);
-      statsById.set(r.id, st);
-      const v = r.geometry.kind === "delta" ? null : rowValue(r.geometry.kind, st);
-      if (v !== null && st.pixel_count > 0) values[r.id] = v;
+      if (st.pixel_count <= 0) continue;
+      const v = rowValue(r.geometry.kind, st);
+      if (v === null) continue;
+      readings[r.id] = v;
+      if (r.geometry.kind !== "delta") values[r.id] = v;
     }
     const tMs = nowMs - startMsRef.current;
     liveSeries.append(tMs, values);
@@ -276,44 +452,12 @@ export function App(): React.JSX.Element {
       logBatchRef.current.push({ t_ms: tMs, region_id, value_c });
     }
 
-    let rulesChanged = false;
-    const nextRules = alarmRulesRef.current.map((rule) => {
-      if (!rule.enabled) return rule;
-      const measured = rule.target_roi_id
-        ? (statsById.get(rule.target_roi_id)?.max_c ?? values.hottest)
-        : values.hottest;
-      const hit =
-        rule.condition === "above" ? measured >= rule.threshold_c : measured <= rule.threshold_c;
-      if (!hit) return rule;
-      if (rule.last_triggered_ms !== null && nowMs - rule.last_triggered_ms < rule.cooldown_ms) {
-        return rule;
-      }
-      rulesChanged = true;
-      setAlarmEvents((evs) => [
-        {
-          id: `ev_${nowMs}_${rule.id}`,
-          timestamp: new Date(nowMs).toTimeString().slice(0, 8),
-          rule_name: rule.name,
-          measured_c: measured,
-          threshold_c: rule.threshold_c,
-          action: rule.action,
-        },
-        ...evs.slice(0, 49),
-      ]);
-      return { ...rule, last_triggered_ms: nowMs };
-    });
-    if (rulesChanged) {
-      alarmRulesRef.current = nextRules;
-      setAlarmRules(nextRules);
+    // Alarms read the value each row shows; they fire once per crossing and cooldown.
+    for (const f of engineRef.current.evaluate(alarmRulesRef.current, readings, nowMs)) {
+      const rule = alarmRulesRef.current.find((r) => r.id === f.ruleId);
+      if (rule) runAlarmRef.current(rule, f.valueC, f.atMs);
     }
   }, []);
-
-  const selectedPortRef = useRef<string>(selectedPort);
-  selectedPortRef.current = selectedPort;
-  const helloRef = useRef<HelloResp | null>(hello);
-  helloRef.current = hello;
-  const manualSimChoiceRef = useRef<boolean>(false);
-  const connectingRef = useRef<boolean>(false);
 
   /** A new chart session: the chart starts empty and the session log starts a new file. */
   const startChartSession = useCallback(() => {
@@ -323,124 +467,83 @@ export function App(): React.JSX.Element {
     void backend.sessionLogStart().catch(() => {});
   }, []);
 
-  const connectAndStream = useCallback(
-    async (port: string, announce = false): Promise<HelloResp> => {
-      connectingRef.current = true;
-      setConnecting(true);
-      try {
+  const [conn] = useState(() =>
+    createConnection({
+      connect: async (port) => {
         const h = await backend.connect(port);
-        setSelectedPort(port);
         setHello(h);
         startChartSession();
         await backend.startStream(handleIncomingFrame);
         setStreaming(true);
         void refreshCameraTelemetry();
-        if (announce) {
-          showToast(isDemoPort(port) ? "Connected to the demo camera" : "Thermocam connected");
-        }
-        return h;
-      } finally {
-        connectingRef.current = false;
-        setConnecting(false);
-      }
-    },
-    [handleIncomingFrame, refreshCameraTelemetry, showToast, startChartSession],
+        if (!isDemoPort(port)) toasts.show({ tone: "ok", text: "Thermocam connected" });
+      },
+      disconnect: () => backend.disconnect(),
+      notify: (text) => toasts.show({ tone: "error", text }),
+    }),
   );
+  const machine = useSyncExternalStore(conn.subscribe, conn.get, conn.get);
+  const connState = machine.state;
+  const connection = liveConnection(machine);
 
-  // Boot: palettes and ports; a real Thermocam wins over the demo camera. Live's material
-  // list is the artifact's (palettes.ts), not the backend's older names.
+  // Leaving "streaming" stops the image; an unplug keeps the last frame on screen.
+  useEffect(() => {
+    if (connState.name !== "streaming") setStreaming(false);
+    if (connState.name === "none" || connState.name === "error") setHello(null);
+  }, [connState]);
+
+  // Boot: palettes. Live's material list is the artifact's (palettes.ts).
   useEffect(() => {
     let active = true;
-    (async () => {
-      try {
-        const [pList, portList] = await Promise.all([backend.getPalettes(), backend.listPorts()]);
-        if (!active) return;
-        if (pList.length > 0) setPalettes(pList);
-        setPorts(portList);
-
-        const realCamera = portList.find((p) => p.is_teensy && !isDemoPort(p.port_name));
-        const simPort = portList.find((p) => isDemoPort(p.port_name))?.port_name ?? DEMO_PORT;
-        const initialPort = realCamera?.port_name ?? simPort;
-        setSelectedPort(initialPort);
-
-        try {
-          await connectAndStream(initialPort, Boolean(realCamera));
-        } catch (err) {
-          if (!active) return;
-          if (realCamera && initialPort !== simPort) {
-            showToast(`Couldn’t open the Thermocam (${errorText(err)}). Showing the demo camera.`);
-            await connectAndStream(simPort, false);
-          } else {
-            throw err;
-          }
-        }
-      } catch (err) {
-        if (active) showToast(`Couldn’t connect: ${errorText(err)}`);
-      }
-    })();
+    void backend
+      .getPalettes()
+      .then((list) => active && list.length > 0 && setPalettes(list))
+      .catch(() => {});
     return () => {
       active = false;
       void backend.stopStream();
     };
-  }, [connectAndStream, showToast]);
+  }, []);
 
-  // Poll USB ports every 2 s; switch from the demo camera when a real one is plugged in.
+  // The port poll, every 2 s: a Thermocam that appears is connected; the demo never is.
   useEffect(() => {
     let active = true;
-    let initialized = false;
-    let lastKnownRealPorts = new Set<string>();
-    const id = setInterval(() => {
-      void backend
-        .listPorts()
-        .then((nextPorts) => {
-          if (!active) return;
-          setPorts(nextPorts);
-          const realPorts = nextPorts.filter((p) => p.is_teensy && !isDemoPort(p.port_name));
-          const realNames = new Set(realPorts.map((p) => p.port_name));
-          const newlyPlugged = initialized
-            ? realPorts.find((p) => !lastKnownRealPorts.has(p.port_name))
-            : undefined;
-          initialized = true;
-          lastKnownRealPorts = realNames;
-
-          if (realPorts.length === 0) {
-            manualSimChoiceRef.current = false;
-            return;
-          }
-          const onSimOrOffline = !helloRef.current || isDemoPort(selectedPortRef.current);
-          if (
-            onSimOrOffline &&
-            !connectingRef.current &&
-            (newlyPlugged || !manualSimChoiceRef.current)
-          ) {
-            const target = newlyPlugged ?? realPorts[0];
-            manualSimChoiceRef.current = false;
-            void connectAndStream(target.port_name, true).catch((err) => {
-              showToast(`Couldn’t connect: ${errorText(err)}`);
-            });
-          }
-        })
-        .catch(() => {
-          // Ignore transient USB enumeration errors
-        });
-    }, 2000);
+    const poll = async () => {
+      const [list, updateMode] = await Promise.all([
+        backend.listPorts().catch(() => null),
+        backend.updateModePresent().catch(() => false),
+      ]);
+      if (!active || !list) return;
+      setPorts(list);
+      conn.dispatch({
+        type: "ports",
+        ports: list.filter((p) => p.is_teensy && !isDemoPort(p.port_name)).map((p) => p.port_name),
+        updateMode,
+      });
+    };
+    void poll();
+    const id = setInterval(() => void poll(), 2000);
     return () => {
       active = false;
       clearInterval(id);
     };
-  }, [connectAndStream, showToast]);
+  }, [conn]);
 
   useEffect(() => {
     let active = true;
     let unlisten: (() => void) | null = null;
     void backend
-      .onCameraDisconnected((reason) => {
+      .onCameraDisconnected(() => {
         if (!active) return;
-        setHello(null);
-        setStreaming(false);
-        setRecording(false);
-        setTimelapseActive(false);
-        showToast(`Camera disconnected: ${reason}`);
+        const s = conn.get().state;
+        if (s.name === "streaming" && s.kind === "camera") {
+          toasts.show({
+            tone: "info",
+            icon: "usb",
+            text: "Thermocam unplugged. Plug it back in to continue.",
+          });
+        }
+        conn.dispatch({ type: "unplugged" });
       })
       .then((fn) => {
         if (active) unlisten = fn;
@@ -450,7 +553,82 @@ export function App(): React.JSX.Element {
       active = false;
       unlisten?.();
     };
-  }, [showToast]);
+  }, [conn]);
+
+  // The camera's button: Snapshot, Record or nothing, as chosen on the Camera page.
+  useEffect(() => {
+    let active = true;
+    let off: (() => void) | null = null;
+    void backend
+      .onCameraEvent((ev) =>
+        handleCameraEvent(ev, settingsRef.current.button_action, {
+          snapshot: () => void actions.snapshot(),
+          toggleRecording: () => void actions.recorder.toggle(),
+        }),
+      )
+      .then((fn) => {
+        if (active) off = fn;
+        else fn();
+      });
+    return () => {
+      active = false;
+      off?.();
+    };
+  }, [actions]);
+
+  // A camera left in update mode (Studio closed during an update) offers to finish.
+  const firmware = useFirmwareFlow();
+  const firmwareOpen = firmware.view.name !== "closed";
+  useEffect(() => {
+    if (!machine.updateMode || firmwareOpen) {
+      toasts.dismissKey("update-mode");
+      return;
+    }
+    toasts.show({
+      tone: "info",
+      icon: "usb",
+      sticky: true,
+      key: "update-mode",
+      text: "The camera is waiting in update mode.",
+      actions: [
+        {
+          label: "Finish update",
+          onClick: () => {
+            setPage("camera");
+            void reopenFirmwareFile(settingsRef.current.last_firmware_path);
+          },
+        },
+      ],
+    });
+  }, [machine.updateMode, firmwareOpen]);
+
+  // Development only: the demo camera can be "unplugged" and "plugged in" again.
+  const devUnplug =
+    import.meta.env?.DEV &&
+    "kind" in connState &&
+    connState.kind === "demo" &&
+    (connState.name === "streaming" || connState.name === "lost")
+      ? {
+          unplugged: connState.name === "lost",
+          onToggle: () => {
+            if (conn.get().state.name === "lost") {
+              conn.dispatch({ type: "replug" });
+              return;
+            }
+            void backend
+              .disconnect()
+              .catch(() => {})
+              .then(() => {
+                toasts.show({
+                  tone: "info",
+                  icon: "usb",
+                  text: "Thermocam unplugged. Plug it back in to continue.",
+                });
+                conn.dispatch({ type: "unplugged" });
+              });
+          },
+        }
+      : null;
 
   // Chart samples go to the session log on disk once a second.
   const flushSessionLog = useCallback(async () => {
@@ -468,53 +646,61 @@ export function App(): React.JSX.Element {
     await flushSessionLog();
     try {
       const saved = await backend.sessionLogExport(null);
-      if (saved) showToast(`Saved ${saved}`);
+      if (saved) toasts.show({ tone: "ok", text: `Saved ${saved}` });
     } catch (err) {
-      showToast(`Couldn’t save the CSV: ${errorText(err)}`);
+      toasts.show({ tone: "error", text: `Couldn’t save the CSV: ${errorText(err)}` });
     }
   };
 
   const copyText = async (text: string, what: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      showToast(`${what} copied`);
+      toasts.show({ tone: "ok", text: `${what} copied` });
     } catch {
-      showToast("Couldn’t copy");
+      toasts.show({ tone: "error", text: "Couldn’t copy" });
     }
   };
 
-  // The frame counter while recording, once a second, not per frame.
+  // ---------- Alarms ----------
+
+  // A deleted region turns its alarm off; the alarm says so.
   useEffect(() => {
-    if (!recording) return;
-    const id = setInterval(() => setRecordedCount(recordedRef.current), 1000);
+    setAlarmRules((rules) => reconcileRegions(rules, new Set(rois.map((r) => r.id))));
+  }, [rois]);
+
+  // What the tab, the banner and the image show, at most four times a second.
+  useEffect(() => {
+    const id = setInterval(() => {
+      const engine = engineRef.current;
+      const firing = engine.firing();
+      const values: Record<string, number> = {};
+      for (const fid of firing) values[fid] = engine.value(fid) ?? Number.NaN;
+      const key = [...firing]
+        .sort()
+        .map((fid) => `${fid}:${(values[fid] ?? 0).toFixed(1)}`)
+        .join(",");
+      setAlarmView((prev) => (prev.key === key ? prev : { firing: new Set(firing), values, key }));
+    }, 250);
     return () => clearInterval(id);
-  }, [recording]);
+  }, []);
 
-  const choosePort = async (port: string) => {
-    if (port === selectedPort && hello) return;
-    manualSimChoiceRef.current = isDemoPort(port);
-    try {
-      if (hello) await backend.disconnect();
-      setHello(null);
-      setStreaming(false);
-      await connectAndStream(port, true);
-    } catch (err) {
-      setHello(null);
-      setStreaming(false);
-      showToast(`Couldn’t connect: ${errorText(err)}`);
-    }
+  const changeRules = (next: AlarmRule[]) => {
+    if (next.some((r) => r.action === "notify" && r.enabled)) void ensureNotifyPermission();
+    setAlarmRules(next);
   };
 
-  const disconnect = async () => {
-    try {
-      await backend.disconnect();
-    } finally {
-      manualSimChoiceRef.current = true;
-      setHello(null);
-      setStreaming(false);
-      showToast("Camera disconnected");
-    }
-  };
+  const imageLive = (connection === "live" || connection === "demo") && streaming;
+  const firingRules = imageLive ? alarmRules.filter((r) => alarmView.firing.has(r.id)) : [];
+  const banner =
+    firingRules.length > 0
+      ? alarmBanner(firingRules[0], alarmView.values[firingRules[0].id] ?? 0, unit)
+      : null;
+  const alertKey = firingRules.map((r) => r.target).join("\n");
+  const alertIds = useMemo(() => new Set(alertKey ? alertKey.split("\n") : []), [alertKey]);
+  const firingNow = new Set(firingRules.map((r) => r.id));
+  const alarmTitle = firingRules.length > 0 ? firingSummary(alarmRules, firingNow) : null;
+
+  // ---------- Live ----------
 
   const activePalette = useMemo(
     () => palettes.find((p) => p.id === paletteId) ?? palettes[0],
@@ -525,7 +711,7 @@ export function App(): React.JSX.Element {
     const range = roiContrastRange(roi, fr.pixels, fr.width, fr.height, 0.06);
     if (range) {
       setColorRange({ mode: "manual", lo: range[0], hi: range[1] });
-      showToast(`Color scale fitted to ${roi.label}`);
+      toasts.show({ tone: "info", text: `Color scale fitted to ${roi.label}` });
     }
   };
 
@@ -539,122 +725,29 @@ export function App(): React.JSX.Element {
     }
   };
 
-  const copyImage = async () => {
-    const canvas = document.querySelector<HTMLCanvasElement>('canvas[data-thermal-canvas="true"]');
-    if (!canvas) return;
-    try {
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
-      if (blob && typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        showToast("Image copied");
-        return;
-      }
-      showToast("Copying images isn’t available here");
-    } catch {
-      showToast("Couldn’t copy the image");
-    }
-  };
-
-  const captureTimelapseNow = useCallback(async () => {
-    const fr = frameStore.getFrame();
-    if (!fr) return;
-    const idx = timelapseIndexRef.current;
-    timelapseIndexRef.current = idx + 1;
-    try {
-      const res = await backend.captureTimelapseFrame({
-        outputDir: timelapseDirRef.current,
-        paletteId: paletteIdRef.current,
-        index: idx,
-        pixels: Array.from(fr.pixels),
-        width: fr.width,
-        height: fr.height,
-        rad: radRef.current,
-      });
-      setTimelapseCount((c) => c + 1);
-      setRecordedCount(res.recorded_count);
-      if (res.saved_path) setLastExportMsg(`Time-lapse frame saved: ${res.saved_path}`);
-    } catch (err) {
-      setTimelapseActive(false);
-      showToast(`Time-lapse stopped: ${errorText(err)}`);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    if (!timelapseActive) return;
-    const id = setInterval(() => void captureTimelapseNow(), timelapseIntervalSec * 1000);
-    return () => clearInterval(id);
-  }, [timelapseActive, timelapseIntervalSec, captureTimelapseNow]);
-
-  const toggleRecording = async () => {
-    const next = !recording;
-    try {
-      const count = await backend.toggleRecording(next);
-      recordedRef.current = next ? 0 : count;
-      setRecording(next);
-      setRecordedCount(next ? 0 : count);
-      showToast(next ? "Recording" : `Recording stopped · ${count} frames`);
-    } catch (err) {
-      showToast(`Couldn’t record: ${errorText(err)}`);
-    }
-  };
-
-  const exportMedia = async (format: string, opts: ExportOptions) => {
-    const fr = frameStore.getFrame();
-    if (!fr) return;
-    const [minRaw, maxRaw] = shownRange(colorRange, fr);
-    try {
-      const saved = await backend.exportMedia({
-        format,
-        palette_id: activePalette.id,
-        min_raw: minRaw,
-        max_raw: maxRaw,
-        rad,
-        pipeline,
-        rois,
-        resolution: opts.resolution,
-        show_colorbar: opts.showColorbar,
-        show_hud: opts.showHud,
-        unit,
-        title: opts.title,
-        notes: opts.notes,
-        pixels: Array.from(fr.pixels),
-        width: fr.width,
-        height: fr.height,
-      });
-      const msg = `Exported ${format.toUpperCase()}: ${saved}`;
-      setLastExportMsg(msg);
-      showToast(msg);
-    } catch (err) {
-      showToast(`Couldn’t export: ${errorText(err)}`);
-    }
-  };
-
-  const snapshot = () =>
-    void exportMedia("png", {
-      resolution: "full_hd1080p",
-      showColorbar: true,
-      showHud: true,
-      title: "Snapshot",
-      notes: "",
-    });
-
   const importPalette = async (name: string, text: string) => {
     const pal = await backend.importCustomPalette(name, text, false);
     setPalettes((prev) => [...prev.filter((p) => p.id !== pal.id), pal]);
     selectPalette(pal.id);
-    showToast(`Palette “${pal.label}” imported`);
+    toasts.show({ tone: "ok", text: `Palette “${pal.label}” imported` });
   };
 
-  const changeCapturesFolder = async () => {
-    const dir = await backend.pickDirectory();
-    if (!dir) return;
+  const openFile = async () => {
     try {
-      const saved = await backend.setCapturesDir(dir);
-      setCapturesDir(saved);
-      updateSettings({ captures_dir: saved });
+      const item = await capturesApi.openFile();
+      if (!item) return;
+      capturesApi.rememberOpened(item);
+      setOpenRequest({ item, at: Date.now() });
+      setPage("captures");
     } catch (err) {
-      showToast(`Couldn’t use that folder: ${errorText(err)}`);
+      toasts.show({ tone: "error", text: `Couldn’t open the file: ${errorText(err)}` });
     }
+  };
+
+  const openExport = (tab?: ExportTab) => {
+    setExportTab(tab);
+    setExportFrom(undefined);
+    setExportOpen(true);
   };
 
   const onShortcut = (id: ShortcutId) => {
@@ -664,6 +757,7 @@ export function App(): React.JSX.Element {
       setActiveTool(tool);
       return;
     }
+    const hasImage = connection !== "none";
     switch (id) {
       case "toggle-hotcold":
         setShowHotCold((v) => !v);
@@ -675,19 +769,21 @@ export function App(): React.JSX.Element {
         setShowGridOverlay((v) => !v);
         break;
       case "snapshot":
-        snapshot();
+        if (hasImage) void actions.snapshot();
         break;
       case "record":
-        void toggleRecording();
+        if (recorder.mode !== "idle" || (hasImage && streaming)) void actions.recorder.toggle();
         break;
       case "pause":
-        if (!recording) void toggleStream();
+        if (recorder.mode !== "recording" && connection !== "lost" && hasImage) {
+          void toggleStream();
+        }
         break;
       case "export":
-        setExportOpen(true);
+        if (hasImage && recorder.mode !== "recording") openExport();
         break;
       case "copy-image":
-        void copyImage();
+        if (hasImage) void actions.copyImage("latest");
         break;
       case "auto-range":
         setColorRange({ mode: "auto" });
@@ -710,14 +806,6 @@ export function App(): React.JSX.Element {
     }
   };
 
-  const cameraState: CameraState = hello
-    ? isDemoPort(selectedPort)
-      ? "demo"
-      : "camera"
-    : connecting
-      ? "connecting"
-      : "none";
-
   const view: ViewState = {
     palette: activePalette,
     rad: liveRad,
@@ -736,26 +824,72 @@ export function App(): React.JSX.Element {
     engineeringDetails: settings.engineering_details,
   };
 
+  const exportSource = useCallback(
+    () => ({
+      frame: frameStore.getFrame(),
+      palette:
+        palettesRef.current.find((p) => p.id === paletteIdRef.current) ?? palettesRef.current[0],
+      range: colorRangeRef.current,
+      rad: radRef.current,
+      pipeline: pipelineRef.current,
+      rois: roisRef.current,
+      unit: settingsRef.current.unit,
+    }),
+    [],
+  );
+
+  const stageNotice =
+    connState.name === "error" ? (
+      <ConnectionNotice
+        kind={connState.kind}
+        platform={platform}
+        onRetry={() => conn.dispatch({ type: "retry" })}
+        onUseDemo={() => conn.dispatch({ type: "demo" })}
+        onCopy={(t) => void copyText(t, "Command")}
+      />
+    ) : connState.name === "none" || (connState.name === "connecting" && !frameStore.getFrame()) ? (
+      <NoCamera
+        onTryDemo={() => conn.dispatch({ type: "demo" })}
+        onOpenFile={() => void openFile()}
+      />
+    ) : null;
+
+  const chip = chipState(machine);
+  const port = connectedPort(machine);
+  const liveBadge =
+    recorder.mode === "recording"
+      ? "rec"
+      : alarmView.firing.size > 0 && page !== "live"
+        ? "alarm"
+        : recorder.mode === "timelapse"
+          ? "timelapse"
+          : null;
+
   return (
     <>
       <Shell
         page={page}
         onPageChange={setPage}
         camera={{
-          state: cameraState,
+          state: chip,
           batteryPct,
           ports,
-          connectedPort: hello ? selectedPort : null,
-          onChoosePort: (p) => void choosePort(p),
-          onDisconnect: () => void disconnect(),
+          connectedPort: port,
+          onChoosePort: (p) =>
+            isDemoPort(p)
+              ? conn.dispatch({ type: "demo" })
+              : conn.dispatch({ type: "choose", port: p }),
+          onDisconnect: () => conn.dispatch({ type: "disconnect" }),
           onOpenCameraSettings: () => setPage("camera"),
+          devUnplug,
         }}
         settings={settings}
         onSettingsChange={updateSettings}
         capturesFolder={folderLabel(capturesDir)}
         onChangeCapturesFolder={() => void changeCapturesFolder()}
         onShortcut={onShortcut}
-        firmware={hello && !isDemoPort(selectedPort) ? hello.fw_build_str : null}
+        firmware={hello && port && !isDemoPort(port) ? hello.fw_build_str : null}
+        liveBadge={liveBadge}
       >
         {page === "live" ? (
           <LivePage
@@ -803,75 +937,45 @@ export function App(): React.JSX.Element {
                 onCopy={(text, what) => void copyText(text, what)}
               />
             }
+            connection={connection}
             streaming={streaming}
-            demo={cameraState === "demo"}
-            recording={recording}
-            recordedCount={recordedCount}
+            actions={actions}
             onTogglePause={() => void toggleStream()}
             onCalibrate={() =>
               void backend
                 .triggerFfc(false)
-                .then(() => showToast("Calibrated"))
-                .catch((err) => showToast(`Couldn’t calibrate: ${errorText(err)}`))
+                .then(() => toasts.show({ tone: "ok", text: "Calibrated" }))
+                .catch((err) =>
+                  toasts.show({ tone: "error", text: `Couldn’t calibrate: ${errorText(err)}` }),
+                )
             }
-            onSnapshot={snapshot}
-            onToggleRecording={() => void toggleRecording()}
+            onExport={() => openExport()}
+            onChangeFolder={() => void changeCapturesFolder()}
+            stageNotice={stageNotice}
             panelHidden={panelHidden}
             onTogglePanel={() => setPanelHidden((v) => !v)}
             inspectorTab={inspectorTab}
             onInspectorTabChange={setInspectorTab}
-            exportOpen={exportOpen}
-            onExportOpenChange={setExportOpen}
+            alarmCount={firingRules.length}
+            alarmTitle={alarmTitle}
+            banner={banner}
+            alertIds={alertIds}
             alarmsPanel={
-              <AlarmsPanel
+              <AlarmsTab
                 rules={alarmRules}
-                events={alarmEvents}
+                onRulesChange={changeRules}
+                firing={firingNow}
+                since={(rid) => engineRef.current.since(rid)}
+                log={alarmLog}
+                onClearLog={() => setAlarmLog([])}
                 rois={rois}
                 unit={unit}
-                onAddRule={(rule) => setAlarmRules((prev) => [...prev, rule])}
-                onUpdateRule={(updated) =>
-                  setAlarmRules((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
-                }
-                onDeleteRule={(id) => setAlarmRules((prev) => prev.filter((r) => r.id !== id))}
-                onClearEvents={() => setAlarmEvents([])}
-              />
-            }
-            exportPanel={
-              <CaptureExportPanel
-                pipeline={pipeline}
-                onPipelineChange={setPipeline}
-                recording={recording}
-                recordedCount={recordedCount}
-                timelapseActive={timelapseActive}
-                timelapseIntervalSec={timelapseIntervalSec}
-                timelapseCount={timelapseCount}
-                timelapseDir={timelapseDir}
-                onPickTimelapseDir={async () => {
-                  const dir = await backend.pickDirectory();
-                  if (dir) setTimelapseDir(dir);
-                }}
-                onTimelapseIntervalChange={setTimelapseIntervalSec}
-                onToggleTimelapse={() => {
-                  const next = !timelapseActive;
-                  setTimelapseActive(next);
-                  if (next) void captureTimelapseNow();
-                  showToast(
-                    next
-                      ? `Time-lapse started · every ${timelapseIntervalSec} s`
-                      : `Time-lapse stopped · ${timelapseCount} frames`,
-                  );
-                }}
-                hwButtonTrigger={hwButtonTrigger}
-                onToggleHwButtonTrigger={setHwButtonTrigger}
-                onToggleRecording={toggleRecording}
-                onExport={(format, opts) => exportMedia(format, opts)}
-                lastExportMsg={lastExportMsg}
               />
             }
           />
         ) : page === "captures" ? (
           <CapturesPage
-            camera={{ state: cameraState, connectionId: hello ? selectedPort : null }}
+            camera={{ state: chip, connectionId: port }}
             capturesDir={capturesDir}
             palettes={palettes}
             paletteId={activePalette.id}
@@ -880,12 +984,13 @@ export function App(): React.JSX.Element {
             unit={unit}
             onUnitChange={(u) => updateSettings({ unit: u })}
             engineeringDetails={settings.engineering_details}
-            notify={showToast}
+            notify={notify}
+            openRequest={openRequest}
           />
         ) : (
           <CameraPage
-            state={cameraState}
-            port={hello ? selectedPort : null}
+            state={chip}
+            port={port}
             hello={hello}
             unit={unit}
             buttonAction={settings.button_action}
@@ -893,22 +998,34 @@ export function App(): React.JSX.Element {
             materialOnCamera={settings.material_on_camera}
             onMaterialOnCameraChange={(on) => updateSettings({ material_on_camera: on })}
             liveMaterial={{ emissivity: rad.emissivity, reflected_c: rad.reflected_temp_c }}
-            onDisconnect={() => void disconnect()}
-            onUseDemo={() => void choosePort(DEMO_PORT)}
-            onReconnect={(p) => connectAndStream(p, false).then(() => undefined)}
+            onDisconnect={() => conn.dispatch({ type: "disconnect" })}
+            onUseDemo={() => conn.dispatch({ type: "demo" })}
+            onReconnect={(p) => conn.connectNow(p)}
           />
         )}
       </Shell>
+      <ExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        api={{
+          exportMedia: (req) => backend.exportMedia(req),
+          onProgress: (cb) => backend.onExportProgress(cb),
+          reveal: (path) => capturesApi.revealInFolder(path),
+        }}
+        toasts={toasts}
+        source={exportSource}
+        recordings={{ video: lastVideo, timelapse: lastTimelapse }}
+        initialTab={exportTab}
+        initialVideoFrom={exportFrom}
+        onCopyImage={() => void actions.copyImage("latest")}
+        platform={platform}
+      />
       <CameraSync
-        connectionId={hello ? selectedPort : null}
+        connectionId={port}
         switchOn={settings.material_on_camera}
         material={{ emissivity: rad.emissivity, reflected_c: rad.reflected_temp_c }}
       />
-      {toast ? (
-        <div className="st-toast" role="status">
-          {toast}
-        </div>
-      ) : null}
+      <Toasts />
     </>
   );
 }

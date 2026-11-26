@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CameraState } from "@/app/CameraChip";
 import { type CaptureItem, capturesApi } from "@/lib/api/captures";
 import type { Palette, TempUnit } from "@/lib/types";
 import { type CapturesApi, Library, type LibraryEntry, type Tab } from "./Library";
+import { cardText, parseCaptureName, systemLocale } from "./names";
 import { OpenedCapture } from "./OpenedCapture";
 import { RecordingPlayer } from "./RecordingPlayer";
 import "./captures.css";
@@ -24,6 +25,8 @@ export interface CapturesPageProps {
   notify: (msg: string) => void;
   locale?: string;
   now?: () => Date;
+  /** Open this capture (Open file… from Live's first start); `at` makes each request new. */
+  openRequest?: { item: CaptureItem; at: number } | null;
 }
 
 /**
@@ -35,6 +38,26 @@ export function CapturesPage(props: CapturesPageProps): React.JSX.Element {
   const [tab, setTab] = useState<Tab>("camera");
   const [opened, setOpened] = useState<{ item: CaptureItem; entries: LibraryEntry[] } | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const request = props.openRequest;
+  const locale = props.locale ?? systemLocale();
+  useEffect(() => {
+    if (!request) return;
+    const { item } = request;
+    setTab(item.where);
+    setOpened({
+      item,
+      entries: [
+        {
+          item,
+          title: cardText(item.fileName, null, "", locale).title,
+          meta: "",
+          taken: parseCaptureName(item.fileName).taken,
+          other: false,
+        },
+      ],
+    });
+  }, [request, locale]);
 
   if (opened) {
     const shared = {

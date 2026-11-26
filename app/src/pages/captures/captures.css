@@ -33,10 +33,6 @@
   margin-right: 4px;
 }
 
-.cp-lib-bar .st-seg svg {
-  display: inline-block;
-}
-
 .cp-store {
   display: inline-flex;
   align-items: center;
@@ -77,6 +73,10 @@
   top: 9px;
   color: var(--tc-text-dim);
   pointer-events: none;
+}
+
+.cp-lib-bar .st-seg svg {
+  display: inline-block;
 }
 
 .cp-lib-body {
@@ -135,6 +135,125 @@
   }
 }
 
+/* A banner at the top of the stage: a set-aside edits file. */
+.cp-stage-banner {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 200px);
+  padding: 6px 6px 6px 12px;
+  border-radius: 999px;
+  background: #3b2a06;
+  border: 1px solid rgb(247 178 59 / 55%);
+  color: #fbd38d;
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.cp-stage-banner span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp-stage-banner button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+
+.cp-stage-banner button:hover {
+  background: rgb(255 255 255 / 10%);
+}
+
+/* The viewer's message when a file can't be opened (dark stage, studio.css .empty). */
+.cp-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  color: #e7e9ee;
+  z-index: 4;
+}
+
+.cp-empty .ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / 14%);
+  background: rgb(255 255 255 / 4%);
+  color: #c9ccd3;
+}
+
+.cp-empty .ring.danger {
+  color: #ff8a8f;
+}
+
+.cp-empty h2 {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-weight: 620;
+  color: #fff;
+}
+
+.cp-empty p {
+  margin: 0;
+  color: #a7abb4;
+  max-width: 46ch;
+}
+
+.cp-empty .cp-detail {
+  margin-top: -8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #7c808b;
+}
+
+.cp-empty .acts {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cp-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  overflow: hidden;
+}
+
+.cp-empty .cp-bar {
+  width: 260px;
+}
+
+.cp-bar i {
+  display: block;
+  height: 100%;
+  background: #5da3e5;
+  border-radius: 999px;
+}
+
 .cp-cap {
   position: relative;
   display: grid;
@@ -162,15 +281,15 @@
   image-rendering: auto;
 }
 
+.cp-skel {
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--tc-surface-2), var(--tc-surface-3), var(--tc-surface-2));
+}
+
 .cp-cap .th .cp-skel {
   position: absolute;
   inset: 0;
   border-radius: 0;
-}
-
-.cp-skel {
-  border-radius: 10px;
-  background: linear-gradient(90deg, var(--tc-surface-2), var(--tc-surface-3), var(--tc-surface-2));
 }
 
 .cp-cap .th .cp-nopic {
@@ -267,28 +386,6 @@
   background: rgb(30 31 35 / 92%);
 }
 
-.cp-cap:hover .check,
-.cp-cap:focus-within .check,
-.cp-cap.sel .check,
-.cp-lib-body.selecting .cp-cap .check,
-.cp-cap:hover .acts,
-.cp-cap:focus-within .acts {
-  opacity: 1;
-}
-
-.cp-cap .check:has(input:focus-visible),
-.cp-cap .acts button:focus-visible,
-.cp-card-cap:focus-visible {
-  outline: 2px solid var(--tc-accent);
-  outline-offset: 2px;
-}
-
-.cp-cap.sel .th {
-  box-shadow:
-    0 0 0 2px var(--tc-bg),
-    0 0 0 4px var(--tc-accent);
-}
-
 .cp-cap.sel .check {
   background: var(--tc-accent);
   border-color: var(--tc-accent);
@@ -315,6 +412,31 @@
   position: absolute;
   inset: 0;
   border-radius: 10px;
+}
+
+.cp-cap:hover .check,
+.cp-cap:focus-within .check,
+.cp-cap.sel .check,
+.cp-cap:hover .acts,
+.cp-cap:focus-within .acts {
+  opacity: 1;
+}
+
+.cp-cap .check:has(input:focus-visible),
+.cp-cap .acts button:focus-visible,
+.cp-card-cap:focus-visible {
+  outline: 2px solid var(--tc-accent);
+  outline-offset: 2px;
+}
+
+.cp-lib-body.selecting .cp-cap .check {
+  opacity: 1;
+}
+
+.cp-cap.sel .th {
+  box-shadow:
+    0 0 0 2px var(--tc-bg),
+    0 0 0 4px var(--tc-accent);
 }
 
 .cp-card-cap .t,
@@ -473,6 +595,17 @@
   margin-top: 4px;
 }
 
+/* Buttons on the dark stage's message (.cp-empty). */
+.cp-empty .tc-btn {
+  background: rgb(255 255 255 / 6%);
+  border-color: rgb(255 255 255 / 16%);
+  color: #f3f4f6;
+}
+
+.cp-empty .tc-btn:hover:not(:disabled) {
+  background: rgb(255 255 255 / 12%);
+}
+
 .cp-banner {
   margin: 12px 0 0;
   display: flex;
@@ -535,135 +668,6 @@
   max-height: calc(100% - 24px);
   overflow-y: auto;
   scrollbar-width: none;
-}
-
-/* A banner at the top of the stage: a set-aside edits file. */
-.cp-stage-banner {
-  position: absolute;
-  left: 50%;
-  top: 12px;
-  transform: translateX(-50%);
-  z-index: 6;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: calc(100% - 200px);
-  padding: 6px 6px 6px 12px;
-  border-radius: 999px;
-  background: #3b2a06;
-  border: 1px solid rgb(247 178 59 / 55%);
-  color: #fbd38d;
-  font-size: 12.5px;
-  font-weight: 550;
-}
-
-.cp-stage-banner span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cp-stage-banner button {
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex: none;
-}
-
-.cp-stage-banner button:hover {
-  background: rgb(255 255 255 / 10%);
-}
-
-/* The viewer's message when a file can't be opened (dark stage, studio.css .empty). */
-.cp-empty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  text-align: center;
-  color: #e7e9ee;
-  z-index: 4;
-}
-
-.cp-empty .ring {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 4%);
-  color: #c9ccd3;
-}
-
-.cp-empty .ring.danger {
-  color: #ff8a8f;
-}
-
-.cp-empty h2 {
-  margin: 6px 0 0;
-  font-size: 18px;
-  font-weight: 620;
-  color: #fff;
-}
-
-.cp-empty p {
-  margin: 0;
-  color: #a7abb4;
-  max-width: 46ch;
-}
-
-.cp-empty .cp-detail {
-  margin-top: -8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: #7c808b;
-}
-
-.cp-empty .acts {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.cp-empty .tc-btn {
-  background: rgb(255 255 255 / 6%);
-  border-color: rgb(255 255 255 / 16%);
-  color: #f3f4f6;
-}
-
-.cp-empty .tc-btn:hover:not(:disabled) {
-  background: rgb(255 255 255 / 12%);
-}
-
-.cp-empty .cp-bar {
-  width: 260px;
-}
-
-.cp-bar {
-  display: block;
-  height: 6px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 12%);
-  overflow: hidden;
-}
-
-.cp-bar i {
-  display: block;
-  height: 100%;
-  background: #5da3e5;
-  border-radius: 999px;
 }
 
 /* Notes tab */

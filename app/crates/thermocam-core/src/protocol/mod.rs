@@ -4,6 +4,7 @@ pub mod codec;
 pub mod crc;
 pub mod messages;
 pub mod parser;
+pub mod stream;
 pub mod transport;
 
 use serde::{Deserialize, Serialize};

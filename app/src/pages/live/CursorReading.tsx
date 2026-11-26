@@ -1,4 +1,5 @@
 import type { FrameStore } from "@/lib/frameStore";
+import { perf } from "@/lib/perf";
 import { formatTemp, rawToObjectC } from "@/lib/thermal";
 import type { RadiometryParams, RoiTool, TempUnit } from "@/lib/types";
 import { useHover, useSampledFrame } from "@/lib/useFrame";
@@ -35,6 +36,7 @@ export function CursorReading({
 }: CursorReadingProps): React.JSX.Element | null {
   const hover = useHover(store);
   const frame = useSampledFrame(store);
+  perf.panelRendered("cursor");
   const hint = TOOL_HINTS[tool];
   if (hint) return <div className="st-readout">{hint}</div>;
   if (!hover || !frame || hover.x >= frame.width || hover.y >= frame.height) return null;

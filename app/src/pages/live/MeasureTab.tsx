@@ -2,6 +2,7 @@ import { ChevronDown } from "lucide-react";
 import { useMemo } from "react";
 import type { FrameStore } from "@/lib/frameStore";
 import { materialLabel } from "@/lib/palettes";
+import { perf } from "@/lib/perf";
 import { evaluateRoi, formatTemp, fromCelsius, rawToObjectC, unitSymbol } from "@/lib/thermal";
 import type { MaterialPreset, RadiometryParams, Roi, RoiStats, TempUnit } from "@/lib/types";
 import { useSampledFrame } from "@/lib/useFrame";
@@ -130,6 +131,7 @@ function MaterialFields({
 export function MeasureTab(props: MeasureTabProps): React.JSX.Element {
   const { store, rad, materials, unit, rois, selectedRoiId } = props;
   const frame = useSampledFrame(store);
+  perf.panelRendered("measure");
 
   const whole = useMemo(() => {
     if (!frame) return null;

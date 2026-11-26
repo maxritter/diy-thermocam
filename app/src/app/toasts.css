@@ -1,0 +1,78 @@
+/* Messages (studio.css .toast, live.html#states). They sit at the bottom of the window's
+   content, newest last; the alarm banner keeps the top of the image. */
+
+.st-toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 60;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.st-toasts .st-toast {
+  position: static;
+  transform: none;
+  padding: 8px 8px 8px 12px;
+  pointer-events: auto;
+  max-width: min(760px, calc(100vw - 48px));
+}
+
+.st-toasts .st-toast:has(> svg:only-of-type + .tt-text:last-child) {
+  padding-right: 12px;
+}
+
+.st-toast .ok {
+  color: var(--tc-pass);
+  flex: none;
+}
+
+.st-toast .err {
+  color: var(--tc-danger);
+  flex: none;
+}
+
+.st-toast .inf {
+  color: var(--tc-text-muted);
+  flex: none;
+}
+
+.st-toast .am {
+  color: var(--tc-amber-ink);
+  flex: none;
+}
+
+.st-toast .tt-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.st-toast .tt-progress {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.st-toast .tt-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--tc-surface-3);
+  overflow: hidden;
+}
+
+.st-toast .tt-bar i {
+  display: block;
+  height: 100%;
+  background: var(--tc-accent);
+  border-radius: 999px;
+}
+
+.st-toast .tt-close {
+  width: 26px;
+  height: 26px;
+}

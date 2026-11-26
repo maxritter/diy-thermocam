@@ -302,3 +302,61 @@ export interface TimeSeriesPoint {
   tSec: number;
   values: Record<string, number>;
 }
+
+// ---------- Captures from Live (agents/rust-commands.md) ----------
+
+/** `cmd_snapshot` → the saved `.DAT`, and its PNG when PNG-on-snapshot is on. */
+export interface SnapshotInfo {
+  path: string;
+  png_path: string | null;
+}
+
+/** A region as Rust draws it (`roi.rs` geometry, `{id, name, geometry, material, visible}`). */
+export interface RenderRegion {
+  id: string;
+  name: string;
+  geometry: RoiGeometry;
+  material: Material | null;
+  visible: boolean;
+}
+
+/** How Rust draws a picture (`RenderSpec`): Copy image, Save PNG…, PNG on snapshot. */
+export interface RenderSpec {
+  palette_id: string;
+  range?: { mode: "auto" | "manual"; min_c: number | null; max_c: number | null };
+  material?: Material;
+  sensor_material?: Material | null;
+  overlays?: { regions?: RenderRegion[]; colorbar?: boolean; hud?: boolean; unit?: TempUnit };
+  /** Integer upscale of the sensor image, 1–8. */
+  scale?: number;
+}
+
+export type RenderSource =
+  | "latest"
+  | { kind: "local"; path: string }
+  | { kind: "camera"; serial: string; sd_path: string }
+  | { kind: "recording"; path: string; index: number };
+
+export type RecordingStopReason = "user" | "disconnected" | "write_error" | "low_disk";
+
+/** `cmd_record_stop` and the `recording-stopped` event. */
+export interface RecordingInfo {
+  path: string;
+  frames: number;
+  duration_ms: number;
+  stopped: RecordingStopReason;
+  detail: string | null;
+}
+
+/** `cmd_record_status`: the running recording or time-lapse. */
+export interface RecordingStatus {
+  path: string;
+  frames: number;
+  elapsed_ms: number;
+  source: "studio" | "timelapse";
+}
+
+/** `camera-event`, serde externally tagged. Button `action`: 0 short, 1 long, 2 down, 3 up. */
+export type CameraEvent =
+  | { Button: { action: number | string; duration_ms: number } }
+  | Record<string, unknown>;

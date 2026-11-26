@@ -1,18 +1,4 @@
-import { Dialog } from "@base-ui/react/dialog";
-import {
-  Camera,
-  ChevronDown,
-  Maximize,
-  Minus,
-  PanelRight,
-  Pause,
-  Play,
-  Plus,
-  Share,
-  Square,
-  X,
-  Zap,
-} from "lucide-react";
+import { Bell, Maximize, Minus, Plus } from "lucide-react";
 import {
   type CSSProperties,
   type ReactNode,
@@ -37,9 +23,13 @@ import type {
   TempUnit,
   ThermalFrame,
 } from "@/lib/types";
+import { CaptureBar } from "./CaptureBar";
 import { CursorReading } from "./CursorReading";
+import type { CaptureActions } from "./captureActions";
 import { ImageTab } from "./ImageTab";
 import { type MaterialChoice, MeasureTab } from "./MeasureTab";
+import { type LiveConnection, RecordingBar } from "./RecordingBar";
+import "./live.css";
 
 export type InspectorTab = "image" | "measure" | "alarms";
 
@@ -82,103 +72,50 @@ export interface LivePageProps {
   onRangeChange: (range: ColorRange) => void;
   onFitRangeToRoi: (roi: Roi, frame: ThermalFrame) => void;
 
+  /** What the bar above the image says about the camera. */
+  connection: LiveConnection;
   streaming: boolean;
-  demo: boolean;
-  recording: boolean;
-  recordedCount: number;
+  actions: CaptureActions;
   onTogglePause: () => void;
   onCalibrate: () => void;
-  onSnapshot: () => void;
-  onToggleRecording: () => void;
+  onExport: () => void;
+  onChangeFolder: () => void;
+  /** Shown instead of the image: Connect your Thermocam, or a connection error. */
+  stageNotice: ReactNode | null;
 
   panelHidden: boolean;
   onTogglePanel: () => void;
   inspectorTab: InspectorTab;
   onInspectorTabChange: (tab: InspectorTab) => void;
-  exportOpen: boolean;
-  onExportOpenChange: (open: boolean) => void;
   chartsOpen: boolean;
   onChartsOpenChange: (open: boolean) => void;
 
-  /** The old Alarms and Export panels, until slice 5 replaces them. */
+  /** The Alarms tab. */
   alarmsPanel: ReactNode;
-  exportPanel: ReactNode;
+  /** Alarms past their limit now: the tab's count and the banner. */
+  alarmCount: number;
+  alarmTitle: string | null;
+  banner: string | null;
+  alertIds: ReadonlySet<string>;
   /** The chart drawer below the image. */
   drawer: ReactNode;
 }
 
-const ICON = { size: 16, strokeWidth: 1.75, "aria-hidden": true } as const;
 const SM = { size: 14, strokeWidth: 1.75, "aria-hidden": true } as const;
 
 /** Columns beside the image: the tool rail (64) and the color scale (108), plus a gutter. */
 const SIDE_COLUMNS = 64 + 108 + 16;
 
-/** Frames per second over the last second, from the store's counter. */
-function useFps(store: FrameStore): number | null {
-  const [fps, setFps] = useState<number | null>(null);
+/** When the frame on screen arrived (sampled), for "Paused · frame from …". */
+function useFrameTime(store: FrameStore): React.RefObject<Date | null> {
+  const ref = useRef<Date | null>(null);
   useEffect(() => {
-    let last = store.counters().received;
-    let lastT = performance.now();
-    const id = setInterval(() => {
-      const now = performance.now();
-      const n = store.counters().received;
-      setFps(((n - last) * 1000) / Math.max(1, now - lastT));
-      last = n;
-      lastT = now;
-    }, 1000);
-    return () => clearInterval(id);
+    if (store.getFrame()) ref.current = new Date();
+    return store.subscribeSampled(() => {
+      ref.current = new Date();
+    });
   }, [store]);
-  return fps;
-}
-
-function LivePill({
-  store,
-  streaming,
-  demo,
-  recording,
-  recordedCount,
-}: {
-  store: FrameStore;
-  streaming: boolean;
-  demo: boolean;
-  recording: boolean;
-  recordedCount: number;
-}): React.JSX.Element {
-  const fps = useFps(store);
-  if (recording) {
-    return (
-      <span className="st-live-pill" style={{ color: "var(--tc-danger)" }}>
-        <span className="st-status-dot rec" />
-        Recording{" "}
-        <span className="font-mono-tech" style={{ fontWeight: 500, color: "var(--tc-text)" }}>
-          {recordedCount} frames
-        </span>
-      </span>
-    );
-  }
-  if (!streaming) {
-    return (
-      <span className="st-live-pill">
-        <span className="st-status-dot off" />
-        Paused
-      </span>
-    );
-  }
-  if (demo) {
-    return (
-      <span className="st-live-pill">
-        <span className="st-status-dot demo" />
-        Demo <span className="muted">simulated image</span>
-      </span>
-    );
-  }
-  return (
-    <span className="st-live-pill">
-      <span className="st-status-dot" />
-      Live{" "}
-      {fps !== null ? <span className="muted font-mono-tech">{fps.toFixed(1)} fps</span> : null}
-    </span>
-  );
+  return ref;
 }
 
 /**
@@ -218,6 +155,7 @@ export function useStageLayout(short: boolean) {
 export function LivePage(props: LivePageProps): React.JSX.Element {
   const { view, store } = props;
   const stage = useStageLayout(props.chartsOpen);
+  const frameTime = useFrameTime(store);
 
   const tabs: { id: InspectorTab; label: string }[] = [
     { id: "image", label: "Image" },
@@ -225,179 +163,154 @@ export function LivePage(props: LivePageProps): React.JSX.Element {
     { id: "alarms", label: "Alarms" },
   ];
 
-  const bodyClass = props.panelHidden
-    ? "st-body full"
-    : props.inspectorTab === "alarms"
-      ? "st-body wide"
-      : "st-body";
+  const vacant = props.stageNotice !== null;
+  const bodyClass = props.panelHidden || vacant ? "st-body full" : "st-body";
 
   const stageStyle = { "--ih": `${stage.ih}px`, "--cbh": `${stage.cbh}px` } as CSSProperties;
+  const lost = props.connection === "lost";
+  const stageClass = [
+    "st-stage",
+    props.chartsOpen && !vacant ? "short" : "",
+    stage.zoomRight ? "zoom-right" : "",
+    vacant ? "lv-vacant" : "",
+    lost ? "lv-lost" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={bodyClass}>
       <div className="st-viewer">
         <div className="st-vbar">
           <div className="st-vbar-left">
-            <LivePill
-              store={store}
-              streaming={props.streaming}
-              demo={props.demo}
-              recording={props.recording}
-              recordedCount={props.recordedCount}
-            />
+            {vacant ? null : (
+              <RecordingBar
+                recorder={props.actions.recorder}
+                connection={props.connection}
+                streaming={props.streaming}
+                store={store}
+                frameTime={frameTime.current}
+              />
+            )}
           </div>
           <div className="st-vbar-right">
-            <button
-              className="tc-btn tc-btn-ghost"
-              type="button"
-              disabled={props.recording}
-              onClick={props.onTogglePause}
-            >
-              {props.streaming ? <Pause {...ICON} /> : <Play {...ICON} />}
-              {props.streaming ? "Pause" : "Resume"}
-            </button>
-            <button
-              className="tc-btn tc-btn-ghost"
-              type="button"
-              disabled={props.recording}
-              title="Closes the shutter for a moment to even out the image"
-              onClick={props.onCalibrate}
-            >
-              <Zap {...ICON} />
-              Calibrate
-            </button>
-            <span className="st-vsep" aria-hidden="true" />
-            <button className="tc-btn tc-btn-primary" type="button" onClick={props.onSnapshot}>
-              <Camera {...ICON} />
-              Snapshot
-            </button>
-            <div className="st-splitbtn">
-              <button
-                className={`tc-btn ${props.recording ? "tc-btn-danger" : ""}`}
-                type="button"
-                onClick={props.onToggleRecording}
-              >
-                {props.recording ? (
-                  <Square {...ICON} />
-                ) : (
-                  <span className="st-rec-dot" aria-hidden="true" />
-                )}
-                {props.recording ? "Stop recording" : "Record"}
-              </button>
-              <button
-                className="tc-btn"
-                type="button"
-                aria-label="Recording options"
-                onClick={() => props.onExportOpenChange(true)}
-              >
-                <ChevronDown {...SM} />
-              </button>
-            </div>
-            <button className="tc-btn" type="button" onClick={() => props.onExportOpenChange(true)}>
-              <Share {...ICON} />
-              Export…
-            </button>
-            <button
-              className="st-icon-btn"
-              type="button"
-              aria-label={props.panelHidden ? "Show side panel" : "Hide side panel"}
-              aria-pressed={props.panelHidden}
-              title="Hide side panel · ⌘\"
-              onClick={props.onTogglePanel}
-            >
-              <PanelRight {...ICON} />
-            </button>
+            {vacant ? null : (
+              <CaptureBar
+                actions={props.actions}
+                streaming={props.streaming}
+                connection={props.connection}
+                panelHidden={props.panelHidden}
+                onTogglePause={props.onTogglePause}
+                onCalibrate={props.onCalibrate}
+                onExport={props.onExport}
+                onTogglePanel={props.onTogglePanel}
+                onChangeFolder={props.onChangeFolder}
+              />
+            )}
           </div>
         </div>
 
-        <div
-          ref={stage.ref}
-          className={`st-stage${props.chartsOpen ? " short" : ""}${stage.zoomRight ? " zoom-right" : ""}`}
-          style={stageStyle}
-        >
-          <Toolbar
-            tool={view.activeTool}
-            onToolChange={props.onToolChange}
-            showHotCold={view.showHotCold}
-            onToggleHotCold={props.onToggleHotCold}
-            showLoupe={view.showLoupe}
-            onToggleLoupe={props.onToggleLoupe}
-            showGrid={view.showGrid}
-            gridSize={[view.gridCols, view.gridRows]}
-            onGridChange={props.onGridChange}
-          />
-          <span aria-hidden="true" />
-          <ThermalViewport
-            store={store}
-            palette={view.palette}
-            range={view.range}
-            rad={view.rad}
-            pipeline={view.pipeline}
-            unit={view.unit}
-            rois={view.rois}
-            selectedRoiId={view.selectedRoiId}
-            tool={view.activeTool}
-            showHotCold={view.showHotCold}
-            showGrid={view.showGrid}
-            gridCols={view.gridCols}
-            gridRows={view.gridRows}
-            zoom={view.zoom}
-            onRoisChange={props.onRoisChange}
-            onSelectRoi={props.onSelectRoi}
-            onToolChange={props.onToolChange}
-          />
-          <ColorbarHistogram
-            store={store}
-            palette={view.palette}
-            range={view.range}
-            onRangeChange={props.onRangeChange}
-            rad={view.rad}
-            unit={view.unit}
-            onUnitChange={props.onUnitChange}
-            boosted={view.pipeline.histogram_eq}
-          />
-          <div className="st-zoom">
-            <button
-              type="button"
-              aria-label="Zoom out"
-              onClick={() => props.onZoomChange(Math.max(0.75, view.zoom - 0.25))}
-            >
-              <Minus {...SM} />
-            </button>
-            <span>{Math.round(view.zoom * 100)}%</span>
-            <button
-              type="button"
-              aria-label="Zoom in"
-              onClick={() => props.onZoomChange(Math.min(2.5, view.zoom + 0.25))}
-            >
-              <Plus {...SM} />
-            </button>
-            <button type="button" aria-label="Fit to window" onClick={() => props.onZoomChange(1)}>
-              <Maximize {...SM} />
-            </button>
-          </div>
-          <CursorReading
-            store={store}
-            rad={view.rad}
-            unit={view.unit}
-            tool={view.activeTool}
-            engineeringDetails={view.engineeringDetails}
-          />
-          {view.showLoupe ? (
-            <Loupe
-              store={store}
-              palette={view.palette}
-              range={view.range}
-              rad={view.rad}
-              unit={view.unit}
-              engineeringDetails={view.engineeringDetails}
-            />
-          ) : null}
+        <div ref={stage.ref} className={stageClass} style={stageStyle}>
+          {vacant ? (
+            props.stageNotice
+          ) : (
+            <>
+              <Toolbar
+                tool={view.activeTool}
+                onToolChange={props.onToolChange}
+                showHotCold={view.showHotCold}
+                onToggleHotCold={props.onToggleHotCold}
+                showLoupe={view.showLoupe}
+                onToggleLoupe={props.onToggleLoupe}
+                showGrid={view.showGrid}
+                gridSize={[view.gridCols, view.gridRows]}
+                onGridChange={props.onGridChange}
+              />
+              <span aria-hidden="true" />
+              <ThermalViewport
+                store={store}
+                palette={view.palette}
+                range={view.range}
+                rad={view.rad}
+                pipeline={view.pipeline}
+                unit={view.unit}
+                rois={view.rois}
+                selectedRoiId={view.selectedRoiId}
+                alertIds={props.alertIds}
+                tool={view.activeTool}
+                showHotCold={view.showHotCold}
+                showGrid={view.showGrid}
+                gridCols={view.gridCols}
+                gridRows={view.gridRows}
+                zoom={view.zoom}
+                onRoisChange={props.onRoisChange}
+                onSelectRoi={props.onSelectRoi}
+                onToolChange={props.onToolChange}
+              />
+              <ColorbarHistogram
+                store={store}
+                palette={view.palette}
+                range={view.range}
+                onRangeChange={props.onRangeChange}
+                rad={view.rad}
+                unit={view.unit}
+                onUnitChange={props.onUnitChange}
+                boosted={view.pipeline.histogram_eq}
+              />
+              {props.banner ? (
+                <div className="lv-banner" role="alert">
+                  <Bell {...SM} />
+                  {props.banner}
+                </div>
+              ) : null}
+              <div className="st-zoom">
+                <button
+                  type="button"
+                  aria-label="Zoom out"
+                  onClick={() => props.onZoomChange(Math.max(0.75, view.zoom - 0.25))}
+                >
+                  <Minus {...SM} />
+                </button>
+                <span>{Math.round(view.zoom * 100)}%</span>
+                <button
+                  type="button"
+                  aria-label="Zoom in"
+                  onClick={() => props.onZoomChange(Math.min(2.5, view.zoom + 0.25))}
+                >
+                  <Plus {...SM} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Fit to window"
+                  onClick={() => props.onZoomChange(1)}
+                >
+                  <Maximize {...SM} />
+                </button>
+              </div>
+              <CursorReading
+                store={store}
+                rad={view.rad}
+                unit={view.unit}
+                tool={view.activeTool}
+                engineeringDetails={view.engineeringDetails}
+              />
+              {view.showLoupe ? (
+                <Loupe
+                  store={store}
+                  palette={view.palette}
+                  range={view.range}
+                  rad={view.rad}
+                  unit={view.unit}
+                  engineeringDetails={view.engineeringDetails}
+                />
+              ) : null}
+            </>
+          )}
         </div>
-        {props.chartsOpen ? props.drawer : null}
+        {props.chartsOpen && !vacant ? props.drawer : null}
       </div>
 
-      {props.panelHidden ? null : (
+      {props.panelHidden || vacant ? null : (
         <aside className="st-insp" aria-label="Side panel">
           <div className="st-insp-tabs">
             <div className="st-tabs" role="tablist" aria-label="Side panel">
@@ -409,9 +322,18 @@ export function LivePage(props: LivePageProps): React.JSX.Element {
                   role="tab"
                   aria-selected={props.inspectorTab === t.id}
                   tabIndex={props.inspectorTab === t.id ? 0 : -1}
+                  title={t.id === "alarms" && props.alarmTitle ? props.alarmTitle : undefined}
                   onClick={() => props.onInspectorTabChange(t.id)}
                 >
                   {t.label}
+                  {t.id === "alarms" && props.alarmCount > 0 ? (
+                    <>
+                      <span className="lv-count" aria-hidden="true">
+                        {props.alarmCount}
+                      </span>
+                      <span className="st-vh">{props.alarmTitle}</span>
+                    </>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -459,26 +381,6 @@ export function LivePage(props: LivePageProps): React.JSX.Element {
           </div>
         </aside>
       )}
-
-      <Dialog.Root open={props.exportOpen} onOpenChange={props.onExportOpenChange}>
-        <Dialog.Portal>
-          <Dialog.Backdrop className="st-scrim z-50" />
-          <Dialog.Popup
-            className="st-dialog z-50"
-            style={{ width: 1080, gridTemplateRows: "auto minmax(0, 1fr)" }}
-          >
-            <div className="dlg-h">
-              <Dialog.Title>Export</Dialog.Title>
-              <Dialog.Close className="st-icon-btn" aria-label="Close">
-                <X {...ICON} />
-              </Dialog.Close>
-            </div>
-            <div style={{ minHeight: 0, height: "min(720px, calc(100vh - 120px))" }}>
-              {props.exportPanel}
-            </div>
-          </Dialog.Popup>
-        </Dialog.Portal>
-      </Dialog.Root>
     </div>
   );
 }

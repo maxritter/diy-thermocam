@@ -234,6 +234,52 @@ impl RealHalfKayDevice {
     }
 }
 
+/// The USB HID devices this computer sees, as `(vendor id, product id)`. Listing only: no
+/// device is opened.
+pub trait HidBus {
+    fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError>;
+}
+
+/// The real HID bus through `hidapi`'s device list.
+pub struct RealHidBus;
+
+impl HidBus for RealHidBus {
+    fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError> {
+        let api = hidapi::HidApi::new().map_err(|e| FlashError::HidIo(e.to_string()))?;
+        Ok(api
+            .device_list()
+            .map(|d| (d.vendor_id(), d.product_id()))
+            .collect())
+    }
+}
+
+impl HidBus for [(u16, u16)] {
+    fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError> {
+        Ok(self.to_vec())
+    }
+}
+
+impl HidBus for Vec<(u16, u16)> {
+    fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError> {
+        Ok(self.clone())
+    }
+}
+
+/// A mock HalfKay device is on its own bus.
+impl HidBus for MockHalfKayDevice {
+    fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError> {
+        Ok(vec![(HALFKAY_VID, HALFKAY_PID)])
+    }
+}
+
+/// A Thermocam waits in update mode: the HalfKay bootloader (`16C0:0478`) is on the bus.
+/// A bus that cannot be listed counts as "not in update mode".
+pub fn update_mode_present<B: HidBus + ?Sized>(bus: &B) -> bool {
+    bus.device_ids()
+        .map(|ids| ids.contains(&(HALFKAY_VID, HALFKAY_PID)))
+        .unwrap_or(false)
+}
+
 /// An `hidapi` open failure: a permission problem (Linux udev, Windows access) or simply absent.
 #[must_use]
 pub fn classify_hid_open_error(message: &str) -> FlashError {

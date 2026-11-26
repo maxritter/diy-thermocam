@@ -52,6 +52,8 @@ describe("the Studio shell", () => {
 
   test("Shift+P leaves the DOM unchanged", async () => {
     const { findByRole, user } = renderApp(<App />);
+    // Nothing streams by itself: start the demo camera, then freeze the image.
+    await user.click(await findByRole("button", { name: "Try the demo camera" }));
     await user.click(await findByRole("button", { name: "Pause" }));
     await findByRole("button", { name: "Resume" });
     await act(async () => {

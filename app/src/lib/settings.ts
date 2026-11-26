@@ -14,6 +14,8 @@ export interface StudioSettings {
   drawer_height: number;
   last_palette: string;
   last_range: ColorRangeSetting;
+  /** The firmware file chosen last, so Finish update can use it again. */
+  last_firmware_path: string | null;
 }
 
 export type ThemeChoice = "system" | "light" | "dark";
@@ -55,6 +57,7 @@ export function defaultSettings(locale: string = systemLocale()): StudioSettings
     drawer_height: 216,
     last_palette: "inferno",
     last_range: { mode: "auto", min_c: null, max_c: null },
+    last_firmware_path: null,
   };
 }
 
@@ -110,6 +113,10 @@ export function parseSettings(value: unknown, locale?: string): StudioSettings {
         ? v.last_palette
         : d.last_palette,
     last_range: parseRange(v.last_range, d.last_range),
+    last_firmware_path:
+      typeof v.last_firmware_path === "string" && v.last_firmware_path.length > 0
+        ? v.last_firmware_path
+        : null,
   };
 }
 

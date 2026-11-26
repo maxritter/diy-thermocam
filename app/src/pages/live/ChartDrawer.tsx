@@ -1,6 +1,7 @@
 import { Copy, Download } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { FrameStore } from "@/lib/frameStore";
+import { perf } from "@/lib/perf";
 import { roiColor, rowStat } from "@/lib/regions";
 import { type ChartWindow, type SeriesSample, type SessionSeries, WINDOWS } from "@/lib/series";
 import { formatTemp, fromCelsius, sampleLineProfile } from "@/lib/thermal";
@@ -221,6 +222,7 @@ export function ChartDrawer({
   onCopy,
 }: ChartDrawerProps): React.JSX.Element {
   const frame = useSampledFrame(store);
+  perf.panelRendered("chart");
   const [chartWindow, setChartWindow] = useState<ChartWindow>("1m");
   const [folded, setFolded] = useState(false);
   const [dragH, setDragH] = useState<number | null>(null);

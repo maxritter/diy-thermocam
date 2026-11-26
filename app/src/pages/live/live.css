@@ -1,0 +1,423 @@
+/* Live additions from the studio-redesign artifact (live.html #states, #alarms, #export,
+   #no-camera): the recording bar, alarms, the Export dialog, and the stage's empty and
+   disconnected states. Class names are prefixed `lv-`. */
+
+/* The bar above the image keeps its buttons whole; what Studio is doing takes the rest.
+   At the smallest window with the side panel open (bar under 860 px), Pause, Calibrate and
+   Export… show their icons only (their names stay as labels and tooltips). */
+.st-vbar {
+  container-type: inline-size;
+}
+
+.st-vbar-left {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.st-vbar-right {
+  flex: none;
+}
+
+@container (max-width: 860px) {
+  .lv-compact .lv-lbl {
+    display: none;
+  }
+
+  .tc-btn.lv-compact {
+    padding: 0 9px;
+  }
+}
+
+.lv-rec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--tc-danger);
+  white-space: nowrap;
+}
+
+.lv-rec-pill .lv-rec-n {
+  font-weight: 500;
+  color: var(--tc-text);
+}
+
+.lv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  background: var(--tc-surface-2);
+  color: var(--tc-text-muted);
+  border: 1px solid var(--tc-border);
+}
+
+.lv-badge.amber {
+  background: var(--tc-amber-soft);
+  color: var(--tc-amber-ink);
+  border-color: var(--tc-amber-line);
+}
+
+/* The Live tab's mark while recording, during a time-lapse, or when an alarm fires. */
+.lv-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.lv-nav-dot.rec {
+  background: var(--tc-danger);
+}
+
+.lv-nav-dot.alarm {
+  background: var(--tc-amber-ink);
+}
+
+.lv-nav-clock {
+  color: var(--tc-amber-ink);
+  flex: none;
+}
+
+/* The alarm banner at the top of the image. */
+.lv-banner {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  z-index: 4;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  background: #3b2a06;
+  border: 1px solid rgb(247 178 59 / 55%);
+  color: #fbd38d;
+  font-size: 12.5px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+/* Unplugged: the last frame stays, dimmed, with its regions. */
+.lv-lost .st-img {
+  opacity: 0.45;
+}
+
+/* No camera yet, and the connection error cards (studio.css .empty, .stage.vacant). */
+.st-stage.lv-vacant {
+  display: block;
+  background: var(--tc-bg-sunken);
+  border: 1px dashed var(--tc-border-strong);
+  color: var(--tc-text);
+}
+
+.lv-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  color: var(--tc-text);
+}
+
+.lv-empty .ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-surface);
+  color: var(--tc-text-muted);
+}
+
+.lv-empty .ring.warn {
+  color: var(--tc-amber-ink);
+  border-color: var(--tc-amber-line);
+  background: var(--tc-amber-soft);
+}
+
+.lv-empty h2 {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-weight: 620;
+  color: var(--tc-text);
+}
+
+.lv-empty p {
+  margin: 0;
+  color: var(--tc-text-muted);
+  max-width: 46ch;
+}
+
+.lv-empty .acts {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.lv-codebox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 420px;
+  max-width: 100%;
+  padding: 6px 6px 6px 12px;
+  border-radius: 8px;
+  background: #000;
+  border: 1px solid rgb(255 255 255 / 14%);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: #e7e9ee;
+  text-align: left;
+}
+
+.lv-codebox .tc-btn {
+  background: rgb(255 255 255 / 6%);
+  border-color: rgb(255 255 255 / 16%);
+  color: #f3f4f6;
+}
+
+.lv-dev {
+  color: var(--tc-text-dim);
+  font-size: 11px;
+}
+
+/* Alarms tab (studio.css › alarms). */
+.lv-alarm {
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: center;
+  background: var(--tc-surface);
+}
+
+.lv-alarm .t {
+  font-weight: 550;
+}
+
+.lv-alarm .s {
+  grid-column: 2 / 4;
+  font-size: 12px;
+  color: var(--tc-text-muted);
+}
+
+.lv-alarm.firing {
+  border-color: var(--tc-amber-line);
+  background: var(--tc-amber-soft);
+}
+
+.lv-alarm.off .t {
+  color: var(--tc-text-muted);
+}
+
+.lv-alarm-edit {
+  border: 1px solid var(--tc-accent-line);
+  border-radius: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  background: var(--tc-surface);
+}
+
+.lv-alarm-edit .lv-every {
+  font-size: 12.5px;
+  color: var(--tc-text-muted);
+}
+
+.lv-alarms {
+  display: grid;
+  gap: 8px;
+}
+
+.lv-log {
+  display: grid;
+  gap: 2px;
+  font-size: 12.5px;
+}
+
+.lv-log > div {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 8px;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--tc-line);
+}
+
+.lv-log > div:last-child {
+  border-bottom: 0;
+}
+
+.lv-log .tm {
+  font-family: var(--font-mono);
+  color: var(--tc-text-muted);
+  font-size: 12px;
+}
+
+.lv-log .v {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.lv-log-empty {
+  font-size: 12.5px;
+  color: var(--tc-text-muted);
+}
+
+.st-tab .lv-count {
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--tc-amber);
+  color: #1b1203;
+  font-size: 11px;
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Export dialog (studio.css .radio-list, .preview). */
+.lv-export .dlg-b {
+  align-content: start;
+}
+
+/* Segmented choices keep their own width, as drawn. */
+.lv-export .st-field > .st-seg {
+  justify-self: start;
+}
+
+.lv-export-image {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+}
+
+.lv-export-col {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.lv-preview {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.lv-preview .pv {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  grid-template-columns: 1fr 22px;
+  gap: 8px;
+  padding: 10px 12px 10px 10px;
+}
+
+.lv-preview .pv .im {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  justify-self: center;
+}
+
+.lv-preview .pv canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: auto;
+}
+
+.lv-preview .pv .bar2 {
+  border-radius: 3px;
+}
+
+.lv-preview .cap2 {
+  font-size: 12px;
+  color: var(--tc-text-muted);
+}
+
+.lv-radio-list {
+  display: grid;
+  gap: 8px;
+}
+
+.lv-radio {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 2px 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--tc-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.lv-radio input {
+  margin: 2px 0 0;
+  accent-color: var(--tc-accent);
+  width: 16px;
+  height: 16px;
+}
+
+.lv-radio-t {
+  font-weight: 550;
+}
+
+.lv-radio-d {
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--tc-text-muted);
+}
+
+.lv-radio:has(input:checked) {
+  border-color: var(--tc-accent-line);
+  background: var(--tc-accent-soft);
+}
+
+.lv-radio:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.lv-export-progress {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+}
+
+.lv-export-progress .tt-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--tc-surface-3);
+  overflow: hidden;
+}
+
+.lv-export-progress .tt-bar i {
+  display: block;
+  height: 100%;
+  background: var(--tc-accent);
+  border-radius: 999px;
+}

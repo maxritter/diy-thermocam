@@ -176,12 +176,32 @@ async function reconnectAfterUpdate(): Promise<void> {
   }
 }
 
+let fileChosen: ((path: string) => void) | null = null;
+
+/** Told the path of every firmware file chosen, so Finish update can use it again. */
+export function onFirmwareFileChosen(cb: ((path: string) => void) | null): void {
+  fileChosen = cb;
+}
+
 /** Update firmware…: the system's file dialog, then the dialog with the checked file. */
 export async function chooseFirmwareFile(): Promise<void> {
   if (firmwareBusy()) return;
   ensureListening();
   const file = await cameraApi.pickFirmwareFile();
+  if (file?.path) fileChosen?.(file.path);
   if (file) await checkFirmwareFile(file);
+}
+
+/**
+ * Finish update: the dialog again with the file chosen last time (the camera already waits in
+ * update mode). Falls back to the file dialog when that file is gone.
+ */
+export async function reopenFirmwareFile(path: string | null): Promise<void> {
+  if (firmwareBusy()) return;
+  ensureListening();
+  const file = path ? await cameraApi.readFirmwareFile(path).catch(() => null) : null;
+  if (file) await checkFirmwareFile(file);
+  else await chooseFirmwareFile();
 }
 
 async function checkFirmwareFile(file: { name: string; text: string }): Promise<void> {

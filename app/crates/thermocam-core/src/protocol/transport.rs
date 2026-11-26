@@ -162,6 +162,8 @@ impl Transport for SerialTransport {
 pub struct MockTransport {
     pub rx_queue: VecDeque<u8>,
     pub tx_log: Vec<u8>,
+    /// Once the queued bytes are read, every read fails with this (an unplugged cable).
+    pub read_error_when_empty: Option<io::ErrorKind>,
 }
 
 impl MockTransport {
@@ -176,6 +178,11 @@ impl Transport for MockTransport {
         Ok(())
     }
     fn read_chunk(&mut self, buf: &mut [u8], _timeout: Duration) -> io::Result<usize> {
+        if self.rx_queue.is_empty() {
+            if let Some(kind) = self.read_error_when_empty {
+                return Err(io::Error::new(kind, "simulated unplug"));
+            }
+        }
         let n = buf.len().min(self.rx_queue.len());
         for slot in buf.iter_mut().take(n) {
             *slot = self.rx_queue.pop_front().unwrap_or(0);

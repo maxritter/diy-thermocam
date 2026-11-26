@@ -1,4 +1,4 @@
-import { isTauriRuntime } from "@/lib/backend";
+import { isTauriRuntime, simSavedCaptures } from "@/lib/backend";
 import { DEFAULT_PALETTES, samplePalette } from "@/lib/palettes";
 import { decodeFrameRawBinary, evaluateRoi, generateDemoFrame } from "@/lib/thermal";
 import type {
@@ -339,6 +339,25 @@ const simComputer: SimLocal[] = [
   },
 ];
 
+/** Snapshots and recordings Live saved in the browser preview join "this computer". */
+function syncSimSaved(): void {
+  for (const c of [...simSavedCaptures()].reverse()) {
+    if (simLocal(c.path)) continue;
+    simComputer.unshift({
+      item: localItem({
+        name: c.name,
+        path: c.path,
+        kind: c.kind,
+        size: (c.frames ?? 1) * 38_805,
+        frames: c.frames,
+        mtime_ms: c.mtimeMs,
+      }),
+      seq: c.frame.frame_seq,
+      t_ms: c.t_ms ?? undefined,
+    });
+  }
+}
+
 const simSidecars = new Map<string, ThermoSidecar>();
 const simQuarantine = new Set<string>(["camera:/20261123180233.DAT"]);
 
@@ -532,6 +551,7 @@ export const capturesApi = {
       return [...listed, ...opened.filter((o) => !ids.has(o.id))];
     }
     await delay(120);
+    syncSimSaved();
     const ids = new Set(simComputer.map((c) => c.item.id));
     return [...simComputer.map((c) => c.item), ...opened.filter((o) => !ids.has(o.id))];
   },

@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { Cpu, Images, Radio, X } from "lucide-react";
+import { Clock, Cpu, Images, Radio, X } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { isTauriRuntime } from "@/lib/backend";
@@ -36,7 +36,30 @@ export interface ShellProps {
   onShortcut: (id: ShortcutId) => void;
   /** Firmware of the connected camera, for About. */
   firmware: string | null;
+  /** The Live tab's mark: a recording, a time-lapse, or an alarm past its limit. */
+  liveBadge?: "rec" | "timelapse" | "alarm" | null;
   children: ReactNode;
+}
+
+function LiveBadge({ kind }: { kind: "rec" | "timelapse" | "alarm" }): React.JSX.Element {
+  if (kind === "timelapse") {
+    return (
+      <Clock
+        size={13}
+        strokeWidth={1.75}
+        className="lv-nav-clock"
+        role="img"
+        aria-label="Time-lapse"
+      />
+    );
+  }
+  return (
+    <span
+      className={`lv-nav-dot ${kind}`}
+      role="img"
+      aria-label={kind === "rec" ? "Recording" : "Alarm"}
+    />
+  );
 }
 
 function AboutDialog({
@@ -102,6 +125,7 @@ export function Shell({
   onChangeCapturesFolder,
   onShortcut,
   firmware,
+  liveBadge = null,
   children,
 }: ShellProps): React.JSX.Element {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -152,6 +176,7 @@ export function Shell({
               >
                 <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
                 {p.label}
+                {p.id === "live" && liveBadge ? <LiveBadge kind={liveBadge} /> : null}
               </button>
             );
           })}

@@ -3,6 +3,7 @@ import { isTypingTarget } from "@/app/shortcuts";
 import { type ColorRange, shownRange } from "@/lib/colorRange";
 import type { FrameStore } from "@/lib/frameStore";
 import { samplePalette } from "@/lib/palettes";
+import { perf } from "@/lib/perf";
 import {
   type DrawTool,
   type FrameSize,
@@ -622,7 +623,10 @@ export function ThermalViewport({
         if (!fr) return;
         const s = live.current.size;
         if (fr.width !== s.width || fr.height !== s.height) setSize(sizeOf(fr));
-        if (paint(fr)) store.markDrawn();
+        if (paint(fr)) {
+          store.markDrawn();
+          perf.frameDrawn(fr.frame_seq);
+        }
       });
     });
     return () => {

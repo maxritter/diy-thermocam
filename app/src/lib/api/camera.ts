@@ -327,6 +327,13 @@ export const cameraApi = {
     }
   },
 
+  /** The firmware file at `path` (`cmd_pick_hex_file` with a path), for Finish update. */
+  async readFirmwareFile(path: string): Promise<FirmwareFile | null> {
+    if (!isTauriRuntime()) return null;
+    const [p, text] = await invoke<[string, string]>("cmd_pick_hex_file", { path });
+    return { name: baseName(p), path: p, text };
+  },
+
   /** `cmd_verify_hex`: checks the file without touching the camera. */
   async verifyFirmware(text: string, expectedSha256?: string | null): Promise<FirmwareImageInfo> {
     if (!isTauriRuntime()) return simVerify(text, expectedSha256);

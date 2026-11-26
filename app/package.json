@@ -16,6 +16,7 @@
   "dependencies": {
     "@base-ui/react": "^1.0.0",
     "@tauri-apps/api": "^2.5.0",
+    "@tauri-apps/plugin-notification": "2.8.1",
     "@tauri-apps/plugin-opener": "2.7.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

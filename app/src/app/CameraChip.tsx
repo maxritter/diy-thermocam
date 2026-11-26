@@ -15,6 +15,8 @@ export interface CameraChipProps {
   onChoosePort: (port: string) => void;
   onDisconnect: () => void;
   onOpenCameraSettings: () => void;
+  /** Development only: simulate an unplug or replug of the demo camera. */
+  devUnplug?: { unplugged: boolean; onToggle: () => void } | null;
 }
 
 const DEMO_PORT = "sim://demo-lepton35";
@@ -70,6 +72,7 @@ export function CameraChip({
   onChoosePort,
   onDisconnect,
   onOpenCameraSettings,
+  devUnplug = null,
 }: CameraChipProps): React.JSX.Element {
   const [showOther, setShowOther] = useState(false);
   const cameras = ports.filter((p) => p.is_teensy && !isDemoPort(p.port_name));
@@ -162,6 +165,17 @@ export function CameraChip({
             >
               Disconnect
             </Menu.Item>
+            {import.meta.env?.DEV && devUnplug ? (
+              <>
+                <hr />
+                <Menu.Item className="item" onClick={devUnplug.onToggle}>
+                  <span>
+                    {devUnplug.unplugged ? "Simulate replug" : "Simulate unplug"}
+                    <span className="sub">Development only · demo camera</span>
+                  </span>
+                </Menu.Item>
+              </>
+            ) : null}
           </Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>

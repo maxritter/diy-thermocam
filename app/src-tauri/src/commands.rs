@@ -31,6 +31,9 @@ use thermocam_core::protocol::codec::{FrameRaw, HelloResp, StreamCtrl};
 use thermocam_core::protocol::messages::{
     AsyncEvent, DeviceConfig, Diagnostics, FsEntry, FsInfoResp, PerfTelemetry, RadParams,
 };
+use thermocam_core::protocol::stream::{
+    Disconnected, StreamStep, StreamWatch, CAMERA_DISCONNECTED_EVENT,
+};
 use thermocam_core::protocol::transport::{
     list_ports, ProtocolClient, SerialPortInfo, SerialTransport, SimulatorTransport,
 };
@@ -183,7 +186,7 @@ pub async fn cmd_start_stream(
         let handle = thread::spawn(move || {
             let started = Instant::now();
             let mut last_ping = Instant::now();
-            let mut consecutive_io_errors: u32 = 0;
+            let mut watch = StreamWatch::default();
 
             while worker_gen.load(Ordering::SeqCst) == my_gen
                 && worker_streaming.load(Ordering::SeqCst)
@@ -216,9 +219,8 @@ pub async fn cmd_start_stream(
                 // Let a waiting command (a card chunk, a config change) take the lock now.
                 thread::yield_now();
 
-                match poll_res {
-                    Ok(pkts) => {
-                        consecutive_io_errors = 0;
+                match watch.observe(poll_res) {
+                    StreamStep::Packets(pkts) => {
                         let had_pkts = !pkts.is_empty();
                         for pkt in pkts {
                             if worker_gen.load(Ordering::SeqCst) != my_gen {
@@ -247,8 +249,10 @@ pub async fn cmd_start_stream(
                                     worker_streaming.store(false, Ordering::SeqCst);
                                     on_camera_lost(&app, &recorder.slot, &recorder.last);
                                     let _ = app.emit(
-                                        "camera-disconnected",
-                                        serde_json::json!({ "reason": "camera exited session" }),
+                                        CAMERA_DISCONNECTED_EVENT,
+                                        Disconnected {
+                                            reason: "camera exited session".into(),
+                                        },
                                     );
                                     return;
                                 }
@@ -258,23 +262,17 @@ pub async fn cmd_start_stream(
                             thread::sleep(Duration::from_millis(2));
                         }
                     }
-                    Err(err) => {
-                        consecutive_io_errors += 1;
-                        if consecutive_io_errors >= 5 {
-                            if worker_gen.load(Ordering::SeqCst) == my_gen {
-                                if let Ok(mut g) = worker_client.lock() {
-                                    *g = None;
-                                }
-                                worker_streaming.store(false, Ordering::SeqCst);
-                                on_camera_lost(&app, &recorder.slot, &recorder.last);
-                                let _ = app.emit(
-                                    "camera-disconnected",
-                                    serde_json::json!({ "reason": err }),
-                                );
+                    StreamStep::Retry => thread::sleep(Duration::from_millis(15)),
+                    StreamStep::Disconnected(gone) => {
+                        if worker_gen.load(Ordering::SeqCst) == my_gen {
+                            if let Ok(mut g) = worker_client.lock() {
+                                *g = None;
                             }
-                            break;
+                            worker_streaming.store(false, Ordering::SeqCst);
+                            on_camera_lost(&app, &recorder.slot, &recorder.last);
+                            let _ = app.emit(CAMERA_DISCONNECTED_EVENT, gone);
                         }
-                        thread::sleep(Duration::from_millis(15));
+                        break;
                     }
                 }
             }
@@ -534,12 +532,27 @@ pub fn cmd_verify_hex(
     parse_teensy41_hex(&hex_text, expected_sha256.as_deref()).map_err(|e| e.to_string())
 }
 
+/// A firmware file and its text: the one at `path` (Finish update reopens the last chosen
+/// file), or one chosen in the system's file dialog.
 #[tauri::command]
-pub fn cmd_pick_hex_file() -> Result<(String, String), String> {
-    let file_path = rfd::FileDialog::new()
-        .add_filter("Intel HEX Firmware", &["hex", "HEX"])
-        .pick_file()
-        .ok_or("cancelled")?;
+pub fn cmd_pick_hex_file(path: Option<String>) -> Result<(String, String), String> {
+    let file_path = match path {
+        Some(p) => {
+            let p = PathBuf::from(p);
+            let is_hex = p
+                .extension()
+                .and_then(|e| e.to_str())
+                .is_some_and(|e| e.eq_ignore_ascii_case("hex"));
+            if !is_hex {
+                return Err("not a .hex file".into());
+            }
+            p
+        }
+        None => rfd::FileDialog::new()
+            .add_filter("Intel HEX Firmware", &["hex", "HEX"])
+            .pick_file()
+            .ok_or("cancelled")?,
+    };
     let text = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
     Ok((file_path.to_string_lossy().into_owned(), text))
 }

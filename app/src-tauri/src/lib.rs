@@ -14,6 +14,7 @@ pub mod session;
 pub mod settings;
 pub mod state;
 pub mod thumbs;
+pub mod update_mode;
 
 use state::AppState;
 
@@ -76,6 +77,7 @@ pub fn build_app() -> tauri::Builder<tauri::Wry> {
             edits::cmd_sidecar_load,
             edits::cmd_sidecar_save,
             edits::cmd_sidecar_reset,
+            update_mode::cmd_update_mode_present,
         ])
 }
 
