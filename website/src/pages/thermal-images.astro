@@ -4,8 +4,15 @@ import MarketingLayout from '../layouts/MarketingLayout.astro';
 import { buildBreadcrumbs } from '../lib/site';
 
 const categories = ['Buildings & HVAC', 'Electronics', 'Everyday', 'Outdoors & People'];
+const showcaseCategories = ['Buildings & HVAC', 'Electronics'];
 
 const thermalCaptures: GalleryItem[] = [
+  {
+    title: 'Laptop Lid (1080p Studio Export)',
+    caption: 'Captured on real hardware and upscaled to 1920×1080 with Desktop Studio.',
+    image: '/images/thermal/real-v3-1080p-capture.png',
+    category: 'Electronics',
+  },
   { title: 'German Ravioli', image: '/images/thermal/pasta_squares.png', category: 'Everyday' },
   { title: 'Houses in the Neighbourhood', image: '/images/thermal/houses_2.jpg', category: 'Buildings & HVAC' },
   { title: 'Pig behind a Fence', image: '/images/thermal/pig.jpg', category: 'Outdoors & People' },
@@ -33,6 +40,57 @@ const thermalCaptures: GalleryItem[] = [
   { title: 'Central Heating #2', image: '/images/thermal/heating_2.jpg', category: 'Buildings & HVAC' },
 ];
 
+const studio1080pShowcase: GalleryItem[] = [
+  {
+    title: 'PCB Buck Converter & Traces',
+    caption: 'Inferno palette · 1920×1080 EdgePreserve export with Box & Spot ROIs (simulated 160×120).',
+    image: '/images/thermal/showcase/pcb-power-stage-1080p.png',
+    category: 'Electronics',
+  },
+  {
+    title: 'Overloaded Circuit Breaker Panel',
+    caption: 'Ironblack palette · Box ROI & ΔT fault comparison across DIN-rail breakers (simulated 160×120).',
+    image: '/images/thermal/showcase/breaker-panel-fault-1080p.png',
+    category: 'Electronics',
+  },
+  {
+    title: 'Window Sill Draft & Wall Radiator',
+    caption: 'Rainbow palette · Cold air infiltration along sill above warm radiator plume (simulated 160×120).',
+    image: '/images/thermal/showcase/window-draft-radiator-1080p.png',
+    category: 'Buildings & HVAC',
+  },
+  {
+    title: 'Underfloor Radiant Heating Loops',
+    caption: 'Lava palette · Supply-to-return hydronic floor pipe trace with Zone ROI (simulated 160×120).',
+    image: '/images/thermal/showcase/underfloor-heating-1080p.png',
+    category: 'Buildings & HVAC',
+  },
+  {
+    title: 'Solar PV Bypass-Diode Hotspot',
+    caption: 'Turbo palette · Single overheated photovoltaic cell isolated with Box ROI (simulated 160×120).',
+    image: '/images/thermal/showcase/solar-pv-hotspot-1080p.png',
+    category: 'Buildings & HVAC',
+  },
+  {
+    title: 'Hydronic Radiator Air Pocket',
+    caption: 'Plasma palette · Trapped upper-right air pocket vs. hot lower supply with ΔT readout (simulated 160×120).',
+    image: '/images/thermal/showcase/radiator-air-pocket-1080p.png',
+    category: 'Buildings & HVAC',
+  },
+  {
+    title: 'Electric Motor Bearing Hotspot',
+    caption: 'Glowbow palette · Failing drive-end bearing compared to stator housing (simulated 160×120).',
+    image: '/images/thermal/showcase/motor-bearing-load-1080p.png',
+    category: 'Electronics',
+  },
+  {
+    title: 'Facade Thermal Bridges at Dusk',
+    caption: 'Viridis palette · Attic ridge leak, floor-slab thermal bridge, and leaky window frames (simulated 160×120).',
+    image: '/images/thermal/showcase/facade-thermal-bridge-1080p.png',
+    category: 'Buildings & HVAC',
+  },
+];
+
 const jsonLd = buildBreadcrumbs([
   { name: 'Home', path: '/' },
   { name: 'Thermal Images', path: '/thermal-images/' },
@@ -41,7 +99,7 @@ const jsonLd = buildBreadcrumbs([
 
 <MarketingLayout
   title="Thermal Images"
-  description="25 radiometric thermal captures taken with DIY-Thermocam across building diagnostics, electronics, HVAC, and fieldwork."
+  description="26 real radiometric captures from DIY-Thermocam plus 8 Full-HD 1080p Desktop Studio export scenarios across electronics, HVAC, and building diagnostics."
   canonicalPath="/thermal-images/"
   jsonLd={jsonLd}
 >
@@ -49,12 +107,30 @@ const jsonLd = buildBreadcrumbs([
     <header class="page-head">
       <h1>Thermal image gallery</h1>
       <p>
-        25 radiometric thermal captures from building inspections, circuit board debugging, and
+        26 real radiometric captures from building inspections, circuit board debugging, and
         fieldwork. Filter by category or click any frame to inspect full size.
       </p>
     </header>
 
     <GalleryGrid client:load items={thermalCaptures} categories={categories} aspect="4/3" />
+
+    <section class="showcase-section">
+      <header class="section-head">
+        <h2>1080p Desktop Studio pipeline showcase</h2>
+        <p>
+          Simulated 160×120 radiometric scenes rendered directly through Desktop Studio's
+          1920×1080 <code>EdgePreserve</code> upscaler (bilateral filter, Lanczos-3, halo-clamped
+          sharpening), scientific palettes, and vector-crisp ROI overlays.
+        </p>
+      </header>
+
+      <GalleryGrid
+        client:load
+        items={studio1080pShowcase}
+        categories={showcaseCategories}
+        aspect="16/9"
+      />
+    </section>
   </section>
 </MarketingLayout>
 
@@ -73,9 +149,24 @@ const jsonLd = buildBreadcrumbs([
     font-size: clamp(2rem, 3.6vw, 2.75rem);
     font-weight: 650;
   }
-  .page-head p {
+  .page-head p,
+  .section-head p {
     margin: 12px 0 0;
     font-size: 1.05rem;
     color: var(--tc-text-muted);
+  }
+  .showcase-section {
+    margin-top: 64px;
+    padding-top: 40px;
+    border-top: 1px solid var(--tc-border);
+  }
+  .section-head {
+    max-width: 68ch;
+    margin-bottom: 28px;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+    font-weight: 650;
   }
 </style>

@@ -10,18 +10,18 @@ Major release unifying firmware, desktop software, KiCad 10 hardware, parametric
 
 ### Added
 - **Unified repository:** Merged `firmware/`, `app/`, `hardware/` (`pcb/`, `enclosure/`, `bom/`), `docs/`, and `website/` with path-filtered CI, `.vscode/` tasks, and `.githooks/pre-commit`.
-- **USB Protocol v2.0 (`docs/protocol-v2.md`):** Little-endian binary framing with CRC-8 and CRC-32 checks. Verified on real V3 hardware at **8.77 fps** streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads without MTP.
+- **USB Protocol v2.0 (`docs/protocol-v2.md`):** Little-endian binary framing with CRC-8 and CRC-32 checks. Measured on a real camera at **8.77 fps** streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads without MTP.
 - **Desktop Studio (`app/`):** Cross-platform Tauri v2, Rust (`thermocam-core`), React 19, and WebGL2 app for macOS, Windows, and Linux. Includes Standard and Pro modes, 19 firmware plus 4 scientific colormaps, ROIs with per-ROI emissivity, Line Profiles, isotherms, and Time Plotter alarms. Exports H.264 MP4, GIF, 16-bit Kelvin TIFF, and reports, with direct SD browsing and HalfKay firmware updates.
 - **Firmware tests and simulator (`firmware/tests_host/`, `firmware/sim/`, `firmware/test/`):** Host C++17 unit tests, virtual Protocol v2 simulator, and physical Teensy 4.1 hardware regression suite.
-- **KiCad 10 V4.0 PCB (`hardware/pcb/`, `PROTOTYPE-PENDING`):** Zero-solder PCBA with USB-C, ESD protection (`USBLC6-2SC6`), TI `BQ24074RGTR` charger, and TI `TPS61022RWUR` 5 V boost. Adds `AO3401A`/`AO3400A` reverse-polarity protection, 2 A PTC fuse, `XC6206P332MR-G` 3.3 V RTC LDO, SMD switches, USB pogo pins, touch jumpers, and 31 verified LCSC SKUs. Legacy V3.0 Eagle files remain at tag `3.0.4`.
-- **Parametric `build123d` enclosures (`hardware/enclosure/`, `PROTOTYPE-PENDING`):** Support-free 3D/CNC shells (`STEP`, `STL`, `3MF`) and 3 mm laser-cut acrylic (`SVG`, `DXF`) for V3.0 and V4.0. Clears both FLIR Lepton 3.5 (`71° DFOV`) and Lepton 3.1R (`119° DFOV`), adds a dovetail lens cap, guided actuators, `505060` battery cradle and lid, blind-roofed `1/4"-20` tripod pocket, and 15 automated geometry checks.
+- **KiCad 10 V4.0 PCB (`hardware/pcb/`):** Zero-solder PCBA with USB-C, ESD protection (`USBLC6-2SC6`), TI `BQ24074RGTR` charger, and TI `TPS61022RWUR` 5 V boost. Adds `AO3401A`/`AO3400A` reverse-polarity protection, 2 A PTC fuse, `XC6206P332MR-G` 3.3 V RTC LDO, SMD switches, USB pogo pins, touch jumpers, and 31 verified LCSC SKUs.
+- **Parametric [build123d](https://github.com/gumyr/build123d) enclosures (`hardware/enclosure/`):** V4.0 support-free 3D-printed shell (`STEP`, `STL`, `3MF`) and 3 mm acrylic case (`SVG`, `DXF`). Clears both FLIR Lepton 3.5 (`71°`) and 3.1R (`119°`), with a dovetail lens cap, `505060` battery cradle, `1/4"-20` tripod pocket, automated geometry tests, and Blender renders.
 - **Single-source BOM (`hardware/bom/`):** Machine-readable `bom.csv` and `validate_bom.py` aligned 1:1 with all 31 V4.0 LCSC SKUs.
 - **Official website (`website/`):** Astro 5 + Starlight site for `www.diy-thermocam.net` with an interactive `/docs/partlist/` configurator, Pagefind search, and single-sourced repo docs.
 
 ### Changed
 - Migrated firmware builds from PlatformIO to `arduino-cli` (`firmware/sketch.yaml`) pinned to Teensy core `1.62.0` (`0 errors, 0 warnings`).
 - Upgraded on-device video playback to double-buffered rendering and restored interactive menus cleanly after USB disconnect.
-- Updated manuals and hardware docs for Firmware 4.0 benchmarks, V4.0 prototype status, and `.DAT` compatibility.
+- Updated manuals and hardware docs for Firmware 4.0 benchmarks, the V4.0 hardware, and `.DAT` compatibility.
 
 ### Fixed
 - Resolved all Teensy 1.62.0 compiler warnings in firmware sources.

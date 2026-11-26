@@ -28,28 +28,33 @@
 
 DIY-Thermocam is an open-source hardware and software thermal imager licensed under GPL-3.0. It pairs a radiometric FLIR Lepton sensor and Teensy 4.1 with a 3.2-inch touchscreen, open KiCad schematics, parametric enclosures, and a cross-platform desktop app.
 
-Every radiometric `.DAT` file stays byte-compatible across V1, V2, V3, and V4 cameras.
+Radiometric `.DAT` files stay byte-compatible with files from earlier DIY-Thermocam cameras.
 
-| Revision | Status | Assembly | Power &amp; USB | Est. BOM (incl. Lepton 3.5) |
-| --- | --- | --- | --- | --- |
-| **V3.0 Classic** | Proven default (tag `3.0.4`) | Hand-soldered through-hole PCB | Micro-USB, TP4056, Pololu 5 V boost, CR1220 | ~$367 (~$195 excl. sensor) |
-| **V4.0 Zero-Solder** | `PROTOTYPE-PENDING` | Factory PCBA + Phillips screwdriver | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$333 (~$161 excl. sensor) |
+| Assembly | Power &amp; USB | Est. BOM (incl. Lepton 3.5) |
+| --- | --- | --- |
+| Factory-assembled PCBA + Phillips screwdriver | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$333 (~$161 excl. sensor) |
 
-> **Prototype status:** V4.0 (`hardware/pcb/` and `hardware/enclosure/exports/3d-v4.0/`) is `PROTOTYPE-PENDING` until physical hardware bring-up is complete. Use V3.0 (tag `3.0.4`) for a proven build today.
+## On the camera and on your computer
 
-## Highlights
+| Firmware 4.0 Live HUD | Firmware 4.0 Touchscreen UI | Desktop Studio (macOS, Windows, Linux) |
+| :---: | :---: | :---: |
+| ![Firmware 4.0 Live HUD](website/public/images/firmware/live-hud.png) | ![Firmware 4.0 Main Menu](website/public/images/firmware/main-menu-dark.png) | ![DIY-Thermocam Desktop Studio Pro](website/public/images/studio/studio-live-pro.png) |
 
-- **Standalone touchscreen camera:** 3.2-inch display, 19 color palettes, auto or manual range, up to 96 temperature spots, and 4–6 hours on a 2000 mAh LiPo.
-- **Firmware 4.0 on Teensy 4.1:** Verified on real V3 hardware at **8.77 fps** USB streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads ([Protocol v2](docs/protocol-v2.md)).
-- **Cross-platform Desktop Studio:** Native Tauri v2 + Rust + WebGL2 app for macOS, Windows, and Linux. Offers Standard and Pro modes, ROI emissivity, MP4 and 16-bit TIFF export, SD browsing, and HalfKay updates.
+- **Standalone touchscreen camera:** 3.2-inch display, 19 color palettes, Dark/Light/High-Contrast themes, auto or manual range, up to 96 temperature spots, and 4–6 hours on a 2000 mAh LiPo.
+- **Firmware 4.0 on Teensy 4.1:** Verified on real hardware at **8.77 fps** USB streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads ([Protocol v2](docs/protocol-v2.md)).
+- **Desktop Studio ([Tauri v2](https://github.com/tauri-apps/tauri) + Rust + WebGL2):** Native macOS, Windows, and Linux app. Includes Standard and Pro modes, ROI emissivity, MP4/TIFF export, SD browsing, and USB updates.
 
 ## Quick start
 
-**Firmware** — download a release `.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), or build from source with `arduino-cli`:
+**Prerequisites:** macOS 12+, Windows 10/11, or Linux (install [PJRC `00-teensy.rules`](https://www.pjrc.com/teensy/00-teensy.rules) on Linux for non-root USB access), plus a data-capable USB-C cable.
+
+**Firmware** — Firmware 4.0 supports **DIY-Thermocam V3 and V4** (Teensy 4.1). V1 and V2 cameras (Teensy 3.2/3.6) must stay on [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). Download a prebuilt `.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases) and flash it in Desktop Studio (**Pro → Updater**), or build from source with [Arduino CLI](https://github.com/arduino/arduino-cli):
 
 ```bash
 cd firmware && arduino-cli compile
 ```
+
+See [`firmware/README.md`](firmware/README.md) for Windows, macOS, and Linux flashing instructions.
 
 **Desktop App** — download an installer from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), or build locally in `app/`:
 
@@ -57,15 +62,19 @@ cd firmware && arduino-cli compile
 cd app && bun install && bun run build
 ```
 
-**Hardware** — pick V3.0 or V4.0 in the [interactive Bill of Materials](https://www.diy-thermocam.net/docs/partlist/), then follow the [Building Instructions](docs/building-instructions.md). Already own a V3? See the [V3 → V4 prototype order list](hardware/bom/README.md#v3--v4-first-prototype-order-list-minimum-vendors).
+**Hardware** — order the parts from the [interactive Bill of Materials](https://www.diy-thermocam.net/docs/partlist/), then follow the [Building Instructions](docs/building-instructions.md).
 
 <details>
 <summary><b>Developer checks and local test commands</b></summary>
 
 ```bash
-# Firmware host tests and virtual simulator
+# Firmware host unit tests, interactive UI simulator tests, and static checks
 make -C firmware/tests_host test
-make -C firmware/sim
+make -C firmware/sim test
+make -C firmware/sim screenshots
+
+# Live hardware regression suite (45 automated v1 + v2 tests on connected camera)
+cd firmware/test && pytest --baseline baseline-3.0.4.json
 
 # Desktop app checks
 cd app && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run lint && bun test
@@ -80,7 +89,7 @@ kicad-cli pcb drc --refill-zones --severity-error --exit-code-violations hardwar
 cd hardware/enclosure/cad && uv run --extra dev --python 3.12 pytest
 ```
 
-Enable the local pre-commit hook with `git config core.hooksPath .githooks`. Legacy V3.0 Windows and Python tools stay archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software).
+Enable the local pre-commit hook with `git config core.hooksPath .githooks`. The original Windows and Python tools stay archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/software).
 
 </details>
 
@@ -88,11 +97,11 @@ Enable the local pre-commit hook with `git config core.hooksPath .githooks`. Leg
 
 | Path | Contents |
 | --- | --- |
-| [`firmware/`](firmware/) | Teensy 4.1 C++17 firmware (`arduino-cli`), host unit tests, virtual simulator, hardware test suite |
-| [`app/`](app/) | Cross-platform Tauri v2 + Rust + React 19 Desktop Studio |
+| [`firmware/`](firmware/) | Teensy 4.1 C++17 firmware ([Arduino CLI](https://github.com/arduino/arduino-cli)), host unit tests, interactive UI simulator, 45-test hardware suite |
+| [`app/`](app/) | Cross-platform [Tauri v2](https://github.com/tauri-apps/tauri) + Rust + React 19 Desktop Studio |
 | [`hardware/pcb/`](hardware/pcb/) | Native KiCad 10 V4.0 PCB, Gerbers, BOM/CPL exports, and 3D STEP model |
-| [`hardware/enclosure/`](hardware/enclosure/) | Parametric `build123d` CAD for 3D/CNC shells and 3 mm laser-cut acrylic |
-| [`hardware/bom/`](hardware/bom/) | Single-source `bom.csv`, schema validator, and prototype order guide |
+| [`hardware/enclosure/`](hardware/enclosure/) | Parametric [build123d](https://github.com/gumyr/build123d) CAD for the 3D-printed shell and 3 mm laser-cut acrylic case, plus Blender renders |
+| [`hardware/bom/`](hardware/bom/) | Single-source `bom.csv`, schema validator, and order guide |
 | [`docs/`](docs/) · [`website/`](website/) | Manuals, protocol specs, and Astro + Starlight site for [www.diy-thermocam.net](https://www.diy-thermocam.net) |
 
 ## License and credits

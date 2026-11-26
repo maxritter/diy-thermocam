@@ -6,12 +6,13 @@ export interface GalleryItem {
   caption?: string;
   image: string;
   category?: string;
+  fit?: 'cover' | 'contain';
 }
 
 interface Props {
   items: GalleryItem[];
   categories?: string[];
-  aspect?: '4/3' | '16/10' | 'auto';
+  aspect?: '4/3' | '16/9' | '16/10' | 'auto';
 }
 
 export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props) {
@@ -129,7 +130,7 @@ export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover',
+                  objectFit: item.fit ?? 'cover',
                   display: 'block',
                 }}
               />

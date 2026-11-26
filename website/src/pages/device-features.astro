@@ -12,7 +12,7 @@ const capabilities = [
   'Protected 2000 mAh 3.7 V LiPo battery for 4–6 hours of field use',
   'Open-source C++17 firmware compiled with arduino-cli and Teensy core 1.62.0',
   'Cross-platform Tauri v2 Desktop Studio for macOS, Windows, and Linux',
-  'Byte-exact .DAT compatibility across V1, V2, V3, and V4 captures',
+  'Byte-exact .DAT compatibility with captures from earlier DIY-Thermocam cameras',
   'Binary USB Protocol v2 with 0.26 ms command latency and 9.20 MB/s SD reads',
 ];
 
@@ -31,6 +31,19 @@ const comparison = [
   { feature: 'Hardware & source code', tc: 'Open-source (GPL-3.0)', flir: 'Closed proprietary' },
 ];
 
+const uiPreviews = [
+  { src: '/images/firmware/live-hud.png', caption: 'Live View HUD — Electronics PCB inspection (Glowbow, simulated)' },
+  { src: '/images/firmware/live-building.png', caption: 'Live View HUD — Window draft & radiator plume (Rainbow, simulated)' },
+  { src: '/images/firmware/live-breaker.png', caption: 'Live View HUD — Overloaded breaker hotspot (Ironblack, simulated)' },
+  { src: '/images/firmware/live-floor.png', caption: 'Live View HUD — Underfloor heating loops (Lava, simulated)' },
+  { src: '/images/firmware/main-menu-dark.png', caption: 'Main Menu Page 1 — Dark theme' },
+  { src: '/images/firmware/main-menu-page2-dark.png', caption: 'Main Menu Page 2 — Overlays, Isotherm, Status, Video, Theme' },
+  { src: '/images/firmware/palette-picker.png', caption: 'Visual Palette Picker — 19 live firmware LUTs' },
+  { src: '/images/firmware/overlays-grid-dark.png', caption: 'Overlays Grid — 1-tap HUD and filter toggles' },
+  { src: '/images/firmware/gallery-viewer.png', caption: 'Gallery Viewer — On-device .DAT inspection and BMP conversion' },
+  { src: '/images/firmware/status-screen.png', caption: 'System Status — Live FPS, VoSPI link, power, SD, and MCU temp' },
+];
+
 const jsonLd = buildBreadcrumbs([
   { name: 'Home', path: '/' },
   { name: 'Device Features', path: '/device-features/' },
@@ -39,7 +52,7 @@ const jsonLd = buildBreadcrumbs([
 
 <MarketingLayout
   title="Device Features"
-  description="Hardware and firmware specifications for DIY-Thermocam V3 and V4, compared side-by-side with the FLIR E6."
+  description="Hardware and firmware specifications for DIY-Thermocam V4, compared side-by-side with the FLIR E6."
   canonicalPath="/device-features/"
   jsonLd={jsonLd}
 >
@@ -59,6 +72,23 @@ const jsonLd = buildBreadcrumbs([
           <li>{item}</li>
         ))}
       </ul>
+    </section>
+
+    <section class="spec-block">
+      <h2>Firmware 4.0 on-device interface</h2>
+      <p class="section-lead">
+        Rendered directly by the Firmware 4.0 UI simulator (640×480). Thermal scenes are simulated
+        160×120 radiometric examples; see <a href="/thermal-images/">Thermal Images</a> for real
+        camera captures.
+      </p>
+      <div class="ui-grid">
+        {uiPreviews.map((shot) => (
+          <figure class="ui-card">
+            <img src={shot.src} alt={shot.caption} width="640" height="480" loading="lazy" />
+            <figcaption>{shot.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
     </section>
 
     <section class="spec-block">
@@ -121,6 +151,35 @@ const jsonLd = buildBreadcrumbs([
     margin: 0 0 20px;
     font-size: 1.35rem;
     font-weight: 650;
+  }
+  .section-lead {
+    margin: -8px 0 22px;
+    color: var(--tc-text-muted);
+    font-size: 15px;
+    max-width: 70ch;
+  }
+  .ui-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .ui-card {
+    margin: 0;
+    border: 1px solid var(--tc-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--tc-surface-1);
+  }
+  .ui-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .ui-card figcaption {
+    padding: 10px 14px;
+    font-size: 13.5px;
+    color: var(--tc-text-muted);
+    border-top: 1px solid var(--tc-border);
   }
   .cap-grid {
     margin: 0;
@@ -189,7 +248,8 @@ const jsonLd = buildBreadcrumbs([
     background: var(--tc-surface-2);
   }
   @media (max-width: 780px) {
-    .cap-grid {
+    .cap-grid,
+    .ui-grid {
       grid-template-columns: 1fr;
     }
   }
