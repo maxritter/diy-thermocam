@@ -50,7 +50,7 @@ Two ready-made boards, a FLIR Lepton and a printed case, put together with screw
 
 | Sensor | Range | Battery | Parts |
 | --- | --- | --- | --- |
-| FLIR Lepton 3.5 or 3.1R, 160 × 120 pixels | −10 to +450 °C, under 50 mK | 4–6 hours on a 2000 mAh LiPo | About $293, or $121 without the sensor |
+| FLIR Lepton 3.5 or 3.1R, 160 × 120 pixels | −10 to +450 °C, under 50 mK | 2.5–3.5 hours on the 1200 mAh LiPo, up to 6 with a 2000 mAh cell | About $293, or $121 without the sensor |
 
 ## Build one
 

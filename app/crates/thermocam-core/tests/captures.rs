@@ -1,9 +1,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+#[cfg(unix)]
+use thermocam_core::captures::CaptureErrorKind;
 use thermocam_core::captures::{
-    check_writable, default_captures_dir, list_captures, unique_path, write_snapshot,
-    CaptureErrorKind, LocalStamp,
+    check_writable, default_captures_dir, list_captures, unique_path, write_snapshot, LocalStamp,
 };
 use thermocam_core::dat::{ThermalDat, LEPTON3_BIG_SIZE};
 use thermocam_core::protocol::transport::generate_demo_frame;
