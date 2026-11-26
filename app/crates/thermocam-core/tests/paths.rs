@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use thermocam_core::paths::{card_file_target, confine, ensure_within, PathError};
+use thermocam_core::paths::{card_file_target, confine, ensure_within};
 
 fn root() -> (tempfile::TempDir, std::path::PathBuf) {
     let dir = tempfile::tempdir().unwrap();
@@ -54,6 +54,7 @@ fn confine_refuses_everything_that_escapes_or_is_not_relative() {
 #[cfg(unix)]
 #[test]
 fn confine_refuses_a_symlink_pointing_outside_the_root() {
+    use thermocam_core::paths::PathError;
     let (_dir, root) = root();
     let outside = tempfile::tempdir().unwrap();
     fs::write(outside.path().join("secret.DAT"), b"x").unwrap();
