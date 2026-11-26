@@ -1,0 +1,8 @@
+(version 1)
+
+# The display-side M2.5 standoffs sit bare on the grounded pads of H1-H4; their hex corners reach 2.9 mm
+# (3.0 mm with hole play) from the hole centre and turn while tightened. Keep other nets 3.3 mm away on F.Cu.
+(rule "Display standoff hex ring"
+	(layer "F.Cu")
+	(condition "A.Type == 'Pad' && A.NetName == 'GND' && A.memberOfFootprint('H*') && B.NetName != 'GND'")
+	(constraint clearance (min 0.9mm)))

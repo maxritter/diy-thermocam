@@ -41,7 +41,7 @@
 		(start -4.06 -3.31)
 		(end -3.04 -3.31)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -50,7 +50,7 @@
 		(start -4.06 0.94)
 		(end -4.06 -3.31)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -59,7 +59,7 @@
 		(start -3.04 -3.31)
 		(end -3.04 -1.71)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -68,7 +68,7 @@
 		(start -3.04 -1.71)
 		(end -1.76 -1.71)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -77,7 +77,7 @@
 		(start -2.34 4.51)
 		(end 2.34 4.51)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -86,7 +86,7 @@
 		(start -1.76 -1.71)
 		(end -1.76 -4.6)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -95,7 +95,7 @@
 		(start 3.04 -3.31)
 		(end 3.04 -1.71)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -104,7 +104,7 @@
 		(start 3.04 -1.71)
 		(end 1.76 -1.71)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -113,7 +113,7 @@
 		(start 4.06 -3.31)
 		(end 3.04 -3.31)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -122,7 +122,7 @@
 		(start 4.06 0.94)
 		(end 4.06 -3.31)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -396,9 +396,9 @@
 		(roundrect_rratio 0.166667)
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal.step"
+	(model "${KIPRJMOD}/V40.3dshapes/JST_PH_S2B-PH-SM4-TB.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 1.0000 -2.7751 0.0000)
 		)
 		(scale
 			(xyz 1 1 1)

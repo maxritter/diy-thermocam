@@ -1,4 +1,4 @@
-Designator,MPN,Qty,Part Link
+Designator,MPN / Seeed SKU,Quantity,Part Link
 "C1,C2,C3,C5,C10",CL21A106KAYNNNE,5,https://www.lcsc.com/product-detail/C15850.html
 "C4,C8,C9",CL21A226MAQNNNE,3,https://www.lcsc.com/product-detail/C45783.html
 "C6,C7,C11,C12",CC0603KRX7R9BB104,4,https://www.lcsc.com/product-detail/C14663.html
@@ -20,14 +20,16 @@ R2,0603WAF1004T5E,1,https://www.lcsc.com/product-detail/C22935.html
 "R4,R6",0603WAF4701T5E,2,https://www.lcsc.com/product-detail/C23162.html
 "R7,R8",0603WAF5101T5E,2,https://www.lcsc.com/product-detail/C23186.html
 "R9,R19,R22",0603WAF1002T5E,3,https://www.lcsc.com/product-detail/C25804.html
-"R10,R12",0603WAF1001T5E,2,https://www.lcsc.com/product-detail/C21190.html
+R10,0603WAF1501T5E,1,https://www.lcsc.com/product-detail/C22843.html
 R11,0603WAF1201T5E,1,https://www.lcsc.com/product-detail/C22765.html
+R12,0603WAF1001T5E,1,https://www.lcsc.com/product-detail/C21190.html
 "R14,R20",0603WAF4702T5E,2,https://www.lcsc.com/product-detail/C25819.html
-"R16,R18,R21",0603WAF7503T5E,3,https://www.lcsc.com/product-detail/C23240.html
+R16,ERJ3EKF7323V,1,https://www.lcsc.com/product-detail/C403344.html
+"R18,R21",0603WAF7503T5E,2,https://www.lcsc.com/product-detail/C23240.html
 R23,0603WAF3001T5E,1,https://www.lcsc.com/product-detail/C4211.html
 SW1,JS102011SAQN,1,https://www.lcsc.com/product-detail/C221660.html
 SW2,B3U-3000P,1,https://www.lcsc.com/product-detail/C963349.html
 SW3,TS-1187A-B-A-B,1,https://www.lcsc.com/product-detail/C318884.html
-U2,TPS61022RWUR,1,https://www.lcsc.com/product-detail/C915088.html
+U2,TPS61022RWUT,1,https://www.lcsc.com/product-detail/C2071784.html
 U3,BQ24074RGTR,1,https://www.lcsc.com/product-detail/C54313.html
 U4,XC6206P332MR-G,1,https://www.lcsc.com/product-detail/C5446.html

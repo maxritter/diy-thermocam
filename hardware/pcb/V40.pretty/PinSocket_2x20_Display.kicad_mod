@@ -3,7 +3,7 @@
 	(generator "pcbnew")
 	(layer "F.Cu")
 	(attr through_hole)
-	(fp_rect (start -2.54 -25.4) (end 2.54 25.4) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS"))
+	(fp_rect (start -2.4 -25.4) (end 2.4 25.4) (stroke (width 0.15) (type solid)) (fill none) (layer "F.SilkS"))
 	(fp_rect (start -2.54 -25.4) (end 2.54 25.4) (stroke (width 0.1) (type solid)) (fill none) (layer "F.Fab"))
 	(fp_rect (start -2.6 -25.6) (end 2.6 25.6) (stroke (width 0.05) (type solid)) (fill none) (layer "F.CrtYd"))
 	(pad "1" thru_hole rect (at -1.27 24.13) (size 1.55 1.55) (drill 1.0) (layers "*.Cu" "*.Mask"))

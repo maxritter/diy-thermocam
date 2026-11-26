@@ -59,7 +59,7 @@
 		(start -1 -1.11)
 		(end 1 -1.11)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -69,7 +69,7 @@
 		(start 1 1.11)
 		(end -1 1.11)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -80,7 +80,7 @@
 			(xy -0.85 -1.29) (xy -1.13 -1.29) (xy -0.85 -1.57) (xy -0.85 -1.29)
 		)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(fill yes)
@@ -264,9 +264,9 @@
 		(uuid "677219e5-362d-44c9-aaa9-e604f6599974")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/Texas_RWU0007A_VQFN-7_2x2mm_P0.5mm.step"
+	(model "${KIPRJMOD}/V40.3dshapes/TI_RWU0007A_VQFN-7.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 0.0100 -0.0000 0.0200)
 		)
 		(scale
 			(xyz 1 1 1)

@@ -59,7 +59,7 @@
 		(start -4.6 -1.9)
 		(end -3.4 -1.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -69,7 +69,7 @@
 		(start -4.6 0.4)
 		(end -4.6 -1.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -79,7 +79,7 @@
 		(start -0.9 -1.9)
 		(end -1.6 -1.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -89,7 +89,7 @@
 		(start 1.6 -1.9)
 		(end 0.9 -1.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -99,7 +99,7 @@
 		(start 3.4 -1.9)
 		(end 4.6 -1.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -109,7 +109,7 @@
 		(start 4.6 -1.9)
 		(end 4.6 0.4)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -482,9 +482,9 @@
 		(uuid "0157b91f-85d0-4483-95f1-29a5cdc70947")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Button_Switch_SMD.3dshapes/SW_SPDT_CK_JS102011SAQN.step"
+	(model "${KIPRJMOD}/V40.3dshapes/SW_CK_JS102011SAQN.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 0.0000 -0.4610 0.4749)
 		)
 		(scale
 			(xyz 1 1 1)

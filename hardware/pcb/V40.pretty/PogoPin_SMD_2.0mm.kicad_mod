@@ -3,8 +3,18 @@
 	(generator "pcbnew")
 	(layer "F.Cu")
 	(attr smd)
-	(fp_circle (center 0 0) (end 1.2 0) (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS"))
 	(fp_circle (center 0 0) (end 1.0 0) (stroke (width 0.1) (type solid)) (fill none) (layer "F.Fab"))
 	(fp_circle (center 0 0) (end 1.25 0) (stroke (width 0.05) (type solid)) (fill none) (layer "F.CrtYd"))
 	(pad "1" smd circle (at 0 0) (size 2.25 2.25) (layers "F.Cu" "F.Paste" "F.Mask"))
+	(model "${KIPRJMOD}/V40.3dshapes/PogoPin_YTC1P-8535-01.step"
+		(offset
+			(xyz 0.0000 -0.0000 0.0000)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

@@ -59,7 +59,7 @@
 		(start -4.7 -1.9)
 		(end -4.7 0.1)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -69,7 +69,7 @@
 		(start -4.7 2)
 		(end -4.7 3.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -79,7 +79,7 @@
 		(start -4.7 3.9)
 		(end 4.7 3.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -89,7 +89,7 @@
 		(start 4.7 -1.9)
 		(end 4.7 0.1)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -99,7 +99,7 @@
 		(start 4.7 2)
 		(end 4.7 3.9)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -359,15 +359,15 @@
 		(uuid "e783dde5-f762-4528-9b55-9220820b0b1c")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_HRO_TYPE-C-31-M-12.step"
+	(model "${KIPRJMOD}/V40.3dshapes/USB_C_HRO_TYPE-C-31-M-12.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 0.0000 -1.0500 0.0000)
 		)
 		(scale
 			(xyz 1 1 1)
 		)
 		(rotate
-			(xyz 0 0 0)
+			(xyz 0 0 180)
 		)
 	)
 )

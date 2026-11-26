@@ -5260,9 +5260,37 @@
 		(at 279.4 139.7)
 		(uuid "bacb5130-d15f-5470-aac1-da618130e4ed")
 	)
-	(no_connect
-		(at 495.3 365.76)
+	(wire
+		(pts
+			(xy 495.3 365.76) (xy 500.38 365.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
 		(uuid "c0eb1043-3500-5680-aad8-7d9772d471bd")
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 500.38 365.76 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left bottom)
+		)
+		(uuid "5b0c2e7a-3f1d-4b8e-9a64-2d7c1e9f0a19")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 500.38 365.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 	)
 	(no_connect
 		(at 469.9 353.06)
@@ -11895,7 +11923,7 @@
 				)
 			)
 		)
-		(property "Value" "1.0k"
+		(property "Value" "1.5k"
 			(at 177.8 248.92 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12882,7 +12910,7 @@
 				)
 			)
 		)
-		(property "Value" "TPS61022RWUR"
+		(property "Value" "TPS61022RWUT"
 			(at 63.5 388.62 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14001,7 +14029,7 @@
 				)
 			)
 		)
-		(property "Value" "750k"
+		(property "Value" "732k"
 			(at 101.6 414.02 0)
 			(show_name no)
 			(do_not_autoplace no)

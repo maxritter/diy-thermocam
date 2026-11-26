@@ -7,7 +7,7 @@ Item #,Designator,Qty,Manufacturer,Mfg Part #,Description / Value,Package/Footpr
 6,F1,1,RUILON (Shenzhen Ruilongyuan Elec),SMD1206P200TF,"2A Resettable PTC Polyfuse (1206) (2.0A Hold, 3.5A Trip, 6V/8V Rated)",FUSE_1206,SMD,LCSC C20988: https://www.lcsc.com/product-detail/C20988.html
 7,J1,1,ZHOURI,2.54-2*20,"2x20 (40-Pin) Female Display Socket (2.54mm Pitch, Dual Row, Straight, Through-Hole)",PinSocket_2x20_Display,THT,LCSC C2977589: https://www.lcsc.com/product-detail/C2977589.html
 8,J2,1,Hong Cheng,HC-PM254-8.5H-2x10PZ,"2x10 (20-Pin) Female Lepton Socket (2.54mm Pitch, Dual Row, Straight, Through-Hole, 8.5mm Height)",PinSocket_2x10_Lepton,THT,LCSC C22373915: https://www.lcsc.com/product-detail/C22373915.html
-9,J3,1,Korean Hroparts Elec,TYPE-C-31-M-12,"USB Type-C 16-Pin SMD Receptacle (USB 2.0 Power + D+/D- Right-Angle, 0.8mm Overhang)",USB_C_TYPE_C_31_M_12,SMD,LCSC C165948: https://www.lcsc.com/product-detail/C165948.html
+9,J3,1,Korean Hroparts Elec,TYPE-C-31-M-12,"USB Type-C 16-Pin SMD Receptacle (USB 2.0 Power + D+/D- Right-Angle, mouth 0.3mm past the board edge)",USB_C_TYPE_C_31_M_12,SMD,LCSC C165948: https://www.lcsc.com/product-detail/C165948.html
 10,J4,1,JST,S2B-PH-SM4-TB(LF)(SN),JST-PH 2.0mm 2-Pin SMD Battery Header (2.0mm Pitch Right-Angle SMD Shrouded Header),JST_PH_2P_RA,SMD,LCSC C295747: https://www.lcsc.com/product-detail/C295747.html
 11,"J5,J6",2,Hong Cheng,HC-PM254-8.5H-1x24PZ,"1x24 (24-Pin) Female Teensy Socket (2.54mm Pitch, 8.5mm Height, Single Row)",PinSocket_1x24,THT,LCSC C41376163: https://www.lcsc.com/product-detail/C41376163.html
 12,L1,1,cjiang (Changjiang Microelectronics Tech),FXL0630-1R0-M,"1.0uH 15A Shielded Power Inductor (1.0uH, 15A Isat, 12A Irms, Molded SMD)",L_0630,SMD,LCSC C167216: https://www.lcsc.com/product-detail/C167216.html
@@ -20,14 +20,16 @@ Item #,Designator,Qty,Manufacturer,Mfg Part #,Description / Value,Package/Footpr
 19,"R4,R6",2,UNI-ROYAL,0603WAF4701T5E,"4.7k Ohm 1% 0603 SMD Resistor (4.7k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C23162: https://www.lcsc.com/product-detail/C23162.html
 20,"R7,R8",2,UNI-ROYAL,0603WAF5101T5E,"5.1k Ohm 1% 0603 SMD Resistor (5.1k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C23186: https://www.lcsc.com/product-detail/C23186.html
 21,"R9,R19,R22",3,UNI-ROYAL,0603WAF1002T5E,"10k Ohm 1% 0603 SMD Resistor (10k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C25804: https://www.lcsc.com/product-detail/C25804.html
-22,"R10,R12",2,UNI-ROYAL,0603WAF1001T5E,"1.0k Ohm 1% 0603 SMD Resistor (1.0k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C21190: https://www.lcsc.com/product-detail/C21190.html
+22,R10,1,UNI-ROYAL,0603WAF1501T5E,"1.5k Ohm 1% 0603 SMD Resistor (1.5k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C22843: https://www.lcsc.com/product-detail/C22843.html
 23,R11,1,UNI-ROYAL,0603WAF1201T5E,"1.2k Ohm 1% 0603 SMD Resistor (1.2k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C22765: https://www.lcsc.com/product-detail/C22765.html
-24,"R14,R20",2,UNI-ROYAL,0603WAF4702T5E,"47k Ohm 1% 0603 SMD Resistor (47k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C25819: https://www.lcsc.com/product-detail/C25819.html
-25,"R16,R18,R21",3,UNI-ROYAL,0603WAF7503T5E,"750k Ohm 1% 0603 SMD Resistor (750k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C23240: https://www.lcsc.com/product-detail/C23240.html
-26,R23,1,UNI-ROYAL,0603WAF3001T5E,"3.0k Ohm 1% 0603 SMD Resistor (3.0k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C4211: https://www.lcsc.com/product-detail/C4211.html
-27,SW1,1,C&K,JS102011SAQN,"Right-Angle SMD Slide Power Switch (SPDT Slide Switch, 2.0mm Travel, Right-Angle)",SW_SLIDE_RA,SMD,LCSC C221660: https://www.lcsc.com/product-detail/C221660.html
-28,SW2,1,Omron Electronics,B3U-3000P,Right-Angle SMD Tactile Capture Switch (SPST-NO Side-Actuated Tactile Switch),SW_TACT_RA,SMD,LCSC C963349: https://www.lcsc.com/product-detail/C963349.html
-29,SW3,1,XKB Connection,TS-1187A-B-A-B,"SMD Tactile PROG Switch (SPST-NO 5.1x5.1mm Tactile Switch, 1.5mm Height)",SW_TACT_PROG,SMD,LCSC C318884: https://www.lcsc.com/product-detail/C318884.html
-30,U2,1,Texas Instruments,TPS61022RWUR,"TI TPS61022 Synchronous 5V Boost Converter (8A Switch, 5.10V Out (R16=750k / R17=100k), True Load Disconnect)",TPS61022_VQFN7,SMD,LCSC C915088: https://www.lcsc.com/product-detail/C915088.html
-31,U3,1,Texas Instruments,BQ24074RGTR,"TI BQ24074 Li-Ion Power-Path Charger IC (1.5A Dynamic Power-Path Charger, 4.4V VSYS, ITERM Pin)",BQ24074_VQFN16,SMD,LCSC C54313: https://www.lcsc.com/product-detail/C54313.html
-32,U4,1,Torex Semicon,XC6206P332MR-G,"XC6206P332MR-G 3.3V Low-Quiescent RTC LDO (3.3V Fixed Output, 1uA Quiescent, SOT-23)",SOT23,SMD,LCSC C5446: https://www.lcsc.com/product-detail/C5446.html
+24,R12,1,UNI-ROYAL,0603WAF1001T5E,"1.0k Ohm 1% 0603 SMD Resistor (1.0k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C21190: https://www.lcsc.com/product-detail/C21190.html
+25,"R14,R20",2,UNI-ROYAL,0603WAF4702T5E,"47k Ohm 1% 0603 SMD Resistor (47k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C25819: https://www.lcsc.com/product-detail/C25819.html
+26,R16,1,Panasonic,ERJ3EKF7323V,"732k Ohm 1% 0603 SMD Resistor (732k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C403344: https://www.lcsc.com/product-detail/C403344.html
+27,"R18,R21",2,UNI-ROYAL,0603WAF7503T5E,"750k Ohm 1% 0603 SMD Resistor (750k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C23240: https://www.lcsc.com/product-detail/C23240.html
+28,R23,1,UNI-ROYAL,0603WAF3001T5E,"3.0k Ohm 1% 0603 SMD Resistor (3.0k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C4211: https://www.lcsc.com/product-detail/C4211.html
+29,SW1,1,C&K,JS102011SAQN,"Right-Angle SMD Slide Power Switch (SPDT Slide Switch, 2.0mm Travel, Right-Angle)",SW_SLIDE_RA,SMD,LCSC C221660: https://www.lcsc.com/product-detail/C221660.html
+30,SW2,1,Omron Electronics,B3U-3000P,Right-Angle SMD Tactile Capture Switch (SPST-NO Side-Actuated Tactile Switch),SW_TACT_RA,SMD,LCSC C963349: https://www.lcsc.com/product-detail/C963349.html
+31,SW3,1,XKB Connection,TS-1187A-B-A-B,"SMD Tactile PROG Switch (SPST-NO 5.1x5.1mm Tactile Switch, 1.5mm Height)",SW_TACT_PROG,SMD,LCSC C318884: https://www.lcsc.com/product-detail/C318884.html
+32,U2,1,Texas Instruments,TPS61022RWUT,"TI TPS61022 Synchronous 5V Boost Converter (8A Switch, 5.0V Out (R16=732k / R17=100k), True Load Disconnect)",TPS61022_VQFN7,SMD,LCSC C2071784: https://www.lcsc.com/product-detail/C2071784.html
+33,U3,1,Texas Instruments,BQ24074RGTR,"TI BQ24074 Li-Ion Power-Path Charger IC (1.5A Dynamic Power-Path Charger, 4.4V VSYS, ITERM Pin)",BQ24074_VQFN16,SMD,LCSC C54313: https://www.lcsc.com/product-detail/C54313.html
+34,U4,1,Torex Semicon,XC6206P332MR-G,"XC6206P332MR-G 3.3V Low-Quiescent RTC LDO (3.3V Fixed Output, 1uA Quiescent, SOT-23)",SOT23,SMD,LCSC C5446: https://www.lcsc.com/product-detail/C5446.html

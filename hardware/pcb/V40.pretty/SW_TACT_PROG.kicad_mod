@@ -59,7 +59,7 @@
 		(start -2.75 -1)
 		(end -2.75 1)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -69,7 +69,7 @@
 		(start -1.75 -2.3)
 		(end -1.3 -2.75)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -79,7 +79,7 @@
 		(start -1.75 2.3)
 		(end -1.3 2.75)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -89,7 +89,7 @@
 		(start -1.3 -2.75)
 		(end 1.3 -2.75)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -99,7 +99,7 @@
 		(start -1.3 2.75)
 		(end 1.3 2.75)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -109,7 +109,7 @@
 		(start 1.75 -2.3)
 		(end 1.3 -2.75)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -119,7 +119,7 @@
 		(start 1.75 2.3)
 		(end 1.3 2.75)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -129,7 +129,7 @@
 		(start 2.75 -1)
 		(end 2.75 1)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -458,9 +458,9 @@
 		(uuid "0320eeb2-6a91-4d2d-9032-8bc9cc0cb72d")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Button_Switch_SMD.3dshapes/SW_Push_1P1T_XKB_TS-1187A.step"
+	(model "${KIPRJMOD}/V40.3dshapes/SW_XKB_TS-1187A-B-A-B.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 0.0000 -0.0005 0.0500)
 		)
 		(scale
 			(xyz 1 1 1)
