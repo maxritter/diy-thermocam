@@ -206,7 +206,7 @@ jobs:
         if: env.HAVE_SIGNING == 'true'
         run: |
           codesign --verify --deep --strict --verbose=2 "$APP"
-          codesign -dv "$APP" 2>&1 | grep -q "Authority=$IDENTITY"
+          codesign -dvv "$APP" 2>&1 | grep -q "Authority=$IDENTITY"
           spctl -a -vv -t exec "$APP"
           spctl -a -vv -t open --context context:primary-signature "$DMG"
 
