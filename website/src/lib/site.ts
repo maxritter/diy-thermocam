@@ -1,9 +1,11 @@
 export const SITE = {
   name: 'DIY-Thermocam',
-  tagline: 'Open-source radiometric thermal imaging built on FLIR Lepton and Teensy 4.1',
+  tagline: 'Build your own radiometric thermal camera with a FLIR Lepton 3.5 and a Teensy 4.1',
   url: 'https://www.diy-thermocam.net',
   repoUrl: 'https://github.com/maxritter/diy-thermocam',
   releasesUrl: 'https://github.com/maxritter/diy-thermocam/releases',
+  /* Firmware .hex files carry their version in the name, so link the latest release page. */
+  firmwareUrl: 'https://github.com/maxritter/diy-thermocam/releases/latest',
   ogImage: 'https://www.diy-thermocam.net/images/og/og-default.png',
   umamiWebsiteId: 'efb7f48a-b0e1-46ff-9e74-2a2c1a76e868',
   author: {
@@ -16,12 +18,41 @@ export const SITE = {
 } as const;
 
 export const NAV_LINKS = [
+  { label: 'Camera', href: '/device-features/' },
   { label: 'Build', href: '/building-instructions/' },
-  { label: 'Features', href: '/device-features/' },
-  { label: 'Software', href: '/software/' },
-  { label: 'Thermal', href: '/thermal-images/' },
-  { label: 'Hardware', href: '/device-images/' },
+  { label: 'Studio', href: '/software/' },
+  { label: 'Gallery', href: '/thermal-images/' },
   { label: 'Docs', href: '/docs/' },
+] as const;
+
+const DL_BASE = 'https://github.com/maxritter/diy-thermocam/releases/latest/download/';
+
+/* Studio installers. The release workflow has to upload files under these names. */
+export const DOWNLOADS = [
+  {
+    os: 'mac',
+    icon: 'apple',
+    name: 'macOS',
+    label: 'Download for macOS',
+    detail: 'Apple silicon and Intel · .dmg',
+    href: `${DL_BASE}DIY-Thermocam-Studio-macOS.dmg`,
+  },
+  {
+    os: 'win',
+    icon: 'windows',
+    name: 'Windows',
+    label: 'Download for Windows',
+    detail: 'Windows 10 and 11 · .exe installer',
+    href: `${DL_BASE}DIY-Thermocam-Studio-Windows.exe`,
+  },
+  {
+    os: 'linux',
+    icon: 'linux',
+    name: 'Linux',
+    label: 'Download for Linux',
+    detail: 'x86-64 · .AppImage, also .deb on the release page',
+    href: `${DL_BASE}DIY-Thermocam-Studio-Linux.AppImage`,
+  },
 ] as const;
 
 export function buildBreadcrumbs(items: Array<{ name: string; path: string }>) {

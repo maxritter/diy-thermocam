@@ -1,0 +1,28 @@
+---
+import Logo from '../Logo.astro';
+
+const path = Astro.url.pathname;
+const inDocs = path.startsWith('/docs/') || path.startsWith('/building-instructions/');
+---
+
+<div class="dt">
+  <a href="/" class="brand" aria-label="DIY-Thermocam home">
+    <Logo size={24} />
+    <span>DIY-Thermocam</span>
+  </a>
+  <nav class="tabs-top" aria-label="Sections">
+    <a href="/docs/" aria-current={inDocs ? 'page' : undefined}>Docs</a>
+    <a href="/software/">Studio</a>
+  </nav>
+</div>
+
+<style>
+  .dt { display: flex; align-items: center; gap: 20px; min-width: 0; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap; }
+  .brand:hover { color: var(--text); }
+  .tabs-top { display: flex; gap: 2px; }
+  .tabs-top a { color: var(--muted); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; }
+  .tabs-top a[aria-current='page'] { color: var(--accent); }
+  .tabs-top a:hover { color: var(--text); }
+  @media (max-width: 860px) { .tabs-top { display: none; } }
+</style>

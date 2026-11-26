@@ -1,5 +1,6 @@
-/* DIY-Thermocam 2026 Design Tokens — shared across marketing site, Starlight /docs/, and Desktop App.
-   Flat neutral surfaces, Geist / Geist Mono, hairline borders, and calibrated thermal accents. */
+/* DIY-Thermocam design tokens, shared by the site, Starlight /docs/ and Studio.
+   QualityLayer's grounds (neutral, hairlines, one blue for actions) plus one identity motif:
+   the Ironbow scale the camera draws on screen. */
 
 @font-face {
   font-family: "Geist";
@@ -18,92 +19,85 @@
 :root,
 :root[data-theme="light"] {
   color-scheme: light;
-  --tc-font-sans: "Geist", system-ui, -apple-system, sans-serif;
-  --tc-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  --tc-bg: #ffffff;
-  --tc-bg-sunken: #fafafa;
-  --tc-surface: #ffffff;
-  --tc-surface-2: #f3f3f4;
-  --tc-surface-3: #e8e9ec;
-  --tc-border: #e5e6e9;
-  --tc-border-strong: #b4b7be;
-
-  --tc-text: #141518;
-  --tc-text-muted: #4b4e57;
-  --tc-text-dim: #666a75;
-
-  /* Calibrated Ironbow Thermal Orange (WCAG AA >= 5.3:1 on #fff and with #fff ink) */
-  --tc-thermal: #b8470c;
-  --tc-thermal-hover: #9a3a08;
-  --tc-thermal-soft: rgb(184 71 12 / 9%);
-  --tc-thermal-line: rgb(184 71 12 / 30%);
-  --tc-text-on-thermal: #ffffff;
-
-  /* Precision instrument blue for technical links and docs navigation */
-  --tc-accent: #1d6ab5;
-  --tc-accent-hover: #165592;
-  --tc-accent-soft: rgb(29 106 181 / 8%);
-  --tc-accent-line: rgb(29 106 181 / 32%);
-  --tc-text-on-accent: #ffffff;
-
-  /* Semantic states (BOM & hardware status) */
-  --tc-pass: #1b7246;
-  --tc-pass-soft: rgb(27 114 70 / 10%);
-  --tc-pass-line: rgb(27 114 70 / 32%);
-  --tc-amber: #925c05;
-  --tc-amber-soft: rgb(247 178 59 / 14%);
-  --tc-amber-line: rgb(157 102 7 / 34%);
-  --tc-danger: #c6282e;
-  --tc-danger-soft: rgb(198 40 46 / 9%);
-  --tc-danger-line: rgb(198 40 46 / 30%);
-
-  --tc-shadow-sm: 0 1px 2px rgb(0 0 0 / 5%);
-  --tc-shadow-window: 0 16px 44px rgb(0 0 0 / 10%);
-  --tc-radius-sm: 6px;
-  --tc-radius-md: 10px;
-  --tc-radius-lg: 14px;
-  --tc-container: 1200px;
-  --tc-nav-h: 64px;
-  --tc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --bg: #ffffff;
+  --bg-2: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --border: #e6e6e6;
+  --border-strong: #cfcfd2;
+  --text: #171717;
+  --muted: #4d4d4d;
+  --dim: #6b6b6b;
+  --accent: #2076c5;
+  --accent-hover: #1a649f;
+  --accent-soft: rgb(32 118 197 / 8%);
+  --on-accent: #ffffff;
+  --amber-ink: #925c05;
+  --amber-soft: rgb(247 178 59 / 14%);
+  --hot: #e0661d;
+  --cad: #f4f6f8;
+  --shadow-window: 0 16px 48px rgb(0 0 0 / 10%);
+  --ironbow: linear-gradient(90deg, #14163f 0%, #3b237a 18%, #8a2a7c 38%, #d2484a 58%, #f08a24 76%, #f9c74f 90%, #fff4c9 100%);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --wrap: 1200px;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --tc-bg: #0a0c10;
-  --tc-bg-sunken: #050608;
-  --tc-surface: #10131a;
-  --tc-surface-2: #171b24;
-  --tc-surface-3: #202633;
-  --tc-border: #252b38;
-  --tc-border-strong: #4a5366;
+  --bg: #0a0a0a;
+  --bg-2: #0f0f10;
+  --surface: #111112;
+  --surface-2: #19191b;
+  --border: #2e2e2e;
+  --border-strong: #454549;
+  --text: #ededed;
+  --muted: #a1a1a1;
+  --dim: #8f8f8f;
+  --accent: #5da3e5;
+  --accent-hover: #79b5ec;
+  --accent-soft: rgb(93 163 229 / 12%);
+  --on-accent: #06121f;
+  --amber-ink: #f7b23b;
+  --amber-soft: rgb(247 178 59 / 12%);
+  --hot: #f59a45;
+  --cad: #e9edf1;
+  --shadow-window: 0 16px 48px rgb(0 0 0 / 35%);
+}
 
-  --tc-text: #ededf0;
-  --tc-text-muted: #a2a8b4;
-  --tc-text-dim: #848b99;
-
-  --tc-thermal: #f5842e;
-  --tc-thermal-hover: #ff9c4f;
-  --tc-thermal-soft: rgb(245 132 46 / 12%);
-  --tc-thermal-line: rgb(245 132 46 / 35%);
-  --tc-text-on-thermal: #120903;
-
-  --tc-accent: #5da3e5;
-  --tc-accent-hover: #7cb6ed;
-  --tc-accent-soft: rgb(93 163 229 / 11%);
-  --tc-accent-line: rgb(93 163 229 / 34%);
-  --tc-text-on-accent: #071422;
-
-  --tc-pass: #6fd39f;
-  --tc-pass-soft: rgb(111 211 159 / 12%);
-  --tc-pass-line: rgb(111 211 159 / 35%);
-  --tc-amber: #f7b23b;
-  --tc-amber-soft: rgb(247 178 59 / 13%);
-  --tc-amber-line: rgb(247 178 59 / 34%);
-  --tc-danger: #ff6b72;
-  --tc-danger-soft: rgb(255 107 114 / 12%);
-  --tc-danger-line: rgb(255 107 114 / 32%);
-
-  --tc-shadow-sm: 0 1px 2px rgb(0 0 0 / 28%);
-  --tc-shadow-window: 0 16px 48px rgb(0 0 0 / 42%);
+/* Older components still read the --tc-* names. */
+:root {
+  --tc-font-sans: var(--font-sans);
+  --tc-font-mono: var(--font-mono);
+  --tc-bg: var(--bg);
+  --tc-bg-sunken: var(--bg-2);
+  --tc-surface: var(--surface);
+  --tc-surface-2: var(--surface-2);
+  --tc-surface-3: var(--surface-2);
+  --tc-border: var(--border);
+  --tc-border-strong: var(--border-strong);
+  --tc-text: var(--text);
+  --tc-text-muted: var(--muted);
+  --tc-text-dim: var(--dim);
+  --tc-thermal: var(--hot);
+  --tc-thermal-hover: var(--hot);
+  --tc-thermal-soft: var(--amber-soft);
+  --tc-thermal-line: var(--border-strong);
+  --tc-text-on-thermal: #ffffff;
+  --tc-accent: var(--accent);
+  --tc-accent-hover: var(--accent-hover);
+  --tc-accent-soft: var(--accent-soft);
+  --tc-accent-line: var(--border-strong);
+  --tc-text-on-accent: var(--on-accent);
+  --tc-amber: var(--amber-ink);
+  --tc-amber-soft: var(--amber-soft);
+  --tc-amber-line: var(--border-strong);
+  --tc-shadow-sm: 0 1px 2px rgb(0 0 0 / 6%);
+  --tc-shadow-window: var(--shadow-window);
+  --tc-radius-sm: 6px;
+  --tc-radius-md: 10px;
+  --tc-radius-lg: var(--radius-lg);
+  --tc-container: var(--wrap);
 }

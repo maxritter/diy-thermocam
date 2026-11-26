@@ -1,6 +1,6 @@
 # Raw Data Format (`.DAT`)
 
-Every still image and video or time-lapse frame saved by DIY-Thermocam stores 14-bit radiometric sensor data in a binary `.DAT` file. The layout stays 100% compatible across V1, V2, V3, and V4 cameras, Desktop Studio, and legacy Windows tools (`ThermoVision`, `Thermal Data Viewer`).
+Every still image and video or time-lapse frame saved by DIY-Thermocam stores 14-bit radiometric sensor data in a binary `.DAT` file. The layout stays 100% compatible with files from earlier DIY-Thermocam cameras, Desktop Studio, and legacy Windows tools (`ThermoVision`, `Thermal Data Viewer`).
 
 Reference firmware writer: [`firmware/src/thermal/save.cpp`](https://github.com/maxritter/diy-thermocam/blob/master/firmware/src/thermal/save.cpp).
 

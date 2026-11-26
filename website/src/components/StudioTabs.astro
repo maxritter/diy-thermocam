@@ -1,0 +1,40 @@
+---
+/* Rendered from example scenes the way Studio draws them. The Studio redesign build replaces these with
+   screenshots from a real camera; swap them back to /images/studio/*.png then. */
+const tabs = [
+  { id: 'live', label: 'Live view', img: '/images/examples/pcb.jpg', w: 1470, h: 1024, alt: 'A circuit board under load with the hottest and coldest points and a scale bar', cap: 'The live image with the hottest, coldest and centre points marked, and the scale beside it.' },
+  { id: 'measure', label: 'Measure', img: '/images/studio-features/measure.jpg', w: 1280, h: 1260, alt: 'A breaker panel with a box around the hot breaker and a line profile across the row', cap: 'Boxes, spots and lines, with a temperature profile along the line.' },
+  { id: 'isotherm', label: 'Isotherms', img: '/images/studio-features/isotherm.jpg', w: 1120, h: 840, alt: 'A house front with everything above 6 °C marked green', cap: 'Mark everything above a temperature: here, where the house loses heat.' },
+  { id: 'palettes', label: 'Palettes', img: '/images/studio-features/palettes.jpg', w: 1452, h: 1092, alt: 'The same house in four palettes', cap: 'The camera’s 19 palettes and five more for print and science.' },
+];
+---
+
+<div class="studio-grid">
+  <div class="tabs" role="tablist" aria-label="Studio screens">
+    {tabs.map((t, i) => (
+      <button type="button" role="tab" id={`t-${t.id}`} aria-controls={`p-${t.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{t.label}</button>
+    ))}
+  </div>
+  <div>
+    {tabs.map((t, i) => (
+      <div id={`p-${t.id}`} role="tabpanel" aria-labelledby={`t-${t.id}`} hidden={i !== 0}>
+        <div class="window"><img src={t.img} alt={t.alt} width={t.w} height={t.h} loading={i === 0 ? 'eager' : 'lazy'} /></div>
+        <p class="panel-cap">{t.cap}</p>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .studio-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 10px; width: max-content; max-width: 100%; background: var(--bg-2); }
+  .tabs [role='tab'] { height: 36px; padding: 0 14px; border: 0; border-radius: 7px; background: none; color: var(--muted); font: 500 14px var(--font-sans); cursor: pointer; }
+  .tabs [role='tab'][aria-selected='true'] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 0 0 1px var(--border); }
+  .window { max-width: 920px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-window); background: #0b0b0c; }
+  .window img { width: 100%; aspect-ratio: 16 / 10; object-fit: contain; }
+  .panel-cap { max-width: 920px; margin: 14px 0 0; color: var(--muted); font-size: 15px; }
+  @media (max-width: 600px) {
+    .tabs { width: 100%; }
+    .tabs [role='tab'] { flex: 1; padding: 0 8px; height: 44px; }
+  }
+</style>

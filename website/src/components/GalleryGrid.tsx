@@ -78,9 +78,11 @@ export default function GalleryGrid({ items, categories, aspect = '4/3' }: Props
                   fontSize: '13.5px',
                   fontWeight: active ? 600 : 500,
                   cursor: 'pointer',
-                  border: active ? '1px solid var(--tc-thermal)' : '1px solid var(--tc-border)',
-                  background: active ? 'var(--tc-thermal)' : 'var(--tc-surface)',
-                  color: active ? 'var(--tc-text-on-thermal)' : 'var(--tc-text-muted)',
+                  border: active
+                    ? '1px solid var(--tc-border-strong)'
+                    : '1px solid var(--tc-border)',
+                  background: active ? 'var(--tc-surface-2)' : 'var(--tc-surface)',
+                  color: active ? 'var(--tc-text)' : 'var(--tc-text-muted)',
                 }}
               >
                 {cat}

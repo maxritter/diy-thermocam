@@ -13,25 +13,15 @@ interface Props {
   jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
-const {
-  title,
-  description,
-  canonicalPath,
-  ogImage = SITE.ogImage,
-  ogType = 'website',
-  jsonLd,
-} = Astro.props;
+const { title, description, canonicalPath, ogImage = SITE.ogImage, ogType = 'website', jsonLd } = Astro.props;
 
 const canonicalUrl = `${SITE.url}${canonicalPath}`;
-const fullTitle =
-  title === SITE.name
-    ? `${SITE.name} — Open-Source Radiometric Thermal Camera`
-    : `${title} — ${SITE.name}`;
+const fullTitle = title === SITE.name ? `${SITE.name}: build your own thermal camera` : `${title} · ${SITE.name}`;
 const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -40,11 +30,14 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <link rel="canonical" href={canonicalUrl} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/images/website/icon.png" />
+    <link rel="icon" type="image/png" href="/images/brand/favicon.png" />
     <link rel="apple-touch-icon" href="/images/brand/favicon.png" />
 
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
     <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/geist-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:type" content={ogType} />
@@ -62,35 +55,28 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
     <script is:inline>
       (() => {
+        let theme = 'light';
         try {
-          const params = new URLSearchParams(window.location.search);
-          const forced = params.get('theme');
+          const forced = new URLSearchParams(window.location.search).get('theme');
           const stored = localStorage.getItem('starlight-theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const theme =
+          theme =
             forced === 'light' || forced === 'dark'
               ? forced
               : stored === 'light' || stored === 'dark'
                 ? stored
-                : prefersDark
+                : window.matchMedia('(prefers-color-scheme: dark)').matches
                   ? 'dark'
                   : 'light';
-          document.documentElement.dataset.theme = theme;
         } catch {
-          document.documentElement.dataset.theme = 'light';
+          /* keep light */
         }
+        document.documentElement.dataset.theme = theme;
       })();
     </script>
 
-    <script
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id={SITE.umamiWebsiteId}
-    ></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id={SITE.umamiWebsiteId}></script>
 
-    {ldList.map((schema) => (
-      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
-    ))}
+    {ldList.map((schema) => <script type="application/ld+json" set:html={JSON.stringify(schema)} />)}
   </head>
   <body>
     <Header currentPath={canonicalPath} />
@@ -98,5 +84,8 @@ const ldList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       <slot />
     </main>
     <Footer />
+    <script>
+      import '../scripts/site.ts';
+    </script>
   </body>
 </html>

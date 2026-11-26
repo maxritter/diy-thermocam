@@ -1,59 +1,20 @@
 ---
-title: Documentation
-description: Guides and technical references for building, flashing, operating, and integrating DIY-Thermocam.
+title: Overview
+description: DIY-Thermocam docs, from ordering parts and building the camera to Studio, firmware updates, the USB protocol and the .DAT file format.
 editUrl: https://github.com/maxritter/diy-thermocam/edit/master/website/src/content/docs/docs/index.mdx
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 2
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import DocsOverview from '../../../components/DocsOverview.astro';
 
-Guides for sourcing parts, assembling V4 or V3 hardware, flashing Teensy 4.1 firmware, reading `.DAT` captures, and communicating over USB Protocol v2.
+<DocsOverview part="intro" />
 
-## Build and operate
+## Start here
 
-<CardGrid>
-  <LinkCard
-    title="Bill of Materials"
-    description="Compare V4.0 Zero-Solder and V3.0 Classic parts, configure options, and export CSV."
-    href="/docs/partlist/"
-  />
-  <LinkCard
-    title="Building Instructions"
-    description="V4 zero-solder 3-step guide and classic V3.0 45-step soldering manual."
-    href="/building-instructions/"
-  />
-  <LinkCard
-    title="User Manual"
-    description="On-device controls, touchscreen menus, charging, microSD storage, and PC connection."
-    href="/docs/manual/"
-  />
-  <LinkCard
-    title="Hardware and Enclosures"
-    description="Schematic, Teensy 4.1 pinmap, KiCad fab files, and build123d enclosures."
-    href="/docs/hardware/"
-  />
-</CardGrid>
+<DocsOverview part="start" />
 
-## Firmware, protocol, and software
+## All guides
 
-<CardGrid>
-  <LinkCard
-    title="Firmware and Flashing"
-    description="Flash releases in Desktop Studio or Teensy Loader, or build with arduino-cli."
-    href="/docs/firmware/"
-  />
-  <LinkCard
-    title="USB Protocol v2.0"
-    description="Binary packet framing, CRC-8/CRC-32 integrity, push streaming, and SD access."
-    href="/docs/protocol-v2/"
-  />
-  <LinkCard
-    title="Raw Data Format (.DAT)"
-    description="Byte layout across V1–V4 cameras, temperature conversion, and .thermo.json sidecars."
-    href="/docs/raw-data/"
-  />
-  <LinkCard
-    title="Desktop Studio"
-    description="Cross-platform Tauri v2 app for live viewing, ROIs, emissivity, exports, and updates."
-    href="/docs/desktop-app/"
-  />
-</CardGrid>
+<DocsOverview part="guides" />

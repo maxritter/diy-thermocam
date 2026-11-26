@@ -13,23 +13,17 @@ export default defineConfig({
     starlight({
       title: 'DIY-Thermocam Docs',
       description:
-        'Technical documentation, interactive BOM, Teensy 4.1 firmware guide, USB Protocol v2 spec, and desktop app reference for DIY-Thermocam V3.',
-      logo: {
-        light: './public/images/brand/logo-light.svg',
-        dark: './public/images/brand/logo-dark.svg',
-        replacesTitle: true,
+        'Build, use and extend DIY-Thermocam: parts list, build guide, Studio, firmware updates, USB protocol and the .DAT file format.',
+      components: {
+        SiteTitle: './src/components/starlight/SiteTitle.astro',
+        ThemeSelect: './src/components/starlight/ThemeSelect.astro',
       },
       favicon: '/favicon.svg',
       social: [
         {
           icon: 'github',
-          label: 'GitHub',
+          label: 'DIY-Thermocam on GitHub',
           href: 'https://github.com/maxritter/diy-thermocam',
-        },
-        {
-          icon: 'youtube',
-          label: 'YouTube',
-          href: 'https://www.youtube.com/channel/UC4XjTWGf-Umvk3ypZHzNSAw',
         },
       ],
       editLink: {
@@ -72,47 +66,42 @@ export default defineConfig({
           attrs: {
             rel: 'icon',
             type: 'image/png',
-            href: '/images/website/icon.png',
+            href: '/images/brand/favicon.png',
           },
         },
       ],
       sidebar: [
         {
-          label: 'Get Started',
+          label: 'Get started',
           items: [
-            { label: 'Documentation Home', slug: 'docs' },
-            { label: 'User Manual', slug: 'docs/manual' },
-            { label: 'Building Instructions (45 Steps)', link: '/building-instructions/' },
+            { label: 'Overview', slug: 'docs' },
+            { label: 'Parts list', slug: 'docs/partlist' },
+            { label: 'Build guide', link: '/building-instructions/' },
+            { label: 'Install Studio', link: '/software/#download' },
           ],
         },
         {
-          label: 'Hardware & Fabrication',
+          label: 'Use the camera',
           items: [
-            { label: 'Bill of Materials (Partlist)', slug: 'docs/partlist' },
-            { label: 'Hardware, PCB & Enclosure', slug: 'docs/hardware' },
+            { label: 'Camera controls', slug: 'docs/manual' },
+            { label: 'Studio', slug: 'docs/desktop-app' },
+            { label: 'Firmware updates', slug: 'docs/firmware' },
           ],
         },
         {
-          label: 'Firmware & Protocol',
+          label: 'Reference',
           items: [
-            { label: 'Firmware & Flashing', slug: 'docs/firmware' },
-            { label: 'USB Protocol v2 Spec', slug: 'docs/protocol-v2' },
-            { label: 'USB Serial Protocol', slug: 'docs/serial' },
-            { label: 'Raw Data Format (.DAT)', slug: 'docs/raw-data' },
-          ],
-        },
-        {
-          label: 'Desktop App & Site',
-          items: [
-            { label: 'Desktop App Reference', slug: 'docs/desktop-app' },
-            { label: 'Back to Main Website', link: '/' },
+            { label: 'Board and shell', slug: 'docs/hardware' },
+            { label: 'USB protocol', slug: 'docs/protocol-v2' },
+            { label: '.DAT file format', slug: 'docs/raw-data' },
           ],
         },
       ],
     }),
     react(),
     mdx(),
-    sitemap(),
+    /* /docs/serial/ repeats /docs/protocol-v2/ for old links; only the original belongs in the sitemap. */
+    sitemap({ filter: (page) => !page.endsWith('/docs/serial/') }),
   ],
   vite: {
     plugins: [tailwindcss()],

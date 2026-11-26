@@ -1,84 +1,72 @@
 ---
-import GalleryGrid, { type GalleryItem } from '../components/GalleryGrid.tsx';
+import V4Status from '../components/V4Status.astro';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
-import { buildBreadcrumbs } from '../lib/site';
+import { buildBreadcrumbs, SITE } from '../lib/site';
 
-const devicePhotos: GalleryItem[] = [
-  {
-    title: 'Front View',
-    caption: '3.2-inch 320×240 resistive touchscreen mounted on a 1/4"-20 tripod.',
-    image: '/images/device/front.jpg',
-  },
-  {
-    title: 'Internal Electronics',
-    caption: 'Teensy 4.1, FLIR Lepton 3.5 on Breakout V2.0, Pololu 5 V boost, and CR1220 holder.',
-    image: '/images/device/inside.jpg',
-  },
-  {
-    title: 'Back View',
-    caption: 'Centered FLIR Lepton aperture on the matte grey 3 mm laser-cut acrylic backplate.',
-    image: '/images/device/back.jpg',
-  },
-  {
-    title: 'Left Side',
-    caption: 'Side enclosure finger joints and clearance profile.',
-    image: '/images/device/left.jpg',
-  },
-  {
-    title: 'Rear Open',
-    caption: 'Direct access to the Teensy Program button, microSD slot, and FLIR Lepton socket.',
-    image: '/images/device/open.jpg',
-  },
-  {
-    title: 'Right Side',
-    caption: 'Side power switch and top momentary capture button.',
-    image: '/images/device/right.jpg',
-  },
+const renders = [
+  { src: '/images/v4/hero-front.jpg', w: 1600, h: 1067, cap: 'Printed shell, front', bg: 'photo' },
+  { src: '/images/v4/hero-back.jpg', w: 1600, h: 1067, cap: 'Printed shell, back with the lens cap open', bg: 'photo' },
+  { src: '/images/v4/hero-back-closed.jpg', w: 1600, h: 1067, cap: 'Printed shell, lens cap closed', bg: 'photo' },
+  { src: '/images/v4/section.jpg', w: 1600, h: 1067, cap: 'Cut through the shell at the Lepton', bg: 'photo' },
+  { src: '/images/v4/exploded.jpg', w: 1333, h: 1600, cap: 'Printed shell, every part exploded', bg: 'photo' },
+  { src: '/images/v4/kit.jpg', w: 1600, h: 1200, cap: 'Everything for the printed build', bg: 'photo' },
+  { src: '/images/v4/laser-hero.jpg', w: 1600, h: 1067, cap: 'Laser-cut acrylic case, front', bg: 'photo' },
+  { src: '/images/v4/laser-hero-back.jpg', w: 1600, h: 1067, cap: 'Acrylic case, back', bg: 'photo' },
+  { src: '/images/v4/laser-exploded.jpg', w: 1600, h: 1067, cap: 'Acrylic case, exploded', bg: 'photo' },
+  { src: '/images/v4/laser-sheet.jpg', w: 1600, h: 1067, cap: 'The acrylic plates as they come off the sheet', bg: 'photo' },
+  { src: '/images/v4/laser-kit.jpg', w: 1600, h: 1200, cap: 'Everything for the acrylic build', bg: 'photo' },
+  { src: '/images/v4/pcb-modules.png', w: 1200, h: 924, cap: 'Board, module side: Teensy, Lepton and battery sockets', bg: 'cad' },
+  { src: '/images/v4/pcb-display.png', w: 1200, h: 924, cap: 'Board, display side: the 2 × 20 display socket', bg: 'cad' },
 ];
 
 const jsonLd = buildBreadcrumbs([
   { name: 'Home', path: '/' },
-  { name: 'Device Images', path: '/device-images/' },
+  { name: 'Board and shell', path: '/device-images/' },
 ]);
 ---
 
 <MarketingLayout
-  title="Device Images"
-  description="Photographs of the assembled DIY-Thermocam V3 hardware, internal PCB layout, FLIR Lepton 3.5, and acrylic enclosure."
+  title="Board and shell"
+  description="Renders of the DIY-Thermocam V4 board from KiCad and of the printed and laser-cut shells from build123d."
   canonicalPath="/device-images/"
   jsonLd={jsonLd}
 >
-  <section class="page-wrap">
-    <header class="page-head">
-      <h1>Device images</h1>
-      <p>
-        Assembled DIY-Thermocam V3 photos from every angle, including the internal Teensy 4.1 and
-        FLIR Lepton 3.5 stack. Click any photo to inspect full size.
-      </p>
-    </header>
+  <section class="page-head">
+    <div class="wrap">
+      <h1>Board and shell</h1>
+      <p>Renders from the KiCad board and the build123d shell. Both are open: change them and order your own.</p>
+      <div class="status"><V4Status /></div>
+    </div>
+  </section>
 
-    <GalleryGrid client:load items={devicePhotos} aspect="4/3" />
+  <section class="gal-wrap">
+    <div class="wrap renders">
+      {renders.map((r) => (
+        <figure class={r.bg}>
+          <a href={r.src}><img src={r.src} alt={r.cap} width={r.w} height={r.h} loading="lazy" /></a>
+          <figcaption>{r.cap}</figcaption>
+        </figure>
+      ))}
+    </div>
+    <div class="wrap links">
+      <a class="btn btn-ghost" href="/docs/hardware/">Read about the board and shell</a>
+      <a href={`${SITE.repoUrl}/tree/master/hardware/pcb`}>hardware/pcb</a>
+      <a href={`${SITE.repoUrl}/tree/master/hardware/enclosure`}>hardware/enclosure</a>
+    </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .page-wrap {
-    max-width: var(--tc-container);
-    margin: 0 auto;
-    padding: 56px 28px 24px;
-  }
-  .page-head {
-    max-width: 64ch;
-    margin-bottom: 36px;
-  }
-  .page-head h1 {
-    margin: 0;
-    font-size: clamp(2rem, 3.6vw, 2.75rem);
-    font-weight: 650;
-  }
-  .page-head p {
-    margin: 12px 0 0;
-    font-size: 1.05rem;
-    color: var(--tc-text-muted);
-  }
+  .status { margin-top: 24px; max-width: 760px; }
+  .gal-wrap { padding-bottom: 96px; }
+  .renders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .renders figure { margin: 0; }
+  .renders a { display: block; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
+  .renders .photo a { background: #c8ccd1; }
+  .renders .cad a { background: var(--cad); }
+  .renders img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .renders .cad img { object-fit: contain; padding: 12px; }
+  .renders figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 36px; font-size: 15px; }
+  @media (max-width: 700px) { .renders { grid-template-columns: 1fr; } .gal-wrap { padding-bottom: 64px; } }
 </style>

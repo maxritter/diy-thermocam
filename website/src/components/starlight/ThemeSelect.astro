@@ -1,0 +1,42 @@
+---
+/* A light/dark toggle in place of Starlight's three-way select, matching the rest of the site. */
+import { ICONS } from '../../lib/icons';
+---
+
+<button class="theme-toggle" type="button" data-sl-theme-toggle aria-label="Switch theme">
+  <span class="moon" set:html={ICONS.moon} />
+  <span class="sun" set:html={ICONS.sun} />
+</button>
+
+<script>
+  const root = document.documentElement;
+  const current = () => (root.dataset.theme === 'dark' ? 'dark' : 'light');
+  function label() {
+    for (const b of document.querySelectorAll('[data-sl-theme-toggle]')) {
+      b.setAttribute('aria-label', current() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+  }
+  for (const b of document.querySelectorAll('[data-sl-theme-toggle]')) {
+    b.addEventListener('click', () => {
+      const next = current() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('starlight-theme', next);
+      } catch {
+        /* storage can be blocked; the page still switches */
+      }
+      label();
+    });
+  }
+  label();
+</script>
+
+<style>
+  .theme-toggle { width: 36px; height: 36px; display: inline-grid; place-items: center; border: 0; background: none; color: var(--muted); border-radius: 8px; cursor: pointer; }
+  .theme-toggle:hover { color: var(--text); background: var(--surface-2); }
+  .theme-toggle :global(svg) { width: 18px; height: 18px; display: block; }
+  .sun { display: none; }
+  :global(:root[data-theme='dark']) .sun { display: block; }
+  :global(:root[data-theme='dark']) .moon { display: none; }
+  @media (max-width: 900px) { .theme-toggle { width: 44px; height: 44px; } }
+</style>

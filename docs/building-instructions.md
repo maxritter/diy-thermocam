@@ -1,339 +1,150 @@
-# Building Instructions
+# Build guide
 
-You can build a DIY-Thermocam in two ways. The **V4 Zero-Solder Kit** *(prototype-pending)* snaps a factory-assembled PCBA and 3D-printed shell together with a Phillips screwdriver. The **classic V3.0 Through-Hole Build** *(proven baseline)* uses traditional hand soldering.
+Turn the assembled board, four modules and a printed shell into a working camera. In each picture, the parts you add are orange and listed at the top.
 
----
+> **V4 is experimental and still in development.** The V4 board and shell haven't been built and tested on a real camera yet. You're welcome to try them, but there's no guarantee they work. Already have a V3? It can update its firmware and use Studio today.
 
-## Option A: DIY-Thermocam V4 — Zero-Solder, Screwdriver-Only (Prototype-Pending)
+## What you need
 
-DIY-Thermocam V4 removes soldering irons, loose jumper wires, coin cells, and trace cutting. The PCB fab populates the USB-C port, charger (`BQ24074`), 5 V boost (`TPS61022`), 3.3 V RTC LDO (`XC6206`), reverse-polarity protection, switches, USB pogo pins, and female headers. You plug in the modules and close the 3D-printed shell with `4× M2.5×6` front and `4× M2.5×8` back countersunk screws.
+| Part | Where |
+| --- | --- |
+| V4 board, assembled *Gerbers, BOM and placement files in hardware/pcb/fab* | JLCPCB, Seeed Fusion or PCBWay |
+| Shell, 8 printed parts *Or a laser-cut 3 mm acrylic case plus 10 small printed parts* | Your printer, JLC3DP, PCBWay, Seeed Fusion or Craftcloud; acrylic from Formulor, Snijlab, Ponoko, SendCutSend or Elecrow |
+| Teensy 4.1 with headers | DigiKey |
+| FLIR Lepton 3.5 *500-0771-01, radiometric, 57°. Or the 3.1R for 95°* | DigiKey or Mouser |
+| Lepton Breakout Board V2.0 *Teledyne FLIR 250-0577-00, not the PureThermal board* | DigiKey or Mouser |
+| Right-angle 2×10 female header *Sullins PPPC102LJBN-RC, connects the breakout to the board* | DigiKey |
+| 3.2" touch display *ER-TFTM032-3: 4-wire SPI, 5 V, resistive touch, pin header* | BuyDisplay |
+| LiPo 505060, 2000 mAh *Protected, at most 5.0 mm thick, JST-PH plug* | ampul.eu; or the slimmer Adafruit 258 (1200 mAh) from Adafruit or DigiKey |
+| Standoffs, screws and nuts *8 metal M2.5 standoffs, 8 countersunk M2.5 screws, nylon washers, the Lepton mount* | ettinger.de |
+| USB-C cable, microSD card, 1/4"-20 hex nut *Any 16–32 GB Class 10 card; the nut from a hardware store* | DigiKey, any shop |
 
-> **Prototype status:** V4 PCB (`hardware/pcb/`) and 3D enclosure (`hardware/enclosure/exports/3d-v4.0/`) are `PROTOTYPE-PENDING` until physical bring-up is complete. For a proven build today, follow the V3.0 guide below.
+[Open the parts list](https://www.diy-thermocam.net/docs/partlist/) for prices, links and the files each fab needs.
 
-### Ordering Flow (4 Orders Total)
+## 1. Teensy
 
-1. **JLCPCB, Seeed Studio Fusion, or PCBWay (PCBA + 3D Shell):** Upload the V4 Gerbers, BOM (31 verified LCSC SKUs), and CPL files for a factory-populated board. Order the 7-part support-free 3D shell (`front_shell`, `back_shell`, `lens_cap`, `capture_button`, `slide_switch_cap`, `battery_cradle`, `battery_lid`) in the same checkout or print it at home.
-2. **DigiKey or Mouser:** Order a Teensy 4.1 with pre-soldered pins (plus 1×5 inner header for `J7`), FLIR Lepton 3.5 (`500-0771-01`) or wide-angle 3.1R (`500-0758-03`), Lepton Breakout Board V2.0 (`250-0577-00`), microSD card, M2.5 standoff and screw kit, and a metal `1/4"-20` hex nut.
-3. **BuyDisplay:** Order `ER-TFTM032-3` (3.2-inch 240×320 SPI TFT touch display, 4-Wire SPI, 5V, Resistive Touch, Pin Header, No Font Chip).
-4. **Battery supplier:** Order a slim **≤5.0 mm UL/IEC 62133 protected `505060` 3.7 V 2000 mAh LiPo** with standard Adafruit/SparkFun JST-PH polarity. Always verify `+`/`-` against the `J4` silkscreen.
+Insert the microSD card. Push the Teensy into its two sockets on the back of the board, USB end toward the bottom edge. Leave its five inner pads empty: spring pins on the board press on them. If pins are soldered there, cut them flush underneath first; never force the Teensy down.
 
-See the interactive [Bill of Materials](/docs/partlist/) for verified links, V3-upgrade reuse options, and live totals.
+![Line drawing: the Teensy 4.1 in orange above its two sockets on the back of the board](../website/public/images/v4/steps/shell-01.jpg)
 
-### V4 Step 1: Unbox the factory PCBA and snap-in modules
+## 2. Lepton screws
 
-Lay out the factory-assembled V4 PCBA, pre-pinned Teensy 4.1, FLIR Lepton 3.5 or 3.1R with Breakout V2.0, and BuyDisplay 3.2" TFT. Keep the slim `505060` LiPo, microSD card, and a Phillips screwdriver ready. No soldering iron, coin cell, or wire stripper is needed.
+From the display side, push the four M2 × 18 screws through the Lepton holes, each with a nylon M2 washer under its head.
 
-![V4 Step 1: Factory PCBA and modular components laid out with screwdriver](/images/build-v4/v4-step-1-unbox-pcba.png)
+![Line drawing: four M2 × 18 screws with nylon washers in orange, pushed through the board from the display side](../website/public/images/v4/steps/shell-02.jpg)
 
-### V4 Step 2: Plug in Teensy 4.1, Lepton, Display, and Battery
+## 3. Lepton
 
-Snap the FLIR Lepton into Breakout Board V2.0 until both clips click. Press Teensy 4.1, Lepton Breakout V2.0, and the 3.2-inch display squarely into their sockets on the V4 PCB. Place the slim `505060` LiPo inside the insulating `battery_cradle` and `battery_lid`, insert the microSD card, verify JST-PH polarity (`+`/`-`), and plug into `J4`.
+Turn the board over. Slide a 12 mm sleeve onto each screw. Snap the Lepton into the breakout, plug the right-angle adapter onto the breakout's header, then lower the breakout onto the screws so the adapter's legs go into J2. Fit the four M2 nuts finger-tight.
 
-![V4 Step 2: Plugging Teensy 4.1, FLIR Lepton, 3.2-inch display, and JST-PH battery into the V4 PCBA](/images/build-v4/v4-step-2-plug-modules.png)
+![Line drawing: the sleeves, the Lepton on its breakout with the adapter, and four M2 nuts in orange](../website/public/images/v4/steps/shell-03.jpg)
 
-### V4 Step 3: Close the 3D-printed enclosure and flash over USB-C
+## 4. Back shell
 
-Slide the metal `1/4"-20` hex nut into the rear shell pocket (max tripod stud `≤ 8.0 mm`). Drop in `capture_button` and `slide_switch_cap`, seat the electronics stack, and fasten `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws. Slide on the dovetail lens cap, plug in USB-C, and flash Firmware 4.0 from [DIY-Thermocam Desktop Studio](/software/).
+Slide the 1/4"-20 nut into its pocket from the open side. Drop the capture button and the switch slider into their slots.
 
-![V4 Step 3: Exploded 3D-printed enclosure assembled with four screws and a Phillips screwdriver](/images/build-v4/v4-step-3-enclosure-screws.png)
+![Line drawing: the tripod nut, capture button and switch slider in orange going into the back shell](../website/public/images/v4/steps/shell-04.jpg)
 
----
+## 5. Rear standoffs
 
-## Option B: Classic DIY-Thermocam V3.0 — 45-Step Through-Hole Guide (Verified Baseline)
+Stand the four 20 mm standoffs in their seats and screw them on from outside with the M2.5 × 8 countersunk screws.
 
-The verified V3.0 through-hole PCB and 6-plate laser-cut acrylic enclosure can be built at home with standard soldering tools. Every part is listed in the [Bill of Materials](/docs/partlist/).
+![Line drawing: four 20 mm standoffs and four M2.5 × 8 screws in orange on the back shell](../website/public/images/v4/steps/shell-05.jpg)
 
-### Prerequisites
+## 6. Board
 
-Verify you have all required V3.0 parts from the [Bill of Materials](/docs/partlist/):
+Put a nylon M2.5 washer on each standoff, then lower the board onto them. The slide switch drops into the slider's fork.
 
-![All required DIY-Thermocam V3 components laid out](/images/manual/1.jpg)
+![Line drawing: four nylon washers and the board with its modules in orange above the standoffs](../website/public/images/v4/steps/shell-06.jpg)
 
-Required hand tools:
+## 7. Middle standoffs
 
-![Assembly tools needed for DIY-Thermocam V3](/images/manual/2.jpg)
+Screw the four 11 mm standoffs through the board into the standoffs below.
 
-- Soldering iron and solder wire
-- Flush wire cutters / cutting pliers
-- Sharp craft knife (`VUSB–VIN` trace cut)
-- Multimeter (with continuity mode)
-- Phillips and flathead screwdrivers
-- Tweezers and a small flat needle file
+![Line drawing: four 11 mm standoffs in orange going into the board](../website/public/images/v4/steps/shell-07.jpg)
 
-### 1. Cut male header strips for the Teensy 4.1
+## 8. C-spacers
 
-Grab the **Teensy 4.1** and the **male pin header strips**. Cut two **24-pin** strips with one flat outer edge as shown so they stay flush inside the PCB outline, plus one **5-pin** strip and one **1-pin** strip.
+Slip a C-spacer over each 11 mm standoff. Turn the gap toward the Teensy socket at the lower right and toward the capture button at the upper right.
 
-![Step 1: Cutting male header strips for Teensy 4.1](/images/manual/3.jpg)
+![Line drawing: four C-spacers in orange on the 11 mm standoffs, with a close-up of the gaps](../website/public/images/v4/steps/shell-08.jpg)
 
-### 2. Solder male headers to the Teensy 4.1
+## 9. Battery
 
-Insert both 24-pin strips on the underside of the Teensy 4.1 (flat edges facing the USB port), followed by the 5-pin and 1-pin strips. Keep every header perpendicular to the board and solder all pins cleanly.
+Lay the cradle on the spacers and the LiPo in the cradle. Run the wires through the gap in the cradle's right wall and round the right board edge to J4 on the back. Check + and − against the marking and plug it in now: J4 is out of reach later. Put the lid on.
 
-![Step 2: Soldering male headers to Teensy 4.1](/images/manual/4.jpg)
+![Line drawing: the battery cradle, the LiPo and the lid in orange above the board](../website/public/images/v4/steps/shell-09.jpg)
 
-### 3. Cut the VUSB–VIN pad on Teensy 4.1
+## 10. Display
 
-Use a sharp craft knife to sever the tiny copper trace between the **VUSB** and **VIN** pads on the underside of the Teensy 4.1. This prevents USB power from bypassing the power switch. Confirm zero continuity across the two pads with your multimeter before proceeding.
+Press the display onto its 2 × 20 header. It rests on the 11 mm standoffs.
 
-![Step 3: Cutting the VUSB-VIN trace on Teensy 4.1](/images/manual/5.jpg)
+![Line drawing: the 3.2-inch display in orange above the stack](../website/public/images/v4/steps/shell-10.jpg)
 
-### 4. Insert the microSD card
+## 11. Front shell
 
-Slide a **Class 10 / U1 microSD card** (16–32 GB FAT32 recommended; exFAT supported on firmware 3.1+) into the slot on top of the Teensy 4.1.
+Fit the front shell. Its four bosses press the display onto the standoffs. Tighten the four M2.5 × 14 countersunk screws with a PH1 Phillips screwdriver until snug.
 
-![Step 4: Inserting the microSD card into Teensy 4.1](/images/manual/6.jpg)
+![Line drawing: the front shell and four M2.5 × 14 screws in orange](../website/public/images/v4/steps/shell-11.jpg)
 
-### 5. Cut female header sockets for the Teensy 4.1
+## 12. Lens cap
 
-Cut two **24-pin**, one **5-pin**, and one **1-pin** strip from the **female header strips**, keeping at least two **10-pin** sections aside for the Lepton socket later.
+Slide the cap into its track from the top. It clicks at the open and closed positions.
 
-![Step 5: Cutting female header sockets](/images/manual/7.jpg)
+![Line drawing: the lens cap in orange sliding into its track on the back](../website/public/images/v4/steps/shell-12.jpg)
 
-### 6. Seat female sockets onto the Teensy 4.1
+## 13. Firmware
 
-Press the female sockets onto the Teensy 4.1 male pins so the microcontroller remains removable for service. Lightly file the plastic edge of the 5-pin socket if it sits tight against the 24-pin rail.
+Connect the camera with a USB-C cable and switch it on. Open [Studio](https://www.diy-thermocam.net/software/#download), go to Updater and choose the firmware file from the [latest release](https://github.com/maxritter/diy-thermocam/releases/latest). Studio restarts the camera when it is done.
 
-![Step 6: Fitting female sockets onto Teensy 4.1](/images/manual/8.jpg)
+<!-- studio-download -->
 
-### 7. Place the Teensy assembly onto the PCB
+## Acrylic case
 
-Align the Teensy 4.1 + female socket assembly into its silkscreen outline on the top side of the PCB and press until seated flat.
+The acrylic case holds the same board stack between six black acrylic plates. Besides the sheet, it needs 10 small printed parts: the battery cradle and lid, 4 C-spacers, the tripod mount, 2 display spacer bars and the microSD chute. Pan head screws with nylon washers replace the countersunk screws.
 
-![Step 7: Seating Teensy assembly onto the PCB](/images/manual/9.jpg)
+![Render of the laser-cut black acrylic case](../website/public/images/v4/laser-hero.jpg)
 
-### 8. Solder the Teensy sockets to the PCB
+### 1. Back plate
 
-Flip the PCB over and solder every Teensy socket pin cleanly.
+Screw the four 20 mm standoffs to the back plate with the M2.5 × 8 pan head screws, a nylon washer under each head.
 
-![Step 8: Soldering Teensy socket pins on the PCB backside](/images/manual/10.jpg)
+![Line drawing: the back plate with four 20 mm standoffs, pan head screws and nylon washers in orange](../website/public/images/v4/steps/acrylic-01.jpg)
 
-### 9. Mount the Li-Ion charger module
+### 2. Bottom plate and tripod mount
 
-Verify the Teensy headers do not protrude beyond the PCB edges (file flush if needed so the enclosure fits). Cut one 3-pin and four 1-pin male header segments to seat a TP4057 charger module on the top of the PCB. If using the recommended **TP4056** module instead of the obsolete TP4057, follow the wiring notes in [issue #103](https://github.com/maxritter/diy-thermocam/issues/103).
+Slot the bottom plate into the back plate. Press the 1/4"-20 nut into the tripod mount past its two lips, then set the mount into the hole in the bottom plate.
 
-![Step 9: Mounting the charging module on PCB V3.0](/images/manual/11.jpg)
+![Line drawing: the bottom plate, the tripod mount and the nut in orange, with a close-up of the nut in the mount](../website/public/images/v4/steps/acrylic-02.jpg)
 
-### 10. Solder and trim the charger pins
+### 3. Board stack
 
-Flip the PCB, solder all seven charger pins, and trim excess lead length flush.
+Follow shell steps 1–3 and 6–10. The board slides down past the tripod mount's fin, which then holds the mount in place.
 
-![Step 10: Soldering charger module pins](/images/manual/12.jpg)
+![Line drawing: the board, battery and display stack in orange on the back plate](../website/public/images/v4/steps/acrylic-03.jpg)
 
-### 11. Orient and mount the 5V step-up converter
+### 4. Keys
 
-Cut a 3-pin male header strip for the **Pololu 5V step-up regulator**. Check your board version carefully before soldering:
+From the inside, push the button key into the small slot in the top plate and the switch key into the slot in the right plate.
 
-- Legacy **U3V12F5** labeled `reg10a - 0J7032 - @2012`: mount with components facing up:
+![Line drawing: the button key and the switch key in orange going into the top and right plates](../website/public/images/v4/steps/acrylic-04.jpg)
 
-![Step 11a: Pololu U3V12F5 reg10a orientation](/images/manual/13_1.png)
+### 5. Side plates
 
-- Legacy **U3V12F5** labeled `reg12b - 0J7517 - @2013` or newer: mount rotated with text facing up:
+Hold each key in its slot and slot the top, left and right plates into the back plate. The switch key's fork goes over the slide switch.
 
-![Step 11b: Pololu U3V12F5 reg12b orientation](/images/manual/13_2.png)
+![Line drawing: the top, left and right plates in orange slotting into the back plate](../website/public/images/v4/steps/acrylic-05.jpg)
 
-- Current **Pololu U3V16F5 (recommended)**: install in this orientation:
+### 6. Front plate
 
-![Step 11c: Pololu U3V16F5 orientation](/images/manual/13.jpg)
+Lay the two spacer bars on the display's mounting holes, put the front plate on and tighten the M2.5 × 14 pan head screws, a nylon washer under each head.
 
-### 12. Solder the step-up regulator pins
+![Line drawing: two spacer bars, the front plate, four M2.5 × 14 screws and washers in orange](../website/public/images/v4/steps/acrylic-06.jpg)
 
-Flip the PCB, solder the three regulator pins, and clip the excess leads.
+### 7. microSD chute
 
-![Step 12: Soldering step-up regulator pins](/images/manual/14.jpg)
+Push the chute into the slot in the top plate until it clicks. Insert the card through it with tweezers.
 
-### 13. Solder the 2×20 display connector
+![Line drawing: the microSD chute in orange going into the top plate](../website/public/images/v4/steps/acrylic-07.jpg)
 
-Insert the **40-pin (2×20) female display header** on the backside of the PCB with the center keying notch facing inward, then solder all 40 pins.
-
-![Step 13: Soldering the 40-pin display connector](/images/manual/15.jpg)
-
-### 14. Position the bi-color charging LED
-
-Place the **bi-color charging LED** on the backside of the PCB with its common cathode (shorter lead) in the pad marked `G`. Leave enough lead length to bend the LED 90° upward so it aligns with the top enclosure indicator hole.
-
-![Step 14: Positioning the bi-color charging LED](/images/manual/16.jpg)
-
-### 15. Solder and trim the charging LED
-
-Flip the PCB, solder the three LED pins, and clip the excess leads.
-
-![Step 15: Soldering the charging LED pins](/images/manual/17.jpg)
-
-### 16. Insert the axial resistors
-
-Insert the four **4.7 kΩ** resistors (`R1, R3, R4, R6`) and two **10 kΩ** resistors (`R2, R5`) into their marked silkscreen positions on the top of the PCB.
-
-![Step 16: Inserting 4.7k and 10k axial resistors](/images/manual/18.jpg)
-
-### 17. Solder and trim the resistors
-
-Flip the PCB, solder all twelve resistor leads, and trim flush.
-
-![Step 17: Soldering axial resistors](/images/manual/19.jpg)
-
-### 18. Place the CR1220 coin cell holder
-
-Seat the **CR1220 coin cell holder** into its marked footprint on the top of the PCB. Do not insert the coin cell yet.
-
-![Step 18: Placing the CR1220 coin cell holder](/images/manual/20.jpg)
-
-### 19. Solder the coin cell holder
-
-Flip the PCB and solder both pads of the coin cell holder.
-
-![Step 19: Soldering the coin cell holder](/images/manual/21.jpg)
-
-### 20. Insert the 2×10 Lepton female headers
-
-Insert the remaining two **10-pin female header strips** (or one 2×10 socket) into the Lepton header footprint (`J2`).
-
-![Step 20: Inserting the Lepton 2x10 female header](/images/manual/22.jpg)
-
-### 21. Solder the Lepton header
-
-Flip the PCB and solder all 20 pins squarely.
-
-![Step 21: Soldering the Lepton header pins](/images/manual/23.jpg)
-
-### 22. Insert the four M2×18 Lepton mounting screws
-
-Feed four **M2×18 screws** up through the four Lepton mounting holes in the PCB.
-
-![Step 22: Inserting M2x18 Lepton mounting screws](/images/manual/24.jpg)
-
-### 23. Apply the battery insulating pad
-
-Hold the M2 screws in place while flipping the PCB over. Trim the **double-sided insulating mounting pad** slightly larger than the battery footprint, peel one liner, and stick it to the PCB backside. Keep the two marked mounting holes clear.
-
-![Step 23: Applying the LiPo insulating pad on PCB backside](/images/manual/25.jpg)
-
-### 24. Slide M2×12 spacers onto the screws
-
-Place the four **M2×12 spacers** onto the four M2×18 screws on the top side of the PCB.
-
-![Step 24: Fitting M2x12 spacers over the screws](/images/manual/26.jpg)
-
-### 25. Fit the header into the Lepton Breakout Board V2.0
-
-Ensure the right-angle 2×10 header is firmly seated on the **FLIR Lepton Breakout Board V2.0**.
-
-![Step 25: Preparing the FLIR Lepton Breakout Board V2.0](/images/manual/27.jpg)
-
-### 26. Mount the Lepton Breakout Board V2.0
-
-Lower the Breakout Board over the four M2×18 screws while guiding its 2×10 header into the PCB socket. Secure with four **M2 nylon nuts**.
-
-![Step 26: Securing the Lepton Breakout Board V2.0](/images/manual/28.jpg)
-
-### 27. Prepare the 3.7 V LiPo battery leads
-
-Double-check battery polarity (`+` red, `-` black) before soldering 26 AWG silicone wire leads to a bare battery pack.
-
-![Step 27: Soldering wire leads to the battery](/images/manual/29.jpg)
-
-### 28. Mount and wire the LiPo battery
-
-Peel the second liner on the insulating pad and press the **2000 mAh LiPo battery** firmly in place. Solder the red wire to `LIPO +` and the black wire to `LIPO -` on the PCB backside.
-
-![Step 28: Mounting the battery and soldering LIPO leads](/images/manual/30.jpg)
-
-### 29. Install and wire the power switch
-
-Snap the **miniature rocker power switch** into the right side panel of the enclosure and solder two red 26 AWG wires to the center and right switch terminals.
-
-![Step 29: Wiring the side power switch](/images/manual/31.jpg)
-
-### 30. Solder power switch wires to the PCB
-
-Solder the two red switch wires horizontally to the `SWITCH` pads on the PCB (polarity does not matter). Keep leads flat and neatly insulated (self-fusing silicone tape works well) so the wires clear the enclosure wall cleanly.
-
-![Step 30: Soldering switch leads horizontally to the PCB](/images/manual/32.jpg)
-
-### 31. Install and wire the capture push button
-
-Mount the **momentary capture button** into the top enclosure panel (with the LED hole facing you) and secure its locking nut. Solder two black 26 AWG wires to the terminals and insulate them with **heat shrink tubing** so they clear the display.
-
-![Step 31: Mounting and insulating the capture push button](/images/manual/33.jpg)
-
-### 32. Solder capture button wires to the PCB
-
-Solder the two black button wires to the `BUTTON` pads on the PCB (polarity does not matter).
-
-![Step 32: Soldering capture button leads to the PCB](/images/manual/34.jpg)
-
-### 33. Fit display standoffs
-
-Peel the protective shipping film off the **3.2" TFT LCD Touch Display** and assemble the four **M2.5×5** and four **M2.5×11** threaded standoffs through its corner mounting holes.
-
-![Step 33: Installing M2.5 standoffs on the 3.2-inch TFT display](/images/manual/35.jpg)
-
-### 34. Mate the display to the PCB
-
-Align the 40-pin display header with the PCB socket and guide the four M2.5 standoffs through the PCB corner holes. Ensure no switch or button wire is pinched between the display and PCB.
-
-![Step 34: Mating the TFT display to the main PCB](/images/manual/36.jpg)
-
-### 35. Add M2.5×20 rear standoffs
-
-Thread the four **M2.5×20 female-female standoffs** onto the M2.5×11 studs protruding through the PCB.
-
-![Step 35: Securing M2.5x20 rear standoffs](/images/manual/37.jpg)
-
-### 36. Fit the 1/4"-20 tripod mount
-
-Insert the **1/4"-20 tripod socket** into the bottom enclosure plate using three **M2×8 screws** (or seat a captive 1/4"-20 nut in the 3D-printed shell).
-
-![Step 36: Installing the tripod mount socket](/images/manual/38.jpg)
-
-### 37. Secure the tripod mount nuts
-
-Tighten the three **M2 metal nuts and washers** on the inside of the bottom plate.
-
-![Step 37: Tightening tripod socket M2 nuts](/images/manual/39.jpg)
-
-### 38. Attach the front enclosure plate
-
-Place the front bezel over the display (verify orientation) and secure it with four **M2.5×6 screws**.
-
-![Step 38: Attaching the front enclosure plate](/images/manual/40.jpg)
-
-### 39. Snap in the FLIR Lepton sensor and CR1220 coin cell
-
-Handling the **FLIR Lepton 3.5** (or 2.5) by its edges only, align the keying notch and press firmly into the Breakout Board socket until both retention clips click. Insert the **CR1220 3V coin cell** with the `+` face up.
-
-![Step 39: Installing the FLIR Lepton module and CR1220 coin cell](/images/manual/41.jpg)
-
-### 40. Fit the remaining enclosure side walls
-
-Interlock the top, bottom, left, and right side panels around the front plate.
-
-![Step 40: Fitting the enclosure side panels](/images/manual/42.jpg)
-
-### 41. Check USB port alignment
-
-Verify the Teensy 4.1 USB connector aligns cleanly inside the bottom enclosure cutout before closing the case.
-
-![Step 41: Verifying USB cutout alignment](/images/manual/43.jpg)
-
-### 42. Flash the firmware while the back is open
-
-Before closing the backplate, flash the latest firmware from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases) using PJRC's [Teensy Loader](https://www.pjrc.com/teensy/loader.html) (enable **Auto**, load `firmware.hex`, connect USB, and press the Teensy Program button). Subsequent updates can be flashed directly from the [DIY-Thermocam Desktop App](/software/) without opening the enclosure.
-
-![Step 42: Flashing DIY-Thermocam firmware via Teensy Loader](/images/manual/flash.png)
-
-Once the camera reboots and shows the live thermal feed, turn the power switch off to finish assembly.
-
-### 43. Close the rear enclosure plate
-
-Position the rear plate so the Lepton lens is centered inside the aperture, then fasten the final four **M2.5×6 screws** gently (do not overtighten on acrylic plates).
-
-![Step 43: Securing the rear enclosure plate](/images/manual/44.jpg)
-
-### 44. Lens protection
-
-If using the 3D-printed parametric enclosure, snap on the integrated lens cap. If attaching an adhesive lens cover to an acrylic plate, verify the sensor's 57° HFOV does not clip the cover edges when open (which creates thermal vignetting).
-
-### 45. First power-on and next steps
-
-Your DIY-Thermocam is ready. Read the [User Manual](/docs/manual/) for on-device controls, install [Desktop Studio](/software/) for live PC viewing and reports, or inspect [USB Protocol v2](/docs/protocol-v2/) to build custom tools.
+Then install the firmware as in step 13.

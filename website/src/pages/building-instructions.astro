@@ -1,153 +1,284 @@
 ---
+/* The build guide reads its words and pictures from docs/building-instructions.md, so GitHub and the
+   site say the same thing. This page only lays them out: a step rail, one picture per step. */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { marked } from 'marked';
-import MarketingLayout from '../layouts/MarketingLayout.astro';
-import { buildBreadcrumbs, SITE } from '../lib/site';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { marked, type Token, type Tokens } from 'marked';
+import BuildNeeds from '../components/BuildNeeds.astro';
+import Icon from '../components/Icon.astro';
+import V4Status from '../components/V4Status.astro';
+import { DOWNLOADS, SITE } from '../lib/site';
 
-const rawMd = readFileSync(resolve(process.cwd(), '../docs/building-instructions.md'), 'utf8');
-const withoutH1 = rawMd.replace(/^\s*#\s+[^\n]+\n+/, '');
+const raw = readFileSync(resolve(process.cwd(), '../docs/building-instructions.md'), 'utf8');
+const tokens = marked.lexer(raw);
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+const siteUrl = (s: string) => s.replace(/^\.\.\/website\/public\/images\//, '/images/').replace(/^https:\/\/www\.diy-thermocam\.net\//, '/');
+const toHtml = (list: Token[]) =>
+  marked
+    .parser(Object.assign(list, { links: tokens.links }))
+    .replaceAll('src="../website/public/images/', 'src="/images/')
+    .replaceAll('href="https://www.diy-thermocam.net/', 'href="/');
+
+interface Img { src: string; alt: string; w: number; h: number }
+interface Step { n: number; title: string; slug: string; html: string; img?: Img; studio: boolean }
+let lead = '';
+const steps: Step[] = [];
+const laserSteps: Step[] = [];
+let acrylic = null as { html: string; img?: Img } | null;
+
+/* Width and height from the JPEG's own header, so every picture reserves its space. */
+function jpegSize(src: string): { w: number; h: number } {
+  const b = readFileSync(resolve(process.cwd(), `public${src}`));
+  let i = 2;
+  while (i < b.length) {
+    const marker = b[i + 1];
+    const len = b.readUInt16BE(i + 2);
+    if (marker >= 0xc0 && marker <= 0xc3) return { h: b.readUInt16BE(i + 5), w: b.readUInt16BE(i + 7) };
+    i += 2 + len;
+  }
+  return { w: 1200, h: 900 };
 }
 
-const renderer = new marked.Renderer();
-renderer.heading = ({ tokens, depth }) => {
-  const html = marked.Parser.parseInline(tokens);
-  const plain = html.replace(/<[^>]+>/g, '');
-  const id = slugify(plain);
-  return `<h${depth} id="${id}">${html}</h${depth}>`;
+let section: 'intro' | 'parts' | 'step' | 'acrylic' | 'laser' = 'intro';
+let body: Token[] = [];
+let current: Step | null = null;
+
+function flush() {
+  const imgs: Img[] = [];
+  const text: Token[] = [];
+  let studio = false;
+  for (const t of body) {
+    if (t.type === 'paragraph' && t.tokens?.length === 1 && t.tokens[0].type === 'image') {
+      const im = t.tokens[0] as Tokens.Image;
+      const src = siteUrl(im.href);
+      imgs.push({ src, alt: im.text, ...jpegSize(src) });
+    } else if (t.type === 'html' && t.raw.includes('studio-download')) {
+      studio = true;
+    } else if (t.type !== 'space') {
+      text.push(t);
+    }
+  }
+  /* The parts table stays in the markdown for GitHub; the page shows BuildNeeds instead. */
+  if (section === 'step' && current) steps.push({ ...current, html: toHtml(text), img: imgs[0], studio });
+  if (section === 'laser' && current) laserSteps.push({ ...current, html: toHtml(text), img: imgs[0], studio });
+  if (section === 'acrylic') acrylic = { html: toHtml(text), img: imgs[0] };
+  body = [];
+}
+
+for (const t of tokens) {
+  if (t.type === 'heading' && t.depth === 1) continue;
+  if (t.type === 'heading' && t.depth === 2) {
+    flush();
+    const m = /^(\d+)\.\s+(.+)$/.exec(t.text);
+    if (m) {
+      section = 'step';
+      current = { n: Number(m[1]), title: m[2], slug: `step-${m[1]}`, html: '', studio: false };
+    } else if (/what you need/i.test(t.text)) section = 'parts';
+    else section = 'acrylic';
+    continue;
+  }
+  if (t.type === 'heading' && t.depth === 3 && (section === 'acrylic' || section === 'laser')) {
+    const m = /^(\d+)\.\s+(.+)$/.exec(t.text);
+    if (m) {
+      flush();
+      section = 'laser';
+      current = { n: Number(m[1]), title: m[2], slug: `acrylic-${m[1]}`, html: '', studio: false };
+      continue;
+    }
+  }
+  if (section === 'intro') {
+    if (!lead && t.type === 'paragraph') lead = t.text;
+    continue;
+  }
+  body.push(t);
+}
+/* Text after the last acrylic step (the pointer back to the firmware step) closes the section. */
+let outro = '';
+if (section === 'laser' && current) {
+  const lastImg = body.findIndex((t) => t.type === 'paragraph' && t.tokens?.length === 1 && t.tokens[0].type === 'image');
+  if (lastImg >= 0) {
+    outro = toHtml(body.slice(lastImg + 1).filter((t) => t.type !== 'space'));
+    body = body.slice(0, lastImg + 1);
+  }
+}
+flush();
+
+const railLabel: Record<string, string> = {
+  'Lepton screws': 'Screws',
+  'Back shell': 'Shell',
+  'Rear standoffs': 'Rear',
+  'Middle standoffs': 'Middle',
+  'C-spacers': 'Spacers',
+  'Front shell': 'Front',
+  'Lens cap': 'Cap',
 };
 
-const guideHtml = await marked.parse(withoutH1, { renderer });
-
-const jsonLd = [
-  buildBreadcrumbs([
-    { name: 'Home', path: '/' },
-    { name: 'Building Instructions', path: '/building-instructions/' },
-  ]),
-  {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: 'How to Build DIY-Thermocam V4 or V3.0 Thermal Camera',
-    description:
-      'Step-by-step assembly guide for the zero-solder V4 PCBA or the proven 45-step V3.0 through-hole camera.',
-    image: `${SITE.url}/images/build-v4/v4-step-1-unbox-pcba.png`,
-    supply: [
-      { '@type': 'HowToSupply', name: 'FLIR Lepton 3.5 Thermal Camera Module' },
-      { '@type': 'HowToSupply', name: 'Teensy 4.1 Development Board' },
-      { '@type': 'HowToSupply', name: 'DIY-Thermocam PCB (V4 PCBA or V3.0 THT)' },
-      { '@type': 'HowToSupply', name: '3.2-inch ILI9341 TFT Touch Display (BuyDisplay ER-TFTM032-3)' },
-      { '@type': 'HowToSupply', name: 'Protected 3.7 V 2000 mAh LiPo Battery' },
-    ],
-    tool: [
-      { '@type': 'HowToTool', name: 'Phillips screwdriver (V4 zero-solder build)' },
-      { '@type': 'HowToTool', name: 'Soldering iron, flush cutters, and multimeter (V3.0 build)' },
-    ],
-  },
+const headings = [
+  { depth: 2, slug: 'parts', text: 'What you need' },
+  ...steps.map((s) => ({ depth: 2, slug: s.slug, text: `${s.n} ${s.title}` })),
+  ...(acrylic ? [{ depth: 2, slug: 'acrylic', text: 'Acrylic case' }] : []),
+  ...laserSteps.map((s) => ({ depth: 3, slug: s.slug, text: `${s.n} ${s.title}` })),
 ];
+
+const howTo = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'Build a DIY-Thermocam V4 thermal camera',
+  description: lead,
+  image: `${SITE.url}/images/v4/exploded.jpg`,
+  tool: [
+    { '@type': 'HowToTool', name: 'PH1 Phillips screwdriver' },
+    { '@type': 'HowToTool', name: '2 mm flat screwdriver' },
+    { '@type': 'HowToTool', name: 'Tweezers' },
+  ],
+  supply: [
+    { '@type': 'HowToSupply', name: 'DIY-Thermocam V4 board, assembled' },
+    { '@type': 'HowToSupply', name: 'Teensy 4.1' },
+    { '@type': 'HowToSupply', name: 'FLIR Lepton 3.5' },
+    { '@type': 'HowToSupply', name: 'Lepton Breakout Board V2.0' },
+    { '@type': 'HowToSupply', name: '3.2-inch SPI touch display ER-TFTM032-3' },
+    { '@type': 'HowToSupply', name: 'LiPo 505060, 2000 mAh' },
+  ],
+  step: steps.map((s) => ({
+    '@type': 'HowToStep',
+    name: s.title,
+    url: `${SITE.url}/building-instructions/#${s.slug}`,
+    text: s.html.replace(/<[^>]+>/g, '').trim(),
+    ...(s.img ? { image: `${SITE.url}${s.img.src}` } : {}),
+  })),
+};
+const mac = DOWNLOADS[0];
 ---
 
-<MarketingLayout
-  title="Building Instructions"
-  description="Assemble DIY-Thermocam V4 with a Phillips screwdriver or follow the proven 45-step V3.0 soldering guide."
-  canonicalPath="/building-instructions/"
-  jsonLd={jsonLd}
+<StarlightPage
+  frontmatter={{
+    title: 'Build guide',
+    description: 'Build DIY-Thermocam V4 step by step: modules, board, battery and display in the printed shell or the laser-cut acrylic case, then the firmware with Studio.',
+    editUrl: 'https://github.com/maxritter/diy-thermocam/edit/master/docs/building-instructions.md',
+    head: [
+      { tag: 'script', attrs: { type: 'application/ld+json' }, content: JSON.stringify(howTo) },
+    ],
+  }}
+  headings={headings}
 >
-  <section class="page-wrap">
-    <header class="page-head">
-      <h1>Building instructions</h1>
+  <p class="dlead">{lead}</p>
+  <div class="meta not-content">
+    <span class="chip"><Icon name="screwdriver" />PH1 and 2 mm flat screwdrivers</span>
+    <span class="chip">No soldering</span>
+    <span class="chip">{steps.length} steps</span>
+  </div>
+  <V4Status />
 
-      <nav class="jump-bar" aria-label="Build tracks">
-        <a href="#option-a-diy-thermocam-v4-zero-solder-screwdriver-only-prototype-pending" class="jump-primary">
-          V4 Zero-Solder (3 steps)
-        </a>
-        <a href="#option-b-classic-diy-thermocam-v3-0-45-step-through-hole-guide-verified-baseline" class="jump-secondary">
-          Classic V3.0 (45 steps)
-        </a>
-        <a href="/docs/partlist/" class="jump-secondary">
-          Interactive BOM
-        </a>
-      </nav>
-    </header>
+  <nav class="rail not-content" aria-label="Steps" style={`--n:${steps.length}`}>
+    <div class="ironbow" aria-hidden="true"></div>
+    {steps.map((s) => (
+      <a href={`#${s.slug}`}><span class="d">{s.n}</span><span class="l">{railLabel[s.title] ?? s.title}</span></a>
+    ))}
+  </nav>
 
-    <article class="tc-prose guide-content" set:html={guideHtml} />
-  </section>
-</MarketingLayout>
+  <h2 id="parts">What you need</h2>
+  <BuildNeeds />
+
+  {steps.map((s) => (
+    <section class:list={['stepblock', s.studio && 'wide']}>
+      <div class="stepcopy">
+        <div class="stephead"><span class="d" aria-hidden="true">{s.n}</span><h2 id={s.slug}>{s.title}</h2></div>
+        <div class="steptext" set:html={s.html} />
+        {s.studio && (
+          <div class="dlrow not-content">
+            <a class="btn btn-primary btn-sm" data-os-download href={mac.href}><Icon name="apple" /><span>{mac.label}</span></a>
+            <a class="btn btn-ghost btn-sm" href="/software/#download">Other systems</a>
+            <a class="btn btn-ghost btn-sm" href={SITE.firmwareUrl}><Icon name="chip" />Firmware release</a>
+          </div>
+        )}
+      </div>
+      {s.img && <figure class="art not-content"><a href={s.img.src} title="Open full size"><img src={s.img.src} alt={s.img.alt} width={s.img.w} height={s.img.h} loading="lazy" /></a></figure>}
+      {s.studio && <div class="shot not-content"><img src="/images/examples/pcb.jpg" alt="What Studio shows once the camera is running: a circuit board under load with the hottest point marked" width="1470" height="1024" loading="lazy" /></div>}
+    </section>
+  ))}
+
+  {acrylic && (
+    <section class="acrylic">
+      <div class="acrylic-head not-content">
+        <div>
+          <h2 id="acrylic">Acrylic case</h2>
+          <div class="steptext" set:html={acrylic.html} />
+          <nav class="minirail" aria-label="Acrylic case steps">
+            {laserSteps.map((s) => <a href={`#${s.slug}`}><span class="d">{s.n}</span>{s.title}</a>)}
+          </nav>
+        </div>
+        {acrylic.img && <img src={acrylic.img.src} alt={acrylic.img.alt} width={acrylic.img.w} height={acrylic.img.h} loading="lazy" />}
+      </div>
+      {laserSteps.map((s) => (
+        <section class="stepblock">
+          <div class="stepcopy">
+            <div class="stephead"><span class="d" aria-hidden="true">{s.n}</span><h3 id={s.slug}>{s.title}</h3></div>
+            <div class="steptext" set:html={s.html} />
+          </div>
+          {s.img && <figure class="art not-content"><a href={s.img.src} title="Open full size"><img src={s.img.src} alt={s.img.alt} width={s.img.w} height={s.img.h} loading="lazy" /></a></figure>}
+        </section>
+      ))}
+      {outro && <div class="steptext outro" set:html={outro} />}
+    </section>
+  )}
+</StarlightPage>
+
+<script>
+  import '../scripts/docs.ts';
+</script>
 
 <style>
-  .page-wrap {
-    max-width: var(--tc-container);
-    margin: 0 auto;
-    padding: 56px 28px 24px;
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; color: var(--muted); background: var(--surface); }
+  .chip :global(svg) { width: 14px; height: 14px; display: block; }
+
+  .rail { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); margin: 28px 0 8px; position: relative; }
+  .rail .ironbow { position: absolute; left: 16px; right: 16px; top: 15px; height: 3px; border-radius: 99px; background: var(--ironbow); }
+  .rail a { position: relative; display: grid; gap: 8px; justify-items: start; text-decoration: none; color: var(--muted); font-size: 13px; padding-right: 6px; min-height: 44px; }
+  .rail a:hover { color: var(--text); }
+  .rail .l { max-width: 100%; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rail a:last-child .l { overflow: visible; }
+  .rail .d { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font-weight: 600; font-size: 14px; }
+
+  .parts :global(table) { width: 100%; }
+  .parts :global(td em) { display: block; color: var(--dim); font-size: 13px; font-style: normal; }
+  .parts :global(td:first-child) { font-weight: 500; }
+
+  /* Desktop first: give the step pictures room, like the parts list. */
+  :global(:root:has(.stepblock) .sl-container) { max-width: 60rem; }
+  /* One step per row: the words on the left, the step picture on the right. */
+  .stepblock { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.5fr); gap: 24px; align-items: start; margin-top: 40px; padding-top: 40px; border-top: 1px solid var(--border); }
+  .stepblock.wide { grid-template-columns: minmax(0, 1fr); }
+  .stephead { display: flex; align-items: center; gap: 12px; }
+  .stephead .d { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--border-strong); font-weight: 600; flex: none; color: var(--text); }
+  .stephead h2, .stephead h3 { margin: 0 !important; }
+  .steptext { margin-top: 10px; max-width: 64ch; }
+  .steptext :global(p) { color: var(--muted); }
+  /* Line-art renders: white ground on purpose, the orange marks the parts you add in this step. */
+  .art { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #ffffff; }
+  .art a { display: block; cursor: zoom-in; }
+  .art a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .art img { display: block; width: 100%; height: auto; border: 0; border-radius: 0; }
+  .shot { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #0b0b0c; box-shadow: var(--shadow-window); }
+  .shot img { width: 100%; border: 0; border-radius: 0; }
+  .dlrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+  .acrylic { margin-top: 72px; }
+  .acrylic-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-2); }
+  .acrylic-head h2 { margin: 0 !important; }
+  .acrylic-head img { width: 100%; height: auto; border-radius: 8px; }
+  .minirail { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .minirail a { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 10px 0 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font-size: 13px; text-decoration: none; }
+  .minirail a:hover { border-color: var(--border-strong); color: var(--accent); }
+  .minirail .d { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-2); font-weight: 600; font-size: 12px; }
+  .outro { margin-top: 32px; }
+
+  @media (max-width: 1000px) {
+    .stepblock, .acrylic-head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   }
-  .page-head {
-    max-width: 68ch;
-    margin-bottom: 40px;
-  }
-  .page-head h1 {
-    margin: 0;
-    font-size: clamp(2rem, 3.6vw, 2.75rem);
-    font-weight: 650;
-  }
-  .page-head p {
-    margin: 12px 0 0;
-    font-size: 1.05rem;
-    color: var(--tc-text-muted);
-  }
-  .jump-bar {
-    margin-top: 24px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .jump-primary,
-  .jump-secondary {
-    display: inline-flex;
-    align-items: center;
-    height: 38px;
-    padding: 0 16px;
-    border-radius: 7px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .jump-primary {
-    background: var(--tc-thermal);
-    color: var(--tc-text-on-thermal);
-  }
-  .jump-secondary {
-    border: 1px solid var(--tc-border-strong);
-    background: transparent;
-    color: var(--tc-text);
-  }
-  .jump-secondary:hover {
-    background: var(--tc-surface-2);
-  }
-  .guide-content :global(table) {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.25rem 0 2rem;
-    font-size: 14px;
-    border: 1px solid var(--tc-border);
-  }
-  .guide-content :global(th) {
-    text-align: left;
-    padding: 10px 12px;
-    background: var(--tc-bg-sunken);
-    color: var(--tc-text);
-    border-bottom: 1px solid var(--tc-border);
-  }
-  .guide-content :global(td) {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--tc-border);
-    vertical-align: top;
-  }
-  .guide-content :global(hr) {
-    display: none;
+  @media (max-width: 860px) {
+    .rail .l { display: none; }
+    .minirail a { min-height: 44px; }
   }
 </style>

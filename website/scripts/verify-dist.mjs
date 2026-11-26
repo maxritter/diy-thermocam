@@ -68,11 +68,11 @@ if (legacyImgCount < 93) {
   errors.push(`Expected at least 93 gallery/device images, found ${legacyImgCount}`);
 }
 
-// Verify V4.0 BOM rows rendered in /docs/partlist/index.html
+// Verify the parts list ships its parts in the HTML, before any script runs
 const partlistHtml = readFileSync(join(DIST, 'docs/partlist/index.html'), 'utf8');
-for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', 'BQ24074', 'TPS61022', '505060']) {
+for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', '505060', 'PPPC102LJBN-RC']) {
   if (!partlistHtml.includes(needle)) {
-    errors.push(`Missing BOM needle in /docs/partlist/: ${needle}`);
+    errors.push(`Missing part in /docs/partlist/: ${needle}`);
   }
 }
 
@@ -105,5 +105,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `VERIFICATION PASSED: ${REQUIRED_ROUTES.length} routes, ${legacyImgCount} gallery/device images, ${REQUIRED_ASSETS.length} brand/build/meta assets, V4.0 BOM rows, Umami, OG, JSON-LD, and Pagefind all verified.`
+  `VERIFICATION PASSED: ${REQUIRED_ROUTES.length} routes, ${legacyImgCount} gallery/device images, ${REQUIRED_ASSETS.length} brand/build/meta assets, parts list, Umami, OG, JSON-LD, and Pagefind all verified.`
 );

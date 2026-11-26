@@ -1,19 +1,18 @@
 ---
+import DownloadList from '../components/DownloadList.astro';
+import Icon from '../components/Icon.astro';
+import StudioTabs from '../components/StudioTabs.astro';
+import V4Status from '../components/V4Status.astro';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
-import { computeBomTotals, loadBomItems } from '../lib/bom';
-import { SITE } from '../lib/site';
+import { EXAMPLE_H, EXAMPLE_W, EXAMPLES } from '../data/examples';
+import { DOWNLOADS, SITE } from '../lib/site';
 
-const bomItems = loadBomItems();
-const v30 = computeBomTotals(bomItems, 'v3.0');
-const v40 = computeBomTotals(bomItems, 'v4.0');
-
-const featuredThermal = [
-  { title: 'Microcontroller PCB', src: '/images/thermal/processor.jpg' },
-  { title: 'German Ravioli', src: '/images/thermal/pasta_squares.png' },
-  { title: 'Car Engine', src: '/images/thermal/car_engine.jpg' },
-  { title: 'House Insulation', src: '/images/thermal/houses_2.jpg' },
-  { title: 'Heater after Venting', src: '/images/thermal/heater_after.jpg' },
-  { title: 'Soldering Iron', src: '/images/thermal/soldering_iron.jpg' },
+const views = [
+  { id: 'front', label: 'Front', src: '/images/v4/view-front.jpg', h: 1066, alt: 'DIY-Thermocam V4 in its printed shell, the 3.2-inch display showing a live thermal image with spot temperatures' },
+  { id: 'back', label: 'Back', src: '/images/v4/view-back.jpg', h: 1066, alt: 'The back of the camera with the lens cap open over the FLIR Lepton' },
+  { id: 'inside', label: 'Inside', src: '/images/v4/view-inside.jpg', h: 1066, alt: 'A cut through the camera: display, board, Teensy and battery stacked on standoffs' },
+  { id: 'kit', label: 'Kit', src: '/images/v4/view-kit.jpg', h: 1066, alt: 'Every part of the kit laid out: shell, display, board, modules, battery and screws' },
+  { id: 'acrylic', label: 'Acrylic', src: '/images/v4/view-acrylic.jpg', h: 1066, alt: 'The laser-cut acrylic case' },
 ];
 
 const jsonLd = [
@@ -24,530 +23,274 @@ const jsonLd = [
     url: `${SITE.url}/`,
     description: SITE.tagline,
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: 'DIY-Thermocam Open-Source Thermal Camera',
-    description:
-      'Open-source radiometric FLIR Lepton thermal camera on Teensy 4.1 with KiCad hardware, parametric enclosures, and a cross-platform desktop app.',
-    image: `${SITE.url}/images/brand/hero-thermal-banner.png`,
-    brand: { '@type': 'Brand', name: 'DIY-Thermocam' },
-    url: `${SITE.url}/`,
-    offers: {
-      '@type': 'Offer',
-      price: String(v30.requiredUsd),
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-      url: `${SITE.url}/docs/partlist/`,
-    },
-  },
 ];
+
 ---
 
 <MarketingLayout
   title={SITE.name}
-  description="Build an open-source radiometric FLIR Lepton thermal camera on Teensy 4.1. Open KiCad hardware, Firmware 4.0, and a cross-platform desktop app under GPL-3.0."
+  description="Build a handheld radiometric thermal camera with a FLIR Lepton 3.5 and a Teensy 4.1. Assembled board, printed shell, and Studio for macOS, Windows and Linux."
   canonicalPath="/"
   jsonLd={jsonLd}
 >
-  <section class="hero">
-    <div class="container hero-grid">
-      <div class="hero-copy">
-        <h1>Open-source radiometric thermal camera</h1>
-        <p class="lead">
-          Build a handheld 160×120 infrared imager with FLIR Lepton 3.5, Teensy 4.1, open KiCad
-          hardware, and a cross-platform desktop app under GPL-3.0.
-        </p>
-        <div class="cta-row">
-          <a href="/building-instructions/" class="btn-primary">Build yours</a>
-          <a href="/docs/partlist/" class="btn-secondary">Bill of Materials (~${Math.round(v40.requiredUsd)})</a>
-          <a href="/docs/" class="inline-link">Read docs</a>
-        </div>
-        <dl class="spec-strip tabular">
-          <div>
-            <dt>Resolution</dt>
-            <dd>160×120 LWIR</dd>
-          </div>
-          <div>
-            <dt>Sensitivity</dt>
-            <dd>&lt; 50 mK NETD</dd>
-          </div>
-          <div>
-            <dt>Range</dt>
-            <dd>-10 to +450 °C</dd>
-          </div>
-          <div>
-            <dt>License</dt>
-            <dd>GPL-3.0</dd>
-          </div>
-        </dl>
-      </div>
-
-      <figure class="hero-media">
-        <img
-          src="/images/brand/hero-thermal-banner.png"
-          alt="DIY-Thermocam V4 dual-angle studio view showing the front FLIR Lepton 3.5 lens and the rear 3.2-inch Ironbow thermal display"
-          width="1600"
-          height="900"
-          fetchpriority="high"
-        />
-      </figure>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <h2>Two ways to build</h2>
-        <p>
-          Order a factory-assembled V4.0 board for screwdriver-only assembly, or hand-solder the
-          proven V3.0 through-hole design.
-        </p>
-      </div>
-
-      <div class="paths-grid">
-        <article class="path-col">
-          <div class="path-meta">
-            <h3>V4.0 Zero-Solder</h3>
-            <span class="status status-pending">Prototype-pending</span>
-          </div>
-          <p>
-            Order a factory-populated PCBA and 3D-printed shell from JLCPCB, Seeed Studio Fusion,
-            or PCBWay. Plug in Teensy 4.1, FLIR Lepton 3.5 or 3.1R, display, and a slim 505060 LiPo.
-          </p>
-          <ul class="detail-list">
-            <li>USB-C with TI BQ24074 power-path charger and TPS61022 5 V boost</li>
-            <li>Onboard slide switch, capture button, polarity protection, and 3.3 V RTC LDO</li>
-            <li>~${v40.requiredUsd.toFixed(0)} full BOM incl. Lepton 3.5 (~${v40.withoutSensorUsd.toFixed(0)} excl. sensor)</li>
-          </ul>
-          <a href="/building-instructions/#option-a-diy-thermocam-v4-zero-solder-screwdriver-only-prototype-pending" class="text-link">
-            V4 assembly guide &rarr;
-          </a>
-        </article>
-
-        <article class="path-col">
-          <div class="path-meta">
-            <h3>V3.0 Classic</h3>
-            <span class="status status-proven">Proven default</span>
-          </div>
-          <p>
-            The verified hand-soldered baseline built by makers, schools, and labs. Uses a 2-layer
-            through-hole PCB, Pololu U3V16F5 boost regulator, and 3 mm laser-cut acrylic shell.
-          </p>
-          <ul class="detail-list">
-            <li>Proven Eagle files preserved at git tag <code>3.0.4</code></li>
-            <li>45-step illustrated assembly manual with real bench photos</li>
-            <li>~${v30.requiredUsd.toFixed(0)} full BOM incl. Lepton 3.5 (~${v30.withoutSensorUsd.toFixed(0)} excl. sensor)</li>
-          </ul>
-          <a href="/docs/partlist/" class="text-link">
-            Compare V4.0 and V3.0 in the BOM &rarr;
-          </a>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="split-row">
-        <div class="split-copy">
-          <h2>Standalone touchscreen camera</h2>
-          <p>
-            Capture 14-bit radiometric <code>.DAT</code> images and time-lapse sequences with 4–6
-            hours of battery life. Pick from 19 color palettes, hold manual temperature limits,
-            and place up to 96 measurement spots on the 3.2-inch display.
-          </p>
-          <p>
-            Open-source C++17 firmware compiles with <code>arduino-cli</code> and Teensy core 1.62.0.
-            Verified on real hardware at 8.77 fps USB streaming and 0.26 ms command latency.
-          </p>
-          <div class="link-row">
-            <a href="/device-features/" class="text-link">Specifications &rarr;</a>
-            <a href="/docs/firmware/" class="text-link">Firmware guide &rarr;</a>
-          </div>
-        </div>
-        <div class="split-media">
-          <img
-            src="/images/device/gui.png"
-            alt="DIY-Thermocam 3.2-inch touchscreen showing live thermal view and on-device menus"
-            loading="lazy"
-          />
-        </div>
-      </div>
-
-      <div class="split-row split-reverse">
-        <div class="split-copy">
-          <h2>Cross-platform Desktop Studio</h2>
-          <p>
-            Connect to macOS, Windows, or Linux over USB for live WebGL2 viewing, draggable range
-            bars, and per-ROI emissivity correction. Export H.264 MP4, 16-bit Kelvin TIFF, CSV,
-            and inspection reports with no FFmpeg install.
-          </p>
-          <p>
-            Binary USB Protocol v2 adds direct microSD browsing at 9.20 MB/s without MTP drivers
-            and built-in HalfKay firmware updates.
-          </p>
-          <div class="link-row">
-            <a href="/software/" class="text-link">Desktop Studio &rarr;</a>
-            <a href="/docs/protocol-v2/" class="text-link">USB Protocol v2 &rarr;</a>
-          </div>
-        </div>
-        <div class="split-media">
-          <img
-            src="/images/software/thermal_analysis_sw_2.png"
-            alt="Thermal analysis workspace displaying a radiometric frame with temperature scale"
-            loading="lazy"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="section-head section-head-row">
+  <section id="camera" class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
         <div>
-          <h2>Captured with DIY-Thermocam</h2>
-          <p>Radiometric frames from building inspections, PCB debugging, HVAC, and fieldwork.</p>
+          <V4Status compact />
+          <h1>Build your own <span class="hot">thermal camera</span></h1>
+          <p class="lead">
+            A handheld radiometric camera with a FLIR Lepton 3.5 and a Teensy 4.1. The board arrives fully
+            assembled: plug in four modules and close the case with eight screws. No soldering.
+          </p>
+          <div class="cta">
+            <a class="btn btn-primary" data-os-download href="/software/#download"><Icon name="download" /><span>Download Studio</span></a>
+            <a class="btn btn-ghost" href="/docs/partlist/"><Icon name="list" /><span>See the parts list</span></a>
+          </div>
+          <div class="hero-dl" role="group" aria-label="Studio and firmware downloads">
+            <span class="dl-label">Studio</span>
+            <div class="dl-chips">
+              {DOWNLOADS.map((d) => (
+                <a class="dl-chip" href={d.href} title={d.detail} aria-label={d.label}><Icon name={d.icon} class="chip-ic" /><span>{d.name}</span></a>
+              ))}
+            </div>
+            <span class="dl-label">Firmware</span>
+            <div class="dl-chips">
+              <a class="dl-chip" href={SITE.firmwareUrl}><Icon name="chip" class="chip-ic" /><span>V3 &amp; V4 · latest release</span><Icon name="arrowUpRight" class="chip-ext" /></a>
+            </div>
+          </div>
         </div>
-        <a href="/thermal-images/" class="text-link">All 25 captures &rarr;</a>
+        <div class="hero-views">
+          <figure class="hero-shot">
+            {views.map((v, i) => (
+              <img id={`v-${v.id}`} role="tabpanel" aria-labelledby={`vt-${v.id}`} src={v.src} alt={v.alt} width="1600" height={v.h} hidden={i !== 0} fetchpriority={i === 0 ? 'high' : undefined} loading={i === 0 ? 'eager' : 'lazy'} />
+            ))}
+          </figure>
+          <div class="thumbs" role="tablist" aria-label="Camera views">
+            {views.map((v, i) => (
+              <button type="button" role="tab" class="thumb" id={`vt-${v.id}`} aria-controls={`v-${v.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+                <span class="thumb-img"><img src={v.src.replace('.jpg', '-thumb.jpg')} alt="" width="360" height="240" decoding="async" /></span>
+                <span class="thumb-label">{v.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+      <dl class="specs">
+        <div class="spec"><dt><Icon name="sensor" class="spec-ic" />Sensor</dt><dd>FLIR Lepton 3.5</dd></div>
+        <div class="spec"><dt><Icon name="grid" class="spec-ic" />Resolution</dt><dd class="num">160 × 120 px</dd></div>
+        <div class="spec"><dt><Icon name="thermometer" class="spec-ic" />Range</dt><dd class="num">−10 to 450 °C</dd></div>
+        <div class="spec"><dt><Icon name="battery" class="spec-ic" />Battery</dt><dd class="num">2000 mAh, USB-C</dd></div>
+        <div class="spec"><dt><Icon name="award" class="spec-ic" />Licence</dt><dd>GPL-3.0</dd></div>
+      </dl>
+    </div>
+  </section>
 
-      <div class="thermal-grid">
-        {featuredThermal.map((item) => (
-          <a href="/thermal-images/" class="thermal-item">
-            <img src={item.src} alt={item.title} loading="lazy" />
-            <span>{item.title}</span>
-          </a>
+  <section id="build" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="big">Four steps from parts to pictures</h2>
+        <p>
+          You need a PH1 and a 2 mm flat screwdriver, tweezers and a USB-C cable. The
+          parts list sorts everything else into one order per shop, and says who can print or cut the shell.
+        </p>
+      </div>
+      <div class="track-wrap">
+        <div class="track-rail ironbow" aria-hidden="true"></div>
+        <ol class="track">
+          <li class="step">
+            <div class="disc">1</div>
+            <h3>Order the parts</h3>
+            <p>The assembled board from a fab, the electronics from DigiKey or Mouser.</p>
+            <figure class="photo"><img src="/images/v4/exploded.jpg" alt="Exploded render of every part: front shell, display, board with modules, battery, back shell" width="1333" height="1600" loading="lazy" /></figure>
+          </li>
+          <li class="step">
+            <div class="disc">2</div>
+            <h3>Plug in the modules</h3>
+            <p>Push the Teensy and the Lepton into their sockets.</p>
+            <figure class="line"><img src="/images/v4/steps/shell-03.jpg" alt="Line drawing: the Lepton on its breakout in orange, lowered onto its screws on the board" width="1118" height="1000" loading="lazy" /></figure>
+          </li>
+          <li class="step">
+            <div class="disc">3</div>
+            <h3>Close the shell</h3>
+            <p>Stack board, battery and display on standoffs, then close the shell.</p>
+            <figure class="line"><img src="/images/v4/steps/shell-11.jpg" alt="Line drawing: the front shell and its four screws in orange" width="1118" height="1000" loading="lazy" /></figure>
+          </li>
+          <li class="step">
+            <div class="disc">4</div>
+            <h3>Connect Studio</h3>
+            <p>Studio installs the firmware over USB-C and shows the live image.</p>
+            <figure class="dark"><img src="/images/examples/pcb.jpg" alt="A Studio export of a circuit board under load, with the hottest point marked" width="1470" height="1024" loading="lazy" /></figure>
+          </li>
+        </ol>
+      </div>
+      <div class="after-track">
+        <a class="btn btn-ghost" href="/building-instructions/">Open the build guide</a>
+        <a href="/docs/partlist/">See the parts list</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="studio" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="big">Studio, the desktop app</h2>
+        <p>Connect the camera over USB to see the live image, measure any point and save radiometric captures.</p>
+      </div>
+      <StudioTabs />
+
+      <div id="download" class="dl">
+        <div>
+          <h3>Download Studio and firmware</h3>
+          <p>Free and open source. Studio installs the firmware over USB-C, so you don't need Teensy Loader. V3 cameras run the same firmware and Studio today.</p>
+        </div>
+        <DownloadList />
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="big">What it sees</h2>
+        <p>Every capture keeps the temperature of each pixel, so you can measure again later. These are example scenes, rendered the way Studio exports them.</p>
+      </div>
+      <div class="gallery">
+        {EXAMPLES.slice(0, 5).map((e, i) => (
+          <figure class={i < 2 ? 'g-wide' : 'g-third'}>
+            <img src={`/images/examples/${e.id}.jpg`} alt={`Example thermal image: ${e.title.toLowerCase()}, ${e.range}`} width={EXAMPLE_W} height={EXAMPLE_H} loading="lazy" />
+            <figcaption><b>{e.title}</b><span>{e.note}</span></figcaption>
+          </figure>
         ))}
       </div>
+      <div class="after-track"><a class="btn btn-ghost" href="/thermal-images/">See all examples</a><span>Open them in Studio: each one has a .DAT file.</span></div>
     </div>
   </section>
 
-  <section class="section closing">
-    <div class="container closing-inner">
-      <div>
-        <h2>Everything in one open-source repository</h2>
-        <p>
-          Schematics, KiCad files, parametric CAD, firmware, desktop app, and manuals live together
-          on GitHub under GPL-3.0.
-        </p>
+  <section id="files" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="big">Every file is in the repository</h2>
+        <p>Change the board, print a different shell or fork the firmware. GPL-3.0.</p>
       </div>
-      <div class="cta-row closing-actions">
-        <a href="/docs/" class="btn-primary">Open documentation</a>
-        <a href={SITE.repoUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary">
-          View on GitHub
-        </a>
+      <div class="files">
+        <div class="file"><Icon name="chip" class="fic" /><h3>Board</h3><p>KiCad project, Gerbers, and BOM and placement files for JLCPCB, Seeed and PCBWay.</p><a href={`${SITE.repoUrl}/tree/master/hardware/pcb`}>hardware/pcb</a></div>
+        <div class="file"><Icon name="box" class="fic" /><h3>Shell</h3><p>build123d source with STEP, STL and 3MF exports. Prints without supports.</p><a href={`${SITE.repoUrl}/tree/master/hardware/enclosure`}>hardware/enclosure</a></div>
+        <div class="file"><Icon name="camera" class="fic" /><h3>Firmware</h3><p>C++17 for Teensy 4.1. Builds with arduino-cli.</p><a href={`${SITE.repoUrl}/tree/master/firmware`}>firmware</a></div>
+        <div class="file"><Icon name="file" class="fic" /><h3>Studio</h3><p>Tauri and Rust with a React interface. Reads every .DAT capture.</p><a href={`${SITE.repoUrl}/tree/master/app`}>app</a></div>
       </div>
     </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .container {
-    max-width: var(--tc-container);
-    margin: 0 auto;
-    padding: 0 28px;
-  }
-  .hero {
-    padding: 72px 0 80px;
-  }
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-    gap: 56px;
-    align-items: center;
-  }
-  .hero-copy h1 {
-    margin: 0;
-    font-size: clamp(2.4rem, 4.2vw, 3.4rem);
-    line-height: 1.06;
-    font-weight: 650;
-    letter-spacing: -0.036em;
-  }
-  .lead {
-    margin: 20px 0 0;
-    font-size: 1.08rem;
-    line-height: 1.62;
-    color: var(--tc-text-muted);
-    max-width: 50ch;
-  }
-  .cta-row {
-    margin-top: 28px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-  }
-  .btn-primary,
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 42px;
-    padding: 0 18px;
-    border-radius: 7px;
-    font-size: 14.5px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 140ms var(--tc-ease), border-color 140ms var(--tc-ease);
-  }
-  .btn-primary {
-    background: var(--tc-thermal);
-    color: var(--tc-text-on-thermal);
-    border: 1px solid var(--tc-thermal);
-  }
-  .btn-primary:hover {
-    background: var(--tc-thermal-hover);
-    border-color: var(--tc-thermal-hover);
-  }
-  .btn-secondary {
-    background: transparent;
-    color: var(--tc-text);
-    border: 1px solid var(--tc-border-strong);
-  }
-  .btn-secondary:hover {
-    background: var(--tc-surface-2);
-  }
-  .inline-link {
-    padding: 0 6px;
-    font-size: 14.5px;
-    font-weight: 550;
-    color: var(--tc-text-muted);
-    text-decoration: none;
-  }
-  .inline-link:hover {
-    color: var(--tc-text);
-    text-decoration: underline;
-  }
-  .spec-strip {
-    margin: 40px 0 0;
-    padding-top: 22px;
-    border-top: 1px solid var(--tc-border);
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-  }
-  .spec-strip dt {
-    font-size: 12px;
-    color: var(--tc-text-dim);
-  }
-  .spec-strip dd {
-    margin: 3px 0 0;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--tc-text);
-    font-family: var(--tc-font-mono);
-  }
-  .hero-media {
-    margin: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--tc-border);
-    background: var(--tc-bg-sunken);
-  }
-  .hero-media img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .section {
-    padding: 80px 0;
-    border-top: 1px solid var(--tc-border);
-  }
-  .section-head {
-    max-width: 60ch;
-    margin-bottom: 40px;
-  }
-  .section-head-row {
-    max-width: none;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-  }
-  .section-head h2 {
-    margin: 0;
-    font-size: clamp(1.6rem, 2.6vw, 2.1rem);
-    font-weight: 650;
-  }
-  .section-head p {
-    margin: 10px 0 0;
-    color: var(--tc-text-muted);
-    font-size: 1rem;
-  }
-  .paths-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 48px;
-  }
-  .path-col {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding-top: 20px;
-    border-top: 1px solid var(--tc-border);
-  }
-  .path-meta {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .path-col h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 650;
-  }
-  .status {
-    font-family: var(--tc-font-mono);
-    font-size: 12px;
-    font-weight: 500;
-  }
-  .status-pending {
-    color: var(--tc-amber);
-  }
-  .status-proven {
-    color: var(--tc-pass);
-  }
-  .path-col p {
-    margin: 0;
-    font-size: 15px;
-    color: var(--tc-text-muted);
-    max-width: 54ch;
-  }
-  .detail-list {
-    margin: 2px 0 4px;
-    padding-left: 18px;
-    font-size: 14.5px;
-    color: var(--tc-text-muted);
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-  }
-  .detail-list code,
-  .split-copy code {
-    font-family: var(--tc-font-mono);
-    font-size: 0.88em;
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: var(--tc-surface-2);
-    color: var(--tc-text);
-  }
-  .text-link {
-    margin-top: auto;
-    font-size: 14.5px;
-    font-weight: 600;
-    color: var(--tc-thermal);
-    text-decoration: none;
-  }
-  .text-link:hover {
-    text-decoration: underline;
-  }
-  .split-row {
-    display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    gap: 56px;
-    align-items: center;
-  }
-  .split-row + .split-row {
-    margin-top: 84px;
-    padding-top: 84px;
-    border-top: 1px solid var(--tc-border);
-  }
-  .split-reverse .split-media {
-    order: -1;
-  }
-  .split-copy h2 {
-    margin: 0 0 14px;
-    font-size: clamp(1.5rem, 2.4vw, 1.95rem);
-    font-weight: 650;
-  }
-  .split-copy p {
-    margin: 0 0 14px;
-    color: var(--tc-text-muted);
-    max-width: 54ch;
-  }
-  .link-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-top: 20px;
-  }
-  .split-media img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 8px;
-    border: 1px solid var(--tc-border);
-  }
-  .thermal-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-  }
-  .thermal-item {
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-  }
-  .thermal-item img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    display: block;
-    border-radius: 8px;
-    border: 1px solid var(--tc-border);
-  }
-  .thermal-item span {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--tc-text-muted);
-  }
-  .thermal-item:hover span {
-    color: var(--tc-text);
-  }
-  .closing-inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 28px;
-  }
-  .closing h2 {
-    margin: 0;
-    font-size: clamp(1.45rem, 2.4vw, 1.9rem);
-    font-weight: 650;
-  }
-  .closing p {
-    margin: 10px 0 0;
-    color: var(--tc-text-muted);
-    max-width: 56ch;
-  }
-  .closing-actions {
-    margin-top: 0;
+  .hero { padding-block: 56px 64px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 56px; align-items: center; }
+  .hero h1 { font-size: clamp(40px, 5vw, 60px); line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
+  .hero h1 .hot { color: var(--hot); }
+  .lead { margin: 20px 0 0; font-size: 18px; line-height: 1.55; color: var(--muted); max-width: 46ch; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .cta .btn :global(.ic) { display: inline-flex; }
+
+  .hero-dl { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 14px; align-items: center; }
+  .dl-label { font-size: 13px; color: var(--dim); font-weight: 500; }
+  .dl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .dl-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-2); color: var(--muted); font: 500 13px/1 var(--font-sans); text-decoration: none; transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease; }
+  .dl-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text); }
+  .dl-chip :global(.chip-ic), .dl-chip :global(.chip-ext) { display: inline-flex; flex: none; }
+  .dl-chip :global(.chip-ic svg) { width: 14px; height: 14px; display: block; color: var(--dim); }
+  .dl-chip :global(.chip-ext svg) { width: 13px; height: 13px; display: block; color: var(--dim); }
+  .dl-chip:hover :global(.chip-ic svg), .dl-chip:hover :global(.chip-ext svg) { color: var(--text); }
+
+  .hero-shot { margin: 0; position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--cad); box-shadow: var(--shadow-window); border: 1px solid var(--border); }
+  .hero-shot img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+
+  .thumbs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+  .thumb { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 0; border: 0; background: none; color: var(--dim); font: 500 12.5px/1.2 var(--font-sans); text-align: center; cursor: pointer; }
+  .thumb:focus-visible { border-radius: var(--radius); }
+  .thumb-img { display: block; width: 100%; aspect-ratio: 3 / 2; border-radius: var(--radius); overflow: hidden; background: var(--cad); border: 1.5px solid var(--border); opacity: 0.72; transition: opacity 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+  .thumb-img img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb:hover { color: var(--text); }
+  .thumb:hover .thumb-img { opacity: 1; border-color: var(--border-strong); }
+  .thumb[aria-selected='true'] { color: var(--text); }
+  .thumb[aria-selected='true'] .thumb-img { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .thumb-label { display: block; }
+
+  .specs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--border); margin: 56px 0 0; }
+  .spec { padding: 18px 20px 0 0; }
+  .spec + .spec { padding-left: 20px; border-left: 1px solid var(--border); }
+  .spec dt { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--dim); }
+  .spec :global(.spec-ic) { display: inline-flex; flex: none; color: var(--muted); }
+  .spec :global(.spec-ic svg) { width: 16px; height: 16px; display: block; }
+  .spec dd { margin: 6px 0 0; font-size: 15px; font-weight: 500; color: var(--text); }
+
+  .track-wrap { position: relative; }
+  .track { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; list-style: none; margin: 0; padding: 0; }
+  .track-rail { position: absolute; left: 22px; right: 22px; top: 21px; }
+  .step { position: relative; display: flex; flex-direction: column; }
+  .disc { position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text); font-weight: 600; font-size: 15px; }
+  .step h3 { margin-top: 18px; font-size: 18px; letter-spacing: -0.01em; }
+  .step p { margin: 6px 0 16px; color: var(--muted); font-size: 15px; }
+  .step figure { margin: auto 0 0; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--cad); aspect-ratio: 4 / 3; display: grid; place-items: center; }
+  .step figure img { width: 100%; height: 100%; object-fit: contain; }
+  .step figure.dark { background: #0b0b0c; }
+  .step figure.line { background: #ffffff; }
+  .step figure.photo img { object-fit: cover; }
+  .step figure.dark img { object-fit: cover; object-position: 40% center; }
+  .after-track { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; color: var(--muted); font-size: 15px; }
+
+  .dl { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 40px; align-items: start; scroll-margin-top: 80px; }
+  .dl h3 { font-size: 22px; letter-spacing: -0.02em; }
+  .dl p { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
+
+  .gallery { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 20px; }
+  .gallery figure { margin: 0; }
+  .gallery img { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #0b0b0c; }
+  .gallery figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .gallery figcaption b { display: block; color: var(--text); font-weight: 600; font-size: 15px; }
+  .g-wide { grid-column: span 6; }
+  .g-third { grid-column: span 4; }
+
+  .files { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border); }
+  .file { padding: 22px 22px 4px 0; }
+  .file + .file { padding-left: 22px; border-left: 1px solid var(--border); }
+  .file :global(.fic) { color: var(--dim); display: block; }
+  .file :global(.fic svg) { width: 22px; height: 22px; display: block; }
+  .file h3 { margin-top: 14px; font-size: 16px; }
+  .file p { margin: 6px 0 12px; color: var(--muted); font-size: 14px; }
+  .file a { font-size: 14px; font-weight: 500; text-decoration: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dl-chip, .thumb-img { transition: none; }
   }
   @media (max-width: 900px) {
-    .hero {
-      padding: 48px 0 56px;
-    }
-    .hero-grid,
-    .paths-grid,
-    .split-row,
-    .thermal-grid {
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-    .split-reverse .split-media {
-      order: 0;
-    }
-    .spec-strip {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .section {
-      padding: 56px 0;
-    }
+    .dl-chip { min-height: 44px; padding: 0 14px; font-size: 14px; }
+    .thumb { min-height: 44px; }
   }
+  @media (max-width: 480px) {
+    .hero-dl { grid-template-columns: 1fr; gap: 6px; }
+  }
+  @media (max-width: 1000px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .specs { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 18px; }
+    .spec:nth-child(4) { padding-left: 0; border-left: 0; }
+    .track { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 40px; }
+    .track-rail { display: none; }
+    .dl { grid-template-columns: 1fr; gap: 20px; }
+    .files { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .file:nth-child(3) { padding-left: 0; border-left: 0; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding-block: 36px 48px; }
+    .specs { margin-top: 40px; }
+    .thumbs { gap: 6px; }
+    .thumb-label { font-size: 11.5px; }
+    .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .spec, .spec + .spec { padding-left: 0; border-left: 0; padding-right: 12px; }
+    .track { grid-template-columns: 1fr; }
+    .g-wide, .g-third { grid-column: span 12; }
+    .files { grid-template-columns: 1fr; }
+    .file + .file { padding-left: 0; border-left: 0; border-top: 1px solid var(--border); }
+    .cta .btn { width: 100%; }
+          }
 </style>

@@ -32,7 +32,7 @@ Radiometric `.DAT` files stay byte-compatible with files from earlier DIY-Thermo
 
 | Assembly | Power &amp; USB | Est. BOM (incl. Lepton 3.5) |
 | --- | --- | --- |
-| Factory-assembled PCBA + Phillips screwdriver | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$333 (~$161 excl. sensor) |
+| Factory-assembled PCBA, two small screwdrivers, no soldering | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$318 (~$146 excl. sensor) |
 
 ## On the camera and on your computer
 

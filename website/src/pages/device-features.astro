@@ -1,256 +1,137 @@
 ---
+import Icon from '../components/Icon.astro';
+import V4Status from '../components/V4Status.astro';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import { buildBreadcrumbs } from '../lib/site';
 
-const capabilities = [
-  'Teensy 4.1 ARM Cortex-M7 running at 450 MHz default (600 MHz capable)',
-  'Native 8.77 fps FLIR Lepton push streaming (export-compliant < 9 Hz)',
-  '19 on-device color palettes plus hot and cold threshold highlights',
-  '3.2-inch 320×240 TFT LCD with resistive touchscreen',
-  '14-bit radiometric .DAT images, continuous video, and interval time-lapse',
-  'Removable microSDHC / microSDXC storage (FAT32 and exFAT)',
-  'Protected 2000 mAh 3.7 V LiPo battery for 4–6 hours of field use',
-  'Open-source C++17 firmware compiled with arduino-cli and Teensy core 1.62.0',
-  'Cross-platform Tauri v2 Desktop Studio for macOS, Windows, and Linux',
-  'Byte-exact .DAT compatibility with captures from earlier DIY-Thermocam cameras',
-  'Binary USB Protocol v2 with 0.26 ms command latency and 9.20 MB/s SD reads',
+const specs = [
+  ['lens', 'Sensor', 'FLIR Lepton 3.5, or 3.1R for a wide view'],
+  ['grid', 'Resolution', '160 × 120 px, radiometric'],
+  ['camera', 'Field of view', '57° (Lepton 3.5) or 95° (Lepton 3.1R)'],
+  ['thermometer', 'Range', '−10 to 140 °C (high gain), up to 450 °C (low gain)'],
+  ['ruler', 'Sensitivity', 'Below 50 mK'],
+  ['layers', 'Frame rate', '8.7 fps'],
+  ['display', 'Display', '3.2", 320 × 240, resistive touch'],
+  ['sd', 'Storage', 'microSD, FAT32 or exFAT'],
+  ['battery', 'Battery', '2000 mAh LiPo, charges over USB-C'],
+  ['chip', 'Processor', 'Teensy 4.1, ARM Cortex-M7 at 450 MHz'],
+  ['file', 'Files', '14-bit radiometric .DAT, plus BMP from the camera'],
+  ['open', 'Licence', 'GPL-3.0: board, shell, firmware and Studio'],
+] as const;
+
+const screens = [
+  { src: '/images/firmware/main-menu-dark.png', cap: 'Main menu' },
+  { src: '/images/firmware/palette-picker.png', cap: 'Palette picker, 19 palettes' },
+  { src: '/images/firmware/overlays-grid-dark.png', cap: 'Overlays: spots, scale, isotherm' },
+  { src: '/images/firmware/gallery-viewer.png', cap: 'Gallery of saved captures' },
+  { src: '/images/firmware/status-screen.png', cap: 'Status: frame rate, battery, SD card' },
+  { src: '/images/firmware/main-menu-page2-dark.png', cap: 'Second menu page' },
 ];
 
 const comparison = [
-  { feature: 'Thermal resolution', tc: '80×60 (Lepton 2.5) or 160×120 (Lepton 3.1R / 3.5)', flir: '160×120' },
-  { feature: 'Thermal sensitivity (NETD)', tc: '< 0.05 °C (50 mK)', flir: '< 0.06 °C (60 mK)' },
-  { feature: 'Temperature range', tc: '-10 °C to +140 °C (High Gain) or +450 °C (Low Gain)', flir: '-20 °C to +250 °C' },
-  { feature: 'Field of view (FOV)', tc: '57° HFOV / 71° DFOV (3.5) or 95° HFOV / 119° DFOV (3.1R)', flir: '45° × 34°' },
-  { feature: 'Display', tc: '3.2" 320×240 TFT, touchscreen', flir: '3.0" 320×240, non-touch' },
-  { feature: 'Temperature spots', tc: 'Up to 96 spots on-device; unlimited ROIs in Desktop Studio', flir: 'Center spot only' },
-  { feature: 'Color schemes', tc: '19 on-device + scientific LUTs in Desktop Studio', flir: 'Rainbow, Iron, Grayscale' },
-  { feature: 'Recording modes', tc: 'Still images, continuous video, and time-lapse', flir: 'Still images only' },
-  { feature: 'Storage', tc: 'Removable microSD card (FAT32 / exFAT)', flir: 'Internal (~500 image sets)' },
-  { feature: 'File formats', tc: 'Open 14-bit .DAT, BMP, PNG, 16-bit TIFF, CSV, H.264 MP4', flir: 'Proprietary radiometric JPEG' },
-  { feature: 'Weight', tc: '~255 g', flir: '575 g' },
-  { feature: 'Hardware & source code', tc: 'Open-source (GPL-3.0)', flir: 'Closed proprietary' },
-];
-
-const uiPreviews = [
-  { src: '/images/firmware/live-hud.png', caption: 'Live View HUD — Electronics PCB inspection (Glowbow, simulated)' },
-  { src: '/images/firmware/live-building.png', caption: 'Live View HUD — Window draft & radiator plume (Rainbow, simulated)' },
-  { src: '/images/firmware/live-breaker.png', caption: 'Live View HUD — Overloaded breaker hotspot (Ironblack, simulated)' },
-  { src: '/images/firmware/live-floor.png', caption: 'Live View HUD — Underfloor heating loops (Lava, simulated)' },
-  { src: '/images/firmware/main-menu-dark.png', caption: 'Main Menu Page 1 — Dark theme' },
-  { src: '/images/firmware/main-menu-page2-dark.png', caption: 'Main Menu Page 2 — Overlays, Isotherm, Status, Video, Theme' },
-  { src: '/images/firmware/palette-picker.png', caption: 'Visual Palette Picker — 19 live firmware LUTs' },
-  { src: '/images/firmware/overlays-grid-dark.png', caption: 'Overlays Grid — 1-tap HUD and filter toggles' },
-  { src: '/images/firmware/gallery-viewer.png', caption: 'Gallery Viewer — On-device .DAT inspection and BMP conversion' },
-  { src: '/images/firmware/status-screen.png', caption: 'System Status — Live FPS, VoSPI link, power, SD, and MCU temp' },
+  ['Thermal resolution', '160 × 120', '160 × 120'],
+  ['Sensitivity', 'Below 50 mK', 'Below 60 mK'],
+  ['Range', '−10 to 450 °C', '−20 to 250 °C'],
+  ['Display', '3.2" touch', '3.0", no touch'],
+  ['Temperature spots', 'Up to 96 on the camera, any number in Studio', 'Centre spot'],
+  ['Recording', 'Stills, video, time-lapse', 'Stills'],
+  ['Storage', 'Removable microSD', 'Internal'],
+  ['Files', 'Open .DAT, PNG, TIFF, CSV, MP4', 'Radiometric JPEG'],
+  ['Source', 'Open, GPL-3.0', 'Closed'],
 ];
 
 const jsonLd = buildBreadcrumbs([
   { name: 'Home', path: '/' },
-  { name: 'Device Features', path: '/device-features/' },
+  { name: 'Camera', path: '/device-features/' },
 ]);
 ---
 
 <MarketingLayout
-  title="Device Features"
-  description="Hardware and firmware specifications for DIY-Thermocam V4, compared side-by-side with the FLIR E6."
+  title="Camera"
+  description="DIY-Thermocam specifications: FLIR Lepton 3.5, 160 × 120 radiometric, −10 to 450 °C, 3.2-inch touch display, microSD and USB-C, compared with the FLIR E6."
   canonicalPath="/device-features/"
   jsonLd={jsonLd}
 >
-  <section class="page-wrap">
-    <header class="page-head">
-      <h1>Device features and specifications</h1>
-      <p>
-        Radiometric long-wave infrared imaging on open hardware, with full KiCad, firmware, and
-        protocol source code.
-      </p>
-    </header>
+  <section class="page-head">
+    <div class="wrap cam-head">
+      <div>
+        <V4Status compact />
+        <h1>The camera</h1>
+        <p>A radiometric thermal camera you can hold, open and change. Every pixel keeps its temperature, on the camera and in Studio.</p>
+      </div>
+      <figure class="cam-shot"><img src="/images/v4/hero-back.jpg" alt="DIY-Thermocam V4 from the back, with the lens cap over the Lepton" width="1600" height="1066" /></figure>
+    </div>
+  </section>
 
-    <section class="spec-block">
-      <h2>Core capabilities</h2>
-      <ul class="cap-grid">
-        {capabilities.map((item) => (
-          <li>{item}</li>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2 class="big">Specifications</h2></div>
+      <dl class="specs">
+        {specs.map(([ic, k, v]) => (
+          <div><Icon name={ic} class="sic" /><dt>{k}</dt><dd>{v}</dd></div>
         ))}
-      </ul>
-    </section>
+      </dl>
+    </div>
+  </section>
 
-    <section class="spec-block">
-      <h2>Firmware 4.0 on-device interface</h2>
-      <p class="section-lead">
-        Rendered directly by the Firmware 4.0 UI simulator (640×480). Thermal scenes are simulated
-        160×120 radiometric examples; see <a href="/thermal-images/">Thermal Images</a> for real
-        camera captures.
-      </p>
-      <div class="ui-grid">
-        {uiPreviews.map((shot) => (
-          <figure class="ui-card">
-            <img src={shot.src} alt={shot.caption} width="640" height="480" loading="lazy" />
-            <figcaption>{shot.caption}</figcaption>
-          </figure>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="big">On the camera</h2>
+        <p>The touch menu, drawn by the firmware's simulator. Real captures are in the <a href="/thermal-images/">gallery</a>.</p>
+      </div>
+      <div class="screens">
+        {screens.map((s) => (
+          <figure><img src={s.src} alt={s.cap} width="640" height="480" loading="lazy" /><figcaption>{s.cap}</figcaption></figure>
         ))}
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="spec-block">
-      <h2>DIY-Thermocam vs. FLIR E6</h2>
-      <div class="table-wrap">
-        <table class="spec-table tabular">
-          <thead>
-            <tr>
-              <th>Specification</th>
-              <th>DIY-Thermocam</th>
-              <th>FLIR E6</th>
-            </tr>
-          </thead>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2 class="big">Next to a FLIR E6</h2></div>
+      <div class="tablewrap">
+        <table class="cmp">
+          <thead><tr><th scope="col"></th><th scope="col">DIY-Thermocam</th><th scope="col">FLIR E6</th></tr></thead>
           <tbody>
-            {comparison.map((row) => (
-              <tr>
-                <td class="label-col">{row.feature}</td>
-                <td class="tc-col">{row.tc}</td>
-                <td>{row.flir}</td>
-              </tr>
+            {comparison.map(([k, a, b]) => (
+              <tr><th scope="row">{k}</th><td>{a}</td><td>{b}</td></tr>
             ))}
           </tbody>
         </table>
       </div>
-    </section>
-
-    <div class="next-links">
-      <a href="/docs/partlist/" class="btn-primary">Bill of Materials</a>
-      <a href="/building-instructions/" class="btn-secondary">Building Instructions</a>
     </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .page-wrap {
-    max-width: var(--tc-container);
-    margin: 0 auto;
-    padding: 56px 28px 24px;
+  .cam-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+  .cam-shot { margin: 0; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-window); background: #c8ccd1; }
+  .cam-shot img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--border); }
+  .specs > div { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-content: start; column-gap: 12px; padding: 18px 20px 18px 0; border-bottom: 1px solid var(--border); }
+  .specs :global(.sic) { grid-row: span 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; background: var(--surface-2); color: var(--muted); }
+  .specs :global(.sic svg) { width: 19px; height: 19px; display: block; }
+  .specs dt { font-size: 13px; color: var(--dim); }
+  .specs dd { margin: 4px 0 0; font-size: 15px; font-weight: 500; }
+  .screens { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .screens figure { margin: 0; }
+  .screens img { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #000; }
+  .screens figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .tablewrap { overflow-x: auto; }
+  .cmp { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; table-layout: fixed; }
+  .cmp th, .cmp td { text-align: left; padding: 12px 16px 12px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .cmp thead th { font-size: 13px; color: var(--dim); font-weight: 500; }
+  .cmp tbody th { font-weight: 500; color: var(--muted); }
+  .cmp thead th:first-child { width: 28%; }
+  .cmp td:nth-child(2) { font-weight: 500; }
+  @media (max-width: 1000px) {
+    .cam-head { grid-template-columns: 1fr; gap: 32px; }
+    .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .screens { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-  .page-head {
-    max-width: 64ch;
-    margin-bottom: 48px;
-  }
-  .page-head h1 {
-    margin: 0;
-    font-size: clamp(2rem, 3.6vw, 2.75rem);
-    font-weight: 650;
-  }
-  .page-head p {
-    margin: 12px 0 0;
-    font-size: 1.05rem;
-    color: var(--tc-text-muted);
-  }
-  .spec-block {
-    padding-top: 32px;
-    border-top: 1px solid var(--tc-border);
-    margin-bottom: 52px;
-  }
-  .spec-block h2 {
-    margin: 0 0 20px;
-    font-size: 1.35rem;
-    font-weight: 650;
-  }
-  .section-lead {
-    margin: -8px 0 22px;
-    color: var(--tc-text-muted);
-    font-size: 15px;
-    max-width: 70ch;
-  }
-  .ui-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-  .ui-card {
-    margin: 0;
-    border: 1px solid var(--tc-border);
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--tc-surface-1);
-  }
-  .ui-card img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .ui-card figcaption {
-    padding: 10px 14px;
-    font-size: 13.5px;
-    color: var(--tc-text-muted);
-    border-top: 1px solid var(--tc-border);
-  }
-  .cap-grid {
-    margin: 0;
-    padding-left: 18px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 36px;
-    color: var(--tc-text-muted);
-    font-size: 15px;
-  }
-  .table-wrap {
-    overflow-x: auto;
-  }
-  .spec-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14.5px;
-  }
-  .spec-table th {
-    text-align: left;
-    padding: 12px 14px 12px 0;
-    border-bottom: 1px solid var(--tc-border-strong);
-    font-weight: 650;
-    color: var(--tc-text);
-  }
-  .spec-table td {
-    padding: 13px 14px 13px 0;
-    border-bottom: 1px solid var(--tc-border);
-    color: var(--tc-text-muted);
-    vertical-align: top;
-  }
-  .label-col {
-    color: var(--tc-text) !important;
-    font-weight: 550;
-  }
-  .tc-col {
-    color: var(--tc-text) !important;
-  }
-  .next-links {
-    margin-top: 36px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .btn-primary,
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    height: 40px;
-    padding: 0 18px;
-    border-radius: 7px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .btn-primary {
-    background: var(--tc-thermal);
-    color: var(--tc-text-on-thermal);
-  }
-  .btn-secondary {
-    border: 1px solid var(--tc-border-strong);
-    color: var(--tc-text);
-    background: transparent;
-  }
-  .btn-secondary:hover {
-    background: var(--tc-surface-2);
-  }
-  @media (max-width: 780px) {
-    .cap-grid,
-    .ui-grid {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 600px) {
+    .specs, .screens { grid-template-columns: 1fr; }
   }
 </style>

@@ -1,25 +1,10 @@
 ---
-title: Bill of Materials (Partlist)
-description: Interactive Bill of Materials for DIY-Thermocam V4.0 (Zero-Solder PCBA) and V3.0 (Classic Through-Hole), with live totals and supplier links.
+title: Parts list
+description: Build your DIY-Thermocam V4 shopping list. Choose what you own, the sensor, the board fab and the shell, and get one order per shop with prices, links and upload files.
 tableOfContents: false
-editUrl: https://github.com/maxritter/diy-thermocam/edit/master/hardware/bom/bom.csv
+editUrl: https://github.com/maxritter/diy-thermocam/edit/master/website/src/data/parts.ts
 ---
 
-import BomExplorer from '../../../components/BomExplorer.tsx';
-import { computeBomTotals, loadBomCsvRaw, loadBomItems } from '../../../lib/bom';
+import PartsConfigurator from '../../../components/PartsConfigurator.astro';
 
-export const bomItems = loadBomItems();
-export const bomCsvRaw = loadBomCsvRaw();
-export const v30 = computeBomTotals(bomItems, 'v3.0');
-export const v40 = computeBomTotals(bomItems, 'v4.0');
-
-Generated from [`hardware/bom/bom.csv`](https://github.com/maxritter/diy-thermocam/blob/master/hardware/bom/bom.csv). Switch between **V4.0 Zero-Solder** (`PROTOTYPE-PENDING`, {v40.requiredRows} parts, ~${v40.requiredUsd.toFixed(2)} incl. Lepton 3.5) and **V3.0 Classic** ({v30.requiredRows} parts, ~${v30.requiredUsd.toFixed(2)} incl. Lepton 3.5), or toggle enclosure and V3-upgrade options below.
-
-<BomExplorer client:load items={bomItems} csvRaw={bomCsvRaw} />
-
-## Ordering notes
-
-- **FLIR Lepton sensor:** Lepton 3.5 (`160×120`, 57° HFOV), wide-angle Lepton 3.1R (`160×120`, 95° HFOV / 119° DFOV, `500-0758-03`), and Lepton 2.5 (`80×60`, EOL notice Sept 2027) all fit Lepton Breakout Board V2.0. Do not substitute a PureThermal USB board — it lacks the 2×10 SPI header.
-- **PCB and enclosure fabrication:** Upload the Gerbers, BOM, and CPL from [`hardware/pcb/fab/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb/fab) to JLCPCB, Seeed Studio Fusion, or PCBWay. Enclosure exports live in [`hardware/enclosure/exports/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure/exports).
-- **Display (BuyDisplay `ER-TFTM032-3`):** Choose 4-Wire SPI, 5V power supply, 3.2-inch resistive touch, pin header, and no font chip.
-- **Battery (V4.0 3D cradle):** Use a slim ≤5.0 mm UL/IEC 62133 protected `505060` 2000 mAh LiPo with Adafruit/SparkFun JST-PH polarity. Always verify `+`/`-` against the `J4` silkscreen.
+<PartsConfigurator />

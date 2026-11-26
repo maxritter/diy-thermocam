@@ -1,10 +1,18 @@
 # Hardware and Fabrication
 
-All PCB, schematic, BOM, and enclosure files live in [`hardware/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware) under **GPL-3.0**. Build every piece yourself with a home 3D printer, laser cutter, and soldering iron, or order factory-assembled boards and shells from **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay**.
+All PCB, schematic, BOM, and enclosure files live in [`hardware/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware) under **GPL-3.0**. Order the factory-assembled board from **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay**, and print or laser-cut the enclosure yourself or order it from the same services.
+
+## V4 hardware
+
+> **V4 is experimental and still in development.** The V4 board and shell haven't been built and tested on a real camera yet. You're welcome to try them, but there's no guarantee they work. Already have a V3? It can update its firmware and use Studio today.
+
+![Exploded render of DIY-Thermocam V4: front shell, display, board with modules, battery and back shell](/images/v4/exploded.jpg)
+
+![KiCad render of the V4 board, module side, with the Teensy, Lepton and battery sockets](/images/v4/pcb-modules.png)
 
 ## Schematic
 
-![DIY-Thermocam V3 schematic](/images/device/schematic.jpg)
+The full V4.0 schematic is in [`hardware/pcb/fab/diy-thermocam-v4.0-schematic.pdf`](https://github.com/maxritter/diy-thermocam/blob/master/hardware/pcb/fab/diy-thermocam-v4.0-schematic.pdf).
 
 ## Teensy 4.1 Pinmap
 
@@ -29,29 +37,28 @@ All PCB, schematic, BOM, and enclosure files live in [`hardware/`](https://githu
 | `D39` | `SPI1` MISO (Lepton VoSPI) |
 | `A16` | USB power sense divider ADC |
 
-## PCB Revisions (V3.0 Classic vs. V4.0 Zero-Solder)
+## PCB V4.0
 
 Board outline: **89.4 × 68.4 mm**, **1.6 mm FR-4**, **2-layer**, 1 oz copper, Lead-Free HASL or ENIG finish.
 
-| Revision | Status | Power, USB &amp; Controls | Assembly | Best For |
-| --- | --- | --- | --- | --- |
-| **PCB V3.0** | **Proven default** (tag `3.0.4`) | Teensy micro-USB, TP4056 charger, Pololu `U3V16F5` boost, wired switch/button, CR1220 coin cell (cut `VUSB–VIN`) | Through-hole hand soldering | Proven build with standard hand tools |
-| **PCB V4.0** | **`PROTOTYPE-PENDING`** | USB-C, TI `BQ24074`, TI `TPS61022`, polarity safety, `XC6206` RTC, SMD controls | **Zero soldering** — plug in Teensy 4.1, Lepton, Display, and `505060` LiPo | Turnkey PCBA (JLCPCB, Seeed, PCBWay) |
+- **Power, USB and controls:** USB-C, TI `BQ24074` charger, TI `TPS61022` boost, reverse-polarity protection, `XC6206` RTC supply, SMD switches.
+- **Assembly:** no soldering. The fab fits every part; you plug in the Teensy 4.1, Lepton, display and `505060` LiPo.
 
-> **Prototype gate:** V3.0 remains the proven default build until the V4.0 PCBA and 3D-printed enclosure complete physical verification.
+### Ordering the PCBA
 
-### Ordering Bare PCBs or Turnkey PCBA
-
-1. Review the interactive [Bill of Materials](/docs/partlist/) and pick your revision.
-2. Download the Gerbers (plus BOM and CPL files for V4.0 PCBA) from [`hardware/pcb/fab/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb/fab). Archived V3.0 Eagle files live at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/pcb).
-3. Upload the fabrication package to **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay**.
+1. Review the interactive [Bill of Materials](/docs/partlist/).
+2. Download the package for your fab from [`hardware/pcb/fab/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb/fab): `jlcpcb/`, `seeed/`, or `pcbway/`, each with a Gerber zip, BOM, and CPL file.
+3. Upload the package to **JLCPCB**, **Seeed Studio Fusion**, or **PCBWay**.
 
 ## Enclosures (Laser-Cut Acrylic and 3D/CNC Shell)
 
+![DIY-Thermocam V4.0 3D-printable and CNC enclosure CAD renders](/images/build-v4/v4-3d-enclosure-hero.png)
+
+![DIY-Thermocam V4.0 6-plate 3 mm laser-cut acrylic enclosure and cutting sheet](/images/build-v4/v4-laser-enclosure-preview.png)
+
 Enclosure sources and exports live in [`hardware/enclosure/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/enclosure):
 
-- **V3.0 Acrylic (proven baseline):** 6-plate 3 mm laser-cut acrylic archived at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/enclosure). Send to any laser-cutting shop using 3 mm matte cast acrylic.
-- **Parametric `build123d` CAD (`PROTOTYPE-PENDING`):** Generates both a 6-plate 3 mm laser-cut kit (`SVG`, `DXF`) and a screwdriver-only 3D/CNC shell (`STEP`, `STL`, `3MF`). Fastens with `4× M2.5×6` front and `4× M2.5×8` back DIN 965 countersunk screws, adds a blind-roofed `1/4"-20` hex-nut tripod pocket (max stud `≤ 8.0 mm`), guided actuators, insulating `505060` battery cradle and lid, dovetail lens cap, and a widened `13.4→20.2 mm` cone clearing both Lepton 3.5 (`71° DFOV`) and Lepton 3.1R (`119° DFOV`).
+- **V4.0 parametric [build123d](https://github.com/gumyr/build123d) CAD:** Generates a screwdriver-only 3D-printed shell (`STEP`, `STL`, `3MF`) and a 6-plate 3 mm acrylic case (`SVG`, `DXF`) on one M2.5 standoff stack. Includes a `1/4"-20` tripod pocket (max stud `≤ 8.0 mm`), insulating `505060` battery cradle, dovetail lens cap, and wide `13.4→20.2 mm` lens cone clearing Lepton 3.5 (`71°`) and 3.1R (`119°`). See the enclosure README for fastener order numbers.
 - **Community 3.0b Enclosure:** Originally contributed by [helmarw/DIY-Thermocam](https://github.com/helmarw/DIY-Thermocam/tree/master/Enclosure/3.0b), inspiring ergonomic details of the parametric shell.
 
 ### Recommended 3D Printing Settings

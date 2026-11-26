@@ -1,0 +1,33 @@
+---
+import { DOWNLOADS, SITE } from '../lib/site';
+import Icon from './Icon.astro';
+---
+
+<div class="dl-list">
+  {DOWNLOADS.map((d) => (
+    <a class="dl-row" href={d.href}>
+      <Icon name={d.icon} class="os-ic" />
+      <span><b>{d.name}</b><small>{d.detail}</small></span>
+      <span class="go"><Icon name="download" />Download</span>
+    </a>
+  ))}
+  <a class="dl-row fw" href={SITE.firmwareUrl}>
+    <Icon name="chip" class="os-ic" />
+    <span><b>Camera firmware</b><small>For V3 and V4 · .hex on the latest GitHub release</small></span>
+    <span class="go"><Icon name="chevron" />Open release</span>
+  </a>
+</div>
+
+<style>
+  .dl-list { display: grid; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .dl-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; text-decoration: none; color: var(--text); background: var(--surface); }
+  .dl-row + .dl-row { border-top: 1px solid var(--border); }
+  .dl-row:hover { background: var(--surface-2); color: var(--text); }
+  .dl-row.fw { background: var(--bg-2); }
+  .dl-row.fw:hover { background: var(--surface-2); }
+  .dl-row :global(.os-ic svg) { width: 24px; height: 24px; display: block; }
+  .dl-row b { font-weight: 600; font-size: 15px; display: block; }
+  .dl-row small { color: var(--dim); font-size: 13px; }
+  .go { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 14px; font-weight: 500; white-space: nowrap; }
+  .go :global(svg) { width: 16px; height: 16px; display: block; }
+</style>

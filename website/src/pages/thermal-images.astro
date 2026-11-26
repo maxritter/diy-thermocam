@@ -1,172 +1,58 @@
 ---
-import GalleryGrid, { type GalleryItem } from '../components/GalleryGrid.tsx';
+import Icon from '../components/Icon.astro';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
+import { EXAMPLE_H, EXAMPLE_W, EXAMPLES } from '../data/examples';
 import { buildBreadcrumbs } from '../lib/site';
-
-const categories = ['Buildings & HVAC', 'Electronics', 'Everyday', 'Outdoors & People'];
-const showcaseCategories = ['Buildings & HVAC', 'Electronics'];
-
-const thermalCaptures: GalleryItem[] = [
-  {
-    title: 'Laptop Lid (1080p Studio Export)',
-    caption: 'Captured on real hardware and upscaled to 1920×1080 with Desktop Studio.',
-    image: '/images/thermal/real-v3-1080p-capture.png',
-    category: 'Electronics',
-  },
-  { title: 'German Ravioli', image: '/images/thermal/pasta_squares.png', category: 'Everyday' },
-  { title: 'Houses in the Neighbourhood', image: '/images/thermal/houses_2.jpg', category: 'Buildings & HVAC' },
-  { title: 'Pig behind a Fence', image: '/images/thermal/pig.jpg', category: 'Outdoors & People' },
-  { title: 'Laptop', image: '/images/thermal/laptop.jpg', category: 'Electronics' },
-  { title: 'Human Body', image: '/images/thermal/body.jpg', category: 'Outdoors & People' },
-  { title: 'Soldering Iron', image: '/images/thermal/soldering_iron.jpg', category: 'Electronics' },
-  { title: 'Milk', image: '/images/thermal/milk.jpg', category: 'Everyday' },
-  { title: 'Neighbourhood and Garden', image: '/images/thermal/houses_1.jpg', category: 'Buildings & HVAC' },
-  { title: 'Window Cold Airstream', image: '/images/thermal/cold_air.jpg', category: 'Buildings & HVAC' },
-  { title: 'Heater before Venting', image: '/images/thermal/heater_before.jpg', category: 'Buildings & HVAC' },
-  { title: 'Heater after Venting', image: '/images/thermal/heater_after.jpg', category: 'Buildings & HVAC' },
-  { title: 'Washbowl', image: '/images/thermal/water_faucet.jpg', category: 'Everyday' },
-  { title: 'Fridge', image: '/images/thermal/refrigerator.jpg', category: 'Everyday' },
-  { title: 'Microcontroller', image: '/images/thermal/processor.jpg', category: 'Electronics' },
-  { title: 'Three Lamps', image: '/images/thermal/lamp.jpg', category: 'Everyday' },
-  { title: 'Car Engine', image: '/images/thermal/car_engine.jpg', category: 'Outdoors & People' },
-  { title: 'Wall Adaptor', image: '/images/thermal/wall_adaptor.jpg', category: 'Electronics' },
-  { title: 'Human Face', image: '/images/thermal/human.jpg', category: 'Outdoors & People' },
-  { title: 'House Front', image: '/images/thermal/house_front.jpg', category: 'Buildings & HVAC' },
-  { title: 'Internet Router', image: '/images/thermal/fritz_box.jpg', category: 'Electronics' },
-  { title: 'Coffee', image: '/images/thermal/coffee.jpg', category: 'Everyday' },
-  { title: 'Attic Insulation', image: '/images/thermal/attic.jpg', category: 'Buildings & HVAC' },
-  { title: 'Row Houses', image: '/images/thermal/buildings.png', category: 'Buildings & HVAC' },
-  { title: 'Central Heating #1', image: '/images/thermal/heating_1.jpg', category: 'Buildings & HVAC' },
-  { title: 'Central Heating #2', image: '/images/thermal/heating_2.jpg', category: 'Buildings & HVAC' },
-];
-
-const studio1080pShowcase: GalleryItem[] = [
-  {
-    title: 'PCB Buck Converter & Traces',
-    caption: 'Inferno palette · 1920×1080 EdgePreserve export with Box & Spot ROIs (simulated 160×120).',
-    image: '/images/thermal/showcase/pcb-power-stage-1080p.png',
-    category: 'Electronics',
-  },
-  {
-    title: 'Overloaded Circuit Breaker Panel',
-    caption: 'Ironblack palette · Box ROI & ΔT fault comparison across DIN-rail breakers (simulated 160×120).',
-    image: '/images/thermal/showcase/breaker-panel-fault-1080p.png',
-    category: 'Electronics',
-  },
-  {
-    title: 'Window Sill Draft & Wall Radiator',
-    caption: 'Rainbow palette · Cold air infiltration along sill above warm radiator plume (simulated 160×120).',
-    image: '/images/thermal/showcase/window-draft-radiator-1080p.png',
-    category: 'Buildings & HVAC',
-  },
-  {
-    title: 'Underfloor Radiant Heating Loops',
-    caption: 'Lava palette · Supply-to-return hydronic floor pipe trace with Zone ROI (simulated 160×120).',
-    image: '/images/thermal/showcase/underfloor-heating-1080p.png',
-    category: 'Buildings & HVAC',
-  },
-  {
-    title: 'Solar PV Bypass-Diode Hotspot',
-    caption: 'Turbo palette · Single overheated photovoltaic cell isolated with Box ROI (simulated 160×120).',
-    image: '/images/thermal/showcase/solar-pv-hotspot-1080p.png',
-    category: 'Buildings & HVAC',
-  },
-  {
-    title: 'Hydronic Radiator Air Pocket',
-    caption: 'Plasma palette · Trapped upper-right air pocket vs. hot lower supply with ΔT readout (simulated 160×120).',
-    image: '/images/thermal/showcase/radiator-air-pocket-1080p.png',
-    category: 'Buildings & HVAC',
-  },
-  {
-    title: 'Electric Motor Bearing Hotspot',
-    caption: 'Glowbow palette · Failing drive-end bearing compared to stator housing (simulated 160×120).',
-    image: '/images/thermal/showcase/motor-bearing-load-1080p.png',
-    category: 'Electronics',
-  },
-  {
-    title: 'Facade Thermal Bridges at Dusk',
-    caption: 'Viridis palette · Attic ridge leak, floor-slab thermal bridge, and leaky window frames (simulated 160×120).',
-    image: '/images/thermal/showcase/facade-thermal-bridge-1080p.png',
-    category: 'Buildings & HVAC',
-  },
-];
 
 const jsonLd = buildBreadcrumbs([
   { name: 'Home', path: '/' },
-  { name: 'Thermal Images', path: '/thermal-images/' },
+  { name: 'Gallery', path: '/thermal-images/' },
 ]);
 ---
 
 <MarketingLayout
-  title="Thermal Images"
-  description="26 real radiometric captures from DIY-Thermocam plus 8 Full-HD 1080p Desktop Studio export scenarios across electronics, HVAC, and building diagnostics."
+  title="Gallery"
+  description="What DIY-Thermocam sees: heat loss on a house, a board under load, a breaker panel, a radiator and more, rendered the way Studio exports them, each with a .DAT file to open in Studio."
   canonicalPath="/thermal-images/"
   jsonLd={jsonLd}
 >
-  <section class="page-wrap">
-    <header class="page-head">
-      <h1>Thermal image gallery</h1>
-      <p>
-        26 real radiometric captures from building inspections, circuit board debugging, and
-        fieldwork. Filter by category or click any frame to inspect full size.
-      </p>
-    </header>
+  <section class="page-head">
+    <div class="wrap">
+      <h1>What it sees</h1>
+      <p>Each picture keeps the temperature of every pixel. Download the .DAT next to it and open it in Studio to measure, change the palette or export it again.</p>
+      <div class="note ex-note"><Icon name="info" /><span>These are example scenes, rendered at the Lepton's 160 × 120 the way Studio exports them. Real V4 captures will replace them once V4 has been tested on a camera.</span></div>
+    </div>
+  </section>
 
-    <GalleryGrid client:load items={thermalCaptures} categories={categories} aspect="4/3" />
-
-    <section class="showcase-section">
-      <header class="section-head">
-        <h2>1080p Desktop Studio pipeline showcase</h2>
-        <p>
-          Simulated 160×120 radiometric scenes rendered directly through Desktop Studio's
-          1920×1080 <code>EdgePreserve</code> upscaler (bilateral filter, Lanczos-3, halo-clamped
-          sharpening), scientific palettes, and vector-crisp ROI overlays.
-        </p>
-      </header>
-
-      <GalleryGrid
-        client:load
-        items={studio1080pShowcase}
-        categories={showcaseCategories}
-        aspect="16/9"
-      />
-    </section>
+  <section class="gal">
+    <div class="wrap grid">
+      {EXAMPLES.map((e) => (
+        <figure>
+          <a href={`/images/examples/${e.id}.jpg`}><img src={`/images/examples/${e.id}.jpg`} alt={`Example thermal image: ${e.title.toLowerCase()}, ${e.range}, ${e.palette} palette`} width={EXAMPLE_W} height={EXAMPLE_H} loading="lazy" /></a>
+          <figcaption>
+            <div class="t"><b>{e.title}</b><span class="meta">{e.palette} · {e.range}</span></div>
+            <p>{e.note}</p>
+            <a class="dat" href={`/examples/${e.dat}`} download><Icon name="download" />{e.dat}</a>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .page-wrap {
-    max-width: var(--tc-container);
-    margin: 0 auto;
-    padding: 56px 28px 24px;
-  }
-  .page-head {
-    max-width: 64ch;
-    margin-bottom: 36px;
-  }
-  .page-head h1 {
-    margin: 0;
-    font-size: clamp(2rem, 3.6vw, 2.75rem);
-    font-weight: 650;
-  }
-  .page-head p,
-  .section-head p {
-    margin: 12px 0 0;
-    font-size: 1.05rem;
-    color: var(--tc-text-muted);
-  }
-  .showcase-section {
-    margin-top: 64px;
-    padding-top: 40px;
-    border-top: 1px solid var(--tc-border);
-  }
-  .section-head {
-    max-width: 68ch;
-    margin-bottom: 28px;
-  }
-  .section-head h2 {
-    margin: 0;
-    font-size: clamp(1.5rem, 2.4vw, 1.9rem);
-    font-weight: 650;
-  }
+  .ex-note { margin-top: 24px; max-width: 760px; }
+  .ex-note :global(.ic svg) { width: 16px; height: 16px; display: block; }
+  .gal { padding-bottom: 96px; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 24px; }
+  figure { margin: 0; }
+  figure > a { display: block; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: #0b0b0c; }
+  figcaption { margin-top: 12px; }
+  .t { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+  .t b { font-size: 16px; font-weight: 600; }
+  .meta { font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  figcaption p { margin: 4px 0 8px; color: var(--muted); font-size: 14.5px; }
+  .dat { display: inline-flex; align-items: center; gap: 6px; font: 500 13px var(--font-mono); text-decoration: none; }
+  .dat :global(svg) { width: 14px; height: 14px; display: block; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } .gal { padding-bottom: 64px; } }
 </style>

@@ -11,59 +11,60 @@ interface RepoDocSpec {
   title: string;
   description: string;
   preamble?: string;
+  /* For a page that repeats another, point search engines at the original. */
+  canonical?: string;
 }
 
 const REPO_DOCS: RepoDocSpec[] = [
   {
     id: 'docs/manual',
     sourceFile: 'manual.md',
-    title: 'User Manual',
-    description:
-      'Daily operation, touchscreen controls, charging, live mode, settings, and firmware updates for DIY-Thermocam V3.',
+    title: 'Camera controls',
+    description: 'Buttons, touch menu, palettes, charging and saving captures on DIY-Thermocam.',
   },
   {
     id: 'docs/hardware',
     sourceFile: 'hardware.md',
-    title: 'Hardware, PCB & Enclosure',
+    title: 'Board and shell',
     description:
-      'Schematic, Teensy 4.1 pinmap, KiCad V3.0 and V4.0 Zero-Solder PCBA revisions, and build123d laser-cut and 3D-printable enclosures.',
+      'The DIY-Thermocam V4 board, pin map, fab options, and the printed and laser-cut shells.',
   },
   {
     id: 'docs/firmware',
     sourceFile: 'firmware.md',
-    title: 'Firmware & Flashing',
+    title: 'Firmware updates',
     description:
-      'Flashing prebuilt firmware with the Desktop App or Teensy Loader, and building from source with arduino-cli and Teensy core 1.62.0.',
+      'Update the DIY-Thermocam firmware with Studio, or build it from source with arduino-cli.',
   },
   {
     id: 'docs/raw-data',
     sourceFile: 'raw-data-format.md',
-    title: 'Raw Data Format (.DAT)',
+    title: '.DAT file format',
     description:
-      'Byte-exact specification of radiometric .DAT files across DIY-Thermocam V1, V2, and V3, plus calibration formulas and .thermo.json sidecars.',
+      'How a radiometric DIY-Thermocam capture is stored, and how to turn raw values into temperatures.',
   },
   {
     id: 'docs/protocol-v2',
     sourceFile: 'protocol-v2.md',
-    title: 'USB Protocol v2.0 Specification',
+    title: 'USB protocol',
     description:
-      'Authoritative binary USB High-Speed wire protocol for DIY-Thermocam V3 firmware 3.1+ and the Tauri v2 Desktop App.',
+      'Packet format and commands for talking to DIY-Thermocam over USB from your own software.',
   },
   {
     id: 'docs/serial',
     sourceFile: 'protocol-v2.md',
-    title: 'USB Serial Protocol',
-    description:
-      'Communicating with DIY-Thermocam V3 over USB CDC ACM using binary Protocol v2.0 (replacing legacy single-byte v1 serial).',
+    title: 'USB protocol (serial)',
+    canonical: 'https://www.diy-thermocam.net/docs/protocol-v2/',
+    description: "DIY-Thermocam's USB protocol, kept at this address for older links.",
     preamble:
-      '> **Protocol v2 Note:** Firmware 4.0 uses **USB Protocol v2.0** (little-endian binary framing, CRC-8/CRC-32 checks, push streaming, and direct SD access without MTP). This page stays live at `/docs/serial/` for existing links and mirrors [USB Protocol v2.0](/docs/protocol-v2/).\n\n',
+      '> This page keeps its address for older links. It shows the same content as [USB protocol](/docs/protocol-v2/).\n\n',
   },
   {
     id: 'docs/desktop-app',
     sourceFile: 'software.md',
-    title: 'Desktop App & Software',
+    title: 'Studio',
     description:
-      'Cross-platform Tauri v2 Desktop App for live WebGL2 viewing, radiometric ROIs, emissivity correction, H.264 MP4 export, SD browsing, and HalfKay updates.',
+      'DIY-Thermocam Studio for macOS, Windows and Linux: live view, measuring, SD card and exports.',
   },
 ];
 
@@ -93,6 +94,9 @@ function createUnifiedDocsLoader(): Loader {
             title: spec.title,
             description: spec.description,
             editUrl: `https://github.com/maxritter/diy-thermocam/edit/master/docs/${spec.sourceFile}`,
+            ...(spec.canonical
+              ? { head: [{ tag: 'link', attrs: { rel: 'canonical', href: spec.canonical } }] }
+              : {}),
           },
         });
 

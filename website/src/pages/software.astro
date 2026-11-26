@@ -1,70 +1,61 @@
 ---
+import DownloadList from '../components/DownloadList.astro';
+import Icon from '../components/Icon.astro';
+import { EXAMPLES } from '../data/examples';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import { buildBreadcrumbs, SITE } from '../lib/site';
 
-const appModules = [
+const features = [
   {
-    title: 'Live WebGL2 view',
-    body: 'Auto-detects cameras over USB Protocol v2 at 8.77 fps and 0.26 ms command latency. Supports all 19 firmware palettes plus Inferno, Viridis, Magma, Plasma, and custom LUTs.',
+    id: 'live',
+    icon: 'palette' as const,
+    title: 'See it live',
+    body: 'Plug in the camera and Studio finds it. The live image runs at the Lepton’s full 8.7 frames a second, with a fixed or automatic temperature range.',
+    points: ['The camera’s 19 palettes, plus Inferno, Viridis, Magma, Plasma, Turbo and your own', 'Hottest, coldest and centre point marked as you move', 'Standard view for quick work; Shift+P opens the Pro tools'],
+    img: '/images/studio-features/palettes.jpg', w: 1452, h: 1092, alt: 'The same house front in four palettes: Ironblack, Rainbow, Arctic and White-Hot',
   },
   {
-    title: 'Standard and Pro modes',
-    body: 'Use Standard mode for quick snapshots and range control. Switch to Pro mode for spot meters, Box/Circle/Polygon ROIs, Line Profiles, isotherms, Time Plotter alarms, and per-ROI emissivity.',
+    id: 'measure',
+    icon: 'ruler' as const,
+    title: 'Measure anything',
+    body: 'Place points and areas on the image and read their temperatures live, or on a saved capture.',
+    points: ['Spots of 1 or 3 × 3 pixels, boxes, circles and polygons', 'Line profiles and the difference between two points', 'Emissivity per area, reflected temperature, and presets for skin, circuit boards, brick and metals'],
+    img: '/images/studio-features/measure.jpg', w: 1280, h: 1260, alt: 'A breaker panel with a box around the hot breaker, a line across the row and the temperature profile along it',
   },
   {
-    title: 'Built-in exports',
-    body: 'Export H.264 MP4, animated GIF, PNG/JPEG with scale bars, CSV, 16-bit Kelvin TIFF, lossless .DAT sequences, and HTML/PDF/Markdown reports with no FFmpeg install.',
+    id: 'watch',
+    icon: 'thermometer' as const,
+    title: 'Find what stands out',
+    body: 'Mark every pixel above or below a temperature, and let Studio watch a reading over time.',
+    points: ['Isotherms you drag to the temperature you care about', 'A live histogram of the whole frame', 'A plot over time, and alarms that start a capture or a recording when a value crosses a limit'],
+    img: '/images/studio-features/isotherm.jpg', w: 1120, h: 840, alt: 'A house front in grey with every surface above 6 °C marked green: windows and the edge of the roof',
   },
   {
-    title: 'Direct SD browser and updater',
-    body: 'Browse and download microSD captures at 9.20 MB/s without MTP drivers. Flash verified Teensy 4.1 firmware releases over built-in HalfKay HID.',
+    id: 'export',
+    icon: 'share' as const,
+    title: 'Export and share',
+    body: 'Save what you see in the format the next person needs. Nothing extra to install.',
+    points: ['PNG or JPEG with a scale bar, GIF, and MP4 video', 'CSV of every temperature, 16-bit TIFF in kelvin, .DAT sequences and time-lapse', 'A report in HTML or Markdown with your measurements'],
+    img: '/images/examples/pcb.jpg', w: 1470, h: 1024, alt: 'An export of a circuit board under load with the hottest and coldest points and a scale bar',
   },
 ];
 
-const legacyTools = [
-  {
-    title: 'ThermoVision by Joe-C',
-    platform: 'Windows · archived at tag 3.0.4',
-    image: '/images/software/thermal_analysis_sw_1.png',
-    desc: 'Third-party Windows radiometric viewer for inspecting and converting DIY-Thermocam .DAT files.',
-    href: 'https://github.com/maxritter/diy-thermocam/tree/3.0.4/software/thermal_analysis_software',
-    extraHref: 'http://joe-c.de/pages/projekte/thermovision.php',
-    extraLabel: 'Author site',
-  },
-  {
-    title: 'Thermal Live Viewer',
-    platform: 'Python · legacy v1 serial',
-    image: '/images/software/thermal_live_viewer.png',
-    desc: 'Standalone viewer for capturing frames and video over the legacy v1 USB serial protocol.',
-    href: 'https://github.com/maxritter/diy-thermocam/tree/3.0.4/software/thermal_live_viewer',
-  },
-  {
-    title: 'Thermal Data Viewer',
-    platform: 'Windows · archived at tag 3.0.4',
-    image: '/images/software/thermal_data_viewer.png',
-    desc: 'Batch converter for folders of V1/V2/V3 .DAT captures to JPG, BMP, PNG, or AVI.',
-    href: 'https://github.com/maxritter/diy-thermocam/tree/3.0.4/software/thermal_data_viewer',
-  },
-  {
-    title: 'Video Converter',
-    platform: 'Windows · archived at tag 3.0.4',
-    desc: 'Combines saved microSD frame sequences into standard video files.',
-    href: 'https://github.com/maxritter/diy-thermocam/tree/3.0.4/software/video_converter',
-  },
-];
+const editor = EXAMPLES.slice(0, 4);
 
 const jsonLd = [
   buildBreadcrumbs([
     { name: 'Home', path: '/' },
-    { name: 'Software', path: '/software/' },
+    { name: 'Studio', path: '/software/' },
   ]),
   {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'DIY-Thermocam Desktop Studio',
+    name: 'DIY-Thermocam Studio',
     operatingSystem: 'macOS, Windows, Linux',
-    applicationCategory: 'UtilitiesApplication',
+    applicationCategory: 'MultimediaApplication',
     license: 'https://www.gnu.org/licenses/gpl-3.0.html',
+    screenshot: `${SITE.url}/images/studio-features/measure.jpg`,
+    featureList: features.map((f) => f.title),
     url: `${SITE.url}/software/`,
     downloadUrl: SITE.releasesUrl,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
@@ -73,225 +64,158 @@ const jsonLd = [
 ---
 
 <MarketingLayout
-  title="Desktop Studio & Software"
-  description="Cross-platform Tauri v2 Desktop Studio for macOS, Windows, and Linux, plus archived V3.0 tools."
+  title="Studio"
+  description="DIY-Thermocam Studio for macOS, Windows and Linux: live view, measuring with spots, boxes and line profiles, isotherms, exports to PNG, MP4, CSV and TIFF, the camera's SD card, and firmware updates."
   canonicalPath="/software/"
   jsonLd={jsonLd}
 >
-  <section class="page-wrap">
-    <header class="page-head">
-      <h1>Desktop Studio and software</h1>
-      <p>
-        One open-source app for live streaming, radiometric .DAT analysis, video export, microSD
-        browsing, and firmware updates on macOS, Windows, and Linux.
-      </p>
-      <div class="cta-row">
-        <a href={SITE.releasesUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
-          Download from GitHub Releases
-        </a>
-        <a href="/docs/desktop-app/" class="btn-secondary">Desktop Studio docs</a>
-        <a href="/docs/protocol-v2/" class="btn-secondary">USB Protocol v2</a>
+  <section class="page-head">
+    <div class="wrap">
+      <h1>Studio, the desktop app</h1>
+      <p>See the camera’s image live on your computer, measure any point, and keep every pixel’s temperature for later. Studio also installs the camera’s firmware.</p>
+      <div class="cta">
+        <a class="btn btn-primary" data-os-download href="#download"><span>Download Studio</span></a>
+        <a class="btn btn-ghost" href="/docs/desktop-app/">Read the Studio guide</a>
       </div>
-    </header>
-
-    <div class="app-grid">
-      {appModules.map((mod) => (
-        <article class="app-item">
-          <h2>{mod.title}</h2>
-          <p>{mod.body}</p>
-        </article>
-      ))}
+      <ul class="facts">
+        <li><span class="os" aria-hidden="true"><Icon name="apple" /><Icon name="windows" /><Icon name="linux" /></span>macOS, Windows and Linux</li>
+        <li>Works with V3 and V4 cameras</li>
+        <li>Free, GPL-3.0</li>
+      </ul>
+      <nav class="jump" aria-label="On this page">
+        {features.map((f) => <a href={`#${f.id}`}>{f.title}</a>)}
+        <a href="#editor">Open saved captures</a>
+        <a href="#camera">SD card and firmware</a>
+      </nav>
     </div>
+  </section>
 
-    <section class="legacy-section">
-      <h2>Legacy V3.0 tools</h2>
-      <p class="legacy-lead">
-        Original Windows and Python tools stay archived at git tag <code>3.0.4</code>. Every
-        <code>.DAT</code> file remains compatible across legacy tools and Desktop Studio.
-      </p>
-
-      <div class="legacy-grid">
-        {legacyTools.map((tool) => (
-          <article class="legacy-item">
-            {tool.image && <img src={tool.image} alt={tool.title} loading="lazy" />}
-            <div class="legacy-body">
-              <div class="legacy-top">
-                <h3>{tool.title}</h3>
-                <span class="meta">{tool.platform}</span>
-              </div>
-              <p>{tool.desc}</p>
-              <div class="legacy-links">
-                <a href={tool.href} target="_blank" rel="noopener noreferrer">View archive &rarr;</a>
-                {tool.extraHref && (
-                  <a href={tool.extraHref} target="_blank" rel="noopener noreferrer">{tool.extraLabel} &rarr;</a>
-                )}
-              </div>
-            </div>
-          </article>
-        ))}
+  {features.map((f, i) => (
+    <section id={f.id} class:list={['section', 'feat', { flip: i % 2 === 1 }]}>
+      <div class="wrap feat-grid">
+        <div class="txt">
+          <Icon name={f.icon} class="fic" />
+          <h2 class="big">{f.title}</h2>
+          <p>{f.body}</p>
+          <ul class="points">{f.points.map((p) => <li>{p}</li>)}</ul>
+        </div>
+        <figure><img src={f.img} alt={f.alt} width={f.w} height={f.h} loading="lazy" /></figure>
       </div>
     </section>
+  ))}
+
+  <section id="editor" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="big">Open saved captures</h2>
+        <p>Studio opens the .DAT files any DIY-Thermocam saves. Change the palette, measure again and export. Your notes and areas go into a .thermo.json file next to the capture, so the .DAT stays readable on the camera.</p>
+      </div>
+      <div class="try">
+        <div><b>Try it without a camera</b><span>Download an example and open it in Studio’s editor.</span></div>
+        <div class="dats">
+          {editor.map((e) => (
+            <a href={`/examples/${e.dat}`} download><Icon name="download" />{e.dat}</a>
+          ))}
+          <a href="/thermal-images/">All examples</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="camera" class="section">
+    <div class="wrap two">
+      <div>
+        <Icon name="sd" class="big-ic" />
+        <h3>The camera’s SD card</h3>
+        <p>Browse, preview, download and delete captures over the same USB cable, at about 9 MB/s. No card reader, no restart.</p>
+      </div>
+      <div>
+        <Icon name="chip" class="big-ic" />
+        <h3>Firmware updates</h3>
+        <p>Choose the firmware file from the <a href={SITE.firmwareUrl}>latest release</a>. Studio checks it, installs it over USB and restarts the camera. You don’t need Teensy Loader.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="download" class="section">
+    <div class="wrap dl">
+      <div>
+        <h2 class="big">Download</h2>
+        <p>Studio and the camera firmware are free. V3 cameras run them today. V4 is experimental and not yet tested on a real camera.</p>
+        <table class="req">
+          <tbody>
+            <tr><th scope="row">macOS</th><td>12 or later, Apple silicon and Intel</td></tr>
+            <tr><th scope="row">Windows</th><td>10 or 11, 64-bit</td></tr>
+            <tr><th scope="row">Linux</th><td>x86-64 or ARM64. Install PJRC's <a href="https://www.pjrc.com/teensy/00-teensy.rules">udev rules</a> once for USB access.</td></tr>
+          </tbody>
+        </table>
+        <p class="small"><a href={SITE.releasesUrl}>All releases and checksums</a></p>
+      </div>
+      <DownloadList />
+    </div>
+  </section>
+
+  <section class="section dev">
+    <div class="wrap">
+      <p>Writing your own tools? Read the <a href="/docs/protocol-v2/">USB protocol</a> and the <a href="/docs/raw-data/">.DAT file format</a>, or start from <a href={`${SITE.repoUrl}/tree/master/app`}>Studio's source</a> (Tauri, Rust and React).</p>
+    </div>
   </section>
 </MarketingLayout>
 
 <style>
-  .page-wrap {
-    max-width: var(--tc-container);
-    margin: 0 auto;
-    padding: 56px 28px 24px;
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .facts { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 18px 0 0; padding: 0; color: var(--muted); font-size: 14px; }
+  .facts li { display: inline-flex; align-items: center; gap: 10px; }
+  .facts .os { display: inline-flex; gap: 8px; color: var(--dim); }
+  .facts .os :global(svg) { width: 16px; height: 16px; display: block; }
+  .jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .jump a { font-size: 13.5px; text-decoration: none; color: var(--muted); padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+  .jump a:hover { color: var(--text); border-color: var(--border-strong); }
+
+  .feat-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 56px; align-items: center; }
+  .flip .feat-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
+  .flip .txt { order: 2; }
+  .txt :global(.fic) { width: 44px; height: 44px; display: grid; place-items: center; margin-bottom: 18px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+  .txt :global(.fic svg) { width: 22px; height: 22px; display: block; }
+  .txt p { margin: 14px 0 0; color: var(--muted); font-size: 17px; max-width: 46ch; }
+  .points { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .points li { position: relative; padding-left: 20px; font-size: 15px; }
+  .points li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 8px; height: 3px; border-radius: 2px; background: var(--ironbow); }
+  .feat figure { margin: 0; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: #0b0b0c; box-shadow: var(--shadow-window); }
+
+  .try { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); }
+  .try b { display: block; font-size: 16px; }
+  .try span { color: var(--muted); font-size: 14.5px; }
+  .dats { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .dats a { display: inline-flex; align-items: center; gap: 6px; font: 500 13.5px var(--font-mono); text-decoration: none; }
+  .dats a:last-child { font-family: var(--font-sans); }
+  .dats :global(svg) { width: 14px; height: 14px; display: block; }
+
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two > div { padding: 24px 32px 0 0; border-top: 1px solid var(--border); }
+  .two > div + div { padding-left: 32px; border-left: 1px solid var(--border); }
+  .two :global(.big-ic svg) { width: 24px; height: 24px; display: block; color: var(--dim); }
+  .two h3 { margin-top: 14px; font-size: 20px; letter-spacing: -0.01em; }
+  .two p { margin: 8px 0 0; color: var(--muted); font-size: 15.5px; max-width: 48ch; }
+
+  .dl { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: start; }
+  .dl > div > p { margin: 14px 0 0; color: var(--muted); font-size: 16px; max-width: 46ch; }
+  .dl .small { font-size: 14px; }
+  .req { margin-top: 20px; border-collapse: collapse; font-size: 14px; width: 100%; }
+  .req th, .req td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .req th { font-weight: 500; width: 86px; color: var(--text); }
+  .req td { color: var(--muted); }
+  .dev p { margin: 0; color: var(--muted); font-size: 16px; }
+  .dev { padding-block: 48px 64px; }
+
+  @media (max-width: 1000px) {
+    .feat-grid, .dl { grid-template-columns: 1fr; gap: 28px; }
+    .flip .feat-grid { grid-template-columns: 1fr; }
+    .flip .txt { order: 0; }
   }
-  .page-head {
-    max-width: 66ch;
-    margin-bottom: 48px;
-  }
-  .page-head h1 {
-    margin: 0;
-    font-size: clamp(2rem, 3.6vw, 2.75rem);
-    font-weight: 650;
-  }
-  .page-head p {
-    margin: 12px 0 0;
-    font-size: 1.05rem;
-    color: var(--tc-text-muted);
-  }
-  .cta-row {
-    margin-top: 24px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .btn-primary,
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    height: 40px;
-    padding: 0 16px;
-    border-radius: 7px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-  .btn-primary {
-    background: var(--tc-thermal);
-    color: var(--tc-text-on-thermal);
-  }
-  .btn-secondary {
-    border: 1px solid var(--tc-border-strong);
-    background: transparent;
-    color: var(--tc-text);
-  }
-  .btn-secondary:hover {
-    background: var(--tc-surface-2);
-  }
-  .app-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 36px 48px;
-    margin-bottom: 64px;
-  }
-  .app-item {
-    padding-top: 20px;
-    border-top: 1px solid var(--tc-border);
-  }
-  .app-item h2 {
-    margin: 0 0 8px;
-    font-size: 1.15rem;
-    font-weight: 650;
-  }
-  .app-item p {
-    margin: 0;
-    font-size: 14.5px;
-    color: var(--tc-text-muted);
-    max-width: 52ch;
-  }
-  .legacy-section {
-    padding-top: 48px;
-    border-top: 1px solid var(--tc-border);
-  }
-  .legacy-section h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 650;
-  }
-  .legacy-lead {
-    margin: 8px 0 28px;
-    color: var(--tc-text-muted);
-    max-width: 64ch;
-  }
-  .legacy-lead code {
-    font-family: var(--tc-font-mono);
-    font-size: 0.88em;
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: var(--tc-surface-2);
-    color: var(--tc-text);
-  }
-  .legacy-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 36px;
-  }
-  .legacy-item {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .legacy-item img {
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    object-fit: cover;
-    border: 1px solid var(--tc-border);
-    border-radius: 8px;
-    display: block;
-  }
-  .legacy-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-  }
-  .legacy-top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .legacy-body h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 650;
-  }
-  .meta {
-    font-family: var(--tc-font-mono);
-    font-size: 12px;
-    color: var(--tc-text-dim);
-  }
-  .legacy-body p {
-    margin: 0;
-    font-size: 14px;
-    color: var(--tc-text-muted);
-  }
-  .legacy-links {
-    margin-top: auto;
-    padding-top: 4px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--tc-thermal);
-  }
-  .legacy-links a {
-    text-decoration: none;
-  }
-  .legacy-links a:hover {
-    text-decoration: underline;
-  }
-  @media (max-width: 820px) {
-    .app-grid,
-    .legacy-grid {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 700px) {
+    .two { grid-template-columns: 1fr; }
+    .two > div + div { padding-left: 0; border-left: 0; margin-top: 24px; }
+    .cta .btn { width: 100%; }
   }
 </style>
