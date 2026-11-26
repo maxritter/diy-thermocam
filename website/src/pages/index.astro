@@ -41,8 +41,8 @@ const jsonLd = [
           <div data-reveal><V4Status compact /></div>
           <h1 data-reveal style="--i:1">Build your own <span class="hl">thermal camera</span></h1>
           <p class="lead" data-reveal style="--i:2">
-            A handheld radiometric camera with a FLIR Lepton 3.5 and a Teensy 4.1. Both boards arrive fully
-            assembled: plug in four modules and close the case with eight screws. No soldering.
+            A handheld thermal camera with a FLIR Lepton. The boards arrive assembled: plug in four modules
+            and close the case. No soldering.
           </p>
           <div class="cta" data-reveal style="--i:3">
             <a class="btn btn-primary" data-os-download href="/software/#download"><Icon name="download" /><span>Download Studio</span></a>
@@ -99,8 +99,7 @@ const jsonLd = [
         <div class="stage-copy">
           <h2 id="stage-h" class="stage-text" data-chars>Every pixel is a <span class="hl">temperature</span>.</h2>
           <p class="stage-sub">
-            The Lepton 3.5 measures 160 × 120 points, almost nine times a second. Every picture keeps all 19,200
-            readings, so you can measure it again later in Studio.
+            160 × 120 readings, nine times a second. Measure any picture again later in Studio.
           </p>
         </div>
         <figure class="stage-shot">
@@ -115,8 +114,7 @@ const jsonLd = [
       <div class="section-head">
         <h2 class="big" data-reveal>Four steps from parts to pictures</h2>
         <p data-reveal style="--i:1">
-          You need a PH1 and a 2 mm flat screwdriver, 4 and 5 mm nut drivers, fine tweezers and a USB-C cable. The
-          parts list sorts everything else into one order per shop, and says who can print or cut the shell.
+          Tools: two screwdrivers, two nut drivers, tweezers and a USB-C cable.
         </p>
       </div>
       <div class="track-wrap">
@@ -125,7 +123,7 @@ const jsonLd = [
           <li class="step" data-reveal style="--i:0">
             <div class="disc">1</div>
             <h3>Order the parts</h3>
-            <p>The two assembled boards from a fab, the electronics from DigiKey or Mouser.</p>
+            <p>Boards from a fab, modules from DigiKey or Mouser.</p>
             <figure class="photo" data-wipe style="--i:1"><img src="/images/v4/exploded.jpg" alt="Exploded render of every part: front shell, display, board with modules, battery, back shell" width="1333" height="1600" loading="lazy" /></figure>
           </li>
           <li class="step" data-reveal style="--i:1">
@@ -159,14 +157,14 @@ const jsonLd = [
     <div class="wrap">
       <div class="section-head">
         <h2 class="big" data-reveal>Studio, the desktop app</h2>
-        <p data-reveal style="--i:1">Connect the camera over USB to see the live image, measure any point and save radiometric captures.</p>
+        <p data-reveal style="--i:1">Live image, measurements and captures over USB.</p>
       </div>
       <div data-reveal style="--i:2"><StudioTabs /></div>
 
       <div id="download" class="dl">
         <div data-reveal>
           <h3>Download Studio and firmware</h3>
-          <p>Free for non-commercial use. Studio installs the firmware over USB-C, so you don't need Teensy Loader. V3 cameras run the same firmware and Studio today.</p>
+          <p>Free for non-commercial use. Also installs the firmware. Works with V3 cameras today.</p>
         </div>
         <div data-reveal style="--i:1"><DownloadList /></div>
       </div>
@@ -177,7 +175,7 @@ const jsonLd = [
     <div class="wrap">
       <div class="section-head">
         <h2 class="big" data-reveal>What it sees</h2>
-        <p data-reveal style="--i:1">Every capture keeps the temperature of each pixel, so you can measure again later. These are example scenes, rendered the way Studio exports them.</p>
+        <p data-reveal style="--i:1">Example scenes, rendered the way Studio exports them.</p>
       </div>
       <div class="gallery">
         {EXAMPLES.slice(0, 5).map((e, i) => (
@@ -200,10 +198,10 @@ const jsonLd = [
         <p data-reveal style="--i:1">Change the board, print a different shell or fork the firmware. Free for non-commercial use.</p>
       </div>
       <div class="files">
-        <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/pcb`} data-reveal style="--i:0"><Icon name="chip" class="fic" /><h3>Board</h3><p>KiCad project, Gerbers, and BOM and placement files for JLCPCB, Seeed and PCBWay.</p><span class="path">hardware/pcb <Icon name="arrowUpRight" class="pic" /></span></a>
-        <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/enclosure`} data-reveal style="--i:1"><Icon name="box" class="fic" /><h3>Shell</h3><p>build123d source with STEP, STL and 3MF exports, plus the laser-cut acrylic case.</p><span class="path">hardware/enclosure <Icon name="arrowUpRight" class="pic" /></span></a>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/pcb`} data-reveal style="--i:0"><Icon name="chip" class="fic" /><h3>Board</h3><p>KiCad project and fab files.</p><span class="path">hardware/pcb <Icon name="arrowUpRight" class="pic" /></span></a>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/hardware/enclosure`} data-reveal style="--i:1"><Icon name="box" class="fic" /><h3>Shell</h3><p>build123d source, STEP and STL.</p><span class="path">hardware/enclosure <Icon name="arrowUpRight" class="pic" /></span></a>
         <a class="file" href={`${SITE.repoUrl}/tree/master/firmware`} data-reveal style="--i:2"><Icon name="camera" class="fic" /><h3>Firmware</h3><p>C++17 for Teensy 4.1. Builds with arduino-cli.</p><span class="path">firmware <Icon name="arrowUpRight" class="pic" /></span></a>
-        <a class="file" href={`${SITE.repoUrl}/tree/master/app`} data-reveal style="--i:3"><Icon name="file" class="fic" /><h3>Studio</h3><p>Tauri and Rust with a React interface. Reads every .DAT capture.</p><span class="path">app <Icon name="arrowUpRight" class="pic" /></span></a>
+        <a class="file" href={`${SITE.repoUrl}/tree/master/app`} data-reveal style="--i:3"><Icon name="file" class="fic" /><h3>Studio</h3><p>Tauri, Rust and React.</p><span class="path">app <Icon name="arrowUpRight" class="pic" /></span></a>
       </div>
     </div>
   </section>

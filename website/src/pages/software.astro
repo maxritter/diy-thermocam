@@ -11,32 +11,32 @@ const features = [
     id: 'live',
     icon: 'palette' as const,
     title: 'See it live',
-    body: 'Plug in the camera and Studio finds it. The live image runs at the Lepton’s full 8.7 frames a second, with a fixed or automatic temperature range.',
-    points: ['The camera’s 19 palettes, plus Inferno, Viridis, Magma, Plasma, Turbo and your own', 'Hottest, coldest and centre point marked as you move', 'Every tool one click away: no modes to switch'],
+    body: 'Plug in the camera and Studio finds it. Full frame rate, fixed or automatic range.',
+    points: ['19 camera palettes, five more and your own', 'Hottest, coldest and centre point marked'],
     shot: 'palettes' as const, alt: 'Studio Live view of a house front in winter in Ironblack, with the palette grid, colour scale and image options beside it',
   },
   {
     id: 'measure',
     icon: 'ruler' as const,
     title: 'Measure anything',
-    body: 'Place points and areas on the image and read their temperatures live, or on a saved capture.',
-    points: ['Spots of 1 or 3 × 3 pixels, boxes, circles and polygons', 'Line profiles and the difference between two points', 'Emissivity per area, reflected temperature, and presets for skin, circuit boards, brick and metals'],
+    body: 'Live, or on a saved capture.',
+    points: ['Spots, boxes, circles, polygons and lines', 'Emissivity per area, with material presets'],
     shot: 'measure' as const, alt: 'Studio measuring a breaker panel: a box on the hot breaker, a line across the row, and charts of the readings over time and along the line',
   },
   {
     id: 'watch',
     icon: 'thermometer' as const,
     title: 'Find what stands out',
-    body: 'Mark every pixel above or below a temperature, and let Studio watch a reading over time.',
-    points: ['Isotherms you drag to the temperature you care about', 'A live histogram of the whole frame', 'A plot over time, and alarms that start a capture or a recording when a value crosses a limit'],
+    body: 'Isotherms, a histogram and alarms.',
+    points: ['Mark every pixel above or below a temperature', 'Alarms start a capture or recording at a limit'],
     shot: 'live' as const, alt: 'Studio Live view of a circuit board under load: a box on the hot chip, a spot on the regulator, and the histogram beside the colour scale',
   },
   {
     id: 'export',
     icon: 'share' as const,
     title: 'Export and share',
-    body: 'Save what you see in the format the next person needs. Nothing extra to install.',
-    points: ['PNG or JPEG with a scale bar, GIF, and MP4 video', 'CSV of every temperature, 16-bit TIFF in kelvin, .DAT sequences and time-lapse', 'A report in HTML or Markdown with your measurements'],
+    body: 'Images, video, raw data and reports.',
+    points: ['PNG, JPEG, GIF and MP4', 'CSV, 16-bit TIFF and .DAT', 'HTML or Markdown report'],
     img: '/images/examples/pcb.jpg', w: 1470, h: 1024, alt: 'An export of a circuit board under load with the hottest and coldest points and a scale bar',
   },
 ];
@@ -73,7 +73,7 @@ const jsonLd = [
   <section class="page-head">
     <div class="wrap">
       <h1>Studio, the desktop app</h1>
-      <p>See the camera’s image live on your computer, measure any point, and keep every pixel’s temperature for later. Studio also installs the camera’s firmware.</p>
+      <p>The camera’s live image on your computer. Measure, record and update the firmware.</p>
       <div class="cta">
         <a class="btn btn-primary" data-os-download href="#download"><span>Download Studio</span></a>
         <a class="btn btn-ghost" href="/docs/desktop-app/">Read the Studio guide</a>
@@ -109,7 +109,7 @@ const jsonLd = [
     <div class="wrap">
       <div class="section-head">
         <h2 class="big">Open saved captures</h2>
-        <p>Studio opens the .DAT files any DIY-Thermocam saves. Change the palette, measure again and export. Your notes and areas go into a .thermo.json file next to the capture, so the .DAT stays readable on the camera.</p>
+        <p>Open any .DAT capture, change the palette, measure again and export.</p>
       </div>
       <div class="shots">
         <AppShot name="library" alt="Studio’s Captures library in grid view with eight thermal pictures, each showing its hottest temperature" />
@@ -132,12 +132,12 @@ const jsonLd = [
       <div>
         <Icon name="sd" class="big-ic" />
         <h3>The camera’s SD card</h3>
-        <p>Browse, preview, download and delete captures over the same USB cable, at about 9 MB/s. No card reader, no restart.</p>
+        <p>Browse and download captures over USB. No card reader.</p>
       </div>
       <div>
         <Icon name="chip" class="big-ic" />
         <h3>Firmware updates</h3>
-        <p>Choose the firmware file from the <a href={SITE.firmwareUrl}>latest release</a>. Studio checks it, installs it over USB and restarts the camera. You don’t need Teensy Loader.</p>
+        <p>Pick the <a href={SITE.firmwareUrl}>firmware file</a>; Studio installs it over USB.</p>
       </div>
     </div>
   </section>
@@ -146,7 +146,7 @@ const jsonLd = [
     <div class="wrap">
       <div class="section-head">
         <h2 class="big">Download</h2>
-        <p>Studio and the camera firmware are free for non-commercial use. V3 cameras run them today. V4 is experimental and not yet tested on a real camera.</p>
+        <p>Free for non-commercial use. V3 cameras run them today; V4 is not yet tested on a real camera.</p>
       </div>
       <DownloadCards />
       <p class="dl-note">On Linux, install PJRC's <a href="https://www.pjrc.com/teensy/00-teensy.rules">udev rules</a> once for USB access. · <a href={SITE.releasesUrl}>All releases and checksums</a></p>

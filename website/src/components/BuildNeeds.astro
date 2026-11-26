@@ -19,21 +19,21 @@ interface Need {
 }
 
 const needs: Need[] = [
-  { name: 'Main board and Lepton carrier', detail: 'Both assembled by the fab, ordered together with the files in hardware/pcb/fab', img: '/images/v4/pcb-modules.png', fit: 'contain',
+  { name: 'Main board and Lepton carrier', detail: 'Both assembled by the fab', img: '/images/v4/pcb-modules.png', fit: 'contain',
     from: [{ name: 'JLCPCB', href: 'https://jlcpcb.com/' }, { name: 'Seeed', href: 'https://www.seeedstudio.com/fusion_pcb.html' }, { name: 'PCBWay', href: 'https://www.pcbway.com/pcb-assembly.html' }] },
-  { name: 'Shell, printed or laser-cut', detail: 'Print it yourself, order nylon from a print service, or have 3 mm acrylic cut. Plus two bare FR4 boards for the battery', img: '/images/v4/view-kit.jpg',
+  { name: 'Shell, printed or laser-cut', detail: 'Printed, or cut from 3 mm acrylic', img: '/images/v4/view-kit.jpg',
     from: MAKERS.filter((m) => !m.own && ['jlc3dp', 'craftcloud', 'formulor', 'sendcutsend'].includes(m.id)).map((m) => ({ name: m.name, href: m.url })) },
-  { name: 'Teensy 4.1 with headers', detail: 'Pins already soldered. Its five inner pads stay free for the spring pins', img: '/images/parts/s-teensy.jpg', fit: 'contain',
+  { name: 'Teensy 4.1 with headers', detail: 'With pins soldered', img: '/images/parts/s-teensy.jpg', fit: 'contain',
     from: [shop('teensy'), shop('teensy', 1)].filter(Boolean) as Need['from'] },
-  { name: 'FLIR Lepton 3.5', detail: 'Radiometric, 160 × 120, 57°. Or the 3.1R for 95°. It snaps into the carrier', img: '/images/parts/s-lepton35.jpg',
+  { name: 'FLIR Lepton 3.5', detail: '160 × 120, 57°; or the 3.1R for 95°', img: '/images/parts/s-lepton35.jpg',
     from: [shop('lepton35'), shop('lepton35', 1)].filter(Boolean) as Need['from'] },
-  { name: '3.2" touch display', detail: 'ER-TFTM032-3: 4-wire SPI, 5 V, resistive touch, pin header', img: '/images/parts/s-display.jpg',
+  { name: '3.2" touch display', detail: 'ER-TFTM032-3, 4-wire SPI, 5 V', img: '/images/parts/s-display.jpg',
     from: [shop('display')].filter(Boolean) as Need['from'] },
-  { name: 'LiPo, Adafruit 258, 1200 mAh', detail: 'Protected, 5 × 34 × 62 mm, JST-PH plug. For more runtime, a 505060 2000 mAh cell at most 5.0 mm thick', img: '/images/parts/s-lipo.jpg',
+  { name: 'LiPo, Adafruit 258, 1200 mAh', detail: 'Protected, 5 × 34 × 62 mm, JST-PH', img: '/images/parts/s-lipo.jpg',
     from: [shop('lipo'), shop('lipo', 1)].filter(Boolean) as Need['from'] },
-  { name: 'Standoffs, screws and nuts', detail: '8 metal M2.5 standoffs, 8 screws, nylon washers, and the screws, sleeves and nuts that hold the Lepton carrier', img: '/images/parts/s-csk.jpg',
+  { name: 'Standoffs, screws and nuts', detail: 'M2.5 standoffs and screws, M2 screws for the carrier', img: '/images/parts/s-csk.jpg',
     from: [{ name: 'ettinger.de', href: 'https://www.ettinger.de/' }] },
-  { name: 'microSD card and USB-C cable', detail: 'Any 16–32 GB Class 10 card; a data cable, not charge-only', img: '/images/parts/s-microsd.jpg',
+  { name: 'microSD card and USB-C cable', detail: '16–32 GB card; a data cable', img: '/images/parts/s-microsd.jpg',
     from: [shop('cable')].filter(Boolean) as Need['from'] },
 ];
 
@@ -65,7 +65,7 @@ const tools = [
 
 <div class="go not-content">
   <a class="btn btn-ghost btn-sm" href="/docs/partlist/">Open the parts list</a>
-  <span>Prices, every link, and the files each fab needs.</span>
+  <span>Prices, links and fab files.</span>
 </div>
 
 <style>

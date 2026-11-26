@@ -140,52 +140,35 @@ if (form && orders && totalEl && plusEl && statusEl) {
         : '');
     const FR4 = 'hardware/enclosure/exports/fr4/';
     const jlc = st.fab === 'jlc';
-    const std = jlc ? ' (at JLCPCB: Standard assembly)' : '';
+    const std = jlc ? ', Standard' : '';
     /* JLCPCB's Gerbers hold each board in a break-off frame (two-sided assembly needs 70 × 70 mm). */
     const panel = jlc
-      ? [
-          'Delivery format: <i>Panel by Customer</i>, 1 design, 1 × 1, no edge rails: the frame is in the file. Keep the CPL as it is; its coordinates match the board in the frame.',
-          'Turn on production-file confirmation, so you approve the placement before assembly starts.',
-        ]
+      ? ['Panel by Customer, 1 × 1, no edge rails', 'Confirm production file: on']
       : [];
-    const SEAT_REMARK =
-      'Seat the through-hole sockets and headers (J1, J5, J6 on the main board; J101 on the carrier) flush and square before soldering.';
-    const Y101_REMARK = 'Y101 (SiT1602, no stored footprint): pin 1 is next to the silkscreen dot.';
+    const SEAT_REMARK = 'Seat J1, J5, J6 and J101 flush and square before soldering.';
+    const Y101_REMARK = 'Y101 pin 1 goes next to the silkscreen dot.';
     const list = (items: string[]) =>
       `<ul class="settings">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`;
     groups[fab.name].extra =
       `<div class="files"><b class="h">Main board: files to upload</b>${boardFiles(F, F)}${list([
-        '2 layers, 89.4 × 68.4 mm, 1.6 mm FR-4, 1 oz copper, lead-free HASL or ENIG, any colour',
-        `Assembly on both sides${std}: everything on the bottom, the display socket J1 on top`,
+        '2 layers, 1.6 mm FR-4, lead-free HASL or ENIG',
+        `Assembly: both sides${std}`,
         ...panel,
-        ...(jlc ? [`Add this remark: <q>${esc(SEAT_REMARK)}</q>`] : []),
-        `Before you pay, compare the placement preview with <a href="${GH}hardware/pcb/fab/${F}assembly-bottom.pdf">the bottom assembly drawing</a>: pin 1 of U2, U3, U4, D1, D2, Q1 and Q2 must line up.`,
-        ...(jlc
-          ? [
-              'The boards arrive in their frames: snap each out by bending the frame, never the board or the USB-C connector and switches, then file the tab stubs flush.',
-            ]
-          : []),
+        ...(jlc ? [`Remark: <q>${esc(SEAT_REMARK)}</q>`] : []),
+        `Check pin 1 against the <a href="${GH}hardware/pcb/fab/${F}assembly-bottom.pdf">assembly drawing</a>`,
+        ...(jlc ? ['Snap boards out by bending the frame, not the board'] : []),
       ])}` +
       `<b class="h sub">Lepton carrier: files to upload</b>${boardFiles(`${F}lepton-`, `${F}lepton-`)}${list(
         [
-          '2 layers, 29.2 × 47.0 mm, 1.6 mm FR-4, 1 oz copper, lead-free HASL or ENIG, any colour',
-          `Assembly on both sides${std}: everything on the bottom, the 2 × 10 header J101 on top`,
+          '2 layers, 1.6 mm FR-4, lead-free HASL or ENIG',
+          `Assembly: both sides${std}`,
           ...panel,
-          ...(jlc
-            ? [`Add these remarks: <q>${esc(SEAT_REMARK)}</q> <q>${esc(Y101_REMARK)}</q>`]
-            : []),
-          `Before you pay, compare the placement preview with <a href="${GH}hardware/pcb/fab/${F}lepton-assembly-bottom.pdf">the carrier's bottom drawing</a>: check U101, U102, U103 and Y101, and that the Lepton socket J102 has its floor hole over the small silkscreen circle.`,
-          ...(jlc
-            ? [
-                'JLCPCB has no stored footprint for the 25 MHz clock Y101 yet: at confirmation, its pin-1 mark must sit next to the silkscreen dot beside it.',
-              ]
-            : []),
+          ...(jlc ? [`Remark: <q>${esc(SEAT_REMARK)} ${esc(Y101_REMARK)}</q>`] : []),
+          `Check pin 1 against the <a href="${GH}hardware/pcb/fab/${F}lepton-assembly-bottom.pdf">assembly drawing</a>`,
         ],
       )}` +
       `<b class="h sub">Battery floor and lid: files to upload</b>${fileRow(`${FR4}${F}battery_floor-gerbers.zip`, 'Gerber step, 0.6 mm thick')}${fileRow(`${FR4}${F}battery_lid-gerbers.zip`, 'Gerber step, 0.4 mm thick')}${list(
-        [
-          'Bare boards, no assembly: FR-4, no copper, black solder mask, at the thickness above. The minimum order of five covers five cameras.',
-        ],
+        ['Bare FR-4, no copper, black solder mask'],
       )}</div>`;
 
     /* The shell: who makes it, what to order there, the price and the files. */

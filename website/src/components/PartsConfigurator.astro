@@ -6,7 +6,7 @@ const printers = MAKERS.filter((m) => m.kind === 'print');
 const lasers = MAKERS.filter((m) => m.kind === 'laser');
 ---
 
-<p class="dlead">Choose what you already have and how you want the shell made. You get one list per shop, with links, prices and the files to upload.</p>
+<p class="dlead">Pick what you have and how the shell is made. You get one list per shop.</p>
 <V4Status compact />
 
 <div class="cfg-grid not-content" id="configurator">
@@ -51,7 +51,7 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
       {lasers.map((m, i) => (
         <label class="opt"><input type="radio" name="lmaker" value={m.id} checked={i === 0} /><span>{m.name}<small>{m.short}</small></span></label>
       ))}
-      <p class="fnote">Seeed's laser service isn't listed: its sheets stop at 20 × 20 cm and 2.55 mm, too small and too thin for this case.</p>
+      <p class="fnote">Seeed's laser sheets are too small for this case.</p>
     </fieldset>
     <fieldset data-kind="laser" hidden>
       <legend>Small parts printed by</legend>

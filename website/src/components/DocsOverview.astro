@@ -3,13 +3,13 @@ import Icon from './Icon.astro';
 import V4Status from './V4Status.astro';
 
 const guides = [
-  { icon: 'download', href: '/software/#download', title: 'Install Studio', body: "Download, first connection, and what to do if the camera isn't found." },
-  { icon: 'camera', href: '/docs/manual/', title: 'Camera controls', body: 'Capture button, touch menu, palettes, charging. One table and the menu map.' },
-  { icon: 'display', href: '/docs/desktop-app/', title: 'Studio', body: 'Live view, measuring, SD card and exports, one screenshot per task.' },
-  { icon: 'chip', href: '/docs/firmware/', title: 'Firmware updates', body: 'Update with Studio, or build from source with arduino-cli.' },
-  { icon: 'box', href: '/docs/hardware/', title: 'Board and shell', body: 'KiCad renders, pin map, print settings, fab options.' },
-  { icon: 'usb', href: '/docs/protocol-v2/', title: 'USB protocol', body: 'Packet format and commands for your own software.' },
-  { icon: 'file', href: '/docs/raw-data/', title: '.DAT file format', body: 'How a radiometric capture is stored.' },
+  { icon: 'download', href: '/software/#download', title: 'Install Studio', body: "Download and first connection." },
+  { icon: 'camera', href: '/docs/manual/', title: 'Camera controls', body: 'Buttons, touch menu and charging.' },
+  { icon: 'display', href: '/docs/desktop-app/', title: 'Studio', body: 'Live view, measuring and exports.' },
+  { icon: 'chip', href: '/docs/firmware/', title: 'Firmware updates', body: 'Update, or build from source.' },
+  { icon: 'box', href: '/docs/hardware/', title: 'Board and shell', body: 'Boards, pin map and printing.' },
+  { icon: 'usb', href: '/docs/protocol-v2/', title: 'USB protocol', body: 'For your own software.' },
+  { icon: 'file', href: '/docs/raw-data/', title: '.DAT file format', body: 'How a capture is stored.' },
 ] as const;
 
 interface Props {
@@ -20,8 +20,7 @@ const { part } = Astro.props;
 
 {part === 'intro' && (<>
 <p class="dlead">
-  DIY-Thermocam is a handheld thermal camera you put together from two assembled boards, four modules and a printed or laser-cut shell.
-  These guides go from ordering parts to your first measurement.
+  From ordering parts to your first measurement.
 </p>
 
 <V4Status />
@@ -35,7 +34,6 @@ const { part } = Astro.props;
   <li><a href="/docs/manual/"><span class="pic dark"><img src="/images/studio/web/studio-measure.webp" alt="" width="1600" height="1305" /></span><b>4 Measure</b><small>On the camera or live on your computer</small></a></li>
 </ol>
 
-<div class="note not-content"><Icon name="info" /><span>Studio installs firmware over USB-C. You only need Teensy Loader if Studio can't reach the Teensy.</span></div>
 </>)}
 
 {part === 'guides' && (

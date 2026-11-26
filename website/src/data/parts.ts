@@ -140,7 +140,7 @@ export const PARTS: Part[] = [
   {
     id: 'lipo',
     name: 'LiPo, Adafruit 258, 1200 mAh',
-    d: 'Protected, 5 × 34 × 62 mm, JST-PH plug. About 2.5–3.5 hours of use. Two printed battery spacers hold it in the middle of the cradle.',
+    d: 'Protected, 5 × 34 × 62 mm, JST-PH plug. 2.5–3.5 hours.',
     img: '/images/parts/s-lipo.jpg',
     shops: [
       {
@@ -159,7 +159,7 @@ export const PARTS: Part[] = [
         alt: 'More runtime: 505060, 2000 mAh',
         n: 'LiPo 505060, 2000 mAh',
         d: 'Protected, 5.0 × 50 × 60 mm, at most 5.0 mm thick. About 4–6 hours of use. Fits the cradle without the battery spacers.',
-        warn: "ampul.eu doesn't list the plug, lead length or polarity: confirm a JST-PH plug, at least 50 mm of lead, and its + and − against the board before you order.",
+        warn: 'Confirm a JST-PH plug, 50 mm lead and polarity before you order.',
         eu: 7.29,
         u: same('https://ampul.eu/en/li-po-batteries/4394-li-pol-battery-2000mah-37v-505060'),
       },
@@ -169,7 +169,7 @@ export const PARTS: Part[] = [
     id: 'sd',
     own: 'sd',
     name: 'microSD card, 16–32 GB',
-    d: 'Any Class 10 card from any shop. Most builders already have one.',
+    d: 'Any Class 10 card.',
     img: '/images/parts/s-microsd.jpg',
     anyIn: ['us', 'eu'],
     shops: [
@@ -408,10 +408,10 @@ export const PARTS: Part[] = [
   {
     id: 'threadlocker',
     name: 'Threadlocker, medium strength',
-    d: 'Removable, such as Loctite 243. A small drop on each Lepton screw tip.',
+    d: 'Removable, such as Loctite 243. A drop per Lepton screw.',
     icon: 'screw',
     anyIn: ['us', 'eu'],
-    anyD: 'Medium-strength, removable, such as Loctite 243. A small drop on each Lepton screw tip.',
+    anyD: 'Medium, removable, such as Loctite 243. A drop per Lepton screw.',
     shops: [],
   },
   {
@@ -456,7 +456,7 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
     min: 'Assembly starts at 2 boards.',
     note: 'Both boards use Standard (two-sided) assembly.',
     carrierWarn:
-      "Every part comes from JLCPCB's own stock except the Lepton socket J102 (Molex 105028-1001, C585422). JLCPCB usually has none, so pre-order it in the parts manager first; the minimum is 9.",
+      'Pre-order the Lepton socket J102 (C585422, minimum 9) in the parts manager first.',
     up: ['Gerber step', 'Assembly: BOM', 'Assembly: CPL'],
   },
   seeed: {
@@ -465,7 +465,7 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
     dir: 'hardware/pcb/fab/seeed/',
     gerbers: 'gerbers.zip',
     min: 'Takes about 4 weeks.',
-    note: 'Seeed buys the parts; the BOM links each one on LCSC. Also upload both assembly drawings.',
+    note: 'Seeed buys the parts. Also upload both assembly drawings.',
     drawings: true,
     up: ['PCB files', 'Assembly: BOM', 'Assembly: placement'],
   },
@@ -475,7 +475,7 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
     dir: 'hardware/pcb/fab/pcbway/',
     gerbers: 'gerbers.zip',
     min: '',
-    note: 'PCBWay buys the parts; the notes column lists each LCSC number. Answer "no" to Chinese substitutes.',
+    note: 'PCBWay buys the parts. Answer "no" to substitutes.',
     up: ['Gerber file', 'Assembly: BOM', 'Assembly: placement'],
   },
 };
@@ -584,7 +584,7 @@ export const MAKERS: Maker[] = [
     name: 'Craftcloud',
     url: 'https://craftcloud3d.com/',
     short: 'Compares print shops in the US and Europe',
-    how: 'Pick PA12 nylon or PETG; it lists offers from many print shops.',
+    how: 'Pick PA12 nylon or PETG.',
     where: 'Offers from shops near you in the US and Europe.',
   },
   {

@@ -16,7 +16,7 @@ export const EXAMPLES: Example[] = [
     dat: 'HOUSE.DAT',
     palette: 'Ironblack',
     range: '−3 to 11 °C',
-    note: 'Heat escapes around every window frame and under the eaves.',
+    note: 'Heat escapes at the windows and eaves.',
   },
   {
     id: 'solar',
@@ -24,7 +24,7 @@ export const EXAMPLES: Example[] = [
     dat: 'SOLAR.DAT',
     palette: 'Rainbow',
     range: '−2 to 78 °C',
-    note: 'One cell runs over 30 °C hotter than the rest: a cracked cell or a failed bypass diode.',
+    note: 'One cell runs over 30 °C hotter than the rest.',
   },
   {
     id: 'pcb',
@@ -32,7 +32,7 @@ export const EXAMPLES: Example[] = [
     dat: 'PCB.DAT',
     palette: 'Inferno',
     range: '24 to 86 °C',
-    note: 'The processor runs at 86 °C, the regulator next to it is the second hot spot.',
+    note: 'The processor at 86 °C, the regulator second.',
   },
   {
     id: 'printer',
@@ -40,7 +40,7 @@ export const EXAMPLES: Example[] = [
     dat: 'PRINTER.DAT',
     palette: 'Rainbow',
     range: '21 to 64 °C',
-    note: 'The heated bed is even at about 60 °C, so the first layer sticks everywhere.',
+    note: 'An even bed at about 60 °C.',
   },
   {
     id: 'person',
@@ -56,7 +56,7 @@ export const EXAMPLES: Example[] = [
     dat: 'WINDOW.DAT',
     palette: 'Rainbow',
     range: '10 to 55 °C',
-    note: 'The frame edges are the coldest part of the room, where the draught gets in.',
+    note: 'Cold frame edges show the draught.',
   },
   {
     id: 'radiator',
@@ -64,7 +64,7 @@ export const EXAMPLES: Example[] = [
     dat: 'RADIATOR.DAT',
     palette: 'Rainbow',
     range: '17 to 56 °C',
-    note: 'Warm channels from the supply pipe, cold window glass above.',
+    note: 'Warm pipe channels, cold glass above.',
   },
   {
     id: 'brakes',
@@ -72,7 +72,7 @@ export const EXAMPLES: Example[] = [
     dat: 'BRAKES.DAT',
     palette: 'Ironblack',
     range: '6 to 118 °C',
-    note: 'The disc is at 118 °C. Compare both sides of the car to find a brake that drags.',
+    note: 'The disc at 118 °C. Compare both sides.',
   },
   {
     id: 'breaker',
@@ -80,7 +80,7 @@ export const EXAMPLES: Example[] = [
     dat: 'BREAKER.DAT',
     palette: 'Ironblack',
     range: '22 to 74 °C',
-    note: 'One overloaded breaker and its cable stand out from the rest.',
+    note: 'One overloaded breaker stands out.',
   },
   {
     id: 'pipe',
@@ -88,7 +88,7 @@ export const EXAMPLES: Example[] = [
     dat: 'PIPE.DAT',
     palette: 'Rainbow',
     range: '18 to 41 °C',
-    note: 'The heating pipe shows through the plaster, so you know where not to drill.',
+    note: 'The pipe shows where not to drill.',
   },
   {
     id: 'coffee',
@@ -96,7 +96,7 @@ export const EXAMPLES: Example[] = [
     dat: 'COFFEE.DAT',
     palette: 'Ironblack',
     range: '19 to 68 °C',
-    note: 'The surface of the coffee is the hottest point; the handle stays cool.',
+    note: 'Hot coffee, cool handle.',
   },
   {
     id: 'motor',
@@ -104,7 +104,7 @@ export const EXAMPLES: Example[] = [
     dat: 'MOTOR.DAT',
     palette: 'Inferno',
     range: '20 to 82 °C',
-    note: 'The front bearing runs 30 °C hotter than the housing: it needs grease or replacing.',
+    note: 'The front bearing runs 30 °C hotter than the housing.',
   },
   {
     id: 'dog',
@@ -112,7 +112,7 @@ export const EXAMPLES: Example[] = [
     dat: 'DOG.DAT',
     palette: 'Lava',
     range: '17 to 38 °C',
-    note: 'Eyes, ears and nose are the warmest parts of a short-haired dog.',
+    note: 'Eyes, ears and nose are warmest.',
   },
   {
     id: 'fox',
@@ -120,7 +120,7 @@ export const EXAMPLES: Example[] = [
     dat: 'FOX.DAT',
     palette: 'White-Hot',
     range: '2 to 33 °C',
-    note: 'Face and legs are warmest; the thick coat keeps the body surface cool.',
+    note: 'The thick coat keeps the body cool.',
   },
   {
     id: 'floor',
@@ -128,7 +128,7 @@ export const EXAMPLES: Example[] = [
     dat: 'FLOOR.DAT',
     palette: 'Plasma',
     range: '20 to 34 °C',
-    note: 'The pipe loops show through the tiles, warmest near the manifold.',
+    note: 'Pipe loops, warmest near the manifold.',
   },
   {
     id: 'strip',
@@ -136,7 +136,7 @@ export const EXAMPLES: Example[] = [
     dat: 'STRIP.DAT',
     palette: 'Ironblack',
     range: '20 to 74 °C',
-    note: 'One plug runs at 74 °C: a loose contact or too much load on one socket.',
+    note: 'One plug at 74 °C: a loose contact or overload.',
   },
   {
     id: 'beehive',
@@ -144,7 +144,7 @@ export const EXAMPLES: Example[] = [
     dat: 'BEEHIVE.DAT',
     palette: 'Rainbow',
     range: '−3 to 11 °C',
-    note: 'The warm patch shows where the bees cluster, so you know the colony is alive without opening the hive.',
+    note: 'The warm patch shows the cluster, without opening the hive.',
   },
   {
     id: 'horse',
@@ -152,7 +152,7 @@ export const EXAMPLES: Example[] = [
     dat: 'HORSE.DAT',
     palette: 'Ironblack',
     range: '8 to 35 °C',
-    note: 'Legs cool towards the hooves. A joint warmer than the same joint on the other leg is an early sign of inflammation.',
+    note: 'A warmer joint than on the other leg can mean inflammation.',
   },
   {
     id: 'pan',
@@ -160,7 +160,7 @@ export const EXAMPLES: Example[] = [
     dat: 'PAN.DAT',
     palette: 'Lava',
     range: '24 to 215 °C',
-    note: 'The heat follows the ring of the induction coil; the middle of the pan is about 60 °C cooler.',
+    note: 'The heat follows the coil ring; the middle is 60 °C cooler.',
   },
   {
     id: 'fridge',
@@ -168,7 +168,7 @@ export const EXAMPLES: Example[] = [
     dat: 'FRIDGE.DAT',
     palette: 'Rainbow',
     range: '9 to 24 °C',
-    note: 'A cold streak along the top of the door: the seal leaks and the fridge runs longer than it should.',
+    note: 'A cold streak where the door seal leaks.',
   },
   {
     id: 'hiker',
@@ -176,7 +176,7 @@ export const EXAMPLES: Example[] = [
     dat: 'HIKER.DAT',
     palette: 'White-Hot',
     range: '−2 to 32 °C',
-    note: 'On a cold night a person stands out among the trees, face and hands most of all.',
+    note: 'A person stands out among the trees.',
   },
   {
     id: 'ceiling',
@@ -184,7 +184,7 @@ export const EXAMPLES: Example[] = [
     dat: 'CEILING.DAT',
     palette: 'Arctic',
     range: '12 to 34 °C',
-    note: 'A cold patch where the insulation above the ceiling is missing. Spots like this are where mould starts.',
+    note: 'A cold patch where insulation is missing.',
   },
   {
     id: 'switch',
@@ -192,7 +192,7 @@ export const EXAMPLES: Example[] = [
     dat: 'SWITCH.DAT',
     palette: 'Inferno',
     range: '22 to 52 °C',
-    note: 'The power supply end runs hottest; keep the air gap beside it free.',
+    note: 'The power supply end runs hottest.',
   },
   {
     id: 'heatpump',
@@ -200,7 +200,7 @@ export const EXAMPLES: Example[] = [
     dat: 'HEATPUMP.DAT',
     palette: 'Plasma',
     range: '−7 to 52 °C',
-    note: 'In heating mode the coil is colder than the winter air; the compressor and its pipes carry the heat into the house.',
+    note: 'The coil is colder than the winter air.',
   },
 ];
 

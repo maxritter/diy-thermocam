@@ -1,15 +1,18 @@
-# User Manual
+# User manual
 
-This manual covers daily operation, on-device touchscreen controls, charging, file transfer, and firmware updates for **DIY-Thermocam V3 and V4** running **Firmware 4.0** (Teensy 4.1). Owners of **V1 and V2** cameras (Teensy 3.2 / 3.6) should continue using [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8).
+For DIY-Thermocam V3 and V4 on firmware 4.0 (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) stay on [firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8).
 
 ## Charging and power
 
-- Plug a USB-C cable into the board-edge port, from a charger or USB-C port rated 1.5 A or more. The TI `BQ24074` charger powers the camera directly while charging the LiPo at about 0.6 A: about 2.5 hours for the 1200 mAh Adafruit cell, about 4 hours for a 2000 mAh cell.
-- Flip the side slide switch to power the camera on or off. A full 2000 mAh LiPo delivers roughly 4–6 hours of field use, the 1200 mAh Adafruit cell about 60 % of that.
+- Charge from the board-edge USB-C port, with a charger or port rated 1.5 A or more.
+- The camera runs while it charges.
+- Full charge: about 2.5 hours for the 1200 mAh Adafruit cell, 4 hours for 2000 mAh.
+- Runtime: about 4–6 hours on 2000 mAh, about 60 % of that on 1200 mAh.
+- The side slide switch turns the camera on and off.
 
 ## Live view controls
 
-The live view in four scenes, drawn by the firmware's simulator:
+Four scenes from the firmware's simulator:
 
 | Circuit board (Glowbow) | Window and radiator (Rainbow) |
 | --- | --- |
@@ -21,16 +24,16 @@ The live view in four scenes, drawn by the firmware's simulator:
 
 | Input | Action |
 | --- | --- |
-| **Short press** top button (`< 1 s`) | Save a radiometric `.DAT` image (plus optional `.BMP` preview) to the microSD card. |
-| **Long press** top button (`> 1 s`) | Open Video Recording (or stop an active recording). |
-| **Short tap** screen | Open the Main Menu. |
-| **Long touch** in Auto range mode | Hold or release the current min/max temperature range. |
-| **Long touch** in Manual range mode | Cycle through saved temperature range presets (`Preset 1`–`3`). |
-| **Long touch** during USB streaming | Exit the PC session cleanly and return to standalone live mode. |
+| Press the top button (under 1 s) | Save a `.DAT` image, plus an optional `.BMP`, to the microSD card |
+| Hold the top button (over 1 s) | Open video recording, or stop it |
+| Tap the screen | Open the main menu |
+| Hold the screen, auto range | Lock or release the current min/max range |
+| Hold the screen, manual range | Cycle range presets 1–3 |
+| Hold the screen, USB streaming | Leave the PC session and return to live view |
 
 ## Main menu
 
-Tap the 3.2-inch touchscreen in live mode to open the 2-page Main Menu. Use **`More >`** / **`< Page 1`** to switch pages and **`< Live`** to return to the live thermal view.
+Tap the screen in live view to open the two-page menu. **More >** and **< Page 1** switch pages; **< Live** goes back.
 
 | Main menu, dark theme | Main menu, light theme | Palette picker |
 | --- | --- | --- |
@@ -38,12 +41,33 @@ Tap the 3.2-inch touchscreen in live mode to open the 2-page Main Menu. Use **`M
 
 ### Page 1
 
-- **Palette:** Visual picker showing live gradient bars for all **19 built-in color schemes** (`Arctic`, `Black-Hot`, `Blue-Red`, `Coldest`, `Contrast`, `Double-Rainbow`, `Gray-Red`, `Glowbow`, `Grayscale`, `Hottest`, `Ironblack`, `Lava`, `Medical`, `Rainbow`, `Wheel 1`, `Wheel 2`, `Wheel 3`, `White-Hot`, `Yellow`).
-- **Range:** Switch between **Auto** (tracks scene min/max) and **Manual** (set custom bounds and save up to 3 presets in EEPROM).
-- **FFC:** Trigger an immediate Flat-Field Correction shutter cycle on the FLIR Lepton to clear thermal drift.
-- **Points:** Add, remove, or clear up to 96 custom spot measurement points anywhere in the frame.
-- **Gallery:** Browse saved **Images** (`.DAT` / `.BMP`) and **Videos** on the microSD card newest first, with `Find`, `<` / `>`, `Play`, `Convert` (to `.BMP`), and `Delete`.
-- **Settings:** Configure **General** (Time, Date, BMP Conversion), **Hardware** (Battery Gauge calibration, Lepton High/Low Gain `-10..+140 °C` vs `-10..+450 °C`, Format SD as FAT32/exFAT, USB MTP), **Display** (Temp. format °C/°F, 180° Rotation / Horizontal Flip, Screen Timeout), and **UI Theme**.
+| Item | What it does |
+| --- | --- |
+| **Palette** | Pick one of 19 color schemes |
+| **Range** | Auto follows the scene; Manual sets bounds and saves up to 3 presets |
+| **FFC** | Run a flat-field correction now to clear thermal drift |
+| **Points** | Add, remove or clear up to 96 measurement spots |
+| **Gallery** | Find, play, convert to `.BMP` or delete saved images and videos |
+| **Settings** | Time, date, sensor gain, SD card, display and theme |
+
+<details>
+<summary>The 19 palettes</summary>
+
+Arctic, Black-Hot, Blue-Red, Coldest, Contrast, Double-Rainbow, Gray-Red, Glowbow, Grayscale, Hottest, Ironblack, Lava, Medical, Rainbow, Wheel 1, Wheel 2, Wheel 3, White-Hot, Yellow.
+
+</details>
+
+<details>
+<summary>All settings</summary>
+
+| Group | Options |
+| --- | --- |
+| General | Time, date, BMP conversion |
+| Hardware | Battery gauge calibration, Lepton gain (high −10 to +140 °C, low −10 to +450 °C), format SD as FAT32 or exFAT, USB MTP |
+| Display | °C or °F, 180° rotation, horizontal flip, screen timeout |
+| UI theme | Dark, light or high contrast |
+
+</details>
 
 | Gallery | Overlays | System status |
 | --- | --- | --- |
@@ -51,26 +75,37 @@ Tap the 3.2-inch touchscreen in live mode to open the 2-page Main Menu. Use **`M
 
 ### Page 2
 
-- **Overlays:** One-tap 3×3 toggle grid for Battery, Time, Date, Spot, Scale bar, Storage, Filter (`Gaussian` / `Box` / `Off`), UI Theme, and Min/Max markers.
-- **Isotherm:** Highlight pixels hotter or colder than a chosen threshold in a contrast color.
-- **Status:** Live telemetry screen showing actual live FPS, VoSPI resync/CRC counters, battery voltage, SD capacity, SPI bus speeds, and Teensy MCU temperature.
-- **USB MTP:** Reboot into USB MTP file transfer mode to copy files with Windows Explorer, Linux file managers, or macOS OpenMTP.
-- **Video:** Record full-rate **Normal** radiometric clips (~8.8 fps) or **Interval** time-lapse sequences (`1 s` to `10 min` cadence). Tap the screen during recording to toggle the backlight; press the top button to stop.
-- **Theme:** Switch between **Dark** (Obsidian + Amber), **Light** (Daylight Outdoor), and **High-Contrast** (Glove/Sun).
+| Item | What it does |
+| --- | --- |
+| **Overlays** | Show or hide battery, time, date, spot, scale, storage, filter, theme, min/max |
+| **Isotherm** | Color pixels above or below a threshold |
+| **Status** | Frame rate, VoSPI errors, battery, SD space, SPI speeds, CPU temperature |
+| **USB MTP** | Restart into file-transfer mode |
+| **Video** | Record clips at about 8.8 fps, or time-lapse every 1 s to 10 min |
+| **Theme** | Dark, Light or High-Contrast |
+
+- While recording, tap the screen to turn the backlight off or on.
+- Press the top button to stop recording.
+- The image filter can be Gaussian, Box or Off.
 
 ## Connecting to a computer
 
 ### Studio (recommended)
 
-Connect the camera to **macOS 12+**, **Windows 10/11**, or **Linux** with a data-capable USB cable and open **DIY-Thermocam Desktop Studio**.
+Connect a data USB cable and open DIY-Thermocam Desktop Studio on macOS 12+, Windows 10/11 or Linux.
 
-On first start Studio shows **Connect your Thermocam**; plug in the camera and it connects by itself, or click **Try the demo camera**. Studio has three places: **Live** for the live image and measuring, **Captures** for the camera's microSD card and the files on your computer, and **Camera** for settings and firmware updates. See [Studio](/docs/desktop-app/) for a tour.
+- Studio connects by itself. No camera? Click **Try the demo camera**.
+- **Live** shows the image, **Captures** the files, **Camera** the settings.
+- Settings you change in Studio apply on the camera at once and stay saved.
+- **Snapshot** and **Record** save `.DAT` files to **Pictures › Thermocam**.
+- **Captures › On the camera** reads the microSD card without MTP.
+- Set what the top button does under **Camera**.
 
-Over [USB Protocol v2](/docs/protocol-v2/), the camera streams raw 16-bit radiometric frames at **8.77 fps**. Settings changed in Studio apply on the camera at once and stay saved. **Snapshot** and **Record** save full-temperature `.DAT` captures in **Pictures › Thermocam** on your computer (change the folder in the gear menu). In **Captures › On the camera**, browse, preview, download and delete microSD files at up to **9.20 MB/s** without MTP drivers or reboots. The top button on the camera takes a snapshot in Studio, starts a recording, or does nothing, as set under **Camera**.
+See [Studio](/docs/desktop-app/) for a tour.
 
 ### Linux USB permissions
 
-On Linux, Studio needs permission to open the camera's USB serial port and, for firmware updates, the Teensy bootloader. If Studio shows **Thermocam found, but Studio can't open it**, or a firmware update stops because Studio couldn't open the camera in update mode, set this up once.
+Do this once if Studio shows **Thermocam found, but Studio can't open it**, or a firmware update can't open the camera in update mode.
 
 1. Add your user to the `dialout` group, then log out and back in:
 
@@ -88,13 +123,18 @@ On Linux, Studio needs permission to open the camera's USB serial port and, for 
 
 3. Unplug the camera, plug it back in, and click **Try again** in Studio.
 
-Some distributions call the group `uucp` instead of `dialout`; `ls -l /dev/ttyACM0` shows which group owns the port.
+Some distributions use the `uucp` group instead. `ls -l /dev/ttyACM0` shows which.
 
 ### Copying files over USB (MTP)
 
-If you want to copy files without opening Desktop Studio, go to **Main Menu → Page 2 → USB MTP** (or **Settings → Hardware → USB MTP**). Plugging in USB during live mode never interrupts filming with an unwanted MTP popup.
+- Open **Main menu → Page 2 → USB MTP**, or **Settings → Hardware → USB MTP**.
+- Copy files with Windows Explorer, a Linux file manager or OpenMTP on macOS.
+- Plugging in USB in live view does not start MTP.
 
 ## Updating the firmware
 
-- **Desktop Studio (recommended):** Open **Camera › Update firmware…**, choose `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), and click **Install**. Studio checks the file, restarts the camera in update mode and writes the firmware. Works on Windows, macOS, and Linux (see [Linux USB permissions](#linux-usb-permissions)).
-- **Standalone Teensy Loader or Arduino CLI:** For a brand-new blank Teensy 4.1 or custom builds from source, follow the [Firmware and Flashing guide](/docs/firmware/).
+1. In Studio, open **Camera › Update firmware…**.
+2. Choose `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases).
+3. Click **Install**. Studio restarts the camera in update mode and writes the firmware.
+
+On Linux, set up [USB permissions](#linux-usb-permissions) first. For a blank Teensy 4.1 or your own build, see [Firmware](/docs/firmware/).
