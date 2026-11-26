@@ -32,7 +32,7 @@ Git keeps the sources only. Generated and paid media (`public/sim/`, `public/vo/
 
 ## Facts on screen
 
-Specifications come from `README.md`: FLIR Lepton 3.5 with 160 × 120 pixels, −10 to +450 °C, Teensy 4.1, 3.2-inch touchscreen, 19 palettes, three themes, up to 96 measuring spots, 4 to 6 hours on a 2000 mAh LiPo, and about $293 in parts with the sensor ($121 without). V4 hardware has not been built yet: the film shows renders and the simulator, not footage.
+Specifications come from `README.md`: FLIR Lepton 3.5 with 160 × 120 pixels, −10 to +450 °C, Teensy 4.1, 3.2-inch touchscreen, 19 palettes, three themes, up to 96 measuring spots, a 1200 mAh LiPo (up to 6 hours with the optional 2000 mAh cell), and about $293 in parts with the sensor ($121 without). V4 hardware has not been built yet: the film shows renders and the simulator, not footage.
 
 ## License
 

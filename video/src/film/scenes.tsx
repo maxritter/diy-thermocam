@@ -234,7 +234,7 @@ export function Assemble() {
   const items: [string, string, 'l' | 'r', number][] = [
     ['lepton_module', 'FLIR Lepton 3.5', 'l', word('stack-1', 'Lepton')],
     ['teensy', 'Teensy 4.1', 'r', word('stack-1', 'Teensy')],
-    ['lipo', '2000 mAh battery', 'l', word('stack-1', 'battery')],
+    ['lipo', 'LiPo battery', 'l', word('stack-1', 'battery')],
     ['display', '3.2″ touchscreen', 'r', word('stack-1', 'touchscreen')],
     ['shell', 'Four screws each side', 'l', word('stack-1', 'shell', 0, 'e') + 0.2],
   ]
@@ -586,7 +586,7 @@ export function Uses() {
 export function Battery() {
   const t = useT()
   const L = len('battery')
-  const hours = word('battery-1', 'four')
+  const hours = word('battery-1', 'up')
   const usb = word('battery-1', 'charges')
   return (
     <>
@@ -603,12 +603,12 @@ export function Battery() {
         }}
       />
       <div style={{ position: 'absolute', left: 1060, top: 300, width: 760 }}>
-        <Caps style={{ opacity: ramp(t, 0.2, 0.7) }}>2000 MAH LITHIUM-POLYMER</Caps>
+        <Caps style={{ opacity: ramp(t, 0.2, 0.7) }}>1200 OR 2000 MAH LITHIUM-POLYMER</Caps>
         <div style={{ marginTop: 10, fontFamily: SANS, fontWeight: 300, fontSize: 170, lineHeight: 1.05, color: C.ink, letterSpacing: '-0.03em', opacity: ramp(t, hours - 0.2, hours + 0.3) }}>
-          4–6 h
+          Up to 6 h
         </div>
         <div style={{ marginTop: 6, fontFamily: SANS, fontWeight: 400, fontSize: 36, color: C.inkSoft, opacity: ramp(t, hours + 0.2, hours + 0.6) }}>
-          of measuring on one charge
+          with the 2000 mAh cell
         </div>
         <div style={{ marginTop: 40, opacity: ramp(t, usb, usb + 0.4), translate: `0 ${lerp(10, 0, ramp(t, usb, usb + 0.4))}px` }}>
           <Pill tone="#3DDC84">Charges over USB-C</Pill>

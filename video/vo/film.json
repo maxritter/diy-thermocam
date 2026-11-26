@@ -13,7 +13,7 @@
     { "id": "palette-1", "scene": "palettes", "text": "Nineteen color palettes. Three themes." },
     { "id": "menu-1", "scene": "menu", "text": "Everything else is one tap away: set the range, place your own measuring spots, record photos and video, and look back in the gallery." },
     { "id": "use-1", "scene": "uses", "text": "Find the overloaded breaker. The drafty window. The one part that runs too hot." },
-    { "id": "battery-1", "scene": "battery", "text": "The battery lasts four to six hours, and charges over USB-C." },
+    { "id": "battery-1", "scene": "battery", "text": "With the larger battery, it runs for up to six hours, and it charges over USB-C." },
     { "id": "studio-1", "scene": "studio", "text": "Plug in one cable, and DIY-Thermocam Studio shows the same image live on your computer." },
     { "id": "studio-2", "scene": "studio", "text": "Draw regions, set alarms, and export your recordings, on Mac, Windows and Linux." },
     { "id": "price-1", "scene": "price", "text": "All parts, including the sensor, come to just under three hundred dollars." },
