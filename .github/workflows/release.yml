@@ -1,72 +1,81 @@
 name: Release
+run-name: ${{ github.event_name == 'push' && format('Release {0}', github.ref_name) || 'Release dry run' }}
 
-# One tag (v4.0.0) builds one GitHub release holding the firmware and Studio for every platform.
-# Asset names are fixed so www.diy-thermocam.net can link /releases/latest/download/<name>.
-# The macOS .dmg is built, signed and notarized on a Mac with the Developer ID identity and added
-# to the draft release before it is published.
+# Pushing a tag vX.Y.Z builds the firmware and Studio for macOS, Windows and Linux, checks every package,
+# and publishes one GitHub release with fixed file names, so www.diy-thermocam.net can link
+# /releases/latest/download/<name>. A manual run builds and checks the same packages without releasing.
+#
+# Order: preflight (versions agree, all tests pass) → four builds, each signed where the OS expects it and
+# started once on its own runner → a draft release with checksums and build provenance → the draft's files
+# are downloaded and checked again → published.
+#
+# Signing:
+# - macOS: Developer ID and notarization. Secrets APPLE_CERTIFICATE (base64 .p12), APPLE_CERTIFICATE_PASSWORD,
+#   ASC_PRIVATE_KEY (.p8 text), ASC_KEY_ID and ASC_ISSUER_ID, the same names QualityLayer uses. A tag release
+#   refuses to ship an unsigned Mac app; a dry run without them builds unsigned.
+# - Windows: Azure Artifact Signing through GitHub's OIDC sign-in (no stored password). Secrets AZURE_CLIENT_ID,
+#   AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID; variables AZURE_SIGNING_ENDPOINT, _ACCOUNT, _PROFILE. The
+#   federated credential trusts the `release` environment of this repository only.
 
 on:
   push:
-    tags: ['v*']
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
 
-permissions:
-  contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
 
 env:
   TAURI_CLI: '@tauri-apps/cli@2.12.1'
+  RELEASE: ${{ github.event_name == 'push' }}
 
 jobs:
-  firmware:
-    name: Firmware
-    runs-on: ubuntu-latest
+  preflight:
+    name: Versions and tests
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Host unit tests
-        working-directory: firmware/tests_host
-        run: make clean && make test
-
-      - uses: arduino/setup-arduino-cli@v2
-        with:
-          version: 1.6.0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.arduino15
-          key: arduino15-release-${{ hashFiles('firmware/sketch.yaml') }}
-
-      - name: Compile
-        working-directory: firmware
+      - name: Every version agrees with the tag
+        id: version
         run: |
-          arduino-cli compile --warnings all --export-binaries --output-dir ../out/build
-          hex=$(find ../out/build -maxdepth 1 -name '*.hex' | head -n 1)
-          test -n "$hex"
-          cp "$hex" ../out/firmware.hex
+          app=$(jq -r .version app/package.json)
+          tauri=$(jq -r .version app/src-tauri/tauri.conf.json)
+          cargo=$(sed -n 's/^version = "\(.*\)"/\1/p' app/Cargo.toml | head -n 1)
+          fw=$(sed -n 's/^uint16_t fwVersion = \([0-9]*\);/\1/p' firmware/src/general/globalvariables.cpp)
+          IFS=. read -r major minor patch <<< "$app"
+          echo "Studio $app, tauri.conf $tauri, Cargo $cargo, firmware $fw"
+          [ "$app" = "$tauri" ] && [ "$app" = "$cargo" ] || { echo "::error::Studio versions disagree"; exit 1; }
+          [ "$fw" = "$((major * 100 + minor * 10 + patch))" ] || { echo "::error::firmware fwVersion $fw is not $app"; exit 1; }
+          if [ "$RELEASE" = true ]; then
+            [ "$GITHUB_REF_NAME" = "v$app" ] || { echo "::error::tag $GITHUB_REF_NAME is not v$app"; exit 1; }
+            grep -q "^## \[$app\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no [$app] section"; exit 1; }
+            [ -f ".github/release-notes/v$app.md" ] || { echo "::error::.github/release-notes/v$app.md is missing"; exit 1; }
+          fi
+          echo "version=$app" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
+      - name: Firmware host tests
+        run: make -C firmware/tests_host clean test
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          name: firmware
-          path: out/firmware.hex
-
-  linux:
-    name: Studio for Linux
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
+          workspaces: app -> target
 
       - name: Linux build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libudev-dev libhidapi-dev
 
-      - uses: oven-sh/setup-bun@v2
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: app -> target
-
-      - name: Checks
+      - name: Studio checks
         working-directory: app
         run: |
           bun install --frozen-lockfile
@@ -75,33 +84,157 @@ jobs:
           bun test
           cargo test --workspace
 
+  firmware:
+    name: Firmware
+    needs: preflight
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: arduino/setup-arduino-cli@81d310742121c928ea9c8bbd407b4217b432ae02 # v2.0.0
+        with:
+          version: 1.6.0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.arduino15
+          key: arduino15-${{ hashFiles('firmware/sketch.yaml') }}
+
+      - name: Compile
+        working-directory: firmware
+        run: |
+          arduino-cli compile --warnings all --export-binaries --output-dir ../out/build
+          hex=$(find ../out/build -maxdepth 1 -name '*.hex' | head -n 1)
+          test -s "$hex"
+          cp "$hex" ../out/firmware.hex
+          grep -q '^:00000001FF' ../out/firmware.hex || { echo "::error::firmware.hex has no end record"; exit 1; }
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: firmware
+          path: out/firmware.hex
+          if-no-files-found: error
+
+  macos:
+    name: Studio for macOS
+    needs: preflight
+    runs-on: macos-15
+    environment: release
+    permissions:
+      contents: read
+    env:
+      HAVE_SIGNING: ${{ secrets.APPLE_CERTIFICATE != '' && secrets.APPLE_CERTIFICATE_PASSWORD != '' && secrets.ASC_PRIVATE_KEY != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' }}
+      IDENTITY: 'Developer ID Application: Maximilian Ritter (T9RHL46525)'
+      APP: app/target/universal-apple-darwin/release/bundle/macos/DIY-Thermocam Studio.app
+      DMG: out/DIY-Thermocam-Studio-macOS.dmg
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: app -> target
+
+      - name: A release needs the signing secrets
+        if: env.RELEASE == 'true' && env.HAVE_SIGNING != 'true'
+        run: |
+          echo "::error::A release must be signed and notarized: set APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, ASC_PRIVATE_KEY, ASC_KEY_ID and ASC_ISSUER_ID."
+          exit 1
+
+      - name: Signing keychain and notarization key
+        if: env.HAVE_SIGNING == 'true'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          umask 077
+          printf '%s\n' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/asc.p8"
+          printf '%s' "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          pass=$(openssl rand -hex 16)
+          kc="$RUNNER_TEMP/signing.keychain-db"
+          security create-keychain -p "$pass" "$kc"
+          security set-keychain-settings -lut 3600 "$kc"
+          security unlock-keychain -p "$pass" "$kc"
+          security import "$RUNNER_TEMP/cert.p12" -k "$kc" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$pass" "$kc" > /dev/null
+          # shellcheck disable=SC2046
+          security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
+          rm -f "$RUNNER_TEMP/cert.p12"
+          security find-identity -v -p codesigning "$kc" | grep -q "$IDENTITY"
+
       - name: Build
         working-directory: app
-        run: bunx "$TAURI_CLI" build --bundles appimage,deb
-
-      - name: Name the files
+        env:
+          CI: 'true'
+          APPLE_API_KEY: ${{ secrets.ASC_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          mkdir out
-          cp app/target/release/bundle/appimage/*.AppImage out/DIY-Thermocam-Studio-Linux.AppImage
-          cp app/target/release/bundle/deb/*.deb out/DIY-Thermocam-Studio-Linux.deb
+          if [ "$HAVE_SIGNING" = true ]; then
+            export APPLE_SIGNING_IDENTITY="$IDENTITY" APPLE_API_KEY_PATH="$RUNNER_TEMP/asc.p8"
+          else
+            unset APPLE_API_KEY APPLE_API_ISSUER
+          fi
+          bun install --frozen-lockfile
+          bunx "$TAURI_CLI" build --target universal-apple-darwin --bundles app,dmg
+          mkdir ../out
+          cp target/universal-apple-darwin/release/bundle/dmg/*.dmg "../$DMG"
 
-      - uses: actions/upload-artifact@v4
+      - name: Sign, notarize and staple the disk image
+        if: env.HAVE_SIGNING == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          codesign --force --timestamp --sign "$IDENTITY" "$DMG"
+          xcrun notarytool submit "$DMG" --key "$RUNNER_TEMP/asc.p8" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" --wait
+          for attempt in 1 2 3 4 5; do xcrun stapler staple "$DMG" && break; sleep $((20 * attempt)); done
+          xcrun stapler validate "$DMG"
+
+      - name: Check the signature and Gatekeeper
+        if: env.HAVE_SIGNING == 'true'
+        run: |
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          codesign -dv "$APP" 2>&1 | grep -q "Authority=$IDENTITY"
+          spctl -a -vv -t exec "$APP"
+          spctl -a -vv -t open --context context:primary-signature "$DMG"
+
+      - name: Start the packaged app
+        run: |
+          [ "$(lipo -archs "$APP/Contents/MacOS/diy-thermocam")" = "x86_64 arm64" ]
+          "$APP/Contents/MacOS/diy-thermocam" & pid=$!
+          sleep 15
+          kill -0 "$pid" || { echo "::error::Studio quit within 15 seconds"; exit 1; }
+          kill "$pid"
+
+      - name: Remove the signing material
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/asc.p8" "$RUNNER_TEMP/cert.p12"
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: linux
+          name: macos
           path: out/*
+          if-no-files-found: error
 
   windows:
     name: Studio for Windows
-    runs-on: windows-latest
+    needs: preflight
+    runs-on: windows-2025
     environment: release
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: app -> target
 
@@ -113,21 +246,20 @@ jobs:
           bunx "$TAURI_CLI" build --no-bundle
 
       - name: Sign in to Azure
-        uses: azure/login@v3
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Sign the app
-        uses: azure/artifact-signing-action@v2
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
         with:
           endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
           signing-account-name: ${{ vars.AZURE_SIGNING_ACCOUNT }}
           certificate-profile-name: ${{ vars.AZURE_SIGNING_PROFILE }}
           files: ${{ github.workspace }}\app\target\release\diy-thermocam.exe
           file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
           exclude-environment-credential: true
           exclude-workload-identity-credential: true
@@ -149,14 +281,13 @@ jobs:
           cp target/release/bundle/nsis/*-setup.exe ../out/DIY-Thermocam-Studio-Windows.exe
 
       - name: Sign the installer
-        uses: azure/artifact-signing-action@v2
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
         with:
           endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
           signing-account-name: ${{ vars.AZURE_SIGNING_ACCOUNT }}
           certificate-profile-name: ${{ vars.AZURE_SIGNING_PROFILE }}
           files: ${{ github.workspace }}\out\DIY-Thermocam-Studio-Windows.exe
           file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
           exclude-environment-credential: true
           exclude-workload-identity-credential: true
@@ -178,30 +309,115 @@ jobs:
             if ($s.Status -ne 'Valid') { throw "$f is not validly signed" }
           }
 
-      - uses: actions/upload-artifact@v4
+      - name: Start the packaged app
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "app\target\release\diy-thermocam.exe" -PassThru
+          Start-Sleep -Seconds 15
+          if ($p.HasExited) { throw "Studio quit within 15 seconds (exit code $($p.ExitCode))" }
+          Stop-Process -Id $p.Id -Force
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows
           path: out/*
+          if-no-files-found: error
 
-  release:
-    name: Draft release
-    needs: [firmware, linux, windows]
-    runs-on: ubuntu-latest
+  linux:
+    name: Studio for Linux
+    needs: preflight
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/download-artifact@v4
+      - name: Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libudev-dev libhidapi-dev xvfb
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: app -> target
+
+      - name: Build
+        working-directory: app
+        run: |
+          bun install --frozen-lockfile
+          bunx "$TAURI_CLI" build --bundles appimage,deb
+
+      - name: Start the packaged app
+        run: |
+          xvfb-run -a app/target/release/diy-thermocam & pid=$!
+          sleep 15
+          kill -0 "$pid" || { echo "::error::Studio quit within 15 seconds"; exit 1; }
+          kill "$pid"
+
+      - name: Name the files
+        run: |
+          mkdir out
+          cp app/target/release/bundle/appimage/*.AppImage out/DIY-Thermocam-Studio-Linux.AppImage
+          cp app/target/release/bundle/deb/*.deb out/DIY-Thermocam-Studio-Linux.deb
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: linux
+          path: out/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish the release
+    needs: [preflight, firmware, macos, windows, linux]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.preflight.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: assets
           merge-multiple: true
 
-      - name: Create the draft release
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Every expected file, with checksums
+        working-directory: assets
         run: |
-          cd assets
-          sha256sum -- * > SHA256SUMS.txt
+          expected="firmware.hex DIY-Thermocam-Studio-macOS.dmg DIY-Thermocam-Studio-Windows.exe DIY-Thermocam-Studio-Linux.AppImage DIY-Thermocam-Studio-Linux.deb"
+          for f in $expected; do test -s "$f" || { echo "::error::$f is missing"; exit 1; }; done
+          [ "$(find . -type f | wc -l)" = 5 ] || { find . -type f; echo "::error::unexpected files"; exit 1; }
+          # shellcheck disable=SC2086
+          sha256sum -- $expected > SHA256SUMS.txt
           cat SHA256SUMS.txt
-          notes="../.github/release-notes/${GITHUB_REF_NAME}.md"
-          gh release create "$GITHUB_REF_NAME" ./* --draft --verify-tag \
-            --title "DIY-Thermocam ${GITHUB_REF_NAME#v}" --notes-file "$notes"
+
+      - name: Build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            assets/firmware.hex
+            assets/DIY-Thermocam-Studio-*
+
+      - name: Draft release
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "::error::$GITHUB_REF_NAME already has a release"; exit 1
+          fi
+          gh release create "$GITHUB_REF_NAME" assets/* --draft --verify-tag \
+            --title "DIY-Thermocam $VERSION" --notes-file ".github/release-notes/$GITHUB_REF_NAME.md"
+
+      - name: Download the draft again and compare
+        run: |
+          mkdir check
+          gh release download "$GITHUB_REF_NAME" --dir check
+          (cd check && sha256sum --check SHA256SUMS.txt)
+
+      - name: Publish
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
