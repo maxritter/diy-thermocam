@@ -374,7 +374,8 @@ impl SimulatorTransport {
 
     pub fn push_next_frame(&mut self) {
         self.frame_seq = self.frame_seq.wrapping_add(1);
-        let frame = generate_demo_frame(self.frame_seq, 160, 120);
+        // Real sample captures in turn (q7); `generate_demo_frame` stays for tests.
+        let frame = crate::demo_scenes::demo_scene_frame(self.frame_seq);
         let payload = frame.to_bytes();
         if let Ok(pkt) = Packet::encode(MsgType::FrameRaw, 0, self.frame_seq as u16, 0, &payload) {
             self.out_buf.extend(pkt);

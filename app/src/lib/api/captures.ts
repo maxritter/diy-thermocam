@@ -4,8 +4,9 @@ import {
   tauriListen as listen,
   simSavedCaptures,
 } from "@/lib/backend";
+import { demoCaptureFrame } from "@/lib/demoCamera";
 import { DEFAULT_PALETTES, samplePalette } from "@/lib/palettes";
-import { decodeFrameRawBinary, evaluateRoi, generateDemoFrame } from "@/lib/thermal";
+import { decodeFrameRawBinary, evaluateRoi } from "@/lib/thermal";
 import type {
   Material,
   RadiometryParams,
@@ -267,10 +268,11 @@ const simCard = {
   totalKb: 31_268_864,
   freeKb: 28_412_000,
   files: [
-    { name: "20261125101500.DAT", seq: 3, mtime: 1764065700, size: 38_805 },
-    { name: "20261125102014.DAT", seq: 16, mtime: 1764066014, size: 38_805 },
+    // Each `seq` falls in a different demo capture (90 frames each): PCB, solar, house, breaker.
+    { name: "20261125101500.DAT", seq: 183, mtime: 1764065700, size: 38_805 },
+    { name: "20261125102014.DAT", seq: 106, mtime: 1764066014, size: 38_805 },
     { name: "20261125102847.DAT", seq: 29, mtime: 1764066527, size: 38_805 },
-    { name: "20261123180233.DAT", seq: 42, mtime: 1763917353, size: 38_805 },
+    { name: "20261123180233.DAT", seq: 312, mtime: 1763917353, size: 38_805 },
     { name: "20261123174809.DAT", seq: 55, mtime: 1763916489, size: 1_204, damaged: true },
   ] as SimFile[],
   video: true,
@@ -282,6 +284,8 @@ interface SimLocal {
   damaged?: boolean;
   /** A recording made in Studio: frame times. */
   t_ms?: number[];
+  /** A snapshot taken in Live: the frame it saved, so it opens exactly as taken. */
+  frame?: ThermalFrame;
 }
 
 function simRecordingTimes(frames: number): number[] {
@@ -330,6 +334,7 @@ function syncSimSaved(): void {
       }),
       seq: c.frame.frame_seq,
       t_ms: c.t_ms ?? undefined,
+      frame: c.kind === "snapshot" ? c.frame : undefined,
     });
   }
 }
@@ -354,8 +359,9 @@ function seedSidecar(name: string): ThermoSidecar {
 }
 simSidecars.set("camera:/20261125101500.DAT", seedSidecar("PCB load"));
 
+/** A simulated capture's frame: the demo camera's real sample captures, by `seq`. */
 function simFrameFor(seq: number): ThermalFrame {
-  return generateDemoFrame(seq);
+  return demoCaptureFrame(seq);
 }
 
 function simCardFile(sdPath: string): SimFile | undefined {
@@ -598,7 +604,7 @@ export const capturesApi = {
     }
     const local = simLocal(ref.path);
     if (local?.damaged) throw badFile();
-    return simFrameFor(local?.seq ?? 19);
+    return local?.frame ?? simFrameFor(local?.seq ?? 19);
   },
 
   /**

@@ -2,7 +2,7 @@
 
 **DIY-Thermocam Desktop Studio** is an open-source app for **macOS, Windows, and Linux**. It shows the live image, measures temperatures, saves and edits full-temperature captures, exports pictures and video, reads the camera's microSD card, and updates the firmware.
 
-![Live view with four measuring regions, the color scale and the chart below](/images/studio/studio-live-pro.png)
+![Live view of a breaker panel with a box on the hot breaker, a line across the row, the color scale and the charts below](/images/studio/studio-live-pro.png)
 
 ## Supported systems
 
@@ -20,13 +20,13 @@ Built with [Tauri v2](https://github.com/tauri-apps/tauri), Rust (`thermocam-cor
 
 | Live | An opened capture | Captures library |
 | --- | --- | --- |
-| ![Studio Live view with the thermal image, the color scale and the palettes beside it](/images/studio/studio-live-standard.png) | ![A saved snapshot opened in Captures, with a measuring box and its readings](/images/studio/studio-editor.png) | ![The Captures library listing the pictures on the camera's card](/images/studio/studio-sd-browser.png) |
+| ![Studio Live view of a house in the Ironblack palette, with the color scale and the palettes beside it](/images/studio/studio-live-standard.png) | ![A saved snapshot of a solar panel opened in Captures, with a box on the hot cell and its readings](/images/studio/studio-editor.png) | ![The Captures library listing the pictures on the camera's card](/images/studio/studio-sd-browser.png) |
 
 Studio has three places, chosen in the header: **Live**, **Captures** and **Camera**. There are no modes to switch: every tool is always one click away.
 
 ### First start
 
-With no camera plugged in, Studio shows **Connect your Thermocam**. Plug in the camera and it connects by itself, or click **Try the demo camera** to explore Studio with a simulated image. If the camera is unplugged, the last image stays on screen, dimmed, and Studio reconnects when the camera returns.
+With no camera plugged in, Studio shows **Connect your Thermocam**. Plug in the camera and it connects by itself, or click **Try the demo camera** to explore Studio with real sample captures (a house, a solar panel, a circuit board and more). If the camera is unplugged, the last image stays on screen, dimmed, and Studio reconnects when the camera returns.
 
 ### Live
 

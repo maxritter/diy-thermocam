@@ -4,6 +4,7 @@ pub mod atomic_file;
 pub mod captures;
 pub mod card;
 pub mod dat;
+pub mod demo_scenes;
 pub mod disk_cache;
 pub mod export;
 pub mod flasher;

@@ -81,7 +81,7 @@ export function RecordingBar({
     connection === "demo" ? (
       <span className="st-live-pill">
         <span className="st-status-dot demo" />
-        Demo <span className="muted">simulated image</span>
+        Demo <span className="muted">sample captures</span>
       </span>
     ) : null;
 
@@ -96,7 +96,7 @@ export function RecordingBar({
           </span>
         </span>
         {connection === "demo" ? (
-          <span className="st-live-pill" title="Demo camera: a simulated image">
+          <span className="st-live-pill" title="Demo camera: real sample captures in turn">
             <span className="st-status-dot demo" />
             Demo
           </span>
