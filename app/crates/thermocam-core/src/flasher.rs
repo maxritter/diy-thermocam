@@ -210,6 +210,59 @@ pub trait HalfKayDevice {
     fn write_report(&mut self, report: &[u8; TEENSY41_REPORT_SIZE]) -> Result<(), FlashError>;
 }
 
+type HidJob = Box<dyn FnOnce(&mut Option<hidapi::HidApi>) + Send>;
+
+/// Runs `job` on the one thread that owns this process's `HidApi`.
+///
+/// `hidapi` keeps one global HID manager per process (on macOS an `IOHIDManager` scheduled on
+/// the creating thread's run loop). Creating and dropping an `HidApi` per call from short-lived
+/// worker threads tore that manager down under concurrent callers and crashed the app
+/// (`EXC_BREAKPOINT` in `CFRunLoopAddSource`). One long-lived thread holds one `HidApi`,
+/// created on first use and never dropped, and serves every listing and open in turn.
+fn with_hid<R: Send + 'static>(
+    job: impl FnOnce(&mut hidapi::HidApi) -> Result<R, FlashError> + Send + 'static,
+) -> Result<R, FlashError> {
+    use std::sync::mpsc;
+    use std::sync::{Mutex, OnceLock};
+
+    static QUEUE: OnceLock<Mutex<mpsc::Sender<HidJob>>> = OnceLock::new();
+    let queue = QUEUE.get_or_init(|| {
+        let (tx, rx) = mpsc::channel::<HidJob>();
+        std::thread::Builder::new()
+            .name("hid".into())
+            .spawn(move || {
+                let mut api: Option<hidapi::HidApi> = None;
+                for job in rx {
+                    job(&mut api);
+                }
+            })
+            .expect("spawn the HID thread");
+        Mutex::new(tx)
+    });
+
+    let (reply_tx, reply_rx) = std::sync::mpsc::channel();
+    let wrapped: HidJob = Box::new(move |slot: &mut Option<hidapi::HidApi>| {
+        let result = (|| {
+            if slot.is_none() {
+                *slot = Some(hidapi::HidApi::new().map_err(|e| FlashError::HidIo(e.to_string()))?);
+            }
+            let api = slot.as_mut().expect("HidApi was just created");
+            api.refresh_devices()
+                .map_err(|e| FlashError::HidIo(e.to_string()))?;
+            job(api)
+        })();
+        let _ = reply_tx.send(result);
+    });
+    queue
+        .lock()
+        .map_err(|_| FlashError::HidIo("HID thread is unavailable".into()))?
+        .send(wrapped)
+        .map_err(|_| FlashError::HidIo("HID thread is unavailable".into()))?;
+    reply_rx
+        .recv()
+        .map_err(|_| FlashError::HidIo("HID thread stopped".into()))?
+}
+
 /// Real USB HID HalfKay device backed by `hidapi`.
 pub struct RealHalfKayDevice {
     dev: hidapi::HidDevice,
@@ -218,11 +271,11 @@ pub struct RealHalfKayDevice {
 impl RealHalfKayDevice {
     /// Attempt a single immediate open of HalfKay `16C0:0478`.
     pub fn open() -> Result<Self, FlashError> {
-        let api = hidapi::HidApi::new().map_err(|e| FlashError::HidIo(e.to_string()))?;
-        let dev = api
-            .open(HALFKAY_VID, HALFKAY_PID)
-            .map_err(|e| classify_hid_open_error(&e.to_string()))?;
-        Ok(Self { dev })
+        with_hid(|api| {
+            api.open(HALFKAY_VID, HALFKAY_PID)
+                .map(|dev| Self { dev })
+                .map_err(|e| classify_hid_open_error(&e.to_string()))
+        })
     }
 
     /// Poll for HalfKay `16C0:0478` to enumerate over USB up to `timeout` (e.g. 10 s after reboot).
@@ -245,11 +298,12 @@ pub struct RealHidBus;
 
 impl HidBus for RealHidBus {
     fn device_ids(&self) -> Result<Vec<(u16, u16)>, FlashError> {
-        let api = hidapi::HidApi::new().map_err(|e| FlashError::HidIo(e.to_string()))?;
-        Ok(api
-            .device_list()
-            .map(|d| (d.vendor_id(), d.product_id()))
-            .collect())
+        with_hid(|api| {
+            Ok(api
+                .device_list()
+                .map(|d| (d.vendor_id(), d.product_id()))
+                .collect())
+        })
     }
 }
 
