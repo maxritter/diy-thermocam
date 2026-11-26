@@ -35,6 +35,11 @@
   --tc-danger-soft: rgb(204 41 54 / 10%);
   --tc-danger-line: rgb(204 41 54 / 35%);
   --tc-canvas-bg: #111214;
+  --tc-raised: #ffffff;
+  --tc-accent-ink: #1a649f;
+  --switch-off-line: #8a8a8a;
+  --shadow-pop: 0 12px 32px rgb(0 0 0 / 14%), 0 2px 6px rgb(0 0 0 / 8%);
+  --scrim: rgb(23 23 23 / 34%);
   --control-h: 32px;
   --radius: 8px;
   --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -73,4 +78,9 @@
   --tc-danger-soft: rgb(255 97 107 / 13%);
   --tc-danger-line: rgb(255 97 107 / 38%);
   --tc-canvas-bg: #060708;
+  --tc-raised: #26282d;
+  --tc-accent-ink: #79b5ec;
+  --switch-off-line: #747884;
+  --shadow-pop: 0 16px 40px rgb(0 0 0 / 55%), 0 2px 8px rgb(0 0 0 / 40%);
+  --scrim: rgb(0 0 0 / 55%);
 }

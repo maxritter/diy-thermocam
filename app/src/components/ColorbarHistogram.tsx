@@ -153,7 +153,7 @@ export function ColorbarHistogram({
         </div>
       </div>
 
-      {/* Live 256-bin Histogram (Pro mode) */}
+      {/* Live 256-bin Histogram */}
       {showHistogram ? (
         <div className="flex flex-col gap-1 border-t border-[var(--tc-line)] pt-2">
           <div className="flex items-center justify-between text-[10px] text-[var(--tc-text-dim)]">

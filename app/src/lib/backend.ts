@@ -1,4 +1,10 @@
 import { DEFAULT_MATERIALS, DEFAULT_PALETTES, parseCustomPaletteText } from "./palettes";
+import {
+  parseSettings,
+  readStoredSettings,
+  type StudioSettings,
+  writeStoredSettings,
+} from "./settings";
 import { decodeFrameRawBinary, generateDemoFrame } from "./thermal";
 import type {
   DeviceConfig,
@@ -27,6 +33,32 @@ async function tauriInvoke<T>(cmd: string, args?: Record<string, unknown>): Prom
   const { invoke } = await import("@tauri-apps/api/core");
   return invoke<T>(cmd, args);
 }
+
+/** True when Tauri rejected because the command is not registered (an older Rust build). */
+export function isMissingCommand(err: unknown, cmd: string): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes(cmd) && /not found|unknown command/i.test(msg);
+}
+
+/**
+ * Calls a Tauri command, or the browser fallback. The fallback also runs when the running Rust
+ * build does not have the command yet, so the frontend can ship ahead of it.
+ */
+async function invokeOr<T>(
+  cmd: string,
+  args: Record<string, unknown> | undefined,
+  fallback: () => T | Promise<T>,
+): Promise<T> {
+  if (!isTauriRuntime()) return fallback();
+  try {
+    return await tauriInvoke<T>(cmd, args);
+  } catch (err) {
+    if (isMissingCommand(err, cmd)) return fallback();
+    throw err;
+  }
+}
+
+const DEFAULT_CAPTURES_DIR = "~/Pictures/Thermocam";
 
 let simTimer: ReturnType<typeof setInterval> | null = null;
 let simSeq = 1;
@@ -70,6 +102,38 @@ let simSdFiles: { name: string; size: number; mtime_epoch: number; seq: number }
 ];
 
 export const backend = {
+  /** Studio's settings (`cmd_settings_load`); localStorage in the browser. */
+  async loadSettings(): Promise<StudioSettings> {
+    const settings = await invokeOr<unknown>("cmd_settings_load", undefined, readStoredSettings);
+    const parsed = parseSettings(settings);
+    writeStoredSettings(parsed);
+    return parsed;
+  },
+
+  /** Saves settings (`cmd_settings_save`). A local copy is kept so the next start paints the
+   * chosen theme before Rust answers. */
+  async saveSettings(settings: StudioSettings): Promise<void> {
+    writeStoredSettings(settings);
+    await invokeOr<void>("cmd_settings_save", { settings: parseSettings(settings) }, () => {});
+  },
+
+  /** The Captures folder (`cmd_captures_dir`), created on first use by Rust. */
+  async capturesDir(): Promise<string> {
+    return invokeOr<string>(
+      "cmd_captures_dir",
+      undefined,
+      () => readStoredSettings().captures_dir ?? DEFAULT_CAPTURES_DIR,
+    );
+  },
+
+  /** Sets the Captures folder (`cmd_set_captures_dir`); Rust checks it is writable. */
+  async setCapturesDir(path: string): Promise<string> {
+    return invokeOr<string>("cmd_set_captures_dir", { path }, () => {
+      writeStoredSettings({ ...readStoredSettings(), captures_dir: path });
+      return path;
+    });
+  },
+
   async listPorts(): Promise<SerialPortInfo[]> {
     if (isTauriRuntime()) {
       const raw =
