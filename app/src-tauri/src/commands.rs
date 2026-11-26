@@ -13,7 +13,7 @@ use tauri::{Emitter, State};
 
 use crate::card::LiveCard;
 use crate::recorder::{on_camera_lost, record_frame, RecorderHandles};
-use crate::state::{stop_stream_and_join, ActiveTransport, AppState};
+use crate::state::{release_client, stop_stream_and_join, ActiveTransport, AppState};
 use thermocam_core::card::{list_card_dir, read_card_file};
 
 use thermocam_core::dat::{ThermalDat, ThermoSidecar};
@@ -92,6 +92,7 @@ pub async fn cmd_connect(
     tauri::async_runtime::spawn_blocking(move || {
         let _lifecycle = stream_lifecycle.lock().map_err(|e| other(e.to_string()))?;
         stop_stream_and_join(&streaming, &stream_gen, &stream_thread);
+        release_client(&client_arc);
         let mut active = if port.starts_with("sim://") {
             ActiveTransport::Simulator(Box::new(ProtocolClient::new(SimulatorTransport::new())))
         } else {
@@ -123,11 +124,8 @@ pub async fn cmd_disconnect(
     tauri::async_runtime::spawn_blocking(move || {
         let _lifecycle = stream_lifecycle.lock().map_err(|e| e.to_string())?;
         stop_stream_and_join(&streaming, &stream_gen, &stream_thread);
-        let mut guard = client_arc.lock().map_err(|e| e.to_string())?;
-        if let Some(mut c) = guard.take() {
-            let _ = c.request_timeout(MsgType::GoodbyeReq, &[], Duration::from_millis(500));
-        }
-        Ok(())
+        release_client(&client_arc);
+        Ok::<(), String>(())
     })
     .await
     .map_err(|e| e.to_string())?

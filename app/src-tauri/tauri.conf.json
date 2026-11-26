@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "DIY-Thermocam",
+  "productName": "DIY-Thermocam Studio",
   "mainBinaryName": "diy-thermocam",
   "version": "0.1.0",
   "identifier": "net.diy-thermocam.studio",

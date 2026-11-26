@@ -179,6 +179,24 @@ pub fn stop_stream_and_join(
     }
 }
 
+/// Hands back the client this Studio holds: a polite goodbye, then dropping it closes the
+/// port. Connect calls this before opening a port, so a reconnect after the page reloads
+/// never finds the port "in use" by Studio itself. Returns whether a client was held.
+pub fn release_client(slot: &Mutex<Option<ActiveTransport>>) -> bool {
+    let held = match slot.lock() {
+        Ok(mut guard) => guard.take(),
+        Err(poisoned) => poisoned.into_inner().take(),
+    };
+    match held {
+        Some(mut client) => {
+            let _ = client.request_timeout(MsgType::GoodbyeReq, &[], Duration::from_millis(500));
+            drop(client);
+            true
+        }
+        None => false,
+    }
+}
+
 pub fn resolve_palette(state: &AppState, id: &str) -> Result<Palette, String> {
     if let Ok(p) = find_palette(id) {
         return Ok(p);
@@ -190,4 +208,27 @@ pub fn resolve_palette(state: &AppState, id: &str) -> Result<Palette, String> {
         .get(id)
         .cloned()
         .ok_or_else(|| format!("palette '{id}' not found"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sim_client() -> ActiveTransport {
+        ActiveTransport::Simulator(Box::new(ProtocolClient::new(SimulatorTransport::new())))
+    }
+
+    #[test]
+    fn releasing_a_held_client_empties_the_slot_so_the_port_can_reopen() {
+        let slot = Mutex::new(Some(sim_client()));
+        assert!(release_client(&slot));
+        assert!(slot.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn releasing_an_empty_slot_does_nothing() {
+        let slot: Mutex<Option<ActiveTransport>> = Mutex::new(None);
+        assert!(!release_client(&slot));
+        assert!(slot.lock().unwrap().is_none());
+    }
 }

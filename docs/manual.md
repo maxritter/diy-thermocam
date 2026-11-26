@@ -64,7 +64,7 @@ Tap the 3.2-inch touchscreen in live mode to open the 2-page Main Menu. Use **`M
 
 Connect the camera to **macOS 12+**, **Windows 10/11**, or **Linux** with a data-capable USB cable and open **DIY-Thermocam Desktop Studio**.
 
-On first start Studio shows **Connect your Thermocam**; plug in the camera and it connects by itself, or click **Try the demo camera**. Studio has three places: **Live** for the live image and measuring, **Captures** for the camera's microSD card and the files on your computer, and **Camera** for settings and firmware updates. See [Desktop App and Software](/docs/software/) for a tour.
+On first start Studio shows **Connect your Thermocam**; plug in the camera and it connects by itself, or click **Try the demo camera**. Studio has three places: **Live** for the live image and measuring, **Captures** for the camera's microSD card and the files on your computer, and **Camera** for settings and firmware updates. See [Studio](/docs/desktop-app/) for a tour.
 
 Over [USB Protocol v2](/docs/protocol-v2/), the camera streams raw 16-bit radiometric frames at **8.77 fps**. Settings changed in Studio apply on the camera at once and stay saved. **Snapshot** and **Record** save full-temperature `.DAT` captures in **Pictures › Thermocam** on your computer (change the folder in the gear menu). In **Captures › On the camera**, browse, preview, download and delete microSD files at up to **9.20 MB/s** without MTP drivers or reboots. The top button on the camera takes a snapshot in Studio, starts a recording, or does nothing, as set under **Camera**.
 
