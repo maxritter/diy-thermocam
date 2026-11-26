@@ -76,19 +76,15 @@ describe("frameStore", () => {
     expect(store.getSampled()?.frame_seq).toBe(2);
   });
 
-  test("hover, series and the drawn counter", () => {
+  test("hover and the drawn counter", () => {
     const clock = fakeScheduler();
-    const store = createFrameStore({ scheduler: clock, seriesCap: 3 });
+    const store = createFrameStore({ scheduler: clock });
     let hovers = 0;
     store.subscribeHover(() => hovers++);
     store.setHover({ x: 1, y: 2, raw: 30000, tempC: 26.9 });
     store.setHover({ x: 1, y: 2, raw: 30000, tempC: 26.9 });
     expect(hovers).toBe(1);
     expect(store.getHover()?.x).toBe(1);
-
-    for (let i = 0; i < 5; i++) store.appendSeries({ tSec: i, values: { max: i } });
-    clock.advanceTo(1000);
-    expect(store.getSeries().map((p) => p.tSec)).toEqual([2, 3, 4]);
 
     store.markDrawn();
     expect(store.counters().drawn).toBe(1);

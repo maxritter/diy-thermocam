@@ -38,17 +38,17 @@ Radiometric `.DAT` files stay byte-compatible with files from earlier DIY-Thermo
 
 | Firmware 4.0 Live HUD | Firmware 4.0 Touchscreen UI | Desktop Studio (macOS, Windows, Linux) |
 | :---: | :---: | :---: |
-| ![Firmware 4.0 Live HUD](website/public/images/firmware/live-hud.png) | ![Firmware 4.0 Main Menu](website/public/images/firmware/main-menu-dark.png) | ![DIY-Thermocam Desktop Studio Pro](website/public/images/studio/studio-live-pro.png) |
+| ![Firmware 4.0 Live HUD](website/public/images/firmware/live-hud.png) | ![Firmware 4.0 Main Menu](website/public/images/firmware/main-menu-dark.png) | ![DIY-Thermocam Desktop Studio Live view with regions and the color scale](website/public/images/studio/studio-live-pro.png) |
 
 - **Standalone touchscreen camera:** 3.2-inch display, 19 color palettes, Dark/Light/High-Contrast themes, auto or manual range, up to 96 temperature spots, and 4–6 hours on a 2000 mAh LiPo.
 - **Firmware 4.0 on Teensy 4.1:** Verified on real hardware at **8.77 fps** USB streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads ([Protocol v2](docs/protocol-v2.md)).
-- **Desktop Studio ([Tauri v2](https://github.com/tauri-apps/tauri) + Rust + WebGL2):** Native macOS, Windows, and Linux app. Includes Standard and Pro modes, ROI emissivity, MP4/TIFF export, SD browsing, and USB updates.
+- **Desktop Studio ([Tauri v2](https://github.com/tauri-apps/tauri) + Rust + WebGL2):** Native macOS, Windows, and Linux app. **Live** measures regions with their own emissivity, sets alarms and exports MP4/TIFF. **Captures** keeps full-temperature snapshots and recordings on your computer, reads the camera's microSD card, and saves edits with Undo. **Camera** holds settings and firmware updates.
 
 ## Quick start
 
-**Prerequisites:** macOS 12+, Windows 10/11, or Linux (install [PJRC `00-teensy.rules`](https://www.pjrc.com/teensy/00-teensy.rules) on Linux for non-root USB access), plus a data-capable USB-C cable.
+**Prerequisites:** macOS 12+, Windows 10/11, or Linux (add your user to the `dialout` group and install [PJRC `00-teensy.rules`](https://www.pjrc.com/teensy/00-teensy.rules); see [Linux USB permissions](docs/manual.md#linux-usb-permissions)), plus a data-capable USB-C cable.
 
-**Firmware** — Firmware 4.0 supports **DIY-Thermocam V3 and V4** (Teensy 4.1). V1 and V2 cameras (Teensy 3.2/3.6) must stay on [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). Download a prebuilt `.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases) and flash it in Desktop Studio (**Pro → Updater**), or build from source with [Arduino CLI](https://github.com/arduino/arduino-cli):
+**Firmware** — Firmware 4.0 supports **DIY-Thermocam V3 and V4** (Teensy 4.1). V1 and V2 cameras (Teensy 3.2/3.6) must stay on [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). Download a prebuilt `.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases) and install it in Desktop Studio (**Camera › Update firmware…**), or build from source with [Arduino CLI](https://github.com/arduino/arduino-cli):
 
 ```bash
 cd firmware && arduino-cli compile

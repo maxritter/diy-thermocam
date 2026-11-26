@@ -1,4 +1,9 @@
-import { isTauriRuntime, simSavedCaptures } from "@/lib/backend";
+import {
+  tauriInvoke as invoke,
+  isTauriRuntime,
+  tauriListen as listen,
+  simSavedCaptures,
+} from "@/lib/backend";
 import { DEFAULT_PALETTES, samplePalette } from "@/lib/palettes";
 import { decodeFrameRawBinary, evaluateRoi, generateDemoFrame } from "@/lib/thermal";
 import type {
@@ -9,6 +14,7 @@ import type {
   SdListing,
   ThermalFrame,
 } from "@/lib/types";
+import { baseName, type CommandError, commandError } from "@/lib/utils";
 
 /**
  * The Captures page's calls to Rust (`agents/rust-commands.md`, plus `cmd_captures_list`).
@@ -44,20 +50,7 @@ export interface CardInfo {
   freeKb: number;
 }
 
-export interface CaptureError {
-  kind: string;
-  detail: string;
-}
-
-/** Rejections come as `{kind, detail}` from new commands and as strings from older ones. */
-export function toCaptureError(err: unknown): CaptureError {
-  if (err && typeof err === "object" && "detail" in err) {
-    const e = err as { kind?: unknown; detail?: unknown };
-    return { kind: typeof e.kind === "string" ? e.kind : "other", detail: String(e.detail) };
-  }
-  if (err instanceof Error) return { kind: "other", detail: err.message };
-  return { kind: "other", detail: String(err) };
-}
+export type CaptureError = CommandError;
 
 // ---------- Edits (sidecar v2) ----------
 
@@ -114,18 +107,6 @@ export interface Series {
 export interface FrameRange {
   from: number;
   to: number;
-}
-
-// ---------- Tauri ----------
-
-async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
-  const core = await import("@tauri-apps/api/core");
-  return core.invoke<T>(cmd, args);
-}
-
-async function listen<T>(event: string, cb: (payload: T) => void): Promise<() => void> {
-  const ev = await import("@tauri-apps/api/event");
-  return ev.listen<T>(event, (e) => cb(e.payload));
 }
 
 interface DatJson {
@@ -236,11 +217,6 @@ function localItem(c: LocalCaptureJson): CaptureItem {
     frames: c.frames,
     mtimeMs: c.mtime_ms || null,
   };
-}
-
-function baseName(path: string): string {
-  const parts = path.split(/[\\/]+/).filter(Boolean);
-  return parts[parts.length - 1] ?? path;
 }
 
 function parentDir(path: string): string {
@@ -607,7 +583,7 @@ export const capturesApi = {
         }
         return frameFromDat(await invoke<DatJson>("cmd_sd_read_dat", { path: ref.sd_path }));
       } catch (err) {
-        const e = toCaptureError(err);
+        const e = commandError(err);
         throw /dat|layout|size|parse|invalid|unexpected/i.test(e.detail)
           ? { kind: "bad_file", detail: e.detail }
           : e;
@@ -677,7 +653,7 @@ export const capturesApi = {
       try {
         [path] = await invoke<[string, DatJson, unknown]>("cmd_load_dat_file", { path: null });
       } catch (err) {
-        const e = toCaptureError(err);
+        const e = commandError(err);
         if (/cancel/i.test(e.detail)) return null;
         throw e;
       }
@@ -747,7 +723,7 @@ export const capturesApi = {
         }
         deleted.push(p);
       } catch (err) {
-        failed.push({ path: p, ...toCaptureError(err) });
+        failed.push({ path: p, ...commandError(err) });
       }
     }
     return { deleted, failed };
@@ -916,7 +892,7 @@ export const capturesApi = {
         });
         return res.path;
       } catch (err) {
-        const e = toCaptureError(err);
+        const e = commandError(err);
         if (e.kind === "cancelled") return null;
         throw e;
       }

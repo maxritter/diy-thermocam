@@ -7,6 +7,7 @@ import type {
   RenderSpec,
   SnapshotInfo,
 } from "@/lib/types";
+import { baseName, type CommandError, commandError } from "@/lib/utils";
 
 /**
  * Snapshot, Copy image, Save PNG… and Record, with their messages (`live.html#states`).
@@ -80,25 +81,6 @@ export interface CaptureActions {
   recorder: Recorder;
 }
 
-interface ErrorLike {
-  kind: string;
-  detail: string;
-}
-
-export function toError(err: unknown): ErrorLike {
-  if (err && typeof err === "object" && "detail" in err) {
-    const e = err as { kind?: unknown; detail?: unknown };
-    return { kind: typeof e.kind === "string" ? e.kind : "other", detail: String(e.detail) };
-  }
-  if (err instanceof Error) return { kind: "other", detail: err.message };
-  return { kind: "other", detail: String(err) };
-}
-
-export function baseName(path: string): string {
-  const parts = path.split(/[\\/]+/).filter(Boolean);
-  return parts[parts.length - 1] ?? path;
-}
-
 /** "36 s", "3 min 12 s", "1 h 04 min". */
 export function durationLabel(ms: number): string {
   const s = Math.max(0, Math.round(ms / 1000));
@@ -126,7 +108,7 @@ export function createCaptureActions(deps: CaptureDeps): CaptureActions {
   const { api, toasts } = deps;
   const reveal = revealLabel(deps.platform);
 
-  const saveError = (e: ErrorLike, what: "save" | "record") => {
+  const saveError = (e: CommandError, what: "save" | "record") => {
     const folderAction = [{ label: "Choose another folder", onClick: deps.chooseFolder }];
     if (e.kind === "read_only") {
       toasts.show({
@@ -160,7 +142,7 @@ export function createCaptureActions(deps: CaptureDeps): CaptureActions {
       await api.writeClipboardPng(png);
       toasts.show({ tone: "ok", text: "Image copied" });
     } catch (err) {
-      toasts.show({ tone: "error", text: `Couldn’t copy the image: ${toError(err).detail}` });
+      toasts.show({ tone: "error", text: `Couldn’t copy the image: ${commandError(err).detail}` });
     }
   };
 
@@ -174,7 +156,7 @@ export function createCaptureActions(deps: CaptureDeps): CaptureActions {
         actions: [{ label: reveal, onClick: () => void api.reveal(res.path).catch(() => {}) }],
       });
     } catch (err) {
-      const e = toError(err);
+      const e = commandError(err);
       if (e.kind === "cancelled") return;
       toasts.show({ tone: "error", text: `Couldn’t save the PNG: ${e.detail}` });
     }
@@ -185,7 +167,7 @@ export function createCaptureActions(deps: CaptureDeps): CaptureActions {
     try {
       saved = await api.snapshot(deps.pngOnSnapshot() ? deps.spec() : null);
     } catch (err) {
-      saveError(toError(err), "save");
+      saveError(commandError(err), "save");
       return;
     }
     const source: RenderSource = { kind: "local", path: saved.path };
@@ -228,7 +210,7 @@ export function createCaptureActions(deps: CaptureDeps): CaptureActions {
       });
     } catch (err) {
       set({ mode: "idle" });
-      const e = toError(err);
+      const e = commandError(err);
       if (e.kind === "already_recording") {
         void recorder.poll();
         return;
@@ -250,7 +232,7 @@ export function createCaptureActions(deps: CaptureDeps): CaptureActions {
       try {
         await api.recordStop();
       } catch (err) {
-        const e = toError(err);
+        const e = commandError(err);
         if (e.kind === "not_recording") set({ mode: "idle" });
         else toasts.show({ tone: "error", text: `Couldn’t stop: ${e.detail}` });
       }

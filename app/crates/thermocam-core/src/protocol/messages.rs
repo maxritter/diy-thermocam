@@ -2,57 +2,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::codec::SparseTempPoint;
+use super::codec::{
+    check_len, read_cstr, read_f32, read_u16, read_u32, read_u64, write_cstr, SparseTempPoint,
+};
 use super::{flags, MsgType, Packet, ProtocolError, BOOTLOADER_MAGIC};
 
 #[inline]
-fn read_u16(b: &[u8], off: usize) -> u16 {
-    u16::from_le_bytes([b[off], b[off + 1]])
-}
-#[inline]
 fn read_i16(b: &[u8], off: usize) -> i16 {
     i16::from_le_bytes([b[off], b[off + 1]])
-}
-#[inline]
-fn read_u32(b: &[u8], off: usize) -> u32 {
-    u32::from_le_bytes([b[off], b[off + 1], b[off + 2], b[off + 3]])
-}
-#[inline]
-fn read_u64(b: &[u8], off: usize) -> u64 {
-    u64::from_le_bytes([
-        b[off],
-        b[off + 1],
-        b[off + 2],
-        b[off + 3],
-        b[off + 4],
-        b[off + 5],
-        b[off + 6],
-        b[off + 7],
-    ])
-}
-#[inline]
-fn read_f32(b: &[u8], off: usize) -> f32 {
-    f32::from_le_bytes([b[off], b[off + 1], b[off + 2], b[off + 3]])
-}
-fn read_cstr(slice: &[u8]) -> String {
-    let end = slice.iter().position(|&c| c == 0).unwrap_or(slice.len());
-    String::from_utf8_lossy(&slice[..end]).into_owned()
-}
-fn write_cstr<const N: usize>(s: &str) -> [u8; N] {
-    let mut buf = [0u8; N];
-    let bytes = s.as_bytes();
-    let len = bytes.len().min(N);
-    buf[..len].copy_from_slice(&bytes[..len]);
-    buf
-}
-fn check_len(payload: &[u8], expected: usize) -> Result<(), ProtocolError> {
-    if payload.len() < expected {
-        return Err(ProtocolError::TruncatedPayload {
-            expected,
-            actual: payload.len(),
-        });
-    }
-    Ok(())
 }
 
 // ── DeviceConfig (32 B) ──────────────────────────────────────────────────────

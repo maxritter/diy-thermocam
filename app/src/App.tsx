@@ -15,6 +15,7 @@ import {
   TARGET_COLDEST,
   TARGET_HOTTEST,
 } from "@/lib/alarms";
+import { cameraApi } from "@/lib/api/camera";
 import type { CaptureItem } from "@/lib/api/captures";
 import { capturesApi } from "@/lib/api/captures";
 import { backend, type SessionLogSample } from "@/lib/backend";
@@ -31,20 +32,17 @@ import { liveSeries } from "@/lib/series";
 import { folderLabel, readStoredSettings, resolveTheme, type StudioSettings } from "@/lib/settings";
 import { evaluateRoi, rawToObjectC, roiContrastRange } from "@/lib/thermal";
 import type {
-  DeviceConfig,
-  Diagnostics,
   DisplayPipeline,
   HelloResp,
   Palette,
-  PerfTelemetry,
   RadiometryParams,
-  RadParams,
   RenderSpec,
   Roi,
   RoiTool,
   SerialPortInfo,
   ThermalFrame,
 } from "@/lib/types";
+import { commandError } from "@/lib/utils";
 import { CameraPage, CameraSync } from "@/pages/camera/CameraPage";
 import {
   onFirmwareFileChosen,
@@ -77,11 +75,8 @@ function initialPage(): PageId {
   return PAGES.some((x) => x.id === p) ? (p as PageId) : "live";
 }
 
-/** Rust rejects with `{ kind, detail }` for new commands and with a string for older ones. */
 function errorText(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (err && typeof err === "object" && "detail" in err) return String(err.detail);
-  return String(err);
+  return commandError(err).detail;
 }
 
 async function writeClipboardPng(bytes: ArrayBuffer): Promise<void> {
@@ -148,12 +143,6 @@ export function App(): React.JSX.Element {
   const [gridCols, setGridCols] = useState(4);
   const [gridRows, setGridRows] = useState(3);
   const [zoom, setZoom] = useState(1);
-
-  // The Camera page reads these itself; T34 removes them with the old panels.
-  const [, setDeviceConfig] = useState<DeviceConfig | null>(null);
-  const [, setDiagnostics] = useState<Diagnostics | null>(null);
-  const [, setPerfTelemetry] = useState<PerfTelemetry | null>(null);
-  const [, setRadParams] = useState<RadParams | null>(null);
 
   const [alarmRules, setAlarmRules] = useState<AlarmRule[]>([]);
   const [alarmLog, setAlarmLog] = useState<AlarmLogEntry[]>([]);
@@ -361,19 +350,6 @@ export function App(): React.JSX.Element {
 
   // ---------- Camera ----------
 
-  const refreshCameraTelemetry = useCallback(async () => {
-    const [cfgRes, diagRes, perfRes, radRes] = await Promise.allSettled([
-      backend.getConfig(),
-      backend.getDiagnostics(),
-      backend.getPerf(false),
-      backend.getRadParams(),
-    ]);
-    if (cfgRes.status === "fulfilled") setDeviceConfig(cfgRes.value);
-    if (diagRes.status === "fulfilled") setDiagnostics(diagRes.value);
-    if (perfRes.status === "fulfilled") setPerfTelemetry(perfRes.value);
-    if (radRes.status === "fulfilled") setRadParams(radRes.value);
-  }, []);
-
   const runAlarm = useCallback(
     (rule: AlarmRule, valueC: number, atMs: number) => {
       const u = settingsRef.current.unit;
@@ -475,7 +451,6 @@ export function App(): React.JSX.Element {
         startChartSession();
         await backend.startStream(handleIncomingFrame);
         setStreaming(true);
-        void refreshCameraTelemetry();
         if (!isDemoPort(port)) toasts.show({ tone: "ok", text: "Thermocam connected" });
       },
       disconnect: () => backend.disconnect(),
@@ -846,6 +821,7 @@ export function App(): React.JSX.Element {
         onRetry={() => conn.dispatch({ type: "retry" })}
         onUseDemo={() => conn.dispatch({ type: "demo" })}
         onCopy={(t) => void copyText(t, "Command")}
+        onOpenHelp={(url) => void cameraApi.openUrl(url)}
       />
     ) : connState.name === "none" || (connState.name === "connecting" && !frameStore.getFrame()) ? (
       <NoCamera

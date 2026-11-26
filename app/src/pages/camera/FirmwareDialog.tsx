@@ -10,9 +10,10 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { cameraApi, type FlashProgress, LINKS, toCameraError } from "@/lib/api/camera";
+import { cameraApi, type FlashProgress, LINKS } from "@/lib/api/camera";
 import { backend } from "@/lib/backend";
 import type { HelloResp } from "@/lib/types";
+import { commandError } from "@/lib/utils";
 import {
   elapsedLabel,
   type Flow,
@@ -118,7 +119,7 @@ async function runCall(kind: "ask" | "quiet", reopen: boolean): Promise<void> {
       kind === "ask" ? options.legacyPort : null,
     );
   } catch (err) {
-    const e = toCameraError(err);
+    const e = commandError(err);
     const stage = flow.view.name;
     const ownWait = !(call === "quiet" && stage === "waiting");
     if (ownWait && (stage === "waiting" || stage === "writing")) {
@@ -210,7 +211,7 @@ async function checkFirmwareFile(file: { name: string; text: string }): Promise<
     const info = await cameraApi.verifyFirmware(file.text);
     dispatch({ type: "checked", info });
   } catch (err) {
-    dispatch({ type: "check_failed", reason: refusedReason(toCameraError(err).detail) });
+    dispatch({ type: "check_failed", reason: refusedReason(commandError(err).detail) });
   }
 }
 

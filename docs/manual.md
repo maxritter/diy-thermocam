@@ -64,7 +64,31 @@ Tap the 3.2-inch touchscreen in live mode to open the 2-page Main Menu. Use **`M
 
 Connect the camera to **macOS 12+**, **Windows 10/11**, or **Linux** with a data-capable USB cable and open **DIY-Thermocam Desktop Studio**.
 
-Over [USB Protocol v2](/docs/protocol-v2/), the camera streams raw 16-bit radiometric frames at **8.77 fps** and applies setting changes in under 1 ms. Browse, preview, download, and delete microSD files at up to **9.20 MB/s** without MTP drivers or reboots. Press the camera shutter button to trigger captures directly on your computer.
+On first start Studio shows **Connect your Thermocam**; plug in the camera and it connects by itself, or click **Try the demo camera**. Studio has three places: **Live** for the live image and measuring, **Captures** for the camera's microSD card and the files on your computer, and **Camera** for settings and firmware updates. See [Desktop App and Software](/docs/software/) for a tour.
+
+Over [USB Protocol v2](/docs/protocol-v2/), the camera streams raw 16-bit radiometric frames at **8.77 fps**. Settings changed in Studio apply on the camera at once and stay saved. **Snapshot** and **Record** save full-temperature `.DAT` captures in **Pictures › Thermocam** on your computer (change the folder in the gear menu). In **Captures › On the camera**, browse, preview, download and delete microSD files at up to **9.20 MB/s** without MTP drivers or reboots. The top button on the camera takes a snapshot in Studio, starts a recording, or does nothing, as set under **Camera**.
+
+### Linux USB permissions
+
+On Linux, Studio needs permission to open the camera's USB serial port and, for firmware updates, the Teensy bootloader. If Studio shows **Thermocam found, but Studio can't open it**, or a firmware update stops because Studio couldn't open the camera in update mode, set this up once.
+
+1. Add your user to the `dialout` group, then log out and back in:
+
+   ```bash
+   sudo usermod -aG dialout $USER
+   ```
+
+2. Install the PJRC udev rules for the Teensy 4.1:
+
+   ```bash
+   curl -fsSLO https://www.pjrc.com/teensy/00-teensy.rules
+   sudo cp 00-teensy.rules /etc/udev/rules.d/
+   sudo udevadm control --reload-rules && sudo udevadm trigger
+   ```
+
+3. Unplug the camera, plug it back in, and click **Try again** in Studio.
+
+Some distributions call the group `uucp` instead of `dialout`; `ls -l /dev/ttyACM0` shows which group owns the port.
 
 ### Copying files over USB (MTP)
 
@@ -72,5 +96,5 @@ If you want to copy files without opening Desktop Studio, go to **Main Menu → 
 
 ## Updating the firmware
 
-- **Desktop Studio (recommended):** Switch to **Pro** mode (`Shift+P`), open the **Updater** tab, load `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), and click **Enter Bootloader & Flash Firmware**. Works on Windows, macOS, and Linux (see Linux udev rules in the [Firmware guide](/docs/firmware/)).
+- **Desktop Studio (recommended):** Open **Camera › Update firmware…**, choose `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases), and click **Install**. Studio checks the file, restarts the camera in update mode and writes the firmware. Works on Windows, macOS, and Linux (see [Linux USB permissions](#linux-usb-permissions)).
 - **Standalone Teensy Loader or Arduino CLI:** For a brand-new blank Teensy 4.1 or custom builds from source, follow the [Firmware and Flashing guide](/docs/firmware/).

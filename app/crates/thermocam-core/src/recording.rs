@@ -84,7 +84,8 @@ pub struct RecordingIndex {
     pub files: Vec<PathBuf>,
 }
 
-fn is_dat_name(name: &str) -> bool {
+/// True for a file name ending in `.DAT` (any case).
+pub fn is_dat_name(name: &str) -> bool {
     name.len() > 4 && name[name.len() - 4..].eq_ignore_ascii_case(".dat")
 }
 

@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' thermo: asset:; img-src 'self' data: blob: thermo: asset:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+      "csp": "default-src 'self' asset:; img-src 'self' data: blob: asset:; style-src 'self' 'unsafe-inline'; script-src 'self'"
     }
   },
   "bundle": {

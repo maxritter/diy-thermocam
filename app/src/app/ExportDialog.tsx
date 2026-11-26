@@ -12,6 +12,7 @@ import type {
   TempUnit,
   ThermalFrame,
 } from "@/lib/types";
+import { baseName, commandError } from "@/lib/utils";
 import { type Platform, revealLabel, type ToastStore } from "./Toasts";
 
 /**
@@ -170,19 +171,6 @@ export interface ExportDialogProps {
 function durationShort(ms: number): string {
   const s = Math.round(ms / 1000);
   return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
-}
-
-function baseName(path: string): string {
-  const parts = path.split(/[\\/]+/).filter(Boolean);
-  return parts[parts.length - 1] ?? path;
-}
-
-function errorOf(err: unknown): { kind: string; detail: string } {
-  if (err && typeof err === "object" && "detail" in err) {
-    const e = err as { kind?: unknown; detail?: unknown };
-    return { kind: typeof e.kind === "string" ? e.kind : "other", detail: String(e.detail) };
-  }
-  return { kind: "other", detail: err instanceof Error ? err.message : String(err) };
 }
 
 /** What `cmd_export_media` receives for the choices (`kind` is Rust's alias of `format`). */
@@ -449,7 +437,7 @@ export function ExportDialog({
       });
       onOpenChange(false);
     } catch (err) {
-      const e = errorOf(err);
+      const e = commandError(err);
       if (e.kind !== "cancelled") {
         toasts.show({ tone: "error", text: `Couldn’t export ${label}: ${e.detail}` });
       }

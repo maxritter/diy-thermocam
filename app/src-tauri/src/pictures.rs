@@ -12,7 +12,7 @@ use thermocam_core::card::{list_card_dir, read_card_file, CardAccess};
 use thermocam_core::dat::ThermalDat;
 use thermocam_core::paths::{card_path, confine};
 use thermocam_core::picture::{render_png, PictureFrame, RenderSpec};
-use thermocam_core::recording::read_recording_frame;
+use thermocam_core::recording::{is_dat_name, read_recording_frame};
 use thermocam_core::sidecar::CaptureRef;
 
 use crate::card::LiveCard;
@@ -24,10 +24,6 @@ use crate::state::{resolve_palette, ActiveTransport, AppState};
 pub struct LoadedFrame {
     pub dat: ThermalDat,
     pub identity: Vec<String>,
-}
-
-fn is_dat_name(name: &str) -> bool {
-    name.len() > 4 && name[name.len() - 4..].eq_ignore_ascii_case(".dat")
 }
 
 /// The first `.DAT` (by name) in a local folder.

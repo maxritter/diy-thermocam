@@ -10,6 +10,7 @@ function setup(kind: "busy" | "permission", platform: "mac" | "windows" | "linux
   const onRetry = mock(() => {});
   const onUseDemo = mock(() => {});
   const onCopy = mock((_t: string) => {});
+  const onOpenHelp = mock((_url: string) => {});
   const view = renderApp(
     <ConnectionNotice
       kind={kind}
@@ -17,9 +18,10 @@ function setup(kind: "busy" | "permission", platform: "mac" | "windows" | "linux
       onRetry={onRetry}
       onUseDemo={onUseDemo}
       onCopy={onCopy}
+      onOpenHelp={onOpenHelp}
     />,
   );
-  return { ...view, onRetry, onUseDemo, onCopy };
+  return { ...view, onRetry, onUseDemo, onCopy, onOpenHelp };
 }
 
 describe("connection errors", () => {
@@ -51,6 +53,14 @@ describe("connection errors", () => {
     expect(onCopy).toHaveBeenCalledWith("sudo usermod -aG dialout $USER");
     await user.click(getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  test("permission on Linux links to the manual's USB permissions section", async () => {
+    const { getByRole, user, onOpenHelp } = setup("permission", "linux");
+    await user.click(getByRole("button", { name: "More help in the manual" }));
+    expect(onOpenHelp).toHaveBeenCalledWith(
+      "https://www.diy-thermocam.net/docs/manual/#linux-usb-permissions",
+    );
   });
 
   for (const platform of ["mac", "windows"] as const) {

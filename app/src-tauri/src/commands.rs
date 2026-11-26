@@ -12,12 +12,9 @@ use tauri::ipc::{Channel, InvokeResponseBody};
 use tauri::{Emitter, State};
 
 use crate::card::LiveCard;
-use crate::recorder::{
-    finish_recording, on_camera_lost, record_frame, start_recording, RecorderHandles,
-};
-use crate::state::{resolve_palette, stop_stream_and_join, ActiveTransport, AppState};
+use crate::recorder::{on_camera_lost, record_frame, RecorderHandles};
+use crate::state::{stop_stream_and_join, ActiveTransport, AppState};
 use thermocam_core::card::{list_card_dir, read_card_file};
-use thermocam_core::recording::StopReason;
 
 use thermocam_core::dat::{ThermalDat, ThermoSidecar};
 use thermocam_core::flasher::{
@@ -38,8 +35,6 @@ use thermocam_core::protocol::transport::{
     list_ports, ProtocolClient, SerialPortInfo, SerialTransport, SimulatorTransport,
 };
 use thermocam_core::protocol::{ConnectError, ConnectErrorKind, MsgType};
-use thermocam_core::radiometry::{RadiometryParams, MATERIAL_PRESETS};
-use thermocam_core::roi::{evaluate_roi, Roi, RoiStats};
 
 #[tauri::command]
 pub fn cmd_list_ports() -> Vec<SerialPortInfo> {
@@ -53,14 +48,6 @@ pub fn cmd_get_palettes(state: State<'_, AppState>) -> Vec<Palette> {
         list.extend(custom.values().cloned());
     }
     list
-}
-
-#[tauri::command]
-pub fn cmd_get_material_presets() -> Vec<serde_json::Value> {
-    MATERIAL_PRESETS
-        .iter()
-        .filter_map(|m| serde_json::to_value(m).ok())
-        .collect()
 }
 
 #[tauri::command]
@@ -518,13 +505,6 @@ pub async fn cmd_sd_download(
 }
 
 #[tauri::command]
-pub fn cmd_save_sidecar(dat_path: String, sidecar: ThermoSidecar) -> Result<String, String> {
-    let path = PathBuf::from(dat_path).with_extension("thermo.json");
-    thermocam_core::sidecar::save_sidecar(&path, &sidecar).map_err(|e| e.to_string())?;
-    Ok(path.to_string_lossy().into_owned())
-}
-
-#[tauri::command]
 pub fn cmd_verify_hex(
     hex_text: String,
     expected_sha256: Option<String>,
@@ -584,88 +564,6 @@ pub async fn cmd_pick_directory() -> Result<String, String> {
         .await
         .ok_or("cancelled")?;
     Ok(dir.path().to_string_lossy().into_owned())
-}
-
-#[derive(Serialize)]
-pub struct TimelapseCaptureResult {
-    recorded_count: usize,
-    saved_path: Option<String>,
-}
-
-#[allow(clippy::too_many_arguments)]
-#[tauri::command]
-pub async fn cmd_capture_timelapse_frame(
-    state: State<'_, AppState>,
-    output_dir: Option<String>,
-    palette_id: String,
-    index: usize,
-    pixels: Vec<u16>,
-    width: u16,
-    height: u16,
-    rad: RadiometryParams,
-) -> Result<TimelapseCaptureResult, String> {
-    let expected = usize::from(width) * usize::from(height);
-    if expected == 0 || pixels.len() != expected {
-        return Err(format!(
-            "timelapse pixel buffer length {} does not match {width}x{height} ({expected})",
-            pixels.len()
-        ));
-    }
-    let palette = resolve_palette(&state, &palette_id)?;
-    tauri::async_runtime::spawn_blocking(move || {
-        let scheme = palette.firmware_id.unwrap_or(10);
-        let dat = ThermalDat::from_pixels(pixels, width, height, rad, scheme, 0);
-        let saved_path = if let Some(dir) = output_dir {
-            let dir_path = PathBuf::from(dir);
-            fs::create_dir_all(&dir_path).map_err(|e| e.to_string())?;
-            let file_path = dir_path.join(format!("timelapse_{index:06}.DAT"));
-            fs::write(&file_path, dat.to_bytes()).map_err(|e| e.to_string())?;
-            Some(file_path.to_string_lossy().into_owned())
-        } else {
-            None
-        };
-        Ok(TimelapseCaptureResult {
-            recorded_count: index + 1,
-            saved_path,
-        })
-    })
-    .await
-    .map_err(|e| e.to_string())?
-}
-
-/// Old Record toggle (until the frontend switches to `cmd_record_start`/`cmd_record_stop`):
-/// `true` starts a disk recording and returns 0, `false` stops it and returns its frame count.
-#[tauri::command]
-pub fn cmd_toggle_recording(
-    app: tauri::AppHandle,
-    state: State<'_, AppState>,
-    active: bool,
-) -> Result<usize, String> {
-    if active {
-        start_recording(&app, &state, None, None).map_err(|e| e.detail)?;
-        Ok(0)
-    } else {
-        Ok(finish_recording(
-            &app,
-            &state.recording,
-            &state.last_recording,
-            StopReason::User,
-        )
-        .map_or(0, |info| info.frames))
-    }
-}
-
-#[tauri::command]
-pub fn cmd_evaluate_rois(
-    pixels: Vec<u16>,
-    width: u16,
-    height: u16,
-    rad: RadiometryParams,
-    rois: Vec<Roi>,
-) -> Vec<RoiStats> {
-    rois.iter()
-        .map(|r| evaluate_roi(r, &pixels, width, height, rad))
-        .collect()
 }
 
 #[tauri::command]

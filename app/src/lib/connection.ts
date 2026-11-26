@@ -8,6 +8,8 @@
  *   knocking on the same port, only on one that left and came back.
  */
 
+import { commandError } from "./utils";
+
 export const DEMO_PORT = "sim://demo-lepton35";
 
 export type ConnKind = "camera" | "demo";
@@ -198,14 +200,6 @@ export interface Connection {
   connectNow(port: string): Promise<void>;
 }
 
-function errorOf(err: unknown): { kind: string; detail: string } {
-  if (err && typeof err === "object" && "detail" in err) {
-    const e = err as { kind?: unknown; detail?: unknown };
-    return { kind: typeof e.kind === "string" ? e.kind : "other", detail: String(e.detail) };
-  }
-  return { kind: "other", detail: err instanceof Error ? err.message : String(err) };
-}
-
 /** The machine with its effects run: connect, disconnect and messages. */
 export function createConnection(deps: ConnectionDeps): Connection {
   let machine = initialConnection();
@@ -248,7 +242,7 @@ export function createConnection(deps: ConnectionDeps): Connection {
               settle(port, null);
             },
             (err) => {
-              conn.dispatch({ type: "failed", port, ...errorOf(err) });
+              conn.dispatch({ type: "failed", port, ...commandError(err) });
               settle(port, err);
             },
           );

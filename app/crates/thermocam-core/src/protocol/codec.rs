@@ -4,16 +4,17 @@ use serde::{Deserialize, Serialize};
 
 use super::{MsgType, Packet, ProtocolError, PROTO_MAJOR, PROTO_MINOR};
 
+// Byte readers and writers shared with `messages.rs`.
 #[inline]
-fn read_u16(b: &[u8], off: usize) -> u16 {
+pub(super) fn read_u16(b: &[u8], off: usize) -> u16 {
     u16::from_le_bytes([b[off], b[off + 1]])
 }
 #[inline]
-fn read_u32(b: &[u8], off: usize) -> u32 {
+pub(super) fn read_u32(b: &[u8], off: usize) -> u32 {
     u32::from_le_bytes([b[off], b[off + 1], b[off + 2], b[off + 3]])
 }
 #[inline]
-fn read_u64(b: &[u8], off: usize) -> u64 {
+pub(super) fn read_u64(b: &[u8], off: usize) -> u64 {
     u64::from_le_bytes([
         b[off],
         b[off + 1],
@@ -26,21 +27,21 @@ fn read_u64(b: &[u8], off: usize) -> u64 {
     ])
 }
 #[inline]
-fn read_f32(b: &[u8], off: usize) -> f32 {
+pub(super) fn read_f32(b: &[u8], off: usize) -> f32 {
     f32::from_le_bytes([b[off], b[off + 1], b[off + 2], b[off + 3]])
 }
-fn read_cstr(slice: &[u8]) -> String {
+pub(super) fn read_cstr(slice: &[u8]) -> String {
     let end = slice.iter().position(|&c| c == 0).unwrap_or(slice.len());
     String::from_utf8_lossy(&slice[..end]).into_owned()
 }
-fn write_cstr<const N: usize>(s: &str) -> [u8; N] {
+pub(super) fn write_cstr<const N: usize>(s: &str) -> [u8; N] {
     let mut buf = [0u8; N];
     let bytes = s.as_bytes();
     let len = bytes.len().min(N);
     buf[..len].copy_from_slice(&bytes[..len]);
     buf
 }
-fn check_len(payload: &[u8], expected: usize) -> Result<(), ProtocolError> {
+pub(super) fn check_len(payload: &[u8], expected: usize) -> Result<(), ProtocolError> {
     if payload.len() < expected {
         return Err(ProtocolError::TruncatedPayload {
             expected,

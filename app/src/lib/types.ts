@@ -2,18 +2,6 @@ export type TempUnit = "celsius" | "fahrenheit" | "kelvin";
 export type SpatialFilter = "none" | "box3x3" | "gaussian3x3" | "median3x3";
 export type UpscaleMethod = "nearest" | "bicubic" | "lanczos3" | "edge_preserve";
 export type IsothermMode = "off" | "above" | "below" | "interval";
-export type AlarmCondition = "above" | "below";
-export type AlarmAction = "notify" | "save_dat" | "start_recording";
-
-export type StudioMode =
-  | "live"
-  | "measurements"
-  | "alarms"
-  | "export"
-  | "sd"
-  | "editor"
-  | "control"
-  | "updater";
 
 export type RoiTool = "select" | "spot" | "spot3" | "box" | "circle" | "polygon" | "line" | "delta";
 
@@ -109,27 +97,6 @@ export interface LineSample {
   y: number;
   raw: number;
   temp_c: number;
-}
-
-export interface TempSwitchRule {
-  id: string;
-  name: string;
-  enabled: boolean;
-  target_roi_id: string | null;
-  condition: AlarmCondition;
-  threshold_c: number;
-  cooldown_ms: number;
-  action: AlarmAction;
-  last_triggered_ms: number | null;
-}
-
-export interface AlarmEvent {
-  id: string;
-  timestamp: string;
-  rule_name: string;
-  measured_c: number;
-  threshold_c: number;
-  action: AlarmAction;
 }
 
 export interface ThermalFrame {
@@ -297,11 +264,6 @@ export type ExportResolution =
   | "qhd1440p"
   | "uhd4k"
   | { custom: { width: number; height: number } };
-
-export interface TimeSeriesPoint {
-  tSec: number;
-  values: Record<string, number>;
-}
 
 // ---------- Captures from Live (agents/rust-commands.md) ----------
 

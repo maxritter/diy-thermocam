@@ -1,9 +1,7 @@
-import { DEFAULT_MATERIALS } from "./palettes";
 import type {
   IsothermConfig,
   LineSample,
   Material,
-  MaterialPreset,
   RadiometryParams,
   Roi,
   RoiGeometry,
@@ -13,8 +11,6 @@ import type {
 } from "./types";
 
 const KELVIN_OFFSET = 273.15;
-
-export const MATERIAL_PRESETS: MaterialPreset[] = DEFAULT_MATERIALS;
 
 export function unitSymbol(unit: TempUnit): string {
   switch (unit) {

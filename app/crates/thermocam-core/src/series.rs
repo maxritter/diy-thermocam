@@ -108,7 +108,8 @@ pub fn compute_series<P: FnMut(usize, usize)>(
     })
 }
 
-fn csv_field(s: &str) -> String {
+/// A CSV field, quoted when it holds a comma, quote or line break (also used by `session_log`).
+pub(crate) fn csv_field(s: &str) -> String {
     if s.contains([',', '"', '\n', '\r']) {
         format!("\"{}\"", s.replace('"', "\"\""))
     } else {

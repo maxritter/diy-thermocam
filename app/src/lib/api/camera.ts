@@ -1,4 +1,4 @@
-import { isTauriRuntime } from "@/lib/backend";
+import { tauriInvoke as invoke, isTauriRuntime, tauriListen } from "@/lib/backend";
 import type {
   DeviceConfig,
   Diagnostics,
@@ -6,27 +6,13 @@ import type {
   PerfTelemetry,
   RadParams,
 } from "@/lib/types";
+import { baseName, type CommandError as CameraError, commandError } from "@/lib/utils";
 
 /**
  * The Camera page's calls to Rust (`docs/plans/2026-11-26-studio-ui-redesign/agents/rust-commands.md`).
  * In the browser preview there is no camera but the demo camera: its values are read, its
  * settings are read-only, and a firmware update is simulated end to end.
  */
-
-/** A rejection in the `{kind, detail}` shape; older commands reject with a string. */
-export interface CameraError {
-  kind: string;
-  detail: string;
-}
-
-export function toCameraError(err: unknown): CameraError {
-  if (err && typeof err === "object" && "detail" in err) {
-    const e = err as { kind?: unknown; detail?: unknown };
-    return { kind: typeof e.kind === "string" ? e.kind : "other", detail: String(e.detail) };
-  }
-  if (err instanceof Error) return { kind: "other", detail: err.message };
-  return { kind: "other", detail: String(err) };
-}
 
 /** One `flash-progress` event from `cmd_flash_firmware`. */
 export type FlashProgress =
@@ -45,11 +31,6 @@ export interface FirmwareFile {
   /** Full path when Rust picked it. */
   path: string | null;
   text: string;
-}
-
-async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
-  const core = await import("@tauri-apps/api/core");
-  return core.invoke<T>(cmd, args);
 }
 
 const READ_ONLY: CameraError = {
@@ -213,7 +194,7 @@ async function simFlash(text: string, expectedSha256?: string | null): Promise<s
   try {
     info = simVerify(text, expectedSha256);
   } catch (err) {
-    const e = toCameraError(err);
+    const e = commandError(err);
     emitFlash({ stage: "error", kind: "bad_file", detail: e.detail });
     throw e;
   }
@@ -270,10 +251,6 @@ function pickWithInput(): Promise<FirmwareFile | null> {
     input.addEventListener("cancel", () => resolve(null));
     input.click();
   });
-}
-
-function baseName(path: string): string {
-  return path.split(/[\\/]/).pop() || path;
 }
 
 export const cameraApi = {
@@ -343,7 +320,7 @@ export const cameraApi = {
         expectedSha256: expectedSha256 || null,
       });
     } catch (err) {
-      throw { kind: "bad_file", detail: toCameraError(err).detail } satisfies CameraError;
+      throw { kind: "bad_file", detail: commandError(err).detail } satisfies CameraError;
     }
   },
 
@@ -364,7 +341,7 @@ export const cameraApi = {
         legacyPort: legacyPort || null,
       });
     } catch (err) {
-      throw toCameraError(err);
+      throw commandError(err);
     }
   },
 
@@ -378,8 +355,7 @@ export const cameraApi = {
       flashListeners.add(cb);
       return () => flashListeners.delete(cb);
     }
-    const { listen } = await import("@tauri-apps/api/event");
-    return listen<FlashProgress>("flash-progress", (ev) => cb(ev.payload));
+    return tauriListen<FlashProgress>("flash-progress", cb);
   },
 
   /** Opens a help or release page in the system browser (opener plugin, limited by capability). */

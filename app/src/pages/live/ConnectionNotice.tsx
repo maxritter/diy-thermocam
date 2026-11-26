@@ -2,6 +2,7 @@ import { Copy, TriangleAlert } from "lucide-react";
 import type { Platform } from "@/app/Toasts";
 
 export const UDEV_COMMAND = "sudo usermod -aG dialout $USER";
+export const LINUX_HELP_URL = "https://www.diy-thermocam.net/docs/manual/#linux-usb-permissions";
 
 export interface ConnectionNoticeProps {
   kind: "busy" | "permission";
@@ -9,6 +10,7 @@ export interface ConnectionNoticeProps {
   onRetry: () => void;
   onUseDemo: () => void;
   onCopy: (text: string) => void;
+  onOpenHelp: (url: string) => void;
 }
 
 /**
@@ -21,6 +23,7 @@ export function ConnectionNotice({
   onRetry,
   onUseDemo,
   onCopy,
+  onOpenHelp,
 }: ConnectionNoticeProps): React.JSX.Element {
   return (
     <div className="lv-empty" role="alert">
@@ -47,6 +50,11 @@ export function ConnectionNotice({
               Copy
             </button>
           </div>
+          <p>
+            <button className="st-link" type="button" onClick={() => onOpenHelp(LINUX_HELP_URL)}>
+              More help in the manual
+            </button>
+          </p>
         </>
       ) : (
         <p>

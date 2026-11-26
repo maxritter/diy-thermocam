@@ -1,4 +1,4 @@
-import type { ThermalFrame, TimeSeriesPoint } from "./types";
+import type { ThermalFrame } from "./types";
 
 /**
  * Per-frame state that lives outside React. The viewer subscribes to every frame; panels
@@ -28,8 +28,6 @@ export interface FrameScheduler {
 export interface FrameStoreOptions {
   /** Minimum time between sampled notifications, in ms. Default 250 (4 Hz). */
   sampleIntervalMs?: number;
-  /** Number of time-series points kept. Default 180. */
-  seriesCap?: number;
   scheduler?: FrameScheduler;
 }
 
@@ -44,10 +42,6 @@ export interface FrameStore {
   setHover(hover: HoverPixel | null): void;
   getHover(): HoverPixel | null;
   subscribeHover(listener: Listener): () => void;
-  appendSeries(point: TimeSeriesPoint): void;
-  clearSeries(): void;
-  /** Sampled copy of the series, replaced at most four times a second. */
-  getSeries(): readonly TimeSeriesPoint[];
   markDrawn(): void;
   counters(): FrameCounters;
 }
@@ -57,8 +51,6 @@ const browserScheduler: FrameScheduler = {
   cancel: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
 };
 
-const EMPTY_SERIES: readonly TimeSeriesPoint[] = Object.freeze([]);
-
 function sameHover(a: HoverPixel | null, b: HoverPixel | null): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -67,15 +59,11 @@ function sameHover(a: HoverPixel | null, b: HoverPixel | null): boolean {
 
 export function createFrameStore(options: FrameStoreOptions = {}): FrameStore {
   const interval = options.sampleIntervalMs ?? 250;
-  const seriesCap = options.seriesCap ?? 180;
   const scheduler = options.scheduler ?? browserScheduler;
 
   let frame: ThermalFrame | null = null;
   let sampled: ThermalFrame | null = null;
   let hover: HoverPixel | null = null;
-  let series: TimeSeriesPoint[] = [];
-  let seriesSnapshot: readonly TimeSeriesPoint[] = EMPTY_SERIES;
-  let seriesDirty = false;
   let pending: unknown = null;
   const counts: FrameCounters = { received: 0, drawn: 0 };
 
@@ -90,10 +78,6 @@ export function createFrameStore(options: FrameStoreOptions = {}): FrameStore {
   const flushSampled = () => {
     pending = null;
     sampled = frame;
-    if (seriesDirty) {
-      seriesSnapshot = series.slice();
-      seriesDirty = false;
-    }
     emit(sampledListeners);
   };
 
@@ -127,18 +111,6 @@ export function createFrameStore(options: FrameStoreOptions = {}): FrameStore {
     },
     getHover: () => hover,
     subscribeHover: subscribe(hoverListeners),
-    appendSeries(point) {
-      series.push(point);
-      if (series.length > seriesCap) series = series.slice(series.length - seriesCap);
-      seriesDirty = true;
-      scheduleSampled();
-    },
-    clearSeries() {
-      series = [];
-      seriesDirty = true;
-      scheduleSampled();
-    },
-    getSeries: () => seriesSnapshot,
     markDrawn() {
       counts.drawn++;
     },

@@ -8,6 +8,8 @@ use std::time::{Duration, SystemTime};
 
 use serde::{Deserialize, Serialize};
 
+use crate::series::csv_field;
+
 pub const LOG_HEADER: &str = "t_ms,region_id,value_c";
 /// Logs older than this are deleted when a new session starts.
 pub const MAX_LOG_AGE: Duration = Duration::from_secs(7 * 24 * 3600);
@@ -24,14 +26,6 @@ pub struct SessionLog {
     path: PathBuf,
     out: BufWriter<File>,
     samples: u64,
-}
-
-fn csv_field(s: &str) -> String {
-    if s.contains([',', '"', '\n', '\r']) {
-        format!("\"{}\"", s.replace('"', "\"\""))
-    } else {
-        s.to_string()
-    }
 }
 
 /// Delete `*.csv` logs in `dir` last written before `now - max_age`. Returns how many.

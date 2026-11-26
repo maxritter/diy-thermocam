@@ -12,7 +12,7 @@ DIY-Thermocam Firmware 4.0 is open-source C++17 code for **DIY-Thermocam V3 and 
 
 Flashing prebuilt `.hex` releases and compiling from source both work on **Windows**, **macOS**, and **Linux**.
 
-| Operating System | Desktop Studio Updater | PJRC Teensy Loader | Build & Flash ([Arduino CLI](https://github.com/arduino/arduino-cli)) | Notes |
+| Operating System | Desktop Studio | PJRC Teensy Loader | Build & Flash ([Arduino CLI](https://github.com/arduino/arduino-cli)) | Notes |
 | --- | --- | --- | --- | --- |
 | **Windows 10 / 11** (x64) | Supported | Supported | `winget install ArduinoSA.CLI` | USB CDC and HalfKay HID drivers are built into Windows. |
 | **macOS 12+** (Apple Silicon & Intel) | Supported | Supported | `brew install arduino-cli` | No extra drivers needed. |
@@ -31,14 +31,20 @@ sudo cp 00-teensy.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
+Studio also needs your user in the `dialout` group to open the camera's serial port; see [Linux USB permissions](/docs/manual/#linux-usb-permissions).
+
 ## Installing a release
 
 ### With Studio (recommended)
 
 1. Connect the camera over USB and switch it on.
-2. Open **DIY-Thermocam Desktop Studio**, switch to **Pro** mode (`Shift+P`), and open the **Updater** tab.
-3. Click **Load .hex File…** to pick `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases) (optionally paste the release SHA-256 digest).
-4. Click **Enter Bootloader & Flash Firmware**. Desktop Studio checks the SHA-256 hash, enters the HalfKay bootloader over USB (including from Firmware 3.0.x via the 134-baud trigger), flashes the image, and reboots the camera.
+2. Open **DIY-Thermocam Desktop Studio** and choose **Camera › Update firmware…**.
+3. Choose `firmware.hex` from [GitHub Releases](https://github.com/maxritter/diy-thermocam/releases). Studio checks the file at once and refuses a damaged one with the reason. To require a matching checksum, paste the release's SHA-256 under **Advanced**.
+4. Click **Install**. Studio restarts the camera in update mode over USB, writes the firmware, and the camera restarts with it. For a camera on Firmware 3.0.x, switch on **Camera with V3.0 firmware** under **Advanced** first.
+
+If the camera hasn't switched to update mode after 10 seconds, Studio says so. Press the program button on the Teensy board inside the camera and the update continues by itself, or click **Try again**.
+
+**Update firmware…** also works with no camera connected, for example on a blank Teensy 4.1. Choose the file and click **Install**. When Studio waits for update mode, press the Teensy's **Program** button.
 
 ### With Teensy Loader (first install on a blank Teensy)
 
