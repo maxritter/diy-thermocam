@@ -1,0 +1,161 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:03.210
+Everything warm glows.
+
+2
+00:00:03.500 --> 00:00:04.750
+You just can't see it.
+
+3
+00:00:07.400 --> 00:00:10.410
+This is DIY-Thermocam V4.
+
+4
+00:00:10.680 --> 00:00:12.670
+A thermal camera you build yourself.
+
+5
+00:00:14.340 --> 00:00:16.770
+At its heart sits a FLIR Lepton.
+
+6
+00:00:18.100 --> 00:00:20.600
+It has nineteen thousand two hundred pixels,
+
+7
+00:00:20.600 --> 00:00:23.230
+and every one of them measures a temperature,
+
+8
+00:00:23.380 --> 00:00:26.150
+from minus ten to four hundred fifty degrees.
+
+9
+00:00:28.540 --> 00:00:31.350
+The new V4 board comes fully assembled.
+
+10
+00:00:31.560 --> 00:00:32.560
+No soldering.
+
+11
+00:00:33.740 --> 00:00:36.340
+Plug in the Lepton, the Teensy, the battery
+
+12
+00:00:36.340 --> 00:00:37.750
+and the touchscreen.
+
+13
+00:00:38.140 --> 00:00:39.810
+Eight screws close the shell.
+
+14
+00:00:42.600 --> 00:00:45.100
+Print the shell yourself, or have it cut from
+
+15
+00:00:45.100 --> 00:00:46.100
+acrylic.
+
+16
+00:00:46.100 --> 00:00:48.010
+Both come from the same design files.
+
+17
+00:00:50.120 --> 00:00:53.580
+Switch it on, and Firmware 4.0 opens straight
+
+18
+00:00:53.580 --> 00:00:54.850
+into the live image.
+
+19
+00:00:55.820 --> 00:00:59.130
+The hottest spot, the coldest spot and the center,
+
+20
+00:00:59.400 --> 00:01:01.630
+measured almost nine times a second.
+
+21
+00:01:05.920 --> 00:01:07.730
+Nineteen color palettes.
+
+22
+00:01:08.000 --> 00:01:09.000
+Three themes.
+
+23
+00:01:11.140 --> 00:01:13.210
+Everything else is one tap away:
+
+24
+00:01:13.560 --> 00:01:16.090
+set the range, place your own measuring spots,
+
+25
+00:01:16.260 --> 00:01:18.700
+record photos and video, and look back in the
+
+26
+00:01:18.700 --> 00:01:19.700
+gallery.
+
+27
+00:01:20.980 --> 00:01:22.730
+Find the overloaded breaker.
+
+28
+00:01:23.040 --> 00:01:24.290
+The drafty window.
+
+29
+00:01:24.600 --> 00:01:26.630
+The one part that runs too hot.
+
+30
+00:01:28.560 --> 00:01:31.640
+The battery lasts four to six hours, and charges
+
+31
+00:01:31.640 --> 00:01:33.450
+over USB-C.
+
+32
+00:01:35.100 --> 00:01:38.220
+Plug in one cable, and DIY-Thermocam Studio
+
+33
+00:01:38.220 --> 00:01:41.230
+shows the same image live on your computer.
+
+34
+00:01:42.340 --> 00:01:45.840
+Draw regions, set alarms, and export your recordings,
+
+35
+00:01:45.840 --> 00:01:48.330
+on Mac, Windows and Linux.
+
+36
+00:01:50.600 --> 00:01:53.460
+All parts, including the sensor, come to just
+
+37
+00:01:53.460 --> 00:01:55.490
+under three hundred dollars.
+
+38
+00:01:58.040 --> 00:02:01.430
+The board, the shell, the firmware and Studio:
+
+39
+00:02:01.780 --> 00:02:04.390
+every file is yours to read and change.
+
+40
+00:02:05.920 --> 00:02:10.490
+Build your own at diy-thermocam.net.

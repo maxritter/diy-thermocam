@@ -33,11 +33,12 @@ export const FILM = {
   src: '/film/diy-thermocam-v4.mp4',
   captions: '/film/diy-thermocam-v4.vtt',
   poster: '/film/diy-thermocam-v4.jpg',
-  seconds: 0,
+  seconds: 133.7,
 } as const;
 
+/* Whole seconds rounded down, the way video players show a length. */
 export function filmLength(seconds: number = FILM.seconds): string {
-  const s = Math.round(seconds);
+  const s = Math.floor(seconds);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
