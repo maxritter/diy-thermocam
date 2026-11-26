@@ -76,10 +76,12 @@ function sourceFiles(dir: string): string[] {
 
 test("(d) no module but thermal.ts uses the low-level compensation", () => {
   const src = join(import.meta.dir, "..");
-  const here = relative(src, import.meta.path);
+  // Paths use "/" on every OS, so the comparison below also holds on Windows.
+  const rel = (f: string) => relative(src, f).replaceAll("\\", "/");
+  const here = rel(import.meta.path);
   const low = ["compensate", "EmissivityC"].join("");
   const offenders = sourceFiles(src)
-    .map((f) => relative(src, f))
+    .map(rel)
     .filter((f) => f !== "lib/thermal.ts" && f !== here)
     .filter((f) => readFileSync(join(src, f), "utf8").includes(low));
   expect(offenders).toEqual([]);
