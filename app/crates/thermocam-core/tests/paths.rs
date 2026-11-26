@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use thermocam_core::paths::{confine, ensure_within, PathError};
+use thermocam_core::paths::{card_file_target, confine, ensure_within, PathError};
 
 fn root() -> (tempfile::TempDir, std::path::PathBuf) {
     let dir = tempfile::tempdir().unwrap();
@@ -113,4 +113,34 @@ fn ensure_within_checks_absolute_paths_against_the_root() {
     assert!(ensure_within(&root, Path::new("relative.DAT")).is_err());
     // The root itself is not a target.
     assert!(ensure_within(&root, &root).is_err());
+}
+
+#[test]
+fn a_card_file_is_copied_under_its_own_plain_name_inside_the_folder() {
+    let (_dir, root) = root();
+    assert_eq!(
+        card_file_target(&root, "/20261126101500.DAT").unwrap(),
+        root.join("20261126101500.DAT")
+    );
+    // A file in a card folder lands flat, under its own name.
+    assert_eq!(
+        card_file_target(&root, "/20261125132503/000001.DAT").unwrap(),
+        root.join("000001.DAT")
+    );
+    // Names a tampered device could list: never written outside the folder.
+    for bad in [
+        "/../../x.dat",
+        "/../x.DAT",
+        "..",
+        "/",
+        "",
+        "a\\..\\x.DAT",
+        "C:x.DAT",
+        "x\0.DAT",
+    ] {
+        assert!(
+            card_file_target(&root, bad).is_err(),
+            "{bad:?} must be refused"
+        );
+    }
 }

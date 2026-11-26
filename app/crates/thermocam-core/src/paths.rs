@@ -89,6 +89,15 @@ pub fn card_path(untrusted: &str) -> Result<String, PathError> {
     Ok(out)
 }
 
+/// Where a file copied from the camera's card goes: its own plain name, directly inside `root`.
+/// The card path is normalised first (`card_path` refuses `..`, backslashes, colons and NUL),
+/// so a name a tampered device lists can never place the copy outside `root`.
+pub fn card_file_target(root: &Path, untrusted_card_path: &str) -> Result<PathBuf, PathError> {
+    let normal = card_path(untrusted_card_path)?;
+    let name = normal.rsplit('/').next().unwrap_or_default();
+    confine(root, name)
+}
+
 /// Accept an absolute path only if it lies inside `root` (after resolving symlinks).
 /// The root itself is refused.
 pub fn ensure_within(root: &Path, candidate: &Path) -> Result<PathBuf, PathError> {

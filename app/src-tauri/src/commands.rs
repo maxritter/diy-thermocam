@@ -485,16 +485,22 @@ pub async fn cmd_sd_delete(state: State<'_, AppState>, path: String) -> Result<(
     .map_err(|e| e.to_string())?
 }
 
+/// Copies a file from the card. `to_captures` puts it in the Captures folder under its own name
+/// (confined there, whatever name the device listed); otherwise a Save dialog asks where.
 #[tauri::command]
 pub async fn cmd_sd_download(
+    app: tauri::AppHandle,
     state: State<'_, AppState>,
     path: String,
-    output_path: Option<String>,
+    to_captures: Option<bool>,
 ) -> Result<String, String> {
     let file_name = path.trim_start_matches('/').to_string();
-    let target = match output_path {
-        Some(p) => PathBuf::from(p),
-        None => rfd::AsyncFileDialog::new()
+    let target = match to_captures {
+        Some(true) => {
+            let root = crate::captures::captures_dir(&app).map_err(|e| e.detail)?;
+            thermocam_core::paths::card_file_target(&root, &path).map_err(|e| e.to_string())?
+        }
+        _ => rfd::AsyncFileDialog::new()
             .set_file_name(&file_name)
             .save_file()
             .await

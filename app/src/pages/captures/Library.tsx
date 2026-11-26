@@ -524,9 +524,8 @@ export function Library({
   };
 
   const copy = (item: CaptureItem) => {
-    if (!capturesDir) return;
     void api
-      .copyToComputer(item, capturesDir)
+      .copyToComputer(item)
       .then(() => {
         setComputerNames((prev) => new Set(prev).add(item.fileName.toLowerCase()));
         live.current.notify("Copied to this computer");

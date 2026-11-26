@@ -730,11 +730,11 @@ export const capturesApi = {
   },
 
   /** Copies a `.DAT` from the card into the Captures folder (`cmd_sd_download`). */
-  async copyToComputer(item: CaptureItem, capturesDir: string): Promise<string> {
+  async copyToComputer(item: CaptureItem): Promise<string> {
     if (item.ref.kind !== "camera") throw { kind: "other", detail: "Already on this computer." };
-    const target = `${capturesDir.replace(/[\\/]+$/, "")}/${item.fileName}`;
     if (isTauriRuntime()) {
-      return invoke<string>("cmd_sd_download", { path: item.ref.sd_path, outputPath: target });
+      // Rust builds the target inside the Captures folder from the card file's own name.
+      return invoke<string>("cmd_sd_download", { path: item.ref.sd_path, toCaptures: true });
     }
     await delay(120);
     const f = simCardFile(item.ref.sd_path);
