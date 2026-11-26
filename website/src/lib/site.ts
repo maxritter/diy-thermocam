@@ -4,8 +4,9 @@ export const SITE = {
   url: 'https://www.diy-thermocam.net',
   repoUrl: 'https://github.com/maxritter/diy-thermocam',
   releasesUrl: 'https://github.com/maxritter/diy-thermocam/releases',
-  /* Firmware .hex files carry their version in the name, so link the latest release page. */
   firmwareUrl: 'https://github.com/maxritter/diy-thermocam/releases/latest',
+  /* The release workflow uploads the firmware under this fixed name. */
+  firmwareFile: 'https://github.com/maxritter/diy-thermocam/releases/latest/download/firmware.hex',
   ogImage: 'https://www.diy-thermocam.net/images/og/og-default.png',
   umamiWebsiteId: 'efb7f48a-b0e1-46ff-9e74-2a2c1a76e868',
   author: {
