@@ -19,6 +19,7 @@ describe("settings", () => {
       button_action: "record",
       material_on_camera: true,
       drawer_height: 312,
+      panel_width: 432,
       last_palette: "ironblack",
       last_range: { mode: "manual", min_c: 20.5, max_c: 55.5 },
     };
@@ -49,6 +50,13 @@ describe("settings", () => {
     expect(parsed.unit).toBe("celsius");
     expect(parsed.theme).toBe("dark");
     expect(parsed.drawer_height).toBe(defaultSettings("de-DE").drawer_height);
+  });
+
+  test("the side panel width starts at 320 and stays within its limits", () => {
+    expect(defaultSettings("de-DE").panel_width).toBe(320);
+    expect(parseSettings({ panel_width: 2000 }, "de-DE").panel_width).toBe(520);
+    expect(parseSettings({ panel_width: 10 }, "de-DE").panel_width).toBe(280);
+    expect(parseSettings({ panel_width: "wide" }, "de-DE").panel_width).toBe(320);
   });
 
   test("the first start picks the unit from the system region", () => {

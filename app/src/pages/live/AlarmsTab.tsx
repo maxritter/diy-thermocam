@@ -1,5 +1,6 @@
-import { Pencil } from "lucide-react";
+import { Bell, History, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
+import { Group } from "@/app/ui/Group";
 import {
   ACTION_LABELS,
   type AlarmAction,
@@ -249,11 +250,11 @@ export function AlarmsTab({
 
   return (
     <>
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Alarms</h3>
-          {firingCount > 0 ? <span className="aside">{firingSummary(rules, firing)}</span> : null}
-        </div>
+      <Group
+        icon={Bell}
+        title="Alarms"
+        aside={firingCount > 0 ? firingSummary(rules, firing) : undefined}
+      >
         <div className="lv-alarms">
           {rules.map((rule) =>
             editing === rule.id ? (
@@ -311,21 +312,24 @@ export function AlarmsTab({
           ) : (
             <div className="st-row-actions">
               <button className="tc-btn tc-btn-sm" type="button" onClick={() => setEditing("new")}>
+                <Plus size={14} strokeWidth={1.75} aria-hidden="true" />
                 New alarm
               </button>
             </div>
           )}
         </div>
-      </div>
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Recent</h3>
-          {log.length > 0 ? (
+      </Group>
+      <Group
+        icon={History}
+        title="Recent"
+        aside={
+          log.length > 0 ? (
             <button className="st-link" type="button" onClick={onClearLog}>
               Clear
             </button>
-          ) : null}
-        </div>
+          ) : undefined
+        }
+      >
         {log.length > 0 ? (
           <div className="lv-log">
             {log.map((e) => (
@@ -339,7 +343,7 @@ export function AlarmsTab({
         ) : (
           <p className="lv-log-empty">Alarms that fire are listed here.</p>
         )}
-      </div>
+      </Group>
     </>
   );
 }

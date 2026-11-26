@@ -1,5 +1,6 @@
-import { ChevronDown } from "lucide-react";
+import { ChartLine, Layers, Scan, SquareDashed } from "lucide-react";
 import { useMemo } from "react";
+import { Group } from "@/app/ui/Group";
 import type { FrameStore } from "@/lib/frameStore";
 import { materialLabel } from "@/lib/palettes";
 import { perf } from "@/lib/perf";
@@ -154,56 +155,39 @@ export function MeasureTab(props: MeasureTabProps): React.JSX.Element {
 
   const material = materials.find((m) => m.id === props.materialId);
   const summary = `${material ? material.name : "Custom"} · ε ${rad.emissivity.toFixed(2)} · ${formatTemp(rad.reflected_temp_c, unit)}`;
+  const chartsLabel = props.chartsLabel ?? "Charts below the image";
 
   return (
     <div role="tabpanel" aria-label="Measure">
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Whole image</h3>
-          {props.wholeAside ? <span className="aside">{props.wholeAside}</span> : null}
-        </div>
+      <Group icon={Scan} title="Whole image" aside={props.wholeAside}>
         <div className="st-stats">
           <Stat k="Hottest" c={whole?.hot ?? null} unit={unit} tone="hot" />
           <Stat k="Coldest" c={whole?.cold ?? null} unit={unit} tone="cold" />
           <Stat k="Center" c={whole?.center ?? null} unit={unit} />
         </div>
-      </div>
+      </Group>
 
       {rois.length === 0 ? (
-        <div className="st-grp">
-          <div className="st-grp-h">
-            <h3>Material</h3>
-          </div>
+        <Group icon={Layers} title="Material">
           <MaterialFields {...props} />
           <p className="st-hint">
-            {props.materialHint ??
-              "Choose what you are measuring so readings come out right; a surface fills in its emissivity, typing a value makes it Custom. Reflected is usually the room temperature."}
+            {props.materialHint ?? "Reflected is usually the room temperature."}
           </p>
-        </div>
+        </Group>
       ) : (
-        <details
-          className="st-more"
-          style={{ borderTop: 0, borderBottom: "1px solid var(--tc-line)" }}
-        >
-          <summary>
-            Material<span className="aside">{summary}</span>
-            <ChevronDown size={14} strokeWidth={1.75} aria-hidden="true" />
-          </summary>
-          <div className="st-grp">
-            <MaterialFields {...props} />
-          </div>
-        </details>
+        <Group icon={Layers} title="Material" aside={summary} collapsible defaultOpen={false}>
+          <MaterialFields {...props} />
+        </Group>
       )}
 
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Regions</h3>
-          {rois.length > 0 ? <span className="aside">{rois.length}</span> : null}
-        </div>
+      <Group
+        icon={SquareDashed}
+        title="Regions"
+        aside={rois.length > 0 ? String(rois.length) : undefined}
+      >
         {rois.length === 0 ? (
           <p className="st-hint">
-            {props.regionsHint ??
-              "None yet. Pick a tool on the left of the image, then click or drag on it."}
+            {props.regionsHint ?? "None yet. Pick a tool, then click the image."}
           </p>
         ) : (
           <div className="st-rows">
@@ -230,19 +214,22 @@ export function MeasureTab(props: MeasureTabProps): React.JSX.Element {
             ))}
           </div>
         )}
-      </div>
+      </Group>
 
       {props.chartsLabel === null ? null : (
-        <div className="st-grp">
-          <div className="st-setrow">
-            <span className="lbl">{props.chartsLabel ?? "Charts below the image"}</span>
+        <Group
+          icon={ChartLine}
+          title="Chart"
+          aside={
             <Switch
               checked={props.chartsOpen}
               onChange={props.onChartsOpenChange}
-              label={props.chartsLabel ?? "Charts below the image"}
+              label={chartsLabel}
             />
-          </div>
-        </div>
+          }
+        >
+          <p className="st-hint">Readings over time, below the image.</p>
+        </Group>
       )}
     </div>
   );

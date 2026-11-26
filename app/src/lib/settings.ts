@@ -1,3 +1,4 @@
+import { clampPanelWidth, PANEL_WIDTH } from "./panelWidth";
 import type { TempUnit } from "./types";
 
 /** Studio's own settings. Rust stores them in `app_config_dir()/settings.json`; the browser
@@ -12,6 +13,8 @@ export interface StudioSettings {
   button_action: ButtonAction;
   material_on_camera: boolean;
   drawer_height: number;
+  /** The side panel's width in px, in Live and Captures (280 to 520). */
+  panel_width: number;
   last_palette: string;
   last_range: ColorRangeSetting;
   /** The firmware file chosen last, so Finish update can use it again. */
@@ -55,6 +58,7 @@ export function defaultSettings(locale: string = systemLocale()): StudioSettings
     button_action: "snapshot",
     material_on_camera: false,
     drawer_height: 216,
+    panel_width: PANEL_WIDTH.default,
     last_palette: "inferno",
     last_range: { mode: "auto", min_c: null, max_c: null },
     last_firmware_path: null,
@@ -108,6 +112,7 @@ export function parseSettings(value: unknown, locale?: string): StudioSettings {
       typeof height === "number" && Number.isFinite(height) && height >= 0
         ? Math.round(height)
         : d.drawer_height,
+    panel_width: typeof v.panel_width === "number" ? clampPanelWidth(v.panel_width) : d.panel_width,
     last_palette:
       typeof v.last_palette === "string" && v.last_palette.length > 0
         ? v.last_palette

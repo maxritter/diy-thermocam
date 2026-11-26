@@ -206,7 +206,7 @@ export function RegionRow({
               ε <b>{(stats?.effective_emissivity ?? rad.emissivity).toFixed(2)}</b>
             </span>
           </div>
-          <div className="st-two">
+          <div className="st-two wide-first">
             <label className="st-field">
               <span>Material</span>
               <select

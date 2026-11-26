@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Clock, Cpu, Images, Radio, X } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { isTauriRuntime } from "@/lib/backend";
 import type { StudioSettings } from "@/lib/settings";
@@ -8,6 +8,7 @@ import { CameraChip, type CameraChipProps } from "./CameraChip";
 import { GearMenu } from "./GearMenu";
 import { ShortcutSheet } from "./ShortcutSheet";
 import { isTypingTarget, matchShortcut, type ShortcutId } from "./shortcuts";
+import { PanelWidthContext, type PanelWidthValue } from "./ui/SidePanel";
 
 export type PageId = "live" | "captures" | "camera";
 
@@ -130,8 +131,8 @@ export function Shell({
 }: ShellProps): React.JSX.Element {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const handlers = useRef({ onPageChange, onShortcut });
-  handlers.current = { onPageChange, onShortcut };
+  const handlers = useRef({ onPageChange, onShortcut, onSettings: onSettingsChange });
+  handlers.current = { onPageChange, onShortcut, onSettings: onSettingsChange };
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -156,6 +157,11 @@ export function Shell({
   }, []);
 
   const current = PAGES.find((p) => p.id === page) ?? PAGES[0];
+  const panelWidth = settings.panel_width;
+  const panel = useMemo<PanelWidthValue>(
+    () => ({ width: panelWidth, onChange: (w) => handlers.current.onSettings({ panel_width: w }) }),
+    [panelWidth],
+  );
 
   return (
     <div className="st-shell">
@@ -194,7 +200,7 @@ export function Shell({
         </div>
       </header>
       <main className="st-page" data-page={current.id} aria-label={current.label}>
-        {children}
+        <PanelWidthContext.Provider value={panel}>{children}</PanelWidthContext.Provider>
       </main>
       <ShortcutSheet open={sheetOpen} onOpenChange={setSheetOpen} />
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} firmware={firmware} />

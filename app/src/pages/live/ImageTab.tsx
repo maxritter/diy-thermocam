@@ -1,7 +1,24 @@
 import { Popover } from "@base-ui/react/popover";
-import { ChevronDown, FlipHorizontal2, RotateCw, Upload } from "lucide-react";
+import {
+  ChartColumn,
+  FlipHorizontal2,
+  Focus,
+  Highlighter,
+  Image as ImageIcon,
+  Lock,
+  Palette as PaletteIcon,
+  RotateCw,
+  Scaling,
+  Sparkles,
+  Thermometer,
+  Upload,
+  Waves,
+} from "lucide-react";
 import { type ChangeEvent, useMemo, useRef, useState } from "react";
-import { type ColorRange, RAW_LIMITS, shownRange } from "@/lib/colorRange";
+import { Group } from "@/app/ui/Group";
+import { Segmented } from "@/app/ui/Segmented";
+import { SettingRow } from "@/app/ui/SettingRow";
+import { type ColorRange, RAW_LIMITS, rangeAfterDragStart, shownRange } from "@/lib/colorRange";
 import type { FrameStore } from "@/lib/frameStore";
 import { paletteGradientCss } from "@/lib/palettes";
 import { objectCToRaw, rawToObjectC } from "@/lib/thermal";
@@ -76,16 +93,20 @@ export function rememberPalette(list: string[], id: string): string[] {
   return next;
 }
 
-const SMOOTHING: { id: UpscaleMethod; label: string }[] = [
-  { id: "edge_preserve", label: "Smooth" },
-  { id: "lanczos3", label: "Sharp" },
-  { id: "nearest", label: "Pixels" },
+/** The four upscalers the pipeline offers, by their names. */
+export const UPSCALERS: { id: UpscaleMethod; label: string }[] = [
+  { id: "nearest", label: "Nearest" },
+  { id: "bicubic", label: "Bicubic" },
+  { id: "lanczos3", label: "Lanczos-3" },
+  { id: "edge_preserve", label: "Edge + USM" },
 ];
 
-const NOISE: { id: SpatialFilter; label: string }[] = [
+/** The spatial filters, Off first. */
+export const DENOISE: { id: SpatialFilter; label: string }[] = [
   { id: "none", label: "Off" },
-  { id: "gaussian3x3", label: "Light" },
-  { id: "median3x3", label: "Strong" },
+  { id: "gaussian3x3", label: "Gaussian 3×3" },
+  { id: "median3x3", label: "Median 3×3" },
+  { id: "box3x3", label: "Box 3×3" },
 ];
 
 const HIGHLIGHT: { id: IsothermMode; label: string }[] = [
@@ -94,14 +115,6 @@ const HIGHLIGHT: { id: IsothermMode; label: string }[] = [
   { id: "below", label: "Below a temperature" },
   { id: "interval", label: "Between two temperatures" },
 ];
-
-function smoothingOf(p: DisplayPipeline): UpscaleMethod {
-  return p.upscaler === "bicubic" ? "edge_preserve" : p.upscaler;
-}
-
-function noiseOf(p: DisplayPipeline): SpatialFilter {
-  return p.filter === "box3x3" ? "gaussian3x3" : p.filter;
-}
 
 function Swatch({
   palette,
@@ -115,7 +128,9 @@ function Swatch({
   return (
     <button className="st-sw" type="button" aria-pressed={pressed} onClick={onClick}>
       <span className="chip" style={{ background: paletteGradientCss(palette, "to right") }} />
-      {palette.label}
+      <span className="nm" title={palette.label}>
+        {palette.label}
+      </span>
     </button>
   );
 }
@@ -288,23 +303,35 @@ export function ImageTab(props: ImageTabProps): React.JSX.Element {
     props.onRangeChange({ mode: "manual", lo: a, hi: b });
   };
 
+  const setScaleMode = (mode: "auto" | "fixed") => {
+    if (mode === "auto") {
+      if (range.mode !== "auto") props.onRangeChange({ mode: "auto" });
+      return;
+    }
+    if (range.mode === "manual" || !Number.isFinite(loRaw) || !Number.isFinite(hiRaw)) return;
+    props.onRangeChange(rangeAfterDragStart(range, [loRaw, hiRaw]));
+  };
+
   const iso = pipeline.isotherm;
   const setIso = (patch: Partial<typeof iso>) =>
     onPipelineChange({ ...pipeline, isotherm: { ...iso, ...patch } });
-  const smoothing = smoothingOf(pipeline);
+  const set = (patch: Partial<DisplayPipeline>) => onPipelineChange({ ...pipeline, ...patch });
+  const sharpen = Math.round(pipeline.sharpen_amount * 100);
 
   return (
     <div role="tabpanel" aria-label="Image">
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Palette</h3>
+      <Group
+        icon={PaletteIcon}
+        title="Palette"
+        aside={
           <AllPalettes
             palettes={palettes}
             paletteId={paletteId}
             onSelectPalette={props.onSelectPalette}
             onImportPalette={props.onImportPalette}
           />
-        </div>
+        }
+      >
         <fieldset className="st-swatches" aria-label="Palette">
           {recent.map((p) => (
             <Swatch
@@ -315,13 +342,24 @@ export function ImageTab(props: ImageTabProps): React.JSX.Element {
             />
           ))}
         </fieldset>
-      </div>
+      </Group>
 
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Color scale</h3>
-          <span className="aside">{range.mode === "auto" ? "Auto" : "Fixed"}</span>
-        </div>
+      <Group
+        icon={Thermometer}
+        title="Color scale"
+        aside={
+          <Segmented
+            label="Color scale mode"
+            small
+            value={range.mode === "auto" ? "auto" : "fixed"}
+            onChange={setScaleMode}
+            options={[
+              { id: "auto", label: "Auto", icon: Sparkles },
+              { id: "fixed", label: "Fixed", icon: Lock },
+            ]}
+          />
+        }
+      >
         <div className="st-two">
           <label className="st-field">
             <span>From</span>
@@ -333,15 +371,13 @@ export function ImageTab(props: ImageTabProps): React.JSX.Element {
           </label>
         </div>
         <p className="st-hint">
-          Auto follows the coldest and hottest point. Typing a value or dragging a handle on the
-          scale fixes it; <strong>Auto</strong> on the scale follows the image again.
+          {range.mode === "auto"
+            ? "Follows the coldest and hottest point."
+            : "Stays put. Type a value or drag the scale."}
         </p>
-      </div>
+      </Group>
 
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Highlight</h3>
-        </div>
+      <Group icon={Highlighter} title="Highlight">
         <label className="st-field">
           <span className="st-vh">Highlight</span>
           <select
@@ -399,107 +435,104 @@ export function ImageTab(props: ImageTabProps): React.JSX.Element {
             </label>
           </div>
         ) : null}
-        <p className="st-hint">Paints one temperature band in a bright color.</p>
-      </div>
+        <p className="st-hint">Paints one band in a bright color.</p>
+      </Group>
 
-      <details className="st-more">
-        <summary>
-          More image options
-          <span className="aside">{SMOOTHING.find((s) => s.id === smoothing)?.label}</span>
-          <ChevronDown {...SM} />
-        </summary>
-        <div className="st-grp">
-          <p className="st-hint" style={{ margin: 0 }}>
-            Changes how the image looks, never the temperatures.
-          </p>
-          <div className="st-field">
-            <span>Smoothing</span>
-            <fieldset className="st-seg full" aria-label="Smoothing">
-              {SMOOTHING.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  aria-pressed={smoothing === s.id}
-                  onClick={() => onPipelineChange({ ...pipeline, upscaler: s.id })}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </fieldset>
-          </div>
-          <label className="st-field">
-            <span style={{ display: "flex", justifyContent: "space-between" }}>
-              Detail{" "}
-              <span className="font-mono-tech">{Math.round(pipeline.sharpen_amount * 100)}%</span>
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={150}
-              value={Math.round(pipeline.sharpen_amount * 100)}
-              aria-label="Detail"
-              onChange={(e) =>
-                onPipelineChange({ ...pipeline, sharpen_amount: Number(e.target.value) / 100 })
-              }
-            />
-          </label>
-          <label className="st-field">
-            <span>Noise reduction</span>
-            <select
-              className="st-select"
-              aria-label="Noise reduction"
-              value={noiseOf(pipeline)}
-              onChange={(e) =>
-                onPipelineChange({ ...pipeline, filter: e.target.value as SpatialFilter })
-              }
-            >
-              {NOISE.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="st-setrow">
-            <span className="lbl">Boost contrast</span>
-            <Switch
-              label="Boost contrast"
-              checked={pipeline.histogram_eq}
-              onChange={(on) => onPipelineChange({ ...pipeline, histogram_eq: on })}
-            />
-          </div>
-          <p className="st-hint" style={{ marginTop: -6 }}>
-            Spreads colors by how often each temperature appears, so the scale is no longer even.
-            The scale shows a mark while it is on.
-          </p>
-          <div className="st-two">
-            <button
-              className="tc-btn tc-btn-sm"
-              type="button"
-              aria-pressed={pipeline.rotate_180}
-              onClick={() => onPipelineChange({ ...pipeline, rotate_180: !pipeline.rotate_180 })}
-            >
-              <RotateCw {...SM} />
-              Rotate 180°
-            </button>
-            <button
-              className="tc-btn tc-btn-sm"
-              type="button"
-              aria-pressed={pipeline.flip_horizontal}
-              onClick={() =>
-                onPipelineChange({ ...pipeline, flip_horizontal: !pipeline.flip_horizontal })
-              }
-            >
-              <FlipHorizontal2 {...SM} />
-              Mirror
-            </button>
-          </div>
-          <p className="st-hint">
-            Turns only this view and its exports. For a camera mounted upside down, use Camera ›
-            Mounted upside down.
-          </p>
+      <Group icon={ImageIcon} title="Image options" aside="Display only" collapsible defaultOpen>
+        <div className="st-rows-set">
+          <SettingRow
+            icon={Scaling}
+            title="Upscaler"
+            desc="How pixels grow"
+            control={
+              <select
+                className="st-select"
+                aria-label="Upscaler"
+                value={pipeline.upscaler}
+                onChange={(e) => set({ upscaler: e.target.value as UpscaleMethod })}
+              >
+                {UPSCALERS.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.label}
+                  </option>
+                ))}
+              </select>
+            }
+          />
+          <SettingRow
+            icon={Focus}
+            title="Sharpening"
+            desc="Unsharp mask amount"
+            value={`${sharpen} %`}
+            stacked
+            control={
+              <input
+                type="range"
+                min={0}
+                max={150}
+                value={sharpen}
+                aria-label="Sharpening"
+                onChange={(e) => set({ sharpen_amount: Number(e.target.value) / 100 })}
+              />
+            }
+          />
+          <SettingRow
+            icon={Waves}
+            title="Denoise"
+            desc="Smooths speckle"
+            control={
+              <select
+                className="st-select"
+                aria-label="Denoise"
+                value={pipeline.filter}
+                onChange={(e) => set({ filter: e.target.value as SpatialFilter })}
+              >
+                {DENOISE.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {n.label}
+                  </option>
+                ))}
+              </select>
+            }
+          />
+          <SettingRow
+            icon={ChartColumn}
+            title="Boost contrast"
+            desc="Histogram equalization"
+            control={
+              <Switch
+                label="Boost contrast"
+                checked={pipeline.histogram_eq}
+                onChange={(on) => set({ histogram_eq: on })}
+              />
+            }
+          />
+          <SettingRow
+            icon={RotateCw}
+            title="Rotate 180°"
+            desc="This view and its exports"
+            control={
+              <Switch
+                label="Rotate 180°"
+                checked={pipeline.rotate_180}
+                onChange={(on) => set({ rotate_180: on })}
+              />
+            }
+          />
+          <SettingRow
+            icon={FlipHorizontal2}
+            title="Mirror"
+            desc="Swaps left and right"
+            control={
+              <Switch
+                label="Mirror"
+                checked={pipeline.flip_horizontal}
+                onChange={(on) => set({ flip_horizontal: on })}
+              />
+            }
+          />
         </div>
-      </details>
+      </Group>
     </div>
   );
 }

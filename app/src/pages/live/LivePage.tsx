@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { SidePanel } from "@/app/ui/SidePanel";
 import { ColorbarHistogram } from "@/components/ColorbarHistogram";
 import { Loupe } from "@/components/Loupe";
 import { ThermalViewport } from "@/components/ThermalViewport";
@@ -311,8 +312,8 @@ export function LivePage(props: LivePageProps): React.JSX.Element {
       </div>
 
       {props.panelHidden || vacant ? null : (
-        <aside className="st-insp" aria-label="Side panel">
-          <div className="st-insp-tabs">
+        <SidePanel
+          tabs={
             <div className="st-tabs" role="tablist" aria-label="Side panel">
               {tabs.map((t) => (
                 <button
@@ -337,49 +338,48 @@ export function LivePage(props: LivePageProps): React.JSX.Element {
                 </button>
               ))}
             </div>
-          </div>
-          <div className="st-insp-body">
-            {props.inspectorTab === "image" ? (
-              <ImageTab
-                store={store}
-                palettes={props.palettes}
-                paletteId={view.palette.id}
-                recentPaletteIds={props.recentPaletteIds}
-                onSelectPalette={props.onSelectPalette}
-                onImportPalette={props.onImportPalette}
-                range={view.range}
-                onRangeChange={props.onRangeChange}
-                rad={view.rad}
-                unit={view.unit}
-                pipeline={view.pipeline}
-                onPipelineChange={props.onPipelineChange}
-              />
-            ) : props.inspectorTab === "measure" ? (
-              <MeasureTab
-                store={store}
-                rad={view.rad}
-                materialId={props.materialId}
-                materials={DEFAULT_MATERIALS}
-                unit={view.unit}
-                onMaterialChange={props.onMaterialChange}
-                rois={view.rois}
-                selectedRoiId={view.selectedRoiId}
-                onSelectRoi={props.onSelectRoi}
-                onRoisChange={props.onRoisChange}
-                onFitRange={(roi) => {
-                  const fr = store.getFrame();
-                  if (fr) props.onFitRangeToRoi(roi, fr);
-                }}
-                chartsOpen={props.chartsOpen}
-                onChartsOpenChange={props.onChartsOpenChange}
-              />
-            ) : (
-              <div role="tabpanel" aria-label="Alarms">
-                {props.alarmsPanel}
-              </div>
-            )}
-          </div>
-        </aside>
+          }
+        >
+          {props.inspectorTab === "image" ? (
+            <ImageTab
+              store={store}
+              palettes={props.palettes}
+              paletteId={view.palette.id}
+              recentPaletteIds={props.recentPaletteIds}
+              onSelectPalette={props.onSelectPalette}
+              onImportPalette={props.onImportPalette}
+              range={view.range}
+              onRangeChange={props.onRangeChange}
+              rad={view.rad}
+              unit={view.unit}
+              pipeline={view.pipeline}
+              onPipelineChange={props.onPipelineChange}
+            />
+          ) : props.inspectorTab === "measure" ? (
+            <MeasureTab
+              store={store}
+              rad={view.rad}
+              materialId={props.materialId}
+              materials={DEFAULT_MATERIALS}
+              unit={view.unit}
+              onMaterialChange={props.onMaterialChange}
+              rois={view.rois}
+              selectedRoiId={view.selectedRoiId}
+              onSelectRoi={props.onSelectRoi}
+              onRoisChange={props.onRoisChange}
+              onFitRange={(roi) => {
+                const fr = store.getFrame();
+                if (fr) props.onFitRangeToRoi(roi, fr);
+              }}
+              chartsOpen={props.chartsOpen}
+              onChartsOpenChange={props.onChartsOpenChange}
+            />
+          ) : (
+            <div role="tabpanel" aria-label="Alarms">
+              {props.alarmsPanel}
+            </div>
+          )}
+        </SidePanel>
       )}
     </div>
   );

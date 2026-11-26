@@ -1,5 +1,6 @@
-import { Check, RefreshCw } from "lucide-react";
+import { Check, Info, NotebookPen, RefreshCw } from "lucide-react";
 import { Fragment } from "react";
+import { Group } from "@/app/ui/Group";
 import type { SaveState } from "./edits";
 
 const SM = { size: 14, strokeWidth: 1.75, "aria-hidden": true } as const;
@@ -94,7 +95,16 @@ export interface NotesTabProps {
 export function NotesTab(p: NotesTabProps): React.JSX.Element {
   return (
     <>
-      <div className="st-grp">
+      <Group
+        icon={NotebookPen}
+        title="Notes"
+        aside={
+          <button className="st-link" type="button" onClick={p.onReset}>
+            <RefreshCw {...SM} />
+            Reset to original
+          </button>
+        }
+      >
         <label className="st-field">
           <span>Name</span>
           <input
@@ -104,6 +114,9 @@ export function NotesTab(p: NotesTabProps): React.JSX.Element {
             onChange={(e) => p.onName(e.target.value)}
           />
         </label>
+        <p className="st-hint" style={{ marginTop: -4 }}>
+          Titles exports. Left empty, the time it was taken.
+        </p>
         <label className="st-field">
           <span>Notes</span>
           <textarea
@@ -136,21 +149,8 @@ export function NotesTab(p: NotesTabProps): React.JSX.Element {
             <RedoIcon />
           </button>
         </div>
-        <p className="st-hint">
-          The name you type shows in Captures and as the title of exports and reports. Left empty,
-          the capture is named by when it was taken.
-        </p>
-        <div>
-          <button className="st-link" type="button" onClick={p.onReset}>
-            <RefreshCw {...SM} />
-            Reset to original
-          </button>
-        </div>
-      </div>
-      <div className="st-grp">
-        <div className="st-grp-h">
-          <h3>Details</h3>
-        </div>
+      </Group>
+      <Group icon={Info} title="Details">
         <dl className="cp-kv">
           {p.details.map((d) => (
             <Fragment key={d.k}>
@@ -159,7 +159,7 @@ export function NotesTab(p: NotesTabProps): React.JSX.Element {
             </Fragment>
           ))}
         </dl>
-      </div>
+      </Group>
     </>
   );
 }

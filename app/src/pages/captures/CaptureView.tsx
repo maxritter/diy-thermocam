@@ -1,6 +1,7 @@
 import { Maximize, Minus, PanelRight, Plus } from "lucide-react";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { isTypingTarget, matchShortcut, type ShortcutId } from "@/app/shortcuts";
+import { SidePanel } from "@/app/ui/SidePanel";
 import { ColorbarHistogram } from "@/components/ColorbarHistogram";
 import { Loupe } from "@/components/Loupe";
 import { ThermalViewport } from "@/components/ThermalViewport";
@@ -306,8 +307,8 @@ export function CaptureView(props: CaptureViewProps): React.JSX.Element {
       </div>
 
       {panelHidden || props.noImage ? null : (
-        <aside className="st-insp" aria-label="Side panel">
-          <div className="st-insp-tabs">
+        <SidePanel
+          tabs={
             <div className="st-tabs" role="tablist" aria-label="Side panel">
               {tabs.map((t) => (
                 <button
@@ -323,63 +324,62 @@ export function CaptureView(props: CaptureViewProps): React.JSX.Element {
                 </button>
               ))}
             </div>
-          </div>
-          <div className="st-insp-body">
-            {tab === "image" ? (
-              <ImageTab
-                store={store}
-                palettes={props.palettes}
-                paletteId={palette.id}
-                recentPaletteIds={props.recentPaletteIds}
-                onSelectPalette={(id) => onEdit((e) => ({ ...e, paletteId: id }))}
-                onImportPalette={props.onImportPalette}
-                range={range}
-                onRangeChange={onRangeChange}
-                rad={rad}
-                unit={unit}
-                pipeline={pipeline}
-                onPipelineChange={setPipeline}
-              />
-            ) : tab === "measure" ? (
-              <MeasureTab
-                store={store}
-                rad={rad}
-                materialId={edits.material.id}
-                materials={DEFAULT_MATERIALS}
-                unit={unit}
-                onMaterialChange={(m) =>
-                  onEdit((e) => ({
-                    ...e,
-                    material: { id: m.id, emissivity: m.emissivity, reflected_c: m.reflected_c },
-                  }))
-                }
-                rois={edits.rois}
-                selectedRoiId={selectedRoiId}
-                onSelectRoi={setSelectedRoiId}
-                onRoisChange={onRoisChange}
-                onFitRange={(roi) => {
-                  const fr = store.getFrame();
-                  if (!fr) return;
-                  const r = roiContrastRange(roi, fr.pixels, fr.width, fr.height, 0.06);
-                  if (r) onRangeChange({ mode: "manual", lo: r[0], hi: r[1] });
-                }}
-                chartsOpen={props.measure?.chartsOpen ?? false}
-                onChartsOpenChange={props.measure?.onChartsOpenChange ?? (() => {})}
-                chartsLabel={props.measure?.chartsLabel ?? null}
-                wholeAside={props.measure?.wholeAside}
-                materialHint="Changing these recalculates every reading from the capture’s raw data."
-                regionsHint={
-                  props.measure?.regionsHint ??
-                  "None yet. Pick a tool on the left of the image, then click or drag on it. Regions are saved with the capture."
-                }
-              />
-            ) : (
-              <div role="tabpanel" aria-label="Notes">
-                {props.notes}
-              </div>
-            )}
-          </div>
-        </aside>
+          }
+        >
+          {tab === "image" ? (
+            <ImageTab
+              store={store}
+              palettes={props.palettes}
+              paletteId={palette.id}
+              recentPaletteIds={props.recentPaletteIds}
+              onSelectPalette={(id) => onEdit((e) => ({ ...e, paletteId: id }))}
+              onImportPalette={props.onImportPalette}
+              range={range}
+              onRangeChange={onRangeChange}
+              rad={rad}
+              unit={unit}
+              pipeline={pipeline}
+              onPipelineChange={setPipeline}
+            />
+          ) : tab === "measure" ? (
+            <MeasureTab
+              store={store}
+              rad={rad}
+              materialId={edits.material.id}
+              materials={DEFAULT_MATERIALS}
+              unit={unit}
+              onMaterialChange={(m) =>
+                onEdit((e) => ({
+                  ...e,
+                  material: { id: m.id, emissivity: m.emissivity, reflected_c: m.reflected_c },
+                }))
+              }
+              rois={edits.rois}
+              selectedRoiId={selectedRoiId}
+              onSelectRoi={setSelectedRoiId}
+              onRoisChange={onRoisChange}
+              onFitRange={(roi) => {
+                const fr = store.getFrame();
+                if (!fr) return;
+                const r = roiContrastRange(roi, fr.pixels, fr.width, fr.height, 0.06);
+                if (r) onRangeChange({ mode: "manual", lo: r[0], hi: r[1] });
+              }}
+              chartsOpen={props.measure?.chartsOpen ?? false}
+              onChartsOpenChange={props.measure?.onChartsOpenChange ?? (() => {})}
+              chartsLabel={props.measure?.chartsLabel ?? null}
+              wholeAside={props.measure?.wholeAside}
+              materialHint="Changing these recalculates every reading from the capture’s raw data."
+              regionsHint={
+                props.measure?.regionsHint ??
+                "None yet. Pick a tool on the left of the image, then click or drag on it. Regions are saved with the capture."
+              }
+            />
+          ) : (
+            <div role="tabpanel" aria-label="Notes">
+              {props.notes}
+            </div>
+          )}
+        </SidePanel>
       )}
     </div>
   );

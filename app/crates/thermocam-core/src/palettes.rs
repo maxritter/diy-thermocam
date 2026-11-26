@@ -90,7 +90,7 @@ pub fn builtin_palettes() -> Vec<Palette> {
 
     list.push(Palette {
         id: "inferno".into(),
-        label: "Inferno (Perceptual)".into(),
+        label: "Inferno".into(),
         firmware_id: None,
         category: "Perceptual".into(),
         rgb: lerp_stops(&[
@@ -106,7 +106,7 @@ pub fn builtin_palettes() -> Vec<Palette> {
     });
     list.push(Palette {
         id: "viridis".into(),
-        label: "Viridis (Perceptual)".into(),
+        label: "Viridis".into(),
         firmware_id: None,
         category: "Perceptual".into(),
         rgb: lerp_stops(&[
@@ -120,7 +120,7 @@ pub fn builtin_palettes() -> Vec<Palette> {
     });
     list.push(Palette {
         id: "magma".into(),
-        label: "Magma (Perceptual)".into(),
+        label: "Magma".into(),
         firmware_id: None,
         category: "Perceptual".into(),
         rgb: lerp_stops(&[
@@ -135,7 +135,7 @@ pub fn builtin_palettes() -> Vec<Palette> {
     });
     list.push(Palette {
         id: "plasma".into(),
-        label: "Plasma (Perceptual)".into(),
+        label: "Plasma".into(),
         firmware_id: None,
         category: "Perceptual".into(),
         rgb: lerp_stops(&[
@@ -150,7 +150,7 @@ pub fn builtin_palettes() -> Vec<Palette> {
     });
     list.push(Palette {
         id: "turbo".into(),
-        label: "Turbo (High-Contrast)".into(),
+        label: "Turbo".into(),
         firmware_id: None,
         category: "Perceptual".into(),
         rgb: lerp_stops(&[
