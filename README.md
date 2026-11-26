@@ -28,7 +28,7 @@ Two ready-made boards, a FLIR Lepton and a printed case, put together with screw
   </picture>
 </p>
 
-<a href="https://www.diy-thermocam.net/film/diy-thermocam-v4.mp4"><img src="website/public/images/brand/watch-the-film.svg" alt="Watch the film, 2:13" width="252" height="44"></a>
+<a href="https://www.diy-thermocam.net/film/diy-thermocam-v4.mp4"><img src="website/public/images/brand/watch-the-film.svg" alt="Watch the film, 2:14" width="252" height="44"></a>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="website/public/images/brand/readme-hero-dark.webp">

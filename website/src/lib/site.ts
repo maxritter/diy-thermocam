@@ -33,7 +33,7 @@ export const FILM = {
   src: '/film/diy-thermocam-v4.mp4',
   captions: '/film/diy-thermocam-v4.vtt',
   poster: '/film/diy-thermocam-v4.jpg',
-  seconds: 133.7,
+  seconds: 134.8,
 } as const;
 
 /* Whole seconds rounded down, the way video players show a length. */
