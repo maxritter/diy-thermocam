@@ -28,7 +28,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' asset:; img-src 'self' data: blob: asset:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+      "csp": "default-src 'self' asset:; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' data: blob: asset:; style-src 'self' 'unsafe-inline'; script-src 'self'"
     }
   },
   "bundle": {

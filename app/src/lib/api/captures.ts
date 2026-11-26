@@ -15,7 +15,7 @@ import type {
   SdListing,
   ThermalFrame,
 } from "@/lib/types";
-import { baseName, type CommandError, commandError } from "@/lib/utils";
+import { baseName, type CommandError, commandError, rawBytes } from "@/lib/utils";
 
 /**
  * The Captures page's calls to Rust (`agents/rust-commands.md`, plus `cmd_captures_list`).
@@ -561,8 +561,11 @@ export const capturesApi = {
     if (known) return known;
     let url: string;
     if (isTauriRuntime()) {
-      const png = await invoke<ArrayBuffer>("cmd_thumbnail", { capture: item.ref, paletteId });
-      url = URL.createObjectURL(new Blob([png], { type: "image/png" }));
+      const png = await invoke<ArrayBuffer | number[]>("cmd_thumbnail", {
+        capture: item.ref,
+        paletteId,
+      });
+      url = URL.createObjectURL(new Blob([rawBytes(png)], { type: "image/png" }));
     } else {
       await delay(90);
       url = drawThumbnail(await capturesApi.loadFirstFrame(item), paletteId);
@@ -779,8 +782,8 @@ export const capturesApi = {
   /** One frame of a recording on this computer (`cmd_recording_frame`, raw bytes). */
   async recordingFrame(path: string, index: number): Promise<ThermalFrame> {
     if (isTauriRuntime()) {
-      const buf = await invoke<ArrayBuffer>("cmd_recording_frame", { path, index });
-      return decodeFrameRawBinary(buf);
+      const buf = await invoke<ArrayBuffer | number[]>("cmd_recording_frame", { path, index });
+      return decodeFrameRawBinary(rawBytes(buf));
     }
     const rec = simRecordingAt(path);
     if (!rec || index < 0 || index >= rec.index.frames) {
