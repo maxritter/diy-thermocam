@@ -1,422 +1,250 @@
 #!/usr/bin/env python3
-"""Turnkey KiCad 10 fabrication & PCBA package exporter for DIY-Thermocam.
+"""Export the DIY-Thermocam V4.0 manufacturing files.
 
-Generates ready-to-upload packages for Seeed Studio Fusion PCB/PCBA, JLCPCB,
-and PCBWay from a KiCad 10 project directory:
-  - Standard Gerber zip (F_Cu, B_Cu, F_Mask, B_Mask, F_Silkscreen, B_Silkscreen,
-    F_Paste, B_Paste, Edge_Cuts) + Excellon .drl drills
-  - PCBA BOM CSVs joined with hardware/bom/bom.csv (JLCPCB, Seeed Fusion, PCBWay)
-  - Pick-and-Place CPL CSVs (JLCPCB & Seeed Fusion column conventions)
-  - 3D STEP model
-  - Schematic PDF
-  - Board top & bottom SVG and 3D PNG renders
+    python3 hardware/pcb/scripts/export_fab.py [--skip-render]
+
+Needs KiCad 10 (set KICAD_CLI if kicad-cli is not in the default macOS location).
+Part numbers come only from hardware/bom/bom.csv.
+
+Writes hardware/pcb/fab/:
+    jlcpcb/   gerbers.zip, bom.csv (LCSC numbers), cpl.csv (rotations and offsets for JLCPCB's part library)
+    seeed/    gerbers.zip, bom.csv (Seeed Fusion template), cpl.csv (KiCad centroids)
+    pcbway/   gerbers.zip, bom.csv (PCBWay template), cpl.csv (KiCad centroids)
+    assembly-top.pdf, assembly-bottom.pdf, schematic.pdf, .step, top/bottom renders (.png)
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import math
 import os
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
-KICAD_CLI = os.environ.get(
-    "KICAD_CLI",
-    "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli",
-)
+KICAD_CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
+STEM = "diy-thermocam-v4.0"
+VENDORS = ("jlcpcb", "seeed", "pcbway")
+GERBER_LAYERS = "F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,F.Paste,B.Paste,Edge.Cuts"
 
-# Normalize V3.0 KiCad-imported Eagle refdes back to hardware/bom/bom.csv designators.
-REF_ALIASES = {
-    "SWITCH0": "SWITCH",
-    "BUTTON0": "BUTTON",
-    "CHG-LED0": "CHG-LED",
-    "LCD-HEADER0": "LCD-HEADER",
-    "PROGRAM0": "PROGRAM",
-    "BOOSTER0": "BOOSTER",
-    "BAT0": "BAT",
+# JLCPCB places parts from its own (EasyEDA) footprint library. Where that footprint's origin or
+# zero orientation differs from ours, this table corrects the JLCPCB CPL only:
+# (dx_mm, dy_mm in CPL coordinates, extra rotation in degrees), applied after the bottom-side
+# transform rot' = 180 - rot. Checked against the EasyEDA footprints of the listed LCSC parts.
+JLC_CPL_CORRECTION: dict[str, tuple[float, float, float]] = {
+    "Q1": (0.0, 0.0, 180.0),     # C15127 SOT-23: EasyEDA pin 3 on the left
+    "Q2": (0.0, 0.0, 180.0),     # C20917 SOT-23
+    "U4": (0.0, 0.0, 180.0),     # C5446 SOT-23
+    "D1": (0.0, 0.0, 270.0),     # C7519 SOT-23-6: EasyEDA pin 1 bottom-left
+    "SW1": (-2.75, 0.0, 0.0),    # C221660: EasyEDA origin on the middle terminal
+    "J3": (0.0, 1.57, 0.0),      # C165948: EasyEDA origin 1.57 mm towards the contacts
+    "U2": (0.175, 0.0, 0.0),     # C915088: EasyEDA origin offset 0.175 mm
+    "J1": (0.0, 0.0, 90.0),      # 2x20 socket: EasyEDA HDR-TH_40P drawn with its rows horizontal
+    "J5": (0.0, 0.0, 270.0),     # C41376163: EasyEDA 1x24 drawn horizontally
+    "J6": (0.0, 0.0, 270.0),     # C41376163
 }
 
+# Multi-pin headers whose footprint origin sits on pin 1: report the pad centre instead.
+PAD_CENTRE_REFS = ("J1", "J2", "J5", "J6")
 
-def run_cmd(cmd: list[str]) -> None:
+
+Row = dict[str, str]
+Part = dict[str, str]
+
+
+def need(pattern: str, text: str) -> re.Match[str]:
+    m = re.search(pattern, text)
+    if m is None:
+        raise SystemExit(f"Unexpected .kicad_pcb content: no match for {pattern!r}")
+    return m
+
+
+def run(cmd: list[str]) -> None:
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
-        raise RuntimeError(
-            f"Command failed ({proc.returncode}): {' '.join(cmd)}\n"
-            f"STDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
-        )
+        raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{proc.stdout}\n{proc.stderr}")
 
 
-# V4.0 Zero-Solder PCBA consolidated LCSC / Seeed OPL lookup (overrides/extends hardware/bom/bom.csv
-# until the post-merge BOM update adds v4.0 rows directly into hardware/bom/bom.csv).
-V40_BOM_OVERRIDES: dict[str, dict[str, str]] = {
-    "J1":   {"mpn": "2.54-2*20",            "manufacturer": "ZHOURI",              "lcsc_part": "C2977589",  "seeed_opl_part": "", "pcba_tier": "extended"},
-    "J2":   {"mpn": "DS1023-02-2x10SF11",   "manufacturer": "CONNFLY Elec",        "lcsc_part": "C18164970", "seeed_opl_part": "", "pcba_tier": "extended"},
-    "J3":   {"mpn": "TYPE-C-31-M-12",       "manufacturer": "Korean Hroparts Elec","lcsc_part": "C165948",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "J4":   {"mpn": "S2B-PH-SM4-TB(LF)(SN)","manufacturer": "JST",                 "lcsc_part": "C295747",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "J5":   {"mpn": "HC-PM254-8.5H-1x24PZ", "manufacturer": "Hong Cheng",          "lcsc_part": "C41376163", "seeed_opl_part": "", "pcba_tier": "extended"},
-    "J6":   {"mpn": "HC-PM254-8.5H-1x24PZ", "manufacturer": "Hong Cheng",          "lcsc_part": "C41376163", "seeed_opl_part": "", "pcba_tier": "extended"},
-    "J7":   {"mpn": "2.54-1*5PFemale",      "manufacturer": "BOOMELE",             "lcsc_part": "C50950",    "seeed_opl_part": "", "pcba_tier": "extended"},
-    "P1":   {"mpn": "YTC1P-8535-01",        "manufacturer": "YIYUAN",              "lcsc_part": "C5221289",  "seeed_opl_part": "", "pcba_tier": "extended"},
-    "P2":   {"mpn": "YTC1P-8535-01",        "manufacturer": "YIYUAN",              "lcsc_part": "C5221289",  "seeed_opl_part": "", "pcba_tier": "extended"},
-    "D1":   {"mpn": "USBLC6-2SC6",          "manufacturer": "STMicroelectronics",  "lcsc_part": "C7519",     "seeed_opl_part": "", "pcba_tier": "extended"},
-    "D2":   {"mpn": "KT-0603R",             "manufacturer": "Hubei KENTO Elec",    "lcsc_part": "C2286",     "seeed_opl_part": "", "pcba_tier": "basic"},
-    "U2":   {"mpn": "TPS61022RWUR",         "manufacturer": "Texas Instruments",   "lcsc_part": "C915088",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "U3":   {"mpn": "BQ24074RGTR",          "manufacturer": "Texas Instruments",   "lcsc_part": "C54313",    "seeed_opl_part": "", "pcba_tier": "extended"},
-    "U4":   {"mpn": "XC6206P332MR-G",       "manufacturer": "Torex Semicon",       "lcsc_part": "C5446",     "seeed_opl_part": "", "pcba_tier": "basic"},
-    "L1":   {"mpn": "FXL0630-1R0-M",        "manufacturer": "cjiang",              "lcsc_part": "C167216",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "Q1":   {"mpn": "AO3401A",              "manufacturer": "Alpha & Omega",       "lcsc_part": "C15127",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "Q2":   {"mpn": "AO3400A",              "manufacturer": "Alpha & Omega",       "lcsc_part": "C20917",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "F1":   {"mpn": "SMD1206P200TF",        "manufacturer": "RUILON",              "lcsc_part": "C20988",    "seeed_opl_part": "", "pcba_tier": "extended"},
-    "SW1":  {"mpn": "JS102011SAQN",         "manufacturer": "C&K",                 "lcsc_part": "C221660",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "SW2":  {"mpn": "B3U-3000P",            "manufacturer": "Omron Electronics",   "lcsc_part": "C963349",   "seeed_opl_part": "", "pcba_tier": "extended"},
-    "SW3":  {"mpn": "TS-1187A-B-A-B",       "manufacturer": "XKB Connection",      "lcsc_part": "C318884",   "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C1":   {"mpn": "CL21A106KAYNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C15850",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C2":   {"mpn": "CL21A106KAYNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C15850",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C3":   {"mpn": "CL21A106KAYNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C15850",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C5":   {"mpn": "CL21A106KAYNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C15850",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C10":  {"mpn": "CL21A106KAYNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C15850",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C4":   {"mpn": "CL21A226MAQNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C45783",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C8":   {"mpn": "CL21A226MAQNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C45783",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C9":   {"mpn": "CL21A226MAQNNNE",      "manufacturer": "Samsung",             "lcsc_part": "C45783",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C6":   {"mpn": "CC0603KRX7R9BB104",    "manufacturer": "YAGEO",               "lcsc_part": "C14663",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C7":   {"mpn": "CC0603KRX7R9BB104",    "manufacturer": "YAGEO",               "lcsc_part": "C14663",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "C11":  {"mpn": "CC0603KRX7R9BB104",    "manufacturer": "YAGEO",               "lcsc_part": "C14663",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R1":   {"mpn": "0603WAF4702T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25819",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R4":   {"mpn": "0603WAF4701T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23162",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R6":   {"mpn": "0603WAF4701T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23162",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R2":   {"mpn": "0603WAF1003T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25803",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R3":   {"mpn": "0603WAF1003T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25803",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R5":   {"mpn": "0603WAF1003T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25803",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R9":   {"mpn": "0603WAF1002T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25804",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R19":  {"mpn": "0603WAF1002T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25804",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R22":  {"mpn": "0603WAF1002T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25804",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R23":  {"mpn": "0603WAF3001T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C4211",     "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R7":   {"mpn": "0603WAF5101T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23186",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R8":   {"mpn": "0603WAF5101T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23186",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R10":  {"mpn": "0603WAF1001T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C21190",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R11":  {"mpn": "0603WAF1201T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C22765",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R12":  {"mpn": "0603WAF1001T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C21190",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R14":  {"mpn": "0603WAF4702T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25819",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R15":  {"mpn": "0603WAF1003T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25803",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R17":  {"mpn": "0603WAF1003T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25803",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R18":  {"mpn": "0603WAF7503T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23240",    "seeed_opl_part": "", "pcba_tier": "extended"},
-    "R20":  {"mpn": "0603WAF4702T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C25819",    "seeed_opl_part": "", "pcba_tier": "basic"},
-    "R21":  {"mpn": "0603WAF7503T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23240",    "seeed_opl_part": "", "pcba_tier": "extended"},
-    "R16":  {"mpn": "0603WAF7503T5E",       "manufacturer": "UNI-ROYAL",           "lcsc_part": "C23240",    "seeed_opl_part": "", "pcba_tier": "extended"},
-}
-
-
-def load_master_bom(bom_csv: Path, rev: str) -> dict[str, dict]:
-    """Map designator -> master BOM row for the target hardware revision."""
-    by_des: dict[str, dict] = {}
+def load_bom(bom_csv: Path) -> dict[str, Row]:
+    """Designator -> bom.csv row. Board parts (v4.0 rows) win over shared off-board module rows."""
+    by_des: dict[str, Row] = {}
     with bom_csv.open(newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            hw = row["hw_rev"].strip().lower()
-            if hw not in ("all", rev.lower()):
+            if row["hw_rev"].strip() not in ("all", "v4.0"):
                 continue
-            raw_des = row.get("designators", "").strip()
-            if not raw_des:
-                continue
-            for des in [d.strip() for d in raw_des.split(",") if d.strip()]:
-                # Prefer revision-specific PCB component rows over offboard/generic rows
+            for des in (d.strip() for d in row["designators"].split(",")):
+                if not des:
+                    continue
                 prev = by_des.get(des)
-                if prev is None or (hw == rev.lower() and prev["hw_rev"].strip().lower() != rev.lower()):
+                if prev is None or (prev["pcba_tier"] == "offboard" and row["pcba_tier"] != "offboard"):
                     by_des[des] = row
-                elif prev["pcba_tier"] == "offboard" and row["pcba_tier"] != "offboard":
-                    by_des[des] = row
-    if rev.lower() == "v4.0":
-        for des, ov in V40_BOM_OVERRIDES.items():
-            by_des[des] = {**by_des.get(des, {}), **ov}
     return by_des
 
 
-def parse_pcb_footprints(pcb_path: Path) -> list[dict]:
-    """Extract placed footprints (Reference, Value, Footprint, Layer, SMD/THT) from .kicad_pcb."""
+def placed_footprints(pcb_path: Path) -> list[Part]:
+    """Footprints that get assembled: reference, value, footprint name, side, SMD or THT."""
     text = pcb_path.read_text(encoding="utf-8")
-    fps = []
+    fps: list[Part] = []
     for block in text.split("\n\t(footprint ")[1:]:
-        fp_name = re.match(r'"([^"]+)"', block).group(1)
-        ref = re.search(r'\(property "Reference" "([^"]*)"', block).group(1)
-        val = re.search(r'\(property "Value" "([^"]*)"', block).group(1)
-        if "exclude_from_bom" in block or "DNP" in val.upper():
+        name = need(r'^"([^"]+)"', block).group(1).split(":")[-1]
+        ref = need(r'\(property "Reference" "([^"]*)"', block).group(1)
+        val = need(r'\(property "Value" "([^"]*)"', block).group(1)
+        attr = re.search(r'\n\t\t\(attr ([^)]*)\)', block)
+        attrs = attr.group(1).split() if attr else []
+        if "exclude_from_bom" in attrs or "dnp" in attrs:
             continue
-        lm = re.search(r'\(layer "([^"]+)"\)', block)
-        layer = lm.group(1) if lm else "F.Cu"
-        # Respect footprint (attr smd) so QFN thermal vias (U3) & USB-C shield tabs (J3) stay SMD
-        has_attr_smd = bool(re.search(r'\(attr\s+[^\)]*\bsmd\b', block))
-        is_smd = has_attr_smd or ("(pad " in block and " smd " in block and " thru_hole " not in block)
+        layer = need(r'\(layer "([^"]+)"\)', block).group(1)
         fps.append({
             "ref": ref,
-            "bom_ref": REF_ALIASES.get(ref, ref),
-            "value": val or fp_name.split(":")[-1],
-            "footprint": fp_name.split(":")[-1],
-            "layer": "top" if layer == "F.Cu" else "bottom",
-            "mount": "SMD" if is_smd else "THT",
+            "value": val,
+            "footprint": name,
+            "side": "Top" if layer == "F.Cu" else "Bottom",
+            "mount": "SMD" if "smd" in attrs else "THT",
         })
-    return sorted(fps, key=lambda x: x["ref"])
+    return sorted(fps, key=lambda f: (re.sub(r"\d", "", f["ref"]), int(re.sub(r"\D", "", f["ref"]) or 0)))
 
 
-def write_boms(fps: list[dict], master_bom: dict[str, dict], fab_dir: Path, stem: str) -> None:
-    # Group by (value, footprint, lcsc, mpn)
-    groups: dict[tuple, list[dict]] = {}
-    for fp in fps:
-        mrow = master_bom.get(fp["bom_ref"], {})
-        lcsc = mrow.get("lcsc_part", "").strip()
-        opl = mrow.get("seeed_opl_part", "").strip()
-        mpn = mrow.get("mpn", "").strip()
-        mfr = mrow.get("manufacturer", "").strip()
-        tier = mrow.get("pcba_tier", "tht_manual" if fp["mount"] == "THT" else "extended").strip()
-        val = fp["value"]
-        key = (val, fp["footprint"], lcsc, opl, mpn, mfr, fp["mount"], tier)
-        groups.setdefault(key, []).append(fp)
-
-    # 1. JLCPCB BOM format
-    jlc_path = fab_dir / f"{stem}-bom-jlcpcb.csv"
-    with jlc_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["Comment", "Designator", "Footprint", "LCSC Part #"])
-        for (val, fp_name, lcsc, _opl, _mpn, _mfr, _mount, _tier), items in groups.items():
-            des = ",".join(i["ref"] for i in items)
-            w.writerow([val, des, fp_name, lcsc])
-
-    # 2. Seeed Studio Fusion PCBA BOM format
-    seeed_path = fab_dir / f"{stem}-bom-seeed.csv"
-    with seeed_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["Designator", "MPN", "Qty", "Seeed OPL", "LCSC", "Value", "Footprint", "Mount", "PCBA Tier"])
-        for (val, fp_name, lcsc, opl, mpn, _mfr, mount, tier), items in groups.items():
-            des = ",".join(i["ref"] for i in items)
-            w.writerow([des, mpn, len(items), opl, lcsc, val, fp_name, mount, tier])
-
-    # 3. PCBWay BOM format
-    pcbway_path = fab_dir / f"{stem}-bom-pcbway.csv"
-    with pcbway_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["Item #", "Designator", "Qty", "Manufacturer", "Mfg Part #", "Description / Value", "Package/Footprint", "Type"])
-        for idx, ((val, fp_name, _lcsc, _opl, mpn, mfr, mount, _tier), items) in enumerate(groups.items(), 1):
-            des = ",".join(i["ref"] for i in items)
-            w.writerow([idx, des, len(items), mfr, mpn, val, fp_name, mount])
-
-
-# Vendor-basis JLCPCB/EasyEDA CPL calibration for V4.0 (dx_mm, dy_mm in PosXY [Y-up], drot_deg)
-# Applied AFTER the standard JLCPCB bottom-side (180 - angle) transform (kicad-jlcpcb-tools / KiKit convention).
-# Verified against EasyEDA component footprints (C7519, C15127, C20917, C5446, C221660, C165948, C915088, C54313, C295747, C963349).
-V40_CPL_CALIBRATION: dict[str, tuple[float, float, float]] = {
-    "Q1":  ( 0.000,  0.000, 180.0),  # C15127 SOT-23: bottom (180-0)+180 = 0 deg
-    "Q2":  ( 0.000,  0.000, 180.0),  # C20917 SOT-23: bottom (180-0)+180 = 0 deg
-    "U4":  ( 0.000,  0.000, 180.0),  # C5446  SOT-23: bottom (180-0)+180 = 0 deg
-    "D1":  ( 0.000,  0.000, 270.0),  # C7519  SOT-23-6: bottom (180-0)+270 = 90 deg
-    "SW1": (-2.750,  0.000,   0.0),  # C221660 EasyEDA origin at middle terminal (Pin 2); bottom (180-270) = 270 deg
-    "J3":  ( 0.000,  1.570,   0.0),  # C165948 EasyEDA origin 1.57 mm along terminal axis from KiCad origin
-    "U2":  ( 0.175,  0.000,   0.0),  # C915088 EasyEDA symmetric pad origin (+0.175 mm X); bottom (180-0) = 180 deg
-    "J5":  ( 0.000,  0.000, 270.0),  # C41376163 horizontal EasyEDA basis: bottom (180-0)+270 = 90 deg
-    "J6":  ( 0.000,  0.000, 270.0),  # C41376163 horizontal EasyEDA basis: bottom (180-0)+270 = 90 deg
-    "J7":  ( 0.000,  0.000,  90.0),  # C50950 horizontal EasyEDA basis: bottom (180-270)+90 = 0 deg
-}
-
-
-def compute_pad_midpoints(pcb_path: Path) -> dict[str, tuple[float, float]]:
-    """Compute true geometric pad-bounding-box midpoints in PosXY (X, -Y) for multi-pin headers."""
+def pad_centres(pcb_path: Path) -> dict[str, tuple[float, float]]:
+    """Centre of the pad bounding box (CPL coordinates, Y up) for multi-pin headers."""
     text = pcb_path.read_text(encoding="utf-8")
     mids: dict[str, tuple[float, float]] = {}
     for block in text.split("\n\t(footprint ")[1:]:
-        rm = re.search(r'\(property "Reference" "([^"]*)"', block)
-        am = re.search(r'\n\t\t\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+([-\d.]+))?\)', block)
-        if not rm or not am:
+        ref = need(r'\(property "Reference" "([^"]*)"', block).group(1)
+        if ref not in PAD_CENTRE_REFS:
             continue
-        ref = rm.group(1)
-        if ref not in ("J1", "J2", "J5", "J6", "J7"):
-            continue
-        fx, fy = float(am.group(1)), float(am.group(2))
-        rot = float(am.group(3) or 0.0)
-        import math
+        at = need(r'\n\t\t\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+([-\d.]+))?\)', block)
+        fx, fy, rot = float(at.group(1)), float(at.group(2)), float(at.group(3) or 0.0)
         rad = math.radians(rot)
-        xs, ys = [], []
+        xs: list[float] = []
+        ys: list[float] = []
         for pm in re.finditer(r'\(pad "[^"]+" \w+ \w+\s+\(at\s+([-\d.]+)\s+([-\d.]+)', block):
             px, py = float(pm.group(1)), float(pm.group(2))
-            wx = fx + px * math.cos(rad) + py * math.sin(rad)
-            wy = fy - px * math.sin(rad) + py * math.cos(rad)
-            xs.append(wx)
-            ys.append(-wy)  # PosXY has Y-up = -KiCad_Y
-        if xs:
-            mids[ref] = (round((min(xs) + max(xs)) / 2.0, 4), round((min(ys) + max(ys)) / 2.0, 4))
+            xs.append(fx + px * math.cos(rad) + py * math.sin(rad))
+            ys.append(-(fy - px * math.sin(rad) + py * math.cos(rad)))
+        mids[ref] = ((min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0)
     return mids
 
 
-def write_cpls(raw_pos_csv: Path, fab_dir: Path, stem: str, rev: str = "", pad_mids: dict[str, tuple[float, float]] | None = None) -> None:
-    rows = []
-    with raw_pos_csv.open(newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            rows.append(row)
+def bom_groups(fps: list[Part], bom: dict[str, Row]) -> list[tuple[Row, list[Part]]]:
+    """Group placed footprints by part; fail if any part lacks an MPN or LCSC number."""
+    missing = [f["ref"] for f in fps if not bom.get(f["ref"], {}).get("mpn") or not bom.get(f["ref"], {}).get("lcsc_part")]
+    if missing:
+        raise SystemExit(f"hardware/bom/bom.csv has no MPN/LCSC number for: {', '.join(missing)}")
+    groups: dict[tuple[str, str], tuple[Row, list[Part]]] = {}
+    for f in fps:
+        row = bom[f["ref"]]
+        key = (row["lcsc_part"], f["footprint"])
+        groups.setdefault(key, (row, []))[1].append(f)
+    return list(groups.values())
 
-    cal_rows = []
-    for r in rows:
-        ref = r["Ref"]
-        side_l = r["Side"].strip().lower()
-        px, py, rot = float(r["PosX"]), float(r["PosY"]), float(r["Rot"])
-        if rev.lower() == "v4.0":
-            if side_l == "bottom":
-                # Standard JLCPCB bottom-side transform (kicad-jlcpcb-tools / KiKit convention)
-                rot = (180.0 - rot) % 360.0
-            if pad_mids and ref in pad_mids:
-                px, py = pad_mids[ref]
-            if ref in V40_CPL_CALIBRATION:
-                dx, dy, drot = V40_CPL_CALIBRATION[ref]
-                px += dx
-                py += dy
-                rot = (rot + drot) % 360.0
-        cal_rows.append((ref, px, py, side_l, rot))
 
-    # JLCPCB CPL: Designator,Mid X,Mid Y,Layer,Rotation
-    jlc_cpl = fab_dir / f"{stem}-cpl-jlcpcb.csv"
-    with jlc_cpl.open("w", newline="", encoding="utf-8") as f:
+def write_csv(path: Path, header: list[str], rows: list[list[object]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
-        for ref, px, py, side_l, rot in cal_rows:
-            side = "Top" if side_l == "top" else "Bottom"
-            w.writerow([ref, f"{px:.4f}mm", f"{py:.4f}mm", side, f"{rot:.2f}"])
-
-    # Seeed Fusion CPL: Designator,PosX,PosY,Layer,Rot
-    seeed_cpl = fab_dir / f"{stem}-cpl-seeed.csv"
-    with seeed_cpl.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["Designator", "PosX", "PosY", "Layer", "Rot"])
-        for ref, px, py, side_l, rot in cal_rows:
-            side = "T" if side_l == "top" else "B"
-            w.writerow([ref, f"{px:.4f}", f"{py:.4f}", side, f"{rot:.2f}"])
+        w.writerow(header)
+        w.writerows(rows)
 
 
-def export_revision(pcb_root: Path, rev: str = "v4.0", skip_render: bool = False) -> None:
-    proj_dir = pcb_root
-    stem = f"diy-thermocam-{rev}"
-    sch_path = proj_dir / f"{stem}.kicad_sch"
-    pcb_path = proj_dir / f"{stem}.kicad_pcb"
-    bom_csv = pcb_root.parent / "bom" / "bom.csv"
+def write_boms(fab: Path, groups: list[tuple[Row, list[Part]]]) -> None:
+    jlc: list[list[object]] = []
+    seeed: list[list[object]] = []
+    pcbway: list[list[object]] = []
+    for i, (row, items) in enumerate(groups, 1):
+        refs = ",".join(f["ref"] for f in items)
+        lcsc = row["lcsc_part"]
+        link = f"https://www.lcsc.com/product-detail/{lcsc}.html"
+        jlc.append([row["mpn"], refs, items[0]["footprint"], lcsc])
+        seeed.append([refs, row["mpn"], len(items), link])
+        pcbway.append([i, refs, len(items), row["manufacturer"], row["mpn"], f"{row['name']} ({row['value_spec']})",
+                       items[0]["footprint"], items[0]["mount"], f"LCSC {lcsc}: {link}"])
+    write_csv(fab / "jlcpcb" / f"{STEM}-bom.csv", ["Comment", "Designator", "Footprint", "LCSC Part #"], jlc)
+    write_csv(fab / "seeed" / f"{STEM}-bom.csv", ["Designator", "MPN", "Qty", "Part Link"], seeed)
+    write_csv(fab / "pcbway" / f"{STEM}-bom.csv",
+              ["Item #", "Designator", "Qty", "Manufacturer", "Mfg Part #", "Description / Value",
+               "Package/Footprint", "Type", "Your Instructions / Notes"], pcbway)
 
-    if not pcb_path.exists():
-        raise FileNotFoundError(f"Missing PCB file: {pcb_path}")
 
-    fab_dir = proj_dir / "fab"
-    gbr_dir = fab_dir / "gerbers"
-    if gbr_dir.exists():
-        shutil.rmtree(gbr_dir)
-    gbr_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"=== Exporting {rev} fabrication package -> {fab_dir} ===")
-
-    # 1. Standard Gerbers + Excellon drills
-    run_cmd([
-        KICAD_CLI, "pcb", "export", "gerbers",
-        "--layers", "F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,F.Paste,B.Paste,Edge.Cuts",
-        "--check-zones",
-        "-o", str(gbr_dir) + "/",
-        str(pcb_path),
-    ])
-    run_cmd([
-        KICAD_CLI, "pcb", "export", "drill",
-        "-u", "mm",
-        "--generate-map", "--map-format", "pdf",
-        "-o", str(gbr_dir) + "/",
-        str(pcb_path),
-    ])
-
-    zip_path = fab_dir / f"{stem}-gerbers.zip"
-    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for p in sorted(gbr_dir.iterdir()):
-            if p.suffix.lower() in {".gtl", ".gbl", ".gts", ".gbs", ".gto", ".gbo", ".gtp", ".gbp", ".gm1", ".gbr", ".drl", ".gbrjob"}:
-                zf.write(p, arcname=p.name)
-    print(f"  [OK] Gerbers + drills zip: {zip_path.name}")
-
-    # 2. Position / CPL CSVs
-    raw_pos = fab_dir / f"{stem}-pos-raw.csv"
-    run_cmd([
-        KICAD_CLI, "pcb", "export", "pos",
-        "--side", "both", "--format", "csv", "--units", "mm",
-        "-o", str(raw_pos),
-        str(pcb_path),
-    ])
-    pad_mids = compute_pad_midpoints(pcb_path) if rev.lower() == "v4.0" else None
-    write_cpls(raw_pos, fab_dir, stem, rev=rev, pad_mids=pad_mids)
-    raw_pos.unlink(missing_ok=True)
-    print(f"  [OK] CPL CSVs (JLCPCB & Seeed Fusion)")
-
-    # 3. PCBA BOM CSVs joined with master hardware/bom/bom.csv
-    master_bom = load_master_bom(bom_csv, rev)
-    fps = parse_pcb_footprints(pcb_path)
-    write_boms(fps, master_bom, fab_dir, stem)
-    print(f"  [OK] BOM CSVs (JLCPCB, Seeed Fusion, PCBWay) for {len(fps)} footprints")
-
-    # 4. 3D STEP model
-    step_path = fab_dir / f"{stem}.step"
-    run_cmd([
-        KICAD_CLI, "pcb", "export", "step",
-        "--subst-models",
-        "--force",
-        "-o", str(step_path),
-        str(pcb_path),
-    ])
-    print(f"  [OK] 3D STEP: {step_path.name} ({step_path.stat().st_size // 1024} KiB)")
-
-    # 5. Schematic PDF
-    if sch_path.exists():
-        pdf_path = fab_dir / f"{stem}-schematic.pdf"
-        run_cmd([
-            KICAD_CLI, "sch", "export", "pdf",
-            "-o", str(pdf_path),
-            str(sch_path),
-        ])
-        print(f"  [OK] Schematic PDF: {pdf_path.name}")
-
-    # 6. Board top & bottom SVG renders
-    run_cmd([
-        KICAD_CLI, "pcb", "export", "svg",
-        "--layers", "F.Cu,F.Silkscreen,F.Mask,Edge.Cuts",
-        "--page-size-mode", "2",
-        "-o", str(fab_dir / f"{stem}-top.svg"),
-        str(pcb_path),
-    ])
-    run_cmd([
-        KICAD_CLI, "pcb", "export", "svg",
-        "--layers", "B.Cu,B.Silkscreen,B.Mask,Edge.Cuts",
-        "--mirror",
-        "--page-size-mode", "2",
-        "-o", str(fab_dir / f"{stem}-bottom.svg"),
-        str(pcb_path),
-    ])
-    print(f"  [OK] Top/Bottom SVG renders")
-
-    # 7. High-res 3D PNG previews
-    if not skip_render:
-        for side in ("top", "bottom"):
-            out_png = fab_dir / f"{stem}-{side}.png"
-            run_cmd([
-                KICAD_CLI, "pcb", "render",
-                "--side", side,
-                "--width", "1600", "--height", "1240",
-                "--quality", "high",
-                "--background", "opaque",
-                "--use-board-stackup-colors",
-                "-o", str(out_png),
-                str(pcb_path),
-            ])
-        print(f"  [OK] Top/Bottom 3D PNG renders")
+def write_cpls(fab: Path, pos_csv: Path, fps: list[Part], centres: dict[str, tuple[float, float]]) -> None:
+    placed = {f["ref"] for f in fps}
+    jlc: list[list[object]] = []
+    generic: list[list[object]] = []
+    with pos_csv.open(newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            ref = r["Ref"]
+            if ref not in placed:
+                continue
+            side = "Top" if r["Side"].strip().lower() == "top" else "Bottom"
+            x, y, rot = float(r["PosX"]), float(r["PosY"]), float(r["Rot"])
+            if ref in centres:
+                x, y = centres[ref]
+            generic.append([ref, f"{x:.4f}mm", f"{y:.4f}mm", side, f"{rot % 360:.2f}"])
+            jrot = (180.0 - rot) % 360.0 if side == "Bottom" else rot
+            dx, dy, drot = JLC_CPL_CORRECTION.get(ref, (0.0, 0.0, 0.0))
+            jlc.append([ref, f"{x + dx:.4f}mm", f"{y + dy:.4f}mm", side, f"{(jrot + drot) % 360:.2f}"])
+    if len(generic) != len(placed):
+        raise SystemExit(f"Position file is missing: {sorted(placed - {g[0] for g in generic})}")
+    header = ["Designator", "Mid X", "Mid Y", "Layer", "Rotation"]
+    write_csv(fab / "jlcpcb" / f"{STEM}-cpl.csv", header, jlc)
+    for vendor in ("seeed", "pcbway"):
+        write_csv(fab / vendor / f"{STEM}-cpl.csv", header, generic)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Export KiCad 10 fabrication packages for DIY-Thermocam.")
-    parser.add_argument("--rev", choices=["v4.0", "all"], default="v4.0", help="PCB revision to export")
-    parser.add_argument("--skip-render", action="store_true", help="Skip 3D PNG raytrace rendering")
+    parser = argparse.ArgumentParser(description="Export DIY-Thermocam V4.0 manufacturing files.")
+    parser.add_argument("--skip-render", action="store_true", help="skip the 3D PNG renders")
     args = parser.parse_args()
 
-    pcb_root = Path(__file__).resolve().parent.parent
-    rev = "v4.0"
-    if not (pcb_root / f"diy-thermocam-{rev}.kicad_pcb").exists():
-        raise FileNotFoundError(f"Missing {pcb_root / f'diy-thermocam-{rev}.kicad_pcb'}")
-    export_revision(pcb_root, rev, skip_render=args.skip_render)
+    pcb_dir = Path(__file__).resolve().parent.parent
+    pcb = pcb_dir / f"{STEM}.kicad_pcb"
+    sch = pcb_dir / f"{STEM}.kicad_sch"
+    fab = pcb_dir / "fab"
+    bom = load_bom(pcb_dir.parent / "bom" / "bom.csv")
+
+    if fab.exists():
+        shutil.rmtree(fab)
+    fab.mkdir()
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmpd = Path(tmp)
+        gbr = tmpd / "gerbers"
+        gbr.mkdir()
+        run([KICAD_CLI, "pcb", "export", "gerbers", "--layers", GERBER_LAYERS, "--check-zones", "-o", f"{gbr}/", str(pcb)])
+        run([KICAD_CLI, "pcb", "export", "drill", "-u", "mm", "--excellon-separate-th", "-o", f"{gbr}/", str(pcb)])
+        zip_path = tmpd / f"{STEM}-gerbers.zip"
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for p in sorted(gbr.iterdir()):
+                zf.write(p, arcname=p.name)
+        for vendor in VENDORS:
+            (fab / vendor).mkdir()
+            shutil.copy2(zip_path, fab / vendor / zip_path.name)
+
+        pos = tmpd / "pos.csv"
+        run([KICAD_CLI, "pcb", "export", "pos", "--side", "both", "--format", "csv", "--units", "mm", "-o", str(pos), str(pcb)])
+        fps = placed_footprints(pcb)
+        write_cpls(fab, pos, fps, pad_centres(pcb))
+        write_boms(fab, bom_groups(fps, bom))
+
+    # Assembly drawings (bottom one mirrored, as seen from the bottom) show references and pin-1 marks.
+    for side, layers, extra in (("top", "F.Fab,F.Silkscreen,F.Mask,Edge.Cuts", []),
+                                ("bottom", "B.Fab,B.Silkscreen,B.Mask,Edge.Cuts", ["--mirror"])):
+        run([KICAD_CLI, "pcb", "export", "pdf", "--mode-single", "--scale", "0", "--black-and-white",
+             "--sketch-pads-on-fab-layers", *extra, "--layers", layers,
+             "-o", str(fab / f"{STEM}-assembly-{side}.pdf"), str(pcb)])
+    run([KICAD_CLI, "sch", "export", "pdf", "-o", str(fab / f"{STEM}-schematic.pdf"), str(sch)])
+    run([KICAD_CLI, "pcb", "export", "step", "--subst-models", "--force", "-o", str(fab / f"{STEM}.step"), str(pcb)])
+    if not args.skip_render:
+        for side in ("top", "bottom"):
+            run([KICAD_CLI, "pcb", "render", "--side", side, "--width", "1600", "--height", "1240", "--quality", "high",
+                 "--background", "opaque", "--use-board-stackup-colors", "-o", str(fab / f"{STEM}-{side}.png"), str(pcb)])
+
+    smd = sum(f["mount"] == "SMD" for f in fps)
+    print(f"Wrote {fab}: {len(fps)} parts ({smd} SMD, {len(fps) - smd} THT) for {', '.join(VENDORS)}")
     return 0
 
 

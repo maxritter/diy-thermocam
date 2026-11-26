@@ -1,4 +1,4 @@
-(footprint "BQ24075_VQFN16"
+(footprint "BQ24074_VQFN16"
 	(version 20260206)
 	(generator "kicad-footprint-generator")
 	(layer "F.Cu")

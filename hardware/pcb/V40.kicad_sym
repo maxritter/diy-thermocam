@@ -2,7 +2,7 @@
 	(version 20251024)
 	(generator "kicad_symbol_editor")
 	(generator_version "10.0")
-	(symbol "BQ24075_VQFN16_17"
+	(symbol "BQ24074_VQFN16_17"
 		(pin_names
 			(offset 1.016)
 		)
@@ -21,7 +21,7 @@
 				)
 			)
 		)
-		(property "Value" "BQ24075_VQFN16_17"
+		(property "Value" "BQ24074_VQFN16_17"
 			(at 0 -15.24 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -31,7 +31,7 @@
 				)
 			)
 		)
-		(property "Footprint" "V40:BQ24075_VQFN16"
+		(property "Footprint" "V40:BQ24074_VQFN16"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -64,7 +64,7 @@
 				)
 			)
 		)
-		(symbol "BQ24075_VQFN16_17_0_1"
+		(symbol "BQ24074_VQFN16_17_0_1"
 			(rectangle
 				(start -7.62 12.7)
 				(end 7.62 -12.7)
@@ -77,7 +77,7 @@
 				)
 			)
 		)
-		(symbol "BQ24075_VQFN16_17_1_1"
+		(symbol "BQ24074_VQFN16_17_1_1"
 			(pin passive line
 				(at -10.16 10.16 0)
 				(length 2.54)

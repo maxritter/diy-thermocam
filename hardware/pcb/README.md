@@ -1,67 +1,66 @@
-# DIY-Thermocam PCB (KiCad 10)
+# DIY-Thermocam V4.0 PCB
 
-Native KiCad 10 hardware project and fabrication pipeline for the **DIY-Thermocam V4.0 Zero-Solder PCBA**. The proven V3.0 Eagle baseline remains preserved at git tag [`3.0.4`](https://github.com/maxritter/diy-thermocam/tree/3.0.4/pcb).
+The main board of the camera. A PCB manufacturer makes it and solders all parts on; you then plug in the Teensy 4.1, the FLIR Lepton breakout board, the display and the battery.
 
-> **Prototype Gate:** V4.0 (`hardware/pcb/`) is `PROTOTYPE-PENDING` until Max builds and verifies a physical unit. Check USB-C power/data, pogo-pin D+/D- alignment on Teensy 4.1, 5 V boost thermals, and enclosure fit before treating it as proven. V3.0 (tag `3.0.4`) remains the default buildable board today.
-
-## V4.0 Zero-Solder PCBA (`PROTOTYPE-PENDING`)
-
-V4.0 keeps the exact `89.4 × 68.4 mm` outline, mounting-hole grid, and module positions of V3.0. It removes hand soldering and fixes V3.0 hardware pain points.
-
-### Why plug-in modules
-
-V4.0 keeps Teensy 4.1 (pre-pinned), FLIR Lepton Breakout V2.0, and BuyDisplay `ER-TFTM032-3` as plug-in modules on factory-soldered female sockets:
-
-1. **Unified firmware:** V3.0 and V4.0 run the exact same Teensy 4.1 `.hex` binary.
-2. **Simple sourcing:** Avoids sourcing a bare `MIMXRT1062` BGA, proprietary PJRC `MKL02` bootloader IC, and bare Molex Lepton socket.
-3. **Low-cost PCBA:** Uses a 2-layer, single-sided `B.Cu` SMD assembly for predictable prototype bring-up.
-
-### Engineering summary
-
-| Area | V4.0 implementation |
+| Display side (top) | Module side (bottom) |
 | --- | --- |
-| **Module parity** | `J1` (BuyDisplay 2×20 on `F.Cu`), `J2` (Lepton 2×10 on `B.Cu`), and `J5`/`J6`/`J7` (Teensy 4.1 on `B.Cu`) match V3.0 at `0.00 mm` XY error. `J1.36/37/40` stay cleared for FT6206 safety. |
-| **USB-C & ESD** | `TYPE-C-31-M-12` (`J3`, `C165948`) on `B.Cu` at `Y = -3.35 mm` (`0.8 mm` edge overhang), dual `5.1 kΩ` CC pull-downs (`R7`/`R8`), and `USBLC6-2SC6` (`D1`, `C7519`) ESD array. |
-| **Teensy USB pogo pins** | `P1` (`D+`, `65.63, -2.15`) and `P2` (`D-`, `68.17, -2.15`) use `YTC1P-8535-01` (`C5221289`, `12.0 mm` free / `11.0 mm` working height) routed as a length-matched pair (`0.00 mm` skew). Teensy `VUSB` stays open. |
-| **Power-path charger** | TI `BQ24074RGTR` (`U3`, `C54313`) regulates `VSYS` to `4.4 V` for reliable USB-only cold start. Configured for `1.3 A` input (`R11 = 1.2 kΩ`), `890 mA` charge (`R10 = 1.0 kΩ`), `90 mA` termination (`R23 = 3.0 kΩ`, `C4211`), `R9 = 10 kΩ` `TS`, `R14 = 47 kΩ` `~6.3 h` timer, and red `~CHG` LED (`D2`). |
-| **LiPo polarity safety** | Right-angle JST-PH (`J4`, `S2B-PH-SM4-TB`, `C295747`) uses standard Adafruit/SparkFun polarity (`Pad 1 = +`, `Pad 2 = -`). Protected by `AO3401A` (`Q1`, `C15127`) + `AO3400A` (`Q2`, `C20917`) active interlock (`<10 µA`) and a `2 A` 1206 PTC fuse (`F1`, `C20988`). |
-| **5 V synchronous boost** | TI `TPS61022RWUR` (`U2`, `C915088`, `5.10 V` via `750 kΩ`/`100 kΩ`) with `FXL0630-1R0-M` (`L1`, `C167216`, `1.0 µH`, `15 A` `Isat`). `0.80 mm` power trunks and local `22 µF` decoupling (`C4`/`C9`). |
-| **RTC & voltage sense** | `XC6206P332MR-G` (`U4`, `C5446`, `1 µA`, `3.3 V`) feeds `VBAT` from `VLIPO`, removing the CR1220 coin cell. Dividers use `47 kΩ / 100 kΩ` (`R1`/`R2`) and `100 kΩ / 100 kΩ` (`R3`/`R5`). |
-| **Onboard controls** | Right-angle SMD power switch `SW1` (`C221660`, drives `U2 EN` so battery charges while OFF), capture button `SW2` (`C963349`), and `PROG` pinhole button `SW3` (`C318884`). |
-| **Touch & expansion** | Resistive touch works out of the box. Cut-and-bridge jumpers `JP1` (`D9`/`SCL0`), `JP2` (`D5`/`SDA0`), and `JP3` (`CTP_INT`) allow switching cleanly to FT6206 capacitive touch. `J8` provides unpopulated I2C pads. |
-| **Signal & fab checks** | Stitched `F.Cu`/`B.Cu` `GND` planes, `2.8 mm` M2.5 corner holes, 31 verified LCSC SKUs, and calibrated JLCPCB/Seeed CPL rotations. `kicad-cli sch erc` and `pcb drc --refill-zones` report `0 errors`. |
+| ![Top side of the V4.0 PCB with the display socket](fab/diy-thermocam-v4.0-top.png) | ![Bottom side of the V4.0 PCB with the Teensy, Lepton and battery connectors](fab/diy-thermocam-v4.0-bottom.png) |
 
-> **Pre-order checks:**
-> 1. PJRC publishes no mechanical drawing for Teensy 4.1 underside `D+`/`D-` pads. Verify `P1`/`P2` XY and polarity on a physical Teensy 4.1 with calipers and a multimeter before ordering PCBA.
-> 2. Pre-pinned Teensy 4.1 boards only populate the outer 48 pins. Solder a 1×5 pin header to Teensy's inner `VBAT`/`PROG` pads to engage `J7`.
-> 3. Do not plug a second USB cable directly into Teensy's micro-USB port while USB-C is connected unless you cut Teensy's `VUSB–VIN` pad.
-> 4. Use a UL/IEC 62133 certified protected `505060` (`≤5.0 mm` thick) 2000 mAh LiPo for the 3D enclosure cradle.
+## Order the board
 
-### V4.0 KiCad 10 Renders (`PROTOTYPE-PENDING`)
+Choose a manufacturer and upload the three files from its folder in [`fab/`](fab/):
 
-| Display Side (`F.Cu`) | Lepton / PCBA Side (`B.Cu`) |
+| Manufacturer | Files | Good to know |
+| --- | --- | --- |
+| **[JLCPCB](https://jlcpcb.com/)** (recommended) | [`fab/jlcpcb/`](fab/jlcpcb/): `…-gerbers.zip`, `…-bom.csv`, `…-cpl.csv` | Every part is in JLCPCB's own stock, but only 39 of the boost converter `U2` were left on 26 November 2026; if it runs out, pre-order it in JLCPCB's parts manager. Assembly starts at 2 boards. |
+| [Seeed Fusion](https://www.seeedstudio.com/fusion_pcb.html) | [`fab/seeed/`](fab/seeed/): `…-gerbers.zip`, `…-bom.csv`, `…-cpl.csv` | Seeed buys the parts; the BOM links each one on LCSC. Also upload both assembly drawings. Takes about 4 weeks. |
+| [PCBWay](https://www.pcbway.com/pcb-assembly.html) | [`fab/pcbway/`](fab/pcbway/): `…-gerbers.zip`, `…-bom.csv`, `…-cpl.csv` | PCBWay buys the parts; the notes column lists each LCSC number. Answer "no" to Chinese substitutes. |
+
+**Board options:** 2 layers, 89.4 × 68.4 mm, 1.6 mm FR-4, 1 oz copper, lead-free HASL or ENIG, any solder mask colour.
+
+**Assembly:** order double-sided assembly so the manufacturer fits every part and you need no soldering iron. All SMD parts and the Teensy and Lepton sockets go on the bottom side; only the display socket `J1` (2×20, through-hole) sits on the top side.
+
+**Before you pay,** compare the manufacturer's placement preview with [`fab/diy-thermocam-v4.0-assembly-bottom.pdf`](fab/diy-thermocam-v4.0-assembly-bottom.pdf). The pin-1 marks of `U2`, `U3`, `U4`, `D1`, `D2`, `Q1` and `Q2` must line up. Rotations of bottom-side parts are the most common assembly mistake.
+
+**Do not substitute** the spring pins `P1`–`P4`, the sockets (`J1`, `J2`, `J5`, `J6`), the USB-C connector `J3` or the inductor `L1`. Their heights and footprints are part of the design.
+
+## What you plug in
+
+- **Teensy 4.1 with pins** into `J5`/`J6`, as it comes. Leave its five inner pads empty: spring pins `P3` (`VBAT`, clock supply) and `P4` (`Program`, PROG button) press on them from below. If pins are soldered there, cut them flush underneath first; never force the Teensy down.
+- **FLIR Lepton 3.5** (or 3.1R) on the **Lepton Breakout Board V2.0** into `J2`.
+- **BuyDisplay `ER-TFTM032-3`** into `J1`, from the display side.
+- **LiPo battery** (`505060`, JST-PH) into `J4`. Check that its `+` wire matches the `+` mark first.
+
+The full parts list with shops is in [`hardware/bom/`](../bom/README.md).
+
+## What is on the board
+
+| Function | How it works |
 | --- | --- |
-| ![V4.0 Top](fab/diy-thermocam-v4.0-top.png) | ![V4.0 Bottom](fab/diy-thermocam-v4.0-bottom.png) |
+| USB-C | Charges the battery and carries USB data. Two spring pins (`P1`, `P2`) press on the USB pads under the Teensy, so the Teensy's own micro-USB port stays unused. Never plug a cable into it while the board is powered. |
+| Charging | TI BQ24074 powers the camera over USB while charging the battery (0.89 A charge current, red `CHG` LED). It draws up to 1.3 A from USB, so use a charger or port rated 1.5 A or more; a 500 mA hub port can cut out. |
+| 5 V supply | TI TPS61022 boost converter. The slide switch `SW1` turns the camera off; the battery still charges while it is off. |
+| Battery protection | `Q1`/`Q2` block a battery plugged in the wrong way round; `F1` is a 2 A resettable fuse. |
+| Clock | An XC6206 regulator keeps the Teensy's clock running from the battery through spring pin `P3`, so no coin cell is needed. |
+| Buttons | `SW2` capture button at the board edge; `SW3` PROG button behind a pinhole for firmware recovery, wired to the Teensy through spring pin `P4`. |
+| Touch | Resistive touch works as delivered. A capacitive-touch display needs a soldering iron: cut `JP1`/`JP2` between pads 1–2, bridge pads 2–3, and close `JP3`. |
 
-## Turnkey Fabrication Pipeline (`scripts/export_fab.py`)
+## First power-up
 
-Regenerate the complete V4.0 manufacturing package with KiCad 10:
+1. Board only, battery connected, `SW1` on: 5.1 V between `VIN` and `GND` on the Teensy socket. `SW1` off: 0 V.
+2. Plug in USB-C: the red `CHG` LED lights while the battery charges.
+3. With the Teensy plugged in, connect USB-C to a computer: the Teensy shows up as a USB device. This confirms `P1`/`P2` touch its USB pads.
+4. Press PROG through the pinhole: Teensy Loader shows the Teensy in bootloader mode. This confirms `P4`.
+5. Set the clock, switch off with `SW1` for a minute and on again: the time kept running. This confirms `P3`.
+
+## Change the design
+
+The KiCad 10 project is [`diy-thermocam-v4.0.kicad_sch`](diy-thermocam-v4.0.kicad_sch) and [`diy-thermocam-v4.0.kicad_pcb`](diy-thermocam-v4.0.kicad_pcb), with its own symbol and footprint libraries ([`V40.kicad_sym`](V40.kicad_sym), [`V40.pretty/`](V40.pretty/)). Part numbers live in [`hardware/bom/bom.csv`](../bom/bom.csv).
+
+After a change, check it and rebuild the order files:
 
 ```bash
+kicad-cli sch erc --severity-error --exit-code-violations hardware/pcb/diy-thermocam-v4.0.kicad_sch
+kicad-cli pcb drc --refill-zones --schematic-parity --severity-error --exit-code-violations hardware/pcb/diy-thermocam-v4.0.kicad_pcb
 python3 hardware/pcb/scripts/export_fab.py
 ```
-
-Outputs under `hardware/pcb/fab/`:
-- `diy-thermocam-v4.0-gerbers.zip` — 2-layer Gerbers and Excellon `.drl` drills
-- `diy-thermocam-v4.0-bom-{jlcpcb,seeed,pcbway}.csv` — PCBA BOMs with LCSC and MPN columns
-- `diy-thermocam-v4.0-cpl-{jlcpcb,seeed}.csv` — Calibrated pick-and-place centroid files
-- `diy-thermocam-v4.0.step` — 3D STEP model for enclosure checks
-- `diy-thermocam-v4.0-schematic.pdf` and `*-{top,bottom}.{svg,png}` — Schematic and board renders
-
-### Ordering Instructions
-
-Common specs: **2 layers, `89.4 × 68.4 mm`, `1.6 mm` FR4, `1 oz` copper, Lead-Free HASL or ENIG, Matte Green or Black soldermask**.
-
-1. **JLCPCB / JLC PCBA:** Upload `diy-thermocam-v4.0-gerbers.zip`, `diy-thermocam-v4.0-bom-jlcpcb.csv`, and `diy-thermocam-v4.0-cpl-jlcpcb.csv`. Select **Bottom Side** PCBA (optionally hand-solder Top `J1` to keep assembly single-sided). Verify part orientation preview for `U3`, `U2`, `D1`, `J3`, `J4`, `Q1`, `Q2`, and `D2`.
-2. **Seeed Studio Fusion:** Upload `diy-thermocam-v4.0-gerbers.zip`, `diy-thermocam-v4.0-bom-seeed.csv`, and `diy-thermocam-v4.0-cpl-seeed.csv`. Select Bottom-side SMD plus THT sockets (`J1` on Top, `J2`/`J5`/`J6`/`J7` on Bottom).
-3. **PCBWay:** Upload `diy-thermocam-v4.0-gerbers.zip`, `diy-thermocam-v4.0-bom-pcbway.csv`, and `diy-thermocam-v4.0-cpl-jlcpcb.csv`.
