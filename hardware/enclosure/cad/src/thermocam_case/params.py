@@ -1,24 +1,18 @@
-"""Single source of truth for DIY-Thermocam V3.0 / V4.0 enclosure dimensions.
+"""Single source of truth for the DIY-Thermocam V4.0 enclosure dimensions.
 
-All XY coordinates are anchored directly to `hardware/pcb/diy-thermocam-v4.0.kicad_pcb`
-in the canonical camera frame (viewed from the Display / Front side):
-  - X in [0, 89.4] mm: left edge (display 2x20 header) -> right edge (power switch)
-  - Y in [0, 68.4] mm: bottom edge (USB / tripod) -> top edge (button / LED / microSD)
-  - Z in [0, 40.2] mm: inner face of Back (Lepton) wall -> inner face of Front (Display) wall
+All XY coordinates come from `hardware/pcb/diy-thermocam-v4.0.kicad_pcb`, in the camera frame
+seen from the display side:
+  - X 0..89.4 mm: left board edge (display 2x20 header) -> right edge (power switch)
+  - Y 0..68.4 mm: bottom edge (USB-C, tripod) -> top edge (capture button, microSD)
+  - Z: 0 = inner face of the back (Lepton) wall, increasing toward the display
 
-Exact zero-drift Z-stackup (verified against Fable 5.2 #176 & Stage 1 #169):
-  - Z =  0.0 .. 20.0 mm : Rear compartment (4x M2.5x20 brass standoffs directly on flat Z=0!)
-      - Back-shell bottom tripod boss sits cleanly at Z=0..14.4, X=44.7, Y=-3.8..+7.2
-        (zero Display/PCB/LiPo/USB-C collision, 3.0 mm solid blind roof stops 10 mm stud!)
-  - Z = 20.0 .. 21.6 mm : Main PCB (89.4 x 68.4 x 1.6 mm)
-  - Z = 21.6 .. 32.6 mm : Mid compartment (4x M2.5x11 brass standoffs = exact 2x20 LCD mate):
-      - Z = 21.6 .. 23.4 mm : 1.80 mm THT pin relief vault (clears real 1.51 mm PCB STEP tails!)
-      - Z = 23.4 .. 24.2 mm : V4 flat-printing smooth LiPo cradle floor (0.80 mm)
-      - Z = 24.2 .. 29.7 mm : Slim UL/IEC 62133 protected pouch (505060 2000 mAh, 5.0 mm + 10% swell = 5.5 mm)
-      - Z = 29.7 .. 30.3 mm : V4 smooth insulating LiPo top lid (0.60 mm -> shields Display SMDs!)
-      - Z = 30.3 .. 32.6 mm : 2.30 mm Display PCB backside SMD/FPC/SD socket clearance
-  - Z = 32.6 .. 34.2 mm : Real BuyDisplay ER-TFTM032-3 PCB (89.4 x 64.9 x 1.6 mm, Y=2.0..66.9!)
-  - Z = 34.2 .. 40.2 mm : Display bezel + 4x M2.5x5 standoffs directly on flat Z=40.2!
+Z stack (mm):
+  -0.5 .. 19.5  4x M2.5x20 hex standoffs, seated 0.5 mm into the back wall
+  19.5 .. 20.0  4x nylon M2.5 washers (keep the standoff corners off the SW2/SW3 pads)
+  20.0 .. 21.6  main PCB
+  21.6 .. 32.6  4x M2.5x11 hex standoffs; printed battery cradle, FR4 floor, 505060 LiPo, FR4 lid
+  32.6 .. 34.2  display PCB (BuyDisplay ER-TFTM032-3, Y 2.0..66.9)
+  34.2 .. 39.2  display module; front screws reach the 11 mm standoffs through 5 mm bosses
 """
 
 from __future__ import annotations
@@ -26,7 +20,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 import re
-import xml.etree.ElementTree as ET
 
 
 @dataclass(frozen=True)
@@ -61,18 +54,16 @@ class BatterySpec:
 
 @dataclass(frozen=True)
 class EnclosureParams:
-    """Complete parametric dimensions for one DIY-Thermocam hardware revision."""
+    """Complete parametric dimensions for the DIY-Thermocam V4.0 enclosures."""
 
-    variant: str
-    version_tag: str
-    description: str
-    is_zero_solder: bool = False
+    version_tag: str = "V4.0"  # Debossed / engraved under the wordmark on the back face
+    file_prefix: str = "diy-thermocam-v4.0"
 
     # --- Verified PCB geometry (from hardware/pcb/diy-thermocam-v4.0.kicad_pcb) ---
     pcb_w: float = 89.40
     pcb_h: float = 68.40
     pcb_t: float = 1.60
-    pcb_z_back: float = 20.00  # Exact zero-drift Z datum (standoffs seat on flat Z=0.0!)
+    pcb_z_back: float = 20.00
 
     mounting_holes: tuple[tuple[float, float], ...] = (
         (12.50, 4.00),
@@ -80,16 +71,29 @@ class EnclosureParams:
         (12.50, 64.90),
         (79.00, 64.90),
     )
+    # Battery-cradle foot around each M2.5x11 standoff: 90 deg opening toward the nearer board edge
+    # (deg, 0 = +X, 90 = +Y), where the clipped ring would be thinner than 1.0 mm; (79.0, 4.0) is
+    # also open toward the J6 pin tails below the lip
+    cradle_foot_edge_gap_deg: tuple[float, ...] = (270.0, 270.0, 90.0, 90.0)
+    cradle_foot_tail_gap_deg: tuple[float | None, ...] = (None, 180.0, None, None)
     mounting_hole_d: float = 2.80
-    countersink_head_d: float = 5.00  # Exact DIN 965 / ISO 10642 M2.5 CSK flush seat (Astra P2-1)
+    # ISO 7046 M2.5: theoretical head Ø5.5 sits flush in a Ø5.6 x 90 deg countersink
+    countersink_head_d: float = 5.60
     countersink_angle_deg: float = 90.0
+    # Rear M2.5x20 standoffs stand 0.5 mm deep in the back wall; a 0.5 mm nylon washer on each
+    # lifts their hex corners off the SW2/SW3 pads (3.11 / 3.18 mm from H4 / H2) on the PCB back
+    standoff_seat_z: float = -0.50
+    rear_washer_t: float = 0.50
+    rear_washer_d: float = 6.00
+    standoff_seat_d: float = 6.40   # Seat pocket for the SW5 hex (5.77 mm across corners)
+    # Front screws reach the 11 mm standoffs through 5 mm bosses (shell) or printed spacer bars (laser)
+    front_boss_d: float = 4.80      # 1.0 mm wall round the Ø2.8 hole; 0.53 mm clear of the display module frame at Y=6.93 / 61.97
 
-    # --- Real BuyDisplay ER-TFTM032-3 PCB (Fable #176 P0-1: 89.4 x 64.9 mm, Y=2.0..66.9!) ---
-    # Exact standoff stackup (Astra ENC-2D-P1-2 / ENC-3D-P2-1): 20 + 1.6 + 11 + 1.6 + 5 = 39.20 mm!
-    internal_depth: float = 39.20
+    # --- BuyDisplay ER-TFTM032-3 (PCB 89.4 x 64.9 mm at Y=2.0..66.9) ---
+    internal_depth: float = 39.20   # Back wall to front wall: 20 + 1.6 + 11 + 1.6 + 5
     display_pcb_z_back: float = 32.60
     display_pcb_t: float = 1.60
-    display_pcb_smd_keepout_h: float = 2.20
+    display_pcb_smd_keepout_h: float = 2.50  # Back-side parts up to 2.5 mm per the module drawing
     display_pcb_w: float = 89.40
     display_pcb_h: float = 64.90
     display_pcb_center_x: float = 44.70
@@ -107,93 +111,111 @@ class EnclosureParams:
         (55.50, 59.00),
         (30.00, 59.00),
     )
-    lepton_x: float = 43.60
-    lepton_y: float = 51.25
-    lepton_optical_centers_check: tuple[tuple[float, float], ...] = (
-        (42.75, 51.00),
-        (44.50, 51.50),
-    )
+    # Lepton socket centre = optical axis: FLIR Breakout V2.0 drawing (U1 16.5 mm from the hole-side
+    # edge, 10.0 mm from the far edge) and the V3 back-plate window both put it at (44.45, 51.00)
+    lepton_x: float = 44.45
+    lepton_y: float = 51.00
     lepton_pupil_z: float = 2.20
     lepton_pupil_clear_d: float = 3.20
-    lepton_hfov_deg: float = 56.0
-    lepton_vfov_deg: float = 42.0
-    lepton_dfov_deg: float = 71.0
-    lepton_31r_hfov_deg: float = 95.0
-    lepton_31r_dfov_deg: float = 119.0
+    lepton_dfov_deg: float = 71.0      # Lepton 3.5
+    lepton_31r_dfov_deg: float = 119.0  # Lepton 3.1R wide-angle (95 deg HFOV)
+    # 12 mm sleeves + 1.6 mm breakout + 7.14 mm Lepton in its Molex socket = shutter face at Z=-0.74:
+    # the Lepton pokes 0.74 mm into the back wall, so the opening there must swallow its body
+    lepton_sleeve_len: float = 12.00
+    breakout_t: float = 1.60
+    lepton_socketed_h: float = 7.14
+    lepton_body_w: float = 11.80        # With socket (FLIR datasheet: 11.8 x 12.7 x 7.14 mm)
+    lepton_body_l: float = 12.70
 
-    # Clears BOTH Lepton 3.5 (71 deg DFOV) AND Lepton 3.1R (95 deg HFOV / 119 deg DFOV) at BOTH centers!
-    laser_lepton_aperture_d: float = 23.80  # Clears 119 deg DFOV even on 3.20 mm acrylic (>=5.6 mm web)!
-    shell_lepton_inner_d: float = 13.40     # Clears 119 deg DFOV at Z=0.0 across both optical centers
-    shell_lepton_outer_d: float = 20.20     # Clears 119 deg DFOV at Z_track_floor=-2.10 w/ >=2.1 mm wall!
+    laser_lepton_aperture_d: float = 25.20  # Clears 119 deg DFOV on 3.2 mm acrylic, axis +-0.5 mm
+    shell_lepton_inner_d: float = 18.80     # Lepton body (17.34 mm diagonal) + 0.7 mm all round
+    shell_lepton_outer_d: float = 20.20     # Clears 119 deg DFOV at the lens-cap track floor
 
-    # --- Teensy 4.1 features ---
-    teensy_x: float = 66.90
-    teensy_z: float = 7.50
-    teensy_prog_x: float = 66.90   # Exact PJRC Teensy 4.1 Prog button XY (Astra P1-6)
-    teensy_prog_y: float = 43.08
-    teensy_prog_hole_d: float = 2.60
-
+    # --- Teensy 4.1 (plugs into the J5/J6 1x24 sockets on B.Cu, X=59.28 / 74.52) ---
+    teensy_center_x: float = 66.90
     microsd_x: float = 66.90
     microsd_z: float = 6.80
-    microsd_w: float = 12.60       # Guides 11x1 mm microSD cleanly without rattle (Astra P1-5)
+    microsd_w: float = 12.60       # 11 x 1 mm card with 0.8 mm side play
     microsd_h: float = 2.80
 
-    # --- Controls ---
-    switch_y: float = 34.45
-    switch_z: float = 28.10
-    switch_h_y: float = 19.30      # Exact NKK CWT12AAS1 19.20x6.80 + 0.1 mm fit (Astra P1-3)
-    switch_w_z: float = 6.90
-    switch_recess_y: float = 0.0
+    # --- Onboard controls (all on V4.0 PCB B.Cu, reached through the back shell) ---
+    # SW3 Prog tact switch pinhole on the back face
+    teensy_prog_x: float = 85.30
+    teensy_prog_y: float = 4.00
+    teensy_prog_hole_d: float = 2.40
 
-    button_x: float = 71.40
-    button_z: float = 28.10
-    button_hole_d: float = 9.20
+    # SW1 C&K JS102011SAQN right-angle slide switch on the right (+X) wall: body X<=89.0,
+    # 1.5 mm actuator X 89.0..91.0, Z 16.6..18.35, 2.0 mm travel (+-1.0 mm from centre)
+    switch_y: float = 12.70
+    switch_z: float = 18.50
+    switch_h_y: float = 10.20      # Wall slot: the 6.0 mm neck stops at +-2.1 mm
+    switch_w_z: float = 4.00
+    switch_recess_y: float = 16.80
+    switch_travel: float = 2.00
+
+    # SW2 Omron B3U-3000P capture switch: plunger tip 0.55 mm past the top PCB edge (Y=68.95),
+    # Z 18.8..19.8, body front at Y=68.25; pretravel 0.2 +0.2/-0.1 mm. Buttons stop on the PCB edge
+    # itself (Y=68.40): shell button 0.15 mm rest gap + 0.60 mm stroke into the switch; the acrylic
+    # key's stem lands on the edge, so its stroke is the plunger's 0.55 mm overhang.
+    button_x: float = 84.00
+    button_z: float = 18.20
     button_plunger_bore_d: float = 6.80
     button_plunger_cap_d: float = 6.20
-    button_plunger_flange_d: float = 9.60
-    button_stem_z: float = 19.30  # Dead-center on SW2 B3U-3000P tip (Z=18.815..19.815), < PCB 20.0!
+    button_stem_z: float = 19.30
+    button_rest_gap: float = 0.15
+    button_stop_stroke: float = 0.60
 
-    led_x: float = 5.50
-    led_z: float = 24.40
-    laser_led_d: float = 5.20      # Clears standard 5 mm V3 LED (Astra P2-2)
-    shell_led_d: float = 5.20
-    back_face_led_holes: tuple[tuple[float, float], ...] = ()
+    # D2 charge LED (0603 on B.Cu) seen through a hole in the back wall
+    back_face_led_holes: tuple[tuple[float, float], ...] = ((5.75, 66.40),)
     back_face_led_d: float = 2.40
+    guide_tube_od: float = 4.40     # Printed light / pin guide tubes from the back wall toward D2 and SW3
 
-    # --- Tripod Mount (1/4"-20 UNC) ---
-    # Fable #176 P0 fix: 3D shell tripod boss sits on back_shell at (X=44.70, Z=6.80, Z=0..13.60)
-    # -> 0.000 mm^3 collision w/ 89.4x64.9 Display PCB, Main PCB, USB-C (0.80 mm clear!), or LiPo;
-    #    100% support-free; 3.0 mm solid blind roof stops even a 10.0 mm tripod screw!
+    # --- Tripod mount: the same 1/4"-20 UNC hex nut (7/16" AF x 5.5 mm) in both enclosures ---
     tripod_x: float = 44.70
-    tripod_z: float = 29.80           # Laser bottom plate (V3 centered; V4 overridden to clear USB-C)
-    shell_tripod_z: float = 6.80      # 3D back_shell empty bottom-center bay (Z in [0.0, 13.60])
-    laser_tripod_x: float = 44.70     # Overridden on V4 to X=27.00 so >=9.6 mm web clears full USB-C!
-    laser_tripod_z: float = 29.80
-    laser_tripod_center_d: float = 9.00
-    laser_tripod_bolt_r: float = 8.20  # >=2.6 mm acrylic web between center bore & M2 bolts (Astra P1-3)
-    laser_tripod_bolt_d: float = 2.20
+    shell_tripod_z: float = 6.80
     shell_tripod_screw_d: float = 6.80
     shell_tripod_hex_af: float = 11.50
     shell_tripod_nut_h: float = 5.80
-    shell_tripod_floor_t: float = 2.20  # Y = -3.80 .. -1.60
-    shell_tripod_roof_t: float = 3.00   # Y = +4.20 .. +7.20 (stops up to 10 mm stud!)
+    shell_tripod_floor_t: float = 1.20  # A 4.5 mm tripod screw gets 3.3 mm (2.6 turns) of thread
+    shell_tripod_roof_t: float = 3.00
     shell_tripod_boss_w: float = 19.00
-    shell_tripod_boss_z_end: float = 13.60  # Leaves 0.80 mm solid separation below V4 USB-C boot (Z=14.4)!
+    shell_tripod_boss_z_end: float = 13.60
+    # Laser case: printed tripod_mount snapped onto the rear standoff at (12.5, 4.0); its plug fills
+    # a hole in the bottom plate so the nut sits 1.2 mm above the outer face
+    laser_tripod_x: float = 26.00     # 3.6 mm acrylic web to the USB-C opening
+    laser_tripod_z: float = 10.00
 
-    # --- Laser-cut acrylic parameters (3.0 mm Acryl GS) ---
+    # --- Laser-cut acrylic parameters (3.0 mm cast acrylic) ---
     laser_t: float = 3.00
-    laser_internal_depth: float = 39.20  # Exact 20+1.6+11+1.6+5 standoff stack = 0 mm bow (Astra P1-2)
-    laser_slot_clearance: float = 0.20   # Fits 2.8..3.2 mm cast acrylic cleanly (Astra P1-1)
+    laser_internal_depth: float = 39.70  # Back plate inner face at Z=-0.5 (standoff seat) to Z=39.2
+    laser_slot_clearance: float = 0.20   # Slots 3.2 mm wide: fits 2.8..3.2 mm stock
     laser_kerf: float = 0.10
-    laser_inner_margin_x_neg: float = 0.25
-    laser_inner_margin_x_pos: float = 0.25
-    laser_inner_margin_y_neg: float = 0.25
-    laser_inner_margin_y_pos: float = 0.50
+    laser_inner_margin_x_neg: float = 0.60  # Display PCB width tolerance is +-0.3 mm
+    laser_inner_margin_x_pos: float = 2.20  # Room for the switch key shoulder
+    laser_inner_margin_y_neg: float = 1.05  # Teensy micro-USB overhangs the board edge to Y=-0.55;
+                                            # leaves the tripod mount's fin its 1.0 mm (MJF minimum)
+    laser_inner_margin_y_pos: float = 2.40  # Room for the capture key hook
     laser_plate_overhang: float = 2.50
     laser_corner_r: float = 3.50
     laser_tab_len: float = 12.00
 
-    # --- 2-piece 3D-printable / CNC shell parameters ---
+    # --- Battery stack between the main PCB (21.6) and the display back parts (30.1) ---
+    # 0.6 mm FR4 floor at Z 23.4..24.0, 0.2 mm over the 1.6 mm THT tails and Lepton screw heads;
+    # 505060 cell up to 5.45 mm (5.0 mm + 9 % swell); 0.05 mm gap; 0.4 mm FR4 lid -> lid top at
+    # Z=29.90, 0.2 mm under the display's back-side parts. The floor and lid are too thin to print
+    # (MJF minimum wall 1.0 mm), so they are bare FR4 boards from the PCB maker. The printed cradle
+    # frame carries the floor on 1.0 mm lips and stands on its own feet around the standoffs.
+    battery_floor_t: float = 0.60
+    battery_lid_gap: float = 0.05
+    battery_lid_t: float = 0.40
+    cradle_lip_t: float = 1.00
+    cradle_lip_w: float = 2.00
+    cradle_wall_t: float = 1.20
+    cradle_foot_od: float = 8.40     # 1.1 mm wall around the Ø6.2 bore for the SW5 hex standoff
+    cradle_foot_top_z: float = 25.40
+    fr4_clearance: float = 0.20      # FR4 floor to cradle wall, per side
+
+    # --- 2-piece 3D-printable shell parameters ---
     shell_wall: float = 2.60
     shell_face_t: float = 2.60
     shell_back_face_t: float = 3.60
@@ -201,35 +223,36 @@ class EnclosureParams:
     shell_edge_chamfer: float = 1.00
     shell_clearance_x_neg: float = 1.60
     shell_clearance_x_pos: float = 2.20
-    shell_clearance_y_neg: float = 1.20  # Compact oy0=-3.80 so USB-C plug boots seat fully!
-    shell_clearance_y_pos: float = 2.00  # iy1=70.40 gives proper SW2 (Y=68.95) travel + hard stop!
+    shell_clearance_y_neg: float = 1.20  # oy0=-3.80 so USB-C plug boots seat fully
+    shell_clearance_y_pos: float = 2.00  # iy1=70.40: room for the capture button flange
     shell_split_z: float = 21.80
     lens_cap_clearance: float = 0.25
 
     usb: UsbCutoutSpec = field(
         default_factory=lambda: UsbCutoutSpec(
-            label="Teensy 4.1 micro-USB",
-            center_x=66.90,
-            center_z=7.50,
+            label="Board-edge USB-C (TYPE-C-31-M-12)",
+            center_x=45.80,
+            center_z=18.40,
             width=10.40,
-            height=5.60,
-            corner_radius=1.50,
-            overmold_width=13.20,
-            overmold_height=8.20,
-            overmold_depth=2.40,
-            laser_width=11.00,
-            laser_height=6.00,
+            height=4.60,
+            corner_radius=1.60,
+            overmold_width=14.20,
+            overmold_height=8.00,
+            overmold_depth=2.80,
+            laser_width=14.20,   # Clears a 13.8 x 7.8 USB-C plug boot right up to the J3 mouth
+            laser_height=8.00,
         )
     )
+    # 505060 protected LiPo, worst case: 62 x 50.5 mm with its protection board, 5.45 mm swollen
     battery: BatterySpec = field(
         default_factory=lambda: BatterySpec(
-            name="Samsung EB-BG355BBE",
-            width_x=53.00,
-            height_y=50.00,
-            thickness_z=5.80,
-            center_x=44.70,
-            center_y=34.45,
-            z_start=22.00,
+            name="505060 2000 mAh protected LiPo (JST-PH), 62 x 50.5 x 5.45 mm worst case",
+            width_x=62.00,
+            height_y=50.50,
+            thickness_z=5.45,
+            center_x=41.70,
+            center_y=34.50,
+            z_start=24.00,
         )
     )
 
@@ -250,99 +273,7 @@ class EnclosureParams:
         return 0.5 * (self.display_win_y_min + self.display_win_y_max)
 
 
-PRESETS: dict[str, EnclosureParams] = {
-    "v3_0": EnclosureParams(
-        variant="v3_0",
-        version_tag="V3.0",
-        description="DIY-Thermocam V3.0 (Teensy 4.1 micro-USB, wired switch/button, EB-BG355BBE LiPo)",
-        is_zero_solder=False,
-        usb=UsbCutoutSpec(
-            label="Teensy 4.1 micro-USB",
-            center_x=66.90,
-            center_z=7.50,
-            width=10.40,
-            height=5.60,
-            corner_radius=1.50,
-            overmold_width=13.20,
-            overmold_height=8.20,
-            overmold_depth=2.80,  # Full-depth through-wall boot opening (0.0 mm thin web, seats to Y=-0.55!)
-            laser_width=13.20,    # Clears full micro-USB boot through 3.0 mm acrylic plate!
-            laser_height=8.20,
-        ),
-        battery=BatterySpec(
-            name="Samsung EB-BG355BBE (w/ 1.6 mm adhesive insulating protector)",
-            width_x=53.00,
-            height_y=50.00,
-            thickness_z=5.80,
-            center_x=44.70,
-            center_y=34.45,
-            z_start=23.20,  # Sits on 1.6 mm insulating protector above 1.55 mm THT tails!
-        ),
-    ),
-    "v4_0": EnclosureParams(
-        variant="v4_0",
-        version_tag="V4.0 PROTO",
-        description=(
-            "DIY-Thermocam V4.0 Zero-Solder PCBA (USB-C full-depth counterbore, support-free "
-            "capture plunger & switch shuttle, enclosed LiPo cradle+lid, back-shell 1/4\"-20 blind nut)"
-        ),
-        is_zero_solder=True,
-        usb=UsbCutoutSpec(
-            label="Board-edge USB-C (TYPE-C-31-M-12)",
-            center_x=45.80,
-            center_z=18.40,
-            width=10.40,
-            height=4.60,
-            corner_radius=1.60,
-            overmold_width=14.20,
-            overmold_height=8.00,
-            overmold_depth=2.80,
-            laser_width=14.20,   # Clears full 13.8x7.8 USB-C boot right to J3 mouth (ENC-3D-P1-1)!
-            laser_height=8.00,
-        ),
-        laser_tripod_x=27.00,    # >=9.6 mm acrylic web clear of full 14.2x8.0 USB-C opening (ENC-2D-P1-3)!
-        laser_tripod_z=28.00,
-        switch_y=12.70,
-        switch_z=18.50,
-        switch_h_y=10.20,        # Positive housing hard-stop at +-2.0 mm (clears +-1.65 mm w/ 0.000 mm^3)!
-        switch_w_z=4.00,
-        switch_recess_y=16.80,
-        button_x=84.00,
-        button_z=18.20,
-        button_hole_d=6.80,
-        button_plunger_bore_d=6.80,
-        button_plunger_cap_d=6.20,
-        button_plunger_flange_d=9.60,
-        button_stem_z=19.30,     # Centered on SW2 B3U-3000P tip (Z=18.815..19.815), < PCB 20.0!
-        back_face_led_holes=((5.75, 66.40),),
-        back_face_led_d=2.40,
-        teensy_prog_x=85.30,
-        teensy_prog_y=4.00,
-        teensy_prog_hole_d=2.40,
-        # ENC-2D-P0-1 & P1-3: Room for pure 3 mm laser-cut acrylic capture_key & switch_key + >=4 mm webs!
-        laser_inner_margin_x_pos=2.20,
-        laser_inner_margin_y_pos=2.40,  # iy1=70.80 -> proper rest gap + 0.55 mm travel over SW2 (Y=68.95)!
-        # Fable #176 P0 fix: 505060 2000mAh UL/IEC 62133 slim protected cell (5.0 mm nominal ->
-        # tested at 5.5 mm swollen thickness!) between 0.8 mm cradle floor (Z=24.2) & 0.6 mm lid (Z=29.7)
-        battery=BatterySpec(
-            name="UL/IEC 62133 Slim Protected LiPo 2000mAh (505060, 5.0mm nominal / 5.5mm swell, JST-PH)",
-            width_x=60.00,
-            height_y=50.00,
-            thickness_z=5.50,
-            center_x=42.50,
-            center_y=34.50,
-            z_start=24.20,
-        ),
-    ),
-}
-
-
-def get_preset(variant: str) -> EnclosureParams:
-    if variant == "v3_1":
-        variant = "v4_0"
-    if variant not in PRESETS:
-        raise KeyError(f"Unknown variant {variant!r}; expected one of {sorted(PRESETS)}")
-    return PRESETS[variant]
+V4_PARAMS = EnclosureParams()
 
 
 def parse_kicad_pcb_metrics(pcb_path: Path) -> dict[str, object]:
@@ -385,39 +316,3 @@ def parse_kicad_pcb_metrics(pcb_path: Path) -> dict[str, object]:
         "chg_led_pos": refs["D2"],
     }
 
-
-def parse_eagle_brd_metrics(brd_path: Path) -> dict[str, object]:
-    tree = ET.parse(brd_path)
-    root = tree.getroot()
-    dim_xs: list[float] = []
-    dim_ys: list[float] = []
-    plain = root.find(".//board/plain")
-    assert plain is not None
-    for wire in plain.findall("wire"):
-        if wire.get("layer") == "20":
-            dim_xs.extend([float(wire.get("x1", 0)), float(wire.get("x2", 0))])
-            dim_ys.extend([float(wire.get("y1", 0)), float(wire.get("y2", 0))])
-    mounting_holes: list[tuple[float, float]] = []
-    lepton_holes: list[tuple[float, float]] = []
-    for sig in root.findall(".//board/signals/signal"):
-        for via in sig.findall("via"):
-            drill = float(via.get("drill", 0))
-            pt = (float(via.get("x", 0)), float(via.get("y", 0)))
-            if 2.6 <= drill <= 3.0:
-                mounting_holes.append(pt)
-            elif 2.0 <= drill <= 2.2:
-                lepton_holes.append(pt)
-    elements = {
-        el.get("name", ""): (float(el.get("x", 0)), float(el.get("y", 0)))
-        for el in root.findall(".//board/elements/element")
-    }
-    return {
-        "pcb_w": round(max(dim_xs) - min(dim_xs), 4),
-        "pcb_h": round(max(dim_ys) - min(dim_ys), 4),
-        "mounting_holes": sorted(mounting_holes),
-        "lepton_holes": sorted(lepton_holes),
-        "teensy_pos": elements["U$2"],
-        "chg_led_pos": elements["CHG-LED"],
-        "switch_pos": elements["SWITCH"],
-        "button_pos": elements["BUTTON"],
-    }

@@ -1,15 +1,10 @@
-"""Parametric 6-plate 3 mm laser-cut acrylic enclosure for DIY-Thermocam V3.0 / V4.0.
+"""Six-plate laser-cut acrylic case (3 mm) for the DIY-Thermocam V4.0.
 
-Incorporates all GPT-6.2 Astra Stage 1 2D findings (#182/#184) & Max #186 polish:
-  - ENC-2D-P1-1: 3.20 mm nominal face slot width (t + 0.20 mm fit allowance matching
-    original V3.0 acrylic design) so 2.8-3.2 mm cast acrylic assembles smoothly without cracking.
-  - ENC-2D-P1-2: Exact 39.20 mm standoff cavity depth (20 + 1.6 + 11 + 1.6 + 5) -> 0.00 mm bow!
-  - ENC-2D-P1-3: Rotated tripod bolt circle (30/150/270 deg, R=8.2 mm, Z=29.8) -> >=2.6 mm
-    bolt-to-center web and >=3.8 mm web clear of V4 USB-C!
-  - ENC-2D-P1-4: Widened 13.60 mm circular Lepton aperture clearing 71 deg DFOV across BOTH
-    optical centers ((42.75, 51.00) & (44.50, 51.50)) even on worst-case 3.20 mm acrylic stock!
-  - Max #186: Separate `#0066FF` `engrave` / `ENGRAVE` layer with Version 1 concentric
-    thermal-lens mark + `DIY-THERMOCAM` wordmark on the back plate (toggleable for $0!).
+Front and back plates carry slots; the four side plates carry tabs and interlock at the corners.
+The capture key and switch key are cut from the same sheet. Slots are 0.2 mm wider than the
+stock, so 2.8..3.2 mm acrylic fits. The back plate's inner face sits at Z=-0.5, the depth of the
+standoff seats in the printed shell, so both enclosures share one board stack.
+The back plate has a separate engrave layer (#0066FF) with the lens mark and wordmark.
 """
 
 from __future__ import annotations
@@ -45,7 +40,21 @@ from build123d import (
     offset,
 )
 
+from .accessories import (
+    PCB_TOP_EDGE_Y,
+    SW2_TIP_Y,
+    TRIPOD_PLUG_X,
+    TRIPOD_PLUG_Z,
+    build_laser_display_spacer,
+    build_laser_sd_chute,
+    build_laser_tripod_mount,
+)
 from .params import EnclosureParams
+
+CAPTURE_KEY_Z0 = 18.20      # 3 mm key spans the SW2 plunger (Z 18.8..19.8) and the PCB edge (20..21.6)
+SWITCH_KEY_Z0 = 16.80       # 3 mm key spans the SW1 actuator (Z 16.6..18.35)
+SWITCH_FORK_TIP_X = 89.50   # 0.5 mm clear of the SW1 body (X<=89.0)
+SWITCH_POCKET_W = 1.90
 
 
 @dataclass(frozen=True)
@@ -58,6 +67,17 @@ class LaserEnclosure:
     sheet_2d: Compound
     engrave_2d: Compound
     sheet_labels: list[tuple[str, float, float]]
+    printed: dict[str, Solid]  # Laser-only printed parts in their assembled position
+
+
+# Printed parts for the laser case -> copies per camera (the cradle comes from the shell set; its
+# FR4 floor and lid are the same boards in both cases)
+LASER_PRINT_PARTS: dict[str, int] = {
+    "battery_cradle": 1,
+    "tripod_mount": 1,
+    "sd_chute": 1,
+    "display_spacer": 2,
+}
 
 
 def _plate_box_bounds(p: EnclosureParams) -> dict[str, float]:
@@ -66,11 +86,13 @@ def _plate_box_bounds(p: EnclosureParams) -> dict[str, float]:
     x1 = p.pcb_w + p.laser_inner_margin_x_pos
     y0 = -p.laser_inner_margin_y_neg
     y1 = p.pcb_h + p.laser_inner_margin_y_pos
-    d_in = p.laser_internal_depth  # 39.20 mm exact standoff stack (ENC-2D-P1-2!)
+    z0 = p.standoff_seat_z
+    d_in = p.laser_internal_depth
+    assert abs(z0 + d_in - p.internal_depth) < 1e-6, "laser depth must close the board stack"
     over = p.laser_plate_overhang
     return {
         "t": t, "x0": x0, "x1": x1, "y0": y0, "y1": y1,
-        "z0": 0.0, "z1": d_in, "w_in": x1 - x0, "h_in": y1 - y0, "d_in": d_in,
+        "z0": z0, "z1": z0 + d_in, "w_in": x1 - x0, "h_in": y1 - y0, "d_in": d_in,
         "fb_w": (x1 - x0) + 2.0 * (t + over),
         "fb_h": (y1 - y0) + 2.0 * (t + over),
         "fb_cx": 0.5 * (x0 + x1),
@@ -141,9 +163,10 @@ def _build_back_engrave_2d(p: EnclosureParams, b: dict[str, float]) -> Compound:
 
 
 def _build_top_or_bottom_2d(p: EnclosureParams, b: dict[str, float], is_top: bool) -> Face:
+    """Top or bottom plate in local (X, Z - z0) coordinates."""
     t, tab_l = b["t"], p.laser_tab_len
     tb_xs, _ = _fb_tab_centers(b)
-    x0, x1, d_in = b["x0"], b["x1"], b["d_in"]
+    x0, x1, d_in, z0 = b["x0"], b["x1"], b["d_in"], b["z0"]
     seg = d_in / 3.0
 
     with BuildSketch() as sk:
@@ -157,31 +180,17 @@ def _build_top_or_bottom_2d(p: EnclosureParams, b: dict[str, float], is_top: boo
                 Rectangle(tab_l, t)
 
         if is_top:
-            if p.is_zero_solder:
-                # ENC-2D-P0-1: Guided 7.2 x 3.4 mm slot for pure 3 mm laser-cut acrylic capture_key!
-                with Locations((p.button_x, 18.30)):
-                    RectangleRounded(7.20, 3.40, 0.30, mode=Mode.SUBTRACT)
-            else:
-                with Locations((p.button_x, p.button_z)):
-                    Circle(p.button_hole_d / 2.0, mode=Mode.SUBTRACT)
-            if not p.back_face_led_holes:
-                with Locations((p.led_x, p.led_z)):
-                    Circle(p.laser_led_d / 2.0, mode=Mode.SUBTRACT)
-            with Locations((p.microsd_x, p.microsd_z)):
-                SlotOverall(p.microsd_w, p.microsd_h, mode=Mode.SUBTRACT)
+            # Capture-key slot (5.0 mm neck + 0.6) and the printed microSD chute's neck
+            with Locations((p.button_x, CAPTURE_KEY_Z0 + t / 2.0 - z0)):
+                RectangleRounded(5.60, t + 0.40, 0.30, mode=Mode.SUBTRACT)
+            with Locations((p.microsd_x, p.microsd_z - z0)):
+                RectangleRounded(p.microsd_w + 2.6, p.microsd_h + 2.6, 0.9, mode=Mode.SUBTRACT)
         else:
-            # ENC-DELTA-P1-1: R=1.0 mm rounded rectangle clears sharp rectangular 13.8x7.8 USB-C boots!
-            with Locations((p.usb.center_x, p.usb.center_z)):
+            # USB-C plug opening (fits a 13.8 x 7.8 boot) and the printed tripod mount's plug
+            with Locations((p.usb.center_x, p.usb.center_z - z0)):
                 RectangleRounded(p.usb.laser_width, p.usb.laser_height, 1.00, mode=Mode.SUBTRACT)
-            # ENC-2D-P1-3: Rotated bolt circle (30, 150, 270 deg; R=8.2 mm) -> >=2.6 mm & >=9.6 mm webs!
-            with Locations((p.laser_tripod_x, p.laser_tripod_z)):
-                Circle(p.laser_tripod_center_d / 2.0, mode=Mode.SUBTRACT)
-            for deg in (30.0, 150.0, 270.0):
-                ang = math.radians(deg)
-                bx = p.laser_tripod_x + p.laser_tripod_bolt_r * math.cos(ang)
-                bz = p.laser_tripod_z + p.laser_tripod_bolt_r * math.sin(ang)
-                with Locations((bx, bz)):
-                    Circle(p.laser_tripod_bolt_d / 2.0, mode=Mode.SUBTRACT)
+            with Locations((p.laser_tripod_x, p.laser_tripod_z - z0)):
+                RectangleRounded(TRIPOD_PLUG_X + 0.2, TRIPOD_PLUG_Z + 0.2, 1.6, mode=Mode.SUBTRACT)
 
     return sk.sketch.faces()[0]
 
@@ -202,63 +211,49 @@ def _build_left_or_right_2d(p: EnclosureParams, b: dict[str, float], is_right: b
             with Locations((ty, -t / 2.0), (ty, d_in + t / 2.0)):
                 Rectangle(tab_l, t)
         if is_right:
-            if p.is_zero_solder:
-                # ENC-2D-P0-1: Guided 10.2 x 3.4 mm slot for pure 3 mm laser-cut acrylic switch_key!
-                with Locations((p.switch_y, 18.30)):
-                    RectangleRounded(p.switch_h_y, 3.40, 0.30, mode=Mode.SUBTRACT)
-            else:
-                with Locations((p.switch_y, p.switch_z)):
-                    Rectangle(p.switch_h_y, p.switch_w_z, mode=Mode.SUBTRACT)
+            # 10.2 mm slot for the switch key's 6.0 mm neck: stops at +-2.1 mm
+            with Locations((p.switch_y, SWITCH_KEY_Z0 + t / 2.0 - b["z0"])):
+                RectangleRounded(p.switch_h_y, t + 0.40, 0.30, mode=Mode.SUBTRACT)
 
     return sk.sketch.faces()[0]
 
 
-def _build_v4_acrylic_keys_2d(p: EnclosureParams, b: dict[str, float]) -> dict[str, Face]:
-    """Build pure 3 mm laser-cut V4 acrylic capture_key & switch_key (ENC-2D-P0-1 fix!).
+def _build_acrylic_keys_2d(p: EnclosureParams, b: dict[str, float]) -> dict[str, Face]:
+    """Capture key and switch key, cut from the case sheet (world XY coordinates).
 
-    Both keys are cut from the exact same 3 mm Acryl GS sheet (Z in [16.80, 19.80] < PCB 20.0!):
-      - `capture_key`: T-shaped plunger retained behind top plate (Y=69.50..70.65), actuator tip at
-        Y=69.10 (0.15 mm clear above SW2 at Y=68.95!), tactile finger button protruding +2.0 mm!
-      - `switch_key`: Forked slide actuator retained behind right plate (X=90.10..91.50), fork tines
-        reaching X=88.90 (1.10 mm axial overlap on C&K JS102011SAQN!), 6.0 mm neck -> +-1.8 mm stop!
+    capture_key: a 10 mm hook bar inside the top plate and a 5 mm neck through its slot, pushed in
+    from inside before the top plate goes on. At rest its stem is 0.15 mm above the SW2 plunger;
+    pressed 0.7 mm, the stem lands on the PCB edge (the key spans Z 18.2..21.2, across the board),
+    which pushes SW2 by the plunger's 0.55 mm overhang.
+    switch_key: a fork around the SW1 actuator, a 14 mm shoulder inside the right plate and a
+    6 mm neck through its 10.2 mm slot.
     """
     t = b["t"]
-    # 1. Capture key (XY plane in world coords: centered at X=p.button_x, Y=69.10..76.20)
-    #    - Outer 10.0 mm tactile cap starts at Y=y_plate_out+0.55 (74.35) -> positive hard-stop on top
-    #      plate outer face (Y=73.80) at -0.55 mm travel (0.40 mm SW2 stroke, prevents SW2 crush!).
-    #    - Inner 7.30 mm asymmetric retention ear (X=79.20..86.50, 1.10 mm tall) threads through the
-    #      7.20 mm slot at ~20 deg tilt and latches 1.20 mm behind the top plate!
-    y_plate_in = b["y1"]          # 70.80 mm
-    y_plate_out = b["y1"] + t     # 73.80 mm
-    y_stop_cap = y_plate_out + 0.55  # 74.35 mm -> exact 0.55 mm travel to positive top-plate stop!
+    y_plate_in = b["y1"]
+    y_plate_out = y_plate_in + t
+    y_stem_tip = SW2_TIP_Y + p.button_rest_gap
+    y_bar_bot = y_stem_tip + 0.20
     with BuildSketch() as sk_cap:
-        # Inner thread-in retention hook (X in [button_x-4.80, button_x+2.50], Y in [69.55, 70.65])
-        with Locations((p.button_x - 1.15, 0.5 * (69.55 + (y_plate_in - 0.15)))):
-            RectangleRounded(7.30, (y_plate_in - 0.15) - 69.55, 0.30)
-        # Narrow actuator nib reaching Y=69.10 (0.15 mm zero-preload gap above SW2 at Y=68.95!)
-        with Locations((p.button_x, 0.5 * (69.10 + 69.70))):
-            Rectangle(3.20, 69.70 - 69.10)
-        # Guided neck through 7.20 mm top-plate slot (5.00 mm wide -> easy tilted hook insertion!)
-        with Locations((p.button_x, 0.5 * (69.65 + y_stop_cap + 0.20))):
-            Rectangle(5.00, (y_stop_cap + 0.20) - 69.65)
-        # Outer 10.0 mm finger cap + positive hard-stop shoulder (overlaps top plate 1.4 mm each side!)
-        with Locations((p.button_x, 0.5 * (y_stop_cap + (y_stop_cap + 1.85)))):
-            RectangleRounded(10.00, 1.85, 0.55)
+        with Locations((p.button_x, 0.5 * (y_bar_bot + y_plate_in))):
+            RectangleRounded(10.00, y_plate_in - y_bar_bot, 0.30)
+        with Locations((p.button_x, 0.5 * (y_stem_tip + y_bar_bot + 0.2))):
+            Rectangle(1.60, y_bar_bot + 0.2 - y_stem_tip)
+        with Locations((p.button_x, 0.5 * (y_plate_in - 0.2 + y_plate_out + 2.0))):
+            RectangleRounded(5.00, y_plate_out + 2.0 - (y_plate_in - 0.2), 0.9)
 
-    # 2. Switch key (XY plane in world coords: X=89.10..96.60, centered at Y=p.switch_y)
-    #    Fork starts at X=89.10 (+0.10 mm clear of SW1 B.Fab body X<=89.0!), pocket cut LAST to X=91.20!
-    x_plate_in = b["x1"]          # 91.60 mm
-    x_plate_out = b["x1"] + t     # 94.60 mm
+    x_plate_in = b["x1"]
+    x_plate_out = x_plate_in + t
+    x_shoulder_in = p.pcb_w + 0.70
     with BuildSketch() as sk_sw:
-        with Locations((0.5 * (90.10 + (x_plate_in - 0.10)), p.switch_y)):
-            RectangleRounded((x_plate_in - 0.10) - 90.10, 14.00, 0.5)
-        with Locations((0.5 * (89.10 + 90.40), p.switch_y)):
-            RectangleRounded(90.40 - 89.10, 7.20, 0.35)
-        with Locations((0.5 * (91.20 + (x_plate_out + 2.00)), p.switch_y)):
-            RectangleRounded((x_plate_out + 2.00) - 91.20, 6.00, 0.8)
-        # Cut fork pocket LAST (X=89.00..91.20) so outer slider never encroaches on SW1 knob (X<=91.0)!
-        with Locations((0.5 * (89.00 + 91.20), p.switch_y)):
-            Rectangle(91.20 - 89.00, 2.40, mode=Mode.SUBTRACT)
+        with Locations((0.5 * (x_shoulder_in + (x_plate_in - 0.10)), p.switch_y)):
+            RectangleRounded((x_plate_in - 0.10) - x_shoulder_in, 14.00, 0.5)
+        with Locations((0.5 * (SWITCH_FORK_TIP_X + x_shoulder_in + 0.3), p.switch_y)):
+            RectangleRounded(x_shoulder_in + 0.3 - SWITCH_FORK_TIP_X, 7.20, 0.35)
+        with Locations((0.5 * (x_plate_in - 0.4 + (x_plate_out + 2.00)), p.switch_y)):
+            RectangleRounded((x_plate_out + 2.00) - (x_plate_in - 0.4), 6.00, 0.8)
+        # Fork pocket, cut last, ending inside the neck
+        with Locations((0.5 * (SWITCH_FORK_TIP_X - 0.1 + x_plate_in - 0.3), p.switch_y)):
+            Rectangle(x_plate_in - 0.3 - (SWITCH_FORK_TIP_X - 0.1), SWITCH_POCKET_W, mode=Mode.SUBTRACT)
 
     return {
         "capture_key": sk_cap.sketch.faces()[0],
@@ -302,31 +297,25 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
     plates_2d = {
         "front": front_2d, "back": back_2d, "top": top_2d,
         "bottom": bottom_2d, "left": left_2d, "right": right_2d,
+        **_build_acrylic_keys_2d(p, b),
     }
-    if p.is_zero_solder:
-        plates_2d.update(_build_v4_acrylic_keys_2d(p, b))
 
     def _to_solid(obj: object) -> Solid:
         return obj if isinstance(obj, Solid) else obj.solids()[0]  # type: ignore[union-attr]
 
-    left_plane = Plane(origin=(b["x0"] - t, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
-    right_plane = Plane(origin=(b["x1"], 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
+    z0 = b["z0"]
+    left_plane = Plane(origin=(b["x0"] - t, 0, z0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
+    right_plane = Plane(origin=(b["x1"], 0, z0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
     plates_3d = {
-        "front": _to_solid(Location((0, 0, d_in)) * _extrude_plate_on_plane(front_3d_f, t)),
-        "back": _to_solid(Location((0, 0, -t)) * _extrude_plate_on_plane(back_3d_f, t)),
-        "bottom": _to_solid(Location((0, b["y0"], 0)) * Rotation(90, 0, 0) * _extrude_plate_on_plane(bottom_2d, t)),
-        "top": _to_solid(Location((0, b["y1"] + t, 0)) * Rotation(90, 0, 0) * _extrude_plate_on_plane(top_2d, t)),
+        "front": _to_solid(Location((0, 0, z0 + d_in)) * _extrude_plate_on_plane(front_3d_f, t)),
+        "back": _to_solid(Location((0, 0, z0 - t)) * _extrude_plate_on_plane(back_3d_f, t)),
+        "bottom": _to_solid(Location((0, b["y0"], z0)) * Rotation(90, 0, 0) * _extrude_plate_on_plane(bottom_2d, t)),
+        "top": _to_solid(Location((0, b["y1"] + t, z0)) * Rotation(90, 0, 0) * _extrude_plate_on_plane(top_2d, t)),
         "left": _to_solid(Location(left_plane) * _extrude_plate_on_plane(left_2d, t)),
         "right": _to_solid(Location(right_plane) * _extrude_plate_on_plane(right_2d, t)),
+        "capture_key": _to_solid(Location((0, 0, CAPTURE_KEY_Z0)) * _extrude_plate_on_plane(plates_2d["capture_key"], t)),
+        "switch_key": _to_solid(Location((0, 0, SWITCH_KEY_Z0)) * _extrude_plate_on_plane(plates_2d["switch_key"], t)),
     }
-    if p.is_zero_solder:
-        # Both 3 mm acrylic control keys sit at Z in [16.80, 19.80] (< PCB 20.0, centered in 3.4 mm slots!)
-        plates_3d["capture_key"] = _to_solid(
-            Location((0, 0, 16.80)) * _extrude_plate_on_plane(plates_2d["capture_key"], t)
-        )
-        plates_3d["switch_key"] = _to_solid(
-            Location((0, 0, 16.80)) * _extrude_plate_on_plane(plates_2d["switch_key"], t)
-        )
 
     gap, margin = 6.0, 5.0
     placed_faces: list[Face] = []
@@ -358,8 +347,7 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
 
     h0 = _place_row(("front", "back"), margin)
     h1 = _place_row(("top", "bottom"), margin + h0 + gap + 4.0)
-    row3 = ("left", "right", "capture_key", "switch_key") if p.is_zero_solder else ("left", "right")
-    _place_row(row3, margin + h0 + gap + 4.0 + h1 + gap + 4.0)
+    _place_row(("left", "right", "capture_key", "switch_key"),margin + h0 + gap + 4.0 + h1 + gap + 4.0)
 
     return LaserEnclosure(
         params=p,
@@ -368,6 +356,12 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
         sheet_2d=Compound(children=placed_faces),
         engrave_2d=engrave_placed,
         sheet_labels=sheet_labels,
+        printed={
+            "tripod_mount": build_laser_tripod_mount(p),
+            "sd_chute": build_laser_sd_chute(p),
+            "display_spacer_bottom": build_laser_display_spacer(p, top=False),
+            "display_spacer_top": build_laser_display_spacer(p, top=True),
+        },
     )
 
 

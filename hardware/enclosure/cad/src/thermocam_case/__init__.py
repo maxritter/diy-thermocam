@@ -1,5 +1,5 @@
-"""Parametric build123d enclosure CAD for DIY-Thermocam V3.0 and V3.1."""
+"""Parametric build123d enclosure CAD for the DIY-Thermocam V4.0 (3D-printed shell + laser-cut acrylic)."""
 
-from .params import EnclosureParams, PRESETS, get_preset
+from .params import V4_PARAMS, EnclosureParams
 
-__all__ = ["EnclosureParams", "PRESETS", "get_preset"]
+__all__ = ["EnclosureParams", "V4_PARAMS"]
