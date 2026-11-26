@@ -43,7 +43,7 @@ boolean checkFirstStart()
 void welcomeScreen()
 {
 	showModalCard(
-		"DIY-THERMOCAM V3",
+		"DIY-THERMOCAM V4",
 		"Welcome to first-time setup.",
 		"Guides you through basic settings.",
 		"Touch screen to continue");

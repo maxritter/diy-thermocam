@@ -10,7 +10,7 @@ default_profile: thermocam
 
 profiles:
   thermocam:
-    notes: DIY-Thermocam V3, Teensy 4.1 at 450 MHz, Serial + MTP Disk, -O3
+    notes: DIY-Thermocam, Teensy 4.1 at 450 MHz, Serial + MTP Disk, -O3
     fqbn: teensy:avr:teensy41:usb=serialmtp,speed=450,opt=o3std
     platforms:
       - platform: teensy:avr (1.62.0)
