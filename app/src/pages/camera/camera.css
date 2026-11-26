@@ -7,38 +7,127 @@
   overflow-y: auto;
 }
 
+/* QualityLayer's settings page: a title with one line, then cards with header rows. */
 .cm-cam {
-  padding: 24px 32px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 32px 40px;
   display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 20px 24px;
   align-content: start;
+}
+
+.cm-cam.one {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cm-head {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .cm-col {
   display: grid;
   gap: 16px;
   align-content: start;
+  min-width: 0;
 }
 
-.cm-panel {
-  border: 1px solid var(--tc-border);
-  border-radius: 12px;
-  background: var(--tc-surface);
+/* The status card's facts: an 18 px icon, the name, the value on the right. */
+.cm-facts {
+  margin: 0;
+  padding: 4px 0;
 }
 
-.cm-panel-h {
-  padding: 16px 18px 6px;
+.cm-fact {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 16px;
 }
 
-.cm-panel-h h2 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 620;
+.cm-fact dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  color: var(--tc-text-muted);
+  font-size: 13px;
+}
+
+.cm-fact-ic {
+  flex: none;
+  color: var(--tc-text-dim);
+}
+
+.cm-fact dd {
+  margin: 0 0 0 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cm-fact dd.pass {
+  color: var(--tc-pass);
+}
+
+.cm-fact dd.fail {
+  color: var(--tc-danger);
+}
+
+.cm-batt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-card-f {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--tc-line);
+}
+
+/* Help: one row per page it opens. */
+.cm-linkrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-top: 1px solid var(--tc-line);
+  background: none;
+  color: var(--tc-text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cm-linkrow:first-child {
+  border-top: 0;
+}
+
+.cm-linkrow:hover {
+  background: var(--tc-surface-2);
+}
+
+.cm-linkrow:focus-visible {
+  outline: 2px solid var(--tc-accent);
+  outline-offset: -2px;
+}
+
+.cm-linkrow-go {
+  margin-left: auto;
+  color: var(--tc-text-dim);
 }
 
 .cm-kv {
@@ -83,39 +172,6 @@
   color: var(--tc-danger);
 }
 
-.cm-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 20px;
-  padding: 0 7px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 550;
-  white-space: nowrap;
-  background: var(--tc-surface-2);
-  color: var(--tc-text-muted);
-  border: 1px solid var(--tc-border);
-}
-
-.cm-badge.pass {
-  background: var(--tc-pass-soft);
-  color: var(--tc-pass);
-  border-color: transparent;
-}
-
-.cm-badge.amber {
-  background: var(--tc-amber-soft);
-  color: var(--tc-amber-ink);
-  border-color: var(--tc-amber-line);
-}
-
-.cm-badge .st-status-dot {
-  width: 6px;
-  height: 6px;
-  box-shadow: none;
-}
-
 .cm-meter {
   display: inline-block;
   width: 64px;
@@ -130,20 +186,6 @@
   height: 100%;
   border-radius: 999px;
   background: var(--tc-pass);
-}
-
-.cm-actions {
-  display: flex;
-  gap: 8px;
-  padding: 4px 18px 16px;
-}
-
-.cm-help {
-  display: grid;
-  gap: 8px;
-  padding: 2px 18px 16px;
-  font-size: 13px;
-  justify-items: start;
 }
 
 .cm-link {
@@ -171,73 +213,12 @@
   line-height: 1.45;
 }
 
+/* A sub-heading inside Diagnostics. */
 .cm-sec-h {
-  padding: 14px 18px 8px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--tc-text-muted);
-  border-top: 1px solid var(--tc-line);
-}
-
-.cm-sec-h:first-child {
-  border-top: 0;
-}
-
-.cm-set-list {
-  display: grid;
-}
-
-.cm-set {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px 24px;
-  align-items: center;
-  padding: 13px 18px;
-  border-top: 1px solid var(--tc-line);
-}
-
-.cm-set:first-child {
-  border-top: 0;
-}
-
-.cm-set .n {
-  font-size: 13px;
+  padding: 12px 16px 6px;
+  font-size: 12px;
   font-weight: 500;
-}
-
-.cm-set .d {
-  grid-column: 1;
-  font-size: 12px;
   color: var(--tc-text-muted);
-}
-
-.cm-set .err {
-  grid-column: 1;
-  font-size: 12px;
-  color: var(--tc-danger);
-}
-
-.cm-set > .ctl {
-  grid-row: 1 / span 2;
-  grid-column: 2;
-}
-
-.cm-set .st-switch input:disabled,
-.cm-set .st-switch input:disabled + .track {
-  cursor: not-allowed;
-}
-
-.cm-set .st-switch:has(input:disabled) {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.cm-set .st-seg button:disabled {
-  cursor: not-allowed;
-}
-
-.cm-set .st-seg:has(button:disabled) {
-  opacity: 0.6;
 }
 
 details.cm-more {
@@ -297,15 +278,23 @@ details.cm-more.boxed > summary {
 
 /* ---------- Diagnostics (camera.html#diagnostics) ---------- */
 
+.cm-diag {
+  padding-bottom: 8px;
+}
+
+.cm-diag .cm-kv {
+  padding: 0 16px 8px;
+}
+
 .cm-diag-tools {
   display: flex;
   justify-content: flex-end;
   gap: 4px;
-  padding: 0 18px 4px;
+  padding: 10px 12px 0;
 }
 
 .cm-timing {
-  padding: 2px 18px 12px;
+  padding: 2px 16px 12px;
   display: grid;
   gap: 7px;
   font-size: 12.5px;
@@ -627,26 +616,43 @@ details.cm-more.boxed > summary {
 .cm-empty {
   width: 640px;
   max-width: 100%;
-  padding: 28px;
+  padding: 16px;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.cm-empty-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--tc-border);
+  color: var(--tc-text-muted);
+}
+
+.cm-empty-txt {
   display: grid;
-  gap: 12px;
-  justify-items: start;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
 .cm-empty .t {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 13.5px;
 }
 
 .cm-empty .d {
+  font-size: 12.5px;
   color: var(--tc-text-muted);
 }
 
 .cm-empty .acts {
   display: flex;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 6px;
+  flex: none;
 }

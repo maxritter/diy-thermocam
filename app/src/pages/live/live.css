@@ -380,7 +380,19 @@
 }
 
 .lv-radio-t {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 550;
+}
+
+.lv-radio-ic {
+  flex: none;
+  color: var(--tc-text-dim);
+}
+
+.lv-radio:has(input:checked) .lv-radio-ic {
+  color: currentColor;
 }
 
 .lv-radio-d {

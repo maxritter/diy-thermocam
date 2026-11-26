@@ -2,30 +2,8 @@ import { useEffect, useState } from "react";
 import { fromCelsius, toCelsius, unitSymbol } from "@/lib/thermal";
 import type { TempUnit } from "@/lib/types";
 
-/** The artifact's on/off switch. */
-export function Switch({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  label: string;
-}): React.JSX.Element {
-  return (
-    <label className="st-switch">
-      <input
-        type="checkbox"
-        role="switch"
-        aria-label={label}
-        aria-checked={checked}
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <span className="track" />
-    </label>
-  );
-}
+/** The artifact's on/off switch, shared with the settings pages. */
+export { Switch } from "@/app/ui/Switch";
 
 /**
  * A number typed as text. It commits on Enter or when it loses focus, never while typing,

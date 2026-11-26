@@ -1,4 +1,5 @@
 import { AlertDialog } from "@base-ui/react/alert-dialog";
+import { Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import type { Where } from "@/lib/api/captures";
 
@@ -34,7 +35,7 @@ export function deleteText(
   if (where === "camera") {
     return {
       title: `Delete ${count} from the camera?`,
-      body: `${listText(parts)} will be removed from the SD card. This can’t be undone. Captures already copied to this computer stay.`,
+      body: `${listText(parts)} will be removed from the SD card. This can’t be undone; copies on this computer stay.`,
       confirm: `Delete ${count}`,
       parts,
     };
@@ -42,7 +43,7 @@ export function deleteText(
   const bin = platform === "windows" ? "Recycle Bin" : "Trash";
   return {
     title: `Move ${count} to the ${bin}?`,
-    body: `${listText(parts)} will be moved to the ${bin}. Their edits go with them, and you can put them back from there.`,
+    body: `${listText(parts)} will be moved to the ${bin} with their edits. You can put them back from there.`,
     confirm: `Move to ${bin}`,
     parts,
   };
@@ -79,7 +80,12 @@ export function DeleteDialog({
         <AlertDialog.Backdrop className="st-scrim z-50" />
         <AlertDialog.Popup className="st-dialog z-50" style={{ width: 440 }}>
           <div className="dlg-h">
-            <AlertDialog.Title>{t.title}</AlertDialog.Title>
+            <div className="dlg-t">
+              <span className="dlg-ic">
+                <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <AlertDialog.Title>{t.title}</AlertDialog.Title>
+            </div>
           </div>
           <div className="dlg-b">
             <AlertDialog.Description style={{ margin: 0, color: "var(--tc-text-muted)" }}>

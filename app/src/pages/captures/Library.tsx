@@ -157,7 +157,7 @@ function StateCard({
   );
 }
 
-const BIG = { size: 28, strokeWidth: 1.75, "aria-hidden": true } as const;
+const BIG = { size: 18, strokeWidth: 1.75, "aria-hidden": true } as const;
 
 /**
  * The library (captures.html#library, #empty-states): On the camera and On this computer,
@@ -609,7 +609,7 @@ export function Library({
       <StateCard
         icon={<HardDrive {...BIG} />}
         title="No SD card in the camera"
-        body="Put a microSD card in the camera and it appears here. Captures on this computer are still in the other tab."
+        body="Put a microSD card in the camera to see its captures here."
       />
     );
   } else if (items.length === 0) {
@@ -624,7 +624,7 @@ export function Library({
         <StateCard
           icon={<Monitor {...BIG} />}
           title="Nothing on this computer yet"
-          body="Snapshots and recordings you take in Live land here, and so do files you open."
+          body="Snapshots and recordings from Live land here, and files you open."
           action={
             <button className="tc-btn" type="button" onClick={() => void openFile()}>
               <FolderOpen {...ICON} />

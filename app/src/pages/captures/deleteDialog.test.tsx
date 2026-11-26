@@ -50,7 +50,7 @@ describe("the Delete dialog", () => {
       ["A", "B"],
       "computer",
       "Move 2 captures to the Trash?",
-      "A and B will be moved to the Trash.",
+      "A and B will be moved to the Trash with their edits.",
     ],
   ] as const)("%p on the %s", (names, where, title, body) => {
     const t = deleteText([...names], where, "mac");

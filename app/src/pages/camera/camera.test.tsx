@@ -64,9 +64,7 @@ describe("the Camera page", () => {
     );
     const panel = await findByRole("region", { name: "No camera connected" });
     expect(
-      within(panel).getByText(
-        "Plug in a Thermocam to see its status and settings. With the demo camera, this page shows its values read-only.",
-      ),
+      within(panel).getByText("Plug in a Thermocam to see its status and settings."),
     ).toBeTruthy();
     const update = getByRole("button", { name: "Update firmware…" }) as HTMLButtonElement;
     expect(update.disabled).toBe(false);
@@ -78,39 +76,40 @@ describe("the Camera page", () => {
   test("the demo camera shows its values read-only", async () => {
     const { findByText, getByRole } = renderApp(<CameraPage {...props("demo")} />);
     expect(await findByText("Read-only")).toBeTruthy();
+    const screen = getByRole("region", { name: "On the camera’s screen" });
     await waitFor(() =>
       expect(
-        (
-          getByRole("checkbox", {
-            name: "Spot temperature on the camera screen",
-          }) as HTMLInputElement
-        ).checked,
+        (within(screen).getByRole("switch", { name: "Spot temperature" }) as HTMLInputElement)
+          .checked,
       ).toBe(true),
     );
-    for (const name of [
-      "Spot temperature on the camera screen",
-      "Mounted upside down",
-      "Use Studio's material on the camera's screen",
-    ]) {
-      expect((getByRole("checkbox", { name }) as HTMLInputElement).disabled).toBe(true);
+    for (const name of ["Spot temperature", "Mounted upside down", "Use Studio’s material"]) {
+      expect((getByRole("switch", { name }) as HTMLInputElement).disabled).toBe(true);
     }
     expect((getByRole("button", { name: "Calibrate now" }) as HTMLButtonElement).disabled).toBe(
       true,
     );
-    // The button choice is Studio's own setting, so it stays available.
-    const group = getByRole("group", { name: "Capture button" });
+    // Switching the range still says it recalibrates the image.
+    const range = getByRole("group", { name: "Measuring range" });
+    expect(range.getAttribute("aria-describedby")).toBeTruthy();
     expect(
-      (within(group).getByRole("button", { name: "Record in Studio" }) as HTMLButtonElement)
-        .disabled,
+      document.getElementById(range.getAttribute("aria-describedby") ?? "")?.textContent,
+    ).toContain("Switching recalibrates the image");
+    // The button choice is Studio's own setting, so it stays available.
+    const group = getByRole("group", { name: "When pressed" });
+    expect(
+      (within(group).getByRole("button", { name: "Record" }) as HTMLButtonElement).disabled,
     ).toBe(false);
   });
 
-  test("the material switch starts off", async () => {
+  test("the material switch starts off and says what it sends", async () => {
     const { findByRole } = renderApp(<CameraPage {...props("demo")} />);
-    const sw = (await findByRole("checkbox", {
-      name: "Use Studio's material on the camera's screen",
-    })) as HTMLInputElement;
+    const sw = (await findByRole("switch", { name: "Use Studio’s material" })) as HTMLInputElement;
     expect(sw.checked).toBe(false);
+    const desc = document.getElementById(sw.getAttribute("aria-describedby") ?? "");
+    expect(desc?.textContent).toContain(
+      "Sends Live’s emissivity and reflected temperature to the camera",
+    );
   });
 
   test("the button choice is saved through Studio's settings", async () => {
@@ -118,8 +117,8 @@ describe("the Camera page", () => {
     const { findByRole, user } = renderApp(
       <CameraPage {...props("demo", { onButtonActionChange: (a) => chosen.push(a) })} />,
     );
-    const group = await findByRole("group", { name: "Capture button" });
-    await user.click(within(group).getByRole("button", { name: "Record in Studio" }));
+    const group = await findByRole("group", { name: "When pressed" });
+    await user.click(within(group).getByRole("button", { name: "Record" }));
     await user.click(within(group).getByRole("button", { name: "Nothing" }));
     expect(chosen).toEqual(["record", "nothing"]);
   });
@@ -206,7 +205,7 @@ describe("the Camera page", () => {
     expect(within(dlg).getByText("Not firmware for a Teensy 4.1 camera")).toBeTruthy();
     expect(
       within(dlg).getByText(
-        "Download the firmware for your camera from the releases page. Nothing was sent to the camera.",
+        "Nothing was sent to the camera. Get its firmware from the releases page.",
       ),
     ).toBeTruthy();
     expect(

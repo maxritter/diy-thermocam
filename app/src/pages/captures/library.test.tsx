@@ -236,9 +236,7 @@ describe("the library", () => {
     await user.click(screen.getByRole("button", { name: /On this computer/ }));
     expect(await screen.findByText("Nothing on this computer yet")).toBeTruthy();
     expect(
-      screen.getByText(
-        "Snapshots and recordings you take in Live land here, and so do files you open.",
-      ),
+      screen.getByText("Snapshots and recordings from Live land here, and files you open."),
     ).toBeTruthy();
   });
 

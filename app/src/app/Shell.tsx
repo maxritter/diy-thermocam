@@ -168,7 +168,7 @@ export function Shell({
       <header className="st-hdr">
         <div className="st-brand">
           <BrandMark size={22} />
-          DIY-Thermocam
+          DIY-Thermocam Studio
         </div>
         <nav className="st-nav" aria-label="Studio">
           {PAGES.map((p) => {

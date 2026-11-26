@@ -98,7 +98,7 @@ export function Diagnostics({
           {copied ? "Copied" : "Copy for a bug report"}
         </button>
       </div>
-      <div className="cm-sec-h" style={{ borderTop: 0 }}>
+      <div className="cm-sec-h">
         {p
           ? `Frame timing · ${(p.loop_total_us / 1000).toFixed(2)} ms of ${(p.frame_period_us / 1000).toFixed(1)} ms per frame`
           : "Frame timing"}
@@ -118,9 +118,7 @@ export function Diagnostics({
       </div>
       <div className="cm-two">
         <div>
-          <div className="cm-sec-h" style={{ borderTop: 0 }}>
-            Rates and link
-          </div>
+          <div className="cm-sec-h">Rates and link</div>
           <dl className="cm-kv nowrap">
             <dt>Sensor</dt>
             <dd>{p ? `${fps(p.live_fps_x100)} fps (max 8.8)` : "–"}</dd>
@@ -135,9 +133,7 @@ export function Diagnostics({
           </dl>
         </div>
         <div>
-          <div className="cm-sec-h" style={{ borderTop: 0 }}>
-            Hardware
-          </div>
+          <div className="cm-sec-h">Hardware</div>
           <dl className="cm-kv nowrap">
             <dt>Sensor part</dt>
             <dd>{d ? partNumber(d.lepton_part_num) : "–"}</dd>

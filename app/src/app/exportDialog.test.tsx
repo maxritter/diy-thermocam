@@ -154,7 +154,7 @@ describe("the Export dialog", () => {
     expect(within(panel).getByText("1920 × 1080 pixels")).toBeTruthy();
     await user.click(within(panel).getByRole("button", { name: "Sensor ×4" }));
     expect(within(panel).getByText("640 × 480 pixels")).toBeTruthy();
-    await user.click(within(panel).getByRole("switch", { name: "Include temperature scale" }));
+    await user.click(within(panel).getByRole("switch", { name: "Temperature scale" }));
     await user.click(getByRole("button", { name: "Export…" }));
     await waitFor(() => expect(api.exportMedia).toHaveBeenCalledTimes(1));
     const req = (api.exportMedia as ReturnType<typeof mock>).mock.calls[0][0] as Record<

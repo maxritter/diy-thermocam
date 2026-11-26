@@ -1,7 +1,9 @@
 import { Menu } from "@base-ui/react/menu";
-import { Check, ChevronDown, Usb } from "lucide-react";
+import { Check, ChevronDown, Cpu, Unplug, Usb } from "lucide-react";
 import { useState } from "react";
 import type { SerialPortInfo } from "@/lib/types";
+
+const MENU_ICON = { size: 14, strokeWidth: 1.75, "aria-hidden": true } as const;
 
 export type CameraState = "camera" | "demo" | "connecting" | "none";
 
@@ -142,12 +144,7 @@ export function CameraChip({
             ) : null}
             {showOther ? null : (
               <Menu.Item className="item" closeOnClick={false} onClick={() => setShowOther(true)}>
-                <Usb
-                  size={16}
-                  strokeWidth={1.75}
-                  style={{ color: "var(--tc-text-muted)" }}
-                  aria-hidden="true"
-                />
+                <Usb {...MENU_ICON} className="item-ic" />
                 <span>
                   Other serial port…
                   <span className="sub">Every port this computer sees</span>
@@ -156,6 +153,7 @@ export function CameraChip({
             )}
             <hr />
             <Menu.Item className="item" onClick={onOpenCameraSettings}>
+              <Cpu {...MENU_ICON} className="item-ic" />
               Camera settings…
             </Menu.Item>
             <Menu.Item
@@ -163,6 +161,7 @@ export function CameraChip({
               disabled={state === "none" || state === "connecting"}
               onClick={onDisconnect}
             >
+              <Unplug {...MENU_ICON} className="item-ic" />
               Disconnect
             </Menu.Item>
             {import.meta.env?.DEV && devUnplug ? (

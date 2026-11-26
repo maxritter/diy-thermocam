@@ -1,4 +1,4 @@
-import { Upload } from "lucide-react";
+import { LoaderCircle, Unplug, Upload } from "lucide-react";
 
 export interface NoCameraProps {
   /** Studio is opening a camera right now. */
@@ -16,28 +16,35 @@ export function NoCamera({
   onUseDemo,
   updateBusy = false,
 }: NoCameraProps): React.JSX.Element {
+  const Icon = connecting ? LoaderCircle : Unplug;
   return (
-    <section className="cm-panel cm-empty" aria-labelledby="cm-nocam-t">
-      <span className="t" id="cm-nocam-t">
-        <span className="st-status-dot off" />
-        {connecting ? "Connecting…" : "No camera connected"}
+    <section className="st-gcard cm-empty" aria-labelledby="cm-nocam-t">
+      <span className="cm-empty-ic">
+        <Icon
+          size={18}
+          strokeWidth={1.75}
+          aria-hidden="true"
+          className={connecting ? "cm-spin" : undefined}
+        />
       </span>
-      <span className="d">
-        Plug in a Thermocam to see its status and settings. With the demo camera, this page shows
-        its values read-only.
-      </span>
+      <div className="cm-empty-txt">
+        <span className="t" id="cm-nocam-t">
+          {connecting ? "Connecting…" : "No camera connected"}
+        </span>
+        <span className="d">Plug in a Thermocam to see its status and settings.</span>
+      </div>
       <div className="acts">
-        <button type="button" className="tc-btn" onClick={onUpdateFirmware} disabled={updateBusy}>
-          <Upload size={16} strokeWidth={1.75} aria-hidden="true" />
-          Update firmware…
+        <button type="button" className="tc-btn" onClick={onUseDemo} disabled={connecting}>
+          Use the demo camera
         </button>
         <button
           type="button"
           className="tc-btn tc-btn-ghost"
-          onClick={onUseDemo}
-          disabled={connecting}
+          onClick={onUpdateFirmware}
+          disabled={updateBusy}
         >
-          Use the demo camera
+          <Upload size={15} strokeWidth={1.75} aria-hidden="true" />
+          Update firmware…
         </button>
       </div>
     </section>

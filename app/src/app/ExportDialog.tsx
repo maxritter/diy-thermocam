@@ -1,5 +1,22 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { Copy, File, Film, Image, Table, X } from "lucide-react";
+import {
+  Binary,
+  CircleDot,
+  Clock,
+  Copy,
+  File,
+  FileImage,
+  FileVideo,
+  Film,
+  Image,
+  type LucideIcon,
+  Ruler,
+  Scaling,
+  Table,
+  Tag,
+  Upload,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { type ColorRange, shownRange } from "@/lib/colorRange";
 import { paletteGradientCss, samplePalette } from "@/lib/palettes";
@@ -14,6 +31,9 @@ import type {
 } from "@/lib/types";
 import { baseName, commandError } from "@/lib/utils";
 import { type Platform, revealLabel, type ToastStore } from "./Toasts";
+import { Segmented } from "./ui/Segmented";
+import { SettingRow } from "./ui/SettingRow";
+import { Switch } from "./ui/Switch";
 
 /**
  * One dialog for every file Studio makes (`live.html#export`): Image, Video, Data and Report,
@@ -42,22 +62,30 @@ const VIDEO_SIZES = IMAGE_SIZES.slice(1);
 
 type DataKind = "csv" | "tiff" | "dat" | "frames";
 
-const DATA_CHOICES: { id: DataKind; title: string; detail: string }[] = [
+const DATA_CHOICES: { id: DataKind; title: string; detail: string; icon: LucideIcon }[] = [
   {
     id: "csv",
     title: "Temperatures as CSV",
-    detail: "One value per pixel. Opens in Excel, Numbers or Python.",
+    detail: "One value per pixel, for Excel, Numbers or Python",
+    icon: Table,
   },
   {
     id: "tiff",
     title: "Thermal TIFF, 16-bit",
-    detail: "Exact temperatures for analysis tools like ImageJ.",
+    detail: "Exact temperatures for tools like ImageJ",
+    icon: FileImage,
   },
-  { id: "dat", title: "Raw capture (.DAT)", detail: "Opens again in Studio and in ThermoVision." },
+  {
+    id: "dat",
+    title: "Raw capture (.DAT)",
+    detail: "Opens again in Studio and ThermoVision",
+    icon: Binary,
+  },
   {
     id: "frames",
     title: "Recording as raw frames",
-    detail: "A folder of .DAT files with a list of their times, from the last recording.",
+    detail: "The last recording as .DAT files with their times",
+    icon: Film,
   },
 ];
 
@@ -261,64 +289,6 @@ export function exportRequest(
   };
 }
 
-function Seg<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: { id: T; label: string; title?: string; disabled?: boolean }[];
-  value: T;
-  onChange: (v: T) => void;
-}): React.JSX.Element {
-  return (
-    <fieldset className="st-seg" aria-label={label}>
-      {options.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          title={o.title}
-          disabled={o.disabled}
-          aria-pressed={value === o.id}
-          onClick={() => onChange(o.id)}
-        >
-          {o.label}
-        </button>
-      ))}
-    </fieldset>
-  );
-}
-
-function Toggle({
-  label,
-  name,
-  checked,
-  onChange,
-}: {
-  label: string;
-  name: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}): React.JSX.Element {
-  return (
-    <div className="st-setrow">
-      <span className="lbl">{label}</span>
-      <label className="st-switch">
-        <input
-          type="checkbox"
-          role="switch"
-          aria-label={name}
-          aria-checked={checked}
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-        />
-        <span className="track" />
-      </label>
-    </div>
-  );
-}
-
 /** The frame in the chosen palette and range, small. */
 function Preview({ source }: { source: () => ExportSource }): React.JSX.Element {
   const ref = useRef<HTMLCanvasElement | null>(null);
@@ -455,7 +425,12 @@ export function ExportDialog({
         <Dialog.Backdrop className="st-scrim z-50" />
         <Dialog.Popup className="st-dialog lv-export z-50" style={{ width: 640 }}>
           <div className="dlg-h">
-            <Dialog.Title>Export</Dialog.Title>
+            <div className="dlg-t">
+              <span className="dlg-ic">
+                <Upload size={16} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <Dialog.Title>Export</Dialog.Title>
+            </div>
             <Dialog.Close className="st-icon-btn" aria-label="Close" disabled={Boolean(busy)}>
               <X size={16} strokeWidth={1.75} aria-hidden="true" />
             </Dialog.Close>
@@ -485,113 +460,146 @@ export function ExportDialog({
               <div role="tabpanel" aria-label="Image" className="lv-export-image">
                 <Preview source={source} />
                 <div className="lv-export-col">
-                  <div className="st-field">
-                    <span>Format</span>
-                    <Seg
-                      label="Format"
-                      value={c.imageFormat}
-                      onChange={(v) => update({ imageFormat: v })}
-                      options={[
-                        { id: "png", label: "PNG" },
-                        { id: "jpg", label: "JPEG" },
-                      ]}
-                    />
-                  </div>
-                  <div className="st-field">
-                    <span>Size</span>
-                    <Seg
-                      label="Size"
-                      value={c.imageSize}
-                      onChange={(v) => update({ imageSize: v })}
-                      options={IMAGE_SIZES}
-                    />
-                    <span className="st-hint">
-                      {w} × {h} pixels
-                    </span>
-                  </div>
-                  <Toggle
-                    label="Temperature scale"
-                    name="Include temperature scale"
-                    checked={c.colorbar}
-                    onChange={(v) => update({ colorbar: v })}
+                  <SettingRow
+                    icon={FileImage}
+                    title="Format"
+                    control={
+                      <Segmented
+                        label="Format"
+                        value={c.imageFormat}
+                        onChange={(v) => update({ imageFormat: v })}
+                        options={[
+                          { id: "png", label: "PNG" },
+                          { id: "jpg", label: "JPEG" },
+                        ]}
+                      />
+                    }
                   />
-                  <Toggle
-                    label="Measurements and labels"
-                    name="Include measurements and labels"
-                    checked={c.labels}
-                    onChange={(v) => update({ labels: v })}
+                  <SettingRow
+                    icon={Scaling}
+                    title="Size"
+                    desc={`${w} × ${h} pixels`}
+                    stacked
+                    control={
+                      <Segmented
+                        label="Size"
+                        value={c.imageSize}
+                        onChange={(v) => update({ imageSize: v })}
+                        options={IMAGE_SIZES}
+                      />
+                    }
+                  />
+                  <SettingRow
+                    icon={Ruler}
+                    title="Temperature scale"
+                    control={
+                      <Switch
+                        label="Temperature scale"
+                        checked={c.colorbar}
+                        onChange={(v) => update({ colorbar: v })}
+                      />
+                    }
+                  />
+                  <SettingRow
+                    icon={Tag}
+                    title="Measurements and labels"
+                    control={
+                      <Switch
+                        label="Measurements and labels"
+                        checked={c.labels}
+                        onChange={(v) => update({ labels: v })}
+                      />
+                    }
                   />
                 </div>
               </div>
             ) : c.tab === "video" ? (
               <div role="tabpanel" aria-label="Video" className="lv-export-col">
-                <div className="st-field">
-                  <span>From</span>
-                  <Seg
-                    label="Source"
-                    value={videoFrom}
-                    onChange={(v) => update({ videoFrom: v })}
-                    options={[
-                      {
-                        id: "video",
-                        label: recordings.video
-                          ? `Last recording · ${durationShort(recordings.video.duration_ms)}`
-                          : "Last recording",
-                        disabled: !recordings.video,
-                      },
-                      {
-                        id: "timelapse",
-                        label: recordings.timelapse
-                          ? `Time-lapse · ${recordings.timelapse.frames} frames`
-                          : "Time-lapse",
-                        disabled: !recordings.timelapse,
-                      },
-                    ]}
-                  />
-                  {!recordings.video && !recordings.timelapse ? (
-                    <span className="st-hint">
-                      Record a video or a time-lapse first, with Record.
-                    </span>
-                  ) : null}
-                </div>
-                <div className="st-field">
-                  <span>Format</span>
-                  <Seg
-                    label="Format"
-                    value={c.videoFormat}
-                    onChange={(v) => update({ videoFormat: v })}
-                    options={[
-                      { id: "mp4", label: "MP4" },
-                      { id: "gif", label: "GIF" },
-                    ]}
-                  />
-                </div>
-                <div className="st-field">
-                  <span>Size</span>
-                  <Seg
-                    label="Size"
-                    value={c.videoSize === "native" ? "full_hd1080p" : c.videoSize}
-                    onChange={(v) => update({ videoSize: v })}
-                    options={VIDEO_SIZES}
-                  />
-                </div>
+                <SettingRow
+                  icon={Film}
+                  title="Source"
+                  desc={
+                    !recordings.video && !recordings.timelapse
+                      ? "Record a video or a time-lapse first, with Record."
+                      : undefined
+                  }
+                  stacked
+                  control={
+                    <Segmented
+                      label="Source"
+                      value={videoFrom}
+                      onChange={(v) => update({ videoFrom: v })}
+                      options={[
+                        {
+                          id: "video",
+                          label: recordings.video
+                            ? `Last recording · ${durationShort(recordings.video.duration_ms)}`
+                            : "Last recording",
+                          icon: CircleDot,
+                          disabled: !recordings.video,
+                        },
+                        {
+                          id: "timelapse",
+                          label: recordings.timelapse
+                            ? `Time-lapse · ${recordings.timelapse.frames} frames`
+                            : "Time-lapse",
+                          icon: Clock,
+                          disabled: !recordings.timelapse,
+                        },
+                      ]}
+                    />
+                  }
+                />
+                <SettingRow
+                  icon={FileVideo}
+                  title="Format"
+                  control={
+                    <Segmented
+                      label="Format"
+                      value={c.videoFormat}
+                      onChange={(v) => update({ videoFormat: v })}
+                      options={[
+                        { id: "mp4", label: "MP4" },
+                        { id: "gif", label: "GIF" },
+                      ]}
+                    />
+                  }
+                />
+                <SettingRow
+                  icon={Scaling}
+                  title="Size"
+                  control={
+                    <Segmented
+                      label="Size"
+                      value={c.videoSize === "native" ? "full_hd1080p" : c.videoSize}
+                      onChange={(v) => update({ videoSize: v })}
+                      options={VIDEO_SIZES}
+                    />
+                  }
+                />
               </div>
             ) : c.tab === "data" ? (
               <div role="tabpanel" aria-label="Data">
                 <div className="lv-radio-list">
-                  {DATA_CHOICES.map((d) => (
-                    <label key={d.id} className="lv-radio">
-                      <input
-                        type="radio"
-                        name="export-data"
-                        checked={c.data === d.id}
-                        disabled={d.id === "frames" && !recordings.video}
-                        onChange={() => update({ data: d.id })}
-                      />
-                      <span className="lv-radio-t">{d.title}</span>
-                      <span className="lv-radio-d">{d.detail}</span>
-                    </label>
-                  ))}
+                  {DATA_CHOICES.map((d) => {
+                    const Icon = d.icon;
+                    return (
+                      <label key={d.id} className="lv-radio">
+                        <input
+                          type="radio"
+                          name="export-data"
+                          checked={c.data === d.id}
+                          disabled={d.id === "frames" && !recordings.video}
+                          onChange={() => update({ data: d.id })}
+                        />
+                        <span className="lv-radio-t">
+                          <Icon {...SM} className="lv-radio-ic" />
+                          {d.title}
+                        </span>
+                        <span className="lv-radio-d">{d.detail}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -617,7 +625,7 @@ export function ExportDialog({
                 </label>
                 <div className="st-field">
                   <span>Format</span>
-                  <Seg
+                  <Segmented
                     label="Format"
                     value={c.reportFormat}
                     onChange={(v) => update({ reportFormat: v })}

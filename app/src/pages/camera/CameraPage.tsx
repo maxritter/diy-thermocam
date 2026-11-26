@@ -1,6 +1,36 @@
-import { ChevronDown, Upload, Zap } from "lucide-react";
+import {
+  ArrowUpRight,
+  Ban,
+  BatteryMedium,
+  BookOpen,
+  Bug,
+  Camera,
+  CircleDot,
+  CircuitBoard,
+  Crosshair,
+  Download,
+  Flame,
+  FlipVertical2,
+  Gauge,
+  HardDrive,
+  type LucideIcon,
+  Microscope,
+  MousePointerClick,
+  Ruler,
+  ScanEye,
+  ShieldCheck,
+  Thermometer,
+  Unplug,
+  Upload,
+  Usb,
+  Zap,
+} from "lucide-react";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { CameraState } from "@/app/CameraChip";
+import { GroupCard } from "@/app/ui/GroupCard";
+import { Segmented } from "@/app/ui/Segmented";
+import { SettingRow } from "@/app/ui/SettingRow";
+import { Switch } from "@/app/ui/Switch";
 import { cameraApi, LINKS } from "@/lib/api/camera";
 import { getSensorMaterial, useMaterialSync } from "@/lib/sensorMaterial";
 import type { ButtonAction } from "@/lib/settings";
@@ -105,75 +135,49 @@ function rangeLabel(lowC: number, highC: number, unit: TempUnit): string {
   return `${f(lowC)} to ${f(highC)} ${unitSymbol(unit)}`;
 }
 
-interface SwitchRowProps {
+/** One fact on the status card: a muted icon, its name and the value on the right. */
+function Fact({
+  icon: Icon,
+  name,
+  children,
+  tone,
+}: {
+  icon: LucideIcon;
   name: string;
-  desc: string;
-  ariaLabel: string;
-  checked: boolean;
-  disabled: boolean;
-  error?: string;
-  onChange: (on: boolean) => void;
-}
-
-function SwitchRow(p: SwitchRowProps): React.JSX.Element {
+  children: React.ReactNode;
+  tone?: "pass" | "fail";
+}): React.JSX.Element {
   return (
-    <div className="cm-set">
-      <span className="n">{p.name}</span>
-      <span className="d">{p.desc}</span>
-      {p.error ? (
-        <span className="err" role="alert">
-          {p.error}
-        </span>
-      ) : null}
-      <label className="st-switch ctl">
-        <input
-          type="checkbox"
-          checked={p.checked}
-          disabled={p.disabled}
-          aria-label={p.ariaLabel}
-          onChange={(e) => p.onChange(e.target.checked)}
-        />
-        <span className="track" />
-      </label>
+    <div className="cm-fact">
+      <dt>
+        <Icon size={18} strokeWidth={1.75} aria-hidden="true" className="cm-fact-ic" />
+        {name}
+      </dt>
+      <dd className={tone}>{children}</dd>
     </div>
   );
 }
 
-interface SegRowProps<T extends string | number> {
-  name: string;
-  desc: string;
-  ariaLabel: string;
-  value: T | null;
-  options: { value: T; label: string }[];
-  disabled: boolean;
-  error?: string;
-  onChange: (v: T) => void;
-}
-
-function SegRow<T extends string | number>(p: SegRowProps<T>): React.JSX.Element {
+/** A Help row: an icon, the page it opens and the outward arrow. */
+function HelpLink({
+  icon: Icon,
+  label,
+  url,
+}: {
+  icon: LucideIcon;
+  label: string;
+  url: string;
+}): React.JSX.Element {
   return (
-    <div className="cm-set">
-      <span className="n">{p.name}</span>
-      <span className="d">{p.desc}</span>
-      {p.error ? (
-        <span className="err" role="alert">
-          {p.error}
-        </span>
-      ) : null}
-      <fieldset className="st-seg ctl" aria-label={p.ariaLabel}>
-        {p.options.map((o) => (
-          <button
-            key={String(o.value)}
-            type="button"
-            aria-pressed={p.value === o.value}
-            disabled={p.disabled}
-            onClick={() => p.value !== o.value && p.onChange(o.value)}
-          >
-            {o.label}
-          </button>
-        ))}
-      </fieldset>
-    </div>
+    <button
+      type="button"
+      className="cm-linkrow"
+      onClick={() => void cameraApi.openUrl(url).catch(() => {})}
+    >
+      <Icon size={18} strokeWidth={1.75} aria-hidden="true" className="cm-fact-ic" />
+      <span>{label}</span>
+      <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" className="cm-linkrow-go" />
+    </button>
   );
 }
 
@@ -264,7 +268,11 @@ export function CameraPage({
   if (!connected) {
     return (
       <div className="cm-page">
-        <div className="cm-cam" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
+        <div className="cm-cam one">
+          <header className="st-page-head cm-head">
+            <h1>Camera</h1>
+            <p>Status and settings of the connected Thermocam.</p>
+          </header>
           <NoCamera
             connecting={state === "connecting"}
             onUpdateFirmware={() => void chooseFirmwareFile()}
@@ -290,33 +298,34 @@ export function CameraPage({
   return (
     <div className="cm-page">
       <div className="cm-cam">
+        <header className="st-page-head cm-head">
+          <h1>Camera</h1>
+          <p>Settings go to the camera at once and stay after it restarts.</p>
+        </header>
         <div className="cm-col">
-          <section className="cm-panel" aria-labelledby="cm-dev-t">
-            <div className="cm-panel-h">
-              <h2 id="cm-dev-t">{demo ? "Demo camera" : "Thermocam V4"}</h2>
-              {demo ? (
-                <span className="cm-badge amber">Read-only</span>
+          <GroupCard
+            title={demo ? "Demo camera" : "Thermocam V4"}
+            aside={
+              demo ? (
+                <span className="st-chip">
+                  <span className="st-status-dot demo" />
+                  Read-only
+                </span>
               ) : (
-                <span className="cm-badge pass">
+                <span className="st-chip">
                   <span className="st-status-dot" />
                   Connected
                 </span>
-              )}
-            </div>
-            <dl className="cm-kv">
-              <dt>Connection</dt>
-              <dd>{demo ? "Simulated" : `USB · ${shortPortName(port ?? "")}`}</dd>
-              <dt>Battery</dt>
-              <dd
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
+              )
+            }
+          >
+            <dl className="cm-facts">
+              <Fact icon={Usb} name="Connection">
+                {demo ? "Simulated" : `USB · ${shortPortName(port ?? "")}`}
+              </Fact>
+              <Fact icon={BatteryMedium} name="Battery">
                 {battery !== null ? (
-                  <>
+                  <span className="cm-batt">
                     <span className="cm-meter" aria-hidden="true">
                       <i
                         style={{
@@ -326,131 +335,95 @@ export function CameraPage({
                       />
                     </span>
                     {battery}%
-                  </>
+                  </span>
                 ) : diagnostics ? (
                   "USB power"
                 ) : (
                   "–"
                 )}
-              </dd>
-              <dt>SD card</dt>
-              <dd>{sdText(diagnostics)}</dd>
-              <dt>Sensor</dt>
-              <dd>{sensorName(hello)}</dd>
-              <dt>Frame rate</dt>
-              <dd>{perf ? `${(perf.live_fps_x100 / 100).toFixed(1)} fps` : "–"}</dd>
-              <dt>Self-test</dt>
-              <dd className={selfTestOk ? "pass" : "fail"}>{selfTestText(mask)}</dd>
-              <dt>Firmware</dt>
-              <dd>{hello?.fw_build_str ?? "–"}</dd>
+              </Fact>
+              <Fact icon={HardDrive} name="SD card">
+                {sdText(diagnostics)}
+              </Fact>
+              <Fact icon={ScanEye} name="Sensor">
+                {sensorName(hello)}
+              </Fact>
+              <Fact icon={Gauge} name="Frame rate">
+                {perf ? `${(perf.live_fps_x100 / 100).toFixed(1)} fps` : "–"}
+              </Fact>
+              <Fact icon={ShieldCheck} name="Self-test" tone={selfTestOk ? "pass" : "fail"}>
+                {selfTestText(mask)}
+              </Fact>
+              <Fact icon={CircuitBoard} name="Firmware">
+                {hello?.fw_build_str ?? "–"}
+              </Fact>
             </dl>
-            <div className="cm-actions">
+            <div className="cm-card-f">
               <button
                 type="button"
                 className="tc-btn"
                 disabled={firmwareBusy(fw)}
                 onClick={() => void chooseFirmwareFile()}
               >
-                <Upload size={16} strokeWidth={1.75} aria-hidden="true" />
+                <Upload size={15} strokeWidth={1.75} aria-hidden="true" />
                 Update firmware…
               </button>
               <button type="button" className="tc-btn tc-btn-ghost" onClick={onDisconnect}>
+                <Unplug size={15} strokeWidth={1.75} aria-hidden="true" />
                 Disconnect
               </button>
             </div>
-          </section>
-          <section className="cm-panel" aria-labelledby="cm-help-t">
-            <div className="cm-panel-h">
-              <h2 id="cm-help-t" style={{ fontSize: 13 }}>
-                Help
-              </h2>
-            </div>
-            <div className="cm-help">
-              <button
-                type="button"
-                className="cm-link"
-                onClick={() => void cameraApi.openUrl(LINKS.manual).catch(() => {})}
-              >
-                User manual
-              </button>
-              <button
-                type="button"
-                className="cm-link"
-                onClick={() => void cameraApi.openUrl(LINKS.firmware).catch(() => {})}
-              >
-                Firmware downloads
-              </button>
-              <button
-                type="button"
-                className="cm-link"
-                onClick={() => void cameraApi.openUrl(LINKS.issues).catch(() => {})}
-              >
-                Report a problem on GitHub
-              </button>
-            </div>
-          </section>
-          <p className="cm-hint" style={{ padding: "0 4px" }}>
-            Settings are sent to the camera right away and kept after it restarts. Number fields
-            apply when you press Enter or leave them; a setting the camera refuses flips back and
-            says why.
-          </p>
+          </GroupCard>
+          <GroupCard title="Help">
+            <HelpLink icon={BookOpen} label="User manual" url={LINKS.manual} />
+            <HelpLink icon={Download} label="Firmware downloads" url={LINKS.firmware} />
+            <HelpLink icon={Bug} label="Report a problem on GitHub" url={LINKS.issues} />
+          </GroupCard>
         </div>
 
-        <section className="cm-panel" aria-label="Camera settings" style={{ alignSelf: "start" }}>
-          <div className="cm-sec-h">On the camera’s screen</div>
-          <div className="cm-set-list">
-            <SwitchRow
-              name="Spot temperature"
+        {/* biome-ignore lint/a11y/useSemanticElements: a named group of cards; <fieldset> would add form semantics. */}
+        <div className="cm-col" role="group" aria-label="Camera settings">
+          <GroupCard title="On the camera’s screen">
+            <SettingRow
+              icon={Crosshair}
+              title="Spot temperature"
               desc="Crosshair with the reading in the center"
-              ariaLabel="Spot temperature on the camera screen"
-              checked={cfg ? hasOverlay(cfg, OVERLAY_SPOT) : false}
-              disabled={locked}
               error={errors.spot}
-              onChange={(on) => overlay("spot", OVERLAY_SPOT, on)}
+              control={
+                <Switch
+                  label="Spot temperature"
+                  checked={cfg ? hasOverlay(cfg, OVERLAY_SPOT) : false}
+                  disabled={locked}
+                  onChange={(on) => overlay("spot", OVERLAY_SPOT, on)}
+                />
+              }
             />
-            <SwitchRow
-              name="Temperature scale"
+            <SettingRow
+              icon={Ruler}
+              title="Temperature scale"
               desc="Color bar along the edge"
-              ariaLabel="Temperature scale on the camera screen"
-              checked={cfg ? hasOverlay(cfg, OVERLAY_COLORBAR) : false}
-              disabled={locked}
               error={errors.colorbar}
-              onChange={(on) => overlay("colorbar", OVERLAY_COLORBAR, on)}
+              control={
+                <Switch
+                  label="Temperature scale"
+                  checked={cfg ? hasOverlay(cfg, OVERLAY_COLORBAR) : false}
+                  disabled={locked}
+                  onChange={(on) => overlay("colorbar", OVERLAY_COLORBAR, on)}
+                />
+              }
             />
-            <SwitchRow
-              name="Battery level"
+            <SettingRow
+              icon={BatteryMedium}
+              title="Battery level"
               desc="Shown in the corner"
-              ariaLabel="Battery level on the camera screen"
-              checked={cfg ? hasOverlay(cfg, OVERLAY_BATTERY) : false}
-              disabled={locked}
               error={errors.battery}
-              onChange={(on) => overlay("battery", OVERLAY_BATTERY, on)}
-            />
-          </div>
-          <div className="cm-sec-h">Image</div>
-          <div className="cm-set-list">
-            <SegRow
-              name="Measuring range"
-              desc="The wide range reaches hot objects but shows less detail. Switching recalibrates the image for a moment."
-              ariaLabel="Measuring range"
-              value={cfg ? cfg.lepton_gain_mode : null}
-              options={[
-                { value: GAIN_HIGH, label: rangeLabel(-10, 140, unit) },
-                { value: GAIN_LOW, label: rangeLabel(-10, 450, unit) },
-              ]}
-              disabled={locked}
-              error={errors.range}
-              onChange={(g) => void controller.setRange(g)}
-            />
-            <SwitchRow
-              name="Mounted upside down"
-              desc="Turns the image on the camera and in Studio"
-              ariaLabel="Mounted upside down"
-              checked={cfg ? cfg.rotation_vert !== 0 : false}
-              disabled={locked}
-              error={errors.upside_down}
-              onChange={(on) =>
-                void controller.toggle("upside_down", { rotation_vert: on ? 1 : 0 })
+              control={
+                <Switch
+                  label="Battery level"
+                  checked={cfg ? hasOverlay(cfg, OVERLAY_BATTERY) : false}
+                  disabled={locked}
+                  onChange={(on) => overlay("battery", OVERLAY_BATTERY, on)}
+                />
               }
             />
             <MaterialSwitch
@@ -460,49 +433,92 @@ export function CameraPage({
               unit={unit}
               disabled={demo}
             />
-            <div className="cm-set">
-              <span className="n">Calibrate</span>
-              <span className="d">
-                The shutter closes for a moment to even out the image. The camera also does this by
-                itself.
-              </span>
-              {errors.calibrate ? (
-                <span className="err" role="alert">
-                  {errors.calibrate}
-                </span>
-              ) : null}
-              <button
-                type="button"
-                className="tc-btn ctl"
-                disabled={locked || settings.busy.includes("calibrate")}
-                onClick={() => void controller.calibrate()}
-              >
-                <Zap size={16} strokeWidth={1.75} aria-hidden="true" />
-                Calibrate now
-              </button>
-            </div>
-          </div>
-          <div className="cm-sec-h">Capture button</div>
-          <div className="cm-set-list">
-            <SegRow<ButtonAction>
-              name="When you press the button on the camera"
-              desc="While Studio is connected. Without Studio, the button saves on the camera."
-              ariaLabel="Capture button"
-              value={buttonAction}
-              options={[
-                { value: "snapshot", label: "Snapshot in Studio" },
-                { value: "record", label: "Record in Studio" },
-                { value: "nothing", label: "Nothing" },
-              ]}
-              disabled={false}
-              onChange={onButtonActionChange}
+          </GroupCard>
+
+          <GroupCard title="Image">
+            <SettingRow
+              icon={Thermometer}
+              title="Measuring range"
+              desc="Wide reaches hotter objects with less detail. Switching recalibrates the image."
+              error={errors.range}
+              control={
+                <Segmented<number>
+                  label="Measuring range"
+                  value={cfg ? cfg.lepton_gain_mode : null}
+                  disabled={locked}
+                  options={[
+                    {
+                      id: GAIN_HIGH,
+                      label: rangeLabel(-10, 140, unit),
+                      icon: Microscope,
+                      title: "More detail",
+                    },
+                    {
+                      id: GAIN_LOW,
+                      label: rangeLabel(-10, 450, unit),
+                      icon: Flame,
+                      title: "Reaches hotter objects",
+                    },
+                  ]}
+                  onChange={(g) => void controller.setRange(g)}
+                />
+              }
             />
-          </div>
-          <details className="cm-more">
-            <summary>
-              Diagnostics<span className="aside">Frame timing, link health and sensor details</span>
-              <ChevronDown size={14} strokeWidth={1.75} aria-hidden="true" />
-            </summary>
+            <SettingRow
+              icon={FlipVertical2}
+              title="Mounted upside down"
+              desc="Turns the image on the camera and in Studio"
+              error={errors.upside_down}
+              control={
+                <Switch
+                  label="Mounted upside down"
+                  checked={cfg ? cfg.rotation_vert !== 0 : false}
+                  disabled={locked}
+                  onChange={(on) =>
+                    void controller.toggle("upside_down", { rotation_vert: on ? 1 : 0 })
+                  }
+                />
+              }
+            />
+            <SettingRow
+              icon={Zap}
+              title="Calibrate"
+              desc="Closes the shutter to even out the image. The camera also does this by itself."
+              error={errors.calibrate}
+              control={
+                <button
+                  type="button"
+                  className="tc-btn"
+                  disabled={locked || settings.busy.includes("calibrate")}
+                  onClick={() => void controller.calibrate()}
+                >
+                  Calibrate now
+                </button>
+              }
+            />
+          </GroupCard>
+
+          <GroupCard title="Capture button">
+            <SettingRow
+              icon={MousePointerClick}
+              title="When pressed"
+              desc="While Studio is connected. Without Studio, the camera saves on its card."
+              control={
+                <Segmented<ButtonAction>
+                  label="When pressed"
+                  value={buttonAction}
+                  options={[
+                    { id: "snapshot", label: "Snapshot", icon: Camera },
+                    { id: "record", label: "Record", icon: CircleDot },
+                    { id: "nothing", label: "Nothing", icon: Ban },
+                  ]}
+                  onChange={onButtonActionChange}
+                />
+              }
+            />
+          </GroupCard>
+
+          <GroupCard title="Diagnostics" aside="Frame timing, link and hardware" collapsible>
             <Diagnostics
               diagnostics={diagnostics}
               perf={perf}
@@ -510,8 +526,8 @@ export function CameraPage({
               onRefresh={() => void refreshTelemetry()}
               reportText={() => reportText({ hello, port, config: cfg, diagnostics, perf })}
             />
-          </details>
-        </section>
+          </GroupCard>
+        </div>
       </div>
       {dialog}
     </div>

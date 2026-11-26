@@ -2,6 +2,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import {
   Check,
   ChevronDown,
+  CircuitBoard,
   Copy,
   FileText,
   LoaderCircle,
@@ -409,7 +410,12 @@ function Header({
 }) {
   return (
     <div className="dlg-h">
-      <Dialog.Title>{title}</Dialog.Title>
+      <div className="dlg-t">
+        <span className="dlg-ic">
+          <CircuitBoard size={16} strokeWidth={1.75} aria-hidden="true" />
+        </span>
+        <Dialog.Title>{title}</Dialog.Title>
+      </div>
       {closable ? (
         <button type="button" className="st-icon-btn" aria-label="Close" onClick={onClose}>
           <X size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -466,8 +472,7 @@ function Body(p: BodyProps): React.JSX.Element | null {
             </div>
             {view.name === "refused" ? (
               <p className="cm-hint">
-                Download the firmware for your camera from the releases page. Nothing was sent to
-                the camera.
+                Nothing was sent to the camera. Get its firmware from the releases page.
               </p>
             ) : (
               <>
@@ -596,9 +601,9 @@ function Body(p: BodyProps): React.JSX.Element | null {
                 { kind: "warn", label: "Camera restarts in update mode", aside: "0:10" },
               ]}
             />
-            <p style={{ margin: 0 }}>
-              Press the program button on the Teensy board inside the camera; the update then
-              continues by itself. Or choose Try again to ask the camera once more.
+            <p className="cm-hint">
+              Press the program button on the Teensy board inside the camera and the update
+              continues by itself, or choose Try again.
             </p>
           </div>
           <div className="dlg-f end">
@@ -692,10 +697,10 @@ function Body(p: BodyProps): React.JSX.Element | null {
                     ]
               }
             />
-            <p style={{ margin: 0 }}>
+            <p className="cm-hint">
               {view.kind === "permission"
-                ? "The camera is in update mode, but this computer didn’t let Studio open it. On Linux, add the udev rule from the user manual, then try again."
-                : "The camera is waiting in update mode, so it is safe to try again. Check the USB cable and keep the camera plugged in."}
+                ? "This computer didn’t let Studio open the camera in update mode. On Linux, add the udev rule from the user manual, then try again."
+                : "The camera waits in update mode, so trying again is safe. Check the USB cable."}
             </p>
             <details className="cm-more boxed">
               <summary>

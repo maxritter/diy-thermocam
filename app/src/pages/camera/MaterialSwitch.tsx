@@ -1,4 +1,7 @@
+import { Layers } from "lucide-react";
 import { useState } from "react";
+import { SettingRow } from "@/app/ui/SettingRow";
+import { Switch } from "@/app/ui/Switch";
 import { materialSync, useSensorMaterial } from "@/lib/sensorMaterial";
 import { formatTemp } from "@/lib/thermal";
 import type { Material, TempUnit } from "@/lib/types";
@@ -50,32 +53,23 @@ export function MaterialSwitch({
 
   const holds =
     !checked && sensor
-      ? ` The camera now uses emissivity ${sensor.emissivity.toFixed(2)} and reflected temperature ${formatTemp(sensor.reflected_c, unit)}.`
+      ? ` It now uses ε ${sensor.emissivity.toFixed(2)}, reflected ${formatTemp(sensor.reflected_c, unit)}.`
       : "";
 
   return (
-    <div className="cm-set">
-      <span className="n">Use Studio’s material on the camera’s screen</span>
-      <span className="d">
-        Sends the emissivity and reflected temperature set in Live to the sensor, so the camera’s
-        own screen and the captures it saves use them too. Off: the camera keeps its own values.
-        {holds}
-      </span>
-      {error ? (
-        <span className="err" role="alert">
-          {error}
-        </span>
-      ) : null}
-      <label className="st-switch ctl">
-        <input
-          type="checkbox"
+    <SettingRow
+      icon={Layers}
+      title="Use Studio’s material"
+      desc={`Sends Live’s emissivity and reflected temperature to the camera, for its screen and its own captures. Off: the camera keeps its values.${holds}`}
+      error={error}
+      control={
+        <Switch
+          label="Use Studio’s material"
           checked={checked}
           disabled={disabled || busy}
-          aria-label="Use Studio's material on the camera's screen"
-          onChange={(e) => void toggle(e.target.checked)}
+          onChange={(on) => void toggle(on)}
         />
-        <span className="track" />
-      </label>
-    </div>
+      }
+    />
   );
 }

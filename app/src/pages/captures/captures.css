@@ -560,21 +560,26 @@
   padding-top: 72px;
 }
 
+/* An empty or error state: a small neutral icon tile, one title, one line, at most one action. */
 .cp-state {
   width: 360px;
-  padding: 28px 24px;
+  padding: 8px 24px;
   display: grid;
-  gap: 10px;
+  gap: 6px;
   justify-items: center;
   text-align: center;
-  border: 1px solid var(--tc-border);
-  border-radius: 12px;
-  background: var(--tc-surface);
 }
 
 .cp-state .ic {
-  width: 28px;
-  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--tc-border);
+  background: var(--tc-surface);
   color: var(--tc-text-muted);
 }
 
@@ -583,16 +588,17 @@
 }
 
 .cp-state strong {
-  font-size: 14px;
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
-.cp-state span {
+.cp-state > span:not(.ic) {
   color: var(--tc-text-muted);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .cp-state .tc-btn {
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 /* Buttons on the dark stage's message (.cp-empty). */

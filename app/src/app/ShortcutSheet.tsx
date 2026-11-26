@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { X } from "lucide-react";
+import { Keyboard, X } from "lucide-react";
 import { Fragment } from "react";
 
 export interface ShortcutSheetProps {
@@ -36,9 +36,14 @@ export function ShortcutSheet({ open, onOpenChange }: ShortcutSheetProps): React
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="st-scrim z-50" />
-        <Dialog.Popup className="st-dialog z-50" style={{ width: 520 }}>
+        <Dialog.Popup className="st-dialog z-50" style={{ width: 600 }}>
           <div className="dlg-h">
-            <Dialog.Title>Keyboard shortcuts</Dialog.Title>
+            <div className="dlg-t">
+              <span className="dlg-ic">
+                <Keyboard size={16} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <Dialog.Title>Keyboard shortcuts</Dialog.Title>
+            </div>
             <Dialog.Close className="st-icon-btn" aria-label="Close">
               <X size={16} strokeWidth={1.75} aria-hidden="true" />
             </Dialog.Close>
@@ -53,7 +58,7 @@ export function ShortcutSheet({ open, onOpenChange }: ShortcutSheetProps): React
                 {keys.length === 1 ? (
                   <span className="st-kbd">{keys[0]}</span>
                 ) : (
-                  <span>
+                  <span style={{ whiteSpace: "nowrap" }}>
                     {keys.map((k, i) => (
                       <Fragment key={k}>
                         {i > 0 ? " " : null}
@@ -66,7 +71,7 @@ export function ShortcutSheet({ open, onOpenChange }: ShortcutSheetProps): React
             ))}
           </div>
           <div className="dlg-f">
-            <span className="muted">On Windows and Linux, Ctrl takes the place of ⌘.</span>
+            <span className="muted">On Windows and Linux, use Ctrl for ⌘.</span>
             <span />
           </div>
         </Dialog.Popup>
