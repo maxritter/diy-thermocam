@@ -32,7 +32,7 @@ Radiometric `.DAT` files stay byte-compatible with files from earlier DIY-Thermo
 
 | Assembly | Power &amp; USB | Est. BOM (incl. Lepton 3.5) |
 | --- | --- | --- |
-| Factory-assembled PCBA, two small screwdrivers, no soldering | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$318 (~$146 excl. sensor) |
+| Two factory-assembled boards (main board and Lepton carrier), two small screwdrivers and two nut drivers (4 mm and 5 mm), no soldering | USB-C, TI BQ24074 charger, TPS61022 boost, 3.3 V RTC LDO | ~$293 (~$121 excl. sensor) |
 
 ## On the camera and on your computer
 
@@ -40,7 +40,7 @@ Radiometric `.DAT` files stay byte-compatible with files from earlier DIY-Thermo
 | :---: | :---: | :---: |
 | ![Firmware 4.0 Live HUD](website/public/images/firmware/live-hud.png) | ![Firmware 4.0 Main Menu](website/public/images/firmware/main-menu-dark.png) | ![DIY-Thermocam Desktop Studio Live view with regions and the color scale](website/public/images/studio/studio-live-pro.png) |
 
-- **Standalone touchscreen camera:** 3.2-inch display, 19 color palettes, Dark/Light/High-Contrast themes, auto or manual range, up to 96 temperature spots, and 4–6 hours on a 2000 mAh LiPo.
+- **Standalone touchscreen camera:** 3.2-inch display, 19 color palettes, Dark/Light/High-Contrast themes, auto or manual range, up to 96 temperature spots, and 4–6 hours on a 2000 mAh LiPo (about 60 % of that on the 1200 mAh Adafruit cell).
 - **Firmware 4.0 on Teensy 4.1:** Verified on real hardware at **8.77 fps** USB streaming, **0.26 ms** median command latency, and **9.20 MB/s** direct microSD reads ([Protocol v2](docs/protocol-v2.md)).
 - **Desktop Studio ([Tauri v2](https://github.com/tauri-apps/tauri) + Rust + WebGL2):** Native macOS, Windows, and Linux app. **Live** measures regions with their own emissivity, sets alarms and exports MP4/TIFF. **Captures** keeps full-temperature snapshots and recordings on your computer, reads the camera's microSD card, and saves edits with Undo. **Camera** holds settings and firmware updates.
 

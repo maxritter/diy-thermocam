@@ -4,8 +4,8 @@ This manual covers daily operation, on-device touchscreen controls, charging, fi
 
 ## Charging and power
 
-- Plug any standard USB-C cable into the board-edge port. The TI `BQ24074` charger powers the camera directly while charging the 2000 mAh LiPo at ~890 mA.
-- Flip the side slide switch to power the camera on or off. A full 2000 mAh LiPo delivers roughly 4–6 hours of field use.
+- Plug a USB-C cable into the board-edge port, from a charger or USB-C port rated 1.5 A or more. The TI `BQ24074` charger powers the camera directly while charging the LiPo at about 0.6 A: about 2.5 hours for the 1200 mAh Adafruit cell, about 4 hours for a 2000 mAh cell.
+- Flip the side slide switch to power the camera on or off. A full 2000 mAh LiPo delivers roughly 4–6 hours of field use, the 1200 mAh Adafruit cell about 60 % of that.
 
 ## Live view controls
 
