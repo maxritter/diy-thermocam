@@ -27,6 +27,9 @@ jobs:
         run: make clean && make test
 
       - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: 1.6.0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/cache@v4
         with:

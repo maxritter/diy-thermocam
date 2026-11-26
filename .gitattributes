@@ -1,0 +1,5 @@
+# Code is checked out with LF on every OS, so the formatters agree on Windows runners.
+app/** text=auto eol=lf
+website/** text=auto eol=lf
+firmware/** text=auto eol=lf
+docs/** text=auto eol=lf

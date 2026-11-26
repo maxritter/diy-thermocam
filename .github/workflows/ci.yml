@@ -68,7 +68,8 @@ jobs:
 
       - uses: arduino/setup-arduino-cli@v2
         with:
-          version: latest
+          version: 1.6.0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine Arduino data dir
         id: arduino-dir
@@ -220,6 +221,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: kicad/kicad:10.0
+      options: --user root
     steps:
       - uses: actions/checkout@v4
 
@@ -252,4 +254,4 @@ jobs:
             exit 0
           fi
           cd hardware/enclosure/cad
-          uv run --python 3.12 pytest
+          uv run --extra dev --python 3.12 pytest
