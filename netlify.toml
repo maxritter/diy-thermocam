@@ -6,8 +6,9 @@
   command = "bun run build"
   publish = "dist"
   # Skip deploys when only firmware, desktop app, or unrelated hardware CAD changed.
-  # Runs from the base directory (website/), so the paths are relative to it.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../docs ../hardware/bom ../netlify.toml"
+  # Runs from the base directory (website/), so the paths are relative to it. Without an earlier successful
+  # build Netlify sets CACHED_COMMIT_REF to COMMIT_REF, and then it must build.
+  ignore = "[ \"$CACHED_COMMIT_REF\" != \"$COMMIT_REF\" ] && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../docs ../hardware/bom ../netlify.toml"
 
 # Astro 5 needs Node 18.20.8 or newer; this overrides the NODE_VERSION left in the dashboard from the Gatsby site.
 [build.environment]
