@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Validate hardware/bom/bom.csv against hardware/bom/schema.json.
 
-Pure Python 3 standard library. Supports schema validation, V3.0 vs V4.0 cost
-rollups, and optional live HTTP link verification (--check-links).
+Pure Python 3 standard library. Supports schema validation, a cost rollup and
+optional live HTTP link verification (--check-links).
 """
 
 from __future__ import annotations
@@ -319,7 +319,6 @@ def main() -> int:
         return 1
 
     print(f"Schema validation PASSED: {len(parsed_rows)} rows in {args.bom.name} match {args.schema.name}.")
-    summarize_revision(parsed_rows, "v3.0")
     summarize_revision(parsed_rows, "v4.0")
 
     if args.check_links:

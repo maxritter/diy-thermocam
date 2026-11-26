@@ -35,8 +35,8 @@
     },
     "hw_rev": {
       "type": "string",
-      "enum": ["all", "v3.0", "v4.0"],
-      "description": "Target hardware revision: all (shared), v3.0 (1:1 Eagle/KiCad port), or v4.0 (zero-solder USB-C + BQ24074 + TPS61022 PCBA revision)."
+      "enum": ["all", "v4.0"],
+      "description": "all: module or accessory used by the camera; v4.0: part on the V4.0 PCB or specific to the V4.0 build."
     },
     "category": {
       "type": "string",
