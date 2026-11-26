@@ -51,7 +51,7 @@ export const DOWNLOADS = [
     icon: 'apple',
     name: 'macOS',
     label: 'Download for macOS',
-    detail: 'Apple silicon and Intel · .dmg',
+    detail: '12 or later, Apple silicon and Intel · .dmg',
     href: `${DL_BASE}DIY-Thermocam-Studio-macOS.dmg`,
   },
   {
@@ -59,7 +59,7 @@ export const DOWNLOADS = [
     icon: 'windows',
     name: 'Windows',
     label: 'Download for Windows',
-    detail: 'Windows 10 and 11 · .exe installer',
+    detail: '10 or 11, 64-bit · .exe installer',
     href: `${DL_BASE}DIY-Thermocam-Studio-Windows.exe`,
   },
   {
@@ -67,7 +67,7 @@ export const DOWNLOADS = [
     icon: 'linux',
     name: 'Linux',
     label: 'Download for Linux',
-    detail: 'x86-64 · .AppImage, also .deb on the release page',
+    detail: 'x86-64 · .AppImage, or .deb on the release page',
     href: `${DL_BASE}DIY-Thermocam-Studio-Linux.AppImage`,
   },
 ] as const;
