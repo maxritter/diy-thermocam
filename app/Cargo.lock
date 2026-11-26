@@ -913,7 +913,7 @@ dependencies = [
 
 [[package]]
 name = "diy-thermocam-app"
-version = "0.1.0"
+version = "4.0.0"
 dependencies = [
  "base64 0.22.1",
  "libc",
@@ -4470,7 +4470,7 @@ dependencies = [
 
 [[package]]
 name = "thermocam-core"
-version = "0.1.0"
+version = "4.0.0"
 dependencies = [
  "base64 0.22.1",
  "crc32fast",

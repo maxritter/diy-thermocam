@@ -1,103 +1,70 @@
 name: Release
 
+# One tag (v4.0.0) builds one GitHub release holding the firmware and Studio for every platform.
+# Asset names are fixed so www.diy-thermocam.net can link /releases/latest/download/<name>.
+# The macOS .dmg is built, signed and notarized on a Mac with the Developer ID identity and added
+# to the draft release before it is published.
+
 on:
   push:
-    tags:
-      - 'firmware-v*'
-      - 'app-v*'
-  workflow_dispatch:
+    tags: ['v*']
 
 permissions:
   contents: write
 
+env:
+  TAURI_CLI: '@tauri-apps/cli@2.12.1'
+
 jobs:
-  release-firmware:
-    name: Build & publish firmware release
-    if: startsWith(github.ref, 'refs/tags/firmware-v')
+  firmware:
+    name: Firmware
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run firmware host C++17 unit tests
+      - name: Host unit tests
         working-directory: firmware/tests_host
-        run: |
-          make clean
-          make test
+        run: make clean && make test
 
       - uses: arduino/setup-arduino-cli@v2
-        with:
-          version: latest
 
-      - name: Cache Teensy core & toolchain
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: ~/.arduino15
           key: arduino15-release-${{ hashFiles('firmware/sketch.yaml') }}
 
-      - name: Compile firmware & package artifacts
+      - name: Compile
         working-directory: firmware
-        shell: bash
         run: |
-          VERSION="${GITHUB_REF_NAME#firmware-v}"
-          mkdir -p ../release-artifacts
-          arduino-cli compile --warnings all --export-binaries --output-dir ../release-artifacts/build
-          HEX_FILE=$(find ../release-artifacts/build -maxdepth 1 -name '*.hex' | head -n 1)
-          test -n "$HEX_FILE"
-          cp "$HEX_FILE" "../release-artifacts/diy-thermocam-v3-firmware-${VERSION}.hex"
-          (
-            cd ../release-artifacts
-            zip "diy-thermocam-v3-firmware-${VERSION}.zip" "diy-thermocam-v3-firmware-${VERSION}.hex"
-            sha256sum "diy-thermocam-v3-firmware-${VERSION}.hex" "diy-thermocam-v3-firmware-${VERSION}.zip" > SHA256SUMS.txt
-          )
+          arduino-cli compile --warnings all --export-binaries --output-dir ../out/build
+          hex=$(find ../out/build -maxdepth 1 -name '*.hex' | head -n 1)
+          test -n "$hex"
+          cp "$hex" ../out/firmware.hex
 
-      - name: Publish draft GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
         with:
-          draft: true
-          generate_release_notes: true
-          files: |
-            release-artifacts/diy-thermocam-v3-firmware-*.hex
-            release-artifacts/diy-thermocam-v3-firmware-*.zip
-            release-artifacts/SHA256SUMS.txt
+          name: firmware
+          path: out/firmware.hex
 
-  release-app:
-    name: Build & publish desktop app (${{ matrix.platform }})
-    if: startsWith(github.ref, 'refs/tags/app-v')
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: macos-latest
-            args: '--target aarch64-apple-darwin'
-          - platform: macos-latest
-            args: '--target x86_64-apple-darwin'
-          - platform: ubuntu-22.04
-            args: ''
-          - platform: windows-latest
-            args: ''
+  linux:
+    name: Studio for Linux
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux Tauri dependencies
-        if: matrix.platform == 'ubuntu-22.04'
+      - name: Linux build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libudev-dev libhidapi-dev
 
       - uses: oven-sh/setup-bun@v2
-
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app -> target
 
-      - name: Install, verify frontend & run Rust core tests
+      - name: Checks
         working-directory: app
-        shell: bash
         run: |
           bun install --frozen-lockfile
           bun run lint
@@ -105,14 +72,133 @@ jobs:
           bun test
           cargo test --workspace
 
-      - name: Build & attach Tauri bundles
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build
+        working-directory: app
+        run: bunx "$TAURI_CLI" build --bundles appimage,deb
+
+      - name: Name the files
+        run: |
+          mkdir out
+          cp app/target/release/bundle/appimage/*.AppImage out/DIY-Thermocam-Studio-Linux.AppImage
+          cp app/target/release/bundle/deb/*.deb out/DIY-Thermocam-Studio-Linux.deb
+
+      - uses: actions/upload-artifact@v4
         with:
-          projectPath: app
-          tagName: ${{ github.ref_name }}
-          releaseName: 'DIY-Thermocam Desktop ${{ github.ref_name }}'
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+          name: linux
+          path: out/*
+
+  windows:
+    name: Studio for Windows
+    runs-on: windows-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app -> target
+
+      - name: Build the app
+        working-directory: app
+        shell: bash
+        run: |
+          bun install --frozen-lockfile
+          bunx "$TAURI_CLI" build --no-bundle
+
+      - name: Sign in to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign the app
+        uses: azure/artifact-signing-action@v2
+        with:
+          endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.AZURE_SIGNING_PROFILE }}
+          files: ${{ github.workspace }}\app\target\release\diy-thermocam.exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          exclude-environment-credential: true
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: false
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
+
+      - name: Build the installer
+        working-directory: app
+        shell: bash
+        run: |
+          bunx "$TAURI_CLI" bundle --bundles nsis
+          mkdir ../out
+          cp target/release/bundle/nsis/*-setup.exe ../out/DIY-Thermocam-Studio-Windows.exe
+
+      - name: Sign the installer
+        uses: azure/artifact-signing-action@v2
+        with:
+          endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.AZURE_SIGNING_PROFILE }}
+          files: ${{ github.workspace }}\out\DIY-Thermocam-Studio-Windows.exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          exclude-environment-credential: true
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: false
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
+
+      - name: Check both signatures
+        shell: pwsh
+        run: |
+          foreach ($f in @("app\target\release\diy-thermocam.exe", "out\DIY-Thermocam-Studio-Windows.exe")) {
+            $s = Get-AuthenticodeSignature $f
+            Write-Output "$f : $($s.Status) $($s.SignerCertificate.Subject)"
+            if ($s.Status -ne 'Valid') { throw "$f is not validly signed" }
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: out/*
+
+  release:
+    name: Draft release
+    needs: [firmware, linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd assets
+          sha256sum -- * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          notes="../.github/release-notes/${GITHUB_REF_NAME}.md"
+          gh release create "$GITHUB_REF_NAME" ./* --draft --verify-tag \
+            --title "DIY-Thermocam ${GITHUB_REF_NAME#v}" --notes-file "$notes"
