@@ -1,9 +1,16 @@
 import { Download, Film, FolderOpen, HardDrive, RefreshCw, Trash2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StudioBadge } from "@/components/ui/Primitives";
+import { backend } from "@/lib/backend";
 import { samplePalette } from "@/lib/palettes";
-import { generateDemoFrame } from "@/lib/thermal";
-import type { Palette, SdListing } from "@/lib/types";
+import type { Palette, SdListing, ThermalFrame } from "@/lib/types";
+
+function fsTypeLabel(fsType: number): string {
+  if (fsType === 1) return "FAT16";
+  if (fsType === 2) return "FAT32";
+  if (fsType === 3) return "exFAT";
+  return "Mounted";
+}
 
 interface SdBrowserPanelProps {
   listing: SdListing | null;
@@ -26,6 +33,37 @@ export function SdBrowserPanel({
   onExportSequenceMp4,
   statusMsg,
 }: SdBrowserPanelProps): React.JSX.Element {
+  const [thumbFrames, setThumbFrames] = useState<Record<string, ThermalFrame>>({});
+  const loadedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const entries = listing?.entries ?? [];
+    const datNames = entries
+      .filter((e) => !e.is_dir && /\.dat$/i.test(e.name))
+      .map((e) => e.name)
+      .filter((name) => !loadedRef.current.has(name));
+    if (datNames.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      for (const name of datNames) {
+        if (cancelled) break;
+        loadedRef.current.add(name);
+        try {
+          const frame = await backend.sdReadFrame(name);
+          if (!cancelled) {
+            setThumbFrames((prev) => ({ ...prev, [name]: frame }));
+          }
+        } catch {
+          loadedRef.current.delete(name);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [listing]);
+
   const totalGb = listing ? listing.info.total_kb / (1024 * 1024) : 0;
   const freeGb = listing ? listing.info.free_kb / (1024 * 1024) : 0;
   const usedPct = totalGb > 0 ? Math.min(100, Math.round(((totalGb - freeGb) / totalGb) * 100)) : 0;
@@ -42,7 +80,9 @@ export function SdBrowserPanel({
             <div className="flex items-center gap-2">
               <h2 className="text-[14px] font-semibold">Camera microSD Card Browser</h2>
               <StudioBadge tone={listing?.info.card_present ? "pass" : "amber"}>
-                {listing?.info.card_present ? "exFAT · Mounted" : "No Card"}
+                {listing?.info.card_present
+                  ? `${fsTypeLabel(listing.info.fs_type)} · Mounted`
+                  : "No Card"}
               </StudioBadge>
             </div>
             <div className="mt-1 flex items-center gap-3 text-[12px] text-[var(--tc-text-muted)]">
@@ -62,7 +102,14 @@ export function SdBrowserPanel({
             <Film className="h-3.5 w-3.5 text-[var(--tc-accent)]" />
             Sequence → Full HD MP4
           </button>
-          <button type="button" onClick={onRefresh} className="tc-btn tc-btn-primary">
+          <button
+            type="button"
+            onClick={() => {
+              loadedRef.current.clear();
+              void onRefresh();
+            }}
+            className="tc-btn tc-btn-primary"
+          >
             <RefreshCw className="h-3.5 w-3.5" />
             Refresh SD
           </button>
@@ -77,13 +124,13 @@ export function SdBrowserPanel({
 
       {/* Thumbnail Grid */}
       <div className="grid grid-cols-4 gap-3">
-        {(listing?.entries ?? []).map((entry, idx) => (
+        {(listing?.entries ?? []).map((entry) => (
           <div key={entry.name} className="tc-card flex flex-col overflow-hidden">
             <div
               onClick={() => onOpenInEditor(entry.name)}
               className="relative aspect-[4/3] w-full cursor-pointer bg-black"
             >
-              <SdThumbCanvas seed={idx * 13 + 3} palette={palette} />
+              <SdThumbCanvas frame={thumbFrames[entry.name] ?? null} palette={palette} />
               <span className="absolute right-2 bottom-2 rounded bg-black/75 px-1.5 py-0.5 font-mono-tech text-[10px] text-zinc-200">
                 {(entry.size / 1024).toFixed(1)} KB
               </span>
@@ -126,15 +173,22 @@ export function SdBrowserPanel({
   );
 }
 
-function SdThumbCanvas({ seed, palette }: { seed: number; palette: Palette }): React.JSX.Element {
+function SdThumbCanvas({
+  frame,
+  palette,
+}: {
+  frame: ThermalFrame | null;
+  palette: Palette;
+}): React.JSX.Element {
   const ref = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     const cv = ref.current;
-    if (!cv) return;
+    if (!cv || !frame || frame.width === 0 || frame.height === 0) return;
+    cv.width = frame.width;
+    cv.height = frame.height;
     const ctx = cv.getContext("2d");
     if (!ctx) return;
-    const frame = generateDemoFrame(seed, 160, 120);
-    const img = ctx.createImageData(160, 120);
+    const img = ctx.createImageData(frame.width, frame.height);
     const span = Math.max(1, frame.max_raw - frame.min_raw);
     for (let i = 0; i < frame.pixels.length; i++) {
       const [r, g, b] = samplePalette(palette, (frame.pixels[i] - frame.min_raw) / span);
@@ -144,6 +198,21 @@ function SdThumbCanvas({ seed, palette }: { seed: number; palette: Palette }): R
       img.data[i * 4 + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
-  }, [seed, palette]);
-  return <canvas ref={ref} width={160} height={120} className="h-full w-full object-cover" />;
+  }, [frame, palette]);
+
+  if (!frame) {
+    return (
+      <div className="flex h-full w-full items-center justify-center font-mono-tech text-[11px] text-[var(--tc-text-dim)]">
+        Loading preview…
+      </div>
+    );
+  }
+  return (
+    <canvas
+      ref={ref}
+      width={frame.width}
+      height={frame.height}
+      className="h-full w-full object-cover"
+    />
+  );
 }

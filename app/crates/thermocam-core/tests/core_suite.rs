@@ -45,6 +45,14 @@ fn parse_hex(s: &str) -> Vec<u8> {
         .collect()
 }
 
+fn hex_to_bytes(s: &str) -> Vec<u8> {
+    assert_eq!(s.len() % 2, 0, "hex string must have even length");
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).expect("valid hex byte"))
+        .collect()
+}
+
 #[test]
 fn protocol_v2_all_golden_vectors_and_resync() {
     assert_eq!(crc8_smbus(b"123456789"), 0xF4);
@@ -983,4 +991,95 @@ fn streaming_mp4_gif_pagination_temporal_heq_and_utc_metadata() {
     })
     .unwrap();
     assert!(gif_buf.starts_with(b"GIF89a"));
+}
+
+#[test]
+fn cross_language_frame_raw_golden_layout() {
+    #[derive(serde::Deserialize)]
+    struct GoldenFile {
+        cases: Vec<GoldenCase>,
+    }
+    #[derive(serde::Deserialize)]
+    struct GoldenCase {
+        name: String,
+        frame_seq: u32,
+        timestamp_us: u64,
+        rtc_epoch: u32,
+        dropped_frames: u32,
+        width: u16,
+        height: u16,
+        pixel_format: u8,
+        gain_mode: u8,
+        ffc_state: u8,
+        flags: u8,
+        min_raw: u16,
+        max_raw: u16,
+        min_x: u16,
+        min_y: u16,
+        max_x: u16,
+        max_y: u16,
+        spot_temp_c: f32,
+        cal_offset: f32,
+        cal_slope: f32,
+        fpa_temp_c: f32,
+        bat_pct: i8,
+        usb_power: bool,
+        temp_point_count: u16,
+        pixels: Vec<u16>,
+        wire_hex: String,
+    }
+
+    let fixture_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures/frame_raw_golden.json");
+    let text = std::fs::read_to_string(&fixture_path)
+        .unwrap_or_else(|e| panic!("failed to read {}: {e}", fixture_path.display()));
+    let golden: GoldenFile = serde_json::from_str(&text).expect("valid golden JSON");
+    assert!(golden.cases.len() >= 2);
+
+    for case in golden.cases {
+        let expected_wire = hex_to_bytes(&case.wire_hex);
+        let frame = FrameRaw {
+            meta: thermocam_core::protocol::codec::FrameRawMeta {
+                frame_seq: case.frame_seq,
+                timestamp_us: case.timestamp_us,
+                rtc_epoch: case.rtc_epoch,
+                dropped_frames: case.dropped_frames,
+                width: case.width,
+                height: case.height,
+                pixel_format: case.pixel_format,
+                gain_mode: case.gain_mode,
+                ffc_state: case.ffc_state,
+                flags: case.flags,
+                min_raw: case.min_raw,
+                max_raw: case.max_raw,
+                min_x: case.min_x,
+                min_y: case.min_y,
+                max_x: case.max_x,
+                max_y: case.max_y,
+                spot_temp_c: case.spot_temp_c,
+                cal_offset: case.cal_offset,
+                cal_slope: case.cal_slope,
+                fpa_temp_c: case.fpa_temp_c,
+                bat_pct: case.bat_pct,
+                usb_power: case.usb_power,
+                temp_point_count: case.temp_point_count,
+            },
+            pixels: case.pixels.clone(),
+            temp_points: Vec::new(),
+        };
+
+        let serialized = frame.to_bytes();
+        assert_eq!(
+            serialized, expected_wire,
+            "Rust FrameRaw::to_bytes drifted from shared golden vector '{}'",
+            case.name
+        );
+
+        let decoded = FrameRaw::from_bytes(&expected_wire).expect("decode golden wire bytes");
+        assert_eq!(
+            decoded, frame,
+            "Rust FrameRaw::from_bytes drifted on '{}'",
+            case.name
+        );
+    }
 }

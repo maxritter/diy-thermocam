@@ -1,7 +1,7 @@
-import { CheckCircle2, Cpu, FileUp, ShieldCheck, UploadCloud } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CheckCircle2, Cpu, FileUp, FolderOpen, ShieldCheck, UploadCloud } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { StudioBadge, StudioSwitch } from "@/components/ui/Primitives";
-import { backend } from "@/lib/backend";
+import { backend, isTauriRuntime } from "@/lib/backend";
 import type { FirmwareImageInfo } from "@/lib/types";
 
 const SAMPLE_TEENSY41_HEX = `:0200000460009A
@@ -22,6 +22,22 @@ export function UpdaterPanel({ connectedPort }: UpdaterPanelProps): React.JSX.El
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [flashing, setFlashing] = useState(false);
+  const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleBrowseHex = async (): Promise<void> => {
+    if (isTauriRuntime()) {
+      const picked = await backend.pickHexFile();
+      if (picked) {
+        setHexText(picked.text);
+        setLoadedFileName(picked.path);
+        setVerified(null);
+        setError(null);
+      }
+      return;
+    }
+    fileInputRef.current?.click();
+  };
 
   useEffect(() => {
     let active = true;
@@ -88,7 +104,7 @@ export function UpdaterPanel({ connectedPort }: UpdaterPanelProps): React.JSX.El
   };
 
   return (
-    <div className="grid h-full grid-cols-12 gap-3 overflow-y-auto p-3">
+    <div className="grid h-full grid-cols-12 content-start gap-3 overflow-y-auto p-3">
       <div className="tc-card col-span-7 space-y-3.5 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -105,17 +121,47 @@ export function UpdaterPanel({ connectedPort }: UpdaterPanelProps): React.JSX.El
         </p>
 
         <div>
-          <div className="mb-1 flex items-center justify-between">
+          <div className="mb-1 flex items-center justify-between gap-2">
             <label className="text-[11.5px] text-[var(--tc-text-muted)]">
-              Intel HEX Firmware Image
+              Intel HEX Firmware Image{loadedFileName ? ` (${loadedFileName})` : ""}
             </label>
-            <button
-              type="button"
-              onClick={() => setHexText(SAMPLE_TEENSY41_HEX)}
-              className="text-[11px] text-[var(--tc-accent)] hover:underline cursor-pointer"
-            >
-              Load Sample Teensy 4.1 Test HEX
-            </button>
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".hex,.HEX"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  void file.text().then((txt) => {
+                    setHexText(txt);
+                    setLoadedFileName(file.name);
+                    setVerified(null);
+                    setError(null);
+                  });
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => void handleBrowseHex()}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--tc-accent)] hover:underline cursor-pointer"
+              >
+                <FolderOpen className="h-3 w-3" />
+                Load .hex File…
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setHexText(SAMPLE_TEENSY41_HEX);
+                  setLoadedFileName(null);
+                  setVerified(null);
+                }}
+                className="text-[11px] text-[var(--tc-text-muted)] hover:text-[var(--tc-text)] hover:underline cursor-pointer"
+              >
+                Sample HEX
+              </button>
+            </div>
           </div>
           <textarea
             value={hexText}

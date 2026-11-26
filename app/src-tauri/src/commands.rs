@@ -314,7 +314,7 @@ async fn cmd_start_stream(
             let client = guard.as_mut().ok_or("not connected")?;
             client.set_stream(StreamCtrl {
                 mode: 1,
-                keep_lcd_on: false,
+                keep_lcd_on: true,
                 include_temp_points: true,
                 perf_interval_s: 1,
                 max_fps_x10: 0,

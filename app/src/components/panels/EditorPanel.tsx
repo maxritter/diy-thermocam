@@ -160,7 +160,7 @@ export function EditorPanel({
                 className="tc-btn tc-btn-primary"
               >
                 <FileDown className="h-3.5 w-3.5" />
-                Export 4K PNG
+                Export {res === "full_hd1080p" ? "1080p" : res === "qhd1440p" ? "1440p" : "4K"} PNG
               </button>
               <button
                 type="button"

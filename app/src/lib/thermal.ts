@@ -111,29 +111,29 @@ export function generateDemoFrame(frameSeq: number, width = 160, height = 120): 
     const ny = y / height;
     for (let x = 0; x < width; x++) {
       const nx = x / width;
-      let tempC = 22.8 + 1.8 * (1 - ny) + 0.5 * Math.sin(nx * 6.28);
+      let tempC = 23.4 + 1.4 * (1 - ny) + 0.4 * Math.sin(nx * 6.28);
 
       const dx1 = (nx - 0.38) * 1.33;
       const dy1 = ny - 0.48;
-      tempC += (41.5 + 2.2 * Math.sin(phase)) * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 0.011);
+      tempC += (22.6 + 1.2 * Math.sin(phase)) * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 0.011);
 
       const dx2 = (nx - 0.68) * 1.33;
       const dy2 = ny - 0.34;
-      tempC += (31.0 + 1.5 * Math.cos(phase * 1.3)) * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 0.0055);
+      tempC += (17.2 + 0.9 * Math.cos(phase * 1.3)) * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 0.0055);
 
       const tFrac = Math.max(0, Math.min(1, (0.68 - nx) / 0.3));
       const traceDist = Math.abs((ny - (0.34 + 0.14 * tFrac)) * 12.0);
       if (nx >= 0.38 && nx <= 0.68 && traceDist < 0.7) {
-        tempC += 11.5 * (1 - traceDist / 0.7);
+        tempC += 6.8 * (1 - traceDist / 0.7);
       }
 
       const dx3 = (nx - 0.72) * 1.33;
       const dy3 = ny - 0.72;
-      tempC += 21.0 * Math.exp(-(dx3 * dx3 + dy3 * dy3) / 0.007);
+      tempC += 12.2 * Math.exp(-(dx3 * dx3 + dy3 * dy3) / 0.007);
 
       if (nx >= 0.08 && nx <= 0.21 && ny >= 0.2 && ny <= 0.8) {
-        const fin = (Math.sin(ny * 40.0) * 0.5 + 0.5) * 1.6;
-        tempC -= 5.4 - fin;
+        const fin = (Math.sin(ny * 40.0) * 0.5 + 0.5) * 1.0;
+        tempC -= 3.2 - fin;
       }
 
       const hash =
@@ -174,34 +174,48 @@ export function generateDemoFrame(frameSeq: number, width = 160, height = 120): 
     cal_offset: -KELVIN_OFFSET,
     cal_slope: 0.01,
     fpa_temp_c: 31.4,
-    bat_pct: 92,
+    bat_pct: 87,
     usb_power: true,
     pixels,
   };
 }
 
-export function decodeFrameRawBinary(buf: ArrayBuffer): ThermalFrame {
-  const view = new DataView(buf);
+export function decodeFrameRawBinary(buf: ArrayBuffer | Uint8Array): ThermalFrame {
+  const byteLength = buf.byteLength;
+  if (byteLength < 64) {
+    throw new Error(`FrameRaw payload too short: ${byteLength} bytes (expected >= 64)`);
+  }
+  const view =
+    buf instanceof ArrayBuffer
+      ? new DataView(buf)
+      : new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   const frame_seq = view.getUint32(0, true);
   const timestamp_us = Number(view.getBigUint64(4, true));
   const rtc_epoch = view.getUint32(12, true);
-  const dropped_frames = view.getUint16(16, true);
-  const width = view.getUint16(18, true);
-  const height = view.getUint16(20, true);
-  const min_raw = view.getUint16(26, true);
-  const max_raw = view.getUint16(28, true);
-  const min_x = view.getUint16(30, true);
-  const min_y = view.getUint16(32, true);
-  const max_x = view.getUint16(34, true);
-  const max_y = view.getUint16(36, true);
-  const spot_temp_c = view.getFloat32(38, true);
-  const cal_offset = view.getFloat32(42, true);
-  const cal_slope = view.getFloat32(46, true);
-  const fpa_temp_c = view.getFloat32(50, true);
-  const bat_pct = view.getInt8(54);
-  const usb_power = view.getUint8(55) !== 0;
+  const dropped_frames = view.getUint32(16, true);
+  const width = view.getUint16(20, true);
+  const height = view.getUint16(22, true);
+  // Offsets 24..27: pixel_format, gain_mode, ffc_state, flags
+  const min_raw = view.getUint16(28, true);
+  const max_raw = view.getUint16(30, true);
+  const min_x = view.getUint16(32, true);
+  const min_y = view.getUint16(34, true);
+  const max_x = view.getUint16(36, true);
+  const max_y = view.getUint16(38, true);
+  const spot_temp_c = view.getFloat32(40, true);
+  const cal_offset = view.getFloat32(44, true);
+  const cal_slope = view.getFloat32(48, true);
+  const fpa_temp_c = view.getFloat32(52, true);
+  const bat_pct = view.getInt8(56);
+  const usb_power = view.getUint8(57) !== 0;
 
   const count = width * height;
+  const requiredBytes = 64 + count * 2;
+  if (count === 0 || byteLength < requiredBytes) {
+    throw new Error(
+      `FrameRaw pixel buffer truncated: ${byteLength} bytes for ${width}x${height} (need ${requiredBytes})`,
+    );
+  }
   const pixels = new Uint16Array(count);
   for (let i = 0; i < count; i++) {
     pixels[i] = view.getUint16(64 + i * 2, true);

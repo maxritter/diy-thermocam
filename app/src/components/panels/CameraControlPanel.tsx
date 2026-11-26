@@ -1,7 +1,19 @@
 import { Activity, Cpu, RefreshCw, SlidersHorizontal, Zap } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MetricTile, StudioBadge, StudioSwitch } from "@/components/ui/Primitives";
 import type { DeviceConfig, Diagnostics, PerfTelemetry, RadParams } from "@/lib/types";
+
+const OVERLAY_SPOT = 1 << 0;
+const OVERLAY_COLORBAR = 1 << 1;
+const OVERLAY_BATTERY = 1 << 2;
+
+function hasFlag(flags: number, mask: number): boolean {
+  return (flags & mask) !== 0;
+}
+
+function withFlag(flags: number, mask: number, enabled: boolean): number {
+  return enabled ? flags | mask : flags & ~mask;
+}
 
 interface CameraControlPanelProps {
   config: DeviceConfig | null;
@@ -32,6 +44,12 @@ export function CameraControlPanel({
   );
   const [persistEeprom, setPersistEeprom] = useState(true);
   const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!radParams) return;
+    setEps(Number((radParams.scene_emissivity / 8192).toFixed(2)));
+    setTBkg(Number((radParams.t_bkg_ck / 100 - 273.15).toFixed(1)));
+  }, [radParams]);
 
   const pushRad = async (): Promise<void> => {
     const ck = Math.round((tBkg + 273.15) * 100);
@@ -65,7 +83,7 @@ export function CameraControlPanel({
   const totalStageUs = Math.max(1, perf?.loop_total_us ?? 1);
 
   return (
-    <div className="grid h-full grid-cols-12 gap-3 overflow-y-auto p-3">
+    <div className="grid h-full grid-cols-12 content-start gap-3 overflow-y-auto p-3">
       {/* Top KPI Row */}
       <div className="col-span-12 grid grid-cols-6 gap-2.5">
         <MetricTile
@@ -93,15 +111,27 @@ export function CameraControlPanel({
         />
         <MetricTile
           label="Lepton FPA"
-          value={diagnostics ? `${diagnostics.lepton_fpa_temp_c.toFixed(1)} °C` : "—"}
+          value={
+            diagnostics && Number.isFinite(diagnostics.lepton_fpa_temp_c)
+              ? `${diagnostics.lepton_fpa_temp_c.toFixed(1)} °C`
+              : "—"
+          }
           sub={diagnostics ? `MCU ${diagnostics.mcu_temp_c.toFixed(1)} °C` : ""}
           tone="thermal"
         />
         <MetricTile
           label="Power & Clock"
-          value={diagnostics ? `${diagnostics.bat_pct}% · ${diagnostics.cpu_mhz} MHz` : "—"}
+          value={
+            diagnostics
+              ? `${diagnostics.bat_pct >= 0 ? `${diagnostics.bat_pct}%` : "USB"} · ${diagnostics.cpu_mhz} MHz`
+              : "—"
+          }
           sub={
-            diagnostics ? `${diagnostics.bat_mv} mV (${diagnostics.usb_power ? "USB" : "Bat"})` : ""
+            diagnostics
+              ? diagnostics.bat_pct >= 0
+                ? `${diagnostics.bat_mv} mV (${diagnostics.usb_power ? "USB" : "Bat"})`
+                : "USB power only"
+              : ""
           }
         />
       </div>
@@ -177,28 +207,45 @@ export function CameraControlPanel({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <StudioSwitch
-                checked={config.spot_enabled}
-                onCheckedChange={(v) => onSaveConfig({ ...config, spot_enabled: v }, persistEeprom)}
+                checked={hasFlag(config.overlay_flags, OVERLAY_SPOT)}
+                onCheckedChange={(v) =>
+                  onSaveConfig(
+                    { ...config, overlay_flags: withFlag(config.overlay_flags, OVERLAY_SPOT, v) },
+                    persistEeprom,
+                  )
+                }
                 label="On-LCD Spot Crosshair"
               />
               <StudioSwitch
-                checked={config.colorbar_enabled}
+                checked={hasFlag(config.overlay_flags, OVERLAY_COLORBAR)}
                 onCheckedChange={(v) =>
-                  onSaveConfig({ ...config, colorbar_enabled: v }, persistEeprom)
+                  onSaveConfig(
+                    {
+                      ...config,
+                      overlay_flags: withFlag(config.overlay_flags, OVERLAY_COLORBAR, v),
+                    },
+                    persistEeprom,
+                  )
                 }
                 label="On-LCD Colorbar"
               />
               <StudioSwitch
-                checked={config.rotation_enabled}
+                checked={config.rotation_vert !== 0}
                 onCheckedChange={(v) =>
-                  onSaveConfig({ ...config, rotation_enabled: v }, persistEeprom)
+                  onSaveConfig({ ...config, rotation_vert: v ? 1 : 0 }, persistEeprom)
                 }
                 label="Camera Rotate 180°"
               />
               <StudioSwitch
-                checked={config.battery_enabled}
+                checked={hasFlag(config.overlay_flags, OVERLAY_BATTERY)}
                 onCheckedChange={(v) =>
-                  onSaveConfig({ ...config, battery_enabled: v }, persistEeprom)
+                  onSaveConfig(
+                    {
+                      ...config,
+                      overlay_flags: withFlag(config.overlay_flags, OVERLAY_BATTERY, v),
+                    },
+                    persistEeprom,
+                  )
                 }
                 label="On-LCD Battery HUD"
               />
@@ -206,15 +253,17 @@ export function CameraControlPanel({
             <div className="flex items-center justify-between pt-1">
               <span className="text-[12px] text-[var(--tc-text-muted)]">Lepton Gain Mode</span>
               <select
-                value={config.gain_mode}
+                value={config.lepton_gain_mode}
                 onChange={(e) =>
-                  onSaveConfig({ ...config, gain_mode: Number(e.target.value) }, persistEeprom)
+                  onSaveConfig(
+                    { ...config, lepton_gain_mode: Number(e.target.value) },
+                    persistEeprom,
+                  )
                 }
                 className="tc-select w-48"
               >
                 <option value={0}>High Gain (-10..+140 °C)</option>
                 <option value={1}>Low Gain (-10..+450 °C)</option>
-                <option value={2}>Auto Gain Switching</option>
               </select>
             </div>
           </div>

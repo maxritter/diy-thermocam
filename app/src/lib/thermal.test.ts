@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import goldenFrameVectors from "../../fixtures/frame_raw_golden.json";
 import { DEFAULT_PALETTES, parseCustomPaletteText, samplePalette } from "./palettes";
 import {
   applyClippedHistogramEq,
@@ -78,31 +79,89 @@ describe("DIY-Thermocam frontend thermal engine", () => {
     expect(Math.max(...eq) - Math.min(...eq)).toBeGreaterThan(100);
   });
 
-  test("binary FrameRaw packet decoding from Tauri Channel<InvokeResponseBody::Raw>", () => {
+  test("binary FrameRaw packet decoding matches Protocol v2 §4.3 (64-byte header + u16 pixels)", () => {
     const w = 4;
     const h = 3;
     const buf = new ArrayBuffer(64 + w * h * 2);
     const view = new DataView(buf);
     view.setUint32(0, 42, true);
     view.setBigUint64(4, 123456n, true);
-    view.setUint16(18, w, true);
-    view.setUint16(20, h, true);
-    view.setUint16(26, 29500, true);
-    view.setUint16(28, 32500, true);
-    view.setFloat32(42, -273.15, true);
-    view.setFloat32(46, 0.01, true);
-    view.setInt8(54, 88);
-    view.setUint8(55, 1);
+    view.setUint32(12, 1764066000, true);
+    view.setUint32(16, 7, true); // dropped_frames: u32 (4 bytes)
+    view.setUint16(20, w, true);
+    view.setUint16(22, h, true);
+    view.setUint8(24, 0); // pixel_format
+    view.setUint8(25, 0); // gain_mode
+    view.setUint8(26, 0); // ffc_state
+    view.setUint8(27, 0x02); // flags
+    view.setUint16(28, 29500, true);
+    view.setUint16(30, 32500, true);
+    view.setUint16(32, 1, true);
+    view.setUint16(34, 2, true);
+    view.setUint16(36, 3, true);
+    view.setUint16(38, 0, true);
+    view.setFloat32(40, 28.5, true);
+    view.setFloat32(44, -273.15, true);
+    view.setFloat32(48, 0.01, true);
+    view.setFloat32(52, 31.4, true);
+    view.setInt8(56, 88);
+    view.setUint8(57, 1);
     for (let i = 0; i < w * h; i++) {
       view.setUint16(64 + i * 2, 30000 + i * 100, true);
     }
     const decoded = decodeFrameRawBinary(buf);
     expect(decoded.frame_seq).toBe(42);
+    expect(decoded.timestamp_us).toBe(123456);
+    expect(decoded.rtc_epoch).toBe(1764066000);
+    expect(decoded.dropped_frames).toBe(7);
     expect(decoded.width).toBe(4);
     expect(decoded.height).toBe(3);
+    expect(decoded.min_raw).toBe(29500);
+    expect(decoded.max_raw).toBe(32500);
+    expect(decoded.min_x).toBe(1);
+    expect(decoded.min_y).toBe(2);
+    expect(decoded.max_x).toBe(3);
+    expect(decoded.max_y).toBe(0);
+    expect(decoded.spot_temp_c).toBeCloseTo(28.5, 4);
+    expect(decoded.cal_offset).toBeCloseTo(-273.15, 3);
+    expect(decoded.cal_slope).toBeCloseTo(0.01, 5);
+    expect(decoded.fpa_temp_c).toBeCloseTo(31.4, 3);
     expect(decoded.bat_pct).toBe(88);
+    expect(decoded.usb_power).toBe(true);
     expect(decoded.pixels[0]).toBe(30000);
     expect(decoded.pixels[11]).toBe(31100);
+  });
+
+  test("cross-language golden FrameRaw binary vectors match Rust FrameRaw::to_bytes byte-for-byte", () => {
+    expect(goldenFrameVectors.cases.length).toBeGreaterThanOrEqual(2);
+    for (const vec of goldenFrameVectors.cases) {
+      const hex = vec.wire_hex;
+      expect(hex.length % 2).toBe(0);
+      const bytes = new Uint8Array(hex.length / 2);
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+      }
+      const decoded = decodeFrameRawBinary(bytes.buffer);
+      expect(decoded.frame_seq).toBe(vec.frame_seq);
+      expect(decoded.timestamp_us).toBe(vec.timestamp_us);
+      expect(decoded.rtc_epoch).toBe(vec.rtc_epoch);
+      expect(decoded.dropped_frames).toBe(vec.dropped_frames);
+      expect(decoded.width).toBe(vec.width);
+      expect(decoded.height).toBe(vec.height);
+      expect(decoded.min_raw).toBe(vec.min_raw);
+      expect(decoded.max_raw).toBe(vec.max_raw);
+      expect(decoded.min_x).toBe(vec.min_x);
+      expect(decoded.min_y).toBe(vec.min_y);
+      expect(decoded.max_x).toBe(vec.max_x);
+      expect(decoded.max_y).toBe(vec.max_y);
+      expect(decoded.spot_temp_c).toBeCloseTo(vec.spot_temp_c, 4);
+      expect(decoded.cal_offset).toBeCloseTo(vec.cal_offset, 3);
+      expect(decoded.cal_slope).toBeCloseTo(vec.cal_slope, 5);
+      expect(decoded.fpa_temp_c).toBeCloseTo(vec.fpa_temp_c, 3);
+      expect(decoded.bat_pct).toBe(vec.bat_pct);
+      expect(decoded.usb_power).toBe(vec.usb_power);
+      expect(Array.from(decoded.pixels)).toEqual(vec.pixels);
+    }
   });
 
   test("palettes & custom 256-entry LUT parser", () => {

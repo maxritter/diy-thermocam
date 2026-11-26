@@ -117,7 +117,7 @@ const INITIAL_ALARMS: TempSwitchRule[] = [
     enabled: true,
     target_roi_id: "roi_mcu",
     condition: "above",
-    threshold_c: 64.5,
+    threshold_c: 48.5,
     cooldown_ms: 8000,
     action: "notify",
     last_triggered_ms: null,
@@ -128,7 +128,7 @@ const INITIAL_ALARMS: TempSwitchRule[] = [
     enabled: false,
     target_roi_id: "roi_vrm",
     condition: "above",
-    threshold_c: 55.0,
+    threshold_c: 42.0,
     cooldown_ms: 10000,
     action: "save_dat",
     last_triggered_ms: null,
@@ -277,7 +277,7 @@ export function App(): React.JSX.Element {
   });
 
   const [rois, setRois] = useState<Roi[]>(INITIAL_ROIS);
-  const [selectedRoiId, setSelectedRoiId] = useState<string | null>("roi_ldo");
+  const [selectedRoiId, setSelectedRoiId] = useState<string | null>("roi_mcu");
   const [activeTool, setActiveTool] = useState<RoiTool>("select");
   const [showHotCold, setShowHotCold] = useState(true);
   const [showLoupe, setShowLoupe] = useState(true);
@@ -377,21 +377,25 @@ export function App(): React.JSX.Element {
   }, [workspace, applyWorkspaceTier]);
 
   const refreshCameraTelemetry = useCallback(async () => {
-    const [cfg, diag, perf, rParams] = await Promise.all([
+    const [cfgRes, diagRes, perfRes, radRes] = await Promise.allSettled([
       backend.getConfig(),
       backend.getDiagnostics(),
       backend.getPerf(false),
       backend.getRadParams(),
     ]);
-    setDeviceConfig(cfg);
-    setDiagnostics(diag);
-    setPerfTelemetry(perf);
-    setRadParams(rParams);
+    if (cfgRes.status === "fulfilled") setDeviceConfig(cfgRes.value);
+    if (diagRes.status === "fulfilled") setDiagnostics(diagRes.value);
+    if (perfRes.status === "fulfilled") setPerfTelemetry(perfRes.value);
+    if (radRes.status === "fulfilled") setRadParams(radRes.value);
   }, []);
 
   const refreshSdListing = useCallback(async () => {
-    const listing = await backend.sdList("/");
-    setSdListing(listing);
+    try {
+      const listing = await backend.sdList("/");
+      setSdListing(listing);
+    } catch {
+      setSdListing(null);
+    }
   }, []);
 
   const handleIncomingFrame = useCallback((fr: ThermalFrame) => {
@@ -400,9 +404,21 @@ export function App(): React.JSX.Element {
       setRecordedCount((c) => Math.min(6000, c + 1));
     }
 
+    let currentRad = radRef.current;
+    if (
+      Number.isFinite(fr.cal_slope) &&
+      fr.cal_slope > 0 &&
+      Number.isFinite(fr.cal_offset) &&
+      (Math.abs(fr.cal_slope - currentRad.cal_slope) > 1e-6 ||
+        Math.abs(fr.cal_offset - currentRad.cal_offset) > 1e-4)
+    ) {
+      currentRad = { ...currentRad, cal_offset: fr.cal_offset, cal_slope: fr.cal_slope };
+      radRef.current = currentRad;
+      setRad(currentRad);
+    }
+
     const nowMs = Date.now();
     const tSec = (nowMs - startMsRef.current) / 1000;
-    const currentRad = radRef.current;
     const currentRois = roisRef.current;
 
     const values: Record<string, number> = {
@@ -451,41 +467,135 @@ export function App(): React.JSX.Element {
     if (rulesChanged) setAlarmRules(nextRules);
   }, []);
 
-  // Boot: load palettes, material presets, ports, SD listing, telemetry, and auto-connect to Demo Simulator
+  const selectedPortRef = useRef<string>(selectedPort);
+  selectedPortRef.current = selectedPort;
+  const helloRef = useRef<HelloResp | null>(hello);
+  helloRef.current = hello;
+  const manualSimChoiceRef = useRef<boolean>(false);
+  const connectingRef = useRef<boolean>(false);
+
+  const connectAndStream = useCallback(
+    async (port: string, announce = false): Promise<HelloResp> => {
+      connectingRef.current = true;
+      try {
+        const h = await backend.connect(port);
+        setSelectedPort(port);
+        setHello(h);
+        await backend.startStream((fr) => {
+          handleIncomingFrame(fr);
+        });
+        setStreaming(true);
+        void Promise.allSettled([refreshCameraTelemetry(), refreshSdListing()]);
+        if (announce) {
+          showToast(
+            port.startsWith("sim://")
+              ? `Connected to Demo Simulator (${h.fw_build_str})`
+              : `Connected to DIY-Thermocam (${h.fw_build_str})`,
+          );
+        }
+        return h;
+      } finally {
+        connectingRef.current = false;
+      }
+    },
+    [handleIncomingFrame, refreshCameraTelemetry, refreshSdListing, showToast],
+  );
+
+  // Boot: load palettes, material presets, ports; prefer real DIY-Thermocam hardware over Demo Simulator
   useEffect(() => {
     let active = true;
     (async () => {
-      const [pList, mList, portList] = await Promise.all([
-        backend.getPalettes(),
-        backend.getMaterialPresets(),
-        backend.listPorts(),
-      ]);
-      if (!active) return;
-      if (pList.length > 0) setPalettes(pList);
-      if (mList.length > 0) setMaterials(mList);
-      setPorts(portList);
-      const initialPort = portList[0]?.port_name ?? "sim://demo-lepton35";
-      setSelectedPort(initialPort);
+      try {
+        const [pList, mList, portList] = await Promise.all([
+          backend.getPalettes(),
+          backend.getMaterialPresets(),
+          backend.listPorts(),
+        ]);
+        if (!active) return;
+        if (pList.length > 0) setPalettes(pList);
+        if (mList.length > 0) setMaterials(mList);
+        setPorts(portList);
 
-      const h = await backend.connect(initialPort);
-      if (!active) return;
-      setHello(h);
-      await Promise.all([refreshCameraTelemetry(), refreshSdListing()]);
-      if (!active) return;
-      await backend.startStream((fr) => {
-        if (active) handleIncomingFrame(fr);
-      });
-      if (!active) {
-        void backend.stopStream();
-        return;
+        const realCamera = portList.find((p) => p.is_teensy && !p.port_name.startsWith("sim://"));
+        const simPort =
+          portList.find((p) => p.port_name.startsWith("sim://"))?.port_name ??
+          "sim://demo-lepton35";
+        const initialPort = realCamera?.port_name ?? simPort;
+        setSelectedPort(initialPort);
+
+        try {
+          await connectAndStream(initialPort, Boolean(realCamera));
+        } catch (err) {
+          if (!active) return;
+          if (realCamera && initialPort !== simPort) {
+            showToast(
+              `Camera open failed (${err instanceof Error ? err.message : String(err)}) — using Simulator`,
+            );
+            await connectAndStream(simPort, false);
+          } else {
+            throw err;
+          }
+        }
+      } catch (err) {
+        if (active) {
+          showToast(`Connection error: ${err instanceof Error ? err.message : String(err)}`);
+        }
       }
-      setStreaming(true);
     })();
     return () => {
       active = false;
       void backend.stopStream();
     };
-  }, [handleIncomingFrame, refreshCameraTelemetry, refreshSdListing]);
+  }, [connectAndStream, showToast]);
+
+  // Poll USB ports every 2s for hot-plug detection; auto-switch from Simulator when a real camera connects
+  useEffect(() => {
+    let active = true;
+    let initialized = false;
+    let lastKnownRealPorts = new Set<string>();
+    const id = setInterval(() => {
+      void backend
+        .listPorts()
+        .then((nextPorts) => {
+          if (!active) return;
+          setPorts(nextPorts);
+          const realPorts = nextPorts.filter(
+            (p) => p.is_teensy && !p.port_name.startsWith("sim://"),
+          );
+          const realNames = new Set(realPorts.map((p) => p.port_name));
+          const newlyPlugged = initialized
+            ? realPorts.find((p) => !lastKnownRealPorts.has(p.port_name))
+            : undefined;
+          initialized = true;
+          lastKnownRealPorts = realNames;
+
+          if (realPorts.length === 0) {
+            manualSimChoiceRef.current = false;
+            return;
+          }
+          const curPort = selectedPortRef.current;
+          const onSimOrOffline = !helloRef.current || curPort.startsWith("sim://");
+          if (
+            onSimOrOffline &&
+            !connectingRef.current &&
+            (newlyPlugged || !manualSimChoiceRef.current)
+          ) {
+            const target = newlyPlugged ?? realPorts[0];
+            manualSimChoiceRef.current = false;
+            void connectAndStream(target.port_name, true).catch((err) => {
+              showToast(`Auto-connect failed: ${err instanceof Error ? err.message : String(err)}`);
+            });
+          }
+        })
+        .catch(() => {
+          // Ignore transient USB enumeration errors
+        });
+    }, 2000);
+    return () => {
+      active = false;
+      clearInterval(id);
+    };
+  }, [connectAndStream, showToast]);
 
   // Listen for USB camera unplug / session-exit events from Rust poll worker
   useEffect(() => {
@@ -543,18 +653,32 @@ export function App(): React.JSX.Element {
   };
 
   const handleToggleConnect = async () => {
-    if (hello) {
+    try {
+      if (hello) {
+        await backend.disconnect();
+        setHello(null);
+        setStreaming(false);
+        showToast("Camera disconnected");
+      } else {
+        manualSimChoiceRef.current = selectedPort.startsWith("sim://");
+        await connectAndStream(selectedPort, true);
+      }
+    } catch (err) {
+      showToast(`Connection error: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  const handlePortChange = async (nextPort: string) => {
+    setSelectedPort(nextPort);
+    manualSimChoiceRef.current = nextPort.startsWith("sim://");
+    if (!hello) return;
+    try {
       await backend.disconnect();
+      await connectAndStream(nextPort, true);
+    } catch (err) {
       setHello(null);
       setStreaming(false);
-      showToast("Camera disconnected");
-    } else {
-      const h = await backend.connect(selectedPort);
-      setHello(h);
-      await Promise.all([refreshCameraTelemetry(), refreshSdListing()]);
-      await backend.startStream(handleIncomingFrame);
-      setStreaming(true);
-      showToast(`Connected: ${h.fw_build_str}`);
+      showToast(`Switch failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -690,20 +814,29 @@ export function App(): React.JSX.Element {
   return (
     <div className="flex h-screen w-screen flex-col bg-[var(--tc-bg)] text-[var(--tc-text)]">
       {/* Top Desktop Studio Bar */}
-      <header className="flex h-[48px] shrink-0 items-center justify-between gap-2 border-b border-[var(--tc-border)] bg-[var(--tc-head)] px-2.5">
+      <header className="flex h-[48px] shrink-0 items-center justify-between gap-1.5 overflow-hidden border-b border-[var(--tc-border)] bg-[var(--tc-head)] px-2.5">
         {/* Brand Identity */}
-        <div className="flex shrink-0 items-center gap-2">
-          <BrandMark size={24} />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <BrandMark size={22} />
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[13.5px] font-semibold tracking-tight">DIY-Thermocam</span>
-            <span className="rounded bg-[var(--tc-surface-2)] px-1.5 py-0.5 font-mono-tech text-[10px] font-medium text-[var(--tc-text-muted)]">
+            <span className="whitespace-nowrap text-[13px] font-semibold tracking-tight">
+              DIY-Thermocam
+            </span>
+            <span
+              className={`rounded bg-[var(--tc-surface-2)] px-1.5 py-0.5 font-mono-tech text-[10px] font-medium text-[var(--tc-text-muted)] ${
+                isPro ? "hidden 2xl:inline" : "hidden lg:inline"
+              }`}
+            >
               Studio
             </span>
           </div>
         </div>
 
         {/* Desktop Navigation (3 essential views in Standard, full 8 modes in Pro) */}
-        <nav className="flex items-center gap-0.5" aria-label="Studio modes">
+        <nav
+          className="flex min-w-0 items-center gap-0.5 overflow-x-auto"
+          aria-label="Studio modes"
+        >
           {NAV_ITEMS.filter((item) => isPro || item.standardVisible).map((item) => {
             const Icon = item.icon;
             const active = mode === item.id;
@@ -713,13 +846,15 @@ export function App(): React.JSX.Element {
                 type="button"
                 title={item.title}
                 onClick={() => setMode(item.id)}
-                className={`tc-btn h-[30px] gap-1.5 px-2 text-[11.5px] ${
+                className={`tc-btn h-[30px] shrink-0 whitespace-nowrap ${
+                  isPro ? "gap-1 px-1.5 text-[11px]" : "gap-1.5 px-2.5 text-[11.5px]"
+                } ${
                   active
                     ? "tc-btn-active font-semibold"
                     : "border-transparent bg-transparent text-[var(--tc-text-muted)] hover:text-[var(--tc-text)]"
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-3.5 w-3.5 shrink-0" />
                 <span>{isPro ? item.proLabel : item.label}</span>
                 {isPro && item.id === "alarms" && alarmEvents.length > 0 ? (
                   <span className="rounded-full bg-[var(--tc-amber)] px-1.5 py-0 font-mono-tech text-[10px] font-semibold text-black">
@@ -732,7 +867,7 @@ export function App(): React.JSX.Element {
         </nav>
 
         {/* Standard | Pro + Connection + Unit + Theme Controls */}
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1">
           {/* Standard | Pro Segmented Toggle */}
           <fieldset
             className="m-0 flex overflow-hidden rounded-[8px] border border-[var(--tc-border)] bg-[var(--tc-surface)] p-0"
@@ -745,7 +880,7 @@ export function App(): React.JSX.Element {
                 type="button"
                 aria-pressed={workspace === tier}
                 onClick={() => applyWorkspaceTier(tier, true)}
-                className={`h-[30px] cursor-pointer px-2.5 text-[11px] font-semibold transition-colors ${
+                className={`h-[28px] cursor-pointer px-1.5 text-[11px] font-semibold transition-colors ${
                   workspace === tier
                     ? "bg-[var(--tc-accent)] text-[var(--tc-text-on-accent)]"
                     : "text-[var(--tc-text-muted)] hover:bg-[var(--tc-surface-2)] hover:text-[var(--tc-text)]"
@@ -757,14 +892,21 @@ export function App(): React.JSX.Element {
           </fieldset>
 
           <select
-            className="tc-select h-[30px] max-w-[146px] font-mono-tech text-[11px]"
+            className={`tc-select h-[30px] min-w-0 truncate font-mono-tech text-[11px] ${
+              isPro ? "w-[126px]" : "w-[168px]"
+            }`}
             value={selectedPort}
-            onChange={(e) => setSelectedPort(e.target.value)}
+            onChange={(e) => void handlePortChange(e.target.value)}
             aria-label="Camera port"
+            title={selectedPort}
           >
             {ports.map((p) => (
               <option key={p.port_name} value={p.port_name}>
-                {p.port_name.startsWith("sim://") ? "Simulator (Lepton 3.5)" : p.port_name}
+                {p.port_name.startsWith("sim://")
+                  ? "Simulator (Lepton 3.5)"
+                  : p.is_teensy
+                    ? `Thermocam (${p.port_name.replace(/^\/dev\/cu\./, "")})`
+                    : p.port_name.replace(/^\/dev\/cu\./, "")}
               </option>
             ))}
           </select>
@@ -772,16 +914,22 @@ export function App(): React.JSX.Element {
           <button
             type="button"
             onClick={() => void handleToggleConnect()}
-            className={`tc-btn h-[30px] px-2 text-[11.5px] ${hello ? "" : "tc-btn-primary"}`}
+            className={`tc-btn h-[30px] whitespace-nowrap px-2 text-[11px] ${
+              hello ? "" : "tc-btn-primary"
+            }`}
           >
-            <Usb className="h-3.5 w-3.5" />
+            <Usb className="h-3.5 w-3.5 shrink-0" />
             <span className="inline-flex items-center gap-1.5">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  hello ? "bg-[var(--tc-pass)]" : "bg-[var(--tc-text-dim)]"
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                  hello
+                    ? selectedPort.startsWith("sim://")
+                      ? "bg-[var(--tc-amber)]"
+                      : "bg-[var(--tc-pass)]"
+                    : "bg-[var(--tc-text-dim)]"
                 }`}
               />
-              {hello ? "Connected" : "Connect"}
+              {hello ? (selectedPort.startsWith("sim://") ? "Demo" : "Live") : "Connect"}
             </span>
           </button>
 
@@ -795,7 +943,7 @@ export function App(): React.JSX.Element {
                 key={u}
                 type="button"
                 onClick={() => setUnit(u)}
-                className={`h-[30px] px-2 font-mono-tech text-[11px] font-medium transition-colors ${
+                className={`h-[28px] px-1.5 font-mono-tech text-[11px] font-medium transition-colors ${
                   unit === u
                     ? "bg-[var(--tc-accent-soft)] text-[var(--tc-accent)]"
                     : "bg-[var(--tc-surface)] text-[var(--tc-text-muted)] hover:bg-[var(--tc-surface-2)]"
@@ -808,7 +956,7 @@ export function App(): React.JSX.Element {
 
           <button
             type="button"
-            className="tc-btn h-[30px] w-[30px] p-0"
+            className="tc-btn h-[30px] w-[30px] shrink-0 p-0"
             onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
             aria-label="Toggle theme"
@@ -825,8 +973,8 @@ export function App(): React.JSX.Element {
             <main className="flex min-w-0 flex-1 flex-col gap-2.5 overflow-hidden p-3">
               {/* Top Control Bar: Essential Everyday Controls in Standard, Full ROI Ribbon in Pro */}
               {isPro ? (
-                <div className="flex items-center justify-between gap-1.5 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-2 py-1.5">
-                  <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center justify-between gap-1.5 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-2 py-1.5">
+                  <div className="flex flex-wrap items-center gap-1">
                     {toolButtons.map((tb) => {
                       const Icon = tb.icon;
                       return (
@@ -938,8 +1086,8 @@ export function App(): React.JSX.Element {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-3 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-3 py-2">
-                  <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border border-[var(--tc-border)] bg-[var(--tc-surface)] px-3 py-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2">
                       <span className="tc-section-label">Palette</span>
                       <select
@@ -956,7 +1104,7 @@ export function App(): React.JSX.Element {
                       </select>
                       <div
                         className="h-3.5 w-20 rounded-full border border-[var(--tc-border)]"
-                        style={{ background: paletteGradientCss(activePalette) }}
+                        style={{ background: paletteGradientCss(activePalette, "to right") }}
                       />
                     </div>
 
@@ -1125,14 +1273,19 @@ export function App(): React.JSX.Element {
                 <div className="flex items-center gap-3">
                   {isPro ? (
                     <>
-                      <span>FPA {frame.fpa_temp_c.toFixed(1)} °C</span>
+                      <span>
+                        FPA{" "}
+                        {Number.isFinite(frame.fpa_temp_c)
+                          ? `${frame.fpa_temp_c.toFixed(1)} °C`
+                          : "—"}
+                      </span>
                       <span>SEQ #{frame.frame_seq}</span>
                     </>
                   ) : (
                     <span>Shift+P for Pro workbench</span>
                   )}
                   <span>{hello?.fw_build_str ?? "Offline"}</span>
-                  <span>BAT {frame.bat_pct}%</span>
+                  <span>{frame.bat_pct >= 0 ? `BAT ${frame.bat_pct}%` : "USB"}</span>
                 </div>
               </div>
             </main>
@@ -1394,31 +1547,35 @@ export function App(): React.JSX.Element {
             ) : null}
           </>
         ) : mode === "control" ? (
-          <CameraControlPanel
-            config={deviceConfig}
-            diagnostics={diagnostics}
-            perf={perfTelemetry}
-            radParams={radParams}
-            onRefreshTelemetry={refreshCameraTelemetry}
-            onTriggerFfc={async (force) => {
-              await backend.triggerFfc(force);
-              showToast(
-                force ? "Forced FFC shutter calibration triggered" : "FFC calibration triggered",
-              );
-            }}
-            onSaveConfig={async (cfg, persist) => {
-              const updated = await backend.setConfig(cfg, persist);
-              setDeviceConfig(updated);
-              showToast(persist ? "Camera config persisted to EEPROM" : "Camera config updated");
-            }}
-            onSaveRadParams={async (params) => {
-              const updated = await backend.setRadParams(params);
-              setRadParams(updated);
-              showToast("Lepton CCI radiometry parameters updated");
-            }}
-          />
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <CameraControlPanel
+              config={deviceConfig}
+              diagnostics={diagnostics}
+              perf={perfTelemetry}
+              radParams={radParams}
+              onRefreshTelemetry={refreshCameraTelemetry}
+              onTriggerFfc={async (force) => {
+                await backend.triggerFfc(force);
+                showToast(
+                  force ? "Forced FFC shutter calibration triggered" : "FFC calibration triggered",
+                );
+              }}
+              onSaveConfig={async (cfg, persist) => {
+                const updated = await backend.setConfig(cfg, persist);
+                setDeviceConfig(updated);
+                showToast(persist ? "Camera config persisted to EEPROM" : "Camera config updated");
+              }}
+              onSaveRadParams={async (params) => {
+                const updated = await backend.setRadParams(params);
+                setRadParams(updated);
+                showToast("Lepton CCI radiometry parameters updated");
+              }}
+            />
+          </div>
         ) : (
-          <UpdaterPanel connectedPort={selectedPort} />
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <UpdaterPanel connectedPort={selectedPort} />
+          </div>
         )}
       </div>
 

@@ -31,27 +31,25 @@ async function tauriInvoke<T>(cmd: string, args?: Record<string, unknown>): Prom
 let simTimer: ReturnType<typeof setInterval> | null = null;
 let simSeq = 1;
 let simConfig: DeviceConfig = {
+  config_ver: 1,
   color_scheme: 10,
+  text_color: 0,
   temp_format: 0,
   filter_type: 1,
-  spot_enabled: true,
-  colorbar_enabled: true,
-  points_enabled: true,
-  battery_enabled: true,
-  time_enabled: true,
-  date_enabled: true,
-  storage_enabled: true,
-  rotation_enabled: false,
+  min_max_points: 3,
+  rotation_vert: 0,
+  rotation_horiz: 0,
+  limits_mode: 0,
+  shutter_mode: 1,
+  lepton_gain_mode: 0,
   hot_cold_mode: 0,
-  gain_mode: 0,
-  min_max_mode: 0,
-  text_color: 0,
-  hot_cold_color: 0,
-  hot_cold_level: 50,
-  locked_min_raw: 29000,
-  locked_max_raw: 33800,
-  cal_offset: -273.15,
-  cal_slope: 0.01,
+  hot_cold_color: 2,
+  screen_off_time: 0,
+  overlay_flags: 0x003f,
+  manual_min_raw: 29315,
+  manual_max_raw: 31315,
+  hot_cold_level_c10: 350,
+  min_max_preset: 0,
 };
 let simRadParams: RadParams = {
   scene_emissivity: 7782,
@@ -84,14 +82,17 @@ export const backend = {
             }
           >
         >("cmd_list_ports");
-      return raw.map((p) => ({
-        port_name: p.port_name ?? p.name ?? "sim://demo-lepton35",
-        vid: p.vid ?? null,
-        pid: p.pid ?? null,
-        manufacturer: p.manufacturer ?? null,
-        product: p.product ?? p.label ?? null,
-        is_teensy: p.is_teensy ?? p.is_thermocam ?? false,
-      }));
+      return raw.map((p) => {
+        const portName = p.port_name ?? p.name ?? "sim://demo-lepton35";
+        return {
+          port_name: portName,
+          vid: p.vid ?? null,
+          pid: p.pid ?? null,
+          manufacturer: p.manufacturer ?? null,
+          product: p.product ?? p.label ?? null,
+          is_teensy: !portName.startsWith("sim://") && (p.is_teensy ?? p.is_thermocam ?? false),
+        };
+      });
     }
     return [
       {
@@ -99,8 +100,8 @@ export const backend = {
         vid: 0x16c0,
         pid: 0x0483,
         manufacturer: "DIY-Thermocam",
-        product: "V3 Simulator (Lepton 3.5 160×120)",
-        is_teensy: true,
+        product: "Simulator (Lepton 3.5)",
+        is_teensy: false,
       },
     ];
   },
@@ -127,8 +128,8 @@ export const backend = {
     return {
       proto_major: 2,
       proto_minor: 0,
-      fw_version: 310,
-      fw_build_str: "3.1.0-sim (2026-11-25)",
+      fw_version: 400,
+      fw_build_str: "4.0.0-sim",
       hw_version: 3,
       lepton_type: 1,
       sensor_w: 160,
@@ -154,15 +155,21 @@ export const backend = {
   async startStream(onFrame: (frame: ThermalFrame) => void): Promise<void> {
     if (isTauriRuntime()) {
       const { Channel } = await import("@tauri-apps/api/core");
-      const ch = new Channel<ArrayBuffer>();
+      const ch = new Channel<ArrayBuffer | Uint8Array | number[]>();
       ch.onmessage = (raw) => {
-        if (raw instanceof ArrayBuffer) {
-          onFrame(decodeFrameRawBinary(raw));
-        } else if (ArrayBuffer.isView(raw)) {
-          const view = raw as Uint8Array;
-          const copy = new Uint8Array(view.byteLength);
-          copy.set(new Uint8Array(view.buffer, view.byteOffset, view.byteLength));
-          onFrame(decodeFrameRawBinary(copy.buffer));
+        try {
+          if (raw instanceof ArrayBuffer) {
+            onFrame(decodeFrameRawBinary(raw));
+          } else if (ArrayBuffer.isView(raw)) {
+            const view = raw as Uint8Array;
+            const copy = new Uint8Array(view.byteLength);
+            copy.set(new Uint8Array(view.buffer, view.byteOffset, view.byteLength));
+            onFrame(decodeFrameRawBinary(copy.buffer));
+          } else if (Array.isArray(raw)) {
+            onFrame(decodeFrameRawBinary(Uint8Array.from(raw).buffer));
+          }
+        } catch (err) {
+          console.error("Failed to decode binary FrameRaw packet:", err);
         }
       };
       await tauriInvoke<void>("cmd_start_stream", { channel: ch });
@@ -202,7 +209,7 @@ export const backend = {
     if (isTauriRuntime()) return tauriInvoke<Diagnostics>("cmd_get_diagnostics");
     return {
       diagnostic_mask: 0xff,
-      bat_pct: 92,
+      bat_pct: 87,
       usb_power: true,
       sd_fs_type: 3,
       bat_mv: 4120,
@@ -430,6 +437,18 @@ export const backend = {
   }): Promise<string> {
     if (isTauriRuntime()) return tauriInvoke<string>("cmd_export_media", { req });
     return `~/Exports/thermocam_20261125.${req.format}`;
+  },
+
+  async pickHexFile(): Promise<{ path: string; text: string } | null> {
+    if (isTauriRuntime()) {
+      try {
+        const [path, text] = await tauriInvoke<[string, string]>("cmd_pick_hex_file");
+        return { path, text };
+      } catch {
+        return null;
+      }
+    }
+    return null;
   },
 
   async verifyHex(hexText: string, expectedSha256?: string): Promise<FirmwareImageInfo> {

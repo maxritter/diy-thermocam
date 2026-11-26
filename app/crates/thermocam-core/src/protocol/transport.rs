@@ -27,19 +27,24 @@ pub struct SerialPortInfo {
     pub is_simulator: bool,
 }
 
-/// Enumerate available serial ports (plus the built-in Demo Simulator).
+/// Enumerate available serial ports (real DIY-Thermocam devices first, built-in Demo Simulator last).
 #[must_use]
 pub fn list_ports() -> Vec<SerialPortInfo> {
-    let mut out = vec![SerialPortInfo {
-        name: "sim://thermocam-v3".to_string(),
-        label: "DIY-Thermocam V3 Demo Simulator (160×120)".to_string(),
-        vid: Some(TEENSY_USB_VID),
-        pid: Some(TEENSY_CDC_PID),
-        is_thermocam: true,
-        is_simulator: true,
-    }];
+    let mut thermocams = Vec::new();
+    let mut others = Vec::new();
     if let Ok(ports) = serialport::available_ports() {
+        let cu_names: std::collections::HashSet<String> = ports
+            .iter()
+            .filter_map(|p| p.port_name.strip_prefix("/dev/cu.").map(str::to_string))
+            .collect();
+
         for p in ports {
+            // On macOS, skip /dev/tty.* when the matching non-blocking /dev/cu.* callout exists.
+            if let Some(suffix) = p.port_name.strip_prefix("/dev/tty.") {
+                if cu_names.contains(suffix) {
+                    continue;
+                }
+            }
             let (vid, pid, product) = match p.port_type {
                 serialport::SerialPortType::UsbPort(u) => {
                     (Some(u.vid), Some(u.pid), u.product.unwrap_or_default())
@@ -48,21 +53,40 @@ pub fn list_ports() -> Vec<SerialPortInfo> {
             };
             let is_thermocam = vid == Some(TEENSY_USB_VID)
                 && matches!(pid, Some(TEENSY_CDC_PID) | Some(TEENSY_CDC_MTP_PID));
-            let label = if product.is_empty() {
+            let label = if is_thermocam {
+                format!("DIY-Thermocam ({})", p.port_name)
+            } else if product.is_empty() {
                 p.port_name.clone()
             } else {
                 format!("{} ({})", p.port_name, product)
             };
-            out.push(SerialPortInfo {
+            let info = SerialPortInfo {
                 name: p.port_name,
                 label,
                 vid,
                 pid,
                 is_thermocam,
                 is_simulator: false,
-            });
+            };
+            if is_thermocam {
+                thermocams.push(info);
+            } else {
+                others.push(info);
+            }
         }
     }
+
+    let mut out = Vec::with_capacity(thermocams.len() + others.len() + 1);
+    out.extend(thermocams);
+    out.push(SerialPortInfo {
+        name: "sim://thermocam-v3".to_string(),
+        label: "Simulator (Lepton 3.5)".to_string(),
+        vid: Some(TEENSY_USB_VID),
+        pid: Some(TEENSY_CDC_PID),
+        is_thermocam: false,
+        is_simulator: true,
+    });
+    out.extend(others);
     out
 }
 
@@ -227,8 +251,8 @@ impl SimulatorTransport {
                 let resp = HelloResp {
                     proto_major: PROTO_MAJOR,
                     proto_minor: PROTO_MINOR,
-                    fw_version: 310,
-                    fw_build_str: "3.1.0-sim (2026-11-25)".to_string(),
+                    fw_version: 400,
+                    fw_build_str: "4.0.0-sim".to_string(),
                     hw_version: 3,
                     lepton_type: 1,
                     sensor_w: 160,
@@ -336,7 +360,7 @@ impl SimulatorTransport {
             MsgType::GetDiagnosticsReq => {
                 let d = Diagnostics {
                     diagnostic_mask: 0xFF,
-                    bat_pct: 92,
+                    bat_pct: 87,
                     usb_power: true,
                     sd_fs_type: 3,
                     bat_mv: 4120,
@@ -597,37 +621,37 @@ pub fn generate_demo_frame(frame_seq: u32, width: u16, height: u16) -> FrameRaw 
         let ny = y as f32 / h as f32;
         for x in 0..w {
             let nx = x as f32 / w as f32;
-            // Ambient PCB substrate ~23.5 C with subtle vertical gradient
-            let mut temp_c = 22.8 + 1.8 * (1.0 - ny) + 0.5 * (nx * std::f32::consts::TAU).sin();
+            // Ambient PCB substrate ~23.8 C with subtle vertical gradient
+            let mut temp_c = 23.4 + 1.4 * (1.0 - ny) + 0.4 * (nx * std::f32::consts::TAU).sin();
 
-            // Hot SoC / MCU package near center-left (~64 C, gently breathing)
+            // Hot SoC / MCU package near center-left (~47.5 C, gently breathing)
             let dx1 = (nx - 0.38) * 1.33;
             let dy1 = ny - 0.48;
             let r1 = dx1 * dx1 + dy1 * dy1;
-            temp_c += (41.5 + 2.2 * phase.sin()) * (-r1 / 0.011).exp();
+            temp_c += (22.6 + 1.2 * phase.sin()) * (-r1 / 0.011).exp();
 
-            // Switching regulator MOSFET hotspot (~53 C)
+            // Switching regulator MOSFET hotspot (~41.5 C)
             let dx2 = (nx - 0.68) * 1.33;
             let dy2 = ny - 0.34;
             let r2 = dx2 * dx2 + dy2 * dy2;
-            temp_c += (31.0 + 1.5 * (phase * 1.3).cos()) * (-r2 / 0.0055).exp();
+            temp_c += (17.2 + 0.9 * (phase * 1.3).cos()) * (-r2 / 0.0055).exp();
 
             // Warm copper trace connecting regulator to MCU
             let trace_dist =
                 ((ny - (0.34 + 0.14 * ((0.68 - nx) / 0.30).clamp(0.0, 1.0))) * 12.0).abs();
             if (0.38..=0.68).contains(&nx) && trace_dist < 0.7 {
-                temp_c += 11.5 * (1.0 - trace_dist / 0.7);
+                temp_c += 6.8 * (1.0 - trace_dist / 0.7);
             }
 
-            // Secondary linear LDO lower-right (~44 C)
+            // Secondary linear LDO lower-right (~36 C)
             let dx3 = (nx - 0.72) * 1.33;
             let dy3 = ny - 0.72;
-            temp_c += 21.0 * (-(dx3 * dx3 + dy3 * dy3) / 0.007).exp();
+            temp_c += 12.2 * (-(dx3 * dx3 + dy3 * dy3) / 0.007).exp();
 
-            // Cool aluminum heatsink fin block on left (~17.5 C)
+            // Cool aluminum heatsink fin block on left (~21.0 C)
             if (0.08..=0.21).contains(&nx) && (0.20..=0.80).contains(&ny) {
-                let fin = ((ny * 40.0).sin() * 0.5 + 0.5) * 1.6;
-                temp_c -= 5.4 - fin;
+                let fin = ((ny * 40.0).sin() * 0.5 + 0.5) * 1.0;
+                temp_c -= 3.2 - fin;
             }
 
             // Subtle sensor NETD noise (~50 mK deterministic hash)
@@ -675,7 +699,7 @@ pub fn generate_demo_frame(frame_seq: u32, width: u16, height: u16) -> FrameRaw 
             cal_offset: -273.15,
             cal_slope: 0.01,
             fpa_temp_c: 31.4,
-            bat_pct: 92,
+            bat_pct: 87,
             usb_power: true,
             temp_point_count: 0,
         },

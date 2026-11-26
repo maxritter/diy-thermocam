@@ -169,27 +169,26 @@ export interface HelloResp {
 }
 
 export interface DeviceConfig {
+  config_ver: number;
   color_scheme: number;
+  text_color: number;
   temp_format: number;
   filter_type: number;
-  spot_enabled: boolean;
-  colorbar_enabled: boolean;
-  points_enabled: boolean;
-  battery_enabled: boolean;
-  time_enabled: boolean;
-  date_enabled: boolean;
-  storage_enabled: boolean;
-  rotation_enabled: boolean;
+  min_max_points: number;
+  rotation_vert: number;
+  rotation_horiz: number;
+  limits_mode: number;
+  shutter_mode: number;
+  lepton_gain_mode: number;
   hot_cold_mode: number;
-  gain_mode: number;
-  min_max_mode: number;
-  text_color: number;
   hot_cold_color: number;
-  hot_cold_level: number;
-  locked_min_raw: number;
-  locked_max_raw: number;
-  cal_offset: number;
-  cal_slope: number;
+  screen_off_time: number;
+  /** Bitmask: bit 0 spot, bit 1 colorbar, bit 2 battery, bit 3 time, bit 4 date, bit 5 storage, bit 6 convert_bmp */
+  overlay_flags: number;
+  manual_min_raw: number;
+  manual_max_raw: number;
+  hot_cold_level_c10: number;
+  min_max_preset: number;
 }
 
 export interface Diagnostics {
