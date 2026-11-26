@@ -25,7 +25,6 @@ void convertVideo(char* dirname);
 void deleteImage(char* filename);
 void deleteVideo(char* dirname);
 void displayGUI(uint32_t imgCount, char* infoText);
-void displayVideoFrame(uint32_t imgCount);
 uint32_t getVideoFrameNumber();
 int loadMenu(char* title, int* array, int length);
 void openImage(char* filename, uint32_t imgCount);

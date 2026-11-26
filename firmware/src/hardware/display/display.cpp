@@ -654,6 +654,12 @@ void display_drawLine(int x1, int y1, int x2, int y2)
 /* Fill the screen by RGB565 color */
 void display_fillScr(word color)
 {
+	if (display_writeToImage && bigBuffer) {
+		for (uint32_t i = 0; i < 76800u; ++i) {
+			bigBuffer[i] = color;
+		}
+		return;
+	}
 	int x = 0;
 	int y = 0;
 	display_begin_spi_transaction();

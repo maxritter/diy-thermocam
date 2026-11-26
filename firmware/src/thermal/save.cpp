@@ -288,48 +288,45 @@ void processVideoFrames(uint32_t framesCaptured, char *dirname)
 	delay(1000);
 }
 
+static bool openRawDataFile(bool isImage, char *name, uint32_t framesCaptured)
+{
+	if (isImage)
+	{
+		sd.chdir("/");
+		strcpy(&name[14], ".DAT");
+		if (sdFile.open(name, O_RDWR | O_CREAT | O_TRUNC))
+			return true;
+		beginSD();
+		if (sdFile.open(name, O_RDWR | O_CREAT | O_TRUNC))
+			return true;
+		if (!serialMode) {
+			showFullMessage((char *)"Error saving image!");
+			delay(1000);
+		}
+		return false;
+	}
+
+	char fileName[] = "000000.DAT";
+	frameFilename(fileName, framesCaptured);
+	if (sdFile.open(fileName, O_RDWR | O_CREAT | O_TRUNC))
+		return true;
+	beginSD();
+	sd.chdir(("/" + String(name)).c_str());
+	if (sdFile.open(fileName, O_RDWR | O_CREAT | O_TRUNC))
+		return true;
+	if (!serialMode) {
+		showFullMessage((char *)"Error saving frame!");
+		delay(1000);
+	}
+	return false;
+}
+
 /* Saves raw data for an image or a video frame (8 KB bulk-buffered, 100% V1/V2/V3 .DAT compatible) */
 void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 {
 	uint32_t t0 = micros();
-	uint16_t result;
-
-	//Create filename for image
-	if (isImage)
-	{
-		strcpy(&name[14], ".DAT");
-		if (!sdFile.open(name, O_RDWR | O_CREAT | O_TRUNC))
-		{
-			beginSD();
-			if (!sdFile.open(name, O_RDWR | O_CREAT | O_TRUNC))
-			{
-				if (!serialMode) {
-					showFullMessage((char *)"Error saving image!");
-					delay(1000);
-				}
-				return;
-			}
-		}
-	}
-	//Create filename for video frame
-	else
-	{
-		char fileName[] = "000000.DAT";
-		frameFilename(fileName, framesCaptured);
-		if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_TRUNC))
-		{
-			beginSD();
-			sd.chdir(("/" + String(name)).c_str());
-			if (!sdFile.open(fileName, O_RDWR | O_CREAT | O_TRUNC))
-			{
-				if (!serialMode) {
-					showFullMessage((char *)"Error saving frame!");
-					delay(1000);
-				}
-				return;
-			}
-		}
-	}
+	if (!openRawDataFile(isImage, name, framesCaptured))
+		return;
 
 	size_t off = 0;
 	bool writeOk = true;
@@ -358,8 +355,7 @@ void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 		{
 			for (int column = 0; column < 80; column++)
 			{
-				result = smallBuffer[(line * 2 * 160) + (column * 2)];
-				put_be16(result);
+				put_be16(smallBuffer[(line * 2 * 160) + (column * 2)]);
 			}
 		}
 		totalBytes = 9600u + 21u + 384u;
@@ -403,7 +399,7 @@ void saveRawData(bool isImage, char *name, uint32_t framesCaptured)
 		sdNoteBytesWritten(totalBytes);
 	} else {
 		if (!isImage && videoSave == videoSave_recording) {
-			videoSave = videoSave_processing; // abort video recording cleanly on SD write error
+			videoSave = videoSave_processing;
 		}
 		if (!serialMode) {
 			showFullMessage((char *)"Error writing SD card!");
@@ -436,6 +432,7 @@ void imgSaveEnd()
 void saveBuffer(char *filename)
 {
 	uint32_t t0 = micros();
+	sd.chdir("/");
 	strcpy(&filename[14], ".BMP");
 	if (!sdFile.open(filename, O_RDWR | O_CREAT | O_TRUNC))
 	{

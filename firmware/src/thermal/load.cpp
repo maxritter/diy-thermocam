@@ -167,14 +167,6 @@ void loadBMPToBuffer(char *filename)
 	sdFile.close();
 }
 
-/* Loads a 640x480 BMP image from the SDCard and prints it on screen */
-void loadBMPImage(char *filename)
-{
-	loadBMPToBuffer(filename);
-	//Draw it on the screen
-	displayBuffer();
-}
-
 /* Checks if the file is an image*/
 bool isImage(char *filename)
 {
@@ -451,250 +443,63 @@ bool yearChoose(char *filename)
 	return false;
 }
 
-/* A method to choose the right monthStorage */
+/* Shared selector for Month/Day/Hour/Minute/Second buckets (eliminates 5x copy-paste). */
+static bool chooseDateBucket(const char *title, const bool *present, int count, int baseVal,
+                             char *outBuf, char *filenameDst, byte *outCount)
+{
+	int values[60];
+	byte num = 0;
+	for (int i = count - 1; i >= 0; i--)
+	{
+		if (present[i])
+			values[num++] = baseVal + i;
+	}
+	*outCount = num;
+	if (num == 0)
+		return true;
+
+	int chosen = values[0];
+	if (num > 1)
+	{
+		int res = loadMenu(const_cast<char *>(title), values, num);
+		if (res == -1)
+			return true;
+		chosen = values[res];
+	}
+	snprintf(outBuf, 3, "%d", chosen);
+	filenameDst[0] = static_cast<char>('0' + (chosen / 10));
+	filenameDst[1] = static_cast<char>('0' + (chosen % 10));
+	return false;
+}
+
+/* Choose month bucket for Find dialog */
 bool monthChoose(bool *months, char *filename)
 {
-	for (int i = 0; i < 12; i++)
-	{
-		if (months[i])
-			monthnum = monthnum + 1;
-	}
-	//Add them to the array in descending order
-	int Months[monthnum];
-	monthnum = 0;
-	for (int i = 11; i >= 0; i--)
-	{
-		if (months[i])
-		{
-			//Add one as monthStorage start with January
-			Months[monthnum] = 1 + i;
-			monthnum = monthnum + 1;
-		}
-	}
-	//If there is only one, chose it directly
-	if (monthnum == 1)
-	{
-		itoa(Months[0], monthBuf, 10);
-	}
-	//If not, open the image chooser
-	else
-	{
-		int res = loadMenu((char *)"Load file: Month", Months,
-						   monthnum);
-		//the user wants to go back to the years
-		if (res == -1)
-		{
-			return true;
-		}
-		else
-		{
-			itoa(Months[res], monthBuf, 10);
-		}
-	}
-	//Add a zero if monthStorage is smaller than 10
-	if (atoi(monthBuf) < 10)
-	{
-		filename[4] = '0';
-		filename[5] = monthBuf[0];
-	}
-	//Else copy those two digits
-	else
-		memcpy(&filename[4], monthBuf, 2);
-	return false;
+	return chooseDateBucket("Load file: Month", months, 12, 1, monthBuf, &filename[4], &monthnum);
 }
 
-/* A method to choose the right dayStorage */
+/* Choose day bucket for Find dialog */
 bool dayChoose(bool *days, char *filename)
 {
-	for (int i = 0; i < 31; i++)
-	{
-		if (days[i])
-			daynum = daynum + 1;
-	}
-	//Sort them descending
-	int Days[daynum];
-	daynum = 0;
-	for (int i = 30; i >= 0; i--)
-	{
-		if (days[i])
-		{
-			Days[daynum] = 1 + i;
-			daynum = daynum + 1;
-		}
-	}
-	//We only have one
-	if (daynum == 1)
-	{
-		itoa(Days[0], dayBuf, 10);
-	}
-	//Choose dayStorage
-	else
-	{
-		int res = loadMenu((char *)"Load file: Day", Days, daynum);
-		if (res == -1)
-		{
-			return true;
-		}
-		else
-		{
-			itoa(Days[res], dayBuf, 10);
-		}
-	}
-	//Add dayStorage to the filename
-	if (atoi(dayBuf) < 10)
-	{
-		filename[6] = '0';
-		filename[7] = dayBuf[0];
-	}
-	else
-		memcpy(&filename[6], dayBuf, 2);
-	return false;
+	return chooseDateBucket("Load file: Day", days, 31, 1, dayBuf, &filename[6], &daynum);
 }
 
-/* A method to choose the right hourStorage */
+/* Choose hour bucket for Find dialog */
 bool hourChoose(bool *hours, char *filename)
 {
-	for (int i = 0; i < 24; i++)
-	{
-		if (hours[i])
-			hournum = hournum + 1;
-	}
-	//Sort them descending
-	int Hours[hournum];
-	hournum = 0;
-	for (int i = 23; i >= 0; i--)
-	{
-		if (hours[i])
-		{
-			Hours[hournum] = i;
-			hournum = hournum + 1;
-		}
-	}
-	//If there is only one
-	if (hournum == 1)
-	{
-		itoa(Hours[0], hourBuf, 10);
-	}
-	//Otherwise choose
-	else
-	{
-		int res = loadMenu((char *)"Load file: Hour", Hours, hournum);
-		if (res == -1)
-		{
-			return true;
-		}
-		else
-		{
-			itoa(Hours[res], hourBuf, 10);
-		}
-	}
-	//Add hourStorage to the filename
-	if (atoi(hourBuf) < 10)
-	{
-		filename[8] = '0';
-		filename[9] = hourBuf[0];
-	}
-	else
-		memcpy(&filename[8], hourBuf, 2);
-	return false;
+	return chooseDateBucket("Load file: Hour", hours, 24, 0, hourBuf, &filename[8], &hournum);
 }
 
-/* A method to choose the right minuteStorage */
+/* Choose minute bucket for Find dialog */
 bool minuteChoose(bool *minutes, char *filename)
 {
-	for (int i = 0; i < 60; i++)
-	{
-		if (minutes[i])
-			minutenum = minutenum + 1;
-	}
-	//Sort them descending
-	int Minutes[minutenum];
-	minutenum = 0;
-	for (int i = 59; i >= 0; i--)
-	{
-		if (minutes[i])
-		{
-			Minutes[minutenum] = i;
-			minutenum = minutenum + 1;
-		}
-	}
-	//if there is only one
-	if (minutenum == 1)
-	{
-		itoa(Minutes[0], minuteBuf, 10);
-	}
-	//Otherwise choose
-	else
-	{
-		int res = loadMenu((char *)"Load file: Minute", Minutes,
-						   minutenum);
-		if (res == -1)
-		{
-			return true;
-		}
-		else
-		{
-			itoa(Minutes[res], minuteBuf, 10);
-		}
-	}
-	//Copy minutes to the filename
-	if (atoi(minuteBuf) < 10)
-	{
-		filename[10] = '0';
-		filename[11] = minuteBuf[0];
-	}
-	else
-		memcpy(&filename[10], minuteBuf, 2);
-	return false;
+	return chooseDateBucket("Load file: Minute", minutes, 60, 0, minuteBuf, &filename[10], &minutenum);
 }
 
-/* A method to choose the right secondStorage */
+/* Choose second bucket for Find dialog */
 bool secondChoose(bool *seconds, char *filename)
 {
-	for (int i = 0; i < 60; i++)
-	{
-		if (seconds[i])
-			secondnum = secondnum + 1;
-	}
-	//Sort them descending
-	int Seconds[secondnum];
-	secondnum = 0;
-	for (int i = 59; i >= 0; i--)
-	{
-		if (seconds[i])
-		{
-			Seconds[secondnum] = i;
-			secondnum = secondnum + 1;
-		}
-	}
-	//if there is only one
-	if (secondnum == 1)
-	{
-		itoa(Seconds[0], secondBuf, 10);
-	}
-	//Otherwise choose the right
-	else
-	{
-		int res = loadMenu((char *)"Load file: Second", Seconds,
-						   secondnum);
-		if (res == -1)
-		{
-			return true;
-		}
-		else
-		{
-			itoa(Seconds[res], secondBuf, 10);
-		}
-	}
-	//Add secondStorage to the filename
-	if (atoi(secondBuf) < 10)
-	{
-		filename[12] = '0';
-		filename[13] = secondBuf[0];
-	}
-	else
-		memcpy(&filename[12], secondBuf, 2);
-	return false;
+	return chooseDateBucket("Load file: Second", seconds, 60, 0, secondBuf, &filename[12], &secondnum);
 }
 
 /* Extract the filename into the buffers */
@@ -717,17 +522,17 @@ void copyIntoBuffers(char *filename)
 	secondBuf[2] = '\0';
 }
 
-/* Check if the file is a valid one */
+static bool isValidImageFileSize(uint32_t fileSize)
+{
+	return (fileSize == lepton2_small) || (fileSize == lepton2_big) ||
+	       (fileSize == lepton3_small) || (fileSize == lepton3_big) || (fileSize == bitmap);
+}
+
+/* Check if the file is a valid thermal image or video folder */
 bool checkFileValidity()
 {
-	//Load images
 	if (loadMode == loadMode_image)
-	{
-		uint32_t fileSize = sdFile.fileSize();
-		return (sdFile.isFile() && ((fileSize == lepton2_small) || (fileSize == lepton2_big) ||
-									(fileSize == lepton3_small) || (fileSize == lepton3_big) || (fileSize == bitmap)));
-	}
-	//Load videos
+		return sdFile.isFile() && isValidImageFileSize(sdFile.fileSize());
 	return sdFile.isDir();
 }
 
@@ -787,68 +592,55 @@ void checkFileEnding(bool *check, char *filename)
 	}
 }
 
+/* Validate current open SD entry as a timestamped gallery item */
+static bool matchesGalleryEntry(char *filename)
+{
+	if (!checkFileValidity())
+		return false;
+	copyIntoBuffers(filename);
+	bool check = true;
+	checkFileStructure(&check);
+	if (loadMode == loadMode_image)
+		checkFileEnding(&check, filename);
+	return check;
+}
+
 /* Find the next or previous file/folder on the SD card or the position */
 bool findFile(char *filename, bool next, bool restart, int *position, char *compare)
 {
+	(void)restart;
 	bool found = false;
 	int counter = 0;
 
-	//Point to root directory
 	dir.open("/");
-
-	//Get filenames from SD Card - one after another and a maximum of maxFiles
 	while (sdFile.openNext(&dir, O_RDONLY))
 	{
-		//Either folder for video or file with specific size for single image
-		if (checkFileValidity())
+		if (matchesGalleryEntry(filename))
 		{
-			//Extract the filename into the buffers
-			copyIntoBuffers(filename);
-			//Check if the name matches the criterion
-			bool check = true;
-			//Check if the other elements are two digits each
-			checkFileStructure(&check);
-			//Check if the filename ends with .DAT or .BMP if the file is a single image
-			if (loadMode == loadMode_image)
-				checkFileEnding(&check, filename);
-			//If all checks were successfull, add image to the results
-			if (check)
+			if (next)
 			{
-				//If we want to get the next image
-				if (next)
-				{
-					found = true;
-					break;
-				}
-				//If we want to get the previous image or get the position
-				if (compare != NULL)
-				{
-					if (strcmp(compare, filename) == 0)
-					{
-						*position = counter;
-						found = true;
-						break;
-					}
-					counter++;
-				}
-				//In case we found it
-				else if (*position == counter)
-				{
-					found = true;
-					break;
-				}
-				//If not, raise the counter
-				else
-					counter++;
+				found = true;
+				break;
 			}
+			if (compare != NULL && strcmp(compare, filename) == 0)
+			{
+				*position = counter;
+				found = true;
+				break;
+			}
+			if (compare == NULL && *position == counter)
+			{
+				found = true;
+				break;
+			}
+			counter++;
 		}
-		//Close the file
 		sdFile.close();
 	}
 
+	if (found)
+		sdFile.close();
 	dir.close();
-
-	//Return result
 	return found;
 }
 
@@ -1136,29 +928,14 @@ void loadDeAlloc()
 	free(secondStorage);
 }
 
-static volatile bool s_loadTouchPending = false;
-
-/* Non-blocking ISR for load menu: only latches flag (never SPI/I2C in ISR!) */
-void loadTouchIRQ()
-{
-	s_loadTouchPending = true;
-}
-
-/* Atomically consume latched load touch IRQ flag */
-bool loadTouchTakePending()
-{
-	noInterrupts();
-	bool pending = s_loadTouchPending;
-	s_loadTouchPending = false;
-	interrupts();
-	return pending;
-}
-
 /* Main-loop touch decoder for load/gallery viewer */
 void loadTouchProcess()
 {
 	//Get touch coordinates safely in main-loop context
 	TS_Point p = touch_getPoint();
+	//Ignore phantom/stale coordinates when no touch is actively pressed
+	if (p.z == 0)
+		return;
 	uint16_t x = p.x;
 	uint16_t y = p.y;
 
@@ -1186,188 +963,122 @@ void loadTouchProcess()
 	else if ((x >= 10) && (x <= 140) && (y >= 160) && (y <= 230))
 		loadTouch = loadTouch_convert;
 
-	//Middle
-	else if ((x > 140) && (x < 180) && (y > 80) && (y < 160))
+	//Middle (covers centered Play pill whether spotEnabled is on or off)
+	else if ((x > 140) && (x < 180) && (y >= 64) && (y <= 160))
 		loadTouch = loadTouch_middle;
 }
 
-/* Main entry point for loading images/videos*/
-void loadFiles()
+/* Dispatch one viewer touch command inside loadFiles(); returns true to exit viewer */
+static bool dispatchGalleryAction(char *filename, int *pos)
 {
-redraw:
-	//Draw modern 2026 Gallery screen
+	switch (loadTouch)
+	{
+	case loadTouch_find:
+		loadFind(filename, pos);
+		return false;
+	case loadTouch_delete:
+		return !loadDelete(filename, pos);
+	case loadTouch_previous:
+		showFullMessage((char *)"Loading..");
+		*pos = (*pos == imgCount - 1) ? 0 : (*pos + 1);
+		return !findFile(filename, false, true, pos);
+	case loadTouch_next:
+		showFullMessage((char *)"Loading..");
+		*pos = (*pos == 0) ? (imgCount - 1) : (*pos - 1);
+		return !findFile(filename, false, true, pos);
+	case loadTouch_convert:
+		if (isImage(filename) && (loadMode == loadMode_image))
+			convertImage(filename);
+		else
+			convertVideo(filename);
+		return false;
+	case loadTouch_none:
+	case loadTouch_exit:
+		return true;
+	default:
+		return false;
+	}
+}
+
+/* Gallery chooser prompt: returns false if user tapped < Back */
+static bool promptGalleryMode()
+{
 	drawLoadMenu();
-	uint32_t t0 = millis();
-	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
-	//Touch handler
+	ui_waitTouchRelease();
 	while (true)
 	{
 		if (checkSerial())
 			drawLoadMenu();
-		//If touch pressed
-		if (touch_touched() == true)
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//IMAGES
-			if (pressedButton == 0)
-			{
-				loadMode = loadMode_image;
-				break;
-			}
-			//VIDEOS
-			if (pressedButton == 1)
-			{
-				loadMode = loadMode_video;
-				break;
-			}
-			//BACK
-			if (pressedButton == 2)
-				return;
+			int pressed = buttons_checkButtons(true);
+			if (pressed == 0) { loadMode = loadMode_image; return true; }
+			if (pressed == 1) { loadMode = loadMode_video; return true; }
+			if (pressed == 2) return false;
 		}
 		delay(5);
 	}
+}
 
-	//Store the filename
+/* Main entry point for loading images/videos */
+void loadFiles()
+{
+	while (true)
+	{
+		if (!promptGalleryMode())
+			return;
+
+		showFullMessage((char *)"Please wait..", true);
+		loadAlloc();
+		clearData();
+		searchFiles();
+
+		if (imgCount > 0)
+			break;
+
+		showFullMessage((loadMode == loadMode_image) ? (char *)"No images found" : (char *)"No videos found", true);
+		delay(1000);
+		loadDeAlloc();
+	}
+
 	char filename[20];
-
-	//Save old settings
 	uint16_t old_minValue = minValue;
 	uint16_t old_maxValue = maxValue;
 	byte old_leptonVersion = leptonVersion;
 
-	//Load message
-	showFullMessage((char *)"Please wait..", true);
-	//Alloc space
-	loadAlloc();
-	//Clear all previous data
-	clearData();
-	//Search files
-	searchFiles();
-
-	//If there are no images or videos, return
-	if (imgCount == 0)
-	{
-		//Show message
-		if (loadMode == loadMode_image)
-			showFullMessage((char *)"No images found", true);
-		else
-			showFullMessage((char *)"No videos found", true);
-		delay(1000);
-		//Deallocate space
-		loadDeAlloc();
-		//Redraw menu
-		goto redraw;
-	}
-
-	//Change settings
 	loadSettings();
 
-	//Open the latest file
 	int pos = imgCount - 1;
-	findFile(filename, false, true, &pos);
-	bool exit = false;
-
-	//New touch interrupt
+	bool exit = !findFile(filename, false, true, &pos);
 	detachInterrupt(pin_touch_irq);
 
-	//Main loop
-	while (true)
+	while (!exit)
 	{
-
-		//Disable decision marker
 		loadTouch = loadTouch_none;
-
-		//Load image
 		if (isImage(filename) && (loadMode == loadMode_image))
 			openImage(filename, imgCount);
-
-		//Play video
 		else
 			playVideo(filename, imgCount);
 
-		//Touch actions
-		switch (loadTouch)
-		{
+		exit = dispatchGalleryAction(filename, &pos);
 
-			//Find
-		case loadTouch_find:
-			loadFind(filename, &pos);
-			break;
-
-			//Delete
-		case loadTouch_delete:
-			if (!loadDelete(filename, &pos))
-				exit = true;
-			break;
-
-			//Previous
-		case loadTouch_previous:
-			showFullMessage((char *)"Loading..");
-			if (pos == imgCount - 1)
-				pos = 0;
-			else
-				pos++;
-			findFile(filename, false, true, &pos);
-			break;
-
-			//Next
-		case loadTouch_next:
-			showFullMessage((char *)"Loading..");
-			if (pos == 0)
-				pos = imgCount - 1;
-			else
-				pos--;
-			findFile(filename, false, true, &pos);
-			break;
-
-			//Exit
-		case loadTouch_exit:
-			exit = true;
-			break;
-
-			//Convert
-		case loadTouch_convert:
-			//Image
-			if (isImage(filename) && (loadMode == loadMode_image))
-				convertImage(filename);
-			//Video
-			else
-				convertVideo(filename);
-			break;
-		}
-
-		//Wait for touch release (bounded so touch glitch can never hang gallery exit)
 		uint32_t tRel = millis();
 		if (touch_capacitive)
-			while (touch_touched() && (millis() - tRel) < 1500u)
-				delay(5);
+			while (touch_touched() && (millis() - tRel) < 1500u) delay(5);
 		else
-			while (!digitalRead(pin_touch_irq) && (millis() - tRel) < 1500u)
-				delay(5);
-
-		//Leave
-		if (exit)
-			break;
+			while (!digitalRead(pin_touch_irq) && (millis() - tRel) < 1500u) delay(5);
 	}
-	//Show message
+
 	drawMainMenuBorder();
 	showFullMessage((char *)"Please wait..", true);
-
-	//Deallocate space
 	loadDeAlloc();
 
-	//Restore old settings from variables
 	minValue = old_minValue;
 	maxValue = old_maxValue;
 	leptonVersion = old_leptonVersion;
-
-	//Restore the rest from EEPROM
 	readEEPROM();
-
-	//Refresh SD space
 	refreshFreeSpace();
 
-	//Restore old touch handler & ensure Lepton VoSPI is cleanly armed
 	attachInterrupt(pin_touch_irq, touchIRQ, FALLING);
 	disableSPIIRQ = false;
 	lepton_startFrame();

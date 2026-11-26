@@ -57,7 +57,7 @@ def test_v2_ping_latency(cam_v2: v2.ThermocamV2) -> None:
 def test_v2_diagnostics(cam_v2: v2.ThermocamV2) -> None:
     p = cam_v2.request(v2.MSG_GET_DIAGNOSTICS_REQ)
     assert p.msg_type == v2.MSG_GET_DIAGNOSTICS_RESP and p.status == v2.OK and len(p.payload) == 80
-    mask, bat, usb, sd_fs, bat_mv, cpu_mhz, mcu_c, sd_tot, sd_free, up_us, dtcm, ocram, fpa_c = struct.unpack(
+    mask, bat, _, sd_fs, _, cpu_mhz, mcu_c, sd_tot, _, up_us, dtcm, ocram, _ = struct.unpack(
         "<BbBBHHfIIQIIf", p.payload[:40]
     )
     part = p.payload[40:72].split(b"\x00", 1)[0].decode("ascii", errors="replace")

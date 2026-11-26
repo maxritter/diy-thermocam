@@ -112,14 +112,15 @@ jobs:
           make clean
           make test
 
-      - name: Build UI simulator & generate screenshots
+      - name: Build UI simulator, run interactive UI tests & generate screenshots
         working-directory: firmware/sim
         run: |
           make clean
+          make test
           make screenshots
           count=$(find out -maxdepth 1 -name '*.png' | wc -l | tr -d ' ')
           echo "Generated $count simulator UI screenshots"
-          test "$count" -ge 8
+          test "$count" -ge 9
 
       - name: Upload firmware simulator screenshots
         uses: actions/upload-artifact@v4

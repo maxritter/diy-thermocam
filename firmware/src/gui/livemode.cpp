@@ -205,7 +205,8 @@ void displayInfos()
 			displayDate();
 		if (storageEnabled)
 			displayFreeSpace();
-		displayTempMode();
+		if (!showMenu)
+			displayTempMode();
 	}
 
 	if (minMaxPoints & minMaxPoints_min)

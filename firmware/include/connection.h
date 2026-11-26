@@ -63,7 +63,6 @@
 void buttonHandler();
 bool checkNoDisplay();
 bool checkSerial();
-int getInt(String text);
 void saveFrame();
 void sendBatteryStatus();
 void sendCalibrationData();

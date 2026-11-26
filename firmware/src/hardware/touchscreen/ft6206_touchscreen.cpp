@@ -70,6 +70,9 @@ void FT6206_Touchscreen::readData(uint16_t *x, uint16_t *y) {
 TS_Point FT6206_Touchscreen::getPoint(void) {
 	uint16_t x, y;
 	readData(&x, &y);
+	if (touches == 0) {
+		return TS_Point(0, 0, 0);
+	}
 	if (rotated) {
 		y = (y > 239) ? 0 : static_cast<uint16_t>(239 - y);
 		x = (x > 319) ? 0 : static_cast<uint16_t>(319 - x);

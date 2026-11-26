@@ -178,191 +178,63 @@ static void drawPlayPillToBuffer() {
 	display_writeToImage = prevWrite;
 }
 
-/* Asks the user if he wants to delete the video */
+/* Remove all sequential frame files inside a video folder and remove the folder itself. */
+static void removeVideoFolderFiles(char* dirname) {
+	dirname[14] = '\0';
+	sd.chdir("/");
+	sd.chdir(dirname);
+
+	uint32_t videoCounter = 0;
+	char filename[] = "000000.DAT";
+	while (true) {
+		frameFilename(filename, videoCounter);
+		if (!sd.exists(filename))
+			break;
+		sd.remove(filename);
+		strcpy(&filename[6], ".BMP");
+		if (sd.exists(filename)) sd.remove(filename);
+		strcpy(&filename[6], ".JPG");
+		if (sd.exists(filename)) sd.remove(filename);
+		strcpy(&filename[6], ".DAT");
+		videoCounter++;
+	}
+
+	sd.chdir("/");
+	sd.rmdir(dirname);
+}
+
+/* Confirm and delete a recorded video folder and all of its frames. */
 void deleteVideo(char* dirname) {
-	//Title & Background
-	drawTitle((char*) "Delete Video", true);
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 46, 308, 162);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 46, 308, 162);
-	display_setColor(UI_TEXT);
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_print((char*)"Delete this recorded video?", CENTER, 68);
-	display_setColor(UI_TEXT_MUTED);
-	display_print((char*)"This removes all .DAT / .BMP", CENTER, 102);
-	display_print((char*)"frames in this recording folder.", CENTER, 122);
-	//Draw bezel-safe buttons (No left, Yes right)
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(166, 178, 142, 46, (char*) "Yes");
-	buttons_addButton(12, 178, 142, 46, (char*) "No");
-	buttons_drawButtons();
-	buttons_setTextFont(smallFont);
-	//Touch handler
-	while (true) {
-		checkSerial();
-		//If touch pressed
-		if (touch_touched() == true) {
-			int pressedButton = buttons_checkButtons(true);
-			//YES
-			if (pressedButton == 0) {
-				showFullMessage((char*) "Delete video..");
-
-				//Delete the ending for a video
-				dirname[14] = '\0';
-
-				//Go into the video folder
-				sd.chdir("/");
-				sd.chdir(dirname);
-
-				//Delete all files
-				uint32_t videoCounter = 0;
-				bool exists;
-				char filename[] = "000000.DAT";
-
-				//Go through the frames
-				while (1) {
-					//Get the frame name
-					frameFilename(filename, videoCounter);
-					//Check frame existance
-					exists = sd.exists(filename);
-					//If the frame does not exists, end remove
-					if (!exists)
-						break;
-					//Otherwise remove file
-					else
-						sd.remove(filename);
-					//Remove Bitmap if there
-					strcpy(&filename[6], ".BMP");
-					if (sd.exists(filename))
-						sd.remove(filename);
-					//Remove Jpeg if there
-					strcpy(&filename[6], ".JPG");
-					if (sd.exists(filename))
-						sd.remove(filename);
-					//Reset ending
-					strcpy(&filename[6], ".DAT");
-					//Raise counter
-					videoCounter++;
-				}
-
-				//Remove the folder
-				sd.chdir("/");
-				sd.rmdir(dirname);
-				
-				//End SD
-				showFullMessage((char*) "Video deleted");
-				delay(1000);
-				return;
-			}
-			//NO
-			else if (pressedButton == 1) {
-				return;
-			}
-		}
-		delay(5);
+	if (!ui_confirmDialog("Delete Video", "Delete this recorded video?",
+		"This removes all .DAT / .BMP", "frames in this recording folder.")) {
+		return;
 	}
+	showFullMessage((char*) "Delete video..");
+	removeVideoFolderFiles(dirname);
+	showFullMessage((char*) "Video deleted");
+	delay(1000);
 }
 
-/* Asks the user if he wants to delete the image */
+/* Confirm and delete a thermal image and any companion .BMP/.JPG files. */
 void deleteImage(char* filename) {
-	//Title & Background
-	drawTitle((char*) "Delete Image", true);
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 46, 308, 162);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 46, 308, 162);
-	display_setColor(UI_TEXT);
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_print((char*)"Delete this thermal image?", CENTER, 68);
-	display_setColor(UI_TEXT_MUTED);
-	display_print((char*)"This also removes any matching", CENTER, 102);
-	display_print((char*)".BMP or .JPG companion file.", CENTER, 122);
-	//Draw bezel-safe buttons (No left, Yes right)
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(166, 178, 142, 46, (char*) "Yes");
-	buttons_addButton(12, 178, 142, 46, (char*) "No");
-	buttons_drawButtons();
-	buttons_setTextFont(smallFont);
-	//Touch handler
-	while (true) {
-		checkSerial();
-		//If touch pressed
-		if (touch_touched() == true) {
-			int pressedButton = buttons_checkButtons(true);
-			//YES
-			if (pressedButton == 0) {
-				showFullMessage((char*) "Delete image..");
-				//Delete .DAT file
-				sd.remove(filename);
-				//Delete .JPG file
-				strcpy(&filename[14], ".JPG");
-				if (sd.exists(filename))
-					sd.remove(filename);
-				//Delete .BMP file
-				strcpy(&filename[14], ".BMP");
-				if (sd.exists(filename))
-					sd.remove(filename);
-				showFullMessage((char*) "Image deleted");
-				delay(1000);
-				return;
-			}
-			//NO
-			else if (pressedButton == 1) {
-				return;
-			}
-		}
-		delay(5);
+	if (!ui_confirmDialog("Delete Image", "Delete this thermal image?",
+		"This also removes any matching", ".BMP or .JPG companion file.")) {
+		return;
 	}
+	showFullMessage((char*) "Delete image..");
+	sd.remove(filename);
+	strcpy(&filename[14], ".JPG");
+	if (sd.exists(filename)) sd.remove(filename);
+	strcpy(&filename[14], ".BMP");
+	if (sd.exists(filename)) sd.remove(filename);
+	showFullMessage((char*) "Image deleted");
+	delay(1000);
 }
 
-/* Asks the user if he really wants to convert the image/video */
+/* Confirm converting raw .DAT image/video data into 640x480 .BMP bitmaps. */
 bool convertPrompt() {
-	//Title & Background
-	drawTitle((char*) "Convert to BMP", true);
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 46, 308, 162);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 46, 308, 162);
-	display_setColor(UI_TEXT);
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_print((char*)"Convert raw thermal data?", CENTER, 68);
-	display_setColor(UI_TEXT_MUTED);
-	display_print((char*)"Creates 640x480 .BMP bitmap(s)", CENTER, 102);
-	display_print((char*)"alongside the original .DAT.", CENTER, 122);
-	//Draw bezel-safe buttons (No left, Yes right)
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(166, 178, 142, 46, (char*) "Yes");
-	buttons_addButton(12, 178, 142, 46, (char*) "No");
-	buttons_drawButtons();
-	buttons_setActive(0);
-	buttons_setTextFont(smallFont);
-	//Wait for touch release (bounded)
-	uint32_t t0 = millis();
-	while (touch_touched() && (millis() - t0) < 1000u) delay(5);
-	//Touch handler
-	while (true) {
-		checkSerial();
-		//If touch pressed
-		if (touch_touched() == true) {
-			int pressedButton = buttons_checkButtons(true);
-			//YES
-			if (pressedButton == 0) {
-				return true;
-			}
-			//NO
-			else if (pressedButton == 1) {
-				return false;
-			}
-		}
-		delay(5);
-	}
+	return ui_confirmDialog("Convert to BMP", "Convert raw thermal data?",
+		"Creates 640x480 .BMP bitmap(s)", "alongside the original .DAT.", true);
 }
 
 /* Convert a raw image lately to BMP */
@@ -452,6 +324,7 @@ void openImage(char* filename, uint32_t imgCount) {
 	if ((filename[15] != 'D') && (filename[15] != 'B')) {
 		showFullMessage((char*) "Unsupported file type");
 		delay(1000);
+		loadTouch = loadTouch_exit;
 		return;
 	}
 
@@ -485,23 +358,26 @@ void openImage(char* filename, uint32_t imgCount) {
 	//Composite image + HUD in RAM and push to LCD in ONE atomic write
 	renderImageWithHUD();
 
-	//Attach lightweight edge-flag interrupt (all SPI/I2C touch reads stay in main loop!)
-	(void)loadTouchTakePending();
-	attachInterrupt(pin_touch_irq, loadTouchIRQ, FALLING);
+	//Wait for finger release from the button that opened or stepped to this image
+	uint32_t tRel = millis();
+	while (touch_touched() && (millis() - tRel) < 1000u) {
+		delay(5);
+	}
 
-	//Wait for touch press safely in main-loop context
+	//Wait for touch press safely in main-loop context (no XPT2046 PENIRQ-vs-SPI race!)
 	while (loadTouch == loadTouch_none) {
 		if (checkSerial()) {
 			renderImageWithHUD();
 		}
-		if (loadTouchTakePending() || touch_touched()) {
+		if (touch_touched()) {
 			loadTouchProcess();
+			//Still images have no center Play button; ignore center taps instead of reloading from SD
+			if (loadTouch == loadTouch_middle) {
+				loadTouch = loadTouch_none;
+			}
 		}
 		delay(5);
 	}
-
-	//Disable touch handler
-	detachInterrupt(pin_touch_irq);
 }
 
 /* Get the number of frames in the video */
@@ -527,21 +403,6 @@ uint32_t getVideoFrameNumber() {
 	return videoCounter;
 }
 
-/* Display the selected video frame */
-void displayVideoFrame(uint32_t imgCount)
-{
-	char filename[] = "000000.DAT";
-
-	//Get the frame name
-	frameFilename(filename, imgCount);
-
-	//Load Raw data
-	loadRawData(filename);
-
-	//Display Raw Data
-	displayRawData();
-}
-
 /* Play a video from the internal storage (100% RAM-composited zero-flicker playback!) */
 void playVideo(char* dirname, uint32_t imgCount) {
 	char buffer[32];
@@ -559,6 +420,7 @@ void playVideo(char* dirname, uint32_t imgCount) {
 		showFullMessage((char*) "Empty video folder");
 		delay(1000);
 		sd.chdir("/");
+		loadTouch = loadTouch_exit;
 		return;
 	}
 
@@ -580,6 +442,14 @@ void playVideo(char* dirname, uint32_t imgCount) {
 	//Jump here when pausing a video
 showFrame:
 	renderVideoFrameWithHUD(frameNumber, true);
+
+	//Wait for finger release from the button that opened or paused this video
+	{
+		uint32_t tEnter = millis();
+		while (touch_touched() && (millis() - tEnter) < 1000u) {
+			delay(5);
+		}
+	}
 
 	//Repeat until we get a valid touch
 	do {

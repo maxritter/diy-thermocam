@@ -61,8 +61,8 @@ int buttons_addButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height, c
 {
 	int btcnt = 0;
 
-	while (((buttons[btcnt].flags & BUTTON_UNUSED) == 0)
-			&& (btcnt < 20))
+	while ((btcnt < 20)
+			&& ((buttons[btcnt].flags & BUTTON_UNUSED) == 0))
 		btcnt++;
 
 	if (btcnt == 20)
@@ -86,7 +86,7 @@ int buttons_addButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height, c
 {
 	int btcnt = 0;
 
-	while (((buttons[btcnt].flags & BUTTON_UNUSED) == 0) && (btcnt < 20))
+	while ((btcnt < 20) && ((buttons[btcnt].flags & BUTTON_UNUSED) == 0))
 		btcnt++;
 
 	if (btcnt == 20)
@@ -231,127 +231,81 @@ void buttons_deleteAllButtons() {
 	}
 }
 
-/* Check which button is pressed */
-int buttons_checkButtons(boolean timeout, boolean fast) {
-	TS_Point p = touch_getPoint();
-	int x = p.x;
-	int y = p.y;
-	int result = -1;
-	word _current_color = display_getColor();
-	int xpos, ypos, width, height;
+/* Draw 2px rounded border highlight/restore for a button */
+static void drawButtonOutline(int buttonID, word borderColor) {
+	if (buttonID < 0 || (buttons[buttonID].flags & BUTTON_NO_BORDER))
+		return;
+	const int x1 = buttons[buttonID].pos_x;
+	const int y1 = buttons[buttonID].pos_y;
+	const int x2 = x1 + buttons[buttonID].width;
+	const int y2 = y1 + buttons[buttonID].height;
+	display_setColor(borderColor);
+	display_drawRoundRect(x1, y1, x2, y2);
+	display_drawRoundRect(x1 - 1, y1 - 1, x2 + 1, y2 + 1);
+}
+
+/* Hit-test touch coordinates against all enabled buttons */
+static int findPressedButton(int x, int y) {
 	for (int i = 0; i < 20; i++) {
-		xpos = buttons[i].pos_x;
-		ypos = buttons[i].pos_y;
-		width = buttons[i].width;
-		height = buttons[i].height;
+		if ((buttons[i].flags & (BUTTON_UNUSED | BUTTON_DISABLED)) != 0)
+			continue;
+		int xpos = buttons[i].pos_x;
+		int ypos = buttons[i].pos_y;
+		int width = buttons[i].width;
+		int height = buttons[i].height;
 		if (buttons[i].largetouch) {
 			xpos -= 30;
 			ypos -= 20;
 			width += 60;
 			height += 40;
 		}
-		if (((buttons[i].flags & BUTTON_UNUSED) == 0)
-				&& ((buttons[i].flags & BUTTON_DISABLED) == 0)
-				&& (result == -1)) {
-			if ((x >= xpos)
-					&& (x <= (xpos + width))
-					&& (y >= ypos)
-					&& (y <= (ypos + height)))
-				result = i;
-		}
+		if (x >= xpos && x <= (xpos + width) && y >= ypos && y <= (ypos + height))
+			return i;
 	}
-	if (result != -1) {
-		if (!(buttons[result].flags & BUTTON_NO_BORDER)) {
-			display_setColor(buttons_colorHilite);
-			if (buttons[result].flags & BUTTON_BITMAP)
-				display_drawRoundRect(buttons[result].pos_x,
-						buttons[result].pos_y,
-						buttons[result].pos_x + buttons[result].width,
-						buttons[result].pos_y + buttons[result].height);
-			else
-				display_drawRoundRect(buttons[result].pos_x,
-						buttons[result].pos_y,
-						buttons[result].pos_x + buttons[result].width,
-						buttons[result].pos_y + buttons[result].height);
-			display_drawRoundRect(buttons[result].pos_x - 1,
-					buttons[result].pos_y - 1,
-					buttons[result].pos_x + buttons[result].width + 1,
-					buttons[result].pos_y + buttons[result].height + 1);
-		}
+	return -1;
+}
+
+/* Fill a button with active or inactive colors and redraw its centered label */
+static void drawButtonState(int buttonID, word fillColor, word textColor) {
+	const button_type& b = buttons[buttonID];
+	display_setColor(fillColor);
+	display_fillRoundRect(b.pos_x + 1, b.pos_y + 1,
+			b.pos_x + b.width - 1, b.pos_y + b.height - 1);
+	display_setFont(buttons_fontText);
+	display_setColor(textColor);
+	int text_x = (b.width / 2) - ((strlen(b.label) * display_getFontXsize()) / 2) + b.pos_x;
+	int text_y = (b.height / 2) - (display_getFontYsize() / 2) + b.pos_y;
+	display_setBackColor(fillColor);
+	display_print(b.label, text_x, text_y);
+}
+
+/* Check which button is pressed */
+int buttons_checkButtons(boolean timeout, boolean fast) {
+	TS_Point p = touch_getPoint();
+	word savedColor = display_getColor();
+	int result = findPressedButton(p.x, p.y);
+
+	drawButtonOutline(result, buttons_colorHilite);
+
+	uint32_t waitMs = fast ? 50u : (timeout ? 150u : 1500u);
+	uint32_t startMs = millis();
+	while (touch_touched() && ((millis() - startMs) < waitMs)) {
+		delay(5);
 	}
-	if (fast) {
-		long time = millis();
-		while ((touch_touched() == 1)
-				&& ((millis() - time) < 50)) {
-		};
-	}
-	else if (timeout) {
-		long time = millis();
-		while ((touch_touched() == 1)
-				&& ((millis() - time) < 150)) {
-		};
-	}
-	else {
-		while (touch_touched() == 1) {
-		};
-	}
-	if (result != -1) {
-		if (!(buttons[result].flags & BUTTON_NO_BORDER)) {
-			display_setColor(buttons_colorBorder);
-			if (buttons[result].flags & BUTTON_BITMAP)
-				display_drawRoundRect(buttons[result].pos_x,
-						buttons[result].pos_y,
-						buttons[result].pos_x + buttons[result].width,
-						buttons[result].pos_y + buttons[result].height);
-			else
-				display_drawRoundRect(buttons[result].pos_x,
-						buttons[result].pos_y,
-						buttons[result].pos_x + buttons[result].width,
-						buttons[result].pos_y + buttons[result].height);
-			display_drawRoundRect(buttons[result].pos_x - 1,
-					buttons[result].pos_y - 1,
-					buttons[result].pos_x + buttons[result].width + 1,
-					buttons[result].pos_y + buttons[result].height + 1);
-		}
-	}
-	display_setColor(_current_color);
+
+	drawButtonOutline(result, buttons_colorBorder);
+	display_setColor(savedColor);
 	return result;
 }
 
 /* Set a specific button to active (thermal orange accent pill) */
 void buttons_setActive(int buttonID) {
-	int text_x, text_y;
-	display_setColor(UI_ACCENT);
-	display_fillRoundRect(buttons[buttonID].pos_x + 1, buttons[buttonID].pos_y + 1,
-			buttons[buttonID].pos_x + buttons[buttonID].width - 1,
-			buttons[buttonID].pos_y + buttons[buttonID].height - 1);
-	display_setFont(buttons_fontText);
-	display_setColor(UI_ACCENT_FG);
-	text_x = ((buttons[buttonID].width / 2)
-			- ((strlen(buttons[buttonID].label) * display_getFontXsize()) / 2))
-				+ buttons[buttonID].pos_x;
-	text_y = (buttons[buttonID].height / 2) - (display_getFontYsize() / 2)
-				+ buttons[buttonID].pos_y;
-	display_setBackColor(UI_ACCENT);
-	display_print(buttons[buttonID].label, text_x, text_y);
+	drawButtonState(buttonID, UI_ACCENT, UI_ACCENT_FG);
 }
 
 /* Set a specific button to inactive */
 void buttons_setInactive(int buttonID) {
-	int text_x, text_y;
-	display_setColor(buttons_colorBackGround);
-	display_fillRoundRect(buttons[buttonID].pos_x + 1, buttons[buttonID].pos_y + 1,
-			buttons[buttonID].pos_x + buttons[buttonID].width - 1,
-			buttons[buttonID].pos_y + buttons[buttonID].height - 1);
-	display_setFont(buttons_fontText);
-	display_setColor(buttons_colorText);
-	text_x = ((buttons[buttonID].width / 2)
-			- ((strlen(buttons[buttonID].label) * display_getFontXsize()) / 2))
-				+ buttons[buttonID].pos_x;
-	text_y = (buttons[buttonID].height / 2) - (display_getFontYsize() / 2)
-				+ buttons[buttonID].pos_y;
-	display_setBackColor(buttons_colorBackGround);
-	display_print(buttons[buttonID].label, text_x, text_y);
+	drawButtonState(buttonID, buttons_colorBackGround, buttons_colorText);
 }
 
 /* Set the text font of all buttons */

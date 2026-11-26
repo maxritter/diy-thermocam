@@ -8,9 +8,9 @@
 #include <display.h>
 #include <touchscreen.h>
 #include <fonts.h>
-#include <bitmaps.h>
 #include <buttons.h>
 #include <hardware.h>
+#include <battery.h>
 #include <connection.h>
 #include <perf.h>
 #include <sdcard.h>
@@ -190,20 +190,65 @@ void showModalCard(const char *title, const char *line1, const char *line2, cons
 	}
 }
 
+/* Bounded wait for finger release so a button tap never bleeds into the next screen */
+void ui_waitTouchRelease(uint32_t maxMs)
+{
+	uint32_t t0 = millis();
+	while (touch_touched() && ((millis() - t0) < maxMs))
+	{
+		delay(5);
+	}
+}
+
+/* Shared 2026 Yes/No confirmation modal with bezel-safe bottom buttons */
+bool ui_confirmDialog(const char* title, const char* headline, const char* line1, const char* line2, bool highlightYes)
+{
+	drawTitle((char *)title, true);
+	display_setColor(UI_SURFACE);
+	display_fillRoundRect(12, 46, 308, 162);
+	display_setColor(UI_BORDER);
+	display_drawRoundRect(12, 46, 308, 162);
+
+	display_setFont(smallFont);
+	display_setBackColor(UI_SURFACE);
+	display_setColor(UI_TEXT);
+	if (headline && headline[0])
+		display_print((char *)headline, CENTER, 68);
+	display_setColor(UI_MUTED);
+	if (line1 && line1[0])
+		display_print((char *)line1, CENTER, 102);
+	if (line2 && line2[0])
+		display_print((char *)line2, CENTER, 122);
+
+	buttons_deleteAllButtons();
+	buttons_setTextFont(bigFont);
+	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
+	buttons_addButton(12, 178, 142, 46, (char *)"No");
+	buttons_drawButtons();
+	if (highlightYes)
+		buttons_setActive(0);
+	buttons_setTextFont(smallFont);
+
+	ui_waitTouchRelease(1000u);
+	while (true)
+	{
+		checkSerial();
+		if (touch_touched())
+		{
+			int pressed = buttons_checkButtons(true);
+			if (pressed == 0) return true;
+			if (pressed == 1) return false;
+		}
+		delay(5);
+	}
+}
+
 /* Wait for finger release (1500 ms max) + 120 ms settle + arm post-menu touch lockout */
 void ui_waitTouchReleaseAndLockout(uint32_t lockoutMs)
 {
-	uint32_t t0 = millis();
-	while (touch_touched() && ((millis() - t0) < 1500u))
-	{
-		delay(5);
-	}
+	ui_waitTouchRelease(1500u);
 	delay(120);
-	uint32_t t1 = millis();
-	while (touch_touched() && ((millis() - t1) < 300u))
-	{
-		delay(5);
-	}
+	ui_waitTouchRelease(300u);
 	noInterrupts();
 	touchIrqFlag = false;
 	showMenu = showMenu_disabled;
@@ -355,7 +400,7 @@ void bootScreen()
 	// Subtitle + version line
 	display_setFont(smallFont);
 	display_setColor(UI_AMBER);
-	display_print((char *)"RADIOMETRIC LWIR  |  V3", CENTER, 166);
+	display_print((char *)"RADIOMETRIC LWIR  |  V4", CENTER, 166);
 
 	display_setColor(UI_BORDER);
 	display_drawHLine(72, 188, 176);
@@ -365,9 +410,12 @@ void bootScreen()
 	delay(500);
 }
 
-/* Draw 2026 live Status & Telemetry card with bezel-safe inset bottom Back pill */
+/* Draw 2026 live Status & Telemetry card (100% RAM-composited into bigBuffer -> single atomic LCD flush, zero flicker!) */
 void drawStatusScreen()
 {
+	const bool prevWrite = display_writeToImage;
+	display_writeToImage = true;
+
 	display_fillScr(UI_BG);
 
 	// Non-touch top header bar (28px)
@@ -446,22 +494,69 @@ void drawStatusScreen()
 	display_setBackColor(UI_SURFACE);
 	display_setColor(UI_TEXT);
 	display_print((char *)"< Back", 59, 203);
+
+	display_writeToImage = prevWrite;
+	displayBuffer();
 }
 
-/* Interactive Status & Telemetry screen */
+namespace {
+struct StatusSnapshot {
+	uint16_t live_fps_x100;
+	uint32_t vospi_resyncs;
+	uint32_t vospi_crc_errors;
+	int8_t bat_pct;
+	uint16_t bat_mv;
+	uint32_t sd_free_mb;
+	uint32_t sd_total_mb;
+	int16_t mcu_temp_x10;
+	byte diag;
+	uint8_t theme;
+
+	bool operator!=(const StatusSnapshot& o) const {
+		return std::memcmp(this, &o, sizeof(StatusSnapshot)) != 0;
+	}
+};
+
+static StatusSnapshot captureStatusSnapshot() {
+	StatusSnapshot s{};
+	s.live_fps_x100 = g_perf.live_fps_x100;
+	s.vospi_resyncs = g_perf.vospi_resyncs;
+	s.vospi_crc_errors = g_perf.vospi_crc_errors;
+	s.bat_pct = batPercentage;
+	s.bat_mv = batMillivolts;
+	s.sd_free_mb = getSDFreeKB() / 1024u;
+	s.sd_total_mb = getSDTotalKB() / 1024u;
+	s.mcu_temp_x10 = static_cast<int16_t>(roundf(perf_mcu_temp_c() * 10.0f));
+	s.diag = diagnostic;
+	s.theme = uiThemeMode;
+	return s;
+}
+} // namespace
+
+/* Interactive Status & Telemetry screen (atomic RAM-composited updates, refreshes only when values change) */
 void showStatusScreen()
 {
 	buttons_deleteAllButtons();
 	buttons_addButton(12, 192, 142, 34, (char *)"", 0x0010);
+	checkBattery(false, false);
+	StatusSnapshot prevSnap = captureStatusSnapshot();
 	drawStatusScreen();
 	uint32_t t0 = millis();
 	while (touch_touched() && (millis() - t0) < 1000u) { delay(5); }
 	uint32_t lastRefreshMs = millis();
 	while (true) {
-		checkSerial();
-		if ((millis() - lastRefreshMs) >= 500u) {
-			lastRefreshMs = millis();
+		if (checkSerial()) {
+			prevSnap = captureStatusSnapshot();
 			drawStatusScreen();
+		}
+		if ((millis() - lastRefreshMs) >= 1000u) {
+			lastRefreshMs = millis();
+			checkBattery(false, false);
+			StatusSnapshot curSnap = captureStatusSnapshot();
+			if (curSnap != prevSnap) {
+				prevSnap = curSnap;
+				drawStatusScreen();
+			}
 		}
 		if (touch_touched()) {
 			int btn = buttons_checkButtons(true);

@@ -22,6 +22,5 @@
 
 void enterMassStorage();
 void setMassStorage();
-void checkMassStorage();
 
 #endif /* MASSSTORAGE_H */

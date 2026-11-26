@@ -10,6 +10,8 @@ Run build/upload from `firmware/`:
 arduino-cli compile                 # uses sketch.yaml (Teensy 4.1, 450 MHz, -O3, core 1.62.0)
 arduino-cli board list              # locate serial port
 arduino-cli upload -p <port>        # requires camera switched on; opens Teensy Loader
+make -C tests_host test             # C++17 host unit tests (protocol v2 + thermal core)
+make -C sim test                    # interactive UI & touch/redraw simulator regression suite
 ```
 
 Hardware regression suite (run from `firmware/test/` against a flashed camera):

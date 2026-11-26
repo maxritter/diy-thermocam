@@ -40,17 +40,18 @@
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
+static bool isLiveModeAcceptingInput()
+{
+	return !showMenu && !videoSave && !longTouch && !imgSave && !serialMode;
+}
+
 /* Non-blocking Touch ISR: only latches edge flag & honors post-menu lockout */
 void touchIRQ()
 {
 	if (touchLockoutUntilMs != 0 && static_cast<int32_t>(millis() - touchLockoutUntilMs) < 0)
-	{
 		return;
-	}
-	if ((!showMenu) && (!videoSave) && (!longTouch) && (!imgSave) && (!serialMode))
-	{
+	if (isLiveModeAcceptingInput())
 		touchIrqFlag = true;
-	}
 }
 
 /* Non-blocking Button ISR: only latches edge flag (no busy-wait in ISR!) */
@@ -66,10 +67,8 @@ void buttonIRQ()
 		videoSave = videoSave_menu;
 		return;
 	}
-	if ((!showMenu) && (!videoSave) && (!longTouch) && (!imgSave) && (!serialMode))
-	{
+	if (isLiveModeAcceptingInput())
 		buttonIrqFlag = true;
-	}
 }
 
 /* Poll deferred touch / button presses in main loop without blocking IRQs */
@@ -125,117 +124,43 @@ static void pollLiveInputs()
 	}
 }
 
+static void cycleManualTempPreset()
+{
+	static const uint16_t kSetFlags[3] = {eeprom_minMax1Set, eeprom_minMax2Set, eeprom_minMax3Set};
+	static const byte kPresetIds[3] = {minMax_preset1, minMax_preset2, minMax_preset3};
+	static const char* const kMessages[3] = {"Switch to Preset 1", "Switch to Preset 2", "Switch to Preset 3"};
+
+	byte current = EEPROM.read(eeprom_minMaxPreset);
+	int startIdx = (current >= minMax_preset1 && current <= minMax_preset3) ? (current - minMax_preset1) : -1;
+
+	for (int step = 1; step <= 3; ++step)
+	{
+		int cand = (startIdx + step) % 3;
+		if (cand == startIdx)
+			continue;
+		if (EEPROM.read(kSetFlags[cand]) == eeprom_setValue)
+		{
+			showTransMessage(const_cast<char *>(kMessages[cand]));
+			EEPROM.write(eeprom_minMaxPreset, kPresetIds[cand]);
+			readTempLimits();
+			return;
+		}
+	}
+	showTransMessage((char *)"No other Preset");
+}
+
 /* Handler for a long touch press */
 void longTouchHandler()
 {
-	//When in auto mode, toggle between locked & unlocked
 	if (autoMode)
 	{
-		//Unlock limits and enable auto FFC
-		if (limitsLocked)
-		{
-			showTransMessage((char *)"Limits unlocked");
-			limitsLocked = false;
-			lepton_ffcMode(true);
-		}
-
-		//Lock limits and disable auto FFC
-		else
-		{
-			lepton_ffcMode(false);
-			showTransMessage((char *)"Limits locked");
-			limitsLocked = true;
-		}
+		limitsLocked = !limitsLocked;
+		lepton_ffcMode(!limitsLocked);
+		showTransMessage(limitsLocked ? (char *)"Limits locked" : (char *)"Limits unlocked");
 	}
-
-	//When in manual mode, toggle between presets
 	else
 	{
-		//Read preset from EEPROM
-		byte minMaxPreset = EEPROM.read(eeprom_minMaxPreset);
-
-		//When in temporary limits
-		if (minMaxPreset == minMax_temporary)
-		{
-			if (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 1");
-				minMaxPreset = minMax_preset1;
-			}
-			else if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 2");
-				minMaxPreset = minMax_preset2;
-			}
-			else if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 3");
-				minMaxPreset = minMax_preset3;
-			}
-			else
-				showTransMessage((char *)"No other Preset");
-		}
-
-		//When in preset 1
-		else if (minMaxPreset == minMax_preset1)
-		{
-			if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 2");
-				minMaxPreset = minMax_preset2;
-			}
-			else if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 3");
-				minMaxPreset = minMax_preset3;
-			}
-			else
-				showTransMessage((char *)"No other Preset");
-		}
-
-		//When in preset 2
-		else if (minMaxPreset == minMax_preset2)
-		{
-			if (EEPROM.read(eeprom_minMax3Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 3");
-				minMaxPreset = minMax_preset3;
-			}
-			else if (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 1");
-				minMaxPreset = minMax_preset1;
-			}
-			else
-				showTransMessage((char *)"No other Preset");
-		}
-
-		//When in preset 3
-		else if (minMaxPreset == minMax_preset3)
-		{
-			if (EEPROM.read(eeprom_minMax1Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 1");
-				minMaxPreset = minMax_preset1;
-			}
-			else if (EEPROM.read(eeprom_minMax2Set) == eeprom_setValue)
-			{
-				showTransMessage((char *)"Switch to Preset 2");
-				minMaxPreset = minMax_preset2;
-			}
-			else
-				showTransMessage((char *)"No other Preset");
-		}
-
-		//When not using temporary preset
-		if (minMaxPreset != minMax_temporary)
-		{
-			//Save new preset to EEPROM
-			EEPROM.write(eeprom_minMaxPreset, minMaxPreset);
-
-			//Load the new limits
-			readTempLimits();
-		}
+		cycleManualTempPreset();
 	}
 
 	//Disable lock limits menu & prevent finger-lift bounce into main menu

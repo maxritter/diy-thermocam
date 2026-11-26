@@ -265,14 +265,6 @@ void checkHardware()
 		showDiagnostic();
 }
 
-/* A method to check if the touch screen is pressed */
-boolean touchScreenPressed()
-{
-	//Check button status with debounce
-	touchDebouncer.update();
-	return touchDebouncer.read();
-}
-
 /* A method to check if the external button is pressed */
 boolean extButtonPressed()
 {

@@ -1,32 +1,22 @@
 /*
-*
-* SETTINGS MENU - Adjust different on-device settings
-*
-* DIY-Thermocam Firmware
-*
-* GNU General Public License v3.0
-*
-* Copyright by Max Ritter
-*
-* http://www.diy-thermocam.net
-* https://github.com/maxritter/diy-thermocam
-*
-*/
-
-/*################################# INCLUDES ##################################*/
+ * SETTINGS MENU - On-device General, Hardware, Display, and Theme settings
+ *
+ * DIY-Thermocam Firmware — GNU GPL v3.0 — Copyright by Max Ritter
+ * http://www.diy-thermocam.net | https://github.com/maxritter/diy-thermocam
+ */
 
 #include <Arduino.h>
+#include <EEPROM.h>
+#include <TimeLib.h>
 #include <globaldefines.h>
 #include <globalvariables.h>
 #include <display.h>
 #include <gui.h>
 #include <hardware.h>
 #include <mainmenu.h>
-#include <TimeLib.h>
 #include <fonts.h>
 #include <lepton.h>
 #include <touchscreen.h>
-#include <EEPROM.h>
 #include <battery.h>
 #include <sdcard.h>
 #include <create.h>
@@ -35,12 +25,23 @@
 #include <connection.h>
 #include <settingsmenu.h>
 
-/*######################## PUBLIC FUNCTION BODIES #############################*/
+namespace {
 
-/* Second Menu */
-void secondMenu(bool firstStart)
+/* Shared numeric stepper (- / + / < Back) for Time & Date fields. */
+struct StepperSpec {
+	const char* title;
+	int minVal;
+	int maxVal;
+	bool wrap;
+	bool firstStart;
+	int (*readVal)();
+	void (*writeVal)(int);
+	void (*onReturn)(bool);
+};
+
+void runNumericStepper(const StepperSpec& spec)
 {
-	drawTitle((char *)"Second", firstStart);
+	drawTitle(const_cast<char *>(spec.title), spec.firstStart);
 	buttons_deleteAllButtons();
 	buttons_setTextFont(bigFont);
 	buttons_addButton(12, 54, 72, 76, (char *)"-");
@@ -48,461 +49,157 @@ void secondMenu(bool firstStart)
 	buttons_setTextFont(smallFont);
 	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
 	buttons_drawButtons();
-	drawCenterElement(second());
-	//Touch handler
+	drawCenterElement(spec.readVal());
+	ui_waitTouchRelease();
+
 	while (true)
 	{
 		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//Minus
-			if (pressedButton == 0)
+			int pressed = buttons_checkButtons(true);
+			int cur = spec.readVal();
+			if (pressed == 0)
 			{
-				if (second() > 0)
-					setTime(hour(), minute(), second() - 1, day(), month(), year());
-				else
-					setTime(hour(), minute(), 59, day(), month(), year());
-				drawCenterElement(second());
+				int next = (cur > spec.minVal) ? (cur - 1) : (spec.wrap ? spec.maxVal : cur);
+				if (next != cur) { spec.writeVal(next); drawCenterElement(spec.readVal()); }
 			}
-			//Plus
-			else if (pressedButton == 1)
+			else if (pressed == 1)
 			{
-				if (second() < 59)
-					setTime(hour(), minute(), second() + 1, day(), month(), year());
-				else
-					setTime(hour(), minute(), 0, day(), month(), year());
-				drawCenterElement(second());
+				int next = (cur < spec.maxVal) ? (cur + 1) : (spec.wrap ? spec.minVal : cur);
+				if (next != cur) { spec.writeVal(next); drawCenterElement(spec.readVal()); }
 			}
-			//Back
-			else if (pressedButton == 2)
+			else if (pressed == 2)
 			{
 				Teensy3Clock.set(now());
-				timeMenu(firstStart);
-				break;
+				spec.onReturn(spec.firstStart);
+				return;
 			}
 		}
 		delay(5);
 	}
 }
 
-/* Minute Menu */
-void minuteMenu(bool firstStart)
+void drawThreeTileSubmenu(const char* title, const char* b0, const char* b1, const char* b2, bool firstStart)
 {
-	drawTitle((char *)"Minute", firstStart);
+	drawTitle(const_cast<char *>(title), firstStart);
 	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char *)"-");
-	buttons_addButton(236, 54, 72, 76, (char *)"+");
 	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
+	buttons_addButton(12, 46, 142, 62, const_cast<char *>(b0));
+	buttons_addButton(166, 46, 142, 62, const_cast<char *>(b1));
+	buttons_addButton(12, 118, 142, 62, const_cast<char *>(b2));
+	if (firstStart)
+		buttons_addButton(166, 192, 142, 34, (char *)"Save");
+	else
+		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
-	drawCenterElement(minute());
-	//Touch handler
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons(true);
-			//Minus
-			if (pressedButton == 0)
-			{
-				if (minute() > 0)
-					setTime(hour(), minute() - 1, second(), day(), month(), year());
-				else
-					setTime(hour(), 59, second(), day(), month(), year());
-				drawCenterElement(minute());
-			}
-			//Plus
-			else if (pressedButton == 1)
-			{
-				if (minute() < 59)
-					setTime(hour(), minute() + 1, second(), day(), month(), year());
-				else
-					setTime(hour(), 0, second(), day(), month(), year());
-				drawCenterElement(minute());
-			}
-			//Back
-			else if (pressedButton == 2)
-			{
-				Teensy3Clock.set(now());
-				timeMenu(firstStart);
-				break;
-			}
-		}
-		delay(5);
-	}
+	if (firstStart)
+		buttons_setActive(3);
 }
 
-/* Hour menu */
-void hourMenu(bool firstStart)
+void runThreeTileHandler(bool firstStart, void (*redraw)(bool), void (*act0)(bool), void (*act1)(bool), void (*act2)(bool))
 {
-	drawTitle((char *)"Hour", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char *)"-");
-	buttons_addButton(236, 54, 72, 76, (char *)"+");
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
-	buttons_drawButtons();
-	drawCenterElement(hour());
-	//Touch handler
+	ui_waitTouchRelease();
 	while (true)
 	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
+		if (checkSerial())
+			redraw(firstStart);
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//Minus
-			if (pressedButton == 0)
+			int pressed = buttons_checkButtons();
+			if (pressed == 0) act0(firstStart);
+			else if (pressed == 1) act1(firstStart);
+			else if (pressed == 2) act2(firstStart);
+			else if (pressed == 3)
 			{
-				if (hour() > 0)
-					setTime(hour() - 1, minute(), second(), day(), month(), year());
-				else
-					setTime(23, minute(), second(), day(), month(), year());
-				drawCenterElement(hour());
-			}
-			//Plus
-			else if (pressedButton == 1)
-			{
-				if (hour() < 23)
-					setTime(hour() + 1, minute(), second(), day(), month(), year());
-				else
-					setTime(0, minute(), second(), day(), month(), year());
-				drawCenterElement(hour());
-			}
-			//Back
-			else if (pressedButton == 2)
-			{
-				Teensy3Clock.set(now());
-				timeMenu(firstStart);
-				break;
+				if (!firstStart) generalMenu();
+				return;
 			}
 		}
 		delay(5);
 	}
 }
 
-/* Day Menu */
-void dayMenu(bool firstStart)
+/* Shared two-option binary toggle menu (Disabled/Enabled, C/F, High/Low Gain). */
+bool runBinaryOptionMenu(const char* title, const char* opt0, const char* opt1, const char* doneLbl,
+                         bool initialState, bool doneOnRight, bool firstStart)
 {
-	drawTitle((char *)"Day", firstStart);
+	drawTitle(const_cast<char *>(title), firstStart);
 	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char *)"-");
-	buttons_addButton(236, 54, 72, 76, (char *)"+");
 	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
+	buttons_addButton(12, 46, 142, 72, const_cast<char *>(opt0));
+	buttons_addButton(166, 46, 142, 72, const_cast<char *>(opt1));
+	buttons_addButton(doneOnRight ? 166 : 12, 192, 142, 34, const_cast<char *>(doneLbl));
 	buttons_drawButtons();
-	drawCenterElement(day());
-	//Touch handler
+
+	bool state = initialState;
+	buttons_setActive(state ? 1 : 0);
+	ui_waitTouchRelease();
+
 	while (true)
 	{
 		checkSerial();
-		//touch press
-		if (touch_touched() == true)
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//Minus
-			if (pressedButton == 0)
+			int pressed = buttons_checkButtons();
+			if (pressed == 0 && state)
 			{
-				if (day() > 1)
-					setTime(hour(), minute(), second(), day() - 1, month(), year());
-				else
-					setTime(hour(), minute(), second(), 31, month(), year());
-				drawCenterElement(day());
+				state = false;
+				buttons_setActive(0);
+				buttons_setInactive(1);
 			}
-			//Plus
-			else if (pressedButton == 1)
+			else if (pressed == 1 && !state)
 			{
-				if (day() < 31)
-					setTime(hour(), minute(), second(), day() + 1, month(), year());
-				else
-					setTime(hour(), minute(), second(), 1, month(), year());
-				drawCenterElement(day());
+				state = true;
+				buttons_setActive(1);
+				buttons_setInactive(0);
 			}
-			//Back
-			else if (pressedButton == 2)
+			else if (pressed == 2)
 			{
-				Teensy3Clock.set(now());
-				dateMenu(firstStart);
-				break;
+				return state;
 			}
 		}
 		delay(5);
 	}
 }
 
-/* Month Menu */
-void monthMenu(bool firstStart)
-{
-	drawTitle((char *)"Month", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char *)"-");
-	buttons_addButton(236, 54, 72, 76, (char *)"+");
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
-	buttons_drawButtons();
-	drawCenterElement(month());
-	//Touch handler
-	while (true)
-	{
-		checkSerial();
-		//touch press
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons(true);
-			//Minus
-			if (pressedButton == 0)
-			{
-				if (month() > 1)
-					setTime(hour(), minute(), second(), day(), month() - 1, year());
-				else
-					setTime(hour(), minute(), second(), day(), 12, year());
-				drawCenterElement(month());
-			}
-			//Plus
-			else if (pressedButton == 1)
-			{
-				if (month() < 12)
-					setTime(hour(), minute(), second(), day(), month() + 1, year());
-				else
-					setTime(hour(), minute(), second(), day(), 1, year());
-				drawCenterElement(month());
-			}
-			//Back
-			else if (pressedButton == 2)
-			{
-				Teensy3Clock.set(now());
-				dateMenu(firstStart);
-				break;
-			}
-		}
-		delay(5);
-	}
-}
+void setSec(int v)  { setTime(hour(), minute(), v, day(), month(), year()); }
+void setMin(int v)  { setTime(hour(), v, second(), day(), month(), year()); }
+void setHr(int v)   { setTime(v, minute(), second(), day(), month(), year()); }
+void setDy(int v)   { setTime(hour(), minute(), second(), v, month(), year()); }
+void setMon(int v)  { setTime(hour(), minute(), second(), day(), v, year()); }
+void setYr(int v)   { setTime(hour(), minute(), second(), day(), month(), v); }
 
-/* Year Menu */
-void yearMenu(bool firstStart)
-{
-	drawTitle((char *)"Year", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(12, 54, 72, 76, (char *)"-");
-	buttons_addButton(236, 54, 72, 76, (char *)"+");
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 190, 142, 36, (char *)"< Back");
-	buttons_drawButtons();
-	drawCenterElement(year());
-	//Touch handler
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons(true);
-			//Minus
-			if (pressedButton == 0)
-			{
-				if (year() > 2020)
-				{
-					setTime(hour(), minute(), second(), day(), month(), year() - 1);
-					drawCenterElement(year());
-				}
-			}
-			//Plus
-			else if (pressedButton == 1)
-			{
-				if (year() < 2099)
-				{
-					setTime(hour(), minute(), second(), day(), month(), year() + 1);
-					drawCenterElement(year());
-				}
-			}
-			//Back
-			else if (pressedButton == 2)
-			{
-				Teensy3Clock.set(now());
-				dateMenu(firstStart);
-				break;
-			}
-		}
-		delay(5);
-	}
-}
+} // namespace
 
-/* Calibrate the battery gauge */
+/* Time & Date field steppers */
+void secondMenu(bool firstStart) { runNumericStepper({"Second", 0, 59, true, firstStart, []() { return second(); }, setSec, timeMenu}); }
+void minuteMenu(bool firstStart) { runNumericStepper({"Minute", 0, 59, true, firstStart, []() { return minute(); }, setMin, timeMenu}); }
+void hourMenu(bool firstStart)   { runNumericStepper({"Hour",   0, 23, true, firstStart, []() { return hour(); },   setHr,  timeMenu}); }
+void dayMenu(bool firstStart)    { runNumericStepper({"Day",    1, 31, true, firstStart, []() { return day(); },    setDy,  dateMenu}); }
+void monthMenu(bool firstStart)  { runNumericStepper({"Month",  1, 12, true, firstStart, []() { return month(); },  setMon, dateMenu}); }
+void yearMenu(bool firstStart)   { runNumericStepper({"Year", 2020, 2099, false, firstStart, []() { return year(); }, setYr, dateMenu}); }
+
+/* Calibrate the battery voltage gauge against a full charge. */
 void batteryGauge()
 {
-	//Title & 2026 Surface Card
-	drawTitle((char *)"Battery Gauge", true);
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 46, 308, 162);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 46, 308, 162);
-	display_setColor(UI_TEXT);
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_print((char *)"Calibrate battery gauge now?", CENTER, 68);
-	display_setColor(UI_TEXT_MUTED);
-	display_print((char *)"Fully charge the battery first", CENTER, 102);
-	display_print((char *)"until LED turns green / blue.", CENTER, 122);
-	//Draw bezel-safe buttons (No left, Yes right)
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
-	buttons_addButton(12, 178, 142, 46, (char *)"No");
-	buttons_drawButtons();
-	buttons_setTextFont(smallFont);
-	//Touch handler
-	while (true)
+	if (ui_confirmDialog("Battery Gauge", "Calibrate battery gauge now?",
+		"Fully charge the battery first", "until LED turns green / blue."))
 	{
-		checkSerial();
-		//If touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons(true);
-			//YES
-			if (pressedButton == 0)
-			{
-				//Calc the compensation value
-				checkBattery(false, true);
-
-				//Show Message
-				showFullMessage((char *)"Battery gauge calibrated", true);
-				delay(1000);
-				break;
-			}
-
-			//NO
-			else if (pressedButton == 1)
-			{
-				break;
-			}
-		}
-		delay(5);
+		checkBattery(false, true);
+		showFullMessage((char *)"Battery gauge calibrated", true);
+		delay(1000);
 	}
-
 	hardwareMenu();
 }
 
-/* Date Menu */
-void dateMenu(bool firstStart)
-{
-	drawTitle((char *)"Date", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 62, (char *)"Day");
-	buttons_addButton(166, 46, 142, 62, (char *)"Month");
-	buttons_addButton(12, 118, 142, 62, (char *)"Year");
-	if (firstStart)
-		buttons_addButton(166, 192, 142, 34, (char *)"Save");
-	else
-		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
-	if (firstStart)
-		buttons_setActive(3);
-}
+/* Date & Time hub menus */
+void dateMenu(bool firstStart)        { drawThreeTileSubmenu("Date", "Day", "Month", "Year", firstStart); }
+void dateMenuHandler(bool firstStart) { runThreeTileHandler(firstStart, dateMenu, dayMenu, monthMenu, yearMenu); }
+void timeMenu(bool firstStart)        { drawThreeTileSubmenu("Time", "Hour", "Minute", "Second", firstStart); }
+void timeMenuHandler(bool firstStart) { runThreeTileHandler(firstStart, timeMenu, hourMenu, minuteMenu, secondMenu); }
 
-/* Date Menu Handler */
-void dateMenuHandler(bool firstStart)
-{
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons();
-			//Day
-			if (pressedButton == 0)
-			{
-				dayMenu(firstStart);
-			}
-			//Month
-			else if (pressedButton == 1)
-			{
-				monthMenu(firstStart);
-			}
-			//Year
-			else if (pressedButton == 2)
-			{
-				yearMenu(firstStart);
-			}
-			//Back
-			else if (pressedButton == 3)
-			{
-				if (!firstStart)
-					generalMenu();
-				break;
-			}
-		}
-		delay(5);
-	}
-}
-
-/* Time Menu */
-void timeMenu(bool firstStart)
-{
-	drawTitle((char *)"Time", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 62, (char *)"Hour");
-	buttons_addButton(166, 46, 142, 62, (char *)"Minute");
-	buttons_addButton(12, 118, 142, 62, (char *)"Second");
-	if (firstStart)
-		buttons_addButton(166, 192, 142, 34, (char *)"Save");
-	else
-		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
-	if (firstStart)
-		buttons_setActive(3);
-}
-
-/* Time Menu Handler */
-void timeMenuHandler(bool firstStart)
-{
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons();
-			//Hours
-			if (pressedButton == 0)
-			{
-				hourMenu(firstStart);
-			}
-			//Minutes
-			else if (pressedButton == 1)
-			{
-				minuteMenu(firstStart);
-			}
-			//Seconds
-			else if (pressedButton == 2)
-			{
-				secondMenu(firstStart);
-			}
-			//Back
-			else if (pressedButton == 3)
-			{
-				if (!firstStart)
-					generalMenu();
-				break;
-			}
-		}
-		delay(5);
-	}
-}
-
-/* General Menu */
+/* General Settings menu */
 void generalMenu()
 {
 	drawTitle((char *)"General Settings");
@@ -515,282 +212,74 @@ void generalMenu()
 	buttons_drawButtons();
 }
 
-/* General Menu Handler */
 void generalMenuHandler()
 {
+	ui_waitTouchRelease();
 	while (true)
 	{
-		checkSerial();
-		if (touch_touched() == true)
+		if (checkSerial())
+			generalMenu();
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons();
-
-			//Time
-			if (pressedButton == 0)
-			{
-				timeMenu();
-				timeMenuHandler();
-			}
-
-			//Date
-			else if (pressedButton == 1)
-			{
-				dateMenu();
-				dateMenuHandler();
-			}
-
-			//BMP Conversion
-			else if (pressedButton == 2)
-			{
-				convertImageMenu();
-			}
-
-			//Back
-			else if (pressedButton == 3)
-			{
-				settingsMenu();
-				break;
-			}
+			int pressed = buttons_checkButtons();
+			if (pressed == 0) { timeMenu(); timeMenuHandler(); }
+			else if (pressed == 1) { dateMenu(); dateMenuHandler(); }
+			else if (pressed == 2) convertImageMenu();
+			else if (pressed == 3) { settingsMenu(); return; }
 		}
 		delay(5);
 	}
 }
 
-/* Convert image selection menu */
+/* Toggle automatic 640x480 BMP companion export alongside raw .DAT captures. */
 void convertImageMenu(bool firstStart)
 {
-	drawTitle((char *)"BMP Conversion", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 72, (char *)"Disabled");
-	buttons_addButton(166, 46, 142, 72, (char *)"Enabled");
-	if (firstStart)
-	{
-		buttons_addButton(166, 192, 142, 34, (char *)"Set");
-		convertEnabled = false;
-	}
-	else
-		buttons_addButton(12, 192, 142, 34, (char *)"< Back");
-	buttons_drawButtons();
-	if (!convertEnabled)
-		buttons_setActive(0);
-	else
-		buttons_setActive(1);
-
-	//Touch handler
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons();
-			//Disabled
-			if (pressedButton == 0)
-			{
-				if (convertEnabled)
-				{
-					convertEnabled = false;
-					buttons_setActive(0);
-					buttons_setInactive(1);
-				}
-			}
-			//Enabled
-			else if (pressedButton == 1)
-			{
-				if (!convertEnabled)
-				{
-					convertEnabled = true;
-					buttons_setActive(1);
-					buttons_setInactive(0);
-				}
-			}
-
-			//Save
-			else if (pressedButton == 2)
-			{
-				//Write new settings to EEPROM
-				EEPROM.write(eeprom_convertEnabled, convertEnabled);
-
-				if (!firstStart)
-					generalMenu();
-				return;
-			}
-		}
-		delay(5);
-	}
+	if (firstStart) convertEnabled = false;
+	convertEnabled = runBinaryOptionMenu(
+		"BMP Conversion", "Disabled", "Enabled",
+		firstStart ? "Set" : "< Back",
+		convertEnabled, firstStart, firstStart);
+	EEPROM.write(eeprom_convertEnabled, convertEnabled);
+	if (!firstStart) generalMenu();
 }
 
-/* Asks the user if he really wants to format */
+/* Confirm and format the internal SD card (FAT32 / exFAT). */
 void formatStorage()
 {
-	//Title & 2026 Surface Card
-	drawTitle((char *)"Format SD Card");
-	display_setColor(UI_SURFACE);
-	display_fillRoundRect(12, 46, 308, 162);
-	display_setColor(UI_BORDER);
-	display_drawRoundRect(12, 46, 308, 162);
-	display_setColor(UI_TEXT);
-	display_setFont(smallFont);
-	display_setBackColor(UI_SURFACE);
-	display_print((char *)"Format the SD card now?", CENTER, 68);
-	display_setColor(UI_TEXT_MUTED);
-	display_print((char *)"This deletes ALL images and", CENTER, 102);
-	display_print((char *)"videos on the internal storage.", CENTER, 122);
-	//Draw bezel-safe buttons (No left, Yes right)
-	buttons_deleteAllButtons();
-	buttons_setTextFont(bigFont);
-	buttons_addButton(166, 178, 142, 46, (char *)"Yes");
-	buttons_addButton(12, 178, 142, 46, (char *)"No");
-	buttons_drawButtons();
-	buttons_setTextFont(smallFont);
-	//Touch handler
-	while (true)
+	if (ui_confirmDialog("Format SD Card", "Format the SD card now?",
+		"This deletes ALL images and", "videos on the internal storage."))
 	{
-		checkSerial();
-		//If touch pressed
-		if (touch_touched() == true)
+		showFullMessage((char *)"Format storage..", true);
+		if (!formatCard())
 		{
-			int pressedButton = buttons_checkButtons(true);
-			//YES
-			if (pressedButton == 0)
-			{
-				showFullMessage((char *)"Format storage..", true);
-				if (!formatCard())
-				{
-					showFullMessage((char *)"Error during formatting!", true);
-					delay(1000);
-					break;
-				}
-				refreshFreeSpace();
-				showFullMessage((char *)"Formatting finished", true);
-				delay(1000);
-				break;
-			}
-			//NO
-			if (pressedButton == 1)
-			{
-				break;
-			}
+			showFullMessage((char *)"Error during formatting!", true);
+			delay(1000);
 		}
-		delay(5);
+		else
+		{
+			refreshFreeSpace();
+			showFullMessage((char *)"Formatting finished", true);
+			delay(1000);
+		}
 	}
-
 	hardwareMenu();
 }
 
+/* Switch FLIR Lepton high-gain (-10..+140 C) vs low-gain (-10..+450 C) radiometric mode. */
 void changeLeptonGain()
 {
-	/* Generate menu */
-	drawTitle((char *)"Lepton Gain");
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 72, (char *)"-10C to +140C");
-	buttons_addButton(166, 46, 142, 72, (char *)"-10C to +450C");
-	buttons_addButton(166, 192, 142, 34, (char *)"Save");
-	buttons_drawButtons();
-	if (leptonGainMode == lepton_gain_high)
-		buttons_setActive(0);
-	else
-		buttons_setActive(1);
-	//Touch handler
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons();
-			//High gain
-			if (pressedButton == 0)
-			{
-				if (leptonGainMode == lepton_gain_low)
-				{
-					leptonGainMode = lepton_gain_high;
-					buttons_setActive(0);
-					buttons_setInactive(1);
-				}
-			}
-			//Low gain
-			else if (pressedButton == 1)
-			{
-				if (leptonGainMode == lepton_gain_high)
-				{
-					leptonGainMode = lepton_gain_low;
-					buttons_setActive(1);
-					buttons_setInactive(0);
-				}
-			}
-			//Save
-			else if (pressedButton == 2)
-			{
-				//Change gain mode
-				if (leptonGainMode == lepton_gain_low)
-				{
-					lepton_setLowGain();
-				}
-				else
-				{
-					lepton_setHighGain();
-				}
-
-				//Write new settings to EEPROM
-				EEPROM.write(eeprom_lepton_gain, leptonGainMode);
-
-				//Trigger shutter
-				lepton_ffc(true, true);
-
-				hardwareMenu();
-				return;
-			}
-		}
-		delay(5);
-	}
+	bool isLow = runBinaryOptionMenu(
+		"Lepton Gain", "-10C to +140C", "-10C to +450C", "Save",
+		leptonGainMode == lepton_gain_low, true, false);
+	leptonGainMode = isLow ? lepton_gain_low : lepton_gain_high;
+	if (leptonGainMode == lepton_gain_low) lepton_setLowGain();
+	else lepton_setHighGain();
+	EEPROM.write(eeprom_lepton_gain, leptonGainMode);
+	lepton_ffc(true, true);
+	hardwareMenu();
 }
 
-/* Hardware menu handler*/
-void hardwareMenuHandler()
-{
-	while (true)
-	{
-		checkSerial();
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons();
-			//Battery Gauge
-			if (pressedButton == 0)
-			{
-				batteryGauge();
-			}
-			//Lepton Gain
-			else if (pressedButton == 1)
-			{
-				changeLeptonGain();
-			}
-			//Format
-			else if (pressedButton == 2)
-			{
-				formatStorage();
-			}
-			//USB MTP (moved out of automatic plug-in popup into Settings)
-			else if (pressedButton == 3)
-			{
-				if (massStoragePrompt())
-					setMassStorage();
-				hardwareMenu();
-			}
-			//Back
-			else if (pressedButton == 4)
-			{
-				settingsMenu();
-				break;
-			}
-		}
-		delay(5);
-	}
-}
-
-/* Hardware menu */
+/* Hardware Settings menu */
 void hardwareMenu()
 {
 	drawTitle((char *)"Hardware Settings");
@@ -804,72 +293,40 @@ void hardwareMenu()
 	buttons_drawButtons();
 }
 
-/* Temperature format menu */
-void tempFormatMenu(bool firstStart)
+void hardwareMenuHandler()
 {
-	drawTitle((char *)"Temp. Format", firstStart);
-	buttons_deleteAllButtons();
-	buttons_setTextFont(smallFont);
-	buttons_addButton(12, 46, 142, 72, (char *)"Celsius (C)");
-	buttons_addButton(166, 46, 142, 72, (char *)"Fahrenheit (F)");
-	buttons_addButton(166, 192, 142, 34, (char *)"Save");
-	if (firstStart)
-	{
-		buttons_relabelButton(2, (char *)"Set", false);
-		tempFormat = tempFormat_celcius;
-	}
-	buttons_drawButtons();
-	if (tempFormat == tempFormat_celcius)
-		buttons_setActive(tempFormat_celcius);
-	else
-		buttons_setActive(tempFormat_fahrenheit);
-	//Touch handler
+	ui_waitTouchRelease();
 	while (true)
 	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
+		if (checkSerial())
+			hardwareMenu();
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons();
-			//Celsius
-			if (pressedButton == 0)
-			{
-				if (tempFormat == tempFormat_fahrenheit)
-				{
-					tempFormat = tempFormat_celcius;
-					buttons_setActive(0);
-					buttons_setInactive(1);
-				}
-			}
-			//Fahrenheit
-			else if (pressedButton == 1)
-			{
-				if (tempFormat == tempFormat_celcius)
-				{
-					tempFormat = tempFormat_fahrenheit;
-					buttons_setActive(1);
-					buttons_setInactive(0);
-				}
-			}
-			//Save
-			else if (pressedButton == 2)
-			{
-				//Write new settings to EEPROM
-				EEPROM.write(eeprom_tempFormat, tempFormat);
-				if (firstStart)
-					return;
-				else
-				{
-					displayMenu();
-				}
-				break;
-			}
+			int pressed = buttons_checkButtons();
+			if (pressed == 0) batteryGauge();
+			else if (pressed == 1) changeLeptonGain();
+			else if (pressed == 2) formatStorage();
+			else if (pressed == 3) { if (massStoragePrompt()) setMassStorage(); hardwareMenu(); }
+			else if (pressed == 4) { settingsMenu(); return; }
 		}
 		delay(5);
 	}
 }
 
-/* Rotate display menu */
+/* Select Celsius vs Fahrenheit temperature display units. */
+void tempFormatMenu(bool firstStart)
+{
+	if (firstStart) tempFormat = tempFormat_celcius;
+	bool isF = runBinaryOptionMenu(
+		"Temp. Format", "Celsius (C)", "Fahrenheit (F)",
+		firstStart ? "Set" : "Save",
+		tempFormat == tempFormat_fahrenheit, true, firstStart);
+	tempFormat = isF ? tempFormat_fahrenheit : tempFormat_celcius;
+	EEPROM.write(eeprom_tempFormat, tempFormat);
+	if (!firstStart) displayMenu();
+}
+
+/* Configure 180-degree display rotation or horizontal mirror flip. */
 void rotateDisplayMenu(bool firstStart)
 {
 	drawTitle((char *)"Disp. Rotation", firstStart);
@@ -878,77 +335,42 @@ void rotateDisplayMenu(bool firstStart)
 	buttons_addButton(12, 46, 142, 62, (char *)"Rotate 180");
 	buttons_addButton(166, 46, 142, 62, (char *)"Hor. Flip");
 	buttons_addButton(12, 118, 142, 62, (char *)"Normal");
-	buttons_addButton(166, 192, 142, 34, (char *)"Save");
-	if (firstStart)
-		buttons_relabelButton(3, (char *)"Set", false);
+	buttons_addButton(166, 192, 142, 34, firstStart ? (char *)"Set" : (char *)"Save");
 	buttons_drawButtons();
-	if (rotationVert)
-		buttons_setActive(0);
-	else if (rotationHorizont)
-		buttons_setActive(1);
-	else
-		buttons_setActive(2);
-	//Touch handler
+
+	int activeIdx = rotationVert ? 0 : (rotationHorizont ? 1 : 2);
+	buttons_setActive(activeIdx);
+	ui_waitTouchRelease();
+
 	while (true)
 	{
 		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons();
-			//Rotate 180°
-			if (pressedButton == 0)
+			int pressed = buttons_checkButtons();
+			if (pressed >= 0 && pressed <= 2 && pressed != activeIdx)
 			{
-				if (!rotationVert)
-				{
-					rotationVert = true;
-					rotationHorizont = false;
-					buttons_setActive(0);
-					buttons_setInactive(1);
-					buttons_setInactive(2);
-				}
+				buttons_setInactive(activeIdx);
+				activeIdx = pressed;
+				buttons_setActive(activeIdx);
+				rotationVert = (activeIdx == 0);
+				rotationHorizont = (activeIdx == 1);
 			}
-			//Mirror horizontally
-			else if (pressedButton == 1)
+			else if (pressed == 3)
 			{
-				if (!rotationHorizont)
-				{
-					rotationHorizont = true;
-					rotationVert = false;
-					buttons_setActive(1);
-					buttons_setInactive(0);
-					buttons_setInactive(2);
-				}
-			}
-			//Disable
-			else if (pressedButton == 2)
-			{
-				rotationVert = false;
-				rotationHorizont = false;
-				buttons_setActive(2);
-				buttons_setInactive(0);
-				buttons_setInactive(1);
-			}
-			//Save
-			else if (pressedButton == 3)
-			{
-				//Write new settings to EEPROM
 				EEPROM.write(eeprom_rotationVert, rotationVert);
 				EEPROM.write(eeprom_rotationHorizont, rotationHorizont);
-				if (firstStart)
-					return;
-				//Set the rotation
+				if (firstStart) return;
 				setDisplayRotation();
-				//Show the display menu
 				displayMenu();
-				break;
+				return;
 			}
 		}
 		delay(5);
 	}
 }
 
-/* Screen timeout menu */
+/* Configure automatic display backlight sleep timeout. */
 void screenTimeoutMenu()
 {
 	drawTitle((char *)"Screen Timeout");
@@ -959,40 +381,34 @@ void screenTimeoutMenu()
 	buttons_addButton(12, 118, 142, 62, (char *)"20 Min.");
 	buttons_addButton(12, 192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
-	//Set current one active
 	buttons_setActive(screenOffTime);
-	//Touch handler
+	ui_waitTouchRelease();
+
 	while (true)
 	{
 		checkSerial();
-		//Touch pressed
-		if (touch_touched() == true)
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons();
-			//Set to new timeout
-			if ((pressedButton == 0) || (pressedButton == 1) || (pressedButton == 2))
+			int pressed = buttons_checkButtons();
+			if (pressed >= 0 && pressed <= 2)
 			{
 				buttons_setInactive(screenOffTime);
-				screenOffTime = pressedButton;
+				screenOffTime = static_cast<byte>(pressed);
 				buttons_setActive(screenOffTime);
 			}
-			//Save
-			else if (pressedButton == 3)
+			else if (pressed == 3)
 			{
-				//Write new settings to EEPROM
 				EEPROM.write(eeprom_screenOffTime, screenOffTime);
-				//Init timer
 				initScreenOffTimer();
-				//Return to display menu
 				displayMenu();
-				break;
+				return;
 			}
 		}
 		delay(5);
 	}
 }
 
-/* Draw dedicated 2026 Theme Selector screen (Dark / Daylight Light / High-Contrast) */
+/* Draw dedicated 2026 Theme Selector screen (Dark / Daylight Light / High-Contrast). */
 void drawThemeMenu()
 {
 	drawTitle((char *)"UI Theme");
@@ -1006,14 +422,15 @@ void drawThemeMenu()
 	buttons_setActive(uiThemeMode);
 }
 
-/* Interactive Theme Selector (persisted immediately to EEPROM) */
+/* Interactive Theme Selector (persisted immediately to EEPROM). */
 void themeMenu()
 {
 	drawThemeMenu();
-	while (touch_touched()) {}
+	ui_waitTouchRelease();
 	while (true)
 	{
-		checkSerial();
+		if (checkSerial())
+			drawThemeMenu();
 		if (touch_touched())
 		{
 			int pressed = buttons_checkButtons(true);
@@ -1032,49 +449,7 @@ void themeMenu()
 	}
 }
 
-/* Display menu handler*/
-void displayMenuHandler()
-{
-	while (true)
-	{
-		checkSerial();
-		//touch pressed
-		if (touch_touched() == true)
-		{
-			int pressedButton = buttons_checkButtons();
-			//Temp. format
-			if (pressedButton == 0)
-			{
-				tempFormatMenu();
-			}
-			//Rotate display
-			else if (pressedButton == 1)
-			{
-				rotateDisplayMenu();
-			}
-			//Screen timeout
-			else if (pressedButton == 2)
-			{
-				screenTimeoutMenu();
-			}
-			//Theme selector (Dark / Light / High-Contrast)
-			else if (pressedButton == 3)
-			{
-				themeMenu();
-				displayMenu();
-			}
-			//Back
-			else if (pressedButton == 4)
-			{
-				settingsMenu();
-				break;
-			}
-		}
-		delay(5);
-	}
-}
-
-/* Display menu */
+/* Display Settings menu */
 void displayMenu()
 {
 	drawTitle((char *)"Display Settings");
@@ -1090,50 +465,27 @@ void displayMenu()
 	buttons_drawButtons();
 }
 
-/* Touch handler for the settings menu */
-void settingsMenuHandler()
+void displayMenuHandler()
 {
+	ui_waitTouchRelease();
 	while (true)
 	{
-		checkSerial();
-		//touch press
-		if (touch_touched() == true)
+		if (checkSerial())
+			displayMenu();
+		if (touch_touched())
 		{
-			int pressedButton = buttons_checkButtons();
-
-			//General
-			if (pressedButton == 0)
-			{
-				generalMenu();
-				generalMenuHandler();
-			}
-			//Hardware
-			else if (pressedButton == 1)
-			{
-				hardwareMenu();
-				hardwareMenuHandler();
-			}
-			//Display
-			else if (pressedButton == 2)
-			{
-				displayMenu();
-				displayMenuHandler();
-			}
-			//Theme selector
-			else if (pressedButton == 3)
-			{
-				themeMenu();
-				settingsMenu();
-			}
-			//Back
-			else if (pressedButton == 4)
-				break;
+			int pressed = buttons_checkButtons();
+			if (pressed == 0) tempFormatMenu();
+			else if (pressed == 1) rotateDisplayMenu();
+			else if (pressed == 2) screenTimeoutMenu();
+			else if (pressed == 3) { themeMenu(); displayMenu(); }
+			else if (pressed == 4) { settingsMenu(); return; }
 		}
 		delay(5);
 	}
 }
 
-/* Settings menu main screen (modern 2026 card grid + Theme selector + inset < Back) */
+/* Top-level Settings menu */
 void settingsMenu()
 {
 	drawTitle((char *)"Settings");
@@ -1147,4 +499,24 @@ void settingsMenu()
 	buttons_addButton(166, 118, 142, 62, themeLbl);
 	buttons_addButton(12,  192, 142, 34, (char *)"< Back");
 	buttons_drawButtons();
+}
+
+void settingsMenuHandler()
+{
+	ui_waitTouchRelease();
+	while (true)
+	{
+		if (checkSerial())
+			settingsMenu();
+		if (touch_touched())
+		{
+			int pressed = buttons_checkButtons();
+			if (pressed == 0) { generalMenu(); generalMenuHandler(); }
+			else if (pressed == 1) { hardwareMenu(); hardwareMenuHandler(); }
+			else if (pressed == 2) { displayMenu(); displayMenuHandler(); }
+			else if (pressed == 3) { themeMenu(); settingsMenu(); }
+			else if (pressed == 4) return;
+		}
+		delay(5);
+	}
 }

@@ -48,39 +48,6 @@ void boxFilter()
 	g_perf.filter_us = micros() - t0;
 }
 
-//Resize the pixels of thermal smallBuffer
-void resizePixels(unsigned short *pixels, int w1, int h1, int w2, int h2)
-{
-	//Calculate the ratio
-	int x_ratio = (int)((w1 << 16) / w2) + 1;
-	int y_ratio = (int)((h1 << 16) / h2) + 1;
-	int x2, y2;
-	for (int i = 0; i < h2; i++)
-	{
-		for (int j = 0; j < w2; j++)
-		{
-			x2 = ((j * x_ratio) >> 16);
-			y2 = ((i * y_ratio) >> 16);
-			pixels[(i * w1) + j] = pixels[(y2 * w1) + x2];
-		}
-	}
-	//Set the other pixels to zero
-	for (int j = 0; j < h2; j++)
-	{
-		for (int i = w2; i < w1; i++)
-		{
-			pixels[i + (j * w1)] = 65535;
-		}
-	}
-	for (int j = h2; j < h1; j++)
-	{
-		for (int i = 0; i < w1; i++)
-		{
-			pixels[i + (j * w1)] = 65535;
-		}
-	}
-}
-
 /* Write the smallBuffer to the bigBuffer using fast integer clamped Catmull-Rom 2x */
 void smallToBigBuffer()
 {
@@ -181,48 +148,63 @@ void getTouchPos(uint16_t *x, uint16_t *y)
 	if (*y > 239) *y = 239;
 }
 
+static bool hasActiveTempPoints()
+{
+	for (byte i = 0; i < 96; i++)
+	{
+		if (tempPoints[i][0] != 0)
+			return true;
+	}
+	return false;
+}
+
+static int findFreeTempPointSlot()
+{
+	for (int i = 0; i < 96; i++)
+	{
+		if (tempPoints[i][0] == 0)
+			return i;
+	}
+	return -1;
+}
+
+static bool removeTempPointsNear(uint16_t cx, uint16_t cy)
+{
+	bool removed = false;
+	for (byte i = 0; i < 96; i++)
+	{
+		uint16_t idx = tempPoints[i][0];
+		if (idx < 1 || idx > tc_core::SMALL_PIXELS)
+			continue;
+		int px = static_cast<int>((idx - 1u) % 160u);
+		int py = static_cast<int>((idx - 1u) / 160u);
+		if (abs(px - static_cast<int>(cx)) <= 10 && abs(py - static_cast<int>(cy)) <= 10)
+		{
+			tempPoints[i][0] = 0;
+			tempPoints[i][1] = 0;
+			removed = true;
+		}
+	}
+	return removed;
+}
+
 /* Function to add or remove a measurement point */
 void tempPointFunction(bool remove)
 {
-	uint16_t xpos, ypos;
-	byte pos = 0;
-	bool removed = false;
-
-	//If remove points, check if there are some first
+	int freeSlot = 0;
 	if (remove)
 	{
-		//Go through the array
-		for (byte i = 0; i < 96; i++)
-		{
-			if (tempPoints[i][0] != 0)
-			{
-				removed = true;
-				break;
-			}
-		}
-		//No points available to remove
-		if (!removed)
+		if (!hasActiveTempPoints())
 		{
 			showFullMessage((char *)"No points available", true);
 			delay(1000);
 			return;
 		}
 	}
-	//If add points, check if we have space left
 	else
 	{
-		//Go through the array
-		byte i;
-		for (i = 0; i < 96; i++)
-		{
-			if (tempPoints[i][0] == 0)
-			{
-				pos = i;
-				break;
-			}
-		}
-		//Maximum number of points added
-		if (i == 96)
+		freeSlot = findFreeTempPointSlot();
+		if (freeSlot < 0)
 		{
 			showFullMessage((char *)"Remove a point first", true);
 			delay(1000);
@@ -230,104 +212,45 @@ void tempPointFunction(bool remove)
 		}
 	}
 
-redraw:
-	//Create thermal small buffer
-	lepton_startFrame();
-	createThermalImg();
-
-	//Show it on the screen
-	displayBuffer();
-
-	//Set text color, font and background
-	changeTextColor();
-	display_setBackColor(VGA_TRANSPARENT);
-	display_setFont(smallFont);
-	//Show current temperature points
-	showTemperatures();
-	//Display title
-	display_setFont(bigFont);
-	display_print((char *)"Select position", CENTER, 210);
-
-	//Get touched coordinates
-	getTouchPos(&xpos, &ypos);
-
-	//Divide through 2 to match 160x120 array size & clamp strictly in-bounds
-	xpos /= 2;
-	ypos /= 2;
-	if (xpos > 159) xpos = 159;
-	if (ypos > 119) ypos = 119;
-
-	//Remove point
-	if (remove)
+	while (true)
 	{
-		//Set marker to false
-		removed = false;
+		lepton_startFrame();
+		createThermalImg();
+		displayBuffer();
 
-		//Check for 10 pixels around the touch position (signed bounds prevent underflow!)
-		int xMin = static_cast<int>(xpos) - 10;
-		int xMax = static_cast<int>(xpos) + 10;
-		int yMin = static_cast<int>(ypos) - 10;
-		int yMax = static_cast<int>(ypos) + 10;
-		if (xMin < 0) xMin = 0;
-		if (xMax > 159) xMax = 159;
-		if (yMin < 0) yMin = 0;
-		if (yMax > 119) yMax = 119;
+		changeTextColor();
+		display_setBackColor(VGA_TRANSPARENT);
+		display_setFont(smallFont);
+		showTemperatures();
+		display_setFont(bigFont);
+		display_print((char *)"Select position", CENTER, 210);
 
-		for (int x = xMin; x <= xMax; x++)
-		{
-			for (int y = yMin; y <= yMax; y++)
-			{
-				//Calculate index number
-				uint16_t index = static_cast<uint16_t>(x + (y * 160) + 1);
-				//If index is valid
-				if ((index >= 1) && (index <= 19200))
-				{
-					//Check for all 96 points
-					for (byte i = 0; i < 96; i++)
-					{
-						//We found a valid temperature point
-						if (tempPoints[i][0] == index)
-						{
-							//Set to invalid
-							tempPoints[i][0] = 0;
-							//Reset value
-							tempPoints[i][1] = 0;
-							//Set markter to true
-							removed = true;
-						}
-					}
-				}
-			}
-		}
-		//Show border
+		uint16_t xpos = 0, ypos = 0;
+		getTouchPos(&xpos, &ypos);
+		xpos = (xpos / 2u > 159u) ? 159u : static_cast<uint16_t>(xpos / 2u);
+		ypos = (ypos / 2u > 119u) ? 119u : static_cast<uint16_t>(ypos / 2u);
+
 		drawMainMenuBorder();
-		//Show removed message
-		if (removed)
-			showFullMessage((char *)"Point removed", true);
-		//Invalid position, redraw
-		else
+		if (remove)
 		{
+			if (removeTempPointsNear(xpos, ypos))
+			{
+				showFullMessage((char *)"Point removed", true);
+				delay(1000);
+				return;
+			}
 			showFullMessage((char *)"Invalid position", true);
 			delay(1000);
-			goto redraw;
+		}
+		else
+		{
+			tempPoints[freeSlot][0] = static_cast<uint16_t>(xpos + (ypos * 160u) + 1u);
+			tempPoints[freeSlot][1] = 0;
+			showFullMessage((char *)"Point added", true);
+			delay(1000);
+			return;
 		}
 	}
-
-	//Add point
-	else
-	{
-		//Add index
-		tempPoints[pos][0] = xpos + (ypos * 160) + 1;
-		//Set raw value to zero
-		tempPoints[pos][1] = 0;
-		//Show border
-		drawMainMenuBorder();
-		//Show message
-		showFullMessage((char *)"Point added", true);
-	}
-
-	//Wait some time
-	delay(1000);
 }
 
 /* Go through the array of temperatures and find min and max temp (fused single pass) */

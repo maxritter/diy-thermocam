@@ -30,6 +30,8 @@ void showStatusScreen();
 void showFullMessage(char* message, bool small = false);
 void showModalCard(const char* title, const char* line1, const char* line2 = nullptr, const char* hint = nullptr);
 void showTransMessage(char* msg);
+void ui_waitTouchRelease(uint32_t maxMs = 1000u);
 void ui_waitTouchReleaseAndLockout(uint32_t lockoutMs = 250u);
+bool ui_confirmDialog(const char* title, const char* headline, const char* line1, const char* line2, bool highlightYes = false);
 
 #endif /* GUI_H */

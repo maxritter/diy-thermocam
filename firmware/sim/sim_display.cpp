@@ -2,6 +2,7 @@
 #include <globaldefines.h>
 #include <globalvariables.h>
 #include <display.h>
+#include "sim_harness.h"
 
 // Host 320x240 RGB565 framebuffer
 uint16_t sim_fb[320 * 240];
@@ -132,6 +133,12 @@ void display_drawLine(int x1, int y1, int x2, int y2) {
 }
 
 void display_fillScr(word color) {
+	if (display_writeToImage && bigBuffer) {
+		g_sim.stats.buffer_fill_scr++;
+	} else {
+		g_sim.stats.direct_fill_scr++;
+		g_sim.stats.direct_draw_ops++;
+	}
 	uint16_t* dst = activeBuf();
 	for (int i = 0; i < 320 * 240; ++i) dst[i] = color;
 }
@@ -151,6 +158,7 @@ void display_drawRect(int x1, int y1, int x2, int y2) {
 }
 
 void display_fillRect(int x1, int y1, int x2, int y2) {
+	if (!display_writeToImage) g_sim.stats.direct_draw_ops++;
 	if (x1 > x2) std::swap(x1, x2);
 	if (y1 > y2) std::swap(y1, y2);
 	int w = x2 - x1;
@@ -243,6 +251,7 @@ void display_fillCircle(int x, int y, int radius) {
 }
 
 void display_printChar(byte c, int x, int y) {
+	if (!display_writeToImage) g_sim.stats.direct_draw_ops++;
 	if (!cfont.font || c < cfont.offset || c >= cfont.offset + cfont.numchars) return;
 	const int row_bytes = cfont.x_size / 8;
 	word temp = static_cast<word>(((c - cfont.offset) * (row_bytes * cfont.y_size)) + 4);
@@ -380,5 +389,6 @@ void display_blendRect(int x, int y, int w, int h, word color, uint8_t alpha_num
 }
 
 void display_writeScreen(unsigned short* pcolors) {
+	g_sim.stats.atomic_flushes++;
 	std::memcpy(sim_fb, pcolors, sizeof(sim_fb));
 }

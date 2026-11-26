@@ -30,7 +30,6 @@ void getTouchPos(uint16_t* x, uint16_t* y);
 void limitValues();
 void refreshMinMax();
 void refreshTempPoints();
-void resizePixels(unsigned short* pixels, int w1, int h1, int w2, int h2);
 void showTemperatures();
 void smallToBigBuffer();
 void tempPointFunction(bool remove = false);

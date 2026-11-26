@@ -48,6 +48,5 @@ bool screenOffCheck();
 void setDiagnostic(byte device);
 void setDisplayRotation();
 void toggleDisplay();
-boolean touchScreenPressed();
 
 #endif /* HARDWARE_H */

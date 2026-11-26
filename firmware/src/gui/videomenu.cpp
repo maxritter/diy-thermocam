@@ -291,7 +291,7 @@ void videoCaptureNormal(uint32_t* framesCaptured, uint16_t* folderFrames, char* 
 	displayBuffer();
 }
 
-void videoCreateFolder(char *dirName) {
+bool videoCreateFolder(char *dirName) {
 	createSDName(dirName, true);
 	if(!sd.chdir("/"))
 	{
@@ -300,11 +300,16 @@ void videoCreateFolder(char *dirName) {
 		{
 			showFullMessage((char*) "Error creating folder!");
 			delay(1000);
-			return;
+			return false;
 		}
 	}
-	sd.mkdir(dirName);
-	sd.chdir(dirName);
+	if (!sd.mkdir(dirName) || !sd.chdir(dirName)) {
+		showFullMessage((char*) "Error creating folder!");
+		delay(1000);
+		sd.chdir("/");
+		return false;
+	}
+	return true;
 }
 
 /* This screen is shown during the video capture */
@@ -324,7 +329,12 @@ void videoCapture() {
 	delay(900);
 
 	//Create folder
-	videoCreateFolder(dirName);
+	if (!videoCreateFolder(dirName)) {
+		videoSave = videoSave_disabled;
+		disableSPIIRQ = false;
+		lepton_startFrame();
+		return;
+	}
 
 	//Switch to recording mode
 	videoSave = videoSave_recording;
@@ -339,7 +349,9 @@ void videoCapture() {
 	//Main loop
 	while (videoSave == videoSave_recording) {
 		if (folderFrames >= 1000) {
-			videoCreateFolder(dirName);
+			if (!videoCreateFolder(dirName)) {
+				break;
+			}
 			folderFrames = 0;
 		}
 
@@ -383,6 +395,9 @@ void videoCapture() {
 		showFullMessage((char*) "Video capture finished");
 		delay(1000);
 	}
+
+	//Always restore SD CWD to root so subsequent still saves never land inside the video folder
+	sd.chdir("/");
 
 	//Refresh free space
 	refreshFreeSpace();

@@ -62,15 +62,6 @@ static uint16_t serialRead16()
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Get integer out of a text string */
-int getInt(String text)
-{
-	char temp[6];
-	text.toCharArray(temp, 5);
-	int x = atoi(temp);
-	return x;
-}
-
 /* Enter the serial connection mode if no display attached */
 bool checkNoDisplay()
 {
@@ -336,191 +327,80 @@ void setColorScheme()
 	Serial.write(CMD_SET_COLORSCHEME);
 }
 
-/* Set the temperature format */
-void setTempFormat()
+/* Read a single validated byte in [minVal, maxVal] from v1 serial, replying CMD_INVALID on failure */
+static bool readValidatedV1Byte(byte minVal, byte maxVal, byte *out)
 {
-	//If not enough data available, leave
 	if (!serialWait(1))
 	{
 		Serial.write(CMD_INVALID);
-		return;
+		return false;
 	}
-
-	//Read byte from serial port
 	byte read = Serial.read();
-
-	//Check if it has a valid number
-	if ((read >= 0) && (read <= 1))
-	{
-		//Set temperature format to input
-		tempFormat = read;
-		//Save to EEPROM
-		EEPROM.write(eeprom_tempFormat, tempFormat);
-	}
-	//Send invalid
-	else
+	if (read < minVal || read > maxVal)
 	{
 		Serial.write(CMD_INVALID);
-		return;
+		return false;
 	}
+	*out = read;
+	return true;
+}
 
-	//Send ACK
+/* Set the temperature format */
+void setTempFormat()
+{
+	byte read = 0;
+	if (!readValidatedV1Byte(0, 1, &read)) return;
+	tempFormat = read;
+	EEPROM.write(eeprom_tempFormat, tempFormat);
 	Serial.write(CMD_SET_TEMPFORMAT);
 }
 
 /* Set the show spot information */
 void setShowSpot()
 {
-	//If not enough data available, leave
-	if (!serialWait(1))
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Read byte from serial port
-	byte read = Serial.read();
-
-	//Check if it has a valid number
-	if ((read >= 0) && (read <= 1))
-	{
-		//Set show spot to input
-		spotEnabled = read;
-		//Save to EEPROM
-		EEPROM.write(eeprom_spotEnabled, spotEnabled);
-	}
-	//Send invalid
-	else
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Send ACK
+	byte read = 0;
+	if (!readValidatedV1Byte(0, 1, &read)) return;
+	spotEnabled = read;
+	EEPROM.write(eeprom_spotEnabled, spotEnabled);
 	Serial.write(CMD_SET_SHOWSPOT);
 }
 
 /* Set the show colorbar information */
 void setShowColorbar()
 {
-	//If not enough data available, leave
-	if (!serialWait(1))
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Read byte from serial port
-	byte read = Serial.read();
-
-	//Check if it has a valid number
-	if ((read >= 0) && (read <= 1))
-	{
-		//Set show colorbar to input
-		colorbarEnabled = read;
-		//Save to EEPROM
-		EEPROM.write(eeprom_colorbarEnabled, colorbarEnabled);
-	}
-	//Send invalid
-	else
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Send ACK
+	byte read = 0;
+	if (!readValidatedV1Byte(0, 1, &read)) return;
+	colorbarEnabled = read;
+	EEPROM.write(eeprom_colorbarEnabled, colorbarEnabled);
 	Serial.write(CMD_SET_SHOWCOLORBAR);
 }
 
-/* Set the show colorbar information */
+/* Set the min/max point display mode */
 void setMinMax()
 {
-	//If not enough data available, leave
-	if (!serialWait(1))
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Read byte from serial port
-	byte read = Serial.read();
-
-	//Check if it has a valid number
-	if ((read >= minMaxPoints_disabled) && (read <= minMaxPoints_both))
-	{
-		//Set show colorbar to input
-		minMaxPoints = read;
-		//Save to EEPROM
-		EEPROM.write(eeprom_minMaxPoints, minMaxPoints);
-	}
-	//Send invalid
-	else
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Send ACK
+	byte read = 0;
+	if (!readValidatedV1Byte(minMaxPoints_disabled, minMaxPoints_both, &read)) return;
+	minMaxPoints = read;
+	EEPROM.write(eeprom_minMaxPoints, minMaxPoints);
 	Serial.write(CMD_SET_SHOWMINMAX);
 }
 
 /* Set the shutter mode */
 void setShutterMode()
 {
-	//If not enough data available, leave
-	if (!serialWait(1))
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Read byte from serial port
-	byte read = Serial.read();
-
-	//Check if it has a valid number
-	if ((read >= 0) && (read <= 1))
-		//Set lepton shutter mode
-		lepton_ffcMode(read);
-	//Send invalid
-	else
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Send ACK
+	byte read = 0;
+	if (!readValidatedV1Byte(0, 1, &read)) return;
+	lepton_ffcMode(read);
 	Serial.write(CMD_SET_SHUTTERMODE);
 }
 
-/* Set the fitler type */
+/* Set the filter type */
 void setFilterType()
 {
-	//If not enough data available, leave
-	if (!serialWait(1))
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Read byte from serial port
-	byte read = Serial.read();
-
-	//Check if it has a valid number
-	if ((read >= filterType_none) && (read <= filterType_box))
-	{
-		//Set filter type to input
-		filterType = read;
-		//Save to EEPROM
-		EEPROM.write(eeprom_filterType, filterType);
-	}
-	//Send invalid
-	else
-	{
-		Serial.write(CMD_INVALID);
-		return;
-	}
-
-	//Send ACK
+	byte read = 0;
+	if (!readValidatedV1Byte(filterType_none, filterType_box, &read)) return;
+	filterType = read;
+	EEPROM.write(eeprom_filterType, filterType);
 	Serial.write(CMD_SET_FILTERTYPE);
 }
 

@@ -217,17 +217,30 @@ class ThermocamV2:
         self.ser.write(data)
         self.ser.flush()
 
+    def _align_to_magic(self) -> bool:
+        idx = self._buf.find(MAGIC)
+        if idx < 0:
+            if len(self._buf) > 3:
+                del self._buf[:-3]
+            return False
+        if idx > 0:
+            del self._buf[:idx]
+        return len(self._buf) >= HEADER_SIZE
+
+    def _decode_aligned_packet(self, total: int) -> Packet | None:
+        raw = bytes(self._buf[:total])
+        del self._buf[:total]
+        exp_crc = struct.unpack("<I", raw[-4:])[0]
+        if (zlib.crc32(raw[:-4]) & 0xFFFFFFFF) != exp_crc:
+            return None
+        if self.record_traffic:
+            self.raw_log.append(raw)
+        msg_type, flags = raw[5], raw[6]
+        seq, status = struct.unpack("<HH", raw[8:12])
+        return Packet(msg_type, flags, seq, status, raw[16:-4], raw)
+
     def _pop_packet(self) -> Packet | None:
-        while True:
-            idx = self._buf.find(MAGIC)
-            if idx < 0:
-                if len(self._buf) > 3:
-                    del self._buf[:-3]
-                return None
-            if idx > 0:
-                del self._buf[:idx]
-            if len(self._buf) < HEADER_SIZE:
-                return None
+        while self._align_to_magic():
             ver = self._buf[4]
             plen = struct.unpack("<I", self._buf[12:16])[0]
             if ver != PROTO_MAJOR or plen > MAX_PAYLOAD_LEN or self._buf[7] != header_crc8(self._buf[:16]):
@@ -236,16 +249,10 @@ class ThermocamV2:
             total = HEADER_SIZE + plen + TRAILER_SIZE
             if len(self._buf) < total:
                 return None
-            raw = bytes(self._buf[:total])
-            del self._buf[:total]
-            exp_crc = struct.unpack("<I", raw[-4:])[0]
-            if (zlib.crc32(raw[:-4]) & 0xFFFFFFFF) != exp_crc:
-                continue
-            if self.record_traffic:
-                self.raw_log.append(raw)
-            msg_type, flags = raw[5], raw[6]
-            seq, status = struct.unpack("<HH", raw[8:12])
-            return Packet(msg_type, flags, seq, status, raw[16:-4], raw)
+            pkt = self._decode_aligned_packet(total)
+            if pkt is not None:
+                return pkt
+        return None
 
     def read_packet(self, timeout: float = 2.0) -> Packet | None:
         deadline = time.monotonic() + timeout
@@ -358,7 +365,7 @@ class ThermocamV2:
                 continue
             if pkt.flags & FLAG_ERROR:
                 raise RuntimeError(f"FS_READ error status=0x{pkt.status:04x}")
-            off, dlen, eof, _ = struct.unpack("<IHBB", pkt.payload[:8])
+            off, dlen, _, _ = struct.unpack("<IHBB", pkt.payload[:8])
             assert off == len(out), f"chunk offset mismatch {off} != {len(out)}"
             out.extend(pkt.payload[8 : 8 + dlen])
             if not (pkt.flags & FLAG_MORE_CHUNKS):

@@ -271,7 +271,7 @@ static void tx_frame_raw(uint32_t frame_seq, uint64_t ts_us, float spot_c) {
 		pix_ptr = reinterpret_cast<const uint8_t*>(s_lepton2RowBuf);
 	}
 
-	uint8_t pts_buf[96 * 6];
+	uint8_t pts_buf[96 * 6] = {};
 	uint16_t pt_count = 0;
 	if (s_v2.stream.include_temp_points) {
 		for (int i = 0; i < 96; ++i) {
@@ -798,6 +798,221 @@ static void handle_fs_delete(uint16_t seq, const uint8_t* p, uint32_t len) {
 /*######################## CONTROL COMMAND DISPATCH ##########################*/
 /*######################## PACKET DISPATCHER #################################*/
 
+static void handle_goodbye(uint16_t seq, uint32_t len) {
+	if (len != 0) { tx_error(MSG_GOODBYE_RESP, seq, ERR_INVALID_ARG); return; }
+	abort_active_fs_read();
+	s_v2.stream.mode = 0;
+	tx_packet(MSG_GOODBYE_RESP, 0, seq, OK, nullptr, 0);
+	Serial.flush();
+	s_v2.running = false;
+}
+
+static void handle_ping(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 8) { tx_error(MSG_PONG_RESP, seq, ERR_INVALID_ARG); return; }
+	uint8_t out[16];
+	memcpy(out, p, 8);
+	write_u64_le(out + 8, perf_uptime_us());
+	tx_packet(MSG_PONG_RESP, 0, seq, OK, out, 16);
+}
+
+static void handle_get_config(uint16_t seq, uint32_t len) {
+	if (len != 0) { tx_error(MSG_GET_CONFIG_RESP, seq, ERR_INVALID_ARG); return; }
+	DeviceConfig c{};
+	populate_device_config(c);
+	uint8_t out[32];
+	encode_device_config(out, c);
+	tx_packet(MSG_GET_CONFIG_RESP, 0, seq, OK, out, 32);
+}
+
+static void handle_set_config(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 36) { tx_error(MSG_SET_CONFIG_RESP, seq, ERR_INVALID_ARG); return; }
+	uint8_t persist = p[0];
+	DeviceConfig c{};
+	if (persist > 1 || !decode_device_config(p + 4, 32, c) || !validate_device_config(c)) {
+		tx_error(MSG_SET_CONFIG_RESP, seq, ERR_INVALID_ARG);
+		return;
+	}
+	apply_device_config(c, persist != 0);
+	DeviceConfig active{};
+	populate_device_config(active);
+	uint8_t out[32];
+	encode_device_config(out, active);
+	tx_packet(MSG_SET_CONFIG_RESP, 0, seq, OK, out, 32);
+}
+
+static void handle_set_time(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 4) { tx_error(MSG_SET_TIME_RESP, seq, ERR_INVALID_ARG); return; }
+	uint32_t epoch = read_u32_le(p);
+	setTime(static_cast<time_t>(epoch));
+	Teensy3Clock.set(static_cast<time_t>(epoch));
+	uint8_t out[4];
+	write_u32_le(out, epoch);
+	tx_packet(MSG_SET_TIME_RESP, 0, seq, OK, out, 4);
+}
+
+static void handle_trigger_ffc(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 1) { tx_error(MSG_TRIGGER_FFC_RESP, seq, ERR_INVALID_ARG); return; }
+	bool force = (p[0] & 0x01u) != 0;
+	if (!autoMode && !force) { tx_error(MSG_TRIGGER_FFC_RESP, seq, ERR_FORBIDDEN); return; }
+	s_v2.ffc_state = 1;
+	emit_ffc_event(0, 0);
+	uint32_t t0 = millis();
+	bool err = lepton_ffc(false, force);
+	uint16_t dur = static_cast<uint16_t>(millis() - t0);
+	if (err) {
+		s_v2.ffc_state = 0;
+		emit_ffc_event(2, dur);
+		tx_error(MSG_TRIGGER_FFC_RESP, seq, ERR_IO);
+	} else {
+		s_v2.ffc_state = 2;
+		emit_ffc_event(1, dur);
+		uint8_t out[2] = {0, 0};
+		tx_packet(MSG_TRIGGER_FFC_RESP, 0, seq, OK, out, 2);
+	}
+}
+
+static void handle_get_temp_points(uint16_t seq, uint32_t len) {
+	if (len != 0) { tx_error(MSG_GET_TEMP_POINTS_RESP, seq, ERR_INVALID_ARG); return; }
+	const bool is_l3 = (leptonVersion == leptonVersion_3_5_shutter);
+	uint8_t out[2 + 96 * 6];
+	uint16_t cnt = 0;
+	for (int i = 0; i < 96; ++i) {
+		uint16_t idx = tempPoints[i][0];
+		if (idx != 0 && idx <= 19200u) {
+			uint16_t z = idx - 1u;
+			uint16_t px = is_l3 ? (z % 160u) : ((z % 160u) / 2u);
+			uint16_t py = is_l3 ? (z / 160u) : ((z / 160u) / 2u);
+			write_u16_le(out + 2 + cnt * 6 + 0, px);
+			write_u16_le(out + 2 + cnt * 6 + 2, py);
+			write_u16_le(out + 2 + cnt * 6 + 4, tempPoints[i][1]);
+			cnt++;
+		}
+	}
+	write_u16_le(out, cnt);
+	tx_packet(MSG_GET_TEMP_POINTS_RESP, 0, seq, OK, out, 2u + cnt * 6u);
+}
+
+static void handle_set_temp_points(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len < 2) { tx_error(MSG_SET_TEMP_POINTS_RESP, seq, ERR_INVALID_ARG); return; }
+	uint16_t cnt = read_u16_le(p);
+	if (cnt > 96 || len != 2u + cnt * 4u) {
+		tx_error(MSG_SET_TEMP_POINTS_RESP, seq, ERR_INVALID_ARG);
+		return;
+	}
+	const bool is_l3 = (leptonVersion == leptonVersion_3_5_shutter);
+	const uint16_t max_w = is_l3 ? 160u : 80u;
+	const uint16_t max_h = is_l3 ? 120u : 60u;
+	for (uint16_t i = 0; i < cnt; ++i) {
+		uint16_t x = read_u16_le(p + 2 + i * 4);
+		uint16_t y = read_u16_le(p + 2 + i * 4 + 2);
+		if (x >= max_w || y >= max_h) { tx_error(MSG_SET_TEMP_POINTS_RESP, seq, ERR_INVALID_ARG); return; }
+	}
+	clearTempPoints();
+	for (uint16_t i = 0; i < cnt; ++i) {
+		uint16_t x = read_u16_le(p + 2 + i * 4);
+		uint16_t y = read_u16_le(p + 2 + i * 4 + 2);
+		uint16_t sx = is_l3 ? x : (x * 2u);
+		uint16_t sy = is_l3 ? y : (y * 2u);
+		tempPoints[i][0] = static_cast<uint16_t>(sy * 160u + sx + 1u);
+		tempPoints[i][1] = smallBuffer[sy * 160u + sx];
+	}
+	uint8_t out[2];
+	write_u16_le(out, cnt);
+	tx_packet(MSG_SET_TEMP_POINTS_RESP, 0, seq, OK, out, 2);
+}
+
+static void handle_get_diagnostics(uint16_t seq, uint32_t len) {
+	if (len != 0) { tx_error(MSG_GET_DIAGNOSTICS_RESP, seq, ERR_INVALID_ARG); return; }
+	checkBattery(false, false);
+	lepton_getFpaTempC();
+	DiagnosticsResp d{};
+	d.diagnostic_mask = diagnostic;
+	d.bat_pct = batPercentage;
+	d.usb_power = isUSBConnected() ? 1 : 0;
+	d.sd_fs_type = getSDFsType();
+	d.bat_mv = batMillivolts;
+	d.cpu_mhz = static_cast<uint16_t>(F_CPU_ACTUAL / 1000000u);
+	d.mcu_temp_c = perf_mcu_temp_c();
+	d.sd_total_kb = getSDTotalKB();
+	d.sd_free_kb = getSDFreeKB();
+	d.uptime_us = perf_uptime_us();
+	d.free_dtcm_bytes = perf_free_dtcm_bytes();
+	d.free_ocram_bytes = perf_free_ocram_bytes();
+	d.lepton_fpa_temp_c = leptonFpaTempC;
+	memcpy(d.lepton_part_num, leptonPartNum, sizeof(d.lepton_part_num));
+	uint8_t out[80];
+	encode_diagnostics(out, d);
+	tx_packet(MSG_GET_DIAGNOSTICS_RESP, 0, seq, OK, out, 80);
+}
+
+static void handle_get_perf(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 1) { tx_error(MSG_GET_PERF_RESP, seq, ERR_INVALID_ARG); return; }
+	uint8_t flags = p[0];
+	PerfTelemetry pt{};
+	perf_fill_telemetry(pt, (flags & 0x02u) != 0, s_parser.rx_errors(), s_parser.crc_errors());
+	if (flags & 0x01u) {
+		perf_reset_counters();
+		s_parser.clear_error_counters();
+	}
+	uint8_t out[84];
+	encode_perf_telemetry(out, pt);
+	tx_packet(MSG_GET_PERF_RESP, 0, seq, OK, out, 84);
+}
+
+static void handle_get_rad_params(uint16_t seq, uint32_t len) {
+	if (len != 0) { tx_error(MSG_GET_RAD_PARAMS_RESP, seq, ERR_INVALID_ARG); return; }
+	if (!checkDiagnostic(diag_lepton)) { tx_error(MSG_GET_RAD_PARAMS_RESP, seq, ERR_UNSUPPORTED); return; }
+	RadParams rp{};
+	if (!lepton_getRadParams(rp)) { tx_error(MSG_GET_RAD_PARAMS_RESP, seq, ERR_IO); return; }
+	uint8_t out[18];
+	encode_rad_params(out, rp);
+	tx_packet(MSG_GET_RAD_PARAMS_RESP, 0, seq, OK, out, 18);
+}
+
+static void handle_set_rad_params(uint16_t seq, const uint8_t* p, uint32_t len) {
+	RadParams rp{};
+	if (!decode_rad_params(p, len, rp) || !validate_rad_params(rp)) {
+		tx_error(MSG_SET_RAD_PARAMS_RESP, seq, ERR_INVALID_ARG);
+		return;
+	}
+	if (!checkDiagnostic(diag_lepton)) { tx_error(MSG_SET_RAD_PARAMS_RESP, seq, ERR_UNSUPPORTED); return; }
+	if (!lepton_setRadParams(rp)) { tx_error(MSG_SET_RAD_PARAMS_RESP, seq, ERR_IO); return; }
+	RadParams back{};
+	if (!lepton_getRadParams(back)) back = rp;
+	uint8_t out[18];
+	encode_rad_params(out, back);
+	tx_packet(MSG_SET_RAD_PARAMS_RESP, 0, seq, OK, out, 18);
+}
+
+static void handle_fs_abort(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 2) { tx_error(MSG_FS_ABORT_RESP, seq, ERR_INVALID_ARG); return; }
+	uint16_t target = read_u16_le(p);
+	if (s_v2.fs_read.active && (target == 0 || target == s_v2.fs_read.req_seq)) {
+		abort_active_fs_read();
+	}
+	tx_packet(MSG_FS_ABORT_RESP, 0, seq, OK, nullptr, 0);
+}
+
+static void handle_enter_bootloader(uint16_t seq, const uint8_t* p, uint32_t len) {
+	if (len != 4) { tx_error(MSG_ENTER_BOOTLOADER_RESP, seq, ERR_INVALID_ARG); return; }
+	if (read_u32_le(p) != BOOTLOADER_MAGIC) {
+		tx_error(MSG_ENTER_BOOTLOADER_RESP, seq, ERR_BAD_MAGIC);
+		return;
+	}
+	abort_active_fs_read();
+	lepton_endFrame();
+	display_waitDmaComplete();
+	if (!s_v2.headless && checkDiagnostic(diag_display)) {
+		enableScreenLight();
+		showFullMessage((char *)"Firmware Update Mode...");
+	}
+	emit_session_exit(2); // reboot_bootloader
+	tx_packet(MSG_ENTER_BOOTLOADER_RESP, 0, seq, OK, nullptr, 0);
+	Serial.send_now();
+	delay(50);
+	_reboot_Teensyduino_();
+}
+
 static void dispatch_packet(const PacketHeader& h, const uint8_t* p) {
 	if (h.flags & FLAG_COMPRESSED) {
 		tx_error(MSG_GENERIC_ERROR_RESP, h.seq, ERR_UNSUPPORTED, "compression unsupported");
@@ -805,265 +1020,28 @@ static void dispatch_packet(const PacketHeader& h, const uint8_t* p) {
 	}
 
 	switch (h.msg_type) {
-	case MSG_HELLO_REQ:
-		handle_hello(h.seq, p, h.payload_len);
-		break;
-
-	case MSG_GOODBYE_REQ:
-		if (h.payload_len != 0) { tx_error(MSG_GOODBYE_RESP, h.seq, ERR_INVALID_ARG); break; }
-		abort_active_fs_read();
-		s_v2.stream.mode = 0;
-		tx_packet(MSG_GOODBYE_RESP, 0, h.seq, OK, nullptr, 0);
-		Serial.flush();
-		s_v2.running = false;
-		break;
-
-	case MSG_PING_REQ:
-		if (h.payload_len != 8) { tx_error(MSG_PONG_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			uint8_t out[16];
-			memcpy(out, p, 8);
-			write_u64_le(out + 8, perf_uptime_us());
-			tx_packet(MSG_PONG_RESP, 0, h.seq, OK, out, 16);
-		}
-		break;
-
-	case MSG_STREAM_CTRL_REQ:
-		handle_stream_ctrl(h.seq, p, h.payload_len);
-		break;
-
-	case MSG_GET_CONFIG_REQ:
-		if (h.payload_len != 0) { tx_error(MSG_GET_CONFIG_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			DeviceConfig c{};
-			populate_device_config(c);
-			uint8_t out[32];
-			encode_device_config(out, c);
-			tx_packet(MSG_GET_CONFIG_RESP, 0, h.seq, OK, out, 32);
-		}
-		break;
-
-	case MSG_SET_CONFIG_REQ:
-		if (h.payload_len != 36) { tx_error(MSG_SET_CONFIG_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			uint8_t persist = p[0];
-			DeviceConfig c{};
-			if (persist > 1 || !decode_device_config(p + 4, 32, c) || !validate_device_config(c)) {
-				tx_error(MSG_SET_CONFIG_RESP, h.seq, ERR_INVALID_ARG);
-				break;
-			}
-			apply_device_config(c, persist != 0);
-			DeviceConfig active{};
-			populate_device_config(active);
-			uint8_t out[32];
-			encode_device_config(out, active);
-			tx_packet(MSG_SET_CONFIG_RESP, 0, h.seq, OK, out, 32);
-		}
-		break;
-
-	case MSG_SET_TIME_REQ:
-		if (h.payload_len != 4) { tx_error(MSG_SET_TIME_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			uint32_t epoch = read_u32_le(p);
-			setTime(static_cast<time_t>(epoch));
-			Teensy3Clock.set(static_cast<time_t>(epoch));
-			uint8_t out[4];
-			write_u32_le(out, epoch);
-			tx_packet(MSG_SET_TIME_RESP, 0, h.seq, OK, out, 4);
-		}
-		break;
-
-	case MSG_TRIGGER_FFC_REQ:
-		if (h.payload_len != 1) { tx_error(MSG_TRIGGER_FFC_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			bool force = (p[0] & 0x01u) != 0;
-			if (!autoMode && !force) { tx_error(MSG_TRIGGER_FFC_RESP, h.seq, ERR_FORBIDDEN); break; }
-			s_v2.ffc_state = 1;
-			emit_ffc_event(0, 0);
-			uint32_t t0 = millis();
-			bool err = lepton_ffc(false, force);
-			uint16_t dur = static_cast<uint16_t>(millis() - t0);
-			if (err) {
-				s_v2.ffc_state = 0;
-				emit_ffc_event(2, dur);
-				tx_error(MSG_TRIGGER_FFC_RESP, h.seq, ERR_IO);
-			} else {
-				s_v2.ffc_state = 2;
-				emit_ffc_event(1, dur);
-				uint8_t out[2] = {0, 0};
-				tx_packet(MSG_TRIGGER_FFC_RESP, 0, h.seq, OK, out, 2);
-			}
-		}
-		break;
-
-	case MSG_GET_TEMP_POINTS_REQ:
-		if (h.payload_len != 0) { tx_error(MSG_GET_TEMP_POINTS_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			const bool is_l3 = (leptonVersion == leptonVersion_3_5_shutter);
-			uint8_t out[2 + 96 * 6];
-			uint16_t cnt = 0;
-			for (int i = 0; i < 96; ++i) {
-				uint16_t idx = tempPoints[i][0];
-				if (idx != 0 && idx <= 19200u) {
-					uint16_t z = idx - 1u;
-					uint16_t px = is_l3 ? (z % 160u) : ((z % 160u) / 2u);
-					uint16_t py = is_l3 ? (z / 160u) : ((z / 160u) / 2u);
-					write_u16_le(out + 2 + cnt * 6 + 0, px);
-					write_u16_le(out + 2 + cnt * 6 + 2, py);
-					write_u16_le(out + 2 + cnt * 6 + 4, tempPoints[i][1]);
-					cnt++;
-				}
-			}
-			write_u16_le(out, cnt);
-			tx_packet(MSG_GET_TEMP_POINTS_RESP, 0, h.seq, OK, out, 2u + cnt * 6u);
-		}
-		break;
-
-	case MSG_SET_TEMP_POINTS_REQ:
-		if (h.payload_len < 2) { tx_error(MSG_SET_TEMP_POINTS_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			uint16_t cnt = read_u16_le(p);
-			if (cnt > 96 || h.payload_len != 2u + cnt * 4u) {
-				tx_error(MSG_SET_TEMP_POINTS_RESP, h.seq, ERR_INVALID_ARG);
-				break;
-			}
-			const bool is_l3 = (leptonVersion == leptonVersion_3_5_shutter);
-			const uint16_t max_w = is_l3 ? 160u : 80u;
-			const uint16_t max_h = is_l3 ? 120u : 60u;
-			bool valid = true;
-			for (uint16_t i = 0; i < cnt; ++i) {
-				uint16_t x = read_u16_le(p + 2 + i * 4);
-				uint16_t y = read_u16_le(p + 2 + i * 4 + 2);
-				if (x >= max_w || y >= max_h) { valid = false; break; }
-			}
-			if (!valid) { tx_error(MSG_SET_TEMP_POINTS_RESP, h.seq, ERR_INVALID_ARG); break; }
-			clearTempPoints();
-			for (uint16_t i = 0; i < cnt; ++i) {
-				uint16_t x = read_u16_le(p + 2 + i * 4);
-				uint16_t y = read_u16_le(p + 2 + i * 4 + 2);
-				uint16_t sx = is_l3 ? x : (x * 2u);
-				uint16_t sy = is_l3 ? y : (y * 2u);
-				tempPoints[i][0] = static_cast<uint16_t>(sy * 160u + sx + 1u);
-				tempPoints[i][1] = smallBuffer[sy * 160u + sx];
-			}
-			uint8_t out[2];
-			write_u16_le(out, cnt);
-			tx_packet(MSG_SET_TEMP_POINTS_RESP, 0, h.seq, OK, out, 2);
-		}
-		break;
-
-	case MSG_SAVE_CAPTURE_REQ:
-		handle_save_capture(h.seq, p, h.payload_len);
-		break;
-
-	case MSG_GET_DIAGNOSTICS_REQ:
-		if (h.payload_len != 0) { tx_error(MSG_GET_DIAGNOSTICS_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			checkBattery(false, false);
-			lepton_getFpaTempC();
-			DiagnosticsResp d{};
-			d.diagnostic_mask = diagnostic;
-			d.bat_pct = batPercentage;
-			d.usb_power = isUSBConnected() ? 1 : 0;
-			d.sd_fs_type = getSDFsType();
-			d.bat_mv = batMillivolts;
-			d.cpu_mhz = static_cast<uint16_t>(F_CPU_ACTUAL / 1000000u);
-			d.mcu_temp_c = perf_mcu_temp_c();
-			d.sd_total_kb = getSDTotalKB();
-			d.sd_free_kb = getSDFreeKB();
-			d.uptime_us = perf_uptime_us();
-			d.free_dtcm_bytes = perf_free_dtcm_bytes();
-			d.free_ocram_bytes = perf_free_ocram_bytes();
-			d.lepton_fpa_temp_c = leptonFpaTempC;
-			memcpy(d.lepton_part_num, leptonPartNum, sizeof(d.lepton_part_num));
-			uint8_t out[80];
-			encode_diagnostics(out, d);
-			tx_packet(MSG_GET_DIAGNOSTICS_RESP, 0, h.seq, OK, out, 80);
-		}
-		break;
-
-	case MSG_GET_PERF_REQ:
-		if (h.payload_len != 1) { tx_error(MSG_GET_PERF_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			uint8_t flags = p[0];
-			PerfTelemetry pt{};
-			perf_fill_telemetry(pt, (flags & 0x02u) != 0, s_parser.rx_errors(), s_parser.crc_errors());
-			if (flags & 0x01u) {
-				perf_reset_counters();
-				s_parser.clear_error_counters();
-			}
-			uint8_t out[84];
-			encode_perf_telemetry(out, pt);
-			tx_packet(MSG_GET_PERF_RESP, 0, h.seq, OK, out, 84);
-		}
-		break;
-
-	case MSG_GET_RAD_PARAMS_REQ:
-		if (h.payload_len != 0) { tx_error(MSG_GET_RAD_PARAMS_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			if (!checkDiagnostic(diag_lepton)) { tx_error(MSG_GET_RAD_PARAMS_RESP, h.seq, ERR_UNSUPPORTED); break; }
-			RadParams rp{};
-			if (!lepton_getRadParams(rp)) { tx_error(MSG_GET_RAD_PARAMS_RESP, h.seq, ERR_IO); break; }
-			uint8_t out[18];
-			encode_rad_params(out, rp);
-			tx_packet(MSG_GET_RAD_PARAMS_RESP, 0, h.seq, OK, out, 18);
-		}
-		break;
-
-	case MSG_SET_RAD_PARAMS_REQ:
-		{
-			RadParams rp{};
-			if (!decode_rad_params(p, h.payload_len, rp) || !validate_rad_params(rp)) {
-				tx_error(MSG_SET_RAD_PARAMS_RESP, h.seq, ERR_INVALID_ARG);
-				break;
-			}
-			if (!checkDiagnostic(diag_lepton)) { tx_error(MSG_SET_RAD_PARAMS_RESP, h.seq, ERR_UNSUPPORTED); break; }
-			if (!lepton_setRadParams(rp)) { tx_error(MSG_SET_RAD_PARAMS_RESP, h.seq, ERR_IO); break; }
-			RadParams back{};
-			if (!lepton_getRadParams(back)) back = rp;
-			uint8_t out[18];
-			encode_rad_params(out, back);
-			tx_packet(MSG_SET_RAD_PARAMS_RESP, 0, h.seq, OK, out, 18);
-		}
-		break;
-
-	case MSG_FS_INFO_REQ:   handle_fs_info(h.seq); break;
-	case MSG_FS_LIST_REQ:   handle_fs_list(h.seq, p, h.payload_len); break;
-	case MSG_FS_STAT_REQ:   handle_fs_stat(h.seq, p, h.payload_len); break;
-	case MSG_FS_READ_REQ:   handle_fs_read_start(h.seq, p, h.payload_len); break;
-	case MSG_FS_DELETE_REQ: handle_fs_delete(h.seq, p, h.payload_len); break;
-
-	case MSG_FS_ABORT_REQ:
-		if (h.payload_len != 2) { tx_error(MSG_FS_ABORT_RESP, h.seq, ERR_INVALID_ARG); break; }
-		{
-			uint16_t target = read_u16_le(p);
-			if (s_v2.fs_read.active && (target == 0 || target == s_v2.fs_read.req_seq)) {
-				abort_active_fs_read();
-			}
-			tx_packet(MSG_FS_ABORT_RESP, 0, h.seq, OK, nullptr, 0);
-		}
-		break;
-
-	case MSG_ENTER_BOOTLOADER_REQ:
-		if (h.payload_len != 4) { tx_error(MSG_ENTER_BOOTLOADER_RESP, h.seq, ERR_INVALID_ARG); break; }
-		if (read_u32_le(p) != BOOTLOADER_MAGIC) {
-			tx_error(MSG_ENTER_BOOTLOADER_RESP, h.seq, ERR_BAD_MAGIC);
-			break;
-		}
-		abort_active_fs_read();
-		lepton_endFrame();
-		display_waitDmaComplete();
-		if (!s_v2.headless && checkDiagnostic(diag_display)) {
-			enableScreenLight();
-			showFullMessage((char *)"Firmware Update Mode...");
-		}
-		emit_session_exit(2); // reboot_bootloader
-		tx_packet(MSG_ENTER_BOOTLOADER_RESP, 0, h.seq, OK, nullptr, 0);
-		Serial.send_now();
-		delay(50);
-		_reboot_Teensyduino_();
-		break;
-
+	case MSG_HELLO_REQ:            handle_hello(h.seq, p, h.payload_len); break;
+	case MSG_GOODBYE_REQ:          handle_goodbye(h.seq, h.payload_len); break;
+	case MSG_PING_REQ:             handle_ping(h.seq, p, h.payload_len); break;
+	case MSG_STREAM_CTRL_REQ:      handle_stream_ctrl(h.seq, p, h.payload_len); break;
+	case MSG_GET_CONFIG_REQ:       handle_get_config(h.seq, h.payload_len); break;
+	case MSG_SET_CONFIG_REQ:       handle_set_config(h.seq, p, h.payload_len); break;
+	case MSG_SET_TIME_REQ:         handle_set_time(h.seq, p, h.payload_len); break;
+	case MSG_TRIGGER_FFC_REQ:      handle_trigger_ffc(h.seq, p, h.payload_len); break;
+	case MSG_GET_TEMP_POINTS_REQ:  handle_get_temp_points(h.seq, h.payload_len); break;
+	case MSG_SET_TEMP_POINTS_REQ:  handle_set_temp_points(h.seq, p, h.payload_len); break;
+	case MSG_SAVE_CAPTURE_REQ:     handle_save_capture(h.seq, p, h.payload_len); break;
+	case MSG_GET_DIAGNOSTICS_REQ:  handle_get_diagnostics(h.seq, h.payload_len); break;
+	case MSG_GET_PERF_REQ:         handle_get_perf(h.seq, p, h.payload_len); break;
+	case MSG_GET_RAD_PARAMS_REQ:   handle_get_rad_params(h.seq, h.payload_len); break;
+	case MSG_SET_RAD_PARAMS_REQ:   handle_set_rad_params(h.seq, p, h.payload_len); break;
+	case MSG_FS_INFO_REQ:          handle_fs_info(h.seq); break;
+	case MSG_FS_LIST_REQ:          handle_fs_list(h.seq, p, h.payload_len); break;
+	case MSG_FS_STAT_REQ:          handle_fs_stat(h.seq, p, h.payload_len); break;
+	case MSG_FS_READ_REQ:          handle_fs_read_start(h.seq, p, h.payload_len); break;
+	case MSG_FS_DELETE_REQ:        handle_fs_delete(h.seq, p, h.payload_len); break;
+	case MSG_FS_ABORT_REQ:         handle_fs_abort(h.seq, p, h.payload_len); break;
+	case MSG_ENTER_BOOTLOADER_REQ: handle_enter_bootloader(h.seq, p, h.payload_len); break;
 	default:
 		tx_error(MSG_GENERIC_ERROR_RESP, h.seq, ERR_UNKNOWN_MSG, "unknown msg_type");
 		break;

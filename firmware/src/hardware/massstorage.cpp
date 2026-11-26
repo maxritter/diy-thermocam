@@ -132,10 +132,3 @@ void setMassStorage()
 	delay(1000);
 	CPU_RESTART;
 }
-
-void checkMassStorage()
-{
-	// MTP is now accessed explicitly via Settings -> Hardware -> USB MTP,
-	// so plugging in USB never hijacks live mode with a blocking popup.
-	usbConnected = isUSBConnected();
-}

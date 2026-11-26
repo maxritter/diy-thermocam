@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cctype>
 #include <algorithm>
 #include <string>
 
@@ -63,19 +64,26 @@ struct String {
 	}
 };
 
-inline uint32_t millis() { return 16500u; }
-inline uint32_t micros() { return 16500000u; }
-inline void delay(uint32_t) {}
-inline void delayMicroseconds(uint32_t) {}
-inline int digitalRead(int) { return HIGH; }
-inline void digitalWrite(int, int) {}
-inline int analogRead(int) { return 0; }
-inline void pinMode(int, int) {}
-inline void noInterrupts() {}
-inline void interrupts() {}
-inline void attachInterrupt(int, void (*)(), int) {}
-inline void detachInterrupt(int) {}
-inline void yield() {}
+uint32_t millis();
+uint32_t micros();
+void delay(uint32_t ms);
+void delayMicroseconds(uint32_t us);
+int digitalRead(int pin);
+void digitalWrite(int pin, int val);
+int analogRead(int pin);
+void pinMode(int pin, int mode);
+void noInterrupts();
+void interrupts();
+void attachInterrupt(int pin, void (*fn)(), int mode);
+void detachInterrupt(int pin);
+void yield();
+
+inline char* itoa(int value, char* str, int base) {
+	if (base == 16) std::snprintf(str, 16, "%x", value);
+	else std::snprintf(str, 16, "%d", value);
+	return str;
+}
+
 inline char* dtostrf(double val, signed char width, unsigned char prec, char* s) {
 	std::snprintf(s, 26, "%*.*f", (int)width, (int)prec, val);
 	return s;

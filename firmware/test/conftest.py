@@ -45,13 +45,14 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
             item.add_marker(skip)
 
 
-@pytest.fixture(scope="session")
-def cam(pytestconfig: pytest.Config) -> Iterator[tc.Thermocam]:
+@pytest.fixture(scope="module")
+def cam(pytestconfig: pytest.Config, metrics: Metrics) -> Iterator[tc.Thermocam]:
     port: str | None = pytestconfig.getoption("--port") or tc.find_port()
     if port is None:
         pytest.exit("No DIY-Thermocam found. Connect it, turn it on, or pass --port.", returncode=2)
     cam = tc.Thermocam(port)
     cam.start()
+    metrics.fw_version = cam.get_fw_version()
     original = cam.get_config()
     yield cam
     try:
@@ -83,6 +84,7 @@ class Metrics:
     def __init__(self, baseline: dict[str, float] | None):
         self.values: dict[str, float] = {}
         self.baseline = baseline
+        self.fw_version: int = 0
 
     def record(self, name: str, value: float, higher_is_better: bool, tolerance: float = 0.15) -> None:
         """Store a measurement and, with --baseline, fail if it is more than `tolerance` worse."""
@@ -97,7 +99,7 @@ class Metrics:
 
 
 @pytest.fixture(scope="session")
-def metrics(pytestconfig: pytest.Config, cam: tc.Thermocam) -> Iterator[Metrics]:
+def metrics(pytestconfig: pytest.Config) -> Iterator[Metrics]:
     path: Path | None = pytestconfig.getoption("--baseline")
     baseline = json.loads(path.read_text())["metrics"] if path else None
     m = Metrics(baseline)
@@ -108,7 +110,7 @@ def metrics(pytestconfig: pytest.Config, cam: tc.Thermocam) -> Iterator[Metrics]
             json.dumps(
                 {
                     "date": time.strftime("%Y-%m-%d %H:%M"),
-                    "firmware_version": cam.get_fw_version(),
+                    "firmware_version": m.fw_version,
                     "host": platform.platform(),
                     "metrics": m.values,
                 },

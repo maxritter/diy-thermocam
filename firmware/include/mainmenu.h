@@ -18,10 +18,7 @@
 
 /*########################## PUBLIC PROCEDURES ################################*/
 
-bool calibrationRepeat();
-void calibrationScreen(bool firstStart = false);
 bool colorMenu();
-void colorMenuString(int pos);
 void drawColorMenuPage(byte page, byte selected);
 void drawLiveDispGrid();
 void drawMainMenu(byte pos);
@@ -32,7 +29,6 @@ bool hotColdColorMenu();
 void hotColdColorMenuString(int pos);
 bool hotColdMenu();
 bool liveDispMenu();
-void liveDispMenuString(int pos);
 void mainMenuBackground();
 void mainMenuHandler(byte* pos);
 bool mainMenuSelect(byte pos, byte page);
