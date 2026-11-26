@@ -121,6 +121,7 @@ def main() -> None:
             scene_dir,
             pcb_path=root.parent / "pcb" / "diy-thermocam-v4.0.kicad_pcb",
             screen_image=cad / "blender" / "assets" / "screen-live-view.png",
+            carrier_pcb_path=root.parent / "pcb" / "diy-thermocam-v4.0-lepton.kicad_pcb",
         )
     steps_json = work / "steps.json"
     steps_json.unlink(missing_ok=True)

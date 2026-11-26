@@ -12,13 +12,13 @@ from pathlib import Path
 
 from build123d import (
     Align,
+    Box,
     BuildPart,
     BuildSketch,
     Circle,
     Compound,
     Cone,
     Cylinder,
-    FontStyle,
     Location,
     Locations,
     Mesher,
@@ -30,32 +30,38 @@ from build123d import (
     Rotation,
     SlotOverall,
     Solid,
-    Text,
     export_step,
     export_stl,
     extrude,
     loft,
 )
 
-from .params import EnclosureParams
 from .accessories import (
+    BUTTON_FLANGE_INTO_WALL,
     BUTTON_FLANGE_X,
     BUTTON_FLANGE_Z,
+    BUTTON_LIFT,
     CAP_BUMP_DY,
     CAP_FINGER_X,
+    CAP_NOTCH_DEPTH,
     PCB_TOP_EDGE_Y,
     SD_CHUTE_LEN_IN,
+    SW2_PUSHER_PCB_GAP,
+    TRIPOD_NUT_AF,
+    TRIPOD_RIB_SQUEEZE,
     _as_solid,
     _xz_plane,
     _yz_plane,
     build_battery_cradle,
     build_battery_floor,
     build_battery_lid,
+    build_battery_spacer,
+    build_battery_spacers,
     build_capture_button_plunger,
     build_lens_cap,
     build_slide_switch_cap,
 )
-
+from .params import MJF_MIN_DETAIL, EnclosureParams
 
 # Printed part name -> copies per camera
 PRINT_PARTS: dict[str, int] = {
@@ -65,7 +71,17 @@ PRINT_PARTS: dict[str, int] = {
     "capture_button": 1,
     "slide_switch_cap": 1,
     "battery_cradle": 1,
+    "battery_spacer": 2,
 }
+# Back-face lens mark: engraved rings (outer, inner radius) and a centre dot, 1.0 mm rings and ridges
+BRAND_RINGS = ((4.5, 3.5), (2.5, 1.5), (0.5, 0.0))
+
+# Front-shell seam tabs: a tongue hangs into the back shell beside its wall (1.0 mm: MJF minimum
+# wall; 0.3 mm gaps: MJF +-0.3). The left tongues sit in 0.3 mm recesses in the back shell's wall,
+# which keeps them 0.6 mm off the PCB edge and J1 and locates them along Y too.
+SEAM_TAB_T, SEAM_TAB_GAP, SEAM_FOOT_H, SEAM_TONGUE_H = 1.00, 0.30, 2.00, 1.40
+LEFT_TAB_YS, LEFT_TAB_LEN, LEFT_TAB_RECESS = (20.0, 50.0), 12.0, 0.30
+
 # Bare FR4 boards from the PCB maker (too thin to print), shared by both enclosures
 FR4_PARTS: dict[str, float] = {"battery_floor": 0.6, "battery_lid": 0.4}  # Name -> board thickness
 
@@ -80,6 +96,7 @@ class PrintableEnclosure:
     capture_button: Solid
     slide_switch_cap: Solid
     battery_cradle: Solid
+    battery_spacers: tuple[Solid, Solid]  # Beside the 34 mm Adafruit 258 only
     battery_floor: Solid   # FR4
     battery_lid: Solid     # FR4
 
@@ -92,7 +109,7 @@ def _shell_envelope(p: EnclosureParams) -> dict[str, float]:
     oy0, oy1 = iy0 - w, iy1 + w
     z_back_outer = -p.shell_back_face_t
     z_back_seam = p.shell_split_z
-    z_front_seam = z_back_seam + 0.20
+    z_front_seam = z_back_seam + 0.30  # MJF +-0.3 mm: the halves never meet before the bosses seat
 
     return {
         "w": w,
@@ -165,7 +182,7 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
                 RectangleRounded(e["iw"], e["ih"], 1.40)
         extrude(amount=z_seam - z_in + 1.0, mode=Mode.SUBTRACT)
 
-        # 3. Standoff seats (0.5 mm deep) and flush ISO 7046 countersinks for the M2.5x8 screws
+        # 3. Standoff seats (0.5 mm deep) and flush ISO 7046 countersinks for the M2.5x6 screws
         cs_depth = (p.countersink_head_d - p.mounting_hole_d) / 2.0
         for mx, my in p.mounting_holes:
             with Locations((mx, my, p.standoff_seat_z)):
@@ -191,13 +208,12 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
                 RectangleRounded(p.shell_tripod_boss_w, y_boss_top - (e["iy0"] - 0.4), 1.6)
         extrude(amount=boss_z_end - (z_in - 0.10))
 
-        # +Z top-loading slide-in channel for metal 1/4"-20 hex nut (prints vertically, 0 overhangs!).
-        # Inside the bottom wall it runs up into the USB-C boot recess, so no thin web is left over
-        # the nut's way in
+        # Slide-in channel for the nut from +Z, open up to the seam: the pocket sits 1.4 mm into the
+        # bottom wall, so the wall above it is cut back to a 1.2 mm skin (the front shell's rim closes
+        # it) and the nut drops straight in from the open shell
         nut_af = p.shell_tripod_hex_af
         hex_r = nut_af / (3.0**0.5)
-        usb_recess_bot = p.usb.center_z - p.usb.overmold_height / 2.0
-        channel_top = max(boss_z_end + 0.5, usb_recess_bot + 0.3)
+        channel_top = z_seam + 1.0
         with BuildSketch(Plane.XY.offset(tz - hex_r)):
             with Locations((p.tripod_x, 0.5 * (y_nut_bot + y_nut_top))):
                 Rectangle(nut_af, p.shell_tripod_nut_h)
@@ -207,6 +223,26 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
             with Locations((p.tripod_x, tz)):
                 RegularPolygon(radius=hex_r, side_count=6, rotation=30.0)
         extrude(amount=p.shell_tripod_nut_h, mode=Mode.SUBTRACT)
+
+        # The channel leaves the nut free toward the board, so two crush ribs on the pocket's X flats
+        # hold it where the screw finds it (as in the acrylic case's tripod_mount): each 1.0 mm rib
+        # reaches TRIPOD_RIB_SQUEEZE into the nut's flat and stands in a 0.8 mm groove, so it prints as
+        # a full-size MJF detail. They cover the lower half of the flats: push the nut home with a
+        # screwdriver.
+        pocket_flat = nut_af / 2.0
+        rib_in = TRIPOD_NUT_AF / 2.0 - TRIPOD_RIB_SQUEEZE
+        groove_floor = pocket_flat + MJF_MIN_DETAIL
+        y_mid = 0.5 * (y_nut_bot + y_nut_top)
+        rib_z0, rib_z1 = tz - 2.3, tz + 0.5   # Starts 1.0 mm above the flat's corner edge
+        for sx in (-1.0, 1.0):
+            with BuildSketch(_xz_plane(y_mid + 0.5 + MJF_MIN_DETAIL)):
+                with Locations((p.tripod_x + sx * 0.5 * (pocket_flat - 0.05 + groove_floor), 0.5 * (rib_z0 + rib_z1))):
+                    Rectangle(groove_floor - pocket_flat + 0.05, rib_z1 - rib_z0)
+            extrude(amount=1.0 + 2.0 * MJF_MIN_DETAIL, mode=Mode.SUBTRACT)
+            with BuildSketch(_xz_plane(y_mid + 0.5)):
+                with Locations((p.tripod_x + sx * 0.5 * (rib_in + groove_floor + 0.05), 0.5 * (rib_z0 + rib_z1))):
+                    Rectangle(groove_floor + 0.05 - rib_in, rib_z1 - rib_z0)
+            extrude(amount=1.0)
 
         # Bottom 6.80 mm tripod stud bore ONLY through floor into nut cavity (NEVER pierces blind roof!)
         with BuildSketch(_xz_plane(e["oy0"] - 0.5)):
@@ -226,19 +262,22 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
         extrude(amount=chute_top_z - (z_in - 0.10))
 
         # 6. Capture-button guide: a block on the top wall with a pocket for the flange, open toward
-        # +Z (drop-in) and toward the PCB, so the flange can reach its stop on the PCB edge.
-        # The block ends 0.5 mm above the PCB edge.
+        # +Z (drop-in) and toward the PCB, so the flange's pusher can pass under the board edge to
+        # SW2. The block ends 0.5 mm above the PCB edge; the pocket reaches 0.3 mm into the wall,
+        # where the flange's back sits.
         guide_bot = PCB_TOP_EDGE_Y + 0.50
         pocket_x, pocket_z = BUTTON_FLANGE_X + 0.50, BUTTON_FLANGE_Z + 0.50
+        pocket_back = e["iy1"] + BUTTON_FLANGE_INTO_WALL + 0.10
         z_block0 = p.button_z - pocket_z / 2.0 - 1.2
         with BuildSketch(_xz_plane(e["iy1"] + 0.40)):
             with Locations((p.button_x, 0.5 * (z_block0 + z_seam))):
-                RectangleRounded(pocket_x + 3.2, z_seam - z_block0, 1.0)
+                # 1.2 mm side walls keep the block 0.9 mm off the rounded top-right inner corner
+                RectangleRounded(pocket_x + 2.4, z_seam - z_block0, 1.0)
         extrude(amount=(e["iy1"] + 0.40) - guide_bot)
-        with BuildSketch(_xz_plane(e["iy1"] + 0.01)):
+        with BuildSketch(_xz_plane(pocket_back)):
             with Locations((p.button_x, 0.5 * (p.button_z - pocket_z / 2.0 + z_seam + 1.0))):
                 RectangleRounded(pocket_x, z_seam + 1.0 - (p.button_z - pocket_z / 2.0), 0.8)
-        extrude(amount=e["iy1"] - guide_bot + 0.2, mode=Mode.SUBTRACT)
+        extrude(amount=pocket_back - guide_bot + 0.2, mode=Mode.SUBTRACT)
 
         # 7. Dovetail lens-cap track, open at the top, with detent notches for the open and closed
         # positions; notches have 40 deg lead-ins and sit outside the Lepton opening
@@ -255,16 +294,18 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
         for cap_y in (e["cap_open_y"], e["cap_closed_y"]):
             for sx in (-1.0, 1.0):
                 nx, ny = p.lepton_x + sx * CAP_FINGER_X, cap_y + CAP_BUMP_DY
+                # 0.8 mm deep with 45 deg ramps, matching the cap's 0.8 mm bumps
                 with BuildSketch(Plane.XY.offset(e["z_track_floor"] - 0.05)):
                     with Locations((nx, ny)):
-                        RectangleRounded(2.00, 2.60, 0.40)
-                with BuildSketch(Plane.XY.offset(e["z_track_floor"] + 0.50)):
+                        RectangleRounded(2.00, 1.60 + 2.0 * (CAP_NOTCH_DEPTH + 0.05), 0.40)
+                with BuildSketch(Plane.XY.offset(e["z_track_floor"] + CAP_NOTCH_DEPTH)):
                     with Locations((nx, ny)):
                         RectangleRounded(2.00, 1.60, 0.40)
                 loft(mode=Mode.SUBTRACT)
 
-        # 8. Lepton opening: Ø18.8 at the inner face (the socketed Lepton reaches 0.74 mm into the
-        # wall), widening to Ø20.2 at the track floor; clears the 71 and 119 deg diagonal FOV
+        # 8. Lepton opening: Ø20.0 at the inner face (the socketed Lepton reaches 0.74 mm into the
+        # wall; 1.3 mm radial play covers the carrier, socket and print tolerances), widening to
+        # Ø21.0 at the track floor; clears the 71 and 119 deg diagonal FOV with the pupil up to Z 3.0
         r_in = p.shell_lepton_inner_d / 2.0
         r_out = p.shell_lepton_outer_d / 2.0
         cone_h = z_in - e["z_track_floor"] + 0.20
@@ -319,9 +360,14 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
             p.switch_y, p.switch_z, p.switch_h_y, p.switch_w_z,
             1.4, z_seam, _yz_plane(e["ox1"] + 1.0), -(e["w"] + 2.5),
         )
+        # Thumb recess round the switch slot: rounded at the bottom, square and open at the seam so
+        # no feather edge is left between its corners and the seam
+        rz = min(p.switch_z, z_seam - 2.2)
         with BuildSketch(_yz_plane(e["ox1"] + 0.05)):
-            with Locations((p.switch_y, min(p.switch_z, z_seam - 2.2))):
+            with Locations((p.switch_y, rz)):
                 RectangleRounded(p.switch_recess_y, 7.0, 2.0)
+            with Locations((p.switch_y, 0.5 * (rz + z_seam + 1.0))):
+                Rectangle(p.switch_recess_y, z_seam + 1.0 - rz)
         extrude(amount=-0.90, mode=Mode.SUBTRACT)
 
         for lx, ly in p.back_face_led_holes:
@@ -332,28 +378,31 @@ def _build_back_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
                 Cone(p.back_face_led_d / 2.0 + 0.65, p.back_face_led_d / 2.0, 0.65,
                      align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
 
-        # 13. Max #186 $0-extra-cost stylish industrial design:
-        #     (a) Shallow 0.40 mm debossed Version 1 concentric thermal-lens mark + wordmark
-        #         Cleanly centered below track_y_min=15.20 (Y in [4.2, 12.8], clear of mounting holes!)
+        # Recesses in the left wall for the front shell's seam tongues, SEAM_TAB_GAP round each
+        z_rec0 = e["z_front_seam"] - SEAM_TONGUE_H - SEAM_TAB_GAP
+        for ty in LEFT_TAB_YS:
+            with Locations((e["ix0"] - LEFT_TAB_RECESS / 2.0 + 0.05, ty, z_rec0)):
+                Box(LEFT_TAB_RECESS + 0.1, LEFT_TAB_LEN + 2.0 * SEAM_TAB_GAP, z_seam + 1.0 - z_rec0,
+                    align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
+
+        # 13. Industrial design details, all at least 0.8 mm wide and deep (JLC3DP MJF minimum detail;
+        #     text this small would blur, so the laser case alone carries the engraved wordmark)
+        #     (a) Concentric thermal-lens mark centred below the lens-cap track (Y 4.1..13.1)
         brand_plane = Plane(origin=(e["ocx"], 0.0, z0), x_dir=(-1, 0, 0), z_dir=(0, 0, -1))
         with BuildSketch(brand_plane):
-            for r_out_b, r_in_b in ((3.6, 2.8), (2.1, 1.4), (0.8, 0.0)):
-                with Locations((-24.0, 8.6)):
+            for r_out_b, r_in_b in BRAND_RINGS:
+                with Locations((0.0, 8.6)):
                     Circle(r_out_b)
                     if r_in_b > 0:
                         Circle(r_in_b, mode=Mode.SUBTRACT)
-            with Locations((4.0, 10.6)):
-                Text("DIY-THERMOCAM", font_size=4.2, font_style=FontStyle.BOLD)
-            with Locations((4.0, 5.6)):
-                Text(p.version_tag, font_size=2.8, font_style=FontStyle.REGULAR)
-        extrude(amount=-0.40, mode=Mode.SUBTRACT)
+        extrude(amount=-MJF_MIN_DETAIL, mode=Mode.SUBTRACT)
 
-        #     (b) Subtle 0.45 mm ergonomic tactile grip grooves along Left (-X) flank
+        #     (b) Grip grooves along the left (-X) flank
         for gy in (24.0, 29.0, 34.0, 39.0, 44.0):
             with BuildSketch(_yz_plane(e["ox0"] - 0.05)):
                 with Locations((gy, 10.5)):
                     RectangleRounded(1.80, 14.0, 0.6)
-            extrude(amount=0.45, mode=Mode.SUBTRACT)
+            extrude(amount=MJF_MIN_DETAIL + 0.05, mode=Mode.SUBTRACT)
 
     return _as_solid(bp.part)
 
@@ -383,17 +432,19 @@ def _build_front_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
                 RectangleRounded(e["iw"], e["ih"], 1.40)
         extrude(amount=(z_in - z_seam) + 1.0, mode=Mode.SUBTRACT)
 
-        # 3. Fused seam alignment tabs (clear of PCB, Display PCB, SW1, and J4 wires!)
-        tab_t, tab_gap, foot_h, tongue_h = 1.00, 0.20, 2.00, 1.40  # 1.0 mm: MJF minimum wall
+        # 3. Fused seam alignment tabs (clear of PCB, Display PCB, SW1, and J4 wires!). The left
+        # tongues hang into recesses in the back shell's wall, 0.6 mm off the PCB edge and J1.
+        tab_t, tab_gap, foot_h, tongue_h = SEAM_TAB_T, SEAM_TAB_GAP, SEAM_FOOT_H, SEAM_TONGUE_H
         foot_w = 0.5 + tab_gap + tab_t
-        for ty in (20.0, 50.0):
+        for ty in LEFT_TAB_YS:
+            x_tongue = e["ix0"] - LEFT_TAB_RECESS + tab_gap
             with BuildSketch(Plane.XY.offset(z_seam)):
-                with Locations((e["ix0"] - 0.5 + foot_w / 2.0, ty)):
-                    Rectangle(foot_w, 12.0)
+                with Locations((0.5 * (e["ix0"] - 0.5 + x_tongue + tab_t), ty)):
+                    Rectangle(x_tongue + tab_t - (e["ix0"] - 0.5), LEFT_TAB_LEN)
             extrude(amount=foot_h)
             with BuildSketch(Plane.XY.offset(z_seam)):
-                with Locations((e["ix0"] + tab_gap + tab_t / 2.0, ty)):
-                    Rectangle(tab_t, 12.0)
+                with Locations((x_tongue + tab_t / 2.0, ty)):
+                    Rectangle(tab_t, LEFT_TAB_LEN)
             extrude(amount=-tongue_h)
 
         for ty in (38.0,):  # single right-hand tab clears the SW1 slide switch
@@ -405,6 +456,23 @@ def _build_front_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
                 with Locations((e["ix1"] - tab_gap - tab_t / 2.0, ty)):
                     Rectangle(tab_t, 9.0)
             extrude(amount=-tongue_h)
+
+        # 3b. Capture-button stop: two fingers that hang into the button's guide pocket, BUTTON_LIFT
+        # over the flange's corners, so the flange can't ride up to the board edge. The shaft slides
+        # between them when pressed; they stay 0.3 mm clear of it, of the pocket's sides, of its open
+        # side toward the PCB and of the pocket's recess in the wall (their back is the wall's inner
+        # face), and above the seam they reach 0.1 mm into the front shell's wall.
+        finger_in = p.button_plunger_cap_d / 2.0 + 0.30
+        finger_out = (BUTTON_FLANGE_X + 0.50) / 2.0 - 0.30
+        stop_y0 = PCB_TOP_EDGE_Y + 0.50 + 0.30
+        stop_z0 = p.pcb_z_back - SW2_PUSHER_PCB_GAP + BUTTON_LIFT
+        for side in (-1.0, 1.0):
+            fx = p.button_x + side * 0.5 * (finger_in + finger_out)
+            with Locations((fx, 0.5 * (stop_y0 + e["iy1"]), stop_z0)):
+                Box(finger_out - finger_in, e["iy1"] - stop_y0, z_seam + foot_h - stop_z0,
+                    align=(Align.CENTER, Align.CENTER, Align.MIN))
+            with Locations((fx, e["iy1"], z_seam)):
+                Box(finger_out - finger_in, 0.20, foot_h, align=(Align.CENTER, Align.CENTER, Align.MIN))
 
         # 4. ENC-3D-P1-1: USB-C full-depth boot counterbore relief notch on front_shell bottom rim (Z>=22.6)!
         with BuildSketch(_xz_plane(e["oy0"] - 0.05)):
@@ -427,27 +495,27 @@ def _build_front_shell(p: EnclosureParams, e: dict[str, float]) -> Solid:
                 Cone(p.mounting_hole_d / 2.0, p.countersink_head_d / 2.0 + 0.05, cs_depth + 0.05,
                      align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
 
-        # 6. Display active viewing window (64.80 x 48.60 mm) with 45 deg touch-friendly bezel
+        # 6. Display window (active area + 0.5 mm all round) with 45 deg touch-friendly bezel
         bevel = 1.60
+        ow, oh = p.display_opening_w, p.display_opening_h
         with BuildSketch(Plane.XY.offset(z_in - 0.5)):
             with Locations((p.display_win_cx, p.display_win_cy)):
-                RectangleRounded(p.display_win_w, p.display_win_h, 0.6)
+                RectangleRounded(ow, oh, 0.6)
         extrude(amount=e["front_face_t"] + 1.0, mode=Mode.SUBTRACT)
         with BuildSketch(Plane.XY.offset(z_out - bevel)):
             with Locations((p.display_win_cx, p.display_win_cy)):
-                RectangleRounded(p.display_win_w, p.display_win_h, 0.6)
+                RectangleRounded(ow, oh, 0.6)
         with BuildSketch(Plane.XY.offset(z_out + 0.1)):
             with Locations((p.display_win_cx, p.display_win_cy)):
-                RectangleRounded(p.display_win_w + 2 * (bevel + 0.1),
-                                 p.display_win_h + 2 * (bevel + 0.1), 1.2)
+                RectangleRounded(ow + 2 * (bevel + 0.1), oh + 2 * (bevel + 0.1), 1.2)
         loft(mode=Mode.SUBTRACT)
 
-        # 7. Matching subtle ergonomic grip grooves on Left (-X) flank (#186)
+        # 7. Grip grooves on the left (-X) flank, matching the back shell's (0.8 mm deep, MJF minimum)
         for gy in (24.0, 29.0, 34.0, 39.0, 44.0):
             with BuildSketch(_yz_plane(e["ox0"] - 0.05)):
                 with Locations((gy, 31.0)):
                     RectangleRounded(1.80, 12.0, 0.6)
-            extrude(amount=0.45, mode=Mode.SUBTRACT)
+            extrude(amount=MJF_MIN_DETAIL + 0.05, mode=Mode.SUBTRACT)
 
     return _as_solid(bp.part)
 
@@ -463,13 +531,15 @@ def build_printable_enclosure(p: EnclosureParams) -> PrintableEnclosure:
         capture_button=build_capture_button_plunger(p, e),
         slide_switch_cap=build_slide_switch_cap(p, e),
         battery_cradle=build_battery_cradle(p),
+        battery_spacers=build_battery_spacers(p),
         battery_floor=build_battery_floor(p),
         battery_lid=build_battery_lid(p),
     )
 
 
 def orient_for_printing(enc: PrintableEnclosure) -> dict[str, Solid]:
-    """Return print-ready solids oriented flat on Z=0 (100% support-free, incl. floor-down cradle!)."""
+    """Return print-ready solids oriented flat on Z=0. MJF needs no supports; on an FDM printer the
+    back shell, lens cap and battery cradle need build-plate supports (see the README)."""
     def _ground(s: Solid) -> Solid:
         bb = s.bounding_box()
         return _as_solid(Location((-bb.min.X, -bb.min.Y, -bb.min.Z)) * s)
@@ -477,12 +547,14 @@ def orient_for_printing(enc: PrintableEnclosure) -> dict[str, Solid]:
     return {
         "front_shell": _ground(Rotation(180, 0, 0) * enc.front_shell),
         "back_shell": _ground(enc.back_shell),
-        # Outer face (Z=z_out) flat on build plate -> 45 deg outward dovetail flare & upward detents = support-free!
+        # Outer face down: the dovetail flares outward at 45 deg and the detents point up
         "lens_cap": _ground(enc.lens_cap_closed),
-        "capture_button": _ground(Rotation(-90, 0, 0) * enc.capture_button),
+        # On its flat pusher face: the whole flange on the plate, its back (which sets the rest gap) on top
+        "capture_button": _ground(Rotation(90, 0, 0) * enc.capture_button),
         "slide_switch_cap": _ground(enc.slide_switch_cap),
-        # Fable #5 / Astra P1-7 fix: FLOOR-DOWN upright on Z=0 -> ZERO bridges, ZERO supports!
+        # Upright on its feet, the floor opening toward the plate
         "battery_cradle": _ground(enc.battery_cradle),
+        "battery_spacer": _ground(build_battery_spacer()),
     }
 
 
@@ -505,24 +577,44 @@ def export_printable_enclosure(enc: PrintableEnclosure, out_dir: Path) -> list[P
 
     asm_children = [
         enc.front_shell, enc.back_shell, enc.lens_cap_open,
-        enc.capture_button, enc.slide_switch_cap, enc.battery_cradle, enc.battery_floor, enc.battery_lid,
+        enc.capture_button, enc.slide_switch_cap, enc.battery_cradle, *enc.battery_spacers, enc.battery_floor,
+        enc.battery_lid,
     ]
     asm_step = out_dir / f"{prefix}-assembly.step"
     export_step(Compound(children=asm_children, label=f"{prefix}-assembly"), str(asm_step))
     exported.append(asm_step)
 
     # One build plate with every printed part at its per-camera quantity
-    plate_mesher = Mesher()
-    cursor_x, cursor_y, row_h = 0.0, 0.0, 0.0
-    plate_items = [(name, solid) for name, solid in print_parts.items() for _ in range(PRINT_PARTS[name])]
-    for idx, (_, solid) in enumerate(plate_items):
-        bb = solid.bounding_box()
-        if idx == 3:
-            cursor_x, cursor_y, row_h = 0.0, row_h + 10.0, 0.0
-        plate_mesher.add_shape(_as_solid(Location((cursor_x, cursor_y, 0.0)) * solid))
-        cursor_x += bb.size.X + 8.0
-        row_h = max(row_h, bb.size.Y)
     plate_3mf = out_dir / f"{prefix}-print-plate.3mf"
-    plate_mesher.write(str(plate_3mf))
+    write_print_plate([s for name, s in print_parts.items() for _ in range(PRINT_PARTS[name])], plate_3mf)
     exported.append(plate_3mf)
     return exported
+
+
+PLATE_W, PLATE_GAP = 200.0, 8.0  # Fits a 220 x 220 mm bed with a 10 mm margin
+
+
+def plate_positions(sizes: list[tuple[float, float]], width: float = PLATE_W,
+                    gap: float = PLATE_GAP) -> list[tuple[float, float]]:
+    """XY offsets that pack footprints (w, h) into shelves no wider than `width`: tallest first,
+    each into the first shelf it fits."""
+    shelves: list[list[float]] = []  # [y, height, next x]
+    pos: list[tuple[float, float]] = [(0.0, 0.0)] * len(sizes)
+    for i in sorted(range(len(sizes)), key=lambda i: -sizes[i][1]):
+        w, h = sizes[i]
+        shelf = next((s for s in shelves if s[2] + w <= width and h <= s[1]), None)
+        if shelf is None:
+            shelf = [sum(s[1] + gap for s in shelves), h, 0.0]
+            shelves.append(shelf)
+        pos[i] = (shelf[2], shelf[0])
+        shelf[2] += w + gap
+    return pos
+
+
+def write_print_plate(solids: list[Solid], path: Path) -> None:
+    """One 3MF build plate, parts flat on Z=0 and packed by `plate_positions`."""
+    mesher = Mesher()
+    boxes = [s.bounding_box() for s in solids]
+    for s, b, (x, y) in zip(solids, boxes, plate_positions([(b.size.X, b.size.Y) for b in boxes])):
+        mesher.add_shape(_as_solid(Location((x - b.min.X, y - b.min.Y, 0.0)) * s))
+    mesher.write(str(path))

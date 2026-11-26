@@ -3,11 +3,12 @@
 Positions are in the camera frame (see params.py). Sources:
   - KiCad board `hardware/pcb/diy-thermocam-v4.0.kicad_pcb` (footprint positions, pad clearances)
   - FLIR Lepton datasheet 500-0771-01: 11.8 x 12.7 x 7.14 mm in the Molex 105028 socket
-  - FLIR Lepton Breakout V2.0 drawing: 29.5 x 29.0 mm board, holes 2 mm from the edges
+  - Lepton carrier board: envelope agreed with the PCB design (params.py, carrier_*)
   - PJRC Teensy 4.1 drawing: 61.0 x 17.8 x 1.57 mm, micro-USB overhang 0.7 mm
   - BuyDisplay ER-TFTM032-3 drawing: module 77.7 x 55.04 x 3.6 (+0.3), back-side parts <= 2.5 mm
   - Omron B3U-3000P, C&K JS102011SAQN, XKB TS-1187A, HRO TYPE-C-31-M-12, JST S2B-PH-SM4-TB
-KiCad ships no 3D models for SW1, SW3, J3, J4 and U2, so those come from the datasheets here.
+KiCad ships no 3D models for SW1, SW3, J3, J4 and U2, so those come from the datasheets here (J3's
+shell legs and the small parts beside it from their KiCad pads and courtyards).
 """
 
 from __future__ import annotations
@@ -41,7 +42,7 @@ def board(p: EnclosureParams, x0: float, x1: float, y0: float, y1: float, z0: fl
     """A PCB slab with its M2.5 mounting holes (and the M2 Lepton holes on the main board)."""
     holes = [(x, y, p.mounting_hole_d / 2.0) for x, y in p.mounting_holes]
     if lepton_holes:
-        holes += [(x, y, 1.05) for x, y in p.lepton_breakout_holes]
+        holes += [(x, y, 1.05) for x, y in p.lepton_carrier_holes]
     s = box(x0, x1, y0, y1, z0, z1)
     for x, y, r in holes:
         s = _as_solid(s - cyl(x, y, z0 - 0.1, z1 + 0.1, r))
@@ -49,7 +50,14 @@ def board(p: EnclosureParams, x0: float, x1: float, y0: float, y1: float, z0: fl
 
 
 def hex_prism(x: float, y: float, z0: float, z1: float, af: float) -> Solid:
-    from build123d import BuildPart, BuildSketch, Locations, Plane, RegularPolygon, extrude
+    from build123d import (
+        BuildPart,
+        BuildSketch,
+        Locations,
+        Plane,
+        RegularPolygon,
+        extrude,
+    )
 
     with BuildPart() as bp:
         with BuildSketch(Plane.XY.offset(z0)):
@@ -82,11 +90,29 @@ def build_fov_cone(
 J2_TAILS = tuple((31.40 + 2.54 * k, y) for k in range(10) for y in (21.00, 23.54))
 J5J6_TAILS = tuple((x, 1.42 + 2.54 * k) for x in (59.28, 74.52) for k in range(24))
 THT_TAIL_R, THT_TAIL_H = 0.85, 1.60
+# USB-C J3 (HRO TYPE-C-31-M-12) shell legs: oval pads (X x Y), centres from the KiCad board; each
+# tail is modelled as its whole pad, 1.6 mm tall
+J3_LEG_DX = 4.32
+J3_LEGS = ((2.30, 1.0, 1.6), (6.48, 1.0, 2.1))   # (Y, pad width, pad length)
+# Back-side parts next to J3 (KiCad courtyards, board frame): X0, X1, Y0, Y1
+BACK_SMALL_PARTS = {
+    "U4": (24.0, 28.0, 14.8, 18.2),
+    "C10": (21.3, 24.7, 18.6, 20.6),
+    "C11": (28.6, 30.2, 16.3, 19.2),
+    "D1": (27.6, 31.8, 6.4, 10.0),
+    "R7_R8": (19.3, 23.8, 8.9, 12.1),
+}
+
+
+def j3_leg_tails(p: EnclosureParams) -> tuple[Solid, ...]:
+    z0 = p.pcb_z_back + p.pcb_t
+    return tuple(box(x - w / 2.0, x + w / 2.0, y - ln / 2.0, y + ln / 2.0, z0, z0 + THT_TAIL_H)
+                 for x in (p.usb.center_x - J3_LEG_DX, p.usb.center_x + J3_LEG_DX) for y, w, ln in J3_LEGS)
 
 
 def front_tht_tails(p: EnclosureParams) -> tuple[Solid, ...]:
     z0 = p.pcb_z_back + p.pcb_t
-    return tuple(cyl(x, y, z0, z0 + THT_TAIL_H, THT_TAIL_R) for x, y in (*J2_TAILS, *J5J6_TAILS))
+    return (*(cyl(x, y, z0, z0 + THT_TAIL_H, THT_TAIL_R) for x, y in (*J2_TAILS, *J5J6_TAILS)), *j3_leg_tails(p))
 
 
 def sw1_actuator(dy: float) -> Solid:
@@ -125,9 +151,12 @@ def build_real_parts(p: EnclosureParams) -> dict[str, Solid]:
     m["SW2_plunger"] = sw2_plunger()
     m["SW3"] = box(85.3 - 2.55, 85.3 + 2.55, 4.0 - 2.55, 4.0 + 2.55, 18.5, pcb_back)
     m["D2_led"] = box(5.75 - 0.8, 5.75 + 0.8, 66.4 - 0.4, 66.4 + 0.4, 19.2, pcb_back)
-    m["J3_usb_c"] = box(45.8 - 4.47, 45.8 + 4.47, -0.3, 7.0, pcb_back - 3.26, pcb_back)
+    ux = p.usb.center_x
+    m["J3_usb_c"] = box(ux - 4.47, ux + 4.47, -0.3, 7.0, pcb_back - 3.26, pcb_back)
     m["J4_battery"] = box(80.55, 88.45, 47.7, 55.3, 15.0, pcb_back)
-    m["U4_C11"] = box(24.55, 28.45, 3.44, 9.72, 18.6, pcb_back)
+    # Small back-side parts beside J3 (KiCad courtyards), 1.4 mm tall at most
+    for name, (x0, x1, y0, y1) in BACK_SMALL_PARTS.items():
+        m[name] = box(x0, x1, y0, y1, pcb_back - 1.4, pcb_back)
     # Teensy 4.1 on 8.5 mm J5/J6 sockets + 2.54 mm header plastic, component side toward the back
     tz1 = pcb_back - 8.5 - 2.54
     tz0 = tz1 - 1.57
@@ -141,23 +170,29 @@ def build_real_parts(p: EnclosureParams) -> dict[str, Solid]:
         m[f"T41_header_{int(sx)}"] = box(sx - 1.27, sx + 1.27, 0.15, 61.11, tz1, pcb_back - 8.5)
         m[f"T41_tails_{int(sx)}"] = box(sx - 1.27, sx + 1.27, 0.15, 61.11, tz0 - 1.45, tz0)
         m[f"J5J6_socket_{int(sx)}"] = box(sx - 1.27, sx + 1.27, 0.15, 61.11, pcb_back - 8.5, pcb_back)
-    # Lepton Breakout V2.0 on 12 mm sleeves; Lepton 3.5 in its Molex socket faces the back wall
+    # Lepton carrier on 12 mm sleeves; Lepton 3.5 in its Molex socket faces the back wall. Until the
+    # carrier's own 3D model is in, its parts are the agreed envelopes: 3.0 mm on either side
     z_bo_top = pcb_back - p.lepton_sleeve_len
-    z_bo_bot = z_bo_top - p.breakout_t
-    m["breakout_pcb"] = box(28.0, 57.5, 32.0, 61.0, z_bo_bot, z_bo_top)
+    z_bo_bot = z_bo_top - p.carrier_t
+    cx0, cx1, cy0, cy1 = p.carrier_x0, p.carrier_x1, p.carrier_y0, p.carrier_y1
+    m["carrier_pcb"] = box(cx0, cx1, cy0, cy1, z_bo_bot, z_bo_top)
+    m["approx_carrier_top_parts"] = box(cx0, cx1, cy0, cy1, z_bo_top, z_bo_top + p.carrier_parts_h)
+    m["approx_carrier_bottom_parts"] = box(cx0, cx1, cy0, cy1, z_bo_bot - p.carrier_parts_h, z_bo_bot)
+    # Straight 2x10 male header under J2: 2.5 mm plastic on the carrier, pins up into the socket
+    m["carrier_header"] = box(31.40 - 1.27, 54.26 + 1.27, 21.00 - 1.27, 23.54 + 1.27, z_bo_top, z_bo_top + 2.5)
+    m["carrier_header_pins"] = box(31.40 - 0.32, 54.26 + 0.32, 21.00 - 0.32, 23.54 + 0.32,
+                                   z_bo_top + 2.5, pcb_back - 8.5)
     m["lepton_socketed"] = box(
         p.lepton_x - p.lepton_body_w / 2.0, p.lepton_x + p.lepton_body_w / 2.0,
         p.lepton_y - p.lepton_body_l / 2.0, p.lepton_y + p.lepton_body_l / 2.0,
         z_bo_bot - p.lepton_socketed_h, z_bo_bot,
     )
-    for i, (hx, hy) in enumerate(p.lepton_breakout_holes):
+    for i, (hx, hy) in enumerate(p.lepton_carrier_holes):
         m[f"lepton_sleeve_{i}"] = cyl(hx, hy, z_bo_top, pcb_back, 2.0)
         m[f"lepton_washer_{i}"] = cyl(hx, hy, pcb_top, pcb_top + 0.3, 2.5)
         m[f"lepton_head_{i}"] = cyl(hx, hy, pcb_top + 0.3, pcb_top + 0.3 + 1.3, 1.9)
         m[f"lepton_nut_{i}"] = hex_prism(hx, hy, z_bo_bot - 1.6, z_bo_bot, 4.0)
         m[f"lepton_screw_tip_{i}"] = cyl(hx, hy, pcb_top + 0.3 - 18.0, z_bo_bot - 1.6, 1.0)
-    # Right-angle 2x10 female adapter between the breakout header and J2 (outline only)
-    m["approx_lepton_adapter"] = box(30.0, 55.7, 20.0, 32.0, z_bo_top, pcb_back - 8.5)
     # HC-PM254-8.5H-2x10PZ: body = KiCad courtyard (29.69..56.07 x 19.52..25.11) less its 0.25 mm margin
     m["J2_socket"] = box(29.94, 55.82, 19.77, 24.86, pcb_back - 8.5, pcb_back)
     # Display: J1 socket + display header, PCB, module (max height), back-side parts

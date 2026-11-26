@@ -10,16 +10,21 @@ Z stack (mm):
   -0.5 .. 19.5  4x M2.5x20 hex standoffs, seated 0.5 mm into the back wall
   19.5 .. 20.0  4x nylon M2.5 washers (keep the standoff corners off the SW2/SW3 pads)
   20.0 .. 21.6  main PCB
-  21.6 .. 32.6  4x M2.5x11 hex standoffs; printed battery cradle, FR4 floor, 505060 LiPo, FR4 lid
+  21.6 .. 32.6  4x M2.5x11 hex standoffs; printed battery cradle, FR4 floor, LiPo, FR4 lid
   32.6 .. 34.2  display PCB (BuyDisplay ER-TFTM032-3, Y 2.0..66.9)
   34.2 .. 39.2  display module; front screws reach the 11 mm standoffs through 5 mm bosses
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
-import re
+
+# JLC3DP 3D printing design guideline, MJF (nylon): walls >= 1.0 mm; raised and engraved details
+# >= 0.8 mm wide and 0.8 mm deep (jlc3dp.com/help/article/3d-printing-design-guideline)
+MJF_MIN_WALL = 1.0
+MJF_MIN_DETAIL = 0.8
 
 
 @dataclass(frozen=True)
@@ -99,37 +104,46 @@ class EnclosureParams:
     display_pcb_center_x: float = 44.70
     display_pcb_center_y: float = 34.45
 
-    display_win_x_min: float = 11.95
+    display_win_x_min: float = 11.95   # The TFT's active area (64.8 x 48.6 mm)
     display_win_x_max: float = 76.75
     display_win_y_min: float = 10.15
     display_win_y_max: float = 58.75
+    display_opening_margin: float = 0.50  # Window = active area + 0.5 mm all round (module placement play)
 
-    # --- FLIR Lepton 2.5 / 3.5 optical geometry ---
-    lepton_breakout_holes: tuple[tuple[float, float], ...] = (
+    # --- FLIR Lepton 2.5 / 3.5 on the Lepton carrier board ---
+    # Carrier mounting holes = main-board holes H5..H8 (M2 screws, 12 mm nylon sleeves)
+    lepton_carrier_holes: tuple[tuple[float, float], ...] = (
         (30.00, 43.00),
         (55.50, 43.00),
         (55.50, 59.00),
         (30.00, 59.00),
     )
-    # Lepton socket centre = optical axis: FLIR Breakout V2.0 drawing (U1 16.5 mm from the hole-side
-    # edge, 10.0 mm from the far edge) and the V3 back-plate window both put it at (44.45, 51.00)
+    # Lepton socket centre = optical axis, kept from the FLIR Breakout V2.0 (and the V3 back-plate
+    # window) so the back walls and their field-of-view openings stay where they are
     lepton_x: float = 44.45
     lepton_y: float = 51.00
     lepton_pupil_z: float = 2.20
     lepton_pupil_clear_d: float = 3.20
     lepton_dfov_deg: float = 71.0      # Lepton 3.5
     lepton_31r_dfov_deg: float = 119.0  # Lepton 3.1R wide-angle (95 deg HFOV)
-    # 12 mm sleeves + 1.6 mm breakout + 7.14 mm Lepton in its Molex socket = shutter face at Z=-0.74:
+    # 12 mm sleeves + 1.6 mm carrier + 7.14 mm Lepton in its Molex socket = shutter face at Z=-0.74:
     # the Lepton pokes 0.74 mm into the back wall, so the opening there must swallow its body
     lepton_sleeve_len: float = 12.00
-    breakout_t: float = 1.60
+    carrier_t: float = 1.60
+    # Carrier envelope agreed with the PCB design (outline and per-side part heights); its straight
+    # 2x10 header plugs into J2 from below
+    carrier_x0: float = 28.00
+    carrier_x1: float = 57.20          # 0.8 mm short of the Teensy PCB edge (X=58.01) at the same height
+    carrier_y0: float = 14.00
+    carrier_y1: float = 61.00
+    carrier_parts_h: float = 3.00      # Per side, outside the Lepton socket
     lepton_socketed_h: float = 7.14
     lepton_body_w: float = 11.80        # With socket (FLIR datasheet: 11.8 x 12.7 x 7.14 mm)
     lepton_body_l: float = 12.70
 
     laser_lepton_aperture_d: float = 25.20  # Clears 119 deg DFOV on 3.2 mm acrylic, axis +-0.5 mm
-    shell_lepton_inner_d: float = 18.80     # Lepton body (17.34 mm diagonal) + 0.7 mm all round
-    shell_lepton_outer_d: float = 20.20     # Clears 119 deg DFOV at the lens-cap track floor
+    shell_lepton_inner_d: float = 20.00     # Lepton body (17.34 mm diagonal) + 1.3 mm all round
+    shell_lepton_outer_d: float = 21.00     # 119 deg DFOV at the lens-cap track floor with the pupil up to Z 3.0
 
     # --- Teensy 4.1 (plugs into the J5/J6 1x24 sockets on B.Cu, X=59.28 / 74.52) ---
     teensy_center_x: float = 66.90
@@ -142,7 +156,7 @@ class EnclosureParams:
     # SW3 Prog tact switch pinhole on the back face
     teensy_prog_x: float = 85.30
     teensy_prog_y: float = 4.00
-    teensy_prog_hole_d: float = 2.40
+    teensy_prog_hole_d: float = 3.00  # 3 mm, not 2.4: MJF powder comes out of a 21 mm deep bore
 
     # SW1 C&K JS102011SAQN right-angle slide switch on the right (+X) wall: body X<=89.0,
     # 1.5 mm actuator X 89.0..91.0, Z 16.6..18.35, 2.0 mm travel (+-1.0 mm from centre)
@@ -154,23 +168,26 @@ class EnclosureParams:
     switch_travel: float = 2.00
 
     # SW2 Omron B3U-3000P capture switch: plunger tip 0.55 mm past the top PCB edge (Y=68.95),
-    # Z 18.8..19.8, body front at Y=68.25; pretravel 0.2 +0.2/-0.1 mm. Buttons stop on the PCB edge
-    # itself (Y=68.40): shell button 0.15 mm rest gap + 0.60 mm stroke into the switch; the acrylic
-    # key's stem lands on the edge, so its stroke is the plunger's 0.55 mm overhang.
+    # Z 18.8..19.8, body front at Y=68.25; pretravel 0.2 +0.2/-0.1 mm. The shell button's flange and
+    # the acrylic key end 0.5 mm under the PCB, so they pass under the board edge and SW2 itself ends
+    # the travel (accessories.SW2_PUSHER_PCB_GAP).
     button_x: float = 84.00
     button_z: float = 18.20
     button_plunger_bore_d: float = 6.80
     button_plunger_cap_d: float = 6.20
-    button_stem_z: float = 19.30
-    button_rest_gap: float = 0.15
-    button_stop_stroke: float = 0.60
+    # Rest gap to the plunger tip: more than the ~0.3 mm board, plunger and print stack plus the 0.1
+    # mm a 3.2 mm acrylic top plate moves the key in, so SW2 never sits pressed
+    button_rest_gap: float = 0.45
 
     # D2 charge LED (0603 on B.Cu) seen through a hole in the back wall
     back_face_led_holes: tuple[tuple[float, float], ...] = ((5.75, 66.40),)
-    back_face_led_d: float = 2.40
-    guide_tube_od: float = 4.40     # Printed light / pin guide tubes from the back wall toward D2 and SW3
+    back_face_led_d: float = 3.00
+    guide_tube_od: float = 5.00     # Printed light / pin guide tubes from the back wall toward D2 and SW3
 
     # --- Tripod mount: the same 1/4"-20 UNC hex nut (7/16" AF x 5.5 mm) in both enclosures ---
+    # Both sit in the middle of the board (as on V3), so the camera balances on the tripod; the
+    # USB-C port moved left instead: its opening ends 15.8 mm from the screw axis, so a plate up to
+    # 31.6 mm wide, centred on the screw, leaves the port free
     tripod_x: float = 44.70
     shell_tripod_z: float = 6.80
     shell_tripod_screw_d: float = 6.80
@@ -180,20 +197,24 @@ class EnclosureParams:
     shell_tripod_roof_t: float = 3.00
     shell_tripod_boss_w: float = 19.00
     shell_tripod_boss_z_end: float = 13.60
-    # Laser case: printed tripod_mount snapped onto the rear standoff at (12.5, 4.0); its plug fills
-    # a hole in the bottom plate so the nut sits 1.2 mm above the outer face
-    laser_tripod_x: float = 26.00     # 3.6 mm acrylic web to the USB-C opening
+    # Laser case: printed tripod_mount; its plug fills a hole in the bottom plate so the nut sits
+    # 1.2 mm above the outer face, and a fin beside the board's bottom edge stops it lifting
+    laser_tripod_x: float = 44.70     # Middle of the board, as tripod_x
     laser_tripod_z: float = 10.00
 
     # --- Laser-cut acrylic parameters (3.0 mm cast acrylic) ---
     laser_t: float = 3.00
     laser_internal_depth: float = 39.70  # Back plate inner face at Z=-0.5 (standoff seat) to Z=39.2
     laser_slot_clearance: float = 0.20   # Slots 3.2 mm wide: fits 2.8..3.2 mm stock
-    laser_kerf: float = 0.10
+    # Formulor cuts centred on the line with ~0.35 mm kerf in 3 mm acrylic ("twice the kerf, around
+    # 0.7 mm" of play per tab and slot): the sheet file grows each outline and shrinks each hole by
+    # half of it, so parts and slots come out at their drawn size
+    laser_kerf: float = 0.35
     laser_inner_margin_x_neg: float = 0.60  # Display PCB width tolerance is +-0.3 mm
     laser_inner_margin_x_pos: float = 2.20  # Room for the switch key shoulder
-    laser_inner_margin_y_neg: float = 1.05  # Teensy micro-USB overhangs the board edge to Y=-0.55;
-                                            # leaves the tripod mount's fin its 1.0 mm (MJF minimum)
+    laser_inner_margin_y_neg: float = 1.30  # Teensy micro-USB overhangs the board edge to Y=-0.55;
+                                            # the tripod mount's 1.0 mm fin (MJF minimum) stays 0.3 mm
+                                            # off the board edge (outline +-0.2, 3.2 mm sheet 0.1 in)
     laser_inner_margin_y_pos: float = 2.40  # Room for the capture key hook
     laser_plate_overhang: float = 2.50
     laser_corner_r: float = 3.50
@@ -201,7 +222,7 @@ class EnclosureParams:
 
     # --- Battery stack between the main PCB (21.6) and the display back parts (30.1) ---
     # 0.6 mm FR4 floor at Z 23.4..24.0, 0.2 mm over the 1.6 mm THT tails and Lepton screw heads;
-    # 505060 cell up to 5.45 mm (5.0 mm + 9 % swell); 0.05 mm gap; 0.4 mm FR4 lid -> lid top at
+    # cell up to 5.45 mm (5.0 mm + 9 % swell); 0.05 mm gap; 0.4 mm FR4 lid -> lid top at
     # Z=29.90, 0.2 mm under the display's back-side parts. The floor and lid are too thin to print
     # (MJF minimum wall 1.0 mm), so they are bare FR4 boards from the PCB maker. The printed cradle
     # frame carries the floor on 1.0 mm lips and stands on its own feet around the standoffs.
@@ -213,7 +234,7 @@ class EnclosureParams:
     cradle_wall_t: float = 1.20
     cradle_foot_od: float = 8.40     # 1.1 mm wall around the Ø6.2 bore for the SW5 hex standoff
     cradle_foot_top_z: float = 25.40
-    fr4_clearance: float = 0.20      # FR4 floor to cradle wall, per side
+    fr4_clearance: float = 0.30      # FR4 floor to cradle wall, per side (MJF +-0.3 mm)
 
     # --- 2-piece 3D-printable shell parameters ---
     shell_wall: float = 2.60
@@ -226,12 +247,12 @@ class EnclosureParams:
     shell_clearance_y_neg: float = 1.20  # oy0=-3.80 so USB-C plug boots seat fully
     shell_clearance_y_pos: float = 2.00  # iy1=70.40: room for the capture button flange
     shell_split_z: float = 21.80
-    lens_cap_clearance: float = 0.25
+    lens_cap_clearance: float = 0.30  # Per side, MJF +-0.3 mm
 
     usb: UsbCutoutSpec = field(
         default_factory=lambda: UsbCutoutSpec(
             label="Board-edge USB-C (TYPE-C-31-M-12)",
-            center_x=45.80,
+            center_x=21.80,      # Left of the tripod screw (Max, V4.0 re-layout)
             center_z=18.40,
             width=10.40,
             height=4.60,
@@ -243,7 +264,9 @@ class EnclosureParams:
             laser_height=8.00,
         )
     )
-    # 505060 protected LiPo, worst case: 62 x 50.5 mm with its protection board, 5.45 mm swollen
+    # The cradle is sized for the larger cell, a 505060 protected LiPo: worst case 62 x 50.5 mm with
+    # its protection board, 5.45 mm swollen. The 34 mm Adafruit 258 sits between two spacer bars
+    # (accessories.SPACER_*).
     battery: BatterySpec = field(
         default_factory=lambda: BatterySpec(
             name="505060 2000 mAh protected LiPo (JST-PH), 62 x 50.5 x 5.45 mm worst case",
@@ -263,6 +286,14 @@ class EnclosureParams:
     @property
     def display_win_h(self) -> float:
         return self.display_win_y_max - self.display_win_y_min
+
+    @property
+    def display_opening_w(self) -> float:
+        return self.display_win_w + 2.0 * self.display_opening_margin
+
+    @property
+    def display_opening_h(self) -> float:
+        return self.display_win_h + 2.0 * self.display_opening_margin
 
     @property
     def display_win_cx(self) -> float:

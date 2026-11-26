@@ -19,7 +19,7 @@ import json
 import math
 import os
 import sys
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import bmesh
@@ -59,6 +59,7 @@ class Shot:
     res: tuple[int, int] = (2400, 1600)
     margin: float = 0.08
     shift_x: float = 0.0                  # Move the subject left by this fraction of the width (room for an inset)
+    cutout: bool = False                  # Photo on a transparent background (PNG), without the floor
 
 
 @dataclass
@@ -73,7 +74,8 @@ class Step:
 STEP_RES = (1800, 1300)
 EXPLODE_3D: dict[str, float] = {
     "screws_back": -16, "lepton_module": 16, "lepton_fasteners": 16, "standoff_rear": 26, "rear_washers": 34,
-    "teensy": 38, "pcba": 46, "standoff_mid": 58, "battery_stack": 64, "lipo": 72, "battery_lid": 80,
+    "teensy": 38, "pcba": 46, "standoff_mid": 58, "battery_stack": 64, "battery_floor": 68, "lipo": 74,
+    "battery_spacers": 74, "battery_lid": 82,
     "display": 94, "front_shell": 118, "screws_front": 138,
 }
 
@@ -86,12 +88,11 @@ PHOTOS: list[Shot] = [
     Shot("v4.0-3d-section", SHELL_BUILD, hide=["cap_closed"], azimuth=62, elevation=14, section_x=44.45,
          lens_mm=70),
     Shot("v4.0-3d-kit", [], kind="flatlay", pose="flat", azimuth=0, elevation=72, lens_mm=70, res=(2400, 1800),
-         units=[["front_shell"], ["back_shell"], ["display"], ["pcba"], ["battery_cradle"], ["battery_lid"],
-                ["lipo", "lipo_lead"], ["^teensy"], ["^lepton_module"], ["lens_cap_open"], ["capture_button"],
-                ["slide_switch_cap"], ["tripod_nut"],
+         units=[["front_shell"], ["back_shell"], ["display"], ["pcba"], ["battery_cradle"], ["battery_floor"],
+                ["battery_lid"], ["lipo", "lipo_lead"], ["battery_spacer_0"], ["battery_spacer_1"], ["^teensy"], ["^lepton_module"], ["lens_cap_open"],
+                ["capture_button"], ["slide_switch_cap"], ["tripod_nut"],
                 *[[f"~standoff_{t}_{i}"] for t in ("rear", "mid") for i in range(4)],
                 *[[f"standoff_washer_{i}"] for i in range(4)],
-                *[[f"cradle_spacer_{i}"] for i in range(4)],
                 *[[f"~shell_screw_{s}_{i}"] for s in ("back", "front") for i in range(4)],
                 *[[f"~lepton_screw_{i}"] for i in range(4)], *[[f"~lepton_spacer_{i}"] for i in range(4)],
                 *[[f"lepton_washer_{i}"] for i in range(4)], *[[f"lepton_nut_{i}"] for i in range(4)]]),
@@ -104,16 +105,18 @@ PHOTOS: list[Shot] = [
          slide_y={"laser_top": 26, "laser_bottom": -26, "laser_tripod": -40, "laser_capture_key": 38,
                   "laser_chute": 40}),
     Shot("v4.0-laser-sheet", ["laser_sheet"], build="laser", pose="flat", azimuth=-12, elevation=66, lens_mm=70),
+    # The LiPo (Adafruit 258) on its own, cut out for the website's parts list
+    Shot("v4.0-part-lipo", [], kind="flatlay", pose="flat", azimuth=-30, elevation=38, lens_mm=85, res=(1200, 1200),
+         units=[["lipo", "lipo_lead"]], margin=0.06, cutout=True),
     Shot("v4.0-laser-kit", [], build="laser", kind="flatlay", pose="flat", azimuth=0, elevation=72, lens_mm=70,
          res=(2400, 1800),
-         units=[["display"], ["pcba"], ["battery_cradle"], ["battery_lid"], ["lipo", "lipo_lead"], ["^teensy"],
-                ["^lepton_module"],
+         units=[["display"], ["pcba"], ["battery_cradle"], ["battery_floor"], ["battery_lid"],
+                ["lipo", "lipo_lead"], ["battery_spacer_0"], ["battery_spacer_1"], ["^teensy"], ["^lepton_module"],
                 *[[f"sheet_part_{i}"] for i in range(8)],
                 ["laser_tripod_mount"], ["laser_tripod_nut"], ["laser_sd_chute"],
                 ["laser_display_spacer_bottom"], ["laser_display_spacer_top"],
                 *[[f"~standoff_{t}_{i}"] for t in ("rear", "mid") for i in range(4)],
                 *[[f"standoff_washer_{i}"] for i in range(4)],
-                *[[f"cradle_spacer_{i}"] for i in range(4)],
                 *[[f"~laser_screw_{s}_{i}"] for s in ("back", "front") for i in range(4)],
                 *[[f"laser_washer_{s}_{i}"] for s in ("back", "front") for i in range(4)],
                 *[[f"~lepton_screw_{i}"] for i in range(4)], *[[f"~lepton_spacer_{i}"] for i in range(4)],
@@ -126,19 +129,19 @@ ICONS: dict[str, list[str]] = {
     "m2washer": ["lepton_washer_0"], "m2nut": ["lepton_nut_0"], "tripod_nut": ["tripod_nut"],
     "capture_button": ["capture_button"], "switch_slider": ["slide_switch_cap"], "standoff20": ["standoff_rear_0"],
     "csk8": ["shell_screw_back_0"], "washer25": ["standoff_washer_0"], "pcba": ["pcba", "teensy", "lepton"],
-    "standoff11": ["standoff_mid_0"], "cspacer": ["cradle_spacer_0"], "cradle": ["battery_cradle"],
-    "lipo": ["lipo"], "lid": ["battery_lid"], "display": ["display"],
+    "standoff11": ["standoff_mid_0"], "cradle": ["battery_cradle"], "floor": ["battery_floor"],
+    "lipo": ["lipo"], "cell_spacer": ["battery_spacer_0"], "lid": ["battery_lid"], "display": ["display"],
     "front_shell": ["front_shell"], "csk14": ["shell_screw_front_0"], "lens_cap": ["lens_cap_open"],
     "laser_back": ["laser_back"], "laser_front": ["laser_front"], "laser_bottom": ["laser_bottom"],
     "pan8": ["laser_screw_back_0"], "pan14": ["laser_screw_front_0"], "washer": ["laser_washer_back_0"],
     "tripod_mount": ["laser_tripod_mount"], "sd_chute": ["laser_sd_chute"],
     "spacer_bar": ["laser_display_spacer_bottom"], "capture_key": ["laser_capture_key"],
-    "switch_key": ["laser_switch_key"], "laser_sides": ["laser_top", "laser_left", "laser_right"],
+    "switch_key": ["laser_switch_key"], "laser_top": ["laser_top"], "laser_lr": ["laser_left", "laser_right"],
 }
 # Modules drawn component side up in the "you need" strip
 ICON_POSES = {"teensy": "flat_flipped", "lepton": "flat_flipped"}
 # Icons drawn from laser-case parts (rendered with the laser build so its printed parts are visible)
-LASER_ICONS = {"laser_back", "laser_front", "laser_bottom", "laser_sides", "pan8", "pan14", "washer", "capture_key",
+LASER_ICONS = {"laser_back", "laser_front", "laser_bottom", "laser_top", "laser_lr", "pan8", "pan14", "washer", "capture_key",
                "switch_key", "tripod_mount", "sd_chute", "spacer_bar"}
 
 
@@ -158,52 +161,56 @@ def _step(file: str, n: int, groups: list[str], parts: list[tuple[str, int, str]
 
 BACK_SHELL_ONLY = ["front_shell", "cap_open", "cap_closed", "battery_stack", "shell_screws"]
 SHELL_STEPS: list[Step] = [
-    _step("assembly-3d-01-teensy.png", 1, ["pcba", "teensy"], [("teensy", 1, "Teensy 4.1")],
-          pose="flat_flipped", offsets={"teensy": -22}, highlight=["teensy"], elevation=32),
-    _step("assembly-3d-02-lepton-screws.png", 2, ["pcba", "teensy", "lepton_washers", "lepton_screws"],
+    # Carrier before Teensy: a nut driver on the H102/H103 nuts needs the Teensy's place
+    _step("assembly-3d-01-lepton-screws.png", 1, ["pcba", "lepton_washers", "lepton_screws"],
           [("m2washer", 4, "Nylon washer M2"), ("m2x18", 4, "M2 × 18")],
           offsets={"lepton_washers": 7, "lepton_screws": 16}, highlight=["lepton_washers", "lepton_screws"],
           elevation=40),
-    _step("assembly-3d-03-lepton.png", 3, ["pcba", "teensy", "lepton"],
-          [("sleeve12", 4, "Sleeve 12 mm"), ("lepton", 1, "Lepton + adapter"), ("m2nut", 4, "M2 nut")],
+    _step("assembly-3d-02-lepton.png", 2, ["pcba", "lepton"],
+          [("sleeve12", 4, "Sleeve 12 mm"), ("lepton", 1, "Lepton + carrier"), ("m2nut", 4, "M2 nut")],
           pose="flat_flipped", offsets={"lepton_spacers": -10, "lepton_module": -22, "lepton_nuts": -32},
           highlight=["lepton_spacers", "lepton_module", "lepton_nuts"], elevation=36),
-    _step("assembly-3d-04-back-shell-parts.png", 4, ["shell"],
-          [("tripod_nut", 1, '1/4"-20 nut'), ("capture_button", 1, "Button"), ("switch_slider", 1, "Slider")],
-          hide=[*BACK_SHELL_ONLY, "standoffs"], offsets={"tripod_nut": 18, "capture_button": 14, "slide_switch_cap": 14},
-          highlight=["tripod_nut", "capture_button", "slide_switch_cap"], elevation=40),
-    _step("assembly-3d-05-rear-standoffs.png", 5, ["shell", "shell_screws"],
-          [("standoff20", 4, "M2.5 × 20"), ("csk8", 4, "M2.5 × 8")],
-          hide=["front_shell", "cap_open", "cap_closed", "battery_stack", "screws_front", "standoff_mid", "rear_washers"],
+    _step("assembly-3d-03-teensy.png", 3, ["pcba", "lepton", "teensy"], [("teensy", 1, "Teensy 4.1")],
+          pose="flat_flipped", offsets={"teensy": -22}, highlight=["teensy"], elevation=32),
+    # Rear standoffs before the loose parts: their screws go in from outside, with the shell face down
+    _step("assembly-3d-04-rear-standoffs.png", 4, ["shell", "shell_screws"],
+          [("standoff20", 4, "M2.5 × 20"), ("csk8", 4, "M2.5 × 6")],
+          hide=["front_shell", "cap_open", "cap_closed", "battery_stack", "screws_front", "standoff_mid", "rear_washers",
+                "tripod_nut", "capture_button", "slide_switch_cap"],
           offsets={"standoff_rear": 22, "screws_back": -22}, highlight=["standoff_rear", "screws_back"], elevation=22),
+    _step("assembly-3d-05-back-shell-parts.png", 5, ["shell", "shell_screws"],
+          [("tripod_nut", 1, '1/4"-20 nut'), ("switch_slider", 1, "Slider")],
+          hide=["front_shell", "cap_open", "cap_closed", "battery_stack", "screws_front", "standoff_mid", "rear_washers",
+                "capture_button"],
+          offsets={"tripod_nut": 18, "slide_switch_cap": 14}, highlight=["tripod_nut", "slide_switch_cap"], elevation=40),
     _step("assembly-3d-06-board.png", 6, SHELL_BUILD,
           [("washer25", 4, "Nylon washer M2.5"), ("pcba", 1, "Board + modules")],
-          hide=[*BACK_SHELL_ONLY, "standoff_mid", "display", "lipo"],
+          hide=[*BACK_SHELL_ONLY, "standoff_mid", "display", "lipo", "capture_button"],
           offsets={"rear_washers": 8, "pcba": 24, "teensy": 24, "lepton": 24},
           highlight=["rear_washers", "pcba", "teensy", "lepton"]),
-    _step("assembly-3d-07-mid-standoffs.png", 7, SHELL_BUILD, [("standoff11", 4, "M2.5 × 11")],
+    # The button drops in past the board edge once the board is in (it would fall out before)
+    _step("assembly-3d-07-capture-button.png", 7, SHELL_BUILD, [("capture_button", 1, "Button")],
+          hide=[*BACK_SHELL_ONLY, "standoff_mid", "display", "lipo"],
+          offsets={"capture_button": 14}, highlight=["capture_button"]),
+    _step("assembly-3d-08-mid-standoffs.png", 8, SHELL_BUILD, [("standoff11", 4, "M2.5 × 11")],
           hide=[*BACK_SHELL_ONLY, "display", "lipo"],
           offsets={"standoff_mid": 16}, highlight=["standoff_mid"]),
-    _step("assembly-3d-08-spacers.png", 8, SHELL_BUILD, [("cspacer", 4, "C-spacer")],
-          hide=["front_shell", "cap_open", "cap_closed", "shell_screws", "battery_cradle", "battery_lid",
-                "display", "lipo"],
-          offsets={"cradle_spacers": 12}, highlight=["cradle_spacers"],
-          inset=Shot("assembly-3d-08-spacers-inset", ["pcba", "cradle_spacers", "standoff_mid"], style="lineart",
-                     pose="flat", azimuth=0, elevation=90, lens_mm=120, highlight=["cradle_spacers"], guides=False,
-                     frame=["pcba"], res=(1000, 780), margin=0.04)),
-    _step("assembly-3d-09-battery.png", 9, SHELL_BUILD,
-          [("cradle", 1, "Cradle"), ("lipo", 1, "LiPo 505060"), ("lid", 1, "Lid")],
+    _step("assembly-3d-09-cradle.png", 9, SHELL_BUILD, [("cradle", 1, "Cradle"), ("floor", 1, "FR4 floor")],
+          hide=[*BACK_SHELL_ONLY[:3], "shell_screws", "battery_lid", "display", "lipo", "battery_spacers"],
+          offsets={"battery_cradle": 14, "battery_floor": 28}, highlight=["battery_cradle", "battery_floor"]),
+    _step("assembly-3d-10-battery.png", 10, SHELL_BUILD,
+          [("cell_spacer", 2, "Battery spacer"), ("lipo", 1, "LiPo 1200 mAh"), ("lid", 1, "FR4 lid")],
           hide=[*BACK_SHELL_ONLY[:3], "shell_screws", "display"],
-          offsets={"battery_cradle": 14, "lipo": 26, "battery_lid": 38},
-          highlight=["battery_cradle", "lipo", "battery_lid"]),
-    _step("assembly-3d-10-display.png", 10, SHELL_BUILD, [("display", 1, "Display")],
+          # Bars and cell shown in place (a lifted cell hides the far bar); the lid floats clear above
+          offsets={"battery_lid": 64}, highlight=["battery_spacers", "lipo", "battery_lid"], elevation=50),
+    _step("assembly-3d-11-display.png", 11, SHELL_BUILD, [("display", 1, "Display")],
           hide=["front_shell", "cap_open", "cap_closed", "shell_screws"],
           offsets={"display": 20}, highlight=["display"]),
-    _step("assembly-3d-11-front-shell.png", 11, [*SHELL_BUILD, "shell_screws"],
+    _step("assembly-3d-12-front-shell.png", 12, [*SHELL_BUILD, "shell_screws"],
           [("front_shell", 1, "Front shell"), ("csk14", 4, "M2.5 × 14")],
           hide=["cap_open", "cap_closed", "screws_back"],
           offsets={"front_shell": 22, "screws_front": 44}, highlight=["front_shell", "screws_front"]),
-    _step("assembly-3d-12-lens-cap.png", 12, [*SHELL_BUILD, "shell_screws"], [("lens_cap", 1, "Lens cap")],
+    _step("assembly-3d-13-lens-cap.png", 13, [*SHELL_BUILD, "shell_screws"], [("lens_cap", 1, "Lens cap")],
           hide=["cap_closed"], pose="upright", azimuth=150, elevation=18,
           slide_y={"cap_open": 58}, highlight=["cap_open"]),
 ]
@@ -219,27 +226,28 @@ LASER_STEPS: list[Step] = [
           highlight=["standoff_rear", "washers_back", "screws_back"], elevation=24),
     _step("assembly-laser-2-tripod.png", 2, [*LASER_BASE, "laser_bottom", "laser_tripod"],
           [("laser_bottom", 1, "Bottom plate"), ("tripod_mount", 1, "Tripod mount"), ("tripod_nut", 1, '1/4"-20 nut')],
-          build="laser", offsets={"laser_bottom": 24}, slide_y={"laser_tripod": 16, "laser_tripod_nut": 30},
+          build="laser", offsets={"laser_bottom": 24}, slide_y={"laser_tripod": 16},
           highlight=["laser_bottom", "laser_tripod"], azimuth=200, elevation=38,
+          # Close-up from the back: the nut slides into the mount's channel along +Z
           inset=Shot("assembly-laser-2-tripod-inset", ["laser_tripod"], build="laser", style="lineart",
-                     pose="flat", azimuth=200, elevation=40, lens_mm=120, slide_y={"laser_tripod_nut": 12},
+                     pose="flat_flipped", azimuth=20, elevation=40, lens_mm=120, offsets={"laser_tripod_nut": -14},
                      highlight=["laser_tripod"], frame=["laser_tripod"], res=(1000, 780), margin=0.10)),
-    _step("assembly-laser-3-stack.png", 3, LASER_STACK, [("pcba", 1, "Shell steps 1–3, 6–10")], build="laser",
+    _step("assembly-laser-3-stack.png", 3, LASER_STACK, [("pcba", 1, "Shell steps 1–3, 6, 8–11")], build="laser",
           offsets={"rear_washers": 6, "pcba": 16, "teensy": 16, "lepton": 16, "standoff_mid": 28, "battery_stack": 34,
-                   "lipo": 42, "battery_lid": 50, "display": 64},
+                   "battery_floor": 38, "lipo": 44, "battery_spacers": 44, "battery_lid": 52, "display": 64},
           highlight=["rear_washers", "modules", "pcba", "standoff_mid", "battery_stack"], elevation=28,
           guides=False),
-    # Keys go into the top and right plates from the inside, before those plates are slotted on
-    _step("assembly-laser-4-keys.png", 4, ["laser_top", "laser_right", "laser_keys"],
-          [("capture_key", 1, "Button key"), ("switch_key", 1, "Switch key")], build="laser",
-          slide_y={"laser_capture_key": -14}, slide_x={"laser_switch_key": -14},
-          highlight=["laser_keys"], azimuth=-40, elevation=28),
-    _step("assembly-laser-5-sides.png", 5, [*LASER_STACK, "laser_keys", "laser_top", "laser_left", "laser_right"],
-          [("laser_sides", 3, "Side plates")], build="laser",
-          offsets={"laser_top": 26, "laser_left": 26, "laser_right": 26, "laser_keys": 26},
-          slide_y={"laser_top": 10, "laser_capture_key": 10},
-          slide_x={"laser_left": -10, "laser_right": 10, "laser_switch_key": 10},
-          highlight=["laser_top", "laser_left", "laser_right"], elevation=30),
+    # Plates drop straight onto the back plate, one at a time: top with the button key in its slot,
+    # then left and right with the switch key (corner joints: top/bottom own the back third)
+    _step("assembly-laser-4-top.png", 4, [*LASER_STACK, "laser_top", "laser_capture_key"],
+          [("capture_key", 1, "Button key"), ("laser_top", 1, "Top plate")], build="laser",
+          offsets={"laser_top": 30, "laser_capture_key": 30},
+          highlight=["laser_top", "laser_capture_key"], elevation=30),
+    _step("assembly-laser-5-sides.png", 5,
+          [*LASER_STACK, "laser_top", "laser_capture_key", "laser_left", "laser_right", "laser_switch_key"],
+          [("switch_key", 1, "Switch key"), ("laser_lr", 2, "Side plates")], build="laser",
+          offsets={"laser_left": 30, "laser_right": 30, "laser_switch_key": 30},
+          highlight=["laser_left", "laser_right", "laser_switch_key"], elevation=30),
     _step("assembly-laser-6-front-plate.png", 6, ["laser", "modules", "pcba"],
           [("spacer_bar", 2, "Spacer bar"), ("laser_front", 1, "Front plate"), ("pan14", 4, "M2.5 × 14"),
            ("washer", 4, "Nylon washer M2.5")], build="laser",
@@ -439,16 +447,16 @@ def load_scene(manifest_path: Path) -> tuple[dict[str, Part], dict[str, object]]
                                    Vector(spec["center_mm"]))
         if spec["material"] == "screen" or spec.get("texture"):
             _planar_uv(meshes)
-    pcba = manifest["pcba"]
-    root, meshes = _import_glb(base / pcba["file"], "pcba")
-    for o in meshes:  # KiCad materials: keep colours, tune finish
-        for slot in o.material_slots:
-            if slot.material and "Principled BSDF" in slot.material.node_tree.nodes:
-                b = slot.material.node_tree.nodes["Principled BSDF"]
-                b.inputs["Roughness"].default_value = max(0.3, b.inputs["Roughness"].default_value)
-    outer = manifest["camera_frame"]["outer_mm"]
-    parts["pcba"] = Part("pcba", root, "kicad", ["pcba"], meshes,
-                         Vector(((outer[0] + outer[3]) / 2, (outer[1] + outer[4]) / 2, pcba["offset_mm"][2])))
+    for board in manifest["boards"]:  # Main board and Lepton carrier, exported from KiCad
+        name = board["name"]
+        root, meshes = _import_glb(base / board["file"], name)
+        for o in meshes:  # KiCad materials: keep colours, tune finish
+            for slot in o.material_slots:
+                if slot.material and "Principled BSDF" in slot.material.node_tree.nodes:
+                    b = slot.material.node_tree.nodes["Principled BSDF"]
+                    b.inputs["Roughness"].default_value = max(0.3, b.inputs["Roughness"].default_value)
+        parts[name] = Part(name, root, "kicad", [name, *board["groups"]], meshes, Vector(board["center_mm"]))
+        BOARD_BASES[name] = Matrix.Translation(Vector(board["offset_mm"]) * MM)
     for p in parts.values():
         p.original_materials = {o.name: [s.material for s in o.material_slots] for o in p.meshes}
     return parts, manifest
@@ -464,7 +472,7 @@ POSES = {
     "flat": Matrix.Identity(4),
     "flat_flipped": Euler((0, math.radians(180), 0)).to_matrix().to_4x4(),
 }
-PCBA_BASE = Matrix.Translation(Vector((0, 0, 21.6)) * MM)
+BOARD_BASES: dict[str, Matrix] = {}  # KiCad board -> lift of its F.Cu face to the device frame
 
 
 def setup_world(style: str, transparent: bool) -> None:
@@ -571,7 +579,7 @@ def _set_visible(p: Part, show: bool) -> None:
 
 
 def _base(p: Part) -> Matrix:
-    return PCBA_BASE if p.name == "pcba" else Matrix.Identity(4)
+    return BOARD_BASES.get(p.name, Matrix.Identity(4))
 
 
 def arrange(parts: dict[str, Part], shot: Shot) -> list[Part]:
@@ -773,9 +781,9 @@ def configure_render(shot: Shot, samples: int, scale: float) -> None:
     r = scene.render
     r.resolution_x, r.resolution_y = shot.res
     r.resolution_percentage = int(100 * scale)
-    transparent = shot.kind == "icon"
+    transparent = shot.kind == "icon" or shot.cutout
     r.film_transparent = transparent
-    if shot.style == "photo":  # Photos as high-quality JPEG keep the repo small; line art stays PNG
+    if shot.style == "photo" and not shot.cutout:  # Photos as high-quality JPEG keep the repo small; line art stays PNG
         r.image_settings.file_format = "JPEG"
         r.image_settings.quality = 92
         r.image_settings.color_mode = "RGB"
@@ -857,6 +865,10 @@ def render_shot(parts: dict[str, Part], manifest: dict[str, object], shot: Shot,
     setup_world(shot.style, shot.kind == "icon")
     if shot.style == "photo":
         setup_studio((lo + hi) / 2, (hi - lo).length / 2, lo.z)
+        if shot.cutout:  # Product shot on its own: no floor, no cast shadow
+            for o in bpy.data.objects:
+                if o.name.startswith("floor"):
+                    o.hide_render = True
     if shot.style == "lineart" and shot.guides and shot.kind == "scene":
         build_guides(visible, shot, manifest["anchors_mm"], flat["guide"])  # type: ignore[arg-type]
     place_camera(shot, flo, fhi)
@@ -900,7 +912,8 @@ def main() -> None:
 
     for shot in PHOTOS:
         if want(shot.name):
-            render_shot(parts, manifest, shot, args.out / f"{shot.name}.jpg", args.samples, args.scale, flat)
+            ext = "png" if shot.cutout else "jpg"
+            render_shot(parts, manifest, shot, args.out / f"{shot.name}.{ext}", args.samples, args.scale, flat)
 
     sheets = []
     icons_needed: set[str] = set()

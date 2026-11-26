@@ -4,8 +4,8 @@ They give the Blender renders the look of the real parts; the clearance tests al
 every printed part. Layouts are measured from the vendor photos and drawings:
   - PJRC Teensy 4.1 (61.0 x 17.8 x 1.57 mm), plugged into J5/J6 (X=59.33/74.57) on the PCB back,
     component side toward the back wall; its five inner pads stay empty (spring pins P3/P4 press on them)
-  - FLIR Lepton 3.5 (10.5 x 10.5 face, 7.14 mm socketed) on the FLIR Breakout V2.0 (29.5 x 29.0 mm),
-    hung on 12 mm sleeves below the PCB; its right-angle 2x10 header plugs into the Sullins adapter
+  - FLIR Lepton 3.5 (10.5 x 10.5 face, 7.14 mm socketed) on the Lepton carrier board, hung on
+    12 mm sleeves below the PCB; its straight 2x10 header plugs into J2
   - BuyDisplay ER-TFTM032-3: black 89.4 x 64.9 mm PCB, white backlight frame, 3.2" TFT glass
   - 505060 LiPo pouch (5.0 x 50 x 60 mm) with its kapton-wrapped protection board toward J4
   - USB-C receptacle J3 (HRO TYPE-C-31-M-12; KiCad ships no 3D model for it)
@@ -14,6 +14,7 @@ Decals (silkscreen, chip markings, battery label) come from `decals.py`.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -277,7 +278,7 @@ def teensy41(p: EnclosureParams) -> list[RenderProp]:
 
 
 # ---------------------------------------------------------------------------------------------
-# FLIR Lepton 3.5 on the Breakout V2.0
+# FLIR Lepton 3.5 on the Lepton carrier
 # ---------------------------------------------------------------------------------------------
 
 # Lepton face features (mm from the lens axis, x right / y up as seen looking at the lens), from the
@@ -345,57 +346,51 @@ def _lepton(p: EnclosureParams, z_bo_bot: float) -> list[RenderProp]:
     ]
 
 
-def lepton_on_breakout(p: EnclosureParams) -> list[RenderProp]:
-    """FLIR Breakout V2.0 (29.5 x 29.0 mm) on four 12 mm sleeves, Lepton facing the back wall (-Z).
+J2_PIN_X0, J2_PIN_ROWS_Y = 31.40, (21.00, 23.54)  # J2 pad 1 and the two rows (KiCad pads)
 
-    The breakout's right-angle 2x10 header points toward J2; a right-angle 2x10 female adapter
-    (Sullins PPPC102LJBN-RC) takes it and plugs into J2 (outline only, no exact drawing).
+
+def lepton_on_carrier(p: EnclosureParams, carrier_from_kicad: bool = False) -> list[RenderProp]:
+    """Lepton carrier on four 12 mm sleeves, Lepton facing the back wall (-Z); its straight 2x10
+    header plugs into J2 from below.
+
+    With `carrier_from_kicad` the board, header and socket come from the carrier's KiCad model
+    (rendered like the main board), so only the Lepton and the fasteners are props. Without it the
+    board is the agreed outline with a modelled header and socket.
     """
     z_top = p.pcb_z_back - p.lepton_sleeve_len
-    z_bot = z_top - p.breakout_t
-    bx, by = 42.75, 46.5
-    with BuildPart() as breakout:
+    z_bot = z_top - p.carrier_t
+    with BuildPart() as carrier:
         with BuildSketch(Plane.XY.offset(z_bot)):
-            with Locations((bx, by)):
-                RectangleRounded(29.5, 29.0, 1.0)
-        extrude(amount=p.breakout_t)
-        with Locations(*[(x, y, z_bot) for x, y in p.lepton_breakout_holes]):
-            Cylinder(1.1, p.breakout_t, align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
+            with Locations((0.5 * (p.carrier_x0 + p.carrier_x1), 0.5 * (p.carrier_y0 + p.carrier_y1))):
+                RectangleRounded(p.carrier_x1 - p.carrier_x0, p.carrier_y1 - p.carrier_y0, 1.0)
+        extrude(amount=p.carrier_t)
+        with Locations(*[(x, y, z_bot) for x, y in p.lepton_carrier_holes]):
+            Cylinder(1.1, p.carrier_t, align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
 
-    # Right-angle 2x10 male header on the +Z side, pins running -Y over the board edge into the adapter
-    xs = [bx + (k - 4.5) * 2.54 for k in range(10)]
-    header_y0, header_y1 = 36.0, 40.5
-    plastic = [_box(x, (header_y0 + header_y1) / 2.0, z_top, 2.42, header_y1 - header_y0, 2.5) for x in xs]
-    adapter_face_y = 31.6
+    # Straight 2x10 male header: 2.5 mm plastic on the carrier, 6 mm pins up into J2, tails below
+    pin_uvs = [(J2_PIN_X0 + 2.54 * k, y) for k in range(10) for y in J2_PIN_ROWS_Y]
+    plastic = [_box(J2_PIN_X0 + 2.54 * k, 0.5 * sum(J2_PIN_ROWS_Y), z_top, 2.42, 5.0, HEADER_H) for k in range(10)]
     pins, joints = [], []
-    for x in xs:
-        for zc, y_hole in ((z_top + 0.75, 37.27), (z_top + 2.0, 39.81)):
-            pins.append(_box(x, (adapter_face_y - 2.0 + header_y0) / 2.0, zc - PIN_SQ / 2.0, PIN_SQ, header_y0 - adapter_face_y + 2.0, PIN_SQ))
-            joints.append(_solid(Location((x, y_hole, z_bot - 0.45)) * Cone(0.34, 0.75, 0.45, align=(Align.CENTER, Align.CENTER, Align.MIN))))
-            joints.append(_box(x, y_hole, z_bot - 1.1, PIN_SQ, PIN_SQ, 0.7))
-    # Sullins female adapter: 20 entry holes facing the breakout, legs down into J2 (hidden in the socket)
-    with BuildPart() as adapter:
-        with Locations((42.85, (20.0 + adapter_face_y) / 2.0, z_bot)):
-            Box(25.4, adapter_face_y - 20.0, 5.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-        for x in xs:
-            for zc in (z_top + 0.75, z_top + 2.0):
-                with Locations((x, adapter_face_y, zc)):
-                    Box(1.0, 2.0, 0.9, align=(Align.CENTER, Align.MAX, Align.CENTER), mode=Mode.SUBTRACT)
-    # Two regulators and an oscillator on the header side
-    smd = [_box(36.0, 52.0, z_top, 2.9, 1.6, 1.1), _box(36.0, 56.0, z_top, 2.9, 1.6, 1.1), _box(50.5, 55.0, z_top, 2.0, 2.5, 0.8)]
+    for x, y in pin_uvs:
+        pins.append(_box(x, y, z_top + HEADER_H, PIN_SQ, PIN_SQ, PIN_LONG - 0.3))
+        pins.append(_solid(Location((x, y, z_top + HEADER_H + PIN_LONG - 0.3))
+                           * Cone(PIN_SQ / 2.0, 0.18, 0.3, align=(Align.CENTER, Align.CENTER, Align.MIN))))
+        joints.append(_solid(Location((x, y, z_bot - 0.5)) * Cone(0.36, 0.78, 0.5, align=(Align.CENTER, Align.CENTER, Align.MIN))))
+        joints.append(_box(x, y, z_bot - SOLDER_STUB, PIN_SQ, PIN_SQ, SOLDER_STUB - 0.3))
 
-    props = [
-        RenderProp("lepton_breakout", _solid(breakout.part), "pcb_green", "breakout_lepton_side", ("-Y", "+X")),
-        RenderProp("lepton_header", _group(plastic), "plastic_black"),
-        RenderProp("lepton_header_pins", _group(pins), "gold"),
-        RenderProp("lepton_joints", _group(joints), "solder"),
-        RenderProp("lepton_adapter", _solid(adapter.part), "plastic_black"),
-        RenderProp("lepton_smd", _group(smd), "ic_black"),
-        *_lepton(p, z_bot),
-    ]
+    if carrier_from_kicad:
+        props = [prop for prop in _lepton(p, z_bot) if prop.name != "lepton_socket"]
+    else:
+        props = [
+            RenderProp("lepton_carrier", _solid(carrier.part), "pcb_green"),
+            RenderProp("lepton_header", _group(plastic), "plastic_black"),
+            RenderProp("lepton_header_pins", _group(pins), "gold"),
+            RenderProp("lepton_joints", _group(joints), "solder"),
+            *_lepton(p, z_bot),
+        ]
     # 4x M2x18 ISO 1207 screws on Ø2.2/5.0 x 0.3 nylon washers, 4x 2.2/4.0 x 12 sleeves, 4x M2 nuts
     pcb_top = p.pcb_z_back + p.pcb_t
-    for i, (x, y) in enumerate(p.lepton_breakout_holes):
+    for i, (x, y) in enumerate(p.lepton_carrier_holes):
         props += [
             RenderProp(f"lepton_spacer_{i}", _tube(x, y, z_top, p.lepton_sleeve_len, 2.0, 1.1), "nylon_black"),
             RenderProp(f"lepton_washer_{i}", _tube(x, y, pcb_top, 0.3, 2.5, 1.1), "nylon_black"),
@@ -463,17 +458,19 @@ def display_module(p: EnclosureParams) -> list[RenderProp]:
     ]
 
 
-LIPO_CELL_X = 56.0   # Pouch length; the protection board adds the last 4 mm of the 60 mm cell
-LIPO_PCM_X = 3.7
+# Adafruit 258 (PKCELL LP503562), 34 x 62 x 5 mm: a 56 mm pouch and its protection board in kapton.
+# It lies between the two spacer bars, the board end toward the wire gap.
+LIPO_CELL_X = 56.0
+LIPO_PCM_X = 6.0
 
 
 def lipo_pouch(p: EnclosureParams) -> list[RenderProp]:
-    """505060 pouch with seal flanges, its protection board in kapton at the J4 end, and (kit only)
-    the red/black lead with a JST-PH plug lying beside it."""
+    """Adafruit 258 pouch with seal flanges, its protection board in kapton at the J4 end, and (kit
+    only) the red/black lead with a JST-PH plug lying beside it."""
     bat = p.battery
     z0, t = bat.z_start, 5.0
     x0 = bat.center_x - (LIPO_CELL_X + LIPO_PCM_X) / 2.0
-    w_y = 49.6
+    w_y = 33.4  # 34.0 over the seal flanges
     with BuildPart() as pouch:
         with BuildSketch(Plane.XY.offset(z0)):
             with Locations((x0 + LIPO_CELL_X / 2.0, bat.center_y)):
@@ -489,16 +486,23 @@ def lipo_pouch(p: EnclosureParams) -> list[RenderProp]:
         RenderProp("lipo", _group([_solid(pouch.part), *flanges]), "lipo_foil", "lipo_label", ("+X", "-Y")),
         RenderProp("lipo_pcm", pcm, "kapton"),
     ]
-    # Lead: two wires leave the kapton by the wire exit (Y=50) and run to a JST-PH plug
+    # Lead: two wires leave the kapton at the corner by the wire exit (Y=50) and arc round to a
+    # JST-PH plug, about 7 cm in all (the Adafruit 258's is 8-10 cm)
     x_exit, r = x0 + LIPO_CELL_X + LIPO_PCM_X, 0.55
+    centre = [(-0.5, 50.0), (4.0, 50.4), (12.0, 49.0), (20.0, 44.0), (24.0, 35.0), (24.5, 24.0), (22.0, 14.0), (21.0, 7.0)]
+    zs = [z0 + 2.4, z0 + r + 0.3, *[z0 + r] * 5, z0 + 1.7]
     wires = []
-    for dy, mat in ((0.6, "wire_red"), (-0.6, "wire_black")):
-        pts = [(x_exit - 0.5, 50.0 + dy, z0 + 2.4), (x_exit + 3.0, 50.4 + dy, z0 + r + 0.3), (x_exit + 9.0, 47.0 + dy, z0 + r),
-               (x_exit + 12.0 + dy, 38.0, z0 + r), (x_exit + 10.5 + dy, 26.0, z0 + r + 0.2), (x_exit + 8.0 + dy, 18.0, z0 + 1.7)]
+    for side, mat in ((1.0, "wire_red"), (-1.0, "wire_black")):
+        pts = []
+        for i, (u, y) in enumerate(centre):
+            (ua, ya), (ub, yb) = centre[max(i - 1, 0)], centre[min(i + 1, len(centre) - 1)]
+            n = math.hypot(ub - ua, yb - ya)
+            nx, ny = -(yb - ya) / n, (ub - ua) / n  # In-plane normal: the two wires lie side by side
+            pts.append((x_exit + u + 0.6 * side * nx, y + 0.6 * side * ny, zs[i]))
         path = Spline(*pts, tangents=[(1, 0, -0.2), (0, -1, 0)])
         section = Plane(origin=path @ 0, z_dir=path % 0) * Circle(r)
         wires.append((sweep(section, path=path), mat))
-    end = (x_exit + 8.0, 18.0)
+    end = (x_exit + centre[-1][0], centre[-1][1])
     plug = _box(end[0], end[1] - 3.4, z0, 6.0, 6.8, 3.4)  # JST PHR-2 housing lying on its side
     for solid, mat in wires:
         props.append(RenderProp(f"lipo_lead_{mat}", solid, mat, kit_only=True))
@@ -506,25 +510,11 @@ def lipo_pouch(p: EnclosureParams) -> list[RenderProp]:
     return props
 
 
-def usb_c_receptacle(p: EnclosureParams) -> RenderProp:
-    """HRO TYPE-C-31-M-12 on the PCB back, mouth at the bottom board edge."""
-    with BuildPart() as bp:
-        with BuildSketch(Plane.XZ.offset(0.30)):  # XZ plane normal is -Y; offset moves toward -Y
-            with Locations((p.usb.center_x, p.usb.center_z)):
-                RectangleRounded(8.94, 3.26, 1.40)
-        extrude(amount=-7.35)
-        with BuildSketch(Plane.XZ.offset(0.35)):
-            with Locations((p.usb.center_x, p.usb.center_z)):
-                RectangleRounded(8.34, 2.56, 1.10)
-        extrude(amount=-6.4, mode=Mode.SUBTRACT)
-    return RenderProp("usb_c", _solid(bp.part), "steel")
-
-
-def build_render_props(p: EnclosureParams) -> list[RenderProp]:
+def build_render_props(p: EnclosureParams, carrier_from_kicad: bool = False) -> list[RenderProp]:
+    """Modules the KiCad boards don't carry (the boards' own parts, J3 included, come from KiCad)."""
     return [
         *teensy41(p),
-        *lepton_on_breakout(p),
+        *lepton_on_carrier(p, carrier_from_kicad),
         *display_module(p),
         *lipo_pouch(p),
-        usb_c_receptacle(p),
     ]

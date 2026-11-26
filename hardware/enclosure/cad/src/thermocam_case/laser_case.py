@@ -4,13 +4,15 @@ Front and back plates carry slots; the four side plates carry tabs and interlock
 The capture key and switch key are cut from the same sheet. Slots are 0.2 mm wider than the
 stock, so 2.8..3.2 mm acrylic fits. The back plate's inner face sits at Z=-0.5, the depth of the
 standoff seats in the printed shell, so both enclosures share one board stack.
-The back plate has a separate engrave layer (#0066FF) with the lens mark and wordmark.
+The back plate has a separate engrave layer with the lens mark and wordmark.
+
+Sheet colours follow Formulor's file rules (formulor.de/en/help/files): cuts are pure blue
+RGB(0, 0, 255) hairlines, vector engraving pure red RGB(255, 0, 0) hairlines, exact values only.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-import math
 from pathlib import Path
 
 from build123d import (
@@ -19,10 +21,12 @@ from build123d import (
     Circle,
     ColorIndex,
     Compound,
+    Edge,
     ExportDXF,
     ExportSVG,
     Face,
     FontStyle,
+    GeomType,
     LineType,
     Location,
     Locations,
@@ -31,7 +35,6 @@ from build123d import (
     Rectangle,
     RectangleRounded,
     Rotation,
-    SlotOverall,
     Solid,
     Text,
     Unit,
@@ -41,8 +44,8 @@ from build123d import (
 )
 
 from .accessories import (
-    PCB_TOP_EDGE_Y,
     SW2_TIP_Y,
+    TRIPOD_PLUG_DZ,
     TRIPOD_PLUG_X,
     TRIPOD_PLUG_Z,
     build_laser_display_spacer,
@@ -51,7 +54,11 @@ from .accessories import (
 )
 from .params import EnclosureParams
 
-CAPTURE_KEY_Z0 = 18.20      # 3 mm key spans the SW2 plunger (Z 18.8..19.8) and the PCB edge (20..21.6)
+CUT_RGB, ENGRAVE_RGB, HAIRLINE_MM = (0, 0, 255), (255, 0, 0), 0.01
+# Formulor: parts under 15 x 15 mm stay in the sheet on bridges, cut contour interrupted 0.5..0.8 mm
+BRIDGE_PART_MAX, BRIDGE_W = 15.0, 0.8
+
+CAPTURE_KEY_Z0 = 16.50      # 3 mm key: Z 16.5..19.5 covers the SW2 plunger (18.8..19.8), 0.5 mm under the PCB
 SWITCH_KEY_Z0 = 16.80       # 3 mm key spans the SW1 actuator (Z 16.6..18.35)
 SWITCH_FORK_TIP_X = 89.50   # 0.5 mm clear of the SW1 body (X<=89.0)
 SWITCH_POCKET_W = 1.90
@@ -65,15 +72,17 @@ class LaserEnclosure:
     plates_3d: dict[str, Solid]
     plates_2d: dict[str, Face]
     sheet_2d: Compound
+    cut_edges: list[Edge]  # sheet_2d's outlines as cut, with bridges on the small parts
     engrave_2d: Compound
     sheet_labels: list[tuple[str, float, float]]
     printed: dict[str, Solid]  # Laser-only printed parts in their assembled position
 
 
-# Printed parts for the laser case -> copies per camera (the cradle comes from the shell set; its
-# FR4 floor and lid are the same boards in both cases)
+# Printed parts for the laser case -> copies per camera (the cradle and spacer bars come from the
+# shell set; the FR4 floor and lid are the same boards in both cases)
 LASER_PRINT_PARTS: dict[str, int] = {
     "battery_cradle": 1,
+    "battery_spacer": 2,
     "tripod_mount": 1,
     "sd_chute": 1,
     "display_spacer": 2,
@@ -134,7 +143,7 @@ def _build_front_or_back_2d(
 
         if is_front:
             with Locations((p.display_win_cx, p.display_win_cy)):
-                RectangleRounded(p.display_win_w, p.display_win_h, 0.5, mode=Mode.SUBTRACT)
+                RectangleRounded(p.display_opening_w, p.display_opening_h, 0.5, mode=Mode.SUBTRACT)
         else:
             with Locations((p.lepton_x, p.lepton_y)):
                 Circle(p.laser_lepton_aperture_d / 2.0, mode=Mode.SUBTRACT)
@@ -148,18 +157,23 @@ def _build_front_or_back_2d(
 
 
 def _build_back_engrave_2d(p: EnclosureParams, b: dict[str, float]) -> Compound:
-    """Build Max #186 separate #0066FF laser-engrave layer (Version 1 concentric lens + wordmark)."""
+    """Separate laser-engrave layer: concentric lens mark and wordmark."""
     cx = b["fb_cx"]
     with BuildSketch() as sk:
-        # 3 concentric thermal-lens rings (zero crosshairs!) cleanly placed on lower back plate
-        for r in (4.2, 2.7, 1.2):
-            with Locations((cx - 25.5, 16.0)):
-                Circle(r)
         with Locations((cx + 5.5, 18.2)):
             Text("DIY-THERMOCAM", font_size=4.8, font_style=FontStyle.BOLD)
         with Locations((cx + 5.5, 12.2)):
             Text(p.version_tag, font_size=3.2, font_style=FontStyle.REGULAR)
-    return Compound(children=list(sk.sketch.edges()))
+    # Three concentric lens rings as separate lines (as sketch faces they would fuse into one disc)
+    rings = [Location((cx - 25.5, 16.0, 0.0)) * Edge.make_circle(r) for r in (4.2, 2.7, 1.2)]
+    return Compound(children=[*rings, *sk.sketch.edges()])
+
+
+# Corner joints: each corner column is split into thirds of the case depth. Top and bottom own the
+# third at the back plate, left and right the two thirds toward the front, so every plate drops onto
+# the back plate past the ones already in: bottom, top, then left and right.
+CORNER_SEGMENTS_TB = (0,)
+CORNER_SEGMENTS_LR = (1, 2)
 
 
 def _build_top_or_bottom_2d(p: EnclosureParams, b: dict[str, float], is_top: bool) -> Face:
@@ -173,7 +187,7 @@ def _build_top_or_bottom_2d(p: EnclosureParams, b: dict[str, float], is_top: boo
         with Locations((0.5 * (x0 + x1), d_in / 2.0)):
             Rectangle(x1 - x0, d_in)
         for corner_x in (x0 - t / 2.0, x1 + t / 2.0):
-            with Locations((corner_x, seg / 2.0), (corner_x, 2.5 * seg)):
+            with Locations(*[(corner_x, (i + 0.5) * seg) for i in CORNER_SEGMENTS_TB]):
                 Rectangle(t, seg)
         for tx in tb_xs:
             with Locations((tx, -t / 2.0), (tx, d_in + t / 2.0)):
@@ -189,7 +203,7 @@ def _build_top_or_bottom_2d(p: EnclosureParams, b: dict[str, float], is_top: boo
             # USB-C plug opening (fits a 13.8 x 7.8 boot) and the printed tripod mount's plug
             with Locations((p.usb.center_x, p.usb.center_z - z0)):
                 RectangleRounded(p.usb.laser_width, p.usb.laser_height, 1.00, mode=Mode.SUBTRACT)
-            with Locations((p.laser_tripod_x, p.laser_tripod_z - z0)):
+            with Locations((p.laser_tripod_x, p.laser_tripod_z + TRIPOD_PLUG_DZ - z0)):
                 RectangleRounded(TRIPOD_PLUG_X + 0.2, TRIPOD_PLUG_Z + 0.2, 1.6, mode=Mode.SUBTRACT)
 
     return sk.sketch.faces()[0]
@@ -205,7 +219,7 @@ def _build_left_or_right_2d(p: EnclosureParams, b: dict[str, float], is_right: b
         with Locations((0.5 * (y0 + y1), d_in / 2.0)):
             Rectangle(y1 - y0, d_in)
         for corner_y in (y0 - t / 2.0, y1 + t / 2.0):
-            with Locations((corner_y, 1.5 * seg)):
+            with Locations(*[(corner_y, (i + 0.5) * seg) for i in CORNER_SEGMENTS_LR]):
                 Rectangle(t, seg)
         for ty in lr_ys:
             with Locations((ty, -t / 2.0), (ty, d_in + t / 2.0)):
@@ -222,9 +236,9 @@ def _build_acrylic_keys_2d(p: EnclosureParams, b: dict[str, float]) -> dict[str,
     """Capture key and switch key, cut from the case sheet (world XY coordinates).
 
     capture_key: a 10 mm hook bar inside the top plate and a 5 mm neck through its slot, pushed in
-    from inside before the top plate goes on. At rest its stem is 0.15 mm above the SW2 plunger;
-    pressed 0.7 mm, the stem lands on the PCB edge (the key spans Z 18.2..21.2, across the board),
-    which pushes SW2 by the plunger's 0.55 mm overhang.
+    from inside before the top plate goes on. At rest its stem is button_rest_gap above the SW2
+    plunger. The key spans Z 16.5..19.5, 0.5 mm under the PCB, so pressed its stem passes under the
+    board edge and pushes the plunger until SW2 itself stops it.
     switch_key: a fork around the SW1 actuator, a 14 mm shoulder inside the right plate and a
     6 mm neck through its 10.2 mm slot.
     """
@@ -267,6 +281,35 @@ def _extrude_plate_on_plane(face_2d: Face, thickness: float) -> Solid:
     solids = bp.part.solids()
     assert len(solids) == 1
     return solids[0]
+
+
+def _cut_edges(face: Face, on_press_face: bool = False) -> list[Edge]:
+    """Cut path of one sheet part. A part under BRIDGE_PART_MAX on both sides keeps two BRIDGE_W
+    bridges, in the middle of the two longest straight edges of its outline. With on_press_face
+    (the capture key) both sit on its topmost edge, the neck's outer end: breaking the key out then
+    loads its 5 mm neck, not the 1.2 mm hook arms, and leaves any stub off the neck's sides, which
+    slide in the top plate's slot with 0.3 mm to spare."""
+    size = face.bounding_box().size
+    if size.X >= BRIDGE_PART_MAX or size.Y >= BRIDGE_PART_MAX:
+        return list(face.edges())
+    if on_press_face:
+        top = max((e for e in face.outer_wire().edges() if e.geom_type == GeomType.LINE), key=lambda e: e.center().Y)
+        assert top.length >= 3.0 * BRIDGE_W, "no room for two bridges on the press face"
+        a, b = top.start_point(), top.end_point()
+        mid, u = (a + b) * 0.5, (b - a).normalized()
+        cuts = [a, mid - u * (1.5 * BRIDGE_W), mid - u * (0.5 * BRIDGE_W), mid + u * (0.5 * BRIDGE_W),
+                mid + u * (1.5 * BRIDGE_W), b]
+        return [e for e in face.edges() if not e.is_same(top)] + [
+            Edge.make_line(cuts[i], cuts[i + 1]) for i in (0, 2, 4)]
+    lines = sorted((e for e in face.outer_wire().edges() if e.geom_type == GeomType.LINE),
+                   key=lambda e: -e.length)[:2]
+    assert len(lines) == 2 and all(e.length > 3.0 * BRIDGE_W for e in lines), "no room for two bridges"
+    out = [e for e in face.edges() if not any(e.is_same(line) for line in lines)]
+    for e in lines:
+        a, b = e.start_point(), e.end_point()
+        mid, u = (a + b) * 0.5, (b - a).normalized()
+        out += [Edge.make_line(a, mid - u * (BRIDGE_W / 2.0)), Edge.make_line(mid + u * (BRIDGE_W / 2.0), b)]
+    return out
 
 
 def _apply_kerf(face_2d: Face, kerf: float) -> Face:
@@ -319,6 +362,7 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
 
     gap, margin = 6.0, 5.0
     placed_faces: list[Face] = []
+    cut_edges: list[Edge] = []
     sheet_labels: list[tuple[str, float, float]] = []
     engrave_placed = engrave_local
 
@@ -328,15 +372,19 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
     back_mir = mirror(kerfed["back"], about=Plane.YZ.offset(b["fb_cx"]))
     kerfed["back"] = back_mir if isinstance(back_mir, Face) else back_mir.faces()[0]
 
-    def _place_row(names: tuple[str, ...], y_pos: float) -> float:
+    x_at: dict[str, float] = {}
+
+    def _place_row(names: tuple[str, ...], y_pos: float, x0: float = margin) -> float:
         nonlocal engrave_placed
-        cx, max_h = margin, 0.0
+        cx, max_h = x0, 0.0
         for name in names:
             f = kerfed[name]
             bb = f.bounding_box()
+            x_at.setdefault(name, cx)
             shift = Location((cx - bb.min.X, y_pos - bb.min.Y, 0))
             pf = shift * f
             placed_faces.append(pf if isinstance(pf, Face) else pf.faces()[0])
+            cut_edges.extend(_cut_edges(placed_faces[-1], on_press_face=name == "capture_key"))
             if name == "back":
                 engrave_placed = shift * engrave_local
             short_lbl = {"capture_key": "CAP", "switch_key": "SW"}.get(name, name.upper())
@@ -347,13 +395,18 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
 
     h0 = _place_row(("front", "back"), margin)
     h1 = _place_row(("top", "bottom"), margin + h0 + gap + 4.0)
-    _place_row(("left", "right", "capture_key", "switch_key"),margin + h0 + gap + 4.0 + h1 + gap + 4.0)
+    y_row2 = margin + h0 + gap + 4.0 + h1 + gap + 4.0
+    _place_row(("left", "right", "capture_key", "switch_key"), y_row2)
+    # A spare of each key above the first pair, inside the side plates' row height: the keys are
+    # small, and a lost or cracked key would otherwise need a new sheet
+    _place_row(("capture_key", "switch_key"), y_row2 + 22.0, x0=x_at["capture_key"])
 
     return LaserEnclosure(
         params=p,
         plates_3d=plates_3d,
         plates_2d=plates_2d,
         sheet_2d=Compound(children=placed_faces),
+        cut_edges=cut_edges,
         engrave_2d=engrave_placed,
         sheet_labels=sheet_labels,
         printed={
@@ -366,22 +419,21 @@ def build_laser_enclosure(p: EnclosureParams, *, kerf: float | None = None) -> L
 
 
 def export_laser_sheet(enc: LaserEnclosure, svg_path: Path, dxf_path: Path) -> None:
-    """Export 6-plate flat cutting sheet to SVG & DXF with separate CUT & #0066FF ENGRAVE layers."""
+    """Export the flat cutting sheet to SVG and DXF: blue hairline CUT layer, red hairline ENGRAVE layer."""
     svg_path.parent.mkdir(parents=True, exist_ok=True)
     dxf_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # SVG: Red hairline `cut` layer (#CC0000) + separate Blue `engrave` layer (#0066FF, Max #186!)
     exporter_svg = ExportSVG(unit=Unit.MM, scale=1.0, margin=5.0)
-    exporter_svg.add_layer("cut", line_color=(204 / 255, 0.0, 0.0), line_weight=0.15)
-    exporter_svg.add_layer("engrave", line_color=(0.0, 102 / 255, 1.0), line_weight=0.15)
-    exporter_svg.add_shape(enc.sheet_2d.edges(), layer="cut")
+    exporter_svg.add_layer("cut", line_color=tuple(c / 255 for c in CUT_RGB), line_weight=HAIRLINE_MM)
+    exporter_svg.add_layer("engrave", line_color=tuple(c / 255 for c in ENGRAVE_RGB), line_weight=HAIRLINE_MM)
+    exporter_svg.add_shape(enc.cut_edges, layer="cut")
     exporter_svg.add_shape(enc.engrave_2d.edges(), layer="engrave")
     exporter_svg.write(str(svg_path))
 
-    # DXF: Red `CUT` layer + separate Blue `ENGRAVE` layer (1:1 mm)
-    exporter_dxf = ExportDXF(unit=Unit.MM, line_weight=0.15)
-    exporter_dxf.add_layer("CUT", color=ColorIndex.RED, line_type=LineType.CONTINUOUS)
-    exporter_dxf.add_layer("ENGRAVE", color=ColorIndex.BLUE, line_type=LineType.CONTINUOUS)
-    exporter_dxf.add_shape(enc.sheet_2d.edges(), layer="CUT")
+    # DXF: the same split by layer and ACI colour (5 = blue, 1 = red), 1:1 mm
+    exporter_dxf = ExportDXF(unit=Unit.MM, line_weight=0.0)
+    exporter_dxf.add_layer("CUT", color=ColorIndex.BLUE, line_type=LineType.CONTINUOUS)
+    exporter_dxf.add_layer("ENGRAVE", color=ColorIndex.RED, line_type=LineType.CONTINUOUS)
+    exporter_dxf.add_shape(enc.cut_edges, layer="CUT")
     exporter_dxf.add_shape(enc.engrave_2d.edges(), layer="ENGRAVE")
     exporter_dxf.write(str(dxf_path))

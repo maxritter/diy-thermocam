@@ -40,6 +40,7 @@ M25_HEX_AF = 5.0          # Standoff across-flats (SW 5)
 M25_TAP_D = 2.5
 M25_MALE_LEN = 6.0        # Male thread length of the M-F standoffs
 DIN965_M25_HEAD_D = 4.7   # ISO 7046 M2.5 actual head diameter (max)
+DIN965_M25_HEAD_D_MIN = 4.4  # ... and (min): the 90 deg cone is cut off this far below its Ø5.5 edge
 DIN965_M25_HEAD_K = 1.5   # 90 deg countersunk head height (from the theoretical Ø5.5 edge)
 PAN_M25_HEAD_D, PAN_M25_HEAD_K = 5.0, 1.75  # ISO 7045 M2.5 pan head
 FRONT_SCREW_LEN = 14.0    # M2.5x14 through the front face, 5 mm boss / spacer and display PCB
@@ -55,15 +56,23 @@ class ScrewJoint:
     clamped: float        # Material between head seat and standoff face
     countersunk: bool
     thread_depth: float   # Female thread depth of the standoff it goes into
+    head_sink: float = 0.0  # Countersunk: how much deeper a real head reaches than one flush at the face
 
     @property
     def engagement(self) -> float:
         return self.screw_len - self.clamped
 
+    @property
+    def engagement_max(self) -> float:
+        return self.engagement + self.head_sink
+
 
 # Female thread depths of the Ettinger standoffs: 005.02.205 (M2.5x20 F-F) 6 mm both ends;
 # 005.12.115 (M2.5x11 M-F, brass) 6 mm, 005.12.119 (stainless) 7 mm -> use 6. Male studs 6 mm.
 REAR_STANDOFF_THREAD, MID_STANDOFF_THREAD = 6.0, 6.0
+# Shell back screws: M2.5x6 (Ettinger 001.12.228) bite 2.9..3.5 mm; an M2.5x8 reached 4.9..5.5 mm into
+# the 6 mm thread and could bottom out with its length tolerance and a thin printed back face
+SHELL_BACK_SCREW_LEN = 6.0
 LASER_WASHER_T = 0.5  # ISO 7089 M2.5 polyamide washer under each pan head on acrylic
 M2_WASHER_T = 0.3     # Ø2.2/5.0 x 0.3 polyamide washer under each Lepton screw head
 
@@ -71,10 +80,13 @@ M2_WASHER_T = 0.3     # Ø2.2/5.0 x 0.3 polyamide washer under each Lepton screw
 def screw_joints(p: EnclosureParams) -> tuple[ScrewJoint, ...]:
     seat_depth = -p.standoff_seat_z  # Standoffs stand in 0.5 mm seats in the back wall
     front_stack = p.internal_depth - (p.display_pcb_z_back + p.display_pcb_t) + p.display_pcb_t
+    # A real ISO 7046 head is cut off below its Ø5.5 cone edge and its length counts from that top,
+    # so in the Ø5.6 countersink its tip reaches up to (5.6 - 4.4) / 2 = 0.6 mm deeper than flush
+    sink = (p.countersink_head_d - DIN965_M25_HEAD_D_MIN) / 2.0
     return (
-        ScrewJoint("3D back: M2.5x8 ISO 7046", 8.0, p.shell_back_face_t - seat_depth, True, REAR_STANDOFF_THREAD),
+        ScrewJoint("3D back: M2.5x6 ISO 7046", SHELL_BACK_SCREW_LEN, p.shell_back_face_t - seat_depth, True, REAR_STANDOFF_THREAD, sink),
         ScrewJoint("3D front: M2.5x14 ISO 7046", FRONT_SCREW_LEN, p.shell_face_t + front_stack, True,
-                   MID_STANDOFF_THREAD),
+                   MID_STANDOFF_THREAD, sink),
         ScrewJoint("Laser back: M2.5x8 ISO 7045 + washer", 8.0, p.laser_t + LASER_WASHER_T, False, REAR_STANDOFF_THREAD),
         ScrewJoint("Laser front: M2.5x14 ISO 7045 + washer", FRONT_SCREW_LEN,
                    LASER_WASHER_T + p.laser_t + front_stack, False, MID_STANDOFF_THREAD),
@@ -196,8 +208,8 @@ def build_standoff_stack(p: EnclosureParams) -> StandoffStack:
 
 
 def build_shell_screws(p: EnclosureParams, z_back_outer: float, z_front_outer: float) -> tuple[Solid, ...]:
-    """4x M2.5x8 ISO 7046 through the back face + 4x M2.5x14 ISO 7046 through the front face (flush)."""
-    back = [countersunk_screw(x, y, z_back_outer, 8.0, pointing=+1) for x, y in p.mounting_holes]
+    """4x M2.5x6 ISO 7046 through the back face + 4x M2.5x14 ISO 7046 through the front face (flush)."""
+    back = [countersunk_screw(x, y, z_back_outer, SHELL_BACK_SCREW_LEN, pointing=+1) for x, y in p.mounting_holes]
     front = [countersunk_screw(x, y, z_front_outer, FRONT_SCREW_LEN, pointing=-1) for x, y in p.mounting_holes]
     return (*back, *front)
 
