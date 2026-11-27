@@ -2,7 +2,7 @@
 
 Open-source C++17 firmware for **DIY-Thermocam V3 and V4** (**Teensy 4.1** + **FLIR Lepton 3.5 / 3.1R / 2.5**). Runs at 450 MHz to keep enclosure heat low while sustaining native **8.77 fps** live thermal viewing, zero-flicker RAM-composited HUDs, buffered microSD `.DAT` recording, and [USB Protocol v2](../docs/protocol-v2.md).
 
-> **Hardware compatibility:** Firmware 4.0 targets **V3 and V4 (Teensy 4.1)** only. If you own an older **DIY-Thermocam V1 or V2 (Teensy 3.2 / 3.6)**, keep using [Firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). Every `.DAT` capture remains compatible across all revisions.
+> **Hardware compatibility:** Firmware 4.0.0 targets **V3 and V4 (Teensy 4.1)** only. If you own a **DIY-Thermocam V1 or V2 (Teensy 3.2 / 3.6)**, use [Firmware 2.4.9](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.9) (source on branch [`v2.4.x`](https://github.com/maxritter/diy-thermocam/tree/v2.4.x/Firmware_V2)). Every `.DAT` capture works across all revisions.
 
 | Live View HUD | Main Menu (Dark) | System Status |
 | :---: | :---: | :---: |

@@ -43,5 +43,10 @@ Major release unifying firmware, desktop software, KiCad 10 hardware, parametric
 ## [3.0.0] - 2021-06-04
 - Initial DIY-Thermocam V3 (Teensy 4.1) firmware release ([GitHub Release](https://github.com/maxritter/diy-thermocam/releases/tag/3.0.0)).
 
+## [2.4.9] - 2026-11-27 (V1 & V2 — Teensy 3.2 / 3.6)
+- Latest maintenance release for DIY-Thermocam V1 and V2 ([GitHub Release](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.9), source on branch [`v2.4.x`](https://github.com/maxritter/diy-thermocam/tree/v2.4.x/Firmware_V2)). V3 and V4 cameras (Teensy 4.1) use `4.0.0`.
+- Fixed runaway calibration compensation in Fahrenheit/Celsius, EEPROM preset validation and auto-healing on upgrade, MLX90614 I2C retry freezes, Lepton 2.5/3.5 ID collision and bounded CCI I2C, and V1 USB Mass Storage boot jump (`extern "C" startup_late_hook`).
+- Ported VoSPI CCITT CRC-16 verification, symmetric integer 3×3 filters, RGB565 colormap LUT, fixed-point V2 bilinear upscaling, and single-transaction V1 SPI refresh from Firmware 4.0.
+
 ## [2.4.8] - 2021-02-07
-- Final DIY-Thermocam V1/V2 (Teensy 3.2/3.6) firmware release ([GitHub Release](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8)).
+- Previous DIY-Thermocam V1/V2 (Teensy 3.2/3.6) firmware release ([GitHub Release](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8)).

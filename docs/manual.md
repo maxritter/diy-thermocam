@@ -1,6 +1,6 @@
 # User manual
 
-For DIY-Thermocam V3 and V4 on firmware 4.0 (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) stay on [firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8).
+For DIY-Thermocam V3 and V4 on [firmware 4.0.0](https://github.com/maxritter/diy-thermocam/releases/tag/v4.0.0) (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) use [firmware 2.4.9](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.9).
 
 ## Charging and power
 

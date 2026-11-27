@@ -13,8 +13,13 @@ import Icon from './Icon.astro';
   ))}
   <a class="dl-row fw" href={SITE.firmwareFile}>
     <Icon name="chip" class="os-ic" />
-    <span><b>Camera firmware</b><small>For V3 and V4 · firmware.hex, install it from Studio</small></span>
+    <span><b>Firmware 4.0.0</b><small>V3 and V4 (Teensy 4.1) · firmware.hex, install from Studio</small></span>
     <span class="go"><Icon name="download" />Download</span>
+  </a>
+  <a class="dl-row fw" href={`${SITE.releasesUrl}/tag/2.4.9`}>
+    <Icon name="chip" class="os-ic" />
+    <span><b>Firmware 2.4.9</b><small>V1 and V2 (Teensy 3.2 / 3.6) · latest legacy release</small></span>
+    <span class="go"><Icon name="arrowUpRight" />Open</span>
   </a>
 </div>
 

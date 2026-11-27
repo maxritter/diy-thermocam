@@ -59,7 +59,7 @@ Two ready-made boards, a FLIR Lepton and a printed case, put together with screw
 | <img src="website/public/images/v4/kit.jpg" alt="All V4 parts laid out: the main board, the Lepton carrier, the Teensy, the display, the battery, the printed shell and its screws" width="260"> | <img src="website/public/images/v4/steps/shell-11.jpg" alt="Build step 11: the display goes onto the board" width="260"> | <img src="website/public/images/studio/studio-live.png" alt="Studio's live view of the camera" width="260"> |
 | The [parts list](https://www.diy-thermocam.net/docs/partlist/) finds shops for your country and adds up the prices. | 15 steps with two screwdrivers and two nut drivers: the [build guide](docs/building-instructions.md). | Studio also installs the firmware: **Camera › Update firmware…** |
 
-Firmware 4.0 runs on V3 and V4 cameras (Teensy 4.1). V1 and V2 stay on [firmware 2.4.8](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.8). On Linux, [allow USB access](docs/manual.md#linux-usb-permissions) first.
+Firmware 4.0.0 runs on V3 and V4 cameras (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) use [firmware 2.4.9](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.9). On Linux, [allow USB access](docs/manual.md#linux-usb-permissions) first.
 
 ## Reference
 
