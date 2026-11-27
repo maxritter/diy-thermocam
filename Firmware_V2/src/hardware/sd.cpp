@@ -74,6 +74,42 @@ uint16_t getCardSize() {
 	return cardSize;
 }
 
+/* Returns the SD filesystem type for Protocol v2 (0=none, 1=FAT16, 2=FAT32) */
+uint8_t getSDFsType() {
+	uint8_t ft = sd.vol()->fatType();
+	if (ft == 16) return 1;
+	if (ft == 32) return 2;
+	return 0;
+}
+
+/* Returns exact SD total capacity in KB */
+uint32_t getSDTotalKB() {
+	startAltClockline();
+	uint32_t blocks = sd.card()->cardSize();
+	endAltClockline();
+	return (blocks + 1u) / 2u;
+}
+
+/* Returns free space in KB without re-initializing sd (safe while files are open) */
+uint32_t getSDFreeKBSafe() {
+	if (!ensureSDReady())
+		return 0;
+	startAltClockline();
+	uint32_t freeKB = sd.vol()->freeClusterCount();
+	freeKB *= sd.vol()->blocksPerCluster() / 2;
+	endAltClockline();
+	return freeKB;
+}
+
+/* Ensures SD card is mounted and ready (attempts beginSD once if not mounted) */
+bool ensureSDReady() {
+	if (sd.vol()->fatType() != 0)
+		return true;
+	if (beginSD() && (sd.vol()->fatType() != 0))
+		return true;
+	return false;
+}
+
 //Refresh free space of the internal space
 void refreshFreeSpace() {
 	uint16_t cardSize = getCardSize();

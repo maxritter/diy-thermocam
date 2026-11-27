@@ -23,8 +23,9 @@ extern "C" {
 /*################# PUBLIC CONSTANTS, VARIABLES & DATA TYPES ##################*/
 
 //Current firmware version
-#define Version 	"Firmware 2.49 from 27.11.2026"
-#define fwVersion 	249
+#define Version 	"Firmware 2.50 from 27.11.2026"
+#define VersionBuildStr "2.50 (2026-11-27)"
+#define fwVersion 	250
 
 //Pins
 #define pin_button        2
@@ -189,6 +190,8 @@ extern "C" {
 #define eeprom_minMax2Comp      176 //4 Byte (176-179)
 #define eeprom_minMax3Comp      180 //4 Byte (180-183)
 #define eeprom_lepton_3_5_gain  184
+#define eeprom_radParamsSet     185
+#define eeprom_radParamsData    186 //16 Byte (186-201)
 #define eeprom_fwVersion        250
 #define eeprom_setValue         200
 

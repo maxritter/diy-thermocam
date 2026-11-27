@@ -60,6 +60,7 @@ void checkBattery(bool start, bool calibrate) {
 
 	//Check if the device is charging
 	int vUSB = analogRead(pin_usb_measure);
+	usbPowerConnected = (vUSB > 50);
 	//Battery is not working if no voltage measured and not connected to USB
 	if ((vBat == -1) && (vUSB <= 50))
 		setDiagnostic(diag_bat);
@@ -97,7 +98,8 @@ void checkBattery(bool start, bool calibrate) {
 	if (batComp != 0)
 		vBat += (float) batComp / 100.0;
 
-	//Calculate the percentage out of the voltage
+	//Store voltage in millivolts & calculate the percentage out of the voltage
+	batMillivolts = (vBat > 0.0f) ? static_cast<uint16_t>(lroundf(vBat * 1000.0f)) : 0u;
 	batPercentage = getLipoPerc(vBat);
 
 	//Show warning on startup if the battery is low

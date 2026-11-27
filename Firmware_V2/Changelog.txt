@@ -1,5 +1,12 @@
 *** Changelog DIY-Thermocam V1/V2 Firmware ***
 
+2.50 (27.11.2026)
+-Added full USB Protocol v2.0 support ("TC2\0") for DIY-Thermocam Studio (Tauri desktop app) on both DIY-Thermocam V1 (Teensy 3.1/3.2) and DIY-Thermocam V2 (Teensy 3.6)
+-Supports live radiometric & MLX90614-calibrated raw thermal streaming (160x120 Lepton 3.0/3.5 and 80x60 Lepton 2.0/2.5), optional 320x240 rendered stream on V2, and simultaneous camera LCD display
+-Supports direct SD card browsing, previewing, downloading, and deleting of thermal .DAT images and video folders from DIY-Thermocam Studio (FS_INFO, FS_LIST, FS_STAT, FS_READ, FS_DELETE, FS_ABORT)
+-Supports live camera configuration sync (GET/SET_CONFIG with RAM/EEPROM persistence), RTC clock sync, FFC trigger with events, sparse temperature points, remote capture saving, hardware diagnostics, performance telemetry, async button/touch/battery events, and radiometric Lepton 2.5/3.5 flux-linear emissivity parameters (GET/SET_RAD_PARAMS with EEPROM persistence)
+-Preserves full backwards compatibility with legacy USB Protocol v1 (0x64) alongside Protocol v2 ("TC2\0") auto-detection
+
 2.49 (27.11.2026)
 -Fixed unstable calibration compensation feedback loop (caused runaway positive/negative temperatures such as ~28743 C/F, especially in Fahrenheit mode)
 -Fixed EEPROM preset & calibration validation (automatically heals corrupt presets on upgrade to prevent white/black lockout screens and extreme colorbar values)

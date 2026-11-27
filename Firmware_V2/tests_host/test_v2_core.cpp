@@ -20,7 +20,7 @@ static void test_lepton_version_constants_distinct() {
 	assert(leptonVersion_2_5_shutter != leptonVersion_3_5_shutter);
 	assert(leptonVersion_2_5_shutter == 3);
 	assert(leptonVersion_3_5_shutter == 4);
-	assert(fwVersion == 249);
+	assert(fwVersion == 250);
 }
 
 static void test_compensate_calib_stability_fahrenheit_and_celsius() {
@@ -187,7 +187,7 @@ static void test_formatting_safety() {
 }
 
 int main() {
-	printf("Running Firmware 2.4.9 host tests...\n");
+	printf("Running Firmware 2.50 host tests...\n");
 	RUN_TEST(test_lepton_version_constants_distinct);
 	RUN_TEST(test_compensate_calib_stability_fahrenheit_and_celsius);
 	RUN_TEST(test_preset_and_calibration_validation);

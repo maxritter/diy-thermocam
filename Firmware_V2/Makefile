@@ -1,4 +1,4 @@
-# Reproducible build for DIY-Thermocam V1 (Teensy 3.1/3.2) and V2 (Teensy 3.6) Firmware 2.4.9
+# Reproducible build for DIY-Thermocam V1 (Teensy 3.1/3.2) and V2 (Teensy 3.6) Firmware 2.50
 ROOT := $(CURDIR)
 BUILD_V1 := $(ROOT)/build/v1
 BUILD_V2 := $(ROOT)/build/v2
@@ -31,8 +31,8 @@ all: test v1 v2
 
 release: all
 	cp $(ROOT)/Changelog.txt $(DIST)/Changelog.txt
-	cd $(DIST) && rm -f DIYThermocam_2.49.zip && zip -q DIYThermocam_2.49.zip Firmware_V1.hex Firmware_V2.hex Changelog.txt
-	@ls -lh $(DIST)/Firmware_V1.hex $(DIST)/Firmware_V2.hex $(DIST)/Changelog.txt $(DIST)/DIYThermocam_2.49.zip
+	cd $(DIST) && rm -f DIYThermocam_2.50.zip && zip -q DIYThermocam_2.50.zip Firmware_V1.hex Firmware_V2.hex Changelog.txt
+	@ls -lh $(DIST)/Firmware_V1.hex $(DIST)/Firmware_V2.hex $(DIST)/Changelog.txt $(DIST)/DIYThermocam_2.50.zip
 
 v1:
 	@mkdir -p $(BUILD_V1) $(DIST)
@@ -62,6 +62,13 @@ test:
 		$(ROOT)/src/general/v2_core.cpp \
 		-o $(ROOT)/tests_host/test_v2_core -lm
 	$(ROOT)/tests_host/test_v2_core
+	$(CXX) -std=c++17 -O2 -Wall -Wextra -Werror \
+		-I$(ROOT)/src/general \
+		$(ROOT)/tests_host/test_tc_proto_v2.cpp \
+		$(ROOT)/src/general/tc_proto_v2.cpp \
+		$(ROOT)/src/general/v2_core.cpp \
+		-o $(ROOT)/tests_host/test_tc_proto_v2 -lm
+	$(ROOT)/tests_host/test_tc_proto_v2
 
 clean:
-	rm -rf $(BUILD_V1) $(BUILD_V2) $(DIST) $(ROOT)/tests_host/test_v2_core
+	rm -rf $(BUILD_V1) $(BUILD_V2) $(DIST) $(ROOT)/tests_host/test_v2_core $(ROOT)/tests_host/test_tc_proto_v2

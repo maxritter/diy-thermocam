@@ -33,6 +33,7 @@
 #include <livemode.h>
 #include <sd.h>
 #include <create.h>
+#include <connection_v2.h>
 #include <connection.h>
 
 /*######################### STATIC DATA DECLARATIONS ##########################*/
@@ -1071,16 +1072,23 @@ bool touchHandler()
 
 /* Check for serial connection */
 void checkSerial() {
-	//If start command received
-	if ((Serial.available() > 0) && (Serial.read() == CMD_START)) {
+	if (Serial.available() <= 0)
+		return;
+
+	//Protocol v2 magic "TC2\0" (0x54 0x43 0x32 0x00) for DIY-Thermocam Studio
+	if (Serial.peek() == 'T') {
+		if (checkSerialV2Magic()) {
+			serialConnectV2(false);
+		}
+		return;
+	}
+
+	//Legacy Protocol v1 start command (0x64)
+	if (Serial.read() == CMD_START) {
 		serialMode = true;
 		serialConnect();
 		serialMode = false;
 	}
-
-	//Another command received, discard it
-	else if ((Serial.available() > 0))
-		Serial.read();
 }
 
 /* Check for updater requests */
@@ -1161,11 +1169,15 @@ void serialOutput() {
 		if (extButtonPressed())
 			buttonHandler();
 
-		//Check for serial commands
+		//Check for serial commands (auto-detect Protocol v2 "TC2\0" or legacy v1)
 		if (Serial.available() > 0) {
-			//Check for exit
-			if (serialHandler())
+			if (Serial.peek() == 'T') {
+				if (checkSerialV2Magic()) {
+					serialConnectV2(checkNoDisplay());
+				}
+			} else if (serialHandler()) {
 				break;
+			}
 		}
 	}
 }

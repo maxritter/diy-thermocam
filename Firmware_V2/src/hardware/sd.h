@@ -19,6 +19,7 @@
 /*########################## PUBLIC PROCEDURES ################################*/
 
 bool beginSD();
+bool ensureSDReady();
 void clearCache(uint8_t addSig);
 void clearFatDir(uint32_t bgn, uint32_t count);
 void dateTime(uint16_t* date, uint16_t* time);
@@ -26,6 +27,9 @@ void formatCard();
 void formatFAT16();
 void formatFAT32();
 uint16_t getCardSize();
+uint8_t getSDFsType();
+uint32_t getSDTotalKB();
+uint32_t getSDFreeKBSafe();
 uint32_t getSDSpace();
 void initSD();
 uint16_t lbnToCylinder(uint32_t lbn);

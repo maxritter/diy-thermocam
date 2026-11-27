@@ -51,6 +51,8 @@ char saveFilename[20];
 ADC *batMeasure;
 //Battery
 int8_t batPercentage;
+uint16_t batMillivolts;
+bool usbPowerConnected;
 long batTimer;
 int8_t batComp;
 
@@ -98,6 +100,11 @@ bool gainMode;
 byte leptonVersion;
 //FLIR Lepton Shutter mode
 byte leptonShutter;
+//FLIR Lepton part number & FPA temperature (Protocol v2 diagnostics)
+char leptonPartNum[32];
+float leptonFpaTempC;
+uint32_t vospiResyncCount;
+uint32_t vospiCrcErrorCount;
 
 //MLX90614 sensor version
 boolean mlx90614Version;

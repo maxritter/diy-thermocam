@@ -2,4 +2,5 @@ Release/
 build/
 dist/
 tests_host/test_v2_core
+tests_host/test_tc_proto_v2
 __pycache__/
