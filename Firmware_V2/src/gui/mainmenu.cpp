@@ -34,6 +34,7 @@
 #include <lepton.h>
 #include <massstorage.h>
 #include <touchscreen.h>
+#include <v2_core.h>
 #include <mainmenu.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
@@ -354,7 +355,7 @@ bool hotColdColorMenu()
 void hotColdChooserHandler()
 {
 	//Help variables
-	char margin[14];
+	char margin[20];
 
 	//Display level as temperature
 	if (!tempFormat)
@@ -649,7 +650,7 @@ bool tempLimitsPresetSaveMenu()
 					EEPROM.write(eeprom_maxValue1High,
 							(maxValue & 0xFF00) >> 8);
 					EEPROM.write(eeprom_maxValue1Low, maxValue & 0x00FF);
-					floatToBytes(farray, (float) calComp);
+					floatToBytes(farray, v2_core::clamp_cal_comp(calComp));
 					for (int i = 0; i < 4; i++)
 						EEPROM.write(eeprom_minMax1Comp + i, (farray[i]));
 					EEPROM.write(eeprom_minMax1Set, eeprom_setValue);
@@ -663,7 +664,7 @@ bool tempLimitsPresetSaveMenu()
 					EEPROM.write(eeprom_maxValue2High,
 							(maxValue & 0xFF00) >> 8);
 					EEPROM.write(eeprom_maxValue2Low, maxValue & 0x00FF);
-					floatToBytes(farray, (float) calComp);
+					floatToBytes(farray, v2_core::clamp_cal_comp(calComp));
 					for (int i = 0; i < 4; i++)
 						EEPROM.write(eeprom_minMax2Comp + i, (farray[i]));
 					EEPROM.write(eeprom_minMax2Set, eeprom_setValue);
@@ -677,7 +678,7 @@ bool tempLimitsPresetSaveMenu()
 					EEPROM.write(eeprom_maxValue3High,
 							(maxValue & 0xFF00) >> 8);
 					EEPROM.write(eeprom_maxValue3Low, maxValue & 0x00FF);
-					floatToBytes(farray, (float) calComp);
+					floatToBytes(farray, v2_core::clamp_cal_comp(calComp));
 					for (int i = 0; i < 4; i++)
 						EEPROM.write(eeprom_minMax3Comp + i, (farray[i]));
 					EEPROM.write(eeprom_minMax3Set, eeprom_setValue);

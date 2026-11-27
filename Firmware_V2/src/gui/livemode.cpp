@@ -114,10 +114,12 @@ void displayDate() {
 
 /* Display the warmup message on screen*/
 void displayWarmup() {
-	char buffer[25];
+	char buffer[28];
 
-	//Create string
-	sprintf(buffer, "Sensor warmup, %2ds left", (int)abs(30 - ((millis() - calTimer) / 1000)));
+	//Create string (safe unsigned arithmetic; never counts back up past 30s)
+	uint32_t elapsed = (millis() - static_cast<uint32_t>(calTimer)) / 1000u;
+	int remaining = (elapsed < 30u) ? static_cast<int>(30u - elapsed) : 0;
+	sprintf(buffer, "Sensor warmup, %2ds left", remaining);
 	//Tinyfont
 	if ((teensyVersion == teensyVersion_old) || (!hqRes))
 		display_print(buffer, 45, 200);
@@ -186,12 +188,12 @@ void displayMinMaxPoint(bool min)
 	//Warmup completed, show absolute temp
 	if (calStatus != cal_warmup)
 	{
-		//Calc x position for the text
+		//Calc x position for the text (keep clear of right screen edge)
 		xpos -= 20;
 		if (xpos < 0)
 			xpos = 0;
-		if (xpos > 279)
-			xpos = 279;
+		if (xpos > 256)
+			xpos = 256;
 
 		//Calc y position for the text
 		ypos += 15;

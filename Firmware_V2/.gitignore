@@ -1,1 +1,5 @@
 Release/
+build/
+dist/
+tests_host/test_v2_core
+__pycache__/

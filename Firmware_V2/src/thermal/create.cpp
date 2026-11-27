@@ -27,52 +27,19 @@
 #include <camera.h>
 #include <lepton.h>
 #include <save.h>
+#include <v2_core.h>
 #include <create.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
-/* Filter a 160x120 smallBuffer with 3x3 gaussian kernel */
+/* Filter a 160x120 smallBuffer with symmetric 3x3 integer gaussian kernel */
 void gaussianFilter() {
-	byte gaussianKernel[3][3] = {
-		{ 1, 2, 1 },
-		{ 2, 4, 2 },
-		{ 1, 2, 1 }
-	};
-	long sum;
-
-	for (int y = 1; y < 119; y++) {
-		for (int x = 1; x < 159; x++) {
-			sum = 0;
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					sum += gaussianKernel[j + 1][k + 1] * smallBuffer[(y - j) * 160 + (x - k)];
-				}
-			}
-			smallBuffer[(y * 160) + x] = (unsigned short)(sum / 16.0);
-		}
-	}
+	v2_core::gaussian_filter_160x120(smallBuffer);
 }
 
-/* Filter a 160x120 smallBuffer with a 3x3 box kernel */
+/* Filter a 160x120 smallBuffer with symmetric 3x3 integer box kernel */
 void boxFilter() {
-	byte boxKernel[3][3] = {
-		{ 1, 1, 1 },
-		{ 1, 1, 1 },
-		{ 1, 1, 1 }
-	};
-	long sum;
-
-	for (int y = 1; y < 119; y++) {
-		for (int x = 1; x < 159; x++) {
-			sum = 0;
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					sum += boxKernel[j + 1][k + 1] * smallBuffer[(y - j) * 160 + (x - k)];
-				}
-			}
-			smallBuffer[(y * 160) + x] = (unsigned short)(sum / 9.0);
-		}
-	}
+	v2_core::box_filter_160x120(smallBuffer);
 }
 
 //Resize the pixels of thermal smallBuffer
@@ -216,78 +183,58 @@ void fillEdges() {
 }
 
 
-/* Write the smallBuffer to the bigBuffer by resizing, eventually add transparency */
+/* Write the smallBuffer to the bigBuffer by fixed-point bilinear resizing, eventually add transparency */
 void smallToBigBuffer(bool trans)
 {
-	unsigned short A, B, C, D, outVal;
-	int x, y, index;
-	float x_ratio = 159.0 / 320;
-	float y_ratio = 119.0 / 240;
-	float x_diff, y_diff;
-	//For transparency
-	byte redV, greenV, blueV, redT, greenT, blueT, red, green, blue;
-	uint16_t value;
-	float scale = (colorElements - 1.0) / (maxValue - minValue);
+	//Fixed-point 8.8 step ratios: 159 / 320 and 119 / 240
+	const uint32_t xStepFp = (159u << 16) / 320u;
+	const uint32_t yStepFp = (119u << 16) / 240u;
 
-	int offset = 0;
-	for (int i = 0; i < 240; i++) {
-		for (int j = 0; j < 320; j++) {
+	const uint16_t alpha256 = static_cast<uint16_t>(lroundf(adjCombAlpha * 256.0f));
+	const uint16_t invAlpha256 = (alpha256 <= 256u) ? (256u - alpha256) : 0u;
 
-			x = (int)(x_ratio * j);
-			y = (int)(y_ratio * i);
-			x_diff = (x_ratio * j) - x;
-			y_diff = (y_ratio * i) - y;
-			index = y * 160 + x;
+	uint32_t offset = 0;
+	uint32_t yFp = 0;
+	for (int i = 0; i < 240; i++, yFp += yStepFp) {
+		uint32_t y = yFp >> 16;
+		uint32_t wy = (yFp >> 8) & 0xFFu;
+		uint32_t iwy = 256u - wy;
+		const uint16_t* row0 = &smallBuffer[y * 160u];
+		const uint16_t* row1 = row0 + 160u;
 
-			A = smallBuffer[index];
-			B = smallBuffer[index + 1];
-			C = smallBuffer[index + 160];
-			D = smallBuffer[index + 160 + 1];
+		uint32_t xFp = 0;
+		for (int j = 0; j < 320; j++, xFp += xStepFp) {
+			uint32_t x = xFp >> 16;
+			uint32_t wx = (xFp >> 8) & 0xFFu;
+			uint32_t iwx = 256u - wx;
 
-			outVal = (unsigned short)(
-				A*(1 - x_diff)*(1 - y_diff) + B*(x_diff)*(1 - y_diff) +
-				C*(y_diff)*(1 - x_diff) + D*(x_diff*y_diff)
-				);
+			uint32_t top = (row0[x] * iwx + row0[x + 1] * wx) >> 8;
+			uint32_t bot = (row1[x] * iwx + row1[x + 1] * wx) >> 8;
+			uint16_t outVal = static_cast<uint16_t>((top * iwy + bot * wy) >> 8);
 
 			//No alpha transparency, just write into the framebuffer
-			if (trans == false)
+			if (!trans) {
 				bigBuffer[offset] = outVal;
-
+			}
 			//We want to create a combined bigBuffer
-			else
-			{
-				//Limit values
-				if (outVal > maxValue)
-					outVal = maxValue;
-				if (outVal < minValue)
-					outVal = minValue;
+			else {
+				uint8_t idx = v2_core::map_raw_to_lut_index(outVal, minValue, maxValue, colorElements);
+				uint8_t redT = colorMap[3 * idx];
+				uint8_t greenT = colorMap[3 * idx + 1];
+				uint8_t blueT = colorMap[3 * idx + 2];
 
-				//Calc color position
-				value = (outVal - minValue) * scale;
+				uint16_t vis = bigBuffer[offset];
+				uint8_t redV = (vis & 0xF800u) >> 8;
+				uint8_t greenV = (vis & 0x07E0u) >> 3;
+				uint8_t blueV = (vis & 0x001Fu) << 3;
 
-				//Calc RGB color values for thermal smallBuffer
-				redT = colorMap[3 * value];
-				greenT = colorMap[3 * value + 1];
-				blueT = colorMap[3 * value + 2];
+				uint8_t red = static_cast<uint8_t>((redT * invAlpha256 + redV * alpha256) >> 8);
+				uint8_t green = static_cast<uint8_t>((greenT * invAlpha256 + greenV * alpha256) >> 8);
+				uint8_t blue = static_cast<uint8_t>((blueT * invAlpha256 + blueV * alpha256) >> 8);
 
-				//Get the RGB565 color of the visual smallBuffer
-				value = bigBuffer[offset];
-
-				//And extract the RGB values out of it
-				redV = (value & 0xF800) >> 8;
-				greenV = (value & 0x7E0) >> 3;
-				blueV = (value & 0x1F) << 3;
-
-				//Mix both
-				red = redT * (1 - adjCombAlpha) + redV * adjCombAlpha;
-				green = greenT * (1 - adjCombAlpha) + greenV * adjCombAlpha;
-				blue = blueT * (1 - adjCombAlpha) + blueV * adjCombAlpha;
-
-				//Convert to RGB565
 				bigBuffer[offset] = (((red & 248) | green >> 5) << 8) | ((green & 28) << 3 | blue >> 3);
 			}
 
-			//Raise counter
 			offset++;
 		}
 	}
@@ -324,12 +271,12 @@ void showTemperatures() {
 			//Draw the marker
 			display_drawLine(xpos, ypos, xpos, ypos);
 
-			//Calc x position for the text
+			//Calc x position for the text (keep clear of right screen edge)
 			xpos -= 20;
 			if (xpos < 0)
 				xpos = 0;
-			if (xpos > 279)
-				xpos = 279;
+			if (xpos > 256)
+				xpos = 256;
 
 			//Calc y position for the text
 			ypos += 15;
@@ -549,20 +496,24 @@ void getHotColdColors(byte* red, byte* green, byte* blue) {
 	}
 }
 
-/* Convert the lepton values to RGB colors */
+/* Convert the lepton values to RGB565 colors using fast integer LUT */
 void convertColors(bool small) {
-	uint8_t red = 0;
-	uint8_t green = 0;
-	uint8_t blue = 0;
-	uint16_t value;
-
-	//Calculate the scale
-	float scale = (colorElements - 1.0) / (maxValue - minValue);
-
-	//For hot and cold mode, calculate rawlevel
-	float hotColdRawLevel = 0.0;
-	if ((hotColdMode != hotColdMode_disabled) && (displayMode != displayMode_combined))
+	//Precompute hot/cold RGB565 color once outside the pixel loop
+	byte hcRed = 0, hcGreen = 0, hcBlue = 0;
+	bool useHot = (hotColdMode == hotColdMode_hot) && (calStatus != cal_warmup) && (displayMode != displayMode_combined);
+	bool useCold = (hotColdMode == hotColdMode_cold) && (calStatus != cal_warmup) && (displayMode != displayMode_combined);
+	uint16_t hotColdRawLevel = 0;
+	uint16_t hotColdRgb565 = 0;
+	if (useHot || useCold) {
 		hotColdRawLevel = tempToRaw(hotColdLevel);
+		getHotColdColors(&hcRed, &hcGreen, &hcBlue);
+		hotColdRgb565 = (((hcRed & 248) | hcGreen >> 5) << 8) | ((hcGreen & 28) << 3 | hcBlue >> 3);
+	}
+
+	//Safe integer fixed-point scale (16.16) guarded against maxValue <= minValue
+	uint32_t maxIdx = (colorElements > 1) ? static_cast<uint32_t>(colorElements - 1) : 0u;
+	uint32_t span = (maxValue > minValue) ? static_cast<uint32_t>(maxValue - minValue) : 1u;
+	uint32_t scaleFp = (maxIdx << 16) / span;
 
 	//Size of the array & buffer
 	int size;
@@ -578,33 +529,26 @@ void convertColors(bool small) {
 		frameBuffer = smallBuffer;
 	}
 
-	//Repeat for 160x120 data
+	uint16_t mn = minValue;
+	uint16_t mx = maxValue;
 	for (int i = 0; i < size; i++) {
-
-		value = frameBuffer[i];
+		uint16_t value = frameBuffer[i];
 
 		//Limit values
-		if (value > maxValue)
-			value = maxValue;
-		if (value < minValue)
-			value = minValue;
+		if (value > mx)
+			value = mx;
+		if (value < mn)
+			value = mn;
 
-		//Hot
-		if ((hotColdMode == hotColdMode_hot) && (value >= hotColdRawLevel) && (calStatus != cal_warmup) && (displayMode != displayMode_combined))
-			getHotColdColors(&red, &green, &blue);
-		//Cold
-		else if ((hotColdMode == hotColdMode_cold) && (value <= hotColdRawLevel) && (calStatus != cal_warmup) && (displayMode != displayMode_combined))
-			getHotColdColors(&red, &green, &blue);
-		//Apply colorscheme
-		else {
-			value = (value - minValue) * scale;
-			red = colorMap[3 * value];
-			green = colorMap[3 * value + 1];
-			blue = colorMap[3 * value + 2];
+		if (useHot && (value >= hotColdRawLevel)) {
+			frameBuffer[i] = hotColdRgb565;
+		} else if (useCold && (value <= hotColdRawLevel)) {
+			frameBuffer[i] = hotColdRgb565;
+		} else {
+			uint32_t idx = (static_cast<uint32_t>(value - mn) * scaleFp) >> 16;
+			if (idx > maxIdx) idx = maxIdx;
+			frameBuffer[i] = colorMap565[idx];
 		}
-
-		//Convert to RGB565
-		frameBuffer[i] = (((red & 248) | green >> 5) << 8) | ((green & 28) << 3 | blue >> 3);
 	}
 }
 
@@ -675,8 +619,12 @@ void createThermalImg(bool small) {
 	//Receive the temperatures over SPI
 	lepton_getRawValues();
 
-	//Get the spot temperature
+	//Get the spot temperature (and ambient temp once per frame)
 	getSpotTemp();
+
+	//Find min and max BEFORE compensating calibration so minValue/maxValue are always valid
+	if ((autoMode) && (!limitsLocked))
+		limitValues();
 
 	//Compensate calibration with MLX90614 for non-radiometric Lepton
 	if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter))
@@ -688,10 +636,6 @@ void createThermalImg(bool small) {
 	//Find min / max position
 	if (minMaxPoints != minMaxPoints_disabled)
 		refreshMinMax();
-
-	//Find min and max if not in manual mode and limits not locked
-	if ((autoMode) && (!limitsLocked))
-		limitValues();
 
 	//If smallBuffer save, save the raw data
 	if (imgSave == imgSave_create)
@@ -720,8 +664,12 @@ void createVisCombImg() {
 	//Receive the temperatures over SPI
 	lepton_getRawValues();
 
-	//Get the spot temperature
+	//Get the spot temperature (and ambient temp once per frame)
 	getSpotTemp();
+
+	//Find min and max BEFORE compensating calibration so minValue/maxValue are always valid
+	if ((autoMode) && (!limitsLocked))
+		limitValues();
 
 	//Compensate calibration with MLX90614 for non-radiometric Lepton
 	if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter))
@@ -733,10 +681,6 @@ void createVisCombImg() {
 	//Find min / max position
 	if (minMaxPoints != minMaxPoints_disabled)
 		refreshMinMax();
-
-	//Find min and max if not in manual mode and limits not locked
-	if ((autoMode) && (!limitsLocked))
-		limitValues();
 
 	//For 320x240 resolution, decompress visual image before thermal
 	if ((teensyVersion == teensyVersion_new) && (hqRes))

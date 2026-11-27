@@ -379,7 +379,7 @@ void loadRawData(char* filename, char* dirname) {
 	//Lepton2.x
 	if ((fileSize == lepton2_small) || (fileSize == lepton2_big)) {
 		//Radiometric Lepton2.5
-		if ((calOffset == -273.15) && (calSlope == 0.01))
+		if ((fabsf(calOffset - (-273.15f)) < 0.05f) && ((fabsf(calSlope - 0.01f) < 0.001f) || (fabsf(calSlope - 0.1f) < 0.01f)))
 		{
 			leptonVersion = leptonVersion_2_5_shutter;
 		}
@@ -392,12 +392,12 @@ void loadRawData(char* filename, char* dirname) {
 
 	//Lepton3.x
 	if ((fileSize == lepton3_small) || (fileSize == lepton3_big)) {
-		//Radiometric Lepton3.5
-		if ((calOffset == -273.15) && (calSlope == 0.01))
+		//Radiometric Lepton3.5 (high gain 0.01 or low gain 0.1)
+		if ((fabsf(calOffset - (-273.15f)) < 0.05f) && ((fabsf(calSlope - 0.01f) < 0.001f) || (fabsf(calSlope - 0.1f) < 0.01f)))
 		{
 			leptonVersion = leptonVersion_3_5_shutter;
 		}
-		//Non-radiometric Lepton3.5
+		//Non-radiometric Lepton3.0
 		else
 		{
 			leptonVersion = leptonVersion_3_0_shutter;

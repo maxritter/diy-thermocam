@@ -23,8 +23,8 @@ extern "C" {
 /*################# PUBLIC CONSTANTS, VARIABLES & DATA TYPES ##################*/
 
 //Current firmware version
-#define Version 	"Firmware 2.47 from 08.09.2018"
-#define fwVersion 	247
+#define Version 	"Firmware 2.49 from 27.11.2026"
+#define fwVersion 	249
 
 //Pins
 #define pin_button        2
@@ -64,7 +64,7 @@ extern "C" {
 #define leptonVersion_3_0_shutter   1 //FLIR Lepton3 Shuttered
 #define leptonVersion_2_0_noShutter 2 //FLIR Lepton2 Non-Shuttered
 #define leptonVersion_2_5_shutter   3 //FLIR Lepton 2.5 Shuttered
-#define leptonVersion_3_5_shutter   3 //FLIR Lepton 3.5 Shuttered
+#define leptonVersion_3_5_shutter   4 //FLIR Lepton 3.5 Shuttered
 
 //Temperature format
 #define tempFormat_celcius    0

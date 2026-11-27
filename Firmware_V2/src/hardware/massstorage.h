@@ -22,6 +22,13 @@ void jumpToApplicationAt0x38980();
 void massStorage();
 void resetPeripherals();
 void restartAndJumpToApp(void);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 void startup_late_hook(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MASSSTORAGE_H */

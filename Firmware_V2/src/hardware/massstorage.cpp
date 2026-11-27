@@ -36,12 +36,16 @@
 
 //The assembly code hook must be run inside a C, not C++ function
 
+#if defined(__MK20DX256__)
+
 /* Load stack pointer and program counter from start of new program */
 void jumpToApplicationAt0x38980() {
-	asm("movw r0, #0x8880");
-	asm("movt r0, #0x0003");
-	asm("ldr sp, [r0]");
-	asm("ldr pc, [r0, #4]");
+	asm volatile(
+		"movw r0, #0x8880\n\t"
+		"movt r0, #0x0003\n\t"
+		"ldr sp, [r0]\n\t"
+		"ldr pc, [r0, #4]\n\t"
+	);
 }
 
 /* Set peripherals back to reset conditions */
@@ -77,7 +81,7 @@ void resetPeripherals() {
 }
 
 /* Look for the condition that indicates we want to jump to the application with offset */
-void startup_late_hook(void) {
+extern "C" void startup_late_hook(void) {
 	if (IS_JUMP_TO_OFFSET_FLAG_SET()) {
 		//Clear the condition
 		CLEAR_JUMP_FLAG();
@@ -94,6 +98,15 @@ void restartAndJumpToApp(void) {
 	CPU_RESTART()
 	;
 }
+
+#else
+
+void jumpToApplicationAt0x38980() {}
+void resetPeripherals() {}
+extern "C" void startup_late_hook(void) {}
+void restartAndJumpToApp(void) {}
+
+#endif
 
 /* Go into mass storage mode */
 void massStorage() {

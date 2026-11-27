@@ -112,6 +112,8 @@ byte diagnostic = diag_ok;
 byte colorScheme;
 //Pointer to the current color scheme
 const byte *colorMap;
+//Precomputed RGB565 LUT for fast integer convertColors
+uint16_t colorMap565[256];
 //Number of rgb elements inside the color scheme
 int16_t colorElements;
 

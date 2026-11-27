@@ -23,12 +23,21 @@
 #include <i2c_t3.h>
 #include <EEPROM.h>
 #include <gui.h>
+#include <v2_core.h>
 #include <lepton.h>
 
 /*######################### STATIC DATA DECLARATIONS ##########################*/
 
 //Array to store one Lepton frame
 static byte leptonFrame[164];
+//Auto-bypass VoSPI CRC only if sensor persistently sends non-CRC packets
+static uint8_t s_crcConsecutiveFails = 0;
+static bool s_crcBypass = false;
+//Preserve last good radiometric spot temperature across transient I2C glitches
+static float s_lastRadSpotC = 25.0f;
+
+static constexpr uint32_t LEPTON_I2C_TIMEOUT_MS = 250u;
+static constexpr uint32_t LEPTON_FRAME_TIMEOUT_MS = 1200u;
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
@@ -220,6 +229,18 @@ LeptonReadError lepton_getPackage(byte line, byte seg)
 	if ((leptonFrame[0] & 0x0F) == 0x0F)
 		return DISCARD;
 
+	//Verify FLIR VoSPI CCITT CRC-16 to reject corrupted SPI pixels (prevents white/black spikes)
+	if (!s_crcBypass)
+	{
+		if (!v2_core::vospi_packet_crc_ok(leptonFrame))
+		{
+			if (++s_crcConsecutiveFails >= 32u)
+				s_crcBypass = true;
+			return ROW_ERROR;
+		}
+		s_crcConsecutiveFails = 0;
+	}
+
 	//Check if the line number matches the expected line
 	if (leptonFrame[1] != line)
 		return ROW_ERROR;
@@ -229,7 +250,7 @@ LeptonReadError lepton_getPackage(byte line, byte seg)
 			&& ((leptonVersion == leptonVersion_3_0_shutter)
 					|| (leptonVersion == leptonVersion_3_5_shutter)))
 	{
-		byte segment = (leptonFrame[0] >> 4);
+		byte segment = (leptonFrame[0] >> 4) & 0x07;
 		if (segment == 0)
 			return SEGMENT_INVALID;
 		if (segment != seg)
@@ -244,6 +265,7 @@ LeptonReadError lepton_getPackage(byte line, byte seg)
 void lepton_getRawValues()
 {
 	byte line, error, segmentNumbers;
+	uint32_t frameStartMs = millis();
 
 	//Determine number of segments
 	if ((leptonVersion == leptonVersion_3_0_shutter)
@@ -266,10 +288,17 @@ void lepton_getRawValues()
 		{
 			for (line = 0; line < 60; line++)
 			{
+				//Wall-clock guard so a missing/stalled sensor cannot hang the UI indefinitely
+				if ((millis() - frameStartMs) > LEPTON_FRAME_TIMEOUT_MS)
+				{
+					lepton_end();
+					return;
+				}
+
 				//Maximum error count
 				if (error == 255)
 				{
-					//If main menu should be entreed
+					//If main menu should be entered
 					if (showMenu == showMenu_desired)
 					{
 						lepton_end();
@@ -289,7 +318,7 @@ void lepton_getRawValues()
 				//Get a package from the lepton
 				LeptonReadError retVal = lepton_getPackage(line, segment);
 
-				//If everythin worked, continue
+				//If everything worked, continue
 				if (retVal == NONE)
 					if (savePackage(line, segment))
 						continue;
@@ -321,58 +350,63 @@ void lepton_setReg(byte reg)
 	Wire.endTransmission();
 }
 
-/* Read I2C Register on the lepton */
+/* Read I2C Register on the lepton (returns -1 on I2C failure) */
 int lepton_readReg(byte reg)
 {
-	uint16_t reading;
 	lepton_setReg(reg);
-	Wire.requestFrom(0x2A, 2);
-	reading = Wire.read();
-	reading = reading << 8;
-	reading |= Wire.read();
+	if (Wire.requestFrom(0x2A, 2) < 2)
+		return -1;
+	uint16_t reading = static_cast<uint16_t>(Wire.read()) << 8;
+	reading |= static_cast<uint16_t>(Wire.read());
 	return reading;
 }
 
-/*
- First reads the DATA Length Register (0x006)
- Then reads the acutal DATA Registers:
- DATA 0 Register, DATA 1 Register etc.
+/* Bounded wait for Lepton CCI command ready (STATUS bit 0 == 0) */
+static bool lepton_waitReady(uint32_t timeoutMs = LEPTON_I2C_TIMEOUT_MS)
+{
+	uint32_t t0 = millis();
+	while (true)
+	{
+		int status = lepton_readReg(0x2);
+		if (status < 0)
+			return false;
+		if ((status & 0x01) == 0)
+			return true;
+		if ((millis() - t0) >= timeoutMs)
+			return false;
+		delay(1);
+	}
+}
 
- If the request length is smaller that the DATA Length it returns -1
+/*
+ First reads the DATA Length Register (0x006, in 16-bit words)
+ Then points to DATA0 (0x0008) and reads data_length_request bytes.
+ Returns -1 on I2C timeout or error.
  */
 int lepton_i2c_read_data_register(byte *data, int data_length_request)
 {
-
-	int data_length_recv;
-	int data_read;
-	// Wait for execution of the command
-	while (lepton_readReg(0x2) & 0x01)
-		;
-
-	// Read the data length (should be 4)
-	data_length_recv = lepton_readReg(0x6);
-
-	if (data_length_recv < data_length_request)
-	{
+	if (!lepton_waitReady())
 		return -1;
-	}
 
-	Wire.requestFrom(0x2A, data_length_request);
-	data_read = Wire.readBytes(data, data_length_request);
-	Wire.endTransmission();
+	int words_avail = lepton_readReg(0x6);
+	if (words_avail < 0)
+		return -1;
+
+	lepton_setReg(0x08);
+	if (static_cast<int>(Wire.requestFrom(0x2A, data_length_request)) < data_length_request)
+		return -1;
+	int data_read = Wire.readBytes(data, data_length_request);
 	return data_read;
 }
 
 /*
  First writes the actual DATA Registers (0x0008).
- Then writes the DATA Length Register (0x006)
+ Then writes the DATA Length Register (0x006, in 16-bit words per FLIR Lepton CCI IDD).
  */
 byte lepton_i2c_write_data_register(byte *data, int length)
 {
-
-	// Wait for execution of the command
-	while (lepton_readReg(0x2) & 0x01)
-		;
+	if (!lepton_waitReady())
+		return 4;
 
 	Wire.beginTransmission(0x2A);
 	// CCI/TWI Data Registers is at 0x0008
@@ -382,15 +416,17 @@ byte lepton_i2c_write_data_register(byte *data, int length)
 	{
 		Wire.write(data[i]);
 	}
-	Wire.endTransmission();
+	byte err = Wire.endTransmission();
+	if (err != 0)
+		return err;
 
-	// CCI/TWI Data Length Register is at 0x0006
+	// CCI/TWI Data Length Register is at 0x0006 (count of 16-bit words)
+	uint16_t wordCount = static_cast<uint16_t>((length + 1) / 2);
 	Wire.beginTransmission(0x2A);
 	Wire.write(0x00);
 	Wire.write(0x06);
-	//Data length bytes
-	Wire.write((length >> 8) & 0xFF);
-	Wire.write(length & 0xFF);
+	Wire.write((wordCount >> 8) & 0xFF);
+	Wire.write(wordCount & 0xFF);
 	return Wire.endTransmission();
 }
 
@@ -399,9 +435,8 @@ byte lepton_i2c_write_data_register(byte *data, int length)
  */
 byte lepton_i2c_execute_command(byte cmdbyte0, byte cmdbyte1)
 {
-	// Wait for execution of the command
-	while (lepton_readReg(0x2) & 0x01)
-		;
+	if (!lepton_waitReady())
+		return 4;
 
 	Wire.beginTransmission(0x2A);
 	Wire.write(0x00);
@@ -455,45 +490,36 @@ bool lepton_ffc(bool message, bool switch_gain)
 /* Get the spotmeter value on a radiometric lepton */
 float lepton_spotTemp()
 {
-	//Get RAD spotmeter value
-	Wire.beginTransmission(0x2A);
-	Wire.write(0x00);
-	Wire.write(0x04);
-	Wire.write(0x4E);
-	Wire.write(0xD0);
-	byte error = Wire.endTransmission();
-
-	//Lepton I2C error, set diagnostic
+	//Get RAD spotmeter value (0x4ED0)
+	byte error = lepton_i2c_execute_command(0x4E, 0xD0);
 	if (error != 0)
-	{
-		setDiagnostic(diag_spot);
-		return 0;
-	}
+		return s_lastRadSpotC;
 
-	//Transfer the new package
-	Wire.beginTransmission(0x2A);
-	while (lepton_readReg(0x2) & 0x01)
-		;
-	Wire.requestFrom(0x2A, lepton_readReg(0x6));
-	byte response[8];
-	Wire.readBytes(response, 8);
-	Wire.endTransmission();
+	byte response[8] = {0};
+	if (lepton_i2c_read_data_register(response, 8) < 8)
+		return s_lastRadSpotC;
 
 	//Calculate spot temperature in Kelvin
-	float spotTemp = (response[0] * 256.0) + response[1];
-	//Multiply by correction factor
-	if(gainMode == lepton_3_5_gain_high)
+	uint16_t rawK = (static_cast<uint16_t>(response[0]) << 8) | response[1];
+	if (rawK == 0u)
+		return s_lastRadSpotC;
+
+	float spotC = static_cast<float>(rawK);
+	//Only Lepton 3.5 in low gain uses 0.1 K/LSB; Lepton 2.5 and 3.5 high gain use 0.01 K/LSB
+	if ((leptonVersion == leptonVersion_3_5_shutter) && (gainMode == lepton_3_5_gain_low))
 	{
-		spotTemp *= 0.01;
+		spotC *= 0.1f;
 	}
 	else
 	{
-		spotTemp *= 0.1;
+		spotC *= 0.01f;
 	}
-	//Convert to celsius
-	spotTemp -= 273.15;
+	spotC -= 273.15f;
 
-	return spotTemp;
+	if ((spotC >= -60.0f) && (spotC <= 600.0f))
+		s_lastRadSpotC = spotC;
+
+	return s_lastRadSpotC;
 }
 
 /* Set the shutter operation to manual/auto */
@@ -544,7 +570,14 @@ void lepton_version()
 	}
 
 	char leptonhw[33];
-	lepton_i2c_read_data_register((byte*) leptonhw, 32);
+	memset(leptonhw, 0, sizeof(leptonhw));
+	if (lepton_i2c_read_data_register((byte*) leptonhw, 32) < 16)
+	{
+		setDiagnostic(diag_lep_conf);
+		leptonVersion = leptonVersion_2_0_noShutter;
+		return;
+	}
+	leptonhw[32] = '\0';
 
 	//Detected Lepton2 Non-Shuttered
 	if (strstr(leptonhw, "05-060340") != NULL)
@@ -574,8 +607,8 @@ void lepton_version()
 		leptonShutter = leptonShutter_auto;
 	}
 
-	//Detected Lepton3.5 Shuttered (Radiometric)
-	else if (strstr(leptonhw, "05-070170") != NULL)
+	//Detected Lepton3.5 Shuttered (Radiometric, including 3.1R / newer batches)
+	else if ((strstr(leptonhw, "05-070170") != NULL) || (strstr(leptonhw, "05-070850") != NULL))
 	{
 		leptonVersion = leptonVersion_3_5_shutter;
 		leptonShutter = leptonShutter_autoRAD;
@@ -656,13 +689,14 @@ void lepton_set_sys_gain_auto()
  */
 int lepton_get_sys_gain_mode()
 {
-
-	byte data[4];
+	byte data[4] = {0};
 
 	//SYS Gain Mode Get Command
 	// 0x0200 (SDK Module ID) + 0x48 (SDK Command ID) + 0x0 (GET operation) + 0x0000 (Protection Bit) = 0x0248.
-	lepton_i2c_execute_command(0x02, 0x48);
-	lepton_i2c_read_data_register(data, 4);
+	if (lepton_i2c_execute_command(0x02, 0x48) != 0)
+		return -1;
+	if (lepton_i2c_read_data_register(data, 4) < 4)
+		return -1;
 
 	//The enum value is the LSB of DATA0
 	return data[1];
@@ -670,18 +704,19 @@ int lepton_get_sys_gain_mode()
 
 /*
  * Returns the  RAD T-Linear Resolution
- * 0: 100
- * 1: 10
+ * 0: 10 (0.1 K/LSB)
+ * 1: 100 (0.01 K/LSB)
  */
 byte lepton_get_rad_tlinear_resolution()
 {
-
-	byte data[4];
+	byte data[4] = {0, 1, 0, 0};
 
 	// RAD T-Linear Resolution Get Command
 	// 0x0E00 (SDK Module ID) + 0xC4 (SDK Command ID) + 0x0 (GET operation) + 0x4000 (Protection Bit) = 0x4EC4.
-	lepton_i2c_execute_command(0x4E, 0xC4);
-	lepton_i2c_read_data_register(data, 4);
+	if (lepton_i2c_execute_command(0x4E, 0xC4) != 0)
+		return 1;
+	if (lepton_i2c_read_data_register(data, 4) < 4)
+		return 1;
 
 	//The enum value is the LSB of DATA0
 	return data[1];
@@ -793,14 +828,15 @@ void lepton_init()
 	//Deactivate limits Locked
 	limitsLocked = false;
 
-	//Check if SPI works
+	//Check if SPI works (use dedicated syncStart so radiometric Leptons also get the full 1 s window)
+	uint32_t syncStart = millis();
 	lepton_begin();
 	do
 	{
 		SPI.transfer(leptonFrame, 164);
 	}
 	//Repeat as long as the frame is not valid, equals sync
-	while (((leptonFrame[0] & 0x0F) == 0x0F) && ((millis() - calTimer) < 1000));
+	while (((leptonFrame[0] & 0x0F) == 0x0F) && ((millis() - syncStart) < 1000u));
 	lepton_end();
 
 	//If sync not received after a second, set diagnostic

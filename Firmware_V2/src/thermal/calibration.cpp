@@ -28,9 +28,14 @@
 #include <buttons.h>
 #include <gui.h>
 #include <fonts.h>
+#include <v2_core.h>
 #include <calibration.h>
 
 /*###################### PRIVATE FUNCTION BODIES ##############################*/
+
+static bool isRadiometricLepton() {
+	return (leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter);
+}
 
 /* Help function for least suqare fit */
 inline static double sqr(double x) {
@@ -41,33 +46,26 @@ inline static double sqr(double x) {
 
 /* Converts a given Temperature in Celcius to Fahrenheit */
 float celciusToFahrenheit(float Tc) {
-	float Tf = ((float) 9.0 / 5.0) * Tc + 32.0;
-	return (Tf);
+	return v2_core::celsius_to_fahrenheit(Tc);
 }
 
 /* Converts a given temperature in Fahrenheit to Celcius */
 float fahrenheitToCelcius(float Tf) {
-	float Tc = (Tf - 32.0) * ((float) 5.0 / 9.0);
-	return Tc;
+	return v2_core::fahrenheit_to_celsius(Tf);
+}
+
+/* Refresh ambient temperature once per frame for non-radiometric Lepton */
+void refreshAmbTemp() {
+	if (!isRadiometricLepton() && checkDiagnostic(diag_spot)) {
+		ambTemp = mlx90614_getAmb();
+	}
 }
 
 /* Function to calculate temperature out of Lepton value */
 float calFunction(uint16_t rawValue) {
-	//For radiometric Lepton, set offset to fixed value
-	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
-		calOffset = -273.15;
-
-	//For non-radiometric Lepton
-	else {
-		//Refresh MLX90614 ambient temp
-		ambTemp = mlx90614_getAmb();
-
-		//Calculate offset out of ambient temp and compensation factor
-		calOffset = ambTemp - (calSlope * 8192) + calComp;
-	}
-
-	//Calculate the temperature in Celcius out of the coefficients
-	float temp = (calSlope * rawValue) + calOffset;
+	bool rad = isRadiometricLepton();
+	calOffset = v2_core::cal_offset_celsius(rad, ambTemp, calSlope, calComp);
+	float temp = v2_core::raw_to_celsius(rawValue, rad, ambTemp, calSlope, calComp);
 
 	//Convert to Fahrenheit if needed
 	if (tempFormat == tempFormat_fahrenheit)
@@ -81,53 +79,33 @@ uint16_t tempToRaw(float temp) {
 	if (tempFormat == tempFormat_fahrenheit)
 		temp = fahrenheitToCelcius(temp);
 
-	//For radiometric Lepton, set offset to fixed value
-	if ((leptonVersion == leptonVersion_2_5_shutter) || (leptonVersion == leptonVersion_3_5_shutter))
-		calOffset = -273.15;
-
-	//For non-radiometric Lepton
-	else {
-		//Refresh MLX90614 ambient temp
-		ambTemp = mlx90614_getAmb();
-
-		//Calculate offset out of ambient temp and compensation factor
-		calOffset = ambTemp - (calSlope * 8192) + calComp;
-	}
-
-	//Calcualte the raw value
-	uint16_t rawValue = (temp - calOffset) / calSlope;
-	return rawValue;
+	bool rad = isRadiometricLepton();
+	calOffset = v2_core::cal_offset_celsius(rad, ambTemp, calSlope, calComp);
+	return v2_core::celsius_to_raw(temp, rad, ambTemp, calSlope, calComp);
 }
 
 /* Calculates the average of the 196 (14x14) pixels in the middle */
 uint16_t calcAverage() {
-	int sum = 0;
-	uint16_t val;
+	uint32_t sum = 0;
 	for (byte vert = 52; vert < 66; vert++) {
 		for (byte horiz = 72; horiz < 86; horiz++) {
-			val = smallBuffer[(vert * 160) + horiz];
-			sum += val;
+			sum += smallBuffer[(vert * 160) + horiz];
 		}
 	}
-	uint16_t avg = (uint16_t)(sum / 196.0);
-	return avg;
+	return static_cast<uint16_t>((sum + 98u) / 196u);
 }
 
-/* Compensate the calibration with MLX90614 values */
+/* Compensate the calibration with MLX90614 values (additive in Celsius, clamped) */
 void compensateCalib() {
+	if (isRadiometricLepton() || !checkDiagnostic(diag_spot))
+		return;
+
 	//Calculate compensation if auto mode enabled and no limits locked
 	if ((autoMode) && (!limitsLocked)) {
-		//Calculate min & max
-		int16_t min = round(calFunction(minValue));
-		int16_t max = round(calFunction(maxValue));
-
-		//If spot temp is lower than current minimum by one degree, lower minimum
-		if (spotTemp < (min - 1))
-			calComp = spotTemp - min;
-
-		//If spot temp is higher than current maximum by one degree, raise maximum
-		else if (spotTemp > (max + 1))
-			calComp = spotTemp - max;
+		float spotC = (tempFormat == tempFormat_fahrenheit)
+			? fahrenheitToCelcius(spotTemp)
+			: spotTemp;
+		calComp = v2_core::compensate_calib_step(spotC, minValue, maxValue, ambTemp, calSlope, calComp);
 	}
 }
 
@@ -287,11 +265,17 @@ void calibrationProcess(bool serial, bool firstStart) {
 		//Calculate the calibration formula with least square fit
 		linreg(100, calLepton, calMLX90614, &calSlope, &calOffset, &calCorrelation);
 
+		//Validate computed slope
+		if (!v2_core::cal_slope_valid(calSlope)) {
+			calSlope = cal_stdSlope;
+			calCorrelation = 0.0f;
+		}
+
 		//Refresh MLX90614 ambient temp
 		ambTemp = mlx90614_getAmb();
 
-		//Calculate compensation
-		calComp = calOffset - ambTemp + (calSlope * 8192);
+		//Calculate compensation and clamp to safe range
+		calComp = v2_core::clamp_cal_comp(calOffset - ambTemp + (calSlope * 8192.0f));
 
 		//When in serial mode, store and send ACK
 		if (serial)

@@ -152,8 +152,11 @@ void sendCalStatus() {
 	//Send status byte
 	Serial.write(calStatus);
 	//Send remaining seconds left
-	if (calStatus == cal_warmup)
-		Serial.write((byte)abs(30 - ((millis() - calTimer) / 1000)));
+	if (calStatus == cal_warmup) {
+		uint32_t elapsed = (millis() - static_cast<uint32_t>(calTimer)) / 1000u;
+		byte remaining = (elapsed < 30u) ? static_cast<byte>(30u - elapsed) : 0u;
+		Serial.write(remaining);
+	}
 	else
 		Serial.write(0);
 }
@@ -1140,8 +1143,12 @@ void serialOutput() {
 		if (checkDiagnostic(diag_lep_data))
 			lepton_getRawValues();
 
-		//Get the spot temperature
+		//Get the spot temperature (and ambient temp once per frame)
 		getSpotTemp();
+
+		//Find min and max BEFORE compensating calibration
+		if ((autoMode) && (!limitsLocked))
+			limitValues();
 
 		//Compensate calibration with MLX90614 for non-radiometric Lepton
 		if ((leptonVersion != leptonVersion_2_5_shutter) && (leptonVersion != leptonVersion_3_5_shutter))
@@ -1149,10 +1156,6 @@ void serialOutput() {
 
 		//Refresh the temp points
 		refreshTempPoints();
-
-		//Find min and max if not in manual mode and limits not locked
-		if ((autoMode) && (!limitsLocked))
-			limitValues();
 
 		//Check button press if not in terminal mode
 		if (extButtonPressed())

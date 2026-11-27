@@ -67,6 +67,7 @@ extern byte teensyVersion;
 extern byte diagnostic;
 extern byte colorScheme;
 extern const byte *colorMap;
+extern uint16_t colorMap565[256];
 extern int16_t colorElements;
 extern float calOffset;
 extern float calSlope;

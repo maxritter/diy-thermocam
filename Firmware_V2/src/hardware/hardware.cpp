@@ -32,6 +32,7 @@
 #include <lepton.h>
 #include <mlx90614.h>
 #include <firststart.h>
+#include <v2_core.h>
 #include <hardware.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
@@ -212,6 +213,47 @@ void checkFWUpgrade()
 				EEPROM.write(eeprom_lepton_3_5_gain, lepton_3_5_gain_high);
 			}
 
+			//Validate & heal corrupt presets or calibration slope when upgrading to 2.49
+			if (eepromVersion < 249)
+			{
+				bool isRad = (leptonVersion == leptonVersion_2_5_shutter)
+						|| (leptonVersion == leptonVersion_3_5_shutter);
+				const byte presetRegs[3][6] = {
+					{ eeprom_minMax1Set, eeprom_minValue1High, eeprom_minValue1Low, eeprom_maxValue1High, eeprom_maxValue1Low, eeprom_minMax1Comp },
+					{ eeprom_minMax2Set, eeprom_minValue2High, eeprom_minValue2Low, eeprom_maxValue2High, eeprom_maxValue2Low, eeprom_minMax2Comp },
+					{ eeprom_minMax3Set, eeprom_minValue3High, eeprom_minValue3Low, eeprom_maxValue3High, eeprom_maxValue3Low, eeprom_minMax3Comp }
+				};
+				byte activePreset = EEPROM.read(eeprom_minMaxPreset);
+				for (int p = 0; p < 3; p++)
+				{
+					if (EEPROM.read(presetRegs[p][0]) == eeprom_setValue)
+					{
+						uint16_t mn = (static_cast<uint16_t>(EEPROM.read(presetRegs[p][1])) << 8)
+								| EEPROM.read(presetRegs[p][2]);
+						uint16_t mx = (static_cast<uint16_t>(EEPROM.read(presetRegs[p][3])) << 8)
+								| EEPROM.read(presetRegs[p][4]);
+						uint8_t farray[4];
+						for (int i = 0; i < 4; i++)
+							farray[i] = EEPROM.read(presetRegs[p][5] + i);
+						float comp = bytesToFloat(farray);
+						if (!v2_core::preset_valid(mn, mx, comp, isRad))
+						{
+							EEPROM.write(presetRegs[p][0], 0);
+							if (activePreset == (p + 1))
+								EEPROM.write(eeprom_minMaxPreset, minMax_temporary);
+						}
+					}
+				}
+				if (EEPROM.read(eeprom_calSlopeSet) == eeprom_setValue)
+				{
+					uint8_t farray[4];
+					for (int i = 0; i < 4; i++)
+						farray[i] = EEPROM.read(eeprom_calSlopeBase + i);
+					if (!v2_core::cal_slope_valid(bytesToFloat(farray)))
+						EEPROM.write(eeprom_calSlopeSet, 0);
+				}
+			}
+
 			//Show upgrade completed message
 			showFullMessage((char*) "Update completed, restart device");
 			//Set EEPROM firmware version to current one
@@ -238,7 +280,8 @@ void readCalibration()
 	//Read slope
 	for (int i = 0; i < 4; i++)
 		farray[i] = EEPROM.read(eeprom_calSlopeBase + i);
-	calSlope = bytesToFloat(farray);
+	float loaded = bytesToFloat(farray);
+	calSlope = v2_core::cal_slope_valid(loaded) ? loaded : cal_stdSlope;
 }
 
 /* Reads the old settings from EEPROM */
@@ -502,8 +545,8 @@ void initI2C()
 {
 	//Start the Bus
 	Wire.begin();
-	//Enable Timeout for Hardware start
-	Wire.setDefaultTimeout(1000);
+	//Bounded 25 ms I2C timeout (covers 32-byte Lepton CCI reads without hanging forever)
+	Wire.setDefaultTimeout(25000);
 	//Use external pullups for new HW
 	if (teensyVersion == teensyVersion_new)
 		Wire.pinConfigure(I2C_PINS_18_19, I2C_PULLUP_EXT);
@@ -534,10 +577,16 @@ void initBuffer()
 {
 	//For Teensy 3.6, init 320x240 buffer
 	if (teensyVersion == teensyVersion_new)
+	{
 		bigBuffer = (uint16_t*) malloc(153600);
+		if (bigBuffer != NULL)
+			memset(bigBuffer, 0, 153600);
+	}
 
 	//Init 160x120 buffer for all devices
 	smallBuffer = (uint16_t*) malloc(38400);
+	if (smallBuffer != NULL)
+		memset(smallBuffer, 0, 38400);
 }
 
 /* Display the content of the small/big buffer on the screen */
@@ -630,18 +679,32 @@ void readTempLimits()
 		found = true;
 	}
 
-	//Apply settings
+	//Apply settings only if preset values are valid (guards against corrupt EEPROM / white-black lockouts)
 	if (found)
 	{
-		minValue =
-				((EEPROM.read(minValueHigh) << 8) + EEPROM.read(minValueLow));
-		maxValue =
-				((EEPROM.read(maxValueHigh) << 8) + EEPROM.read(maxValueLow));
+		uint16_t loadedMin =
+				(static_cast<uint16_t>(EEPROM.read(minValueHigh)) << 8) + EEPROM.read(minValueLow);
+		uint16_t loadedMax =
+				(static_cast<uint16_t>(EEPROM.read(maxValueHigh)) << 8) + EEPROM.read(maxValueLow);
 		uint8_t farray[4];
 		for (int i = 0; i < 4; i++)
 			farray[i] = EEPROM.read(minMaxComp + i);
-		calComp = bytesToFloat(farray);
-		autoMode = false;
+		float loadedComp = bytesToFloat(farray);
+		bool isRad = (leptonVersion == leptonVersion_2_5_shutter)
+				|| (leptonVersion == leptonVersion_3_5_shutter);
+		if (v2_core::preset_valid(loadedMin, loadedMax, loadedComp, isRad))
+		{
+			minValue = loadedMin;
+			maxValue = loadedMax;
+			calComp = isRad ? 0.0f : v2_core::clamp_cal_comp(loadedComp);
+			autoMode = false;
+		}
+		else
+		{
+			EEPROM.write(eeprom_minMaxPreset, minMax_temporary);
+			calComp = 0.0f;
+			autoMode = true;
+		}
 	}
 }
 
@@ -721,7 +784,7 @@ void checkNoFFC()
 	}
 }
 
-//Get the spot temperature from Lepton or MLX90614
+//Get the spot temperature from Lepton or MLX90614 (and refresh ambient temp once per frame)
 void getSpotTemp()
 {
 	//Get spot value from radiometric Lepton
@@ -729,9 +792,15 @@ void getSpotTemp()
 			|| (leptonVersion == leptonVersion_3_5_shutter))
 		spotTemp = lepton_spotTemp();
 
-	//Get temperature from MLX90614
+	//Get object and ambient temperatures from MLX90614
 	else
-		spotTemp = mlx90614_getTemp();
+	{
+		if (checkDiagnostic(diag_spot))
+		{
+			spotTemp = mlx90614_getTemp();
+			ambTemp = mlx90614_getAmb();
+		}
+	}
 
 	//Convert to Fahrenheit if required
 	if (tempFormat == tempFormat_fahrenheit)
@@ -836,8 +905,8 @@ void initHardware()
 	mlx90614_init();
 	//Init SD card
 	initSD();
-	//Disable I2C timeout
-	Wire.setDefaultTimeout(0);
+	//Keep bounded 25 ms I2C timeout during runtime so bus glitches cannot freeze the camera
+	Wire.setDefaultTimeout(25000);
 	//Init screen off timer
 	initScreenOffTimer();
 	//Init the buffer(s)

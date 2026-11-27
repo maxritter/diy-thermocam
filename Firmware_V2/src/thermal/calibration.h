@@ -27,6 +27,7 @@ void checkWarmup();
 void compensateCalib();
 float fahrenheitToCelcius(float Tf);
 int linreg(int n, const uint16_t x[], const float y[], float* m, float* b, float* r);
+void refreshAmbTemp();
 uint16_t tempToRaw(float temp);
 
 #endif /* CALIBRATION_H */

@@ -23,16 +23,14 @@
 #include <bitmaps.h>
 #include <buttons.h>
 #include <hardware.h>
+#include <v2_core.h>
 #include <gui.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
 /* Converts a given float to char array */
 void floatToChar(char* buffer, float val) {
-	int units = val;
-	int hundredths = val * 100;
-	hundredths = abs(hundredths % 100);
-	sprintf(buffer, "%d.%02d", units, hundredths);
+	v2_core::format_float_2dp(buffer, 10, val);
 }
 
 /* Sets the text color to the right one */

@@ -54,14 +54,15 @@ static const unsigned char mlx90614_crcTable[] = { 0x00, 0x07, 0x0E, 0x09, 0x1C,
 0xA0, 0xA7, 0xB2, 0xB5, 0xBC, 0xBB, 0x96, 0x91, 0x98, 0x9F, 0x8A, 0x8D, 0x84, 0x83, 0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5, 0xCC, 0xCB, 0xE6,
 0xE1, 0xE8, 0xEF, 0xFA, 0xFD, 0xF4, 0xF3 };
 
+static float s_lastValidAmbC = 25.0f;
+static float s_lastValidObjC = 25.0f;
+
 /*######################## PUBLIC FUNCTION BODIES #############################*/
 
 /* Calculate CRC8 checksum for PEC */
 char mlx90614_crc8(byte buffer[], int len) {
 	unsigned char m_crc = 0;
-	int m_byte_count = 0;
 	for (int i = 0; i < len; i++) {
-		m_byte_count++;
 		m_crc = mlx90614_crcTable[m_crc ^ buffer[i]];
 	}
 	return m_crc;
@@ -69,8 +70,6 @@ char mlx90614_crc8(byte buffer[], int len) {
 
 /* Receive data from the RAM over I2C */
 uint16_t mlx90614_getRawData(boolean TaTo, boolean* check) {
-	// Store the two relevant bytes of data for temperature
-	byte dataLow, dataHigh;
 	Wire.beginTransmission(mlx90614_RAM);
 	//Measure Ambient Temp
 	if (TaTo)
@@ -79,23 +78,29 @@ uint16_t mlx90614_getRawData(boolean TaTo, boolean* check) {
 	else {
 		Wire.send(mlx90614_ObjectTemp);
 	}
-	Wire.endTransmission(I2C_NOSTOP);
-	//Receive data
-	Wire.requestFrom(mlx90614_RAM, 3);
-	if (Wire.available() != 3)
+	if (Wire.endTransmission(I2C_NOSTOP) != 0) {
 		*check = 0;
-	dataLow = Wire.read();
-	if (dataLow == -1)
+		return 0;
+	}
+	//Receive data (3 bytes: LSB, MSB, PEC)
+	if (Wire.requestFrom(mlx90614_RAM, 3) != 3) {
 		*check = 0;
-	dataHigh = Wire.read();
-	if (dataHigh == -1)
+		return 0;
+	}
+	int dataLow = Wire.read();
+	int dataHigh = Wire.read();
+	int pec = Wire.read();
+	if ((dataLow < 0) || (dataHigh < 0) || (pec < 0)) {
 		*check = 0;
-	byte pec = Wire.read();
-	if (pec == -1)
+		return 0;
+	}
+	//Bit 15 of MSB is the MLX90614 error flag
+	if (dataHigh & 0x80) {
 		*check = 0;
-	Wire.endTransmission();
+		return 0;
+	}
 	//Convert data
-	uint16_t tempData = (((dataHigh & 0x007F) << 8) + dataLow);
+	uint16_t tempData = static_cast<uint16_t>(((dataHigh & 0x007F) << 8) + dataLow);
 	return tempData;
 }
 
@@ -153,7 +158,7 @@ float mlx90614_measure(boolean TaTo, boolean* check) {
 	return tempData;
 }
 
-/* Set the maximum temp to 380°C */
+/* Set the maximum temp to 380 deg C */
 void mlx90614_setMax() {
 	byte count = 0;
 	do {
@@ -172,7 +177,7 @@ void mlx90614_setMax() {
 	} while (mlx90614_receive(mlx90614_toMax) != 65315);
 }
 
-/* Check if the maximum temp is 380°C */
+/* Check if the maximum temp is 380 deg C */
 boolean mlx90614_checkMax() {
 	//Check if maximum temp setting is correct
 	if (mlx90614_receive(mlx90614_toMax) != 65315)
@@ -181,7 +186,7 @@ boolean mlx90614_checkMax() {
 	return 1;
 }
 
-/* Set the minimum temp to -70°C */
+/* Set the minimum temp to -70 deg C */
 void mlx90614_setMin() {
 	byte count = 0;
 	do {
@@ -200,7 +205,7 @@ void mlx90614_setMin() {
 	} while (mlx90614_receive(mlx90614_toMin) != 20315);
 }
 
-/* Check if the minimum temp is -70°C */
+/* Check if the minimum temp is -70 deg C */
 boolean mlx90614_checkMin() {
 	//Check if minimum temp setting is correct
 	if (mlx90614_receive(mlx90614_toMin) != 20315)
@@ -287,42 +292,44 @@ boolean mlx90614_checkFilter() {
 
 /* Read and return the ambient temperature */
 float mlx90614_getAmb() {
-	float ambTemp;
-	boolean check = 1;
+	float ambC;
+	boolean check;
 	byte count = 0;
 
-	//Repeat until valid value
+	//Repeat until valid value (reset check every attempt; bounded to <=20 ms so UI never freezes)
 	do {
-		ambTemp = mlx90614_measure(1, &check);
-		//If we cannot connect,continue
-		if (count == 100)
-			return 0;
+		check = 1;
+		ambC = mlx90614_measure(1, &check);
+		if (check) {
+			s_lastValidAmbC = ambC;
+			return ambC;
+		}
+		if (count >= 10)
+			return s_lastValidAmbC;
 		count++;
-		delay(10);
-	} while (check == 0);
-
-	//Return ambient temperature
-	return ambTemp;
+		delay(2);
+	} while (true);
 }
 
 /* Read and return the object temperature */
 float mlx90614_getTemp() {
-	float objTemp;
-	boolean check = 1;
+	float objC;
+	boolean check;
 	byte count = 0;
 
-	//Repeat until valid value
+	//Repeat until valid value (reset check every attempt; bounded to <=20 ms so UI never freezes)
 	do {
-		objTemp = mlx90614_measure(0, &check);
-		//If we cannot connect, continue
-		if (count == 100)
-			return 0;
+		check = 1;
+		objC = mlx90614_measure(0, &check);
+		if (check) {
+			s_lastValidObjC = objC;
+			return objC;
+		}
+		if (count >= 10)
+			return s_lastValidObjC;
 		count++;
-		delay(10);
-	} while (check == 0);
-
-	//Return object temperature
-	return objTemp;
+		delay(2);
+	} while (true);
 }
 
 /* Initializes the sensor */
@@ -377,31 +384,39 @@ void mlx90614_init() {
 		}
 	}
 
-	//Check if the object temp is valid
-	boolean check = 1;
+	//Check if the object temp is valid (reset check on each retry)
+	boolean check;
 	byte count = 0;
 	do {
-		mlx90614_measure(0, &check);
-		//If we cannot connect, set error and continue
-		if (count == 100) {
+		check = 1;
+		float objC = mlx90614_measure(0, &check);
+		if (check) {
+			s_lastValidObjC = objC;
+			break;
+		}
+		if (count >= 25) {
 			setDiagnostic(diag_spot);
 			break;
 		}
 		count++;
 		delay(10);
-	} while (check == 0);
+	} while (true);
 
-	//Check if the ambient temp is valid
-	check = 1;
+	//Check if the ambient temp is valid (reset check on each retry)
 	count = 0;
 	do {
-		mlx90614_measure(1, &check);
-		//If we cannot connect, set error and continue
-		if (count == 100) {
+		check = 1;
+		float ambC = mlx90614_measure(1, &check);
+		if (check) {
+			s_lastValidAmbC = ambC;
+			ambTemp = ambC;
+			break;
+		}
+		if (count >= 25) {
 			setDiagnostic(diag_spot);
 			break;
 		}
 		count++;
 		delay(10);
-	} while (check == 0);
+	} while (true);
 }

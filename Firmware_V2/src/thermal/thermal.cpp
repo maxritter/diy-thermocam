@@ -33,6 +33,7 @@
 #include <livemode.h>
 #include <videomenu.h>
 #include <globalvariables.h>
+#include <v2_core.h>
 #include <thermal.h>
 
 /*######################## PUBLIC FUNCTION BODIES #############################*/
@@ -216,7 +217,7 @@ void longTouchHandler() {
 /* Show the color bar on screen */
 void showColorBar() {
 	//Help variables
-	char buffer[6];
+	char buffer[12];
 	byte red, green, blue, fac;
 	byte count = 0;
 
@@ -229,10 +230,10 @@ void showColorBar() {
 	else
 		height = 120 - ((120 - (colorElements / 4)) / 2);
 
-	//Calculate color level for hot and cold
-	float colorLevel = 0;
-	if ((hotColdMode != hotColdMode_disabled) && (displayMode != displayMode_combined))
-		colorLevel = (tempToRaw(hotColdLevel) * 1.0 - minValue) / (maxValue * 1.0 - minValue);
+	//Calculate color level for hot and cold (guarded against maxValue <= minValue)
+	float colorLevel = 0.0f;
+	if ((hotColdMode != hotColdMode_disabled) && (displayMode != displayMode_combined) && (maxValue > minValue))
+		colorLevel = (tempToRaw(hotColdLevel) * 1.0f - minValue) / (maxValue * 1.0f - minValue);
 
 	//Display color bar
 	for (int i = 0; i < (colorElements - 1); i++) {
@@ -275,7 +276,7 @@ void showColorBar() {
 	float min = calFunction(minValue);
 	float max = calFunction(maxValue);
 	//Calculate step
-	float step = (max - min) / 3.0;
+	float step = (max - min) / 3.0f;
 
 	//For 320x240, set fac to one
 	if (teensyVersion == teensyVersion_new)
@@ -284,20 +285,25 @@ void showColorBar() {
 	else
 		fac = 2;
 
+	//Right-align labels neatly left of the colorbar so wide numbers never wrap off-screen
+	const int charW = ((teensyVersion == teensyVersion_new) && hqRes) ? 8 : 6;
+	auto printBarLabel = [&](float val, int y) {
+		v2_core::format_temp_int(buffer, sizeof(buffer), val);
+		int x = 294 - static_cast<int>(strlen(buffer)) * charW;
+		if (x < 0) x = 0;
+		display_print(buffer, x, y);
+	};
+
 	//Draw min temp
-	sprintf(buffer, "%d", (int)round(min));
-	display_print(buffer, 270, (height * fac) - 5);
+	printBarLabel(min, (height * fac) - 5);
 
 	//Draw temperatures after min before max
 	for (int i = 2; i >= 1; i--) {
-		float temp = min + (i*step);
-		sprintf(buffer, "%d", (int)round(temp));
-		display_print(buffer, 270, (height * fac) - 5 - (i * (colorElements / 6)));
+		printBarLabel(min + (i * step), (height * fac) - 5 - (i * (colorElements / 6)));
 	}
 
 	//Draw max temp
-	sprintf(buffer, "%d", (int)round(max));
-	display_print(buffer, 270, (height * fac) - 5 - (3 * (colorElements / 6)));
+	printBarLabel(max, (height * fac) - 5 - (3 * (colorElements / 6)));
 }
 
 /* Change the display options */
@@ -498,6 +504,9 @@ void selectColorScheme() {
 		colorElements = 224;
 		break;
 	}
+
+	//Precompute RGB565 LUT for fast integer convertColors
+	v2_core::build_rgb565_lut(colorMap, colorElements, colorMap565);
 }
 
 /* Change the color scheme for the thermal image */

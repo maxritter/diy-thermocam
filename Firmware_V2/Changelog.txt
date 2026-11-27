@@ -1,0 +1,18 @@
+*** Changelog DIY-Thermocam V1/V2 Firmware ***
+
+2.49 (27.11.2026)
+-Fixed unstable calibration compensation feedback loop (caused runaway positive/negative temperatures such as ~28743 C/F, especially in Fahrenheit mode)
+-Fixed EEPROM preset & calibration validation (automatically heals corrupt presets on upgrade to prevent white/black lockout screens and extreme colorbar values)
+-Fixed MLX90614 I2C retry bug that froze the camera for 1+ seconds per frame on a single bus glitch, and cached ambient temperature once per frame
+-Fixed FLIR Lepton 2.5 vs 3.5 version constant collision (both were defined as 3, causing multi-second freezes on Lepton 2.5 and wrong PC Live Viewer resolution on Lepton 3.5)
+-Fixed FLIR Lepton CCI I2C word-count handling, bounded all Lepton I2C busy-waits (250 ms timeout) and Wire timeout (25 ms) so I2C glitches can no longer hang the device, and added Lepton 3.5 (05-070850) part number support
+-Fixed V1 USB Mass Storage mode rebooting back to firmware (startup_late_hook was C++ name-mangled instead of extern "C", preventing the jump to MassStorage.hex at 0x38880)
+-Ported VoSPI CCITT CRC-16 packet verification (with automatic fallback) from V4 firmware to reject corrupted SPI pixels
+-Ported fast integer symmetric 3x3 Gaussian/Box filters, precomputed RGB565 colormap LUT, fixed-point bilinear upscaling (V2), and single-transaction SPI screen refresh (V1) for significantly higher framerate and lower CPU load
+-Fixed divide-by-zero when minValue == maxValue, negative float formatting (-0.50), colorbar/label edge wrapping, warmup countdown underflow, and minor buffer overflows
+
+2.48 (27.04.2019)
+-Added support for ArduCAM-M-2MP Plus
+
+2.47 (08.09.2018)
+-Added gain setting for Lepton3.5 in Temp Limits menu, so it can now measure up to +450C

@@ -372,7 +372,7 @@ void display_init()
 	if (check != 0xE0)
 		setDiagnostic(diag_display);
 
-	//Read 180° rotation
+	//Read 180 deg  rotation
 	byte read = EEPROM.read(eeprom_rotationVert);
 	if ((read == 0) || (read == 1))
 		rotationVert = read;
@@ -1501,22 +1501,26 @@ void display_writeScreen(unsigned short* pcolors, boolean small)
 	display_setAddr(0, 0, 319, 239);
 	display_writecommand_cont(ILI9341_RAMWR);
 
-	//160x120 array, doubled
+	//160x120 array, doubled (keep SPI CS active across all rows, end only on final pixel)
 	if (small) {
 		for (byte y = 120; y > 0; y--) {
-			for (byte x = 160; x > 1; x--) {
-				display_writedata16_cont(*pcolors);
-				display_writedata16_cont(*pcolors++);
+			for (byte x = 160; x > 0; x--) {
+				uint16_t c = *pcolors++;
+				display_writedata16_cont(c);
+				display_writedata16_cont(c);
 			}
-			display_writedata16_cont(*pcolors);
-			display_writedata16_last(*pcolors++);
 			pcolors = pcolors - 160;
 			for (byte x = 160; x > 1; x--) {
-				display_writedata16_cont(*pcolors);
-				display_writedata16_cont(*pcolors++);
+				uint16_t c = *pcolors++;
+				display_writedata16_cont(c);
+				display_writedata16_cont(c);
 			}
-			display_writedata16_cont(*pcolors);
-			display_writedata16_last(*pcolors++);
+			uint16_t lastC = *pcolors++;
+			display_writedata16_cont(lastC);
+			if (y == 1)
+				display_writedata16_last(lastC);
+			else
+				display_writedata16_cont(lastC);
 		}
 	}
 	//320x240 array
