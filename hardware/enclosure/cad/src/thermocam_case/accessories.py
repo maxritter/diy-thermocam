@@ -338,7 +338,7 @@ def build_battery_cradle(p: EnclosureParams) -> Solid:
             Box(20.0, out_h + 10.0, lip_h + 0.5, align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
         j5 = [(59.28, THT_TAIL_R_CLEAR)]
         band_in = out_h / 2.0 - p.cradle_wall_t - p.cradle_lip_w   # Lip band's inner edge from the centre
-        washers = [(hx, 2.5 + TAIL_CLEAR) for hx, hy in p.lepton_carrier_holes if hy + 2.5 + TAIL_CLEAR > cy + band_in]
+        washers = [(hx, 2.5 + TAIL_CLEAR) for hx, hy in p.lepton_breakout_holes if hy + 2.5 + TAIL_CLEAR > cy + band_in]
         j3 = [(x, 0.5 + TAIL_CLEAR) for x in (p.usb.center_x - J3_LEG_DX, p.usb.center_x + J3_LEG_DX)]
         for band_y, cuts in ((cy - out_h / 2.0, j5 + j3), (cy + out_h / 2.0, j5 + washers)):
             merged: list[list[float]] = []
@@ -504,13 +504,14 @@ def build_battery_spacers(p: EnclosureParams) -> tuple[Solid, Solid]:
 
 # --- Laser-case parts ----------------------------------------------------------------------------
 
-TRIPOD_NUT_AF, TRIPOD_NUT_H = 11.11, 5.50   # 1/4"-20 UNC hex nut, 7/16" AF
+TRIPOD_NUT_AF, TRIPOD_NUT_H = 11.10, 5.56   # 1/4"-20 UNC hex nut (HNSS 025 20), 7/16" AF x 7/32" H
 TRIPOD_RIB_SQUEEZE = 0.25                     # Crush ribs reach this far into the nut's flats
-# The plug fills the bottom-plate hole (0.1 mm play all round). It sits 0.575 mm toward +Z of the nut
-# so the hole's -Z edge stops the slid-in nut's corner 0.14 mm away and the +Z side keeps a 1.0 mm
-# wall over the pocket's corner.
-TRIPOD_PLUG_X, TRIPOD_PLUG_Z, TRIPOD_PLUG_DZ = 18.00, 14.05, 0.575
-TRIPOD_POCKET_AF = TRIPOD_NUT_AF + 0.29       # Slide-in pocket of the acrylic case's mount
+# The plug fills the bottom-plate hole (0.1 mm play all round). It sits 0.625 mm toward +Z of the nut
+# so the hole's -Z edge stops the slid-in nut's corner and the +Z side keeps >= 1.0 mm wall over the
+# pocket's corner.
+TRIPOD_PLUG_X, TRIPOD_PLUG_Z, TRIPOD_PLUG_DZ = 18.00, 14.15, 0.625
+TRIPOD_POCKET_AF = 11.50                      # Slide-in pocket of the acrylic case's mount (matches shell)
+TRIPOD_POCKET_H_CLEAR = 0.54                  # 6.10 mm pocket (+0.24 mm even at JLC3DP -0.3 mm PA12)
 TRIPOD_FLOOR_T = 1.20
 TRIPOD_FIN_GAP = 0.30   # Fin to board edge: PCB outline +-0.2, a 3.2 mm bottom plate sits 0.1 further in
 
@@ -536,7 +537,7 @@ def build_laser_tripod_mount(p: EnclosureParams) -> Solid:
     y_in, y_out = laser_bottom_faces(p)
     y_plug_bot = y_out + 0.05
     y_nut_bot = y_out + TRIPOD_FLOOR_T
-    y_pocket_top = y_nut_bot + TRIPOD_NUT_H + 0.30
+    y_pocket_top = y_nut_bot + TRIPOD_NUT_H + TRIPOD_POCKET_H_CLEAR
     y_top = y_pocket_top + MJF_MIN_WALL + 0.2
     body_x, body_z = 18.0, 16.0
     pocket_af = TRIPOD_POCKET_AF

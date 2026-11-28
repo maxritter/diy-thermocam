@@ -173,8 +173,8 @@ def flat_washer(x: float, y: float, z0: float, d_out: float = 6.0, d_in: float =
 
 
 def tripod_hex_nut(x: float, z: float, y_bottom: float, corners_along_x: bool = False) -> Solid:
-    """1/4"-20 UNC hex nut (7/16" = 11.1 mm AF, 5.5 mm thick) with its axis along Y."""
-    af, h = 11.11, 5.50
+    """1/4"-20 UNC hex nut (7/16" = 11.10 mm AF, 7/32" = 5.56 mm thick) with its axis along Y."""
+    af, h = 11.10, 5.56
     with BuildPart() as bp:
         with BuildSketch(Plane(origin=(x, y_bottom, z), x_dir=(1, 0, 0), z_dir=(0, 1, 0))):
             RegularPolygon(radius=af / math.sqrt(3.0), side_count=6, rotation=0.0 if corners_along_x else 30.0)

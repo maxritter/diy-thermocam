@@ -4,8 +4,8 @@ Each decal is drawn the way a person sees that face (a "view canvas"), then resa
 device frame: Blender maps every textured part with planar UVs over its own XY bounding box
 (u along +X, v along +Y), so the PNG written here is that XY map. `view` names the device axes
 that point right and down on the canvas, e.g. ("+Y", "-X") for the Teensy's component side.
-Layouts follow the vendor photos (PJRC Teensy 4.1, BuyDisplay ER-TFTM032-3). The main board and
-the Lepton carrier need none: they come from KiCad with their own silkscreen.
+Layouts follow the vendor photos (PJRC Teensy 4.1, FLIR Breakout V2.0, BuyDisplay ER-TFTM032-3).
+The main board needs none: it comes from KiCad with its own silkscreen.
 """
 
 from __future__ import annotations
@@ -24,6 +24,7 @@ FONT_MONO = ("/System/Library/Fonts/Menlo.ttc", "/usr/share/fonts/truetype/dejav
 
 # sRGB colours sampled from the vendor photos
 TEENSY_GREEN, TEENSY_TRACE = (38, 122, 44), (50, 136, 52)
+BREAKOUT_GREEN, BREAKOUT_TRACE = (30, 88, 38), (42, 104, 50)
 SILK, GOLD, COPPER = (238, 240, 236), (214, 172, 96), (196, 120, 70)
 CHIP, CHIP_INK = (26, 26, 28), (128, 128, 130)
 DISPLAY_BLACK, DISPLAY_TRACE = (18, 18, 20), (30, 30, 33)
@@ -134,6 +135,27 @@ def chip_small(lines: list[str]) -> Callable[[Image.Image, float], None]:
     return paint
 
 
+def breakout_lepton_side(img: Image.Image, s: float) -> None:
+    """FLIR Breakout V2.0, Lepton side: header pads on the right, socket left of centre."""
+    d = ImageDraw.Draw(img)
+    rng = random.Random(35)
+    w, h = img.width / s, img.height / s
+    _traces(d, rng, s, (1.5, 1.5, w - 8.0, h - 1.5), 40, BREAKOUT_TRACE, 0.18)
+    for _ in range(55):  # Gold vias, kept off the socket
+        u, v = rng.uniform(1.8, w - 8.5), rng.uniform(1.8, h - 1.8)
+        if abs(u - 10.0) < 6.8 and abs(v - h / 2) < 6.8:
+            continue
+        r = rng.choice((0.28, 0.32, 0.45)) * s
+        d.ellipse((u * s - r, v * s - r, u * s + r, v * s + r), fill=GOLD)
+        d.ellipse((u * s - r * 0.45, v * s - r * 0.45, u * s + r * 0.45, v * s + r * 0.45), fill=(120, 96, 52))
+    for u, v in ((4.0, 4.2), (8.2, 3.6), (4.5, 24.8), (15.8, 6.0), (17.0, 22.5)):  # Square test pads
+        r = 0.55 * s
+        d.rectangle((u * s - r, v * s - r, u * s + r, v * s + r), fill=GOLD)
+    _text(img, (1.2 * s, h / 2 * s), "250-0577-00 REV 2", round(0.95 * s), SILK, angle=90, bold=True)
+    _text(img, (10.0 * s, (h / 2 + 7.6) * s), "U1", round(1.0 * s), SILK, bold=True)
+    d.rectangle((3.2 * s, (h - 6.2) * s, 5.0 * s, (h - 3.4) * s), fill=SILK)  # Label patch
+
+
 def lipo_label(img: Image.Image, s: float) -> None:
     w, h = img.width / s, img.height / s
     ink = (34, 34, 36)
@@ -169,6 +191,7 @@ PAINTERS: dict[str, tuple[Callable[[Image.Image, float], None], tuple[int, int, 
     "chip_flash": (chip_small(["25Q64JV", "IQ 2228"]), CHIP, 90.0),
     "chip_bootloader": (chip_small(["MKL02", "Z32VFG4"]), CHIP, 90.0),
     "chip_phy": (chip_small(["DP83825I", "TI 2AT"]), CHIP, 90.0),
+    "breakout_lepton_side": (breakout_lepton_side, BREAKOUT_GREEN, 30.0),
     "lipo_label": (lipo_label, (190, 193, 198), 20.0),
     "display_pcb_front": (display_pcb_front, DISPLAY_BLACK, 15.0),
 }

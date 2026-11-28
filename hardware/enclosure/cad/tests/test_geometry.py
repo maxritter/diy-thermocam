@@ -198,7 +198,7 @@ def test_params_match_real_kicad_pcb() -> None:
     assert abs(float(metrics["pcb_w"]) - P.pcb_w) <= 0.01
     assert abs(float(metrics["pcb_h"]) - P.pcb_h) <= 0.01
     assert sorted(P.mounting_holes) == metrics["mounting_holes"]
-    assert sorted(P.lepton_carrier_holes) == metrics["lepton_holes"]
+    assert sorted(P.lepton_breakout_holes) == metrics["lepton_holes"]
     usb_x, _ = metrics["usb_pos"]  # type: ignore[misc]
     _, sw_y = metrics["switch_pos"]  # type: ignore[misc]
     btn_x, _ = metrics["button_pos"]  # type: ignore[misc]
@@ -243,34 +243,14 @@ def test_pin_tails_match_kicad_pads() -> None:
     assert legs == tails, (legs, tails)
 
 
-# --- Lepton carrier (its own KiCad board) ------------------------------------------------------------
+# --- FLIR Lepton Breakout Board V2.0 (250-0577-00) + right-angle adapter ----------------------------
 
-CARRIER_PCB_PATH = KICAD_PCB_PATH.with_name("diy-thermocam-v4.0-lepton.kicad_pcb")
 J2_SOCKET_H = 8.5  # HC-PM254-8.5H-2x10PZ: entry face 8.5 mm below the main board
 
 
-def _footprints(path) -> list[tuple[str, str, str, float, float, float, str]]:
-    """(footprint, reference, layer, x, y, rotation, text) of every footprint, KiCad coordinates."""
-    out = []
-    for block in path.read_text().split("\n\t(footprint ")[1:]:
-        name = re.match(r'"([^"]+)"', block)
-        layer = re.search(r'\(layer "([^"]+)"\)', block)
-        at = re.search(r"\n\t\t\(at ([-\d.]+) ([-\d.]+)(?: ([-\d.]+))?\)", block)
-        ref = re.search(r'\(property "Reference" "([^"]+)"', block)
-        assert name and layer and at and ref, block[:200]
-        out.append((name[1], ref[1], layer[1], float(at[1]), float(at[2]), float(at[3] or 0.0), block))
-    return out
-
-
-def _tht_pads(block: str, x: float, y: float) -> dict[int, tuple[float, float]]:
-    """Pad number -> device XY of a footprint's through-hole pads (footprint not rotated)."""
-    return {int(n): (round(x + float(px), 2), round(-(y + float(py)), 2))
-            for n, px, py in re.findall(r'\(pad "(\d+)" thru_hole \w+\s*\(at ([-\d.]+) ([-\d.]+)', block)}
-
-
 def _step_solids(path) -> list[Solid]:
-    """Solids of a KiCad STEP export. Some vendor models (the Molex socket) are bare shells, not
-    solids; each such shell counts as its bounding box, which is never smaller than the part."""
+    """Solids of a KiCad STEP export. Some vendor models are bare shells, not solids; each such
+    shell counts as its bounding box, which is never smaller than the part."""
     from build123d import import_step
 
     shape = import_step(str(path))
@@ -280,103 +260,38 @@ def _step_solids(path) -> list[Solid]:
     return solids + [Solid.from_bounding_box(sh.bounding_box()) for sh in loose]
 
 
-def _only(fps, pattern: str):
-    hits = [fp for fp in fps if re.search(pattern, fp[0])]
-    assert len(hits) == 1, f"{pattern}: {[fp[1] for fp in hits]}"
-    return hits[0]
-
-
-def test_carrier_board_matches_the_enclosure_envelope() -> None:
-    """The carrier keeps the outline, holes, header and socket position both enclosures are built
-    around, and each header pin lands on the J2 pad of the same number."""
-    text = CARRIER_PCB_PATH.read_text()
-    pts = []
-    for block in re.findall(r"\n\t\(gr_\w+(.*?)\n\t\)", text, re.DOTALL):
-        if '(layer "Edge.Cuts")' in block:
-            pts += [(float(x), -float(y)) for x, y in re.findall(r"\((?:start|mid|end) ([-\d.]+) ([-\d.]+)\)", block)]
-    xs, ys = [x for x, _ in pts], [y for _, y in pts]
-    assert (min(xs), max(xs), min(ys), max(ys)) == pytest.approx(
-        (P.carrier_x0, P.carrier_x1, P.carrier_y0, P.carrier_y1), abs=0.01)
-
-    fps = _footprints(CARRIER_PCB_PATH)
-    holes = sorted((round(x, 2), round(-y, 2)) for name, _, _, x, y, _, _ in fps if "MountingHole" in name)
-    assert holes == sorted(P.lepton_carrier_holes)
-
-    _, _, h_layer, hx, hy, h_rot, h_block = _only(fps, r"PinHeader_2x10")
-    _, _, s_layer, sx, sy, _, _ = _only(fps, r"LeptonSocket")
-    assert h_layer == "F.Cu" and s_layer == "B.Cu"  # Header toward the main board, Lepton toward the back wall
-    assert (sx, -sy) == pytest.approx((P.lepton_x, P.lepton_y), abs=0.01)
-    _, _, j2_layer, jx, jy, j2_rot, j2_block = _only(
-        [fp for fp in _footprints(KICAD_PCB_PATH) if fp[1] == "J2"], r".")
-    assert h_rot == 0.0 and j2_rot == 0.0 and j2_layer == "B.Cu"
-    header, j2 = _tht_pads(h_block, hx, hy), _tht_pads(j2_block, jx, jy)
-    assert header and all(j2.get(n) == xy for n, xy in header.items()), (header, j2)
-
-
-@pytest.fixture(scope="module")
-def carrier_step(tmp_path_factory):
-    """The carrier's KiCad STEP in the device frame, split into the whole board, the header and
-    the back-side parts other than the Lepton socket."""
-    import subprocess
-
-    from thermocam_case.scene import _kicad_cli
-
-    try:
-        cli = _kicad_cli()
-    except FileNotFoundError:
-        pytest.skip("kicad-cli (KiCad 10) not installed")
-    fps = _footprints(CARRIER_PCB_PATH)
-    header = _only(fps, r"PinHeader_2x10")[1]
-    back = ",".join(ref for name, ref, layer, *_ in fps
-                    if layer == "B.Cu" and "LeptonSocket" not in name and "MountingHole" not in name)
-    out = tmp_path_factory.mktemp("carrier")
-    prl = CARRIER_PCB_PATH.with_suffix(".kicad_prl")
-    had_prl = prl.exists()
-    z_back_face = P.pcb_z_back - P.lepton_sleeve_len - P.carrier_t  # STEP: board back face at Z=0
-    solids = {}
-    for key, args in (("all", []), ("header", ["--no-board-body", "--component-filter", header]),
-                      ("back_parts", ["--no-board-body", "--component-filter", back])):
-        path = out / f"{key}.step"
-        subprocess.run([cli, "pcb", "export", "step", "--user-origin", "0x0mm", "-f", *args, "-o", str(path),
-                        str(CARRIER_PCB_PATH)], check=True, capture_output=True)
-        solids[key] = [_move(s, 0.0, 0.0, z_back_face) for s in _step_solids(path)]
-    if not had_prl:
-        prl.unlink(missing_ok=True)
-    return solids
-
-
-def test_carrier_parts_fit_their_height_budget(carrier_step) -> None:
-    """Back-side parts stay within carrier_parts_h; the header reaches far enough into J2 without
-    bottoming out on the main board."""
-    z_back_face = P.pcb_z_back - P.lepton_sleeve_len - P.carrier_t
-    back = min(s.bounding_box().min.Z for s in carrier_step["back_parts"])
-    assert back >= z_back_face - P.carrier_parts_h, f"back-side parts reach Z {back:.2f}"
-    hb = [s.bounding_box() for s in carrier_step["header"]]
-    hx0, hx1 = min(b.min.X for b in hb), max(b.max.X for b in hb)
-    hy0, hy1 = min(b.min.Y for b in hb), max(b.max.Y for b in hb)
-    pins_x, pins_y = [x for x, _ in J2_TAILS], [y for _, y in J2_TAILS]
-    # The header's 3D model sits over its pads (a wrong model rotation shows in the renders and STEP)
-    assert hx0 == pytest.approx(min(pins_x) - 1.27, abs=0.1) and hx1 == pytest.approx(max(pins_x) + 1.27, abs=0.1), \
-        f"header model spans X {hx0:.2f}..{hx1:.2f}"
-    assert hy0 == pytest.approx(min(pins_y) - 1.27, abs=0.1) and hy1 == pytest.approx(max(pins_y) + 1.27, abs=0.1), \
-        f"header model spans Y {hy0:.2f}..{hy1:.2f}"
-    tip = max(b.max.Z for b in hb)
-    entry = P.pcb_z_back - J2_SOCKET_H
-    assert tip - entry >= 4.0, f"header pins enter J2 only {tip - entry:.2f} mm"
-    assert tip <= P.pcb_z_back - 1.0, f"header pin tips at Z {tip:.2f}, J2 floor at {P.pcb_z_back}"
-
-
-def test_carrier_from_kicad_clears_both_enclosures(enc, laser, k, carrier_step) -> None:
-    """The real carrier (board, socket, header, every part) touches no printed part, plate,
-    standoff or the main board."""
+def test_breakout_v2_and_adapter_clear_both_enclosures_and_main_board(enc, laser, k, main_board_step) -> None:
+    """FLIR Lepton Breakout Board V2.0 (29.5 x 29.0 mm, jumpers up to 9.2 mm on +Z) and the Sullins
+    PPPC102LJBN-RC right-angle adapter clear every printed part, acrylic plate, standoff, the Teensy,
+    J2's plastic rim, and every component on the real KiCad main board."""
     stack = build_standoff_stack(P)
     others = {**_shell_parts(enc), **_laser_parts(enc, laser), **{f"standoff_{i}": s for i, s in enumerate(stack.all)}}
     others["main_pcb"] = k.pcb
-    others.update({n: s for n, s in k.real.items() if n.startswith(("T41_", "J5J6_"))})  # The Teensy beside it
-    pairs = [(f"carrier[{i}] x {n}", s, part) for i, s in enumerate(carrier_step["all"]) for n, part in others.items()]
+    others.update({n: s for n, s in k.real.items() if n.startswith(("T41_", "J5J6_"))})
+    bo_parts = {n: s for n, s in k.real.items()
+                if n in ("breakout_pcb", "breakout_jumpers", "lepton_adapter", "lepton_adapter_even_bends")}
+    pairs = [(f"{bn} x {on}", bs, os_) for bn, bs in bo_parts.items() for on, os_ in others.items()]
+    # Sullins PPPC102LJBN-RC body and even-row horizontal bends must NOT collide with J2's 8.5 mm housing
+    pairs.append(("lepton_adapter x J2_socket", k.real["lepton_adapter"], k.real["J2_socket"]))
+    pairs.append(("lepton_adapter_even_bends x J2_socket", k.real["lepton_adapter_even_bends"], k.real["J2_socket"]))
     _assert_clear(pairs)
-    edge_x = max(s.bounding_box().max.X for s in carrier_step["all"])
-    assert edge_x <= P.carrier_x1 + 0.01, f"a carrier part overhangs its +X edge to {edge_x:.2f}"
+    # Pin insertion into J2 (Sullins 3.15 mm tails reach past the 5.08 mm body into the 8.5 mm socket)
+    z_bo_top = P.pcb_z_back - P.lepton_sleeve_len - P.lepton_shim_t
+    j2_mouth_z = P.pcb_z_back - J2_SOCKET_H
+    j2_max_mouth_z = P.pcb_z_back - (J2_SOCKET_H + 0.15)  # Hong Cheng 8.50 +-0.15 mm worst-case tall socket
+    assert k.real["lepton_adapter_even_bends"].bounding_box().max.Z <= j2_max_mouth_z - 0.20
+    assert (z_bo_top + 5.08 + 3.15) - j2_mouth_z >= 3.5
+    # M2x18 screw reaches cleanly past the 1.2 mm ISO 4035 M2 nut through the 12.9 mm sleeve + shim stack
+    assert 18.0 - (0.3 + P.pcb_t + P.lepton_sleeve_len + P.lepton_shim_t + P.breakout_t + 1.2) >= 0.35
+    # Breakout jumpers (Z 7.4..16.6) leave at least 2.5 mm air gap to the main PCB back (Z 20.0),
+    # and stay clear of every SMD component on the real KiCad main board
+    j2_box = k.real["J2_socket"].bounding_box()
+    non_j2_main = [s for s in main_board_step
+                   if not (s.bounding_box().min.X >= j2_box.min.X - 1.0 and s.bounding_box().max.X <= j2_box.max.X + 1.0
+                           and s.bounding_box().min.Y >= j2_box.min.Y - 1.0 and s.bounding_box().max.Y <= j2_box.max.Y + 1.0
+                           and s.bounding_box().min.Z < P.pcb_z_back - 2.0)]
+    _assert_clear([(f"breakout_jumpers x main[{i}]", k.real["breakout_jumpers"], s) for i, s in enumerate(non_j2_main)])
+    assert P.pcb_z_back - k.real["breakout_jumpers"].bounding_box().max.Z >= 2.5 - 1e-6
 
 
 SW1_MODEL_ACTUATOR_DY = 1.0  # SW1's KiCad model: actuator in position a, +1.0 mm from pin 2
@@ -430,15 +345,14 @@ def test_usb_c_plug_boot_reaches_j3(enc, laser) -> None:
     _assert_clear([(f"USB-C boot x {n}", boot, s) for n, s in walls.items()], tol=1e-4)
 
 
-def test_teensy_plugs_in_past_the_fitted_carrier(k, carrier_step) -> None:
-    """Build order: the carrier goes on first (its H102/H103 nuts need a nut driver where the Teensy
-    would be), then the Teensy slides straight into J5/J6 beside it."""
+def test_teensy_plugs_in_past_the_fitted_breakout(k) -> None:
+    """Build order: the Breakout V2.0 goes on first (its right-side nuts need a nut driver where
+    the Teensy would be), then the Teensy slides straight into J5/J6 beside it."""
     teensy = [s for n, s in k.real.items() if n.startswith("T41_") and n != "T41_sd_card"]
-    carrier = {**{f"carrier[{i}]": s for i, s in enumerate(carrier_step["all"])},
-               **{n: s for n, s in k.real.items() if n.startswith(("lepton_", "carrier_"))}}
+    breakout = {n: s for n, s in k.real.items() if n.startswith(("lepton_", "breakout_"))}
     for i in range(25):  # 12 mm: well past the 6 mm header engagement
         moved = [_move(s, 0.0, 0.0, -0.5 * i) for s in teensy]
-        hits = [n for n, c in carrier.items() for m in moved if _inter_vol(m, c) >= 1e-3]
+        hits = [n for n, c in breakout.items() for m in moved if _inter_vol(m, c) >= 1e-3]
         assert not hits, f"Teensy {0.5 * i:.1f} mm out of J5/J6 hits {sorted(set(hits))}"
 
 
@@ -545,14 +459,13 @@ def test_adafruit_cell_sits_between_the_spacer_bars(enc, laser, k) -> None:
 # a stub stands up to ~0.2 mm proud of the routed edge; checked at 0.3 mm
 MAIN_TABS = [("bottom", 6.0, 5.0), ("bottom", 32.5, 5.0), *(("top", x, 5.0) for x in (25.0, 45.0, 65.0)),
              ("right", 26.0, 5.0), ("left", 4.5, 5.0)]
-CARRIER_TABS = [("low", 42.6, 8.0), ("high", 46.0, 8.0)]   # Short edges at Y 14 and Y 61
 TAB_STUB = 0.3
 
 
 def test_panel_tab_stubs_clear_both_cases(enc, laser, k) -> None:
-    """A filed tab stub on the main board or the carrier edge touches no case part, with the board
-    in place or lowered in from +Z (shell: into the back shell; acrylic: onto the back plate, past
-    the bottom plate and tripod mount)."""
+    """A filed tab stub on the main board touches no case part, with the board in place or lowered
+    in from +Z (shell: into the back shell; acrylic: onto the back plate, past the bottom plate and
+    tripod mount)."""
     zb, zt = P.pcb_z_back, P.pcb_z_back + P.pcb_t
     stubs = {}
     for edge, at, w in MAIN_TABS:
@@ -563,10 +476,6 @@ def test_panel_tab_stubs_clear_both_cases(enc, laser, k) -> None:
         else:
             x0 = -TAB_STUB if edge == "left" else P.pcb_w
             stubs[f"main {edge} {at:g}"] = _box(x0, x0 + TAB_STUB, a0, a1, zb, zt)
-    cb = k.real["carrier_pcb"].bounding_box()
-    for name, at, w in CARRIER_TABS:
-        y0, y1 = (cb.min.Y - TAB_STUB, cb.min.Y) if name == "low" else (cb.max.Y, cb.max.Y + TAB_STUB)
-        stubs[f"carrier {name} {at:g}"] = _box(at - w / 2.0, at + w / 2.0, y0, y1, cb.min.Z, cb.max.Z)
     stack = build_standoff_stack(P)
     others = {**_shell_parts(enc), **_laser_parts(enc, laser), **{f"standoff_{i}": s for i, s in enumerate(stack.all)}}
     _assert_clear([(f"{sn} x {n}", s, o) for sn, s in stubs.items() for n, o in others.items()])
@@ -580,12 +489,11 @@ def test_panel_tab_stubs_clear_both_cases(enc, laser, k) -> None:
     _assert_clear([(f"{sn} lowered x {n}", s, o) for sn, s in sweeps.items() for n, o in entry.items()])
 
 
-def test_carrier_and_its_sleeves_clear_the_teensy(k) -> None:
-    """The carrier shares the Teensy PCB's height (Z 7.4..9.0): its edge stays 0.8 mm off the
-    Teensy (V-cut and Teensy width tolerances), the nylon sleeves at H102/H103 0.5 mm (a touch
-    there is nylon on a bare board edge, harmless)."""
+def test_breakout_and_its_sleeves_clear_the_teensy(k) -> None:
+    """FLIR Breakout V2.0 shares the Teensy PCB's height (Z 6.4..8.0 vs 7.4..9.0): its edge stays
+    0.5 mm off the Teensy, and the nylon sleeves stay 0.5 mm clear."""
     t41 = k.real["T41_pcb"]
-    assert k.real["carrier_pcb"].distance_to(t41) >= 0.8 - 1e-6
+    assert k.real["breakout_pcb"].distance_to(t41) >= 0.5 - 1e-6
     assert min(k.real[f"lepton_sleeve_{i}"].distance_to(t41) for i in range(4)) >= 0.5 - 1e-6
 
 
@@ -813,10 +721,12 @@ def test_tripod_nuts_stay_on_the_screw_axis(enc, laser, k) -> None:
     nut = tripod_hex_nut(P.laser_tripod_x, P.laser_tripod_z, y_out + TRIPOD_FLOOR_T)
     mount, plate = laser.printed["tripod_mount"], laser.plates_3d["bottom"]
     rest = _inter_vol(nut, mount)
-    # Roof 0.3 mm above the nut, the pocket's V and the plate's hole edge under 0.25 mm away
-    for d, stop in (((0, 0.35, 0), mount), ((0, 0, 0.25), mount), ((0, 0, -0.25), plate)):
+    # Roof 0.54 mm above the 5.56 mm nut (6.10 mm pocket: still +0.24 mm at JLC3DP -0.3 mm),
+    # the pocket's V and the plate's hole edge under 0.25 mm away
+    for d, stop in (((0, 0.60, 0), mount), ((0, 0, 0.25), mount), ((0, 0, -0.25), plate)):
         moved = _move(nut, *d)
         assert _inter_vol(moved, stop) > (rest + 0.5 if stop is mount else 0.01), f"nut free toward {d}"
+    assert P.shell_tripod_nut_h - 5.56 >= 0.50
     assert P.shell_tripod_screw_d - 6.35 < 2 * 0.25 + 1e-9
 
 
@@ -1060,7 +970,8 @@ def test_lepton_fov_and_body_clearance(enc, laser, k) -> None:
         pairs.append((f"3.2 mm laser back x {cname}", thick_back, cone))
     _assert_clear(pairs)
     lep = k.real["lepton_socketed"]
-    assert lep.bounding_box().min.Z == pytest.approx(-0.74, abs=0.01)
+    expected_shutter_z = P.pcb_z_back - P.lepton_sleeve_len - P.lepton_shim_t - P.breakout_t - P.lepton_socketed_h
+    assert lep.bounding_box().min.Z == pytest.approx(expected_shutter_z, abs=0.01)
     # Tolerance stack (+-0.3 mm in Z, +-0.5 mm in XY) still clears the shell
     for dx, dy, dz in ((0.5, 0.5, -0.3), (-0.5, -0.5, -0.3), (0.5, -0.5, -0.3), (-0.5, 0.5, -0.3)):
         assert _inter_vol(_move(lep, dx, dy, dz), enc.back_shell) < 1e-3

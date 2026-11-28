@@ -3,7 +3,7 @@
 Positions are in the camera frame (see params.py). Sources:
   - KiCad board `hardware/pcb/diy-thermocam-v4.0.kicad_pcb` (footprint positions, pad clearances)
   - FLIR Lepton datasheet 500-0771-01: 11.8 x 12.7 x 7.14 mm in the Molex 105028 socket
-  - Lepton carrier board: envelope agreed with the PCB design (params.py, carrier_*)
+  - FLIR Lepton Breakout Board V2.0 (250-0577-00) + right-angle 2x10 female header (PPPC102LJBN-RC)
   - PJRC Teensy 4.1 drawing: 61.0 x 17.8 x 1.57 mm, micro-USB overhang 0.7 mm
   - BuyDisplay ER-TFTM032-3 drawing: module 77.7 x 55.04 x 3.6 (+0.3), back-side parts <= 2.5 mm
   - Omron B3U-3000P, C&K JS102011SAQN, XKB TS-1187A, HRO TYPE-C-31-M-12, JST S2B-PH-SM4-TB
@@ -42,7 +42,7 @@ def board(p: EnclosureParams, x0: float, x1: float, y0: float, y1: float, z0: fl
     """A PCB slab with its M2.5 mounting holes (and the M2 Lepton holes on the main board)."""
     holes = [(x, y, p.mounting_hole_d / 2.0) for x, y in p.mounting_holes]
     if lepton_holes:
-        holes += [(x, y, 1.05) for x, y in p.lepton_carrier_holes]
+        holes += [(x, y, 1.05) for x, y in p.lepton_breakout_holes]
     s = box(x0, x1, y0, y1, z0, z1)
     for x, y, r in holes:
         s = _as_solid(s - cyl(x, y, z0 - 0.1, z1 + 0.1, r))
@@ -170,29 +170,38 @@ def build_real_parts(p: EnclosureParams) -> dict[str, Solid]:
         m[f"T41_header_{int(sx)}"] = box(sx - 1.27, sx + 1.27, 0.15, 61.11, tz1, pcb_back - 8.5)
         m[f"T41_tails_{int(sx)}"] = box(sx - 1.27, sx + 1.27, 0.15, 61.11, tz0 - 1.45, tz0)
         m[f"J5J6_socket_{int(sx)}"] = box(sx - 1.27, sx + 1.27, 0.15, 61.11, pcb_back - 8.5, pcb_back)
-    # Lepton carrier on 12 mm sleeves; Lepton 3.5 in its Molex socket faces the back wall. Until the
-    # carrier's own 3D model is in, its parts are the agreed envelopes: 3.0 mm on either side
-    z_bo_top = pcb_back - p.lepton_sleeve_len
-    z_bo_bot = z_bo_top - p.carrier_t
-    cx0, cx1, cy0, cy1 = p.carrier_x0, p.carrier_x1, p.carrier_y0, p.carrier_y1
-    m["carrier_pcb"] = box(cx0, cx1, cy0, cy1, z_bo_bot, z_bo_top)
-    m["approx_carrier_top_parts"] = box(cx0, cx1, cy0, cy1, z_bo_top, z_bo_top + p.carrier_parts_h)
-    m["approx_carrier_bottom_parts"] = box(cx0, cx1, cy0, cy1, z_bo_bot - p.carrier_parts_h, z_bo_bot)
-    # Straight 2x10 male header under J2: 2.5 mm plastic on the carrier, pins up into the socket
-    m["carrier_header"] = box(31.40 - 1.27, 54.26 + 1.27, 21.00 - 1.27, 23.54 + 1.27, z_bo_top, z_bo_top + 2.5)
-    m["carrier_header_pins"] = box(31.40 - 0.32, 54.26 + 0.32, 21.00 - 0.32, 23.54 + 0.32,
-                                   z_bo_top + 2.5, pcb_back - 8.5)
+    # FLIR Lepton Breakout Board V2.0 (250-0577-00) on 12 mm sleeves + 2x 0.3 mm nylon washers
+    # (12.6 mm total); Lepton faces the back wall. Its +Z face carries jumpers J5-J9 (up to 9.2 mm
+    # tall, Z 7.4..16.6) and the right-angle 2x10 male header (Harwin M20-9951045, insulator recessed
+    # under the breakout edge as on V3) which mates with Sullins PPPC102LJBN-RC into J2.
+    z_bo_top = pcb_back - p.lepton_sleeve_len - p.lepton_shim_t
+    z_bo_bot = z_bo_top - p.breakout_t
+    bx0, bx1, by0, by1 = p.breakout_x0, p.breakout_x1, p.breakout_y0, p.breakout_y1
+    m["breakout_pcb"] = box(bx0, bx1, by0, by1, z_bo_bot, z_bo_top)
+    # Jumpers J5-J9 and SMD parts stay inside the 4 mounting-hole band (X 30..55.5, Y 34..58)
+    m["breakout_jumpers"] = box(bx0 + 2.0, bx1 - 2.0, by0 + 2.0, by1 - 3.0, z_bo_top, z_bo_top + p.breakout_jumper_h)
+    # Sullins PPPC102LJBN-RC (Dwg 10494): 25.88 x 8.50 x 5.08 mm body. With tails aligned on J2
+    # (Y 23.54 / 21.00, 1.60 / 4.14 mm behind the rear face), its rear sits at Y=25.14 (+0.28 mm clear
+    # of J2 housing at Y=24.86) and its front tucks 1.64 mm under the breakout edge against Harwin's
+    # recessed insulator (Y=33.64, matching V3 hardware photos 27.jpg/28.jpg).
+    adapter_back_y = 23.54 + 1.60
+    m["lepton_adapter"] = box(29.94, 55.82, adapter_back_y, adapter_back_y + 8.50, z_bo_top, z_bo_top + 5.08)
+    # Even-row horizontal leg bends (0.40 mm thick, centered at z_bo_top + 3.81) crossing over J2's mouth
+    m["lepton_adapter_even_bends"] = box(
+        31.10, 54.56, 23.34, adapter_back_y, z_bo_top + 3.81 - 0.20, z_bo_top + 3.81 + 0.20
+    )
     m["lepton_socketed"] = box(
         p.lepton_x - p.lepton_body_w / 2.0, p.lepton_x + p.lepton_body_w / 2.0,
         p.lepton_y - p.lepton_body_l / 2.0, p.lepton_y + p.lepton_body_l / 2.0,
         z_bo_bot - p.lepton_socketed_h, z_bo_bot,
     )
-    for i, (hx, hy) in enumerate(p.lepton_carrier_holes):
+    for i, (hx, hy) in enumerate(p.lepton_breakout_holes):
         m[f"lepton_sleeve_{i}"] = cyl(hx, hy, z_bo_top, pcb_back, 2.0)
+        m[f"lepton_shim_{i}"] = cyl(hx, hy, pcb_back - p.lepton_shim_t, pcb_back, 2.5)
         m[f"lepton_washer_{i}"] = cyl(hx, hy, pcb_top, pcb_top + 0.3, 2.5)
         m[f"lepton_head_{i}"] = cyl(hx, hy, pcb_top + 0.3, pcb_top + 0.3 + 1.3, 1.9)
-        m[f"lepton_nut_{i}"] = hex_prism(hx, hy, z_bo_bot - 1.6, z_bo_bot, 4.0)
-        m[f"lepton_screw_tip_{i}"] = cyl(hx, hy, pcb_top + 0.3 - 18.0, z_bo_bot - 1.6, 1.0)
+        m[f"lepton_nut_{i}"] = hex_prism(hx, hy, z_bo_bot - 1.2, z_bo_bot, 4.0)
+        m[f"lepton_screw_tip_{i}"] = cyl(hx, hy, pcb_top + 0.3 - 18.0, z_bo_bot - 1.2, 1.0)
     # HC-PM254-8.5H-2x10PZ: body = KiCad courtyard (29.69..56.07 x 19.52..25.11) less its 0.25 mm margin
     m["J2_socket"] = box(29.94, 55.82, 19.77, 24.86, pcb_back - 8.5, pcb_back)
     # Display: J1 socket + display header, PCB, module (max height), back-side parts

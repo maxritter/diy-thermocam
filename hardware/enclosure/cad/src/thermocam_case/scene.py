@@ -79,13 +79,10 @@ def export_pcba_glb(pcb_path: Path, out_path: Path) -> Path:
     return out_path
 
 
-def export_scene(out_dir: Path, pcb_path: Path, screen_image: Path, p: EnclosureParams = V4_PARAMS,
-                 carrier_pcb_path: Path | None = None) -> Path:
+def export_scene(out_dir: Path, pcb_path: Path, screen_image: Path, p: EnclosureParams = V4_PARAMS) -> Path:
     """Write `<name>.glb` per part plus `manifest.json`; returns the manifest path.
 
-    The main board and, when `carrier_pcb_path` exists, the Lepton carrier come from KiCad. Both
-    boards share KiCad's coordinates, so each only moves along Z to its front (F.Cu) face."""
-    carrier_from_kicad = carrier_pcb_path is not None and carrier_pcb_path.exists()
+    The main board comes from KiCad and only moves along Z to its front (F.Cu) face."""
     out_dir.mkdir(parents=True, exist_ok=True)
     enc = build_printable_enclosure(p)
     laser = build_laser_enclosure(p)
@@ -168,7 +165,7 @@ def export_scene(out_dir: Path, pcb_path: Path, screen_image: Path, p: Enclosure
         add(f"sheet_part_{i}", _solid_of(extrude(face, amount=p.laser_t)), "acrylic", ["laser_sheet"])
 
     # Plug-in modules (kit-only extras such as the loose battery lead stay out of the assemblies)
-    for prop in build_render_props(p, carrier_from_kicad):
+    for prop in build_render_props(p):
         groups = ["lipo_lead"] if prop.kit_only else _module_groups(prop.name)
         add(prop.name, prop.solid, prop.material, groups, prop.decal, prop.view)
 
@@ -179,14 +176,6 @@ def export_scene(out_dir: Path, pcb_path: Path, screen_image: Path, p: Enclosure
         "offset_mm": [0.0, 0.0, pcb_top],
         "center_mm": [(e["ox0"] + e["ox1"]) / 2.0, (e["oy0"] + e["oy1"]) / 2.0, pcb_top],
     }]
-    if carrier_pcb_path is not None and carrier_from_kicad:
-        carrier_top = p.pcb_z_back - p.lepton_sleeve_len
-        boards.append({
-            "name": "lepton_carrier", "groups": _module_groups("lepton_carrier"),
-            "file": export_pcba_glb(carrier_pcb_path, out_dir / "lepton_carrier.glb").name,
-            "offset_mm": [0.0, 0.0, carrier_top],
-            "center_mm": [(p.carrier_x0 + p.carrier_x1) / 2.0, (p.carrier_y0 + p.carrier_y1) / 2.0, carrier_top],
-        })
     bat_top = p.battery.z_start + p.battery.thickness_z
     fbb = enc.battery_floor.bounding_box()
     floor_corners = [(x, y) for x in (fbb.min.X + 2.0, fbb.max.X - 2.0) for y in (fbb.min.Y + 2.0, fbb.max.Y - 2.0)]
@@ -212,7 +201,7 @@ def export_scene(out_dir: Path, pcb_path: Path, screen_image: Path, p: Enclosure
             "laser_front": [[x, y, p.internal_depth] for x, y in holes],
             "laser_back": [[x, y, p.standoff_seat_z] for x, y in holes],
             "teensy": [[sx, sy, 11.5] for sx in (59.28, 74.52) for sy in (1.42, 59.84)],
-            "lepton_module": [[x, y, pcb_top - p.pcb_t - p.lepton_sleeve_len] for x, y in p.lepton_carrier_holes],
+            "lepton_module": [[x, y, pcb_top - p.pcb_t - p.lepton_sleeve_len - p.lepton_shim_t] for x, y in p.lepton_breakout_holes],
         },
     }
     manifest_path = out_dir / "manifest.json"
@@ -226,7 +215,9 @@ def _solid_of(shape: object) -> Solid:
 
 def _module_groups(name: str) -> list[str]:
     if name.startswith("lepton_"):
-        kind = name.split("_")[1]  # spacer / washer / screw / nut / carrier / header / socket / ...
+        kind = name.split("_")[1]  # spacer / shim / washer / screw / nut / header / adapter / ...
+        if kind == "shim":
+            return ["lepton_spacers", "lepton_fasteners", "lepton", "modules"]
         if kind in ("spacer", "washer", "screw", "nut"):
             return [f"lepton_{kind}s", "lepton_fasteners", "lepton", "modules"]
         return ["lepton_module", "lepton", "modules"]

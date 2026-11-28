@@ -167,7 +167,7 @@ SHELL_STEPS: list[Step] = [
           offsets={"lepton_washers": 7, "lepton_screws": 16}, highlight=["lepton_washers", "lepton_screws"],
           elevation=40),
     _step("assembly-3d-02-lepton.png", 2, ["pcba", "lepton"],
-          [("sleeve12", 4, "Sleeve 12 mm"), ("lepton", 1, "Lepton + carrier"), ("m2nut", 4, "M2 nut")],
+          [("sleeve12", 4, "Sleeve 12 mm"), ("lepton", 1, "Lepton + breakout"), ("m2nut", 4, "M2 nut")],
           pose="flat_flipped", offsets={"lepton_spacers": -10, "lepton_module": -22, "lepton_nuts": -32},
           highlight=["lepton_spacers", "lepton_module", "lepton_nuts"], elevation=36),
     _step("assembly-3d-03-teensy.png", 3, ["pcba", "lepton", "teensy"], [("teensy", 1, "Teensy 4.1")],
@@ -447,7 +447,7 @@ def load_scene(manifest_path: Path) -> tuple[dict[str, Part], dict[str, object]]
                                    Vector(spec["center_mm"]))
         if spec["material"] == "screen" or spec.get("texture"):
             _planar_uv(meshes)
-    for board in manifest["boards"]:  # Main board and Lepton carrier, exported from KiCad
+    for board in manifest["boards"]:  # Main board, exported from KiCad
         name = board["name"]
         root, meshes = _import_glb(base / board["file"], name)
         for o in meshes:  # KiCad materials: keep colours, tune finish

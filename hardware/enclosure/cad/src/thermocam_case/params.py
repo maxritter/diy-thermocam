@@ -110,33 +110,36 @@ class EnclosureParams:
     display_win_y_max: float = 58.75
     display_opening_margin: float = 0.50  # Window = active area + 0.5 mm all round (module placement play)
 
-    # --- FLIR Lepton 2.5 / 3.5 on the Lepton carrier board ---
-    # Carrier mounting holes = main-board holes H5..H8 (M2 screws, 12 mm nylon sleeves)
-    lepton_carrier_holes: tuple[tuple[float, float], ...] = (
+    # --- FLIR Lepton 2.5 / 3.5 on FLIR Lepton Breakout Board V2.0 (250-0577-00) ---
+    # Breakout mounting holes = main-board holes H5..H8 (M2 screws, 12 mm nylon sleeves)
+    lepton_breakout_holes: tuple[tuple[float, float], ...] = (
         (30.00, 43.00),
         (55.50, 43.00),
         (55.50, 59.00),
         (30.00, 59.00),
     )
-    # Lepton socket centre = optical axis, kept from the FLIR Breakout V2.0 (and the V3 back-plate
-    # window) so the back walls and their field-of-view openings stay where they are
+    # Lepton socket centre = optical axis: FLIR Breakout V2.0 drawing (U1 16.5 mm from the hole-side
+    # edge, 10.0 mm from the far edge) and the V3 back-plate window both put it at (44.45, 51.00)
     lepton_x: float = 44.45
     lepton_y: float = 51.00
-    lepton_pupil_z: float = 2.20
+    lepton_pupil_z: float = 1.30
     lepton_pupil_clear_d: float = 3.20
     lepton_dfov_deg: float = 71.0      # Lepton 3.5
     lepton_31r_dfov_deg: float = 119.0  # Lepton 3.1R wide-angle (95 deg HFOV)
-    # 12 mm sleeves + 1.6 mm carrier + 7.14 mm Lepton in its Molex socket = shutter face at Z=-0.74:
-    # the Lepton pokes 0.74 mm into the back wall, so the opening there must swallow its body
+    # 12 mm sleeves + 3x 0.3 mm nylon washers (12.9 mm stack) + 1.6 mm breakout + 7.14 mm Lepton =
+    # shutter face at Z=-1.64: sits safely inside the back wall aperture while keeping the Sullins
+    # PPPC102LJBN-RC even-row horizontal bends (Z 10.71..11.11) clear of J2 even at Hong Cheng's
+    # 8.65 mm worst-case socket height (Z=11.35, +0.24 mm margin).
     lepton_sleeve_len: float = 12.00
-    carrier_t: float = 1.60
-    # Carrier envelope agreed with the PCB design (outline and per-side part heights); its straight
-    # 2x10 header plugs into J2 from below
-    carrier_x0: float = 28.00
-    carrier_x1: float = 57.20          # 0.8 mm short of the Teensy PCB edge (X=58.01) at the same height
-    carrier_y0: float = 14.00
-    carrier_y1: float = 61.00
-    carrier_parts_h: float = 3.00      # Per side, outside the Lepton socket
+    lepton_shim_t: float = 0.90         # 3x 0.3 mm M2 nylon washers (003.03.010) on each sleeve
+    breakout_t: float = 1.60
+    # FLIR 250-0577-00 datasheet: 29.5 x 29.0 mm PCB, 15.0 mm total incl. Molex socket (4.2 mm) and
+    # jumpers J5-J9 on the +Z side -> 15.0 - 4.2 - 1.6 = 9.2 mm max component height toward the main board
+    breakout_x0: float = 28.00
+    breakout_x1: float = 57.50          # 0.51 mm clear of the Teensy PCB edge (X=58.01) at the same height
+    breakout_y0: float = 32.00
+    breakout_y1: float = 61.00
+    breakout_jumper_h: float = 9.20
     lepton_socketed_h: float = 7.14
     lepton_body_w: float = 11.80        # With socket (FLIR datasheet: 11.8 x 12.7 x 7.14 mm)
     lepton_body_l: float = 12.70
@@ -184,7 +187,7 @@ class EnclosureParams:
     back_face_led_d: float = 3.00
     guide_tube_od: float = 5.00     # Printed light / pin guide tubes from the back wall toward D2 and SW3
 
-    # --- Tripod mount: the same 1/4"-20 UNC hex nut (7/16" AF x 5.5 mm) in both enclosures ---
+    # --- Tripod mount: the same 1/4"-20 UNC hex nut (7/16" = 11.10 mm AF x 7/32" = 5.56 mm) in both enclosures ---
     # Both sit in the middle of the board (as on V3), so the camera balances on the tripod; the
     # USB-C port moved left instead: its opening ends 15.8 mm from the screw axis, so a plate up to
     # 31.6 mm wide, centred on the screw, leaves the port free
@@ -192,7 +195,7 @@ class EnclosureParams:
     shell_tripod_z: float = 6.80
     shell_tripod_screw_d: float = 6.80
     shell_tripod_hex_af: float = 11.50
-    shell_tripod_nut_h: float = 5.80
+    shell_tripod_nut_h: float = 6.10    # 5.56 mm nut + 0.54 mm clearance (still +0.24 mm at JLC3DP -0.3 mm)
     shell_tripod_floor_t: float = 1.20  # A 4.5 mm tripod screw gets 3.3 mm (2.6 turns) of thread
     shell_tripod_roof_t: float = 3.00
     shell_tripod_boss_w: float = 19.00
