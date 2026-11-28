@@ -37,8 +37,8 @@ const REQUIRED_ASSETS = [
   'images/brand/hero-thermal-banner.png',
   'images/thermal/real-v3-1080p-capture.png',
   'images/v4/pcb-modules.png',
-  'images/v4/pcb-lepton.png',
   'images/v4/fr4-battery.png',
+  'images/parts/s-breakout.jpg',
 ];
 
 const errors = [];
@@ -69,10 +69,21 @@ if (legacyImgCount < 93) {
 
 // Verify the parts list ships its parts in the HTML, before any script runs
 const partlistHtml = readFileSync(join(DIST, 'docs/partlist/index.html'), 'utf8');
-for (const needle of ['FLIR Lepton 3.5', 'Teensy 4.1', 'ER-TFTM032-3', 'Adafruit 258', 'C585422']) {
+for (const needle of ['FLIR Lepton 3.5', '250-0577-00', 'PPPC102LJBN-RC', 'Teensy 4.1', 'ER-TFTM032-3', 'Adafruit 258', 'HNSS 025 20']) {
   if (!partlistHtml.includes(needle)) {
     errors.push(`Missing part in /docs/partlist/: ${needle}`);
   }
+}
+for (const forbidden of ['C585422', 'zollshop.de', 'Lepton carrier']) {
+  if (partlistHtml.includes(forbidden)) {
+    errors.push(`Stale reference "${forbidden}" still in /docs/partlist/`);
+  }
+}
+
+// Verify software download page has current V1/V2 firmware (2.5.0+) and not stale 2.4.9
+const softwareHtml = readFileSync(join(DIST, 'software/index.html'), 'utf8');
+if (!softwareHtml.includes('2.5.0') || softwareHtml.includes('2.4.9')) {
+  errors.push('Expected software page to reference Firmware 2.5.0 (not 2.4.9)');
 }
 
 // Verify Umami, JSON-LD, OG tags, and absence of legacy Stackbit strings

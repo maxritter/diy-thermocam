@@ -5,7 +5,7 @@
 <h1>DIY-Thermocam<br><sub>Build your own thermal camera</sub></h1>
 
 **A thermal camera that knows the temperature of every pixel. Every file to build it is public.**<br>
-Two ready-made boards, a FLIR Lepton and a printed case, put together with screwdrivers. No soldering.
+One factory-assembled board, a FLIR Lepton on its Breakout Board V2.0 and a printed case, put together with screwdrivers. No soldering.
 
 <a href="https://github.com/maxritter/diy-thermocam/releases"><img src="https://img.shields.io/github/v/release/maxritter/diy-thermocam?sort=semver&amp;style=for-the-badge&amp;label=latest&amp;color=e8661a&amp;labelColor=30363d" alt="Latest release"></a>
 <a href="https://github.com/maxritter/diy-thermocam/releases"><img src="https://img.shields.io/github/downloads/maxritter/diy-thermocam/total?style=for-the-badge&amp;color=e8661a&amp;labelColor=30363d" alt="Downloads"></a>
@@ -35,7 +35,7 @@ Two ready-made boards, a FLIR Lepton and a printed case, put together with screw
   <img src="website/public/images/brand/readme-hero-light.webp" alt="The DIY-Thermocam V4 with a live thermal image on its touchscreen, Studio measuring a hot breaker on a computer, and five thermal pictures: a solar panel, a house in winter, a dog, a circuit board and a fox at night." width="840">
 </picture>
 
-<sub>V4 is experimental: its boards and case haven't been tested on a real camera yet. A V3 runs firmware 4.0 and Studio today.<br>The thermal pictures are example scenes, rendered the way Studio exports them.</sub>
+<sub>V4 is experimental: its board and case haven't been tested on a real camera yet. A V3 runs firmware 4.0 and Studio today.<br>The thermal pictures are example scenes, rendered the way Studio exports them.</sub>
 
 </div>
 
@@ -50,16 +50,16 @@ Two ready-made boards, a FLIR Lepton and a printed case, put together with screw
 
 | Sensor | Range | Battery | Parts |
 | --- | --- | --- | --- |
-| FLIR Lepton 3.5 or 3.1R, 160 × 120 pixels | −10 to +450 °C, under 50 mK | 2.5–3.5 hours on the 1200 mAh LiPo, up to 6 with a 2000 mAh cell | About $293, or $121 without the sensor |
+| FLIR Lepton 3.5 or 3.1R, 160 × 120 pixels | −10 to +450 °C, under 50 mK | 2.5–3.5 hours on the 1200 mAh LiPo, up to 6 with a 2000 mAh cell | About $356, or $184 without the sensor |
 
 ## Build one
 
 | 1. Order the parts | 2. Put it together | 3. Install Studio |
 | :---: | :---: | :---: |
-| <img src="website/public/images/v4/kit.jpg" alt="All V4 parts laid out: the main board, the Lepton carrier, the Teensy, the display, the battery, the printed shell and its screws" width="260"> | <img src="website/public/images/v4/steps/shell-11.jpg" alt="Build step 11: the display goes onto the board" width="260"> | <img src="website/public/images/studio/studio-live.png" alt="Studio's live view of the camera" width="260"> |
+| <img src="website/public/images/v4/kit.jpg" alt="All V4 parts laid out: the main board, the Lepton Breakout Board V2.0, the Teensy, the display, the battery, the printed shell and its screws" width="260"> | <img src="website/public/images/v4/steps/shell-11.jpg" alt="Build step 11: the display goes onto the board" width="260"> | <img src="website/public/images/studio/studio-live.png" alt="Studio's live view of the camera" width="260"> |
 | The [parts list](https://www.diy-thermocam.net/docs/partlist/) finds shops for your country and adds up the prices. | 15 steps with two screwdrivers and two nut drivers: the [build guide](docs/building-instructions.md). | Studio also installs the firmware: **Camera › Update firmware…** |
 
-Firmware 4.0.0 runs on V3 and V4 cameras (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) use [firmware 2.4.9](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.9). On Linux, [allow USB access](docs/manual.md#linux-usb-permissions) first.
+Firmware 4.0.0 runs on V3 and V4 cameras (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) use [firmware 2.5.0](https://github.com/maxritter/diy-thermocam/releases/tag/2.5.0). On Linux, [allow USB access](docs/manual.md#linux-usb-permissions) first.
 
 ## Reference
 

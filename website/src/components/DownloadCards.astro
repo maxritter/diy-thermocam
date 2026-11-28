@@ -1,8 +1,11 @@
 ---
 /* The download page's two downloads, each with a picture of what it is: Studio on the computer, the firmware on
    the camera. The home page keeps the compact DownloadList. */
+import { getFirmwareReleases } from '../lib/releases';
 import { DOWNLOADS, SITE } from '../lib/site';
 import Icon from './Icon.astro';
+
+const rel = await getFirmwareReleases();
 ---
 
 <div class="cards">
@@ -35,8 +38,8 @@ import Icon from './Icon.astro';
       <img src="/images/firmware/live-hud.png" alt="The camera's screen: a live thermal image of a board with the hottest and coldest spot, the centre reading and the scale" width="640" height="480" loading="lazy" decoding="async" />
     </figure>
     <div class="body">
-      <h3>Firmware 4.0.0</h3>
-      <p>4.0.0 is for V3 and V4 cameras (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) use 2.4.9.</p>
+      <h3>Firmware <span data-fw-latest-ver>{rel.latest.version}</span></h3>
+      <p><span data-fw-latest-ver>{rel.latest.version}</span> is for V3 and V4 cameras (Teensy 4.1). V1 and V2 cameras (Teensy 3.2 / 3.6) use <span data-fw-legacy-ver>{rel.legacy.version}</span>.</p>
       <ol class="steps">
         <li><span>Download <b>firmware.hex</b></span></li>
         <li><span>Connect the camera over USB-C</span></li>
@@ -45,12 +48,12 @@ import Icon from './Icon.astro';
       <div class="rows">
         <a class="row" href={SITE.firmwareFile}>
           <Icon name="chip" class="os" />
-          <span><b>Firmware 4.0.0 (firmware.hex)</b><small>V3 and V4 · Teensy 4.1</small></span>
+          <span><b>Firmware <span data-fw-latest-ver>{rel.latest.version}</span> (firmware.hex)</b><small>V3 and V4 · Teensy 4.1</small></span>
           <span class="go"><Icon name="download" />Download</span>
         </a>
-        <a class="row" href={`${SITE.releasesUrl}/tag/2.4.9`}>
+        <a class="row" data-fw-legacy-link href={rel.legacy.url}>
           <Icon name="chip" class="os" />
-          <span><b>Firmware 2.4.9</b><small>V1 and V2 · Teensy 3.2 and 3.6</small></span>
+          <span><b>Firmware <span data-fw-legacy-ver>{rel.legacy.version}</span></b><small>V1 and V2 · Teensy 3.2 and 3.6</small></span>
           <span class="go"><Icon name="arrowUpRight" />Open</span>
         </a>
         <a class="row" href="/docs/firmware/">

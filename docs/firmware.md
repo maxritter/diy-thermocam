@@ -2,7 +2,7 @@
 
 Firmware 4.0.0 is open-source C++17 (GPL v3.0) for DIY-Thermocam V3 and V4 (Teensy 4.1). The source is in [`firmware/`](https://github.com/maxritter/diy-thermocam/tree/master/firmware).
 
-> **V1 or V2 camera (Teensy 3.2 / 3.6)?** Use [firmware 2.4.9](https://github.com/maxritter/diy-thermocam/releases/tag/2.4.9) (source on branch [`v2.4.x`](https://github.com/maxritter/diy-thermocam/tree/v2.4.x/Firmware_V2)). `.DAT` files work across all hardware versions.
+> **V1 or V2 camera (Teensy 3.2 / 3.6)?** Use [firmware 2.5.0](https://github.com/maxritter/diy-thermocam/releases/tag/2.5.0) (source on branch [`v2.4.x`](https://github.com/maxritter/diy-thermocam/tree/v2.4.x/Firmware_V2)). `.DAT` files work across all hardware versions.
 
 | Live view | Main menu | Gallery | System status |
 | --- | --- | --- | --- |

@@ -15,6 +15,7 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
       <legend>I already have</legend>
       <label class="opt"><input type="checkbox" name="own" value="teensy" /><span>Teensy 4.1</span></label>
       <label class="opt"><input type="checkbox" name="own" value="lepton" /><span>FLIR Lepton</span></label>
+      <label class="opt"><input type="checkbox" name="own" value="breakout" /><span>FLIR Lepton Breakout V2.0</span></label>
       <label class="opt"><input type="checkbox" name="own" value="display" /><span>3.2" display ER-TFTM032-3</span></label>
       <label class="opt"><input type="checkbox" name="own" value="sd" /><span>microSD card</span></label>
       <label class="opt"><input type="checkbox" name="own" value="cable" /><span>USB-C cable</span></label>
@@ -31,7 +32,7 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
     </fieldset>
     <fieldset>
       <legend>Board made by</legend>
-      <label class="opt"><input type="radio" name="fab" value="jlc" checked /><span>JLCPCB<small>Recommended. Pre-order one part, the Lepton socket</small></span></label>
+      <label class="opt"><input type="radio" name="fab" value="jlc" checked /><span>JLCPCB<small>Recommended. Every part in stock</small></span></label>
       <label class="opt"><input type="radio" name="fab" value="seeed" /><span>Seeed Fusion</span></label>
       <label class="opt"><input type="radio" name="fab" value="pcbway" /><span>PCBWay</span></label>
     </fieldset>
@@ -76,7 +77,7 @@ const lasers = MAKERS.filter((m) => m.kind === 'laser');
     <div class="status" id="copy-status" role="status"></div>
     <div id="orders">
       <ul class="ssr">
-        <li>V4 main board and Lepton carrier, assembled by JLCPCB, Seeed Fusion or PCBWay. At JLCPCB: {FAB.jlc.carrierWarn}</li>
+        <li>V4 main board, assembled by JLCPCB, Seeed Fusion or PCBWay ({FAB.jlc.note})</li>
         <li>Battery floor (0.6 mm) and lid (0.4 mm): bare FR4 boards from any PCB maker</li>
         {PARTS.map((p) => (
           <li>{p.need ? `${p.need}× ` : ''}{p.name}: {p.d}</li>

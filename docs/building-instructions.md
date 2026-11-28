@@ -1,6 +1,6 @@
 # Build guide
 
-Turn the two assembled boards, four modules and a printed shell into a working camera. In each picture, the parts you add are orange.
+Turn the assembled board, four modules and a printed shell into a working camera. In each picture, the parts you add are orange.
 
 > **V4 is experimental.** Its board and shell are not yet tested on a real camera. A V3 can run the new firmware and Studio today.
 
@@ -8,15 +8,16 @@ Turn the two assembled boards, four modules and a printed shell into a working c
 
 | Part | Where |
 | --- | --- |
-| V4 main board and Lepton carrier, both assembled *Gerbers, BOM and placement files in hardware/pcb/fab* | JLCPCB, Seeed Fusion or PCBWay |
+| V4 main board, assembled *Gerbers, BOM and placement files in hardware/pcb/fab* | JLCPCB, Seeed Fusion or PCBWay |
 | Shell, 8 printed parts *Or a laser-cut 3 mm acrylic case plus 7 small printed parts* | Your printer, JLC3DP, PCBWay, Seeed Fusion or Craftcloud; acrylic from Formulor, Snijlab, Ponoko, SendCutSend or Elecrow |
 | Battery floor and lid *2 bare FR4 boards, 0.6 and 0.4 mm; Gerbers in hardware/enclosure/exports/fr4* | JLCPCB or any PCB maker |
 | Teensy 4.1 with headers | DigiKey |
 | FLIR Lepton 3.5 *500-0771-01, radiometric, 57°. Or the 3.1R for 95°* | DigiKey or Mouser |
+| FLIR Lepton Breakout Board V2.0 + right-angle 2×10 female header *Teledyne FLIR 250-0577-00 (Rev R200) and Sullins PPPC102LJBN-RC (3.15 mm tails)* | DigiKey (or Mouser for the breakout) |
 | 3.2" touch display *ER-TFTM032-3: 4-wire SPI, 5 V, resistive touch, pin header* | BuyDisplay |
-| LiPo, Adafruit 258 *1200 mAh, protected, 5 × 34 × 62 mm, JST-PH plug. More runtime: a 505060 2000 mAh cell, at most 5.0 mm thick; confirm its JST-PH plug and polarity first* | Adafruit or DigiKey; the 505060 from ampul.eu |
+| LiPo, Adafruit 258 *1200 mAh, protected, 5 × 34 × 62 mm, JST-PH 2.0 mm plug. Or a 505060 2000 mAh cell (Amazon / ampul.eu): max 62 × 50.5 mm, ≤ 5.0 mm thick, built-in protection, ≥ 500 mA charge rating, JST-PH 2.0 mm plug, ≥ 50 mm lead, check `+` on J4 pin 1* | Adafruit, ampul.eu or Amazon |
 | Standoffs, screws and nuts *8 metal M2.5 standoffs, 8 countersunk M2.5 screws, nylon washers, the Lepton mount* | ettinger.de |
-| USB-C cable, microSD card, 1/4"-20 hex nut *Any 16–32 GB Class 10 card; the nut from a hardware store* | DigiKey, any shop |
+| 1/4"-20 hex nut, USB-C cable, microSD card *Stainless 1/4"-20 nut (HNSS 025 20) from DigiKey; any 16–32 GB Class 10 card* | DigiKey, any shop |
 | Tools and threadlocker *PH1 Phillips screwdriver, 2 mm flat screwdriver, 4 mm nut driver, 5 mm nut driver no more than 7.5 mm across, fine tweezers; medium-strength removable threadlocker such as Loctite 243* | Any hardware store |
 
 [Open the parts list](https://www.diy-thermocam.net/docs/partlist/) for prices, links and the files each fab needs.
@@ -31,27 +32,16 @@ Turn the two assembled boards, four modules and a printed shell into a working c
 
 ## 2. Lepton
 
-- Turn the board over. Slide a 12 mm sleeve onto each screw.
-- Snap the Lepton into the carrier's socket.
-- Lower the carrier onto the screws, header pins into J2.
-- Press beside the header, never on the Lepton.
+- Turn the board over. Slide three 0.3 mm nylon M2 washers (`003.03.010`) and one 12 mm sleeve onto each screw (= 12.9 mm spacing, so the right-angle header clears `J2` across tolerances).
+- Check the FLIR Breakout Board V2.0 label: it should be **Rev R200** (older Rev R120 boards had D1 reversed and cannot power up from `J2` pin 2).
+- Snap the Lepton into the FLIR Breakout Board V2.0.
+- Push the right-angle 2 × 10 female header (`PPPC102LJBN-RC`) firmly onto the breakout's header, legs pointing toward the main board (same side as the jumpers).
+- Lower the breakout onto the screws, guiding the adapter's legs into `J2`. Press beside the header, never on the Lepton.
 - Threadlocker on each screw tip, kept off the Lepton.
-- Tighten the four M2 nuts with the 4 mm nut driver until snug.
-- Fit the carrier before the Teensy: the nut driver needs that space.
+- Tighten the four 1.2 mm M2 thin nuts (`002.09.012`) with the 4 mm nut driver until snug.
+- Fit the breakout before the Teensy: the nut driver needs that space.
 
-<details>
-<summary>Have a multimeter? Check the supplies first</summary>
-
-Before the Lepton goes in the first time:
-
-1. Fit the carrier alone, nuts finger-tight.
-2. Connect USB-C and switch on.
-3. Measure across the capacitors marked 1.2V, 2.8V and 3.0V ([PCB README](../hardware/pcb/README.md#first-power-up), step 6).
-4. Switch off, remove the carrier, continue above.
-
-</details>
-
-![Line drawing: the sleeves, the Lepton on its carrier and four M2 nuts in orange](../website/public/images/v4/steps/shell-02.jpg)
+![Line drawing: the sleeves, the Lepton on its Breakout Board V2.0 with right-angle header and four M2 nuts in orange](../website/public/images/v4/steps/shell-02.jpg)
 
 ## 3. Teensy
 
@@ -144,7 +134,7 @@ Before the Lepton goes in the first time:
 
 ## 15. Firmware
 
-- Connect USB-C and switch the camera on.
+- Connect USB-C to a port or powered hub rated **1.5 A or more** (the camera's USB input limit is 1.3 A nominal, up to 1.45 A worst case; a 500 mA hub port can cut out) and switch the camera on.
 - In [Studio](https://www.diy-thermocam.net/software/#download), open **Camera › Update firmware…**.
 - Choose the file from the [latest release](https://github.com/maxritter/diy-thermocam/releases/latest). Studio restarts the camera.
 

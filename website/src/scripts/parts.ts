@@ -118,14 +118,10 @@ if (form && orders && totalEl && plusEl && statusEl) {
       groups[shop].rows.push(entry);
     };
 
-    /* Board fab: two assembled boards (main board and Lepton carrier) and the bare FR4 battery
-       boards, each with its files and upload step. */
+    /* Board fab: assembled main board and the bare FR4 battery boards, each with its files and upload step. */
     const quote = '<span class="p">Quote<small>at checkout</small></span>';
     add(fab.name, {
       html: `<div class="prow">${thumb({ img: '/images/v4/pcb-modules.png', fit: true })}<span><b>V4 main board, assembled</b><span class="d">${esc(fab.note)} ${esc(fab.min)}</span><span class="links"><a href="${fab.url}">${esc(fab.name)}</a></span></span><span></span>${quote}</div>`,
-    });
-    add(fab.name, {
-      html: `<div class="prow">${thumb({ img: '/images/v4/pcb-lepton.png', fit: true })}<span><b>Lepton carrier, assembled</b><span class="d">A second, small board in the same order. The Lepton snaps into its socket, and its header plugs into the main board.</span>${fab.carrierWarn ? `<span class="warn">${esc(fab.carrierWarn)}</span>` : ''}</span><span></span>${quote}</div>`,
     });
     add(fab.name, {
       html: `<div class="prow">${thumb({ img: '/images/v4/fr4-battery.png', fit: true })}<span><b>Battery floor and lid, bare FR4</b><span class="d">A 0.6 mm floor and a 0.4 mm lid that hold the battery, for both cases. Any PCB maker; at JLCPCB five of each cost about $2.</span></span><span></span>${quote}</div>`,
@@ -141,12 +137,15 @@ if (form && orders && totalEl && plusEl && statusEl) {
     const FR4 = 'hardware/enclosure/exports/fr4/';
     const jlc = st.fab === 'jlc';
     const std = jlc ? ', Standard' : '';
-    /* JLCPCB's Gerbers hold each board in a break-off frame (two-sided assembly needs 70 × 70 mm). */
+    /* JLCPCB's Gerber holds the board in a break-off frame (two-sided assembly needs 70 × 70 mm). */
     const panel = jlc
-      ? ['Panel by Customer, 1 × 1, no edge rails', 'Confirm production file: on']
+      ? [
+          'Panel by Customer, 1 × 1, no edge rails',
+          'Tooling holes: Added by Customer',
+          'Confirm production file: on',
+        ]
       : [];
-    const SEAT_REMARK = 'Seat J1, J5, J6 and J101 flush and square before soldering.';
-    const Y101_REMARK = 'Y101 pin 1 goes next to the silkscreen dot.';
+    const SEAT_REMARK = 'Seat J1, J2, J5 and J6 flush and square before soldering.';
     const list = (items: string[]) =>
       `<ul class="settings">${items.map((s) => `<li>${s}</li>`).join('')}</ul>`;
     groups[fab.name].extra =
@@ -156,17 +155,8 @@ if (form && orders && totalEl && plusEl && statusEl) {
         ...panel,
         ...(jlc ? [`Remark: <q>${esc(SEAT_REMARK)}</q>`] : []),
         `Check pin 1 against the <a href="${GH}hardware/pcb/fab/${F}assembly-bottom.pdf">assembly drawing</a>`,
-        ...(jlc ? ['Snap boards out by bending the frame, not the board'] : []),
+        ...(jlc ? ['Snap the board out by bending the frame, not the board'] : []),
       ])}` +
-      `<b class="h sub">Lepton carrier: files to upload</b>${boardFiles(`${F}lepton-`, `${F}lepton-`)}${list(
-        [
-          '2 layers, 1.6 mm FR-4, lead-free HASL or ENIG',
-          `Assembly: both sides${std}`,
-          ...panel,
-          ...(jlc ? [`Remark: <q>${esc(SEAT_REMARK)} ${esc(Y101_REMARK)}</q>`] : []),
-          `Check pin 1 against the <a href="${GH}hardware/pcb/fab/${F}lepton-assembly-bottom.pdf">assembly drawing</a>`,
-        ],
-      )}` +
       `<b class="h sub">Battery floor and lid: files to upload</b>${fileRow(`${FR4}${F}battery_floor-gerbers.zip`, 'Gerber step, 0.6 mm thick')}${fileRow(`${FR4}${F}battery_lid-gerbers.zip`, 'Gerber step, 0.4 mm thick')}${list(
         ['Bare FR-4, no copper, black solder mask'],
       )}</div>`;

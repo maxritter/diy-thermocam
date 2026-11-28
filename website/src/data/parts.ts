@@ -1,5 +1,5 @@
 /* Shops and prices for the /docs/partlist/ configurator.
-   Every price was read on the shop's own page on 26 November 2026, logged out and without VAT:
+   Prices were verified on each shop's own page on 28 November 2026, logged out and without VAT:
    `us` is the US store's price in $, `eu` the European store's price in €.
    `euNo` means the European store doesn't sell the part to private buyers.
    Mouser's short product links break on eu.mouser.com, so Mouser links use its search, which lands on the
@@ -122,6 +122,39 @@ export const PARTS: Part[] = [
     ],
   },
   {
+    id: 'breakout',
+    own: 'breakout',
+    name: 'FLIR Lepton Breakout Board V2.0',
+    d: 'Teledyne FLIR 250-0577-00 (Rev R200; check the label on arrival). Do not substitute a PureThermal USB board.',
+    img: '/images/parts/s-breakout.jpg',
+    fit: true,
+    shops: [
+      {
+        s: 'DigiKey',
+        dist: 'digikey',
+        us: 66,
+        eu: 57.95,
+        u: digikey('flir-lepton/250-0577-00/10385179'),
+      },
+      { s: 'Mouser', dist: 'mouser', us: 66, eu: 58.61, u: mouser('250-0577-00') },
+    ],
+  },
+  {
+    id: 'adapter',
+    name: 'Right-angle 2×10 female header',
+    d: 'Sullins PPPC102LJBN-RC (3.15 mm tails). Pushes onto Breakout V2.0; its legs plug into J2. Do not substitute shorter-tail headers.',
+    icon: 'header',
+    shops: [
+      {
+        s: 'DigiKey',
+        dist: 'digikey',
+        us: 1.58,
+        eu: 1.39,
+        u: digikey('sullins-connector-solutions/PPPC102LJBN-RC/776021'),
+      },
+    ],
+  },
+  {
     id: 'display',
     own: 'display',
     name: '3.2" touch display',
@@ -152,6 +185,7 @@ export const PARTS: Part[] = [
         s: 'DigiKey',
         dist: 'digikey',
         us: 9.95,
+        euNo: "DigiKey doesn't ship LiPo cells in Europe",
         u: digikey('adafruit-industries-llc/258/5054544'),
       },
       {
@@ -159,9 +193,22 @@ export const PARTS: Part[] = [
         alt: 'More runtime: 505060, 2000 mAh',
         n: 'LiPo 505060, 2000 mAh',
         d: 'Protected, 5.0 × 50 × 60 mm, at most 5.0 mm thick. About 4–6 hours of use. Fits the cradle without the battery spacers.',
-        warn: 'Confirm a JST-PH plug, 50 mm lead and polarity before you order.',
+        warn: 'Confirm a JST-PH 2.0 mm plug, ≥ 500 mA charge rating, 50 mm lead and polarity before you order.',
         eu: 7.29,
         u: same('https://ampul.eu/en/li-po-batteries/4394-li-pol-battery-2000mah-37v-505060'),
+      },
+      {
+        s: 'Amazon',
+        alt: 'Amazon: AKZYTUE 503759, 1200 mAh',
+        n: 'AKZYTUE 503759, 1200 mAh',
+        d: 'Protected, 4.7 × 37 × 60 mm, 600 mA max charge, 50 mm lead, JST-PH 2.0 mm. Omit the 34 mm spacer bars and hold snug with thin tape.',
+        warn: 'Check that the red (+) wire matches the + mark at J4 before plugging in.',
+        us: 12.99,
+        eu: 15.91,
+        u: {
+          us: 'https://www.amazon.com/AKZYTUE-1200mAh-Battery-Rechargeable-Connector/dp/B08R61MX85',
+          eu: 'https://www.amazon.de/dp/B08R61MX85',
+        },
       },
     ],
   },
@@ -274,7 +321,7 @@ export const PARTS: Part[] = [
     pack: true,
     need: 4,
     name: 'Screw M2 × 18, cheese head, slotted',
-    d: 'Holds the Lepton carrier · 001.14.177',
+    d: 'Holds the Lepton Breakout V2.0 · 001.14.177',
     img: '/images/parts/s-m2x18.jpg',
     shops: [
       {
@@ -287,9 +334,9 @@ export const PARTS: Part[] = [
   {
     id: 'm2washer',
     pack: true,
-    need: 4,
+    need: 16,
     name: 'Washer M2, nylon',
-    d: 'Black, under the M2 screw heads, off the board tracks · 003.03.010',
+    d: 'Black, 0.3 mm: 1 under each M2 screw head + 3 on each 12 mm sleeve · 003.03.010',
     img: '/images/parts/s-washer.jpg',
     shops: [
       {
@@ -318,14 +365,14 @@ export const PARTS: Part[] = [
     id: 'm2nut',
     pack: true,
     need: 4,
-    name: 'Hex nut M2',
-    d: 'Stainless A2 · 002.10.019',
+    name: 'Hex nut M2, thin (1.2 mm)',
+    d: 'Stainless A2, ISO 4035 · 002.09.012',
     img: '/images/parts/s-m2nut.jpg',
     shops: [
       {
         s: 'ettinger.de',
-        eu: 4.35,
-        u: ettinger('sechskantmutter-iso4032-m2-stahl-rostfrei-a2-blank', '002.10.019'),
+        eu: 6.1,
+        u: ettinger('sechskantmutter-iso4035-m2-stahl-rostfrei-a2-blank', '002.09.012'),
       },
     ],
   },
@@ -411,23 +458,21 @@ export const PARTS: Part[] = [
     d: 'Removable, such as Loctite 243. A drop per Lepton screw.',
     icon: 'screw',
     anyIn: ['us', 'eu'],
-    anyD: 'Medium, removable, such as Loctite 243. A drop per Lepton screw.',
+    anyD: 'Medium, removable, such as Loctite 243 (hardware store or Amazon; DigiKey/Mouser Europe do not stock single bottles). A drop per Lepton screw.',
     shops: [],
   },
   {
     id: 'nut1420',
     name: 'Hex nut 1/4"-20 UNC',
-    d: 'Zinc-plated steel, 7/16" across flats, 5.5 mm tall. Sold singly.',
+    d: 'Stainless steel, 7/16" (11.1 mm) across flats, 5.56 mm tall · BFirst HNSS 025 20 (min. order 10)',
     icon: 'nut',
-    anyIn: ['us'],
-    anyD: 'The standard tripod nut, 7/16" across flats. Every hardware store has it.',
     shops: [
       {
-        s: 'zollshop.de',
-        eu: 0.18,
-        u: same(
-          'https://www.zollshop.de/Zollmuttern-Scheiben-Federringe/Zollmuttern-UNC-UNF/Muttern-14-Zoll/14-Zoll-UNC/1061/1/4-Zoll-20-UNC-Sechskantmutter-Stahl-verzinkt/',
-        ),
+        s: 'DigiKey',
+        dist: 'digikey',
+        us: 1.16,
+        eu: 1.03,
+        u: digikey('bfirst-industrial/HNSS-025-20/2619052'),
       },
     ],
   },
@@ -439,10 +484,8 @@ export interface Fab {
   dir: string;
   min: string;
   note: string;
-  /** The Gerber zip's name after `diy-thermocam-v4.0-` (and `lepton-`); JLCPCB gets panels. */
+  /** The Gerber zip's name after `diy-thermocam-v4.0-`; JLCPCB gets a routed panel. */
   gerbers: string;
-  /** Something to do before ordering the Lepton carrier from this fab. */
-  carrierWarn?: string;
   drawings?: boolean;
   up: [string, string, string];
 }
@@ -454,9 +497,7 @@ export const FAB: Record<'jlc' | 'seeed' | 'pcbway', Fab> = {
     dir: 'hardware/pcb/fab/jlcpcb/',
     gerbers: 'panel-gerbers.zip',
     min: 'Assembly starts at 2 boards.',
-    note: 'Both boards use Standard (two-sided) assembly.',
-    carrierWarn:
-      'Pre-order the Lepton socket J102 (C585422, minimum 9) in the parts manager first.',
+    note: 'Standard (two-sided) assembly. Every part comes from JLCPCB stock.',
     up: ['Gerber step', 'Assembly: BOM', 'Assembly: CPL'],
   },
   seeed: {
@@ -604,7 +645,7 @@ export const MAKERS: Maker[] = [
     name: 'Formulor',
     url: 'https://www.formulor.de/en/',
     short: 'Berlin, ships in Europe',
-    how: 'Acrylic GS black, opaque, 3 mm, sheet format P2 (384 × 384 mm). No minimum order.',
+    how: 'Acrylic GS black, opaque, 3 mm, sheet format P2 (384 × 384 mm). No minimum order. Ask Formulor to confirm the sheet measures 2.8–3.2 mm before cutting (cast 3 mm stock can range 2.3–3.7 mm).',
     where: 'Ships from Germany: €5.90 within Germany, free from €50.',
     file: 'svg',
   },

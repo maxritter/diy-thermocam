@@ -6,7 +6,10 @@ import StudioTabs from '../components/StudioTabs.astro';
 import V4Status from '../components/V4Status.astro';
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import { EXAMPLE_H, EXAMPLE_W, EXAMPLES } from '../data/examples';
+import { getFirmwareReleases } from '../lib/releases';
 import { DOWNLOADS, FILM, SITE } from '../lib/site';
+
+const rel = await getFirmwareReleases();
 
 const views = [
   { id: 'front', label: 'Front', src: '/images/v4/view-front.jpg', h: 1066, alt: 'DIY-Thermocam V4 in its printed shell, the 3.2-inch display showing a live thermal image with spot temperatures' },
@@ -41,7 +44,7 @@ const jsonLd = [
           <div data-reveal><V4Status compact /></div>
           <h1 data-reveal style="--i:1">Build your own <span class="hl">thermal camera</span></h1>
           <p class="lead" data-reveal style="--i:2">
-            A handheld thermal camera with a FLIR Lepton. The boards arrive assembled: plug in four modules
+            A handheld thermal camera with a FLIR Lepton. The board arrives assembled: plug in four modules
             and close the case. No soldering.
           </p>
           <div class="cta" data-reveal style="--i:3">
@@ -58,8 +61,8 @@ const jsonLd = [
             </div>
             <span class="dl-label">Firmware</span>
             <div class="dl-chips">
-              <a class="dl-chip" href={SITE.firmwareUrl}><Icon name="chip" class="chip-ic" /><span>V3 &amp; V4 · 4.0.0</span><Icon name="arrowUpRight" class="chip-ext" /></a>
-              <a class="dl-chip" href={`${SITE.releasesUrl}/tag/2.4.9`}><Icon name="chip" class="chip-ic" /><span>V1 &amp; V2 · 2.4.9</span><Icon name="arrowUpRight" class="chip-ext" /></a>
+              <a class="dl-chip" href={SITE.firmwareUrl}><Icon name="chip" class="chip-ic" /><span>V3 &amp; V4 · <span data-fw-latest-ver>{rel.latest.version}</span></span><Icon name="arrowUpRight" class="chip-ext" /></a>
+              <a class="dl-chip" data-fw-legacy-link href={rel.legacy.url}><Icon name="chip" class="chip-ic" /><span>V1 &amp; V2 · <span data-fw-legacy-ver>{rel.legacy.version}</span></span><Icon name="arrowUpRight" class="chip-ext" /></a>
             </div>
             <span class="dl-label">Parts</span>
             <div class="dl-chips">
@@ -124,14 +127,14 @@ const jsonLd = [
           <li class="step" data-reveal style="--i:0">
             <div class="disc">1</div>
             <h3>Order the parts</h3>
-            <p>Boards from a fab, modules from DigiKey or Mouser.</p>
+            <p>Board from a fab, modules from DigiKey or Mouser.</p>
             <figure class="photo" data-wipe style="--i:1"><img src="/images/v4/exploded.jpg" alt="Exploded render of every part: front shell, display, board with modules, battery, back shell" width="1333" height="1600" loading="lazy" /></figure>
           </li>
           <li class="step" data-reveal style="--i:1">
             <div class="disc">2</div>
             <h3>Plug in the modules</h3>
             <p>Push the Teensy and the Lepton into their sockets.</p>
-            <figure class="line" data-wipe style="--i:2"><img src="/images/v4/steps/shell-02.jpg" alt="Line drawing: the Lepton on its carrier in orange, lowered onto its screws on the board" width="1118" height="1000" loading="lazy" /></figure>
+            <figure class="line" data-wipe style="--i:2"><img src="/images/v4/steps/shell-02.jpg" alt="Line drawing: the Lepton on its Breakout Board V2.0 in orange, lowered onto its screws on the board" width="1118" height="1000" loading="lazy" /></figure>
           </li>
           <li class="step" data-reveal style="--i:2">
             <div class="disc">3</div>

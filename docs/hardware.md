@@ -15,10 +15,7 @@ Board, schematic, BOM and enclosure files are in [`hardware/`](https://github.co
 
 ## Schematic
 
-| Board | Schematic |
-| --- | --- |
-| Main board | [diy-thermocam-v4.0-schematic.pdf](https://github.com/maxritter/diy-thermocam/blob/master/hardware/pcb/fab/diy-thermocam-v4.0-schematic.pdf) |
-| Lepton carrier | [diy-thermocam-v4.0-lepton-schematic.pdf](https://github.com/maxritter/diy-thermocam/blob/master/hardware/pcb/fab/diy-thermocam-v4.0-lepton-schematic.pdf) |
+[diy-thermocam-v4.0-schematic.pdf](https://github.com/maxritter/diy-thermocam/blob/master/hardware/pcb/fab/diy-thermocam-v4.0-schematic.pdf)
 
 ## Teensy 4.1 pin map
 
@@ -45,35 +42,29 @@ Board, schematic, BOM and enclosure files are in [`hardware/`](https://github.co
 
 ## PCB V4.0
 
-Two boards, both fully assembled by the fab. You plug in the Teensy 4.1, Lepton, display and LiPo; no soldering.
+One board, fully assembled by the fab. You plug in the Teensy 4.1, the FLIR Lepton on its Breakout Board V2.0 (via the right-angle 2×10 female header), the display and the LiPo; no soldering.
 
-| | Main board | Lepton carrier |
-| --- | --- | --- |
-| Size | 89.4 × 68.4 mm | 29.2 × 47.0 mm |
-| Carries | USB-C, TI `BQ24074` charger, TI `TPS61022` boost, reverse-polarity protection, `XC6206` RTC supply, SMD switches | Lepton in a Molex socket, its 1.2 V, 2.8 V and 3.0 V supplies and 25 MHz clock; its pin header plugs into `J2` |
+- **Size:** 89.4 × 68.4 mm, 1.6 mm FR-4, 2 layers, 1 oz copper, lead-free HASL or ENIG.
+- **Carries:** USB-C, TI `BQ24074` charger, TI `TPS61022` boost, reverse-polarity protection, `XC6206` RTC supply, SMD switches, spring pins for Teensy USB/VBAT/PROG, and the sockets for the Teensy, Lepton Breakout V2.0 and display.
 
-Both: 1.6 mm FR-4, 2 layers, 1 oz copper, lead-free HASL or ENIG.
-
-### Ordering the assembled boards
+### Ordering the assembled board
 
 1. Check the interactive [bill of materials](/docs/partlist/).
 2. Download your fab's folder from [`hardware/pcb/fab/`](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb/fab): `jlcpcb/`, `seeed/` or `pcbway/`.
-3. Place one assembly order per board at JLCPCB, Seeed Studio Fusion or PCBWay.
-4. Follow the order settings and checks in the [PCB README](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb#order-the-boards).
+3. Place one assembly order at JLCPCB, Seeed Studio Fusion or PCBWay.
+4. Follow the order settings and checks in the [PCB README](https://github.com/maxritter/diy-thermocam/tree/master/hardware/pcb#order-the-board).
 
 At JLCPCB:
 
-- Pre-order the Lepton socket `C585422` (minimum 9) in the parts manager first. It is usually out of stock.
-- Choose *Panel by Customer*.
+- Choose *Panel by Customer* (1×1, no edge rails) and *Tooling holes: Added by Customer*.
+- Every part comes from JLCPCB's own stock.
 
 <details>
 <summary>What each fab folder holds</summary>
 
-| | Main board | Lepton carrier |
-| --- | --- | --- |
-| Gerber zip, BOM, CPL | `diy-thermocam-v4.0-*` | `diy-thermocam-v4.0-lepton-*` |
+- `diy-thermocam-v4.0-panel-gerbers.zip` (JLCPCB) or `diy-thermocam-v4.0-gerbers.zip` (Seeed, PCBWay), plus `diy-thermocam-v4.0-bom.csv` and `diy-thermocam-v4.0-cpl.csv`.
 
-The JLCPCB Gerbers put each board in a break-off frame. JLCPCB assembles both sides only on panels of at least 70 × 70 mm.
+The JLCPCB Gerber puts the board in a 107.4 × 86.4 mm break-off frame. JLCPCB assembles both sides only on panels of at least 70 × 70 mm.
 
 </details>
 

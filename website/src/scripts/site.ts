@@ -1,5 +1,5 @@
 import { ICONS } from '../lib/icons';
-import { paintDownload } from './download';
+import { paintDownload, refreshReleases } from './download';
 
 const root = document.documentElement;
 
@@ -79,6 +79,7 @@ function wireMenu() {
 
 paintToggles();
 paintDownload();
+refreshReleases();
 wireTabs();
 wireMenu();
 for (const b of document.querySelectorAll('[data-theme-toggle]')) {

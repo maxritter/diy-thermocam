@@ -14,12 +14,11 @@ interface Need {
   detail: string;
   img?: string;
   fit?: 'cover' | 'contain';
-  icon?: 'header';
   from: { name: string; href: string }[];
 }
 
 const needs: Need[] = [
-  { name: 'Main board and Lepton carrier', detail: 'Both assembled by the fab', img: '/images/v4/pcb-modules.png', fit: 'contain',
+  { name: 'V4 main board', detail: 'Assembled by the fab, plus bare FR4 battery floor and lid', img: '/images/v4/pcb-modules.png', fit: 'contain',
     from: [{ name: 'JLCPCB', href: 'https://jlcpcb.com/' }, { name: 'Seeed', href: 'https://www.seeedstudio.com/fusion_pcb.html' }, { name: 'PCBWay', href: 'https://www.pcbway.com/pcb-assembly.html' }] },
   { name: 'Shell, printed or laser-cut', detail: 'Printed, or cut from 3 mm acrylic', img: '/images/v4/view-kit.jpg',
     from: MAKERS.filter((m) => !m.own && ['jlc3dp', 'craftcloud', 'formulor', 'sendcutsend'].includes(m.id)).map((m) => ({ name: m.name, href: m.url })) },
@@ -27,14 +26,20 @@ const needs: Need[] = [
     from: [shop('teensy'), shop('teensy', 1)].filter(Boolean) as Need['from'] },
   { name: 'FLIR Lepton 3.5', detail: '160 × 120, 57°; or the 3.1R for 95°', img: '/images/parts/s-lepton35.jpg',
     from: [shop('lepton35'), shop('lepton35', 1)].filter(Boolean) as Need['from'] },
+  { name: 'Lepton Breakout V2.0 + RA header', detail: 'FLIR 250-0577-00 (Rev R200) + Sullins PPPC102LJBN-RC (3.15 mm tails)', img: '/images/parts/s-breakout.jpg', fit: 'contain',
+    from: [
+      { name: 'Breakout (DigiKey)', href: shop('breakout')!.href },
+      { name: 'Breakout (Mouser)', href: shop('breakout', 1)!.href },
+      { name: 'RA header (DigiKey)', href: shop('adapter')!.href },
+    ] },
   { name: '3.2" touch display', detail: 'ER-TFTM032-3, 4-wire SPI, 5 V', img: '/images/parts/s-display.jpg',
     from: [shop('display')].filter(Boolean) as Need['from'] },
   { name: 'LiPo, Adafruit 258, 1200 mAh', detail: 'Protected, 5 × 34 × 62 mm, JST-PH', img: '/images/parts/s-lipo.jpg',
-    from: [shop('lipo'), shop('lipo', 1)].filter(Boolean) as Need['from'] },
-  { name: 'Standoffs, screws and nuts', detail: 'M2.5 standoffs and screws, M2 screws for the carrier', img: '/images/parts/s-csk.jpg',
+    from: [shop('lipo'), shop('lipo', 2)].filter(Boolean) as Need['from'] },
+  { name: 'Standoffs, screws and nuts', detail: 'M2.5 standoffs and screws, M2 screws for Breakout V2.0', img: '/images/parts/s-csk.jpg',
     from: [{ name: 'ettinger.de', href: 'https://www.ettinger.de/' }] },
-  { name: 'microSD card and USB-C cable', detail: '16–32 GB card; a data cable', img: '/images/parts/s-microsd.jpg',
-    from: [shop('cable')].filter(Boolean) as Need['from'] },
+  { name: '1/4"-20 nut, microSD and USB-C', detail: 'Stainless tripod nut at DigiKey; 16–32 GB card; data cable', img: '/images/parts/s-microsd.jpg',
+    from: [shop('nut1420'), shop('cable')].filter(Boolean) as Need['from'] },
 ];
 
 const tools = [
