@@ -20,7 +20,7 @@ Item #,Designator,Qty,Manufacturer,Mfg Part #,Description / Value,Package/Footpr
 19,"R4,R6",2,UNI-ROYAL,0603WAF4701T5E,"4.7k Ohm 1% 0603 SMD Resistor (4.7k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C23162: https://www.lcsc.com/product-detail/C23162.html
 20,"R7,R8",2,UNI-ROYAL,0603WAF5101T5E,"5.1k Ohm 1% 0603 SMD Resistor (5.1k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C23186: https://www.lcsc.com/product-detail/C23186.html
 21,"R9,R19,R22",3,UNI-ROYAL,0603WAF1002T5E,"10k Ohm 1% 0603 SMD Resistor (10k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C25804: https://www.lcsc.com/product-detail/C25804.html
-22,R10,1,UNI-ROYAL,0603WAF1501T5E,"1.5k Ohm 1% 0603 SMD Resistor (1.5k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C22843: https://www.lcsc.com/product-detail/C22843.html
+22,R10,1,UNI-ROYAL,0603WAF2001T5E,"2.0k Ohm 1% 0603 SMD Resistor (2.0k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C22975: https://www.lcsc.com/product-detail/C22975.html
 23,R11,1,UNI-ROYAL,0603WAF1201T5E,"1.2k Ohm 1% 0603 SMD Resistor (1.2k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C22765: https://www.lcsc.com/product-detail/C22765.html
 24,R12,1,UNI-ROYAL,0603WAF1001T5E,"1.0k Ohm 1% 0603 SMD Resistor (1.0k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C21190: https://www.lcsc.com/product-detail/C21190.html
 25,"R14,R20",2,UNI-ROYAL,0603WAF4702T5E,"47k Ohm 1% 0603 SMD Resistor (47k Ohm, +/-1%, 100mW)",R_0603,SMD,LCSC C25819: https://www.lcsc.com/product-detail/C25819.html

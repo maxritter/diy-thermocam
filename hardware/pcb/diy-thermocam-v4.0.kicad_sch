@@ -11923,7 +11923,7 @@
 				)
 			)
 		)
-		(property "Value" "1.5k"
+		(property "Value" "2.0k"
 			(at 177.8 248.92 0)
 			(show_name no)
 			(do_not_autoplace no)

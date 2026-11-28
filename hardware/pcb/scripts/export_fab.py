@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Export the DIY-Thermocam V4.0 manufacturing files for both boards: the main board and the Lepton carrier.
+"""Export the DIY-Thermocam V4.0 manufacturing files for the main board.
 
     python3 hardware/pcb/scripts/export_fab.py [--skip-render]
 
 Needs KiCad 10 (set KICAD_CLI if kicad-cli is not in the default macOS location).
-Part numbers come only from hardware/bom/bom.csv; designators are unique across both boards.
+Part numbers come only from hardware/bom/bom.csv.
 
-Writes hardware/pcb/fab/, once per board (file names start with the board's file stem):
+Writes hardware/pcb/fab/ (file names start with diy-thermocam-v4.0):
     jlcpcb/   panel-gerbers.zip (the board in its own routed frame with break-off tabs, tooling holes and
               fiducials, ordered as "Panel by Customer"), bom.csv (LCSC numbers), cpl.csv (rotations and
               offsets for JLCPCB's part library; same coordinates as the panel)
@@ -30,7 +30,7 @@ import zipfile
 from pathlib import Path
 
 KICAD_CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
-STEMS = ("diy-thermocam-v4.0", "diy-thermocam-v4.0-lepton")
+STEMS = ("diy-thermocam-v4.0",)
 VENDORS = ("jlcpcb", "seeed", "pcbway")
 GERBER_LAYERS = "F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,F.Paste,B.Paste,Edge.Cuts"
 
@@ -49,29 +49,23 @@ JLC_CPL_CORRECTION: dict[str, tuple[float, float, float]] = {
     "J1": (0.0, 0.0, 90.0),      # 2x20 socket: EasyEDA HDR-TH_40P drawn with its rows horizontal
     "J5": (0.0, 0.0, 270.0),     # C41376163: EasyEDA 1x24 drawn horizontally
     "J6": (0.0, 0.0, 270.0),     # C41376163
-    # Lepton carrier
-    "U101": (0.0, 0.0, 180.0),   # C163219 SOT-23-5: EasyEDA pins 1-3 on the right
-    "U102": (0.0, 0.0, 180.0),   # C53099 SOT-23-5, same EasyEDA footprint
-    "U103": (0.0, 0.0, 270.0),   # C403651 SOT-23-5: EasyEDA drawn with its pin rows horizontal
-    "L101": (0.0, 0.0, 180.0),   # C43389: EasyEDA pad 1 on the right (unpolarised, kept consistent)
 }
 
 # Multi-pin headers whose footprint origin sits on pin 1: report the pad centre instead.
-PAD_CENTRE_REFS = ("J1", "J2", "J5", "J6", "J101")
+PAD_CENTRE_REFS = ("J1", "J2", "J5", "J6")
 
-# JLCPCB assembly panels. Each board sits in its own frame (JLCPCB: >= 70 x 70 mm, 5 mm or wider process edges,
+# JLCPCB assembly panel. The board sits in its own routed frame (JLCPCB: >= 70 x 70 mm, 5 mm or wider process edges,
 # 2 mm non-plated tooling holes placed asymmetrically, 1 mm fiducials 3.85 mm from the panel edge), separated by
 # a 2 mm routed slot. Routed edges hold +-0.2 mm, where V-cut holds +-0.4 mm and leaves a lip. Break-off tabs
 # with mouse bites sit only where the edge is free: never at J3, the Teensy sockets, the spring pins, SW1, SW2,
-# Q2, the acrylic case's tripod fin (bottom edge, X 35.7-53.7), or on the carrier's 47 mm edges (the one beside
-# the Teensy has 0.8 mm to spare). Bites follow JLCPCB's guide: 0.6 mm holes, 0.35 mm webs, a third into the board.
+# Q2, or the acrylic case's tripod fin (bottom edge, X 35.7-53.7). Bites follow JLCPCB's guide: 0.6 mm holes,
+# 0.35 mm webs, a third into the board.
 # Tabs: (edge, centre along that edge, width); edges by KiCad coordinates: ymin = top of the drawing.
 PANEL_TABS: dict[str, list[tuple[str, float, float]]] = {
     "diy-thermocam-v4.0": [("ymax", 6.0, 5.0), ("ymax", 32.5, 5.0),                        # USB edge, beside J3
                            ("ymin", 25.0, 5.0), ("ymin", 45.0, 5.0), ("ymin", 65.0, 5.0),   # far edge, clear of D2/SW2
                            ("xmax", -26.0, 5.0),                                            # right edge, between SW1 and Q2
                            ("xmin", -4.5, 5.0)],                                            # left edge, below J1
-    "diy-thermocam-v4.0-lepton": [("ymin", 46.0, 8.0), ("ymax", 42.6, 8.0)],               # the two 29.2 mm edges only
 }
 PANEL_GAP, PANEL_FRAME, PANEL_MIN = 2.0, 7.0, 70.0
 BITE_DRILL, BITE_PITCH, BITE_OUT = 0.6, 0.95, 0.1   # hole, centre spacing, hole centre outside the board edge

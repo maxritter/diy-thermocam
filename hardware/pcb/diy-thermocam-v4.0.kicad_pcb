@@ -8037,7 +8037,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "1.5k"
+		(property "Value" "2.0k"
 			(at 0 1.5 0)
 			(layer "B.Fab")
 			(hide yes)
